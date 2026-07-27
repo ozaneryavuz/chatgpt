@@ -8,6 +8,7 @@
 - [Elektrik Hesaplama Merkezi](./alo186/hesaplama/)
 - [Akıllı Ürün Eşleştirme ve Affiliate Katalog](./alo186/urun-eslestirme/)
 - [Otel, Site ve İşletme Elektrik Sürekliliği Paneli](./alo186/sureklilik-paneli/)
+- [Elektrik Sürekliliği SaaS API v0.2](./alo186/sureklilik-api/)
 - [Elektrik Faturası Zekâ Merkezi](./alo186/fatura-analizi/)
 - [UPS ve Power Station süre hesabı](./alo186/hesaplama/ups-suresi/)
 - [EV şarj süresi ve maliyet hesabı](./alo186/hesaplama/ev-sarj-suresi/)
@@ -30,7 +31,11 @@ Powerbank ve akım korumalı grup priz kategorilerinde teknik minimumları karş
 
 ### Elektrik Sürekliliği Paneli
 
-Otel, apartman/site ve küçük işletmeler için local-first pilot panelidir. Çoklu lokasyon, kritik yük, jeneratör/UPS testleri, kesinti olayı, görev, zaman çizelgesi, maliyet, audit log, JSON yedek ve PDF çıktısı sunar. Kullanıcı hesabı, merkezi veritabanı ve rol bazlı SaaS katmanı sonraki fazdadır.
+Otel, apartman/site ve küçük işletmeler için local-first pilot panelidir. Çoklu lokasyon, kritik yük, jeneratör/UPS testleri, kesinti olayı, görev, zaman çizelgesi, maliyet, audit log, JSON yedek ve PDF çıktısı sunar.
+
+### Elektrik Sürekliliği SaaS API v0.2
+
+Local-first paneli çok kullanıcılı ürüne taşıyan FastAPI/PostgreSQL temelidir. Scrypt parola güvenliği, süreli imzalı oturum, kuruluş/tenant izolasyonu, admin-teknik ekip-görüntüleyici rolleri, kritik yükler, varlık testleri, P1 yüklere göre otomatik olay görevleri, zorunlu görev kapanış koruması ve kuruluş bazlı audit log sağlar. Docker Compose, SQLite test ortamı ve GitHub Actions kalite kontrolü içerir.
 
 ### Elektrik Faturası Zekâ Merkezi
 
@@ -56,7 +61,7 @@ GitHub görevleri:
 - #3 Tam Türkiye il–ilçe–EDAŞ arama motoru — tamamlandı
 - #4 25 elektrik sorunu karar motoru — tamamlandı
 - #5 Doğrulanmış ürün eşleştirme ve affiliate — v1 yayımlandı, katalog genişlemesi sürüyor
-- #6 Otel/site/işletme sürekliliği paneli — local-first pilot yayımlandı, SaaS fazı sürüyor
+- #6 Otel/site/işletme sürekliliği paneli — local-first pilot ve SaaS API v0.2 yayımlandı; üretim sertleştirmesi sürüyor
 - #7 Kullanıcı fayda hesaplayıcıları v1 — tamamlandı
 
 ## Yayın
