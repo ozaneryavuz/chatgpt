@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 from typing import Any, Literal
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, model_validator
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
@@ -303,12 +303,12 @@ def patch_tenant_entity(
     return serialize_entity(entity)
 
 
-@router.delete("/entities/{entity_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/entities/{entity_id}", status_code=status.HTTP_204_NO_CONTENT, response_class=Response)
 def retire_tenant_entity(
     entity_id: str,
     context: OrgContext = Depends(require_roles(Role.admin)),
     db: Session = Depends(get_db),
-) -> None:
+) -> Response:
     entity = _tenant_entity(db, entity_id, context)
     if entity.scope_key == GLOBAL_SCOPE:
         raise HTTPException(status_code=403, detail="Global Knowledge Graph varlığı tenant API ile silinemez.")
@@ -323,6 +323,7 @@ def retire_tenant_entity(
         entity_id=entity.id,
     )
     db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.post("/sources", status_code=status.HTTP_201_CREATED)
@@ -434,12 +435,12 @@ def patch_tenant_assertion(
     return serialize_assertion(assertion)
 
 
-@router.delete("/assertions/{assertion_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/assertions/{assertion_id}", status_code=status.HTTP_204_NO_CONTENT, response_class=Response)
 def retire_tenant_assertion(
     assertion_id: str,
     context: OrgContext = Depends(require_roles(Role.admin)),
     db: Session = Depends(get_db),
-) -> None:
+) -> Response:
     assertion = _tenant_assertion(db, assertion_id, context)
     if assertion.scope_key == GLOBAL_SCOPE:
         raise HTTPException(status_code=403, detail="Global Knowledge Graph iddiası tenant API ile silinemez.")
@@ -454,6 +455,7 @@ def retire_tenant_assertion(
         entity_id=assertion.id,
     )
     db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.get("/entities/{entity_id}/neighbors")
