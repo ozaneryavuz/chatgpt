@@ -96,6 +96,8 @@ def fetch(url: str, timeout: float, *, api_health: bool = False) -> dict[str, ob
 
 
 def tls_expiry(hostname: str, port: int = 443, timeout: float = 10.0) -> dict[str, object]:
+    # create_default_context + server_hostname, exact ve wildcard SAN eşleşmesini
+    # TLS handshake sırasında zaten doğrular; burada tekrar exact string karşılaştırması yapılmaz.
     context = ssl.create_default_context()
     with socket.create_connection((hostname, port), timeout=timeout) as sock:
         with context.wrap_socket(sock, server_hostname=hostname) as tls_sock:
@@ -104,13 +106,14 @@ def tls_expiry(hostname: str, port: int = 443, timeout: float = 10.0) -> dict[st
         tzinfo=timezone.utc
     )
     remaining = expires - datetime.now(timezone.utc)
-    sans = {value for kind, value in certificate.get("subjectAltName", []) if kind == "DNS"}
+    sans = [value for kind, value in certificate.get("subjectAltName", []) if kind == "DNS"]
     return {
-        "ok": remaining.days >= 21 and hostname in sans,
+        "ok": remaining.days >= 21,
         "hostname": hostname,
         "expiresAt": expires.isoformat(),
         "daysRemaining": remaining.days,
-        "sanMatch": hostname in sans,
+        "hostnameVerifiedByTlsContext": True,
+        "subjectAltNames": sans,
         "issuer": dict(item[0] for item in certificate.get("issuer", [])),
     }
 
@@ -135,7 +138,7 @@ def email_dns(domain: str) -> list[dict[str, object]]:
     return [
         {"ok": len(spf) == 1, "kind": "email-dns", "name": "spf", "recordCount": len(spf)},
         {
-            "ok": any("v=DMARC1" in value.upper() for value in dmarc),
+            "ok": any("V=DMARC1" in value.upper() for value in dmarc),
             "kind": "email-dns",
             "name": "dmarc",
             "recordCount": len(dmarc),
