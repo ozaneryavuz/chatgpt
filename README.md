@@ -2,9 +2,15 @@
 
 ## ALO186 geliştirmeleri
 
-- [ALO186 modül ön izleme merkezi](./alo186/)
-- [Elektrik Faturası Zekâ Merkezi kaynak kodu](./alo186/fatura-analizi/)
+- [ALO186 ücretsiz araçlar merkezi](./alo186/)
+- [186 mı, 112 mi, elektrikçi mi? karar motoru](./alo186/karar-motoru/)
+- [Elektrik Faturası Zekâ Merkezi](./alo186/fatura-analizi/)
 - [UPS ve Power Station Yedek Güç Hesaplayıcısı](./alo186/yedek-guc-hesaplayici/)
+- [Elektrik Kesintisi Maliyet Hesaplayıcısı](./alo186/kesinti-maliyet-hesaplayici/)
+
+### Karar motoru
+
+Elektrik çarpması, yangın, yere düşmüş kablo, bölgesel kesinti, bina içi arıza, gerilim sorunu, sayaç, sokak aydınlatması ve koruma cihazı problemlerini güvenlik ve kapsam açısından ayırır; kullanıcıyı 112, 186, EDAŞ, bina yönetimi veya yetkili elektrikçi seçeneklerinden doğru olana yönlendirir.
 
 ### Elektrik Faturası Zekâ Merkezi
 
@@ -13,3 +19,7 @@
 ### Yedek Güç Hesaplayıcısı
 
 Cihazların sürekli ve kalkış gücünü birlikte değerlendirir; hedef süreye göre gerekli Wh kapasitesini veya mevcut UPS/power station ürününün tahmini çalışma süresini hesaplar. LiFePO4, lityum ve kurşun-asit batarya varsayımlarını, dönüşüm kayıplarını, yaşlanma payını ve kapasite rezervini açıkça gösterir.
+
+### Kesinti Maliyet Hesaplayıcısı
+
+Ev, site, otel ve işletmeler için ciro kaybı, personel bekleme, stok/gıda kaybı, jeneratör yakıtı, yeniden başlatma ve cihaz hasarı kalemlerini olay başı ve yıllık toplamda hesaplar; süreklilik yatırımı için öncelikli aksiyonlar üretir.
