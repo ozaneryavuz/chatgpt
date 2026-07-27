@@ -1,0 +1,68 @@
+logging {
+  level  = "info"
+  format = "logfmt"
+}
+
+prometheus.scrape "alo186_api" {
+  targets = [
+    {
+      "__address__" = sys.env("ALO186_METRICS_TARGET"),
+      "service"     = "alo186-api",
+      "environment" = "production",
+    },
+  ]
+  metrics_path    = "/metrics"
+  scheme          = sys.env("ALO186_METRICS_SCHEME")
+  scrape_interval = "30s"
+  scrape_timeout  = "10s"
+  http_headers = {
+    "X-Metrics-Token" = [sys.env("ALO186_METRICS_TOKEN")],
+  }
+  forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+}
+
+prometheus.remote_write "grafana_cloud" {
+  endpoint {
+    url = sys.env("GRAFANA_CLOUD_PROMETHEUS_URL")
+    basic_auth {
+      username = sys.env("GRAFANA_CLOUD_PROMETHEUS_USER")
+      password = sys.env("GRAFANA_CLOUD_API_KEY")
+    }
+  }
+  external_labels = {
+    project = "alo186",
+    stack   = "continuity-api",
+  }
+}
+
+discovery.docker "containers" {
+  host = "unix:///var/run/docker.sock"
+}
+
+discovery.relabel "container_logs" {
+  targets = discovery.docker.containers.targets
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "service_name"
+  }
+}
+
+loki.source.docker "containers" {
+  host          = "unix:///var/run/docker.sock"
+  targets       = discovery.docker.containers.targets
+  labels        = { project = "alo186", environment = "production" }
+  relabel_rules = discovery.relabel.container_logs.rules
+  forward_to    = [loki.write.grafana_cloud.receiver]
+}
+
+loki.write "grafana_cloud" {
+  endpoint {
+    url = sys.env("GRAFANA_CLOUD_LOKI_URL")
+    basic_auth {
+      username = sys.env("GRAFANA_CLOUD_LOKI_USER")
+      password = sys.env("GRAFANA_CLOUD_API_KEY")
+    }
+  }
+}
