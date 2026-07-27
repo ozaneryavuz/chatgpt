@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>EV Şarjında Kaçak Akım: Tip A mı, Tip B mi?</title>
+  <meta name="description" content="EV wallbox için kaçak akım korumasında Tip A + 6 mA DC algılama ve Tip B seçeneklerini; RDC-DD, 30 mA ve ürün belgesiyle ayırın.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="https://www.alo186.com/sektor-rehberi/ev-sarj-kacak-akim-korumasi">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="EV Şarjında Kaçak Akım Koruması: Tip A mı, Tip B mi?">
+  <meta property="og:description" content="Wallbox içindeki 6 mA DC algılama ile haricî RCD seçimini doğru okuyun.">
+  <meta property="og:url" content="https://www.alo186.com/sektor-rehberi/ev-sarj-kacak-akim-korumasi">
+  <meta name="theme-color" content="#071631">
+  <link rel="stylesheet" href="../article.css">
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@graph":[
+      {
+        "@type":"Article",
+        "@id":"https://www.alo186.com/sektor-rehberi/ev-sarj-kacak-akim-korumasi#article",
+        "headline":"EV Şarjında Kaçak Akım Koruması: Tip A + 6 mA DC mi, Tip B mi?",
+        "description":"Elektrikli araç şarj devresinde RCD Tip A, Tip B ve RDC-DD 6 mA DC algılama seçeneklerini üretici dokümanı ve sistem yaklaşımıyla açıklayan teknik rehber.",
+        "datePublished":"2026-07-28",
+        "dateModified":"2026-07-28",
+        "inLanguage":"tr-TR",
+        "mainEntityOfPage":{"@type":"WebPage","@id":"https://www.alo186.com/sektor-rehberi/ev-sarj-kacak-akim-korumasi"},
+        "author":{"@type":"Organization","name":"ALO186 Teknik İçerik Ekibi"},
+        "publisher":{"@type":"Organization","@id":"https://www.alo186.com/#organization","name":"ALO186","url":"https://www.alo186.com"},
+        "about":[
+          {"@type":"Thing","name":"Elektrikli araç şarjı"},
+          {"@type":"Thing","name":"Kaçak akım koruma cihazı"},
+          {"@type":"Thing","name":"RDC-DD"},
+          {"@type":"Thing","name":"6 mA DC artık akım algılama"}
+        ]
+      },
+      {
+        "@type":"BreadcrumbList",
+        "itemListElement":[
+          {"@type":"ListItem","position":1,"name":"Ana Sayfa","item":"https://www.alo186.com"},
+          {"@type":"ListItem","position":2,"name":"Sektör Rehberi","item":"https://www.alo186.com/sektor-rehberi"},
+          {"@type":"ListItem","position":3,"name":"EV şarj kaçak akım koruması","item":"https://www.alo186.com/sektor-rehberi/ev-sarj-kacak-akim-korumasi"}
+        ]
+      },
+      {
+        "@type":"FAQPage",
+        "mainEntity":[
+          {"@type":"Question","name":"Wallbox için Tip A kaçak akım rölesi yeterli mi?","acceptedAnswer":{"@type":"Answer","text":"Yalnız şarj cihazının uygun standarda göre 6 mA DC artık akım algılama ve kesme özelliğine sahip olduğu üretici belgesiyle doğrulanmışsa, üretici talimatı ve yerel kurallar kapsamında Tip A haricî RCD kullanılabilir. Bu özellik yoksa Tip B gerekebilir."}},
+          {"@type":"Question","name":"6 mA DC koruması 30 mA RCD'nin yerine geçer mi?","acceptedAnswer":{"@type":"Answer","text":"Her zaman hayır. 6 mA DC algılama işlevi, DC bileşenin yukarıdaki Tip A RCD'yi olumsuz etkilemesini önlemek için kullanılır. Birçok üründe yine ayrı 30 mA Tip A RCD veya üreticinin belirttiği eşdeğer koruma gerekir."}},
+          {"@type":"Question","name":"B karakteristik sigorta ile Tip B RCD aynı şey mi?","acceptedAnswer":{"@type":"Answer","text":"Hayır. B karakteristiği otomatik sigortanın aşırı akım açma eğrisini, Tip B RCD ise algılayabildiği artık akım dalga biçimlerini ifade eder. Ürün üzerindeki işaretler ve teknik föy ayrı ayrı kontrol edilmelidir."}}
+        ]
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#icerik">İçeriğe geç</a>
+  <header class="site-header"><div class="header-inner"><a class="brand" href="https://www.alo186.com" aria-label="ALO186 ana sayfa"><span class="brand-mark" aria-hidden="true">186</span><span><strong>ALO186</strong><small>Bağımsız elektrik bilgi ağı</small></span></a><a class="top-link" href="https://www.alo186.com/sektor-rehberi">Sektör rehberi</a></div></header>
+
+  <main class="wrap" id="icerik">
+    <nav class="breadcrumb" aria-label="İçerik yolu"><a href="https://www.alo186.com">Ana sayfa</a> / <a href="https://www.alo186.com/sektor-rehberi">Sektör rehberi</a> / EV şarj koruması</nav>
+
+    <section class="hero">
+      <div>
+        <span class="eyebrow">EV wallbox · RCD · RDC-DD · 6 mA DC</span>
+        <h1>EV şarjında kaçak akım koruması: Tip A mı, Tip B mi?</h1>
+        <p class="lead">Doğru cevap yalnız şarj gücüne bakılarak verilmez. Wallbox’ın içinde doğrulanmış 6 mA DC algılama bulunup bulunmadığı, haricî RCD gereksinimi, topraklama sistemi ve üretici kurulum talimatı birlikte değerlendirilmelidir.</p>
+        <div class="meta"><span class="chip">Son doğrulama: 28 Temmuz 2026</span><span class="chip">Okuma: 8 dakika</span><span class="chip">Kullanıcı niyeti: Wallbox için hangi RCD?</span></div>
+      </div>
+      <aside class="answer-card" aria-label="Kısa cevap">
+        <h2>Kısa cevap</h2>
+        <p>Mode 3 AC şarjda yaygın iki çözüm vardır: <strong>Tip B RCD</strong> veya <strong>Tip A/F RCD + uygun 6 mA DC algılama cihazı</strong>. Wallbox’ta RDC-DD bulunduğu yalnız ürün teknik belgesiyle doğrulanmalıdır; “DC koruma var” ifadesi tek başına yeterli olmayabilir.</p>
+        <a href="#karar">Karar tablosuna git →</a>
+      </aside>
+    </section>
+
+    <div class="article-layout">
+      <article class="article-body">
+        <div class="callout danger"><strong>Sabit tesisata müdahale etmeyin</strong>EV şarj devresi sürekli yüksek akım taşıyabilir. Pano, RCD, sigorta, kablo kesiti, topraklama ve yük yönetimi yetkili elektrik uzmanı tarafından projelendirilip test edilmelidir. Mevcut koruma elemanını yalnız maliyet gerekçesiyle değiştirmeyin veya devre dışı bırakmayın.</div>
+
+        <h2 id="neden-farkli">EV şarj devresi neden sıradan priz devresinden farklıdır?</h2>
+        <p>Elektrikli aracın araç üzerindeki şarj cihazı güç elektroniği içerir. Bir arıza durumunda artık akım yalnız sinüzoidal AC biçiminde olmayabilir; darbeli DC veya düzgün DC bileşen oluşabilir. Uygun olmayan bir RCD, algılaması gereken arıza akımını doğru değerlendiremeyebilir.</p>
+        <p>Bu nedenle EV şarj koruması yalnız “30 mA röle var mı?” sorusuna indirgenemez. Korumanın algılayabildiği dalga biçimi, wallbox’ın kendi DC algılama işlevi ve cihazların birlikte çalışma düzeni belirleyicidir.</p>
+
+        <h2 id="kavramlar">Önce üç kavramı ayırın</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Kavram</th><th>Görevi</th><th>Karıştırılmaması gereken</th></tr></thead>
+            <tbody>
+              <tr><td>RCD / kaçak akım koruma cihazı</td><td>Belirli artık akım koşullarında devreyi açar</td><td>Aşırı akım sigortası değildir</td></tr>
+              <tr><td>RDC-DD</td><td>EV şarjında DC artık akımı algılar ve şarj beslemesinin kesilmesini sağlar</td><td>Her üründe tam 30 mA RCD yerine geçmez</td></tr>
+              <tr><td>MCB/otomatik sigorta</td><td>Aşırı akım ve kısa devre koruması sağlar</td><td>Üzerindeki B/C eğrisi, RCD Tip A/B sınıfı değildir</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout warn"><strong>Yaygın isim hatası</strong>“Tip B sigorta” denildiğinde iki farklı ürün kastedilebilir. MCB üzerindeki B eğrisi ile düzgün DC artık akımı algılayabilen Tip B RCD tamamen farklı özelliklerdir.</div>
+
+        <h2 id="tipler">Tip A ve Tip B neyi algılar?</h2>
+        <p><strong>Tip A RCD</strong>, AC artık akımın yanında belirli darbeli DC dalga biçimlerini algılar. Ancak 6 mA üzerindeki düzgün DC bileşen bulunabilecek uygulamalarda, tek başına Tip A kullanımı uygun olmayabilir.</p>
+        <p><strong>Tip B RCD</strong>, Tip A’nın kapsadığı dalga biçimlerine ek olarak düzgün DC ve güç elektroniği kaynaklı daha geniş artık akım biçimleri için tasarlanır. EV şarj, fotovoltaik inverter ve değişken hızlı sürücü gibi uygulamalarda ürün ve sistem koşullarına göre kullanılır.</p>
+        <p><strong>RDC-DD 6 mA DC algılama</strong> ise şarj cihazında veya haricî bir modülde bulunabilir. Görevi, DC bileşen Tip A RCD’nin işlevini olumsuz etkileyecek seviyeye ulaşmadan şarj devresini kesmektir.</p>
+
+        <h2 id="karar">Pratik karar tablosu</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Wallbox belgesi</th><th>Yaygın koruma yaklaşımı</th><th>Doğrulanacak nokta</th></tr></thead>
+            <tbody>
+              <tr><td>IEC 62955 uyumlu RDC-DD / 6 mA DC algılama açıkça belirtilmiş</td><td>Üretici talimatına göre haricî 30 mA Tip A veya Tip F RCD değerlendirilebilir</td><td>Haricî RCD yine zorunlu mu; tipi, kutup sayısı ve anma değeri nedir?</td></tr>
+              <tr><td>DC artık akım algılama yok veya belgede belirsiz</td><td>Tip B RCD gerekebilir</td><td>Şarj cihazı ve yerel uygulama şartları</td></tr>
+              <tr><td>Wallbox içinde “RCD” bulunduğu yazıyor</td><td>Doğrudan sonuç çıkarılmaz</td><td>İç eleman tam ürün standardına uygun RCD mi, yoksa yalnız RDC-DD işlevi mi?</td></tr>
+              <tr><td>Birden fazla şarj noktası aynı üst RCD altında</td><td>Seçicilik ve birikimli kaçak akım ayrıca hesaplanır</td><td>Üst/alt RCD koordinasyonu ve üretici sınırları</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Schneider Electric, Mode 3 şarj için iki yaklaşımı açıklar: Tip B RCD veya Tip A/F RCD ile IEC 62955’e uygun RDC-DD kombinasyonu. Schneider’in EVlink Home dokümanı, cihazda 6 mA RDC-DD bulunmasına rağmen en az 30 mA Tip A RCD eklenmesi gerektiğini belirtir. Bu örnek, “wallbox içinde 6 mA algılama var; haricî RCD’ye gerek yok” çıkarımının neden her ürün için doğru olmadığını gösterir.</p>
+
+        <h2 id="belge">Ürün sayfasında hangi ifadeleri aramalısınız?</h2>
+        <ul>
+          <li><strong>RDC-DD compliant with IEC 62955</strong> veya eşdeğer açık uygunluk ifadesi</li>
+          <li><strong>6 mA DC residual current detection</strong> ve algılama sonrası cihazın ne yaptığı</li>
+          <li>Haricî RCD’nin gerekli olup olmadığı; gerekiyorsa Tip A, F veya B şartı</li>
+          <li>RCD’nin anma artık akımı; yaygın olarak 30 mA bilgisi</li>
+          <li>Tek faz/üç faz, kutup sayısı ve şebeke-topraklama sistemi şartları</li>
+          <li>Her şarj noktası için ayrı koruma gereksinimi</li>
+          <li>Üreticinin önerdiği sigorta, kablo ve kısa devre dayanım koşulları</li>
+        </ul>
+        <p>Yalnız pazarlama sayfasındaki “entegre koruma” ifadesiyle karar vermeyin. Kurulum kılavuzu, teknik föy, uygunluk beyanı ve tam model kodu kontrol edilmelidir. Aynı ürün ailesinin farklı model son eklerinde Tip B RCD veya RDC-DD donanımı değişebilir.</p>
+
+        <h2 id="ornekler">Üretici örnekleri ne anlatıyor?</h2>
+        <div class="decision">
+          <article><h3>Schneider EVlink Home</h3><p>Üretici, 6 mA RDC-DD’nin gömülü olduğunu ve yine en az 30 mA Tip A RCD eklenmesini istediğini belirtir.</p></article>
+          <article><h3>Hager witty start</h3><p>Ürün sayfası 6 mA DC arıza algılama bulunduğunu ve korumanın Tip A RCBO ile tamamlandığını belirtir.</p></article>
+          <article><h3>Legrand Green’up Premium</h3><p>Bazı model sayfalarında gömülü 6 mA DC korumanın yukarı akım Tip A veya Tip F RCD kullanımına izin verdiği açıklanır.</p></article>
+          <article><h3>ABB Terra AC yaklaşımı</h3><p>ABB teknik içeriği, Mode 3 için Tip B veya Tip A/F + IEC 62955 RDC-DD seçeneklerini ve iç işlev ile tam RCD’nin ayrımını vurgular.</p></article>
+        </div>
+        <p>Bu örnekler marka önerisi değildir. Amaç, koruma mimarisinin model bazında değiştiğini göstermektir.</p>
+
+        <h2 id="sadece-rcd-degil">Güvenli wallbox için yalnız RCD yetmez</h2>
+        <p>Kaçak akım koruması önemli olsa da şarj devresinin güvenliği bir sistem bütünüdür:</p>
+        <ul>
+          <li>Şarj cihazına ayrılmış uygun devre ve aşırı akım koruması</li>
+          <li>Gerilim düşümü, döşeme biçimi, sıcaklık ve eşzamanlılığa göre kablo seçimi</li>
+          <li>Topraklama ve koruma iletkeni sürekliliği</li>
+          <li>Gerekli ise aşırı gerilim koruması ve yıldırım risk değerlendirmesi</li>
+          <li>Ana bağlantı gücünü aşmamak için dinamik yük yönetimi</li>
+          <li>Dış ortamda uygun IP/IK sınıfı ve mekanik koruma</li>
+          <li>Devreye alma sırasında RCD, topraklama ve işlev testleri</li>
+        </ul>
+        <div class="callout success"><strong>Satın alma öncesi en değerli belge</strong>Satıcıdan yalnız “kaç kW?” bilgisini değil, tam model koduna ait kurulum kılavuzunu ve “haricî RCD gereksinimi” sayfasını isteyin. Bu belge pano maliyetini ve doğru koruma tipini doğrudan etkiler.</div>
+
+        <h2 id="kontrol">Teklif karşılaştırırken 10 maddelik kontrol</h2>
+        <ol>
+          <li>Wallbox tam marka ve model kodu yazılmış mı?</li>
+          <li>Tek faz/üç faz ve azami akım belirtilmiş mi?</li>
+          <li>6 mA DC algılama açıkça belgelenmiş mi?</li>
+          <li>Bu işlevin IEC 62955 uyumu veya üretici teknik standardı gösterilmiş mi?</li>
+          <li>Haricî RCD tipi ve 30 mA gereksinimi teklifte yer alıyor mu?</li>
+          <li>RCD gerçekten Tip B mi; yoksa MCB’nin B eğrisi yanlış mı yorumlanmış?</li>
+          <li>Her şarj noktası için ayrı devre/koruma yaklaşımı var mı?</li>
+          <li>Kablo kesiti hesap ve montaj koşuluna göre mi seçilmiş?</li>
+          <li>Topraklama, RCD açma ve işlev testleri teslim kapsamına alınmış mı?</li>
+          <li>Yük yönetimi ve ana bağlantı gücü kontrol edilmiş mi?</li>
+        </ol>
+
+        <section class="cta" aria-label="Dönüşüm çağrısı">
+          <h2>Wallbox teklifini yalnız kW fiyatıyla karşılaştırmayın</h2>
+          <p>Tam model kodunu, 6 mA DC algılama belgesini, haricî RCD tipini, kablo ve devreye alma testlerini aynı tabloda karşılaştırın. Koruma maliyetini teklif sonrasında sürpriz hâline getirmeyin.</p>
+          <a href="https://www.alo186.com/hesaplama">EV şarj hesap araçlarına git</a>
+          <a href="https://www.alo186.com/elektrik-portali">Elektrik araçları merkezini aç</a>
+        </section>
+
+        <section class="faq" id="sss">
+          <h2>Sık sorulan sorular</h2>
+          <details><summary>Wallbox için Tip A kaçak akım rölesi yeterli mi?</summary><p>Yalnız şarj cihazının uygun standarda göre 6 mA DC artık akım algılama ve kesme özelliğine sahip olduğu üretici belgesiyle doğrulanmışsa, üretici talimatı ve yerel kurallar kapsamında Tip A haricî RCD kullanılabilir. Bu özellik yoksa Tip B gerekebilir.</p></details>
+          <details><summary>6 mA DC koruması 30 mA RCD’nin yerine geçer mi?</summary><p>Her zaman hayır. 6 mA DC algılama işlevi, DC bileşenin yukarıdaki Tip A RCD’yi olumsuz etkilemesini önlemek için kullanılır. Birçok üründe yine ayrı 30 mA Tip A RCD veya üreticinin belirttiği eşdeğer koruma gerekir.</p></details>
+          <details><summary>B karakteristik sigorta ile Tip B RCD aynı şey mi?</summary><p>Hayır. B karakteristiği otomatik sigortanın aşırı akım açma eğrisini, Tip B RCD ise algılayabildiği artık akım dalga biçimlerini ifade eder. Ürün üzerindeki işaretler ve teknik föy ayrı ayrı kontrol edilmelidir.</p></details>
+        </section>
+
+        <section class="sources" id="kaynaklar">
+          <h2>Teknik kaynaklar</h2>
+          <ol>
+            <li><a href="https://www.se.com/es/es/faqs/FA403693/" rel="nofollow noopener">Schneider Electric — EV charging RCD types and RDC-DD</a></li>
+            <li><a href="https://www.se.com/tr/tr/faqs/FAQ000234506/" rel="nofollow noopener">Schneider Electric Türkiye — EVlink Home 6 mA RDC-DD and external Type A RCD</a></li>
+            <li><a href="https://cataloghi.it.abb.com/view/563647845/1/" rel="nofollow noopener">ABB — Electrical safety for AC EV charging</a></li>
+            <li><a href="https://hager.com/sg/solutions/solutions-by-application/energy-distribution/charging-stations/product-page-evcs-witty-start" rel="nofollow noopener">Hager — witty start integrated 6 mA DC detection</a></li>
+            <li><a href="https://www.legrand.com/ecatalogue/en/catalog/products/three-phase-plastic-greenup-premium-charging-stations-for-1-electric-modes-3-22kw-32a-059007" rel="nofollow noopener">Legrand — Green’up Premium integrated 6 mA DC protection</a></li>
+          </ol>
+          <p>Kaynaklar 28 Temmuz 2026 tarihinde kontrol edilmiştir. Nihai uygulamada Türkiye’deki güncel mevzuat, dağıtım/bağlantı şartları, üretici kılavuzu ve proje gereksinimleri birlikte doğrulanmalıdır.</p>
+        </section>
+        <p class="trust-note">ALO186 bağımsız bilgilendirme platformudur; kamu kurumu, EDAŞ, wallbox üreticisi veya elektrik projesi onay mercii değildir. İçerik, yetkili tasarım ve ölçümün yerine geçmez.</p>
+      </article>
+
+      <aside class="sidebar">
+        <nav class="toc" aria-label="İçindekiler"><strong>İçindekiler</strong><a href="#neden-farkli">Neden farklı?</a><a href="#kavramlar">RCD, RDC-DD ve MCB</a><a href="#tipler">Tip A ve Tip B</a><a href="#karar">Karar tablosu</a><a href="#belge">Belgede aranacaklar</a><a href="#sadece-rcd-degil">Sistem güvenliği</a><a href="#kontrol">Teklif kontrolü</a><a href="#sss">Sık sorulanlar</a></nav>
+        <div class="related"><strong>İlgili araç ve rehberler</strong><a href="https://www.alo186.com/hesaplama">EV şarj hesaplamaları</a><a href="https://www.alo186.com/elektrik-portali">Elektrik araçları merkezi</a><a href="https://www.alo186.com/amazon-elektrik-urunleri">Teknik ürün seçim rehberleri</a><a href="https://www.alo186.com/sektor-rehberi/gunes-paneli-batarya-elektrik-kesintisi">GES ve batarya kesinti rehberi</a></div>
+      </aside>
+    </div>
+  </main>
+  <footer class="site-footer"><div class="wrap"><strong>ALO186</strong><p>Bağımsız elektrik bilgi ağıdır; arıza kaydı almaz ve resmî kurum değildir.</p></div></footer>
+</body>
+</html>
