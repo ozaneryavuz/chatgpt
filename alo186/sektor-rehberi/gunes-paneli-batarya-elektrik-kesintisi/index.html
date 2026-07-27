@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Güneş Paneli Varken Elektrik Kesilince Neden Enerji Yok?</title>
+  <meta name="description" content="Güneş paneli ve batarya olmasına rağmen kesintide neden elektrik gelmediğini; EPS, backup çıkışı, ada koruması ve kritik yük panosunu öğrenin.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="https://www.alo186.com/sektor-rehberi/gunes-paneli-batarya-elektrik-kesintisi">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Güneş Paneli Varken Elektrik Kesilince Neden Enerji Yok?">
+  <meta property="og:description" content="Şebeke bağlantılı GES, batarya ve yedek güç sistemlerinde EPS/backup işlevini güvenli biçimde ayırın.">
+  <meta property="og:url" content="https://www.alo186.com/sektor-rehberi/gunes-paneli-batarya-elektrik-kesintisi">
+  <meta name="theme-color" content="#071631">
+  <link rel="stylesheet" href="../article.css">
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@graph":[
+      {
+        "@type":"Article",
+        "@id":"https://www.alo186.com/sektor-rehberi/gunes-paneli-batarya-elektrik-kesintisi#article",
+        "headline":"Güneş Paneli ve Batarya Varken Elektrik Kesilince Neden Enerji Yok?",
+        "description":"Şebeke bağlantılı güneş sistemlerinin kesintide neden durduğunu; anti-islanding, EPS, backup çıkışı, batarya ve kritik yük panosu kavramlarını açıklayan güvenlik rehberi.",
+        "datePublished":"2026-07-28",
+        "dateModified":"2026-07-28",
+        "inLanguage":"tr-TR",
+        "mainEntityOfPage":{"@type":"WebPage","@id":"https://www.alo186.com/sektor-rehberi/gunes-paneli-batarya-elektrik-kesintisi"},
+        "author":{"@type":"Organization","name":"ALO186 Teknik İçerik Ekibi"},
+        "publisher":{"@type":"Organization","@id":"https://www.alo186.com/#organization","name":"ALO186","url":"https://www.alo186.com"},
+        "about":[
+          {"@type":"Thing","name":"Güneş enerjisi sistemi"},
+          {"@type":"Thing","name":"Batarya yedekleme"},
+          {"@type":"Thing","name":"Anti-islanding"},
+          {"@type":"Thing","name":"EPS çıkışı"}
+        ]
+      },
+      {
+        "@type":"BreadcrumbList",
+        "itemListElement":[
+          {"@type":"ListItem","position":1,"name":"Ana Sayfa","item":"https://www.alo186.com"},
+          {"@type":"ListItem","position":2,"name":"Sektör Rehberi","item":"https://www.alo186.com/sektor-rehberi"},
+          {"@type":"ListItem","position":3,"name":"GES ve batarya kesinti rehberi","item":"https://www.alo186.com/sektor-rehberi/gunes-paneli-batarya-elektrik-kesintisi"}
+        ]
+      },
+      {
+        "@type":"FAQPage",
+        "mainEntity":[
+          {"@type":"Question","name":"Güneş paneli elektrik kesilince neden çalışmaz?","acceptedAnswer":{"@type":"Answer","text":"Standart şebeke bağlantılı inverterler, şebeke kesildiğinde ada koruması nedeniyle üretimi durdurur. Kesintide enerji için uyumlu bir backup/EPS işlevi, gerekli ayırma-anahtarlama düzeni ve uygun yük bağlantısı gerekir."}},
+          {"@type":"Question","name":"Batarya varsa tüm ev kesintide otomatik çalışır mı?","acceptedAnswer":{"@type":"Answer","text":"Hayır. Batarya bulunması tek başına bütün evin yedekleneceği anlamına gelmez. İnverterin backup özelliği, çıkış gücü, faz yapısı, transfer düzeni ve hangi devrelerin kritik yük panosuna bağlı olduğu belirleyicidir."}},
+          {"@type":"Question","name":"EPS çıkışına klima veya pompa bağlanabilir mi?","acceptedAnswer":{"@type":"Answer","text":"Yalnız üreticinin sürekli ve kısa süreli çıkış sınırları ile cihazın kalkış akımı uygunsa değerlendirilebilir. Motorlu yükler ilk çalışmada yüksek güç isteyebildiğinden proje ve üretici verisi kontrol edilmelidir."}}
+        ]
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#icerik">İçeriğe geç</a>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="https://www.alo186.com" aria-label="ALO186 ana sayfa"><span class="brand-mark" aria-hidden="true">186</span><span><strong>ALO186</strong><small>Bağımsız elektrik bilgi ağı</small></span></a>
+      <a class="top-link" href="https://www.alo186.com/sektor-rehberi">Sektör rehberi</a>
+    </div>
+  </header>
+
+  <main class="wrap" id="icerik">
+    <nav class="breadcrumb" aria-label="İçerik yolu"><a href="https://www.alo186.com">Ana sayfa</a> / <a href="https://www.alo186.com/sektor-rehberi">Sektör rehberi</a> / GES ve kesinti</nav>
+
+    <section class="hero">
+      <div>
+        <span class="eyebrow">GES · batarya · EPS · ada koruması</span>
+        <h1>Güneş paneli ve batarya varken elektrik kesilince neden yine enerji yok?</h1>
+        <p class="lead">Çünkü güneş paneli, batarya ve “hibrit inverter” ifadeleri tek başına kesintide yedek enerji garantisi değildir. Güvenli bir ada şebekesi oluşturabilen uyumlu inverter, doğru transfer düzeni ve yedeklenecek devrelerin ayrı planlanması gerekir.</p>
+        <div class="meta"><span class="chip">Son doğrulama: 28 Temmuz 2026</span><span class="chip">Okuma: 8 dakika</span><span class="chip">Kullanıcı niyeti: Kesintide GES neden çalışmıyor?</span></div>
+      </div>
+      <aside class="answer-card" aria-label="Kısa cevap">
+        <h2>Kısa cevap</h2>
+        <p>Standart şebeke bağlantılı GES, elektrik kesildiğinde hattı besleyip saha çalışanlarını tehlikeye atmamak için üretimi durdurur. Kesintide çalışma için inverterin açıkça tanımlanmış <strong>backup/EPS</strong> özelliği, şebekeden güvenli ayrılma ve uygun yük bağlantısı gerekir.</p>
+        <a href="#kontrol-listesi">Sistemimi nasıl ayırırım? →</a>
+      </aside>
+    </section>
+
+    <div class="article-layout">
+      <article class="article-body">
+        <div class="callout danger"><strong>Güvenlik sınırı</strong>İnverter, ana pano, transfer şalteri, nötr-toprak düzeni veya batarya bağlantılarına kullanıcı müdahalesi önerilmez. Kesintide “ters besleme” oluşturabilecek uygunsuz bağlantılar elektrik çarpması, yangın ve şebeke çalışanları için ölümcül risk doğurabilir.</div>
+
+        <h2 id="neden-durur">Şebeke bağlantılı güneş sistemi neden durur?</h2>
+        <p>Çatıdaki paneller güneş görmeye devam etse bile standart on-grid inverter, şebeke gerilim ve frekansını referans alır. Şebeke kaybolduğunda inverterin üretime devam etmesi, bina tesisatının dağıtım şebekesinden ayrılmadığı bir durumda dış hattı gerilimlendirebilir. Bu nedenle inverterler şebeke arızasını algılar ve beslemeyi keser. Bu işlev genel olarak <strong>anti-islanding</strong> veya ada koruması olarak anılır.</p>
+        <p>Dolayısıyla “panel üretiyor, o hâlde prizde enerji olmalı” çıkarımı doğru değildir. Panelin DC üretmesi ile evde güvenli ve kararlı bir AC ada şebekesi kurulması farklı işlevlerdir.</p>
+
+        <h2 id="dort-sistem">Dört sistemi birbirinden ayırın</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Sistem</th><th>Şebeke varken</th><th>Şebeke kesilince</th><th>Temel sınırlama</th></tr></thead>
+            <tbody>
+              <tr><td>Standart on-grid GES</td><td>Üretimi ev yüklerine ve şebekeye aktarır</td><td>Genellikle üretimi durdurur</td><td>Yedek çıkış oluşturmaz</td></tr>
+              <tr><td>Hibrit inverter + batarya, backup kurulmamış</td><td>Bataryayı şarj/deşarj edebilir</td><td>Normal yükler enerjisiz kalabilir</td><td>Batarya varlığı tek başına transfer işlevi değildir</td></tr>
+              <tr><td>Sınırlı EPS/PV Point çıkışı</td><td>Ürüne göre enerjili veya yalnız kesintide aktif olabilir</td><td>Belirli priz ya da devreyi besler</td><td>Çıkış gücü ve faz sayısı sınırlıdır</td></tr>
+              <tr><td>Tam/parsiyel backup sistemi</td><td>Normal şebeke paralelinde çalışır</td><td>Seçili devreleri veya tasarıma göre evi besler</td><td>Uyumlu ekipman, ayırma ve yük yönetimi gerekir</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Örneğin bazı üreticiler yalnız belirlenmiş tek fazlı bir çıkış üzerinden temel yedek enerji sunarken, bazı çözümler haricî veya bütünleşik transfer donanımıyla seçili devreleri ya da üç fazlı yük grubunu besleyebilir. Bu nedenle ürün adındaki “hibrit” kelimesi yerine teknik dokümandaki <em>backup power, EPS, off-grid output, transfer time, continuous output</em> ve <em>phase configuration</em> alanlarına bakılmalıdır.</p>
+
+        <h2 id="batarya-yetmez">Batarya neden tek başına yeterli değildir?</h2>
+        <p>Batarya yalnızca enerji deposudur. Kesintide kullanılabilmesi için sistemin şu sorulara cevap vermesi gerekir:</p>
+        <ul>
+          <li>İnverter şebeke yokken kendi gerilim ve frekans referansını oluşturabiliyor mu?</li>
+          <li>Bina yükleri dağıtım şebekesinden güvenli ve standartlara uygun biçimde ayrılıyor mu?</li>
+          <li>Hangi devreler backup çıkışına bağlı: tüm ev mi, kritik yük panosu mu, tek priz mi?</li>
+          <li>İnverterin kesintide sürekli çıkış gücü ve kısa süreli tepe gücü nedir?</li>
+          <li>Tek faz/üç faz yapısı ile bina yükleri uyumlu mu?</li>
+          <li>Bataryanın kullanılabilir kWh değeri, hedef süre için yeterli mi?</li>
+        </ul>
+        <div class="callout warn"><strong>Önemli ayrım</strong>Bir sistem şebeke varken 10 kW verebilirken backup modunda daha düşük güçle sınırlanabilir. Ayrıca batarya kapasitesi kWh, aynı anda çalıştırılabilecek güç ise kW ile değerlendirilir.</div>
+
+        <h2 id="kritik-yuk">Kritik yük panosu neden çoğu ev için daha akıllı?</h2>
+        <p>Tüm evi yedeklemek; elektrikli ocak, klima, ısı pompası, havuz pompası, araç şarjı ve rezistanslı yüklerin aynı anda devreye girmesi nedeniyle maliyeti ve gerekli inverter gücünü hızla artırır. Bunun yerine kesintide gerçekten gerekli devrelerin ayrı bir kritik yük grubuna alınması çoğu senaryoda daha verimlidir.</p>
+        <div class="decision">
+          <article><h3>Genellikle kritik kabul edilenler</h3><p>Buzdolabı, modem, seçili aydınlatma, alarm, kombi kontrolü, kapı/otomasyon, düşük güçlü çalışma ekipmanı.</p></article>
+          <article><h3>Yük yönetimi gerektirenler</h3><p>Klima, hidrofor, derin dondurucu grupları ve motorlu cihazlar; kalkış akımı ve eşzamanlılık kontrol edilmelidir.</p></article>
+          <article><h3>Çoğu ev sisteminde kesintide kapatılanlar</h3><p>EV şarjı, elektrikli şofben, sauna, fırın, büyük rezistanslı ısıtıcılar ve havuz ısıtması.</p></article>
+        </div>
+
+        <h2 id="hesap">Kaba enerji hesabı nasıl yapılır?</h2>
+        <p>Ön değerlendirme için önce kesintide çalışacak cihazların gerçek güçlerini toplayın. Ardından hedef süreyi ve sistem kayıplarını dikkate alın.</p>
+        <div class="formula">Gerekli nominal enerji ≈ (Toplam yük W × süre saat) ÷ (inverter verimi × kullanılabilir batarya oranı)</div>
+        <p>Örneğin 350 W ortalama kritik yükü 6 saat beslemek için teorik enerji 2,1 kWh’tir. Verim, güvenli deşarj sınırı, sıcaklık ve yaşlanma payı eklendiğinde nominal batarya ihtiyacı daha yüksek çıkar. Motorlu cihazların kalkış gücü bu enerji hesabından ayrı kontrol edilmelidir.</p>
+        <p>Kendi cihaz listeniz için <a href="https://www.alo186.com/hesaplama/yedek-guc">ALO186 Yedek Güç Hesaplayıcısı</a> üzerinden Wh, sürekli güç ve tepe güç gereksinimini birlikte değerlendirebilirsiniz.</p>
+
+        <h2 id="kontrol-listesi">Kesintide çalışmayan sistemi ayırmak için 8 güvenli kontrol</h2>
+        <ol>
+          <li>İnverter modelinin teknik dokümanında backup/EPS özelliği gerçekten var mı?</li>
+          <li>Bu özellik varsayılan olarak kapalı mı ve devreye alma gerektiriyor mu?</li>
+          <li>Backup terminaline fiziksel olarak hangi devrelerin bağlandığı projede gösterilmiş mi?</li>
+          <li>Haricî backup kutusu veya otomatik transfer ekipmanı gerekiyor mu?</li>
+          <li>Sistem tek faz mı, üç faz mı; yedeklenen devrelerle uyumlu mu?</li>
+          <li>Batarya doluluk alt sınırı veya “yedek rezerv” ayarı çok düşük/yüksek mı?</li>
+          <li>Kesinti anındaki yük, backup çıkışının sürekli ya da kalkış sınırını aşıyor mu?</li>
+          <li>Kurulum ve devreye alma test tutanağında gerçek şebeke kesintisi senaryosu denenmiş mi?</li>
+        </ol>
+        <p>Bu kontroller ürün ekranından bilgi toplamak içindir; pano içi bağlantı veya koruma ayarı değişikliği yetkili teknik personel tarafından yapılmalıdır.</p>
+
+        <h2 id="yanlis-beklentiler">En sık görülen yanlış beklentiler</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Beklenti</th><th>Gerçek durum</th><th>Doğru soru</th></tr></thead>
+            <tbody>
+              <tr><td>“Hibrit inverter aldım, bütün ev çalışır.”</td><td>Backup donanımı ve yük bağlantısı ayrıca gerekebilir.</td><td>Kesintide hangi terminal, kaç kW ve kaç faz besleniyor?</td></tr>
+              <tr><td>“Batarya 10 kWh ise 10 kW cihaz çalıştırır.”</td><td>kWh enerji, kW güçtür; çıkış gücü ayrı sınırdır.</td><td>İnverterin sürekli ve tepe çıkışı kaç kW?</td></tr>
+              <tr><td>“Güneş varken batarya gereksiz.”</td><td>Bulut geçişi, kalkış gücü ve ürün mimarisi enerji sürekliliğini etkiler.</td><td>Bataryasız backup özelliğinin sınırı nedir?</td></tr>
+              <tr><td>“Bir prizden eve geri besleme yapabilirim.”</td><td>Bu yöntem korumasız ters besleme ve yangın riski doğurabilir.</td><td>Standartlara uygun transfer ve ayırma nasıl projelendirilmiş?</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <section class="cta" aria-label="Dönüşüm çağrısı">
+          <h2>Kesintide çalışacak yükleri önce sayısallaştırın</h2>
+          <p>Panel veya batarya satın almadan önce cihazların W değerini, hedef süreyi ve kalkış gücünü belirleyin. Böylece gereğinden küçük ya da pahalı biçimde büyük sistem seçme riskini azaltın.</p>
+          <a href="https://www.alo186.com/hesaplama/yedek-guc">Yedek güç hesabını aç</a>
+          <a href="https://www.alo186.com/elektrik-kesintisi">Kesinti rehberine git</a>
+        </section>
+
+        <section class="faq" id="sss">
+          <h2>Sık sorulan sorular</h2>
+          <details><summary>Güneş paneli elektrik kesilince neden çalışmaz?</summary><p>Standart şebeke bağlantılı inverterler, şebeke kesildiğinde ada koruması nedeniyle üretimi durdurur. Kesintide enerji için uyumlu bir backup/EPS işlevi, gerekli ayırma-anahtarlama düzeni ve uygun yük bağlantısı gerekir.</p></details>
+          <details><summary>Batarya varsa tüm ev kesintide otomatik çalışır mı?</summary><p>Hayır. Batarya bulunması tek başına bütün evin yedekleneceği anlamına gelmez. İnverterin backup özelliği, çıkış gücü, faz yapısı, transfer düzeni ve hangi devrelerin kritik yük panosuna bağlı olduğu belirleyicidir.</p></details>
+          <details><summary>EPS çıkışına klima veya pompa bağlanabilir mi?</summary><p>Yalnız üreticinin sürekli ve kısa süreli çıkış sınırları ile cihazın kalkış akımı uygunsa değerlendirilebilir. Motorlu yükler ilk çalışmada yüksek güç isteyebildiğinden proje ve üretici verisi kontrol edilmelidir.</p></details>
+        </section>
+
+        <section class="sources" id="kaynaklar">
+          <h2>Teknik kaynaklar</h2>
+          <ol>
+            <li><a href="https://www.fronius.com/en/solar-energy/solar-solutions/backup-power" rel="nofollow noopener">Fronius — Backup power solutions and PV Point</a></li>
+            <li><a href="https://www.sma.de/en/products/backup-off-grid-solutions/backup-sunny-boy-smart-energy" rel="nofollow noopener">SMA — Sunny Boy Smart Energy backup solution</a></li>
+            <li><a href="https://manuals.sma.de/STPxx3SE40/en-US/14463271435.html" rel="nofollow noopener">SMA — Battery-backup function technical manual</a></li>
+          </ol>
+          <p>Kaynaklar 28 Temmuz 2026 tarihinde kontrol edilmiştir. Ürün özellikleri model, yazılım sürümü, ülke ve şebeke bağlantı şartlarına göre değişebilir.</p>
+        </section>
+        <p class="trust-note">ALO186 bağımsız bilgilendirme platformudur; EDAŞ, kamu kurumu veya ürün üreticisi değildir. Bu içerik proje, standart uygunluk kontrolü veya yetkili elektrik mühendisliği hizmetinin yerine geçmez.</p>
+      </article>
+
+      <aside class="sidebar">
+        <nav class="toc" aria-label="İçindekiler"><strong>İçindekiler</strong><a href="#neden-durur">GES neden durur?</a><a href="#dort-sistem">Dört sistem tipi</a><a href="#batarya-yetmez">Batarya neden yetmez?</a><a href="#kritik-yuk">Kritik yük panosu</a><a href="#hesap">Enerji hesabı</a><a href="#kontrol-listesi">Kontrol listesi</a><a href="#sss">Sık sorulanlar</a></nav>
+        <div class="related"><strong>İlgili araç ve rehberler</strong><a href="https://www.alo186.com/hesaplama/yedek-guc">UPS ve batarya kapasite hesabı</a><a href="https://www.alo186.com/elektrik-kesintisi">Elektrik kesintisi rehberi</a><a href="https://www.alo186.com/elektrik-portali">Elektrik araçları merkezi</a><a href="./jenerator-kac-kva-olmali">Jeneratör kaç kVA olmalı?</a></div>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="site-footer"><div class="wrap"><strong>ALO186</strong><p>Bağımsız elektrik bilgi ağıdır; arıza kaydı almaz ve resmî kurum değildir.</p></div></footer>
+</body>
+</html>
