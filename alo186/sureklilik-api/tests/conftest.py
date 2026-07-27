@@ -23,11 +23,12 @@ os.environ.setdefault("ALO186_GLOBAL_RATE_LIMIT", "10000")
 os.environ.setdefault("ALO186_AUTH_RATE_LIMIT", "1000")
 os.environ.setdefault("ALO186_RATE_LIMIT_WINDOW_SECONDS", "60")
 os.environ.setdefault("ALO186_METRICS_TOKEN", "test-metrics-token")
+os.environ.setdefault("ALO186_INVITATION_TTL_SECONDS", "604800")
 
 import pytest
 from fastapi.testclient import TestClient
 
-from app.main import app
+from app.application import app
 from app.rate_limit import auth_limiter, global_limiter
 
 
