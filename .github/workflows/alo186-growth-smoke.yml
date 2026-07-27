@@ -1,0 +1,82 @@
+name: ALO186 Growth Smoke Tests
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/**'
+      - '.github/workflows/alo186-growth-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check JavaScript syntax
+        run: |
+          node --check alo186/hesaplama/modem-internet-yedekleme/app.js
+          node --check alo186/hesaplama/ups-suresi/app.js
+          node --check alo186/hesaplama/kesinti-hazirlik-plani/app.js
+
+      - name: Validate trust and routing contracts
+        run: |
+          python3 - <<'PY'
+          from html.parser import HTMLParser
+          from pathlib import Path
+
+          root = Path('alo186/hesaplama')
+          files = {
+              'hub': root / 'index.html',
+              'modem_html': root / 'modem-internet-yedekleme/index.html',
+              'modem_js': root / 'modem-internet-yedekleme/app.js',
+              'ups_html': root / 'ups-suresi/index.html',
+              'ups_js': root / 'ups-suresi/app.js',
+              'plan_html': root / 'kesinti-hazirlik-plani/index.html',
+              'plan_js': root / 'kesinti-hazirlik-plani/app.js',
+          }
+          missing = [str(path) for path in files.values() if not path.exists()]
+          assert not missing, f'Missing files: {missing}'
+
+          class IdParser(HTMLParser):
+              def __init__(self):
+                  super().__init__(); self.ids=[]
+              def handle_starttag(self, tag, attrs):
+                  for key, value in attrs:
+                      if key == 'id' and value: self.ids.append(value)
+
+          for key in ('modem_html', 'ups_html', 'plan_html'):
+              text = files[key].read_text(encoding='utf-8')
+              parser = IdParser(); parser.feed(text)
+              duplicates = sorted({value for value in parser.ids if parser.ids.count(value) > 1})
+              assert not duplicates, f'{key} duplicate IDs: {duplicates}'
+
+          hub = files['hub'].read_text(encoding='utf-8')
+          modem_html = files['modem_html'].read_text(encoding='utf-8')
+          modem_js = files['modem_js'].read_text(encoding='utf-8')
+          ups_html = files['ups_html'].read_text(encoding='utf-8')
+          ups_js = files['ups_js'].read_text(encoding='utf-8')
+          plan_html = files['plan_html'].read_text(encoding='utf-8')
+          plan_js = files['plan_js'].read_text(encoding='utf-8')
+
+          assert './modem-internet-yedekleme/' in hub
+          assert 'modem-internet-yedekleme/' in plan_js
+          assert 'amazon.com.tr' not in modem_html.lower(), 'Calculator must not link directly to Amazon.'
+          assert 'amazon.com.tr' not in ups_html.lower(), 'UPS calculator must route through the disclosed selection center.'
+          assert 'reklam / satış ortaklığı' in modem_html.lower()
+          assert 'reklam / satış ortaklığı' in ups_html.lower()
+          assert 'fiyat, stok' in modem_html.lower()
+          assert 'fiyat, stok' in ups_html.lower()
+          assert 'id="note"' not in plan_html, 'Free-text note field reintroduces unnecessary personal-data risk.'
+          assert 'localstorage' in plan_html.lower()
+          assert "if(medical)" in plan_js and "if($('internet').checked)" in plan_js
+          assert 'modem_backup_calculated' in modem_js
+          assert 'ups_product_route_opened' in ups_js
+          assert 'outage_plan_reviewed' in plan_js
+          assert 'product_route_shown' in ups_js
+          print('ALO186 growth smoke checks passed.')
+          PY
