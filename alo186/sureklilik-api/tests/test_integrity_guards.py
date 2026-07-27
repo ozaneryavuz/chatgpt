@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from .test_api import headers, register
+from test_api import headers, register
 
 
 def test_last_admin_cannot_demote_self(client):
