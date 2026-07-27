@@ -20,7 +20,8 @@ done
 
 DATABASE_URL=${ALO186_DATABASE_URL/postgresql+psycopg:\/\//postgresql:\/\/}
 DATABASE_URL=${DATABASE_URL/postgres:\/\//postgresql:\/\/}
-export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-auto}
+AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-auto}
+export AWS_DEFAULT_REGION
 export RESTIC_REPOSITORY="s3:${ALO186_R2_ENDPOINT%/}/${ALO186_R2_RESTIC_BUCKET}"
 
 KEEP_DAILY=${ALO186_BACKUP_KEEP_DAILY:-14}
@@ -45,16 +46,24 @@ cleanup() {
 }
 
 failed() {
-  local exit_code=$?
+  local exit_code
+  exit_code=${1:-1}
+  trap - ERR
   heartbeat "/fail"
   echo "ALO186 backup başarısız oldu (exit=$exit_code)." >&2
   exit "$exit_code"
 }
-trap failed ERR
-trap cleanup EXIT INT TERM
+
+terminate() {
+  exit 130
+}
+
+trap cleanup EXIT
+trap 'failed $?' ERR
+trap terminate INT TERM
 
 if ! restic snapshots --compact >/dev/null 2>&1; then
-  echo "Restic deposu oluşturuluyor: $RESTIC_REPOSITORY"
+  echo "Restic deposu erişilemiyor veya henüz oluşturulmadı; init deneniyor: $RESTIC_REPOSITORY"
   restic init
 fi
 
@@ -90,15 +99,26 @@ if [[ "$(date -u +%u)" == "7" ]]; then
   restic check --read-data-subset=1/20
 fi
 
-# Ayın ilk günü ayrı ve immutability politikalı vault bucket'a ham aylık kopya.
-# Vault bucket üzerinde retention lock yalnız sağlayıcı panelinde etkinleştirilmelidir.
+# Ayın ilk günü ayrı, retention-lock uygulanabilen vault bucket'a istemci tarafında
+# şifrelenmiş dump kopyası. Restic parolasından ayrı anahtar hata alanını ayırır.
 if [[ "$(date -u +%d)" == "01" && -n "${ALO186_R2_VAULT_BUCKET:-}" ]]; then
+  if [[ -z "${ALO186_VAULT_ENCRYPTION_KEY:-}" ]]; then
+    echo "ALO186_R2_VAULT_BUCKET kullanılıyorsa ALO186_VAULT_ENCRYPTION_KEY zorunludur." >&2
+    exit 1
+  fi
   vault_prefix="monthly/$(date -u +%Y)/$(date -u +%m)"
+  vault_file="$DUMP_FILE.enc"
+  vault_checksum="$vault_file.sha256"
+  openssl enc -aes-256-cbc -pbkdf2 -iter 200000 -salt \
+    -in "$DUMP_FILE" \
+    -out "$vault_file" \
+    -pass env:ALO186_VAULT_ENCRYPTION_KEY
+  sha256sum "$vault_file" > "$vault_checksum"
   aws --endpoint-url "$ALO186_R2_ENDPOINT" --region auto s3 cp \
-    "$DUMP_FILE" "s3://${ALO186_R2_VAULT_BUCKET}/${vault_prefix}/$(basename "$DUMP_FILE")" \
+    "$vault_file" "s3://${ALO186_R2_VAULT_BUCKET}/${vault_prefix}/$(basename "$vault_file")" \
     --only-show-errors
   aws --endpoint-url "$ALO186_R2_ENDPOINT" --region auto s3 cp \
-    "$CHECKSUM_FILE" "s3://${ALO186_R2_VAULT_BUCKET}/${vault_prefix}/$(basename "$CHECKSUM_FILE")" \
+    "$vault_checksum" "s3://${ALO186_R2_VAULT_BUCKET}/${vault_prefix}/$(basename "$vault_checksum")" \
     --only-show-errors
 fi
 
