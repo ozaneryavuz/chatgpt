@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import timedelta
 
 from fastapi import HTTPException
-from sqlalchemy import delete, func, select
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.orm import Session, selectinload
 
 from .auth_service import revoke_all_sessions
@@ -200,6 +200,26 @@ def request_organization_deletion(db: Session, organization: Organization) -> No
     db.flush()
 
 
+def _detach_user_references(db: Session, user_id: str) -> None:
+    # V0.2 şemalarında FK ON DELETE SET NULL bulunmayabilir. Tarihsel operasyon
+    # kayıtlarını koruyup kullanıcı bağlantısını silme öncesinde anonimleştirir.
+    db.execute(
+        update(AssetTest)
+        .where(AssetTest.created_by_user_id == user_id)
+        .values(created_by_user_id=None)
+    )
+    db.execute(
+        update(Incident)
+        .where(Incident.created_by_user_id == user_id)
+        .values(created_by_user_id=None)
+    )
+    db.execute(
+        update(AuditLog)
+        .where(AuditLog.user_id == user_id)
+        .values(user_id=None)
+    )
+
+
 def purge_due_data(db: Session) -> dict[str, int]:
     now = utcnow()
     token_result = db.execute(
@@ -241,7 +261,9 @@ def purge_due_data(db: Session) -> dict[str, int]:
     user_count = len(users)
     for organization in organizations:
         db.delete(organization)
+    db.flush()
     for user in users:
+        _detach_user_references(db, user.id)
         db.delete(user)
     db.commit()
     return {
