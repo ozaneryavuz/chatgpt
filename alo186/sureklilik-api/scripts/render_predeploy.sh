@@ -29,3 +29,13 @@ assert settings.database_url.startswith("postgresql+psycopg://")
 check_db()
 print("ALO186 pre-deploy migration ve DB kontrolü başarılı.")
 PY
+
+if [ "${ALO186_KG_SEED_PUBLIC:-false}" = "true" ]; then
+  echo "ALO186 public Knowledge Graph seed/sync başlatılıyor."
+  STRICT_FLAG=""
+  if [ "${ALO186_KG_SEED_STRICT:-false}" = "true" ]; then
+    STRICT_FLAG="--strict"
+  fi
+  # shellcheck disable=SC2086
+  python -m app.knowledge_seed sync-public --timeout "${ALO186_KG_SEED_TIMEOUT:-30}" ${STRICT_FLAG}
+fi
