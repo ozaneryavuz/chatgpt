@@ -1,0 +1,44 @@
+name: ALO186 hesaplayıcı kalite kontrolü
+
+on:
+  push:
+    branches: [main, feat/alo186-kullanici-fayda-v1]
+    paths:
+      - 'alo186/hesaplama/**'
+      - 'alo186/tests/**'
+      - '.github/workflows/alo186-calculators-ci.yml'
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/**'
+      - 'alo186/tests/**'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Hesap motoru testleri
+        run: node alo186/tests/test_calc_core.js
+      - name: HTML temel kontrolleri
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r file; do
+            grep -qi '<!doctype html>' "$file"
+            grep -qi '<title>' "$file"
+            grep -qi 'meta name="description"' "$file"
+            grep -qi 'rel="canonical"' "$file"
+          done < <(find alo186/hesaplama -name '*.html' -type f | sort)
+      - name: JavaScript sözdizimi
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r file; do
+            node --check "$file"
+          done < <(find alo186/hesaplama -name '*.js' -type f | sort)
