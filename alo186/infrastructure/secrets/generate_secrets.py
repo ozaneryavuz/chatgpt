@@ -14,6 +14,7 @@ def values() -> dict[str, str]:
         "ALO186_DATA_ENCRYPTION_KEY": base64.urlsafe_b64encode(os.urandom(32)).decode("ascii"),
         "ALO186_METRICS_TOKEN": secrets.token_urlsafe(32),
         "RESTIC_PASSWORD": secrets.token_urlsafe(48),
+        "ALO186_VAULT_ENCRYPTION_KEY": secrets.token_urlsafe(48),
         "ALO186_WEBHOOK_SECRET": secrets.token_urlsafe(40),
     }
 
