@@ -89,6 +89,12 @@ jobs:
             -e GRAFANA_CLOUD_PROMETHEUS_USER=123 \
             -e GRAFANA_CLOUD_API_KEY=test-key \
             alo186-alloy-ci validate /etc/alloy/config.alloy
+      - name: Caddyfile validate
+        run: |
+          docker run --rm \
+            -v "$GITHUB_WORKSPACE/alo186/sureklilik-api/infra/caddy/Caddyfile:/etc/caddy/Caddyfile:ro" \
+            caddy:2.11.4-alpine \
+            caddy validate --config /etc/caddy/Caddyfile
       - name: Portable Compose ve Caddy config
         working-directory: alo186/sureklilik-api
         env:
@@ -106,6 +112,7 @@ jobs:
         run: |
           python alo186/infrastructure/secrets/generate_secrets.py --output /tmp/alo186-secrets.env
           test "$(stat -c '%a' /tmp/alo186-secrets.env)" = '600'
+          grep -q '^ALO186_VAULT_ENCRYPTION_KEY=' /tmp/alo186-secrets.env
           python alo186/infrastructure/dns/sync_cloudflare_dns.py --help
           python alo186/infrastructure/smtp/smtp_probe.py --help
           python alo186/infrastructure/monitoring/production_probe.py --help
@@ -113,4 +120,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ! git grep -n -E '(sk_live_[A-Za-z0-9]+|AKIA[0-9A-Z]{16}|BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY)' -- ':!*.md'
+          patterns=(
+            'sk[_]live_[A-Za-z0-9]+'
+            'A[K]IA[0-9A-Z]{16}'
+            '[B]EGIN (RSA |EC |OPENSSH )?PRIVATE KEY'
+          )
+          for pattern in "${patterns[@]}"; do
+            if git grep -n -E "$pattern" -- ':!*.md'; then
+              echo "Muhtemel secret pattern bulundu: $pattern" >&2
+              exit 1
+            fi
+          done
