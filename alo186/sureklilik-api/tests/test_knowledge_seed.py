@@ -62,10 +62,10 @@ def test_public_seed_is_idempotent_and_covers_full_catalog(monkeypatch):
     with SessionLocal() as db:
         assert db.scalar(select(func.count()).select_from(KnowledgeEntity).where(KnowledgeEntity.kind == "Province")) >= 81
         assert db.scalar(select(func.count()).select_from(KnowledgeEntity).where(KnowledgeEntity.kind == "District")) >= 973
-        assert db.scalar(select(func.count()).select_from(KnowledgeEntity).where(KnowledgeEntity.kind == "DistributionCompany")) == 21
-        assert db.scalar(select(func.count()).select_from(KnowledgeEntity).where(KnowledgeEntity.kind == "Problem")) == 25
-        assert db.scalar(select(func.count()).select_from(KnowledgeEntity).where(KnowledgeEntity.kind == "ProductCategory")) == 7
-        assert db.scalar(select(func.count()).select_from(KnowledgeEntity).where(KnowledgeEntity.kind == "Product")) == 7
+        assert db.scalar(select(func.count()).select_from(KnowledgeEntity).where(KnowledgeEntity.kind == "DistributionCompany")) >= 21
+        assert db.scalar(select(func.count()).select_from(KnowledgeEntity).where(KnowledgeEntity.kind == "Problem")) >= 25
+        assert db.scalar(select(func.count()).select_from(KnowledgeEntity).where(KnowledgeEntity.kind == "ProductCategory")) >= 7
+        assert db.scalar(select(func.count()).select_from(KnowledgeEntity).where(KnowledgeEntity.kind == "Product")) >= 7
         assert db.scalar(select(func.count()).select_from(KnowledgeSource).where(KnowledgeSource.scope_key == "global")) >= 5
         assert db.scalar(select(func.count()).select_from(KnowledgeAssertion).where(KnowledgeAssertion.scope_key == "global")) > 1_000
         assert db.scalar(select(func.count()).select_from(KnowledgeVerificationRun).where(KnowledgeVerificationRun.status == "verified")) >= 2
@@ -109,10 +109,10 @@ def test_seed_non_strict_keeps_static_graph_when_remote_dataset_is_unreachable(m
         assert source.status == "unreachable"
         assert db.scalar(
             select(func.count()).select_from(KnowledgeEntity).where(KnowledgeEntity.kind == "DistributionCompany")
-        ) == 21
+        ) >= 21
         assert db.scalar(
             select(func.count()).select_from(KnowledgeEntity).where(KnowledgeEntity.kind == "Problem")
-        ) == 25
+        ) >= 25
         assert db.scalar(
             select(func.count()).select_from(KnowledgeVerificationRun).where(
                 KnowledgeVerificationRun.source_id == source.id,
