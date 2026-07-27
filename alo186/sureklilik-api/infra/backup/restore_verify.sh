@@ -17,10 +17,14 @@ for name in "${required[@]}"; do
   fi
 done
 
-export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-auto}
+AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-auto}
+export AWS_DEFAULT_REGION
 export RESTIC_REPOSITORY="s3:${ALO186_R2_ENDPOINT%/}/${ALO186_R2_RESTIC_BUCKET}"
 TARGET_DIR=$(mktemp -d)
-trap 'rm -rf "$TARGET_DIR"' EXIT INT TERM
+cleanup() { rm -rf "$TARGET_DIR"; }
+terminate() { exit 130; }
+trap cleanup EXIT
+trap terminate INT TERM
 
 SNAPSHOT=${1:-latest}
 echo "Restic snapshot doğrulanıyor: $SNAPSHOT"
