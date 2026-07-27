@@ -1,0 +1,61 @@
+prometheus.scrape "alo186_api" {
+  targets = [
+    {
+      "__address__"      = sys.env("ALO186_API_METRICS_TARGET"),
+      "__scheme__"       = "https",
+      "__metrics_path__" = "/metrics",
+      "service"          = "alo186-continuity-api",
+      "environment"      = "production",
+    },
+  ]
+  scrape_interval = "30s"
+  scrape_timeout  = "10s"
+
+  authorization {
+    type        = "Bearer"
+    credentials = sys.env("ALO186_METRICS_TOKEN")
+  }
+
+  forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+}
+
+prometheus.remote_write "grafana_cloud" {
+  external_labels = {
+    service     = "alo186-continuity-api",
+    environment = "production",
+    region      = "frankfurt",
+  }
+
+  endpoint {
+    url = sys.env("GRAFANA_CLOUD_PROMETHEUS_URL")
+
+    basic_auth {
+      username = sys.env("GRAFANA_CLOUD_PROMETHEUS_USERNAME")
+      password = sys.env("GRAFANA_CLOUD_API_KEY")
+    }
+  }
+}
+
+// Bu Docker log bölümü yalnız taşınabilir VPS/Caddy kurulumunda kullanılır.
+// Render production logları için Render Log Stream doğrudan Grafana Cloud Loki'ye bağlanmalıdır.
+discovery.docker "local" {
+  host = "unix:///var/run/docker.sock"
+}
+
+loki.source.docker "local" {
+  host       = "unix:///var/run/docker.sock"
+  targets    = discovery.docker.local.targets
+  labels     = { service = "alo186", environment = "production" }
+  forward_to = [loki.write.grafana_cloud.receiver]
+}
+
+loki.write "grafana_cloud" {
+  endpoint {
+    url = sys.env("GRAFANA_CLOUD_LOKI_URL")
+
+    basic_auth {
+      username = sys.env("GRAFANA_CLOUD_LOKI_USERNAME")
+      password = sys.env("GRAFANA_CLOUD_API_KEY")
+    }
+  }
+}

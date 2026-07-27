@@ -1,0 +1,269 @@
+# yaml-language-server: $schema=https://render.com/schema/render.yaml.json
+previews:
+  generation: off
+
+databases:
+  - name: alo186-postgres
+    plan: basic-1gb
+    region: frankfurt
+    postgresMajorVersion: "16"
+    databaseName: alo186
+    user: alo186
+    diskSizeGB: 15
+    storageAutoscalingEnabled: true
+    connectionPool: none
+    ipAllowList: []
+
+services:
+  - type: web
+    name: alo186-continuity-api
+    runtime: docker
+    plan: starter
+    region: frankfurt
+    branch: main
+    rootDir: alo186/sureklilik-api
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    autoDeployTrigger: checksPass
+    preDeployCommand: ./scripts/render_predeploy.sh
+    healthCheckPath: /health/ready
+    maxShutdownDelaySeconds: 60
+    domains:
+      - api.alo186.com
+    envVars:
+      - key: ALO186_ENV
+        value: production
+      - key: ALO186_DATABASE_URL
+        fromDatabase:
+          name: alo186-postgres
+          property: connectionString
+      - key: ALO186_TOKEN_SECRET
+        generateValue: true
+      - key: ALO186_DATA_ENCRYPTION_KEY
+        sync: false
+      - key: ALO186_METRICS_TOKEN
+        generateValue: true
+      - key: ALO186_ALLOWED_ORIGINS
+        value: https://www.alo186.com
+      - key: ALO186_ALLOWED_HOSTS
+        value: api.alo186.com,alo186-continuity-api.onrender.com,localhost,127.0.0.1
+      - key: ALO186_PUBLIC_BASE_URL
+        value: https://www.alo186.com
+      - key: ALO186_AUTO_CREATE_SCHEMA
+        value: "false"
+      - key: ALO186_RUN_MIGRATIONS
+        value: "false"
+      - key: ALO186_EMAIL_VERIFICATION_REQUIRED
+        value: "true"
+      - key: ALO186_EXPOSE_TEST_TOKENS
+        value: "false"
+      - key: ALO186_EMAIL_BACKEND
+        value: smtp
+      - key: ALO186_SMTP_HOST
+        value: smtp.postmarkapp.com
+      - key: ALO186_SMTP_PORT
+        value: "587"
+      - key: ALO186_SMTP_USERNAME
+        sync: false
+      - key: ALO186_SMTP_PASSWORD
+        sync: false
+      - key: ALO186_SMTP_FROM_EMAIL
+        value: noreply@alo186.com
+      - key: ALO186_SMTP_USE_TLS
+        value: "true"
+      - key: ALO186_TRUST_PROXY_HEADERS
+        value: "true"
+      - key: ALO186_GLOBAL_RATE_LIMIT
+        value: "240"
+      - key: ALO186_AUTH_RATE_LIMIT
+        value: "10"
+      - key: ALO186_RATE_LIMIT_WINDOW_SECONDS
+        value: "900"
+      - key: ALO186_MAX_REQUEST_BYTES
+        value: "1048576"
+      - key: ALO186_DELETION_GRACE_DAYS
+        value: "30"
+      - key: ALO186_AUDIT_RETENTION_DAYS
+        value: "730"
+      - key: ALO186_OUTBOX_RETENTION_DAYS
+        value: "30"
+      - key: ALO186_SENTRY_DSN
+        sync: false
+      - key: ALO186_SENTRY_TRACES_SAMPLE_RATE
+        value: "0.05"
+
+  - type: worker
+    name: alo186-email-worker
+    runtime: docker
+    plan: starter
+    region: frankfurt
+    branch: main
+    rootDir: alo186/sureklilik-api
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    dockerCommand: python -m app.worker email-loop --interval 15
+    autoDeployTrigger: checksPass
+    maxShutdownDelaySeconds: 60
+    envVars:
+      - key: ALO186_ENV
+        value: production
+      - key: ALO186_DATABASE_URL
+        fromDatabase:
+          name: alo186-postgres
+          property: connectionString
+      - key: ALO186_TOKEN_SECRET
+        fromService:
+          type: web
+          name: alo186-continuity-api
+          envVarKey: ALO186_TOKEN_SECRET
+      - key: ALO186_DATA_ENCRYPTION_KEY
+        fromService:
+          type: web
+          name: alo186-continuity-api
+          envVarKey: ALO186_DATA_ENCRYPTION_KEY
+      - key: ALO186_ALLOWED_ORIGINS
+        value: https://www.alo186.com
+      - key: ALO186_ALLOWED_HOSTS
+        value: localhost,127.0.0.1
+      - key: ALO186_PUBLIC_BASE_URL
+        value: https://www.alo186.com
+      - key: ALO186_AUTO_CREATE_SCHEMA
+        value: "false"
+      - key: ALO186_RUN_MIGRATIONS
+        value: "false"
+      - key: ALO186_EMAIL_VERIFICATION_REQUIRED
+        value: "true"
+      - key: ALO186_EXPOSE_TEST_TOKENS
+        value: "false"
+      - key: ALO186_EMAIL_BACKEND
+        value: smtp
+      - key: ALO186_SMTP_HOST
+        value: smtp.postmarkapp.com
+      - key: ALO186_SMTP_PORT
+        value: "587"
+      - key: ALO186_SMTP_USERNAME
+        fromService:
+          type: web
+          name: alo186-continuity-api
+          envVarKey: ALO186_SMTP_USERNAME
+      - key: ALO186_SMTP_PASSWORD
+        fromService:
+          type: web
+          name: alo186-continuity-api
+          envVarKey: ALO186_SMTP_PASSWORD
+      - key: ALO186_SMTP_FROM_EMAIL
+        value: noreply@alo186.com
+      - key: ALO186_SMTP_USE_TLS
+        value: "true"
+      - key: ALO186_SENTRY_DSN
+        fromService:
+          type: web
+          name: alo186-continuity-api
+          envVarKey: ALO186_SENTRY_DSN
+
+  - type: cron
+    name: alo186-retention-cron
+    runtime: docker
+    plan: starter
+    region: frankfurt
+    branch: main
+    rootDir: alo186/sureklilik-api
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    dockerCommand: python -m app.worker retention-once
+    schedule: "15 2 * * *"
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: ALO186_ENV
+        value: production
+      - key: ALO186_DATABASE_URL
+        fromDatabase:
+          name: alo186-postgres
+          property: connectionString
+      - key: ALO186_TOKEN_SECRET
+        fromService:
+          type: web
+          name: alo186-continuity-api
+          envVarKey: ALO186_TOKEN_SECRET
+      - key: ALO186_DATA_ENCRYPTION_KEY
+        fromService:
+          type: web
+          name: alo186-continuity-api
+          envVarKey: ALO186_DATA_ENCRYPTION_KEY
+      - key: ALO186_ALLOWED_ORIGINS
+        value: https://www.alo186.com
+      - key: ALO186_ALLOWED_HOSTS
+        value: localhost,127.0.0.1
+      - key: ALO186_PUBLIC_BASE_URL
+        value: https://www.alo186.com
+      - key: ALO186_AUTO_CREATE_SCHEMA
+        value: "false"
+      - key: ALO186_RUN_MIGRATIONS
+        value: "false"
+      - key: ALO186_EMAIL_VERIFICATION_REQUIRED
+        value: "true"
+      - key: ALO186_EXPOSE_TEST_TOKENS
+        value: "false"
+      - key: ALO186_EMAIL_BACKEND
+        value: smtp
+      - key: ALO186_SMTP_HOST
+        value: smtp.postmarkapp.com
+      - key: ALO186_SMTP_PORT
+        value: "587"
+      - key: ALO186_SMTP_USERNAME
+        fromService:
+          type: web
+          name: alo186-continuity-api
+          envVarKey: ALO186_SMTP_USERNAME
+      - key: ALO186_SMTP_PASSWORD
+        fromService:
+          type: web
+          name: alo186-continuity-api
+          envVarKey: ALO186_SMTP_PASSWORD
+      - key: ALO186_SMTP_FROM_EMAIL
+        value: noreply@alo186.com
+      - key: ALO186_SMTP_USE_TLS
+        value: "true"
+      - key: ALO186_AUDIT_RETENTION_DAYS
+        value: "730"
+      - key: ALO186_OUTBOX_RETENTION_DAYS
+        value: "30"
+      - key: ALO186_SENTRY_DSN
+        fromService:
+          type: web
+          name: alo186-continuity-api
+          envVarKey: ALO186_SENTRY_DSN
+
+  - type: cron
+    name: alo186-r2-backup-cron
+    runtime: docker
+    plan: starter
+    region: frankfurt
+    branch: main
+    rootDir: alo186/sureklilik-api
+    dockerfilePath: ./ops/backup/Dockerfile
+    dockerContext: .
+    dockerCommand: /usr/local/bin/backup-to-r2
+    schedule: "30 1 * * *"
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: ALO186_DATABASE_URL
+        fromDatabase:
+          name: alo186-postgres
+          property: connectionString
+      - key: RESTIC_REPOSITORY
+        sync: false
+      - key: RESTIC_PASSWORD
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_DEFAULT_REGION
+        value: auto
+      - key: ALO186_BACKUP_KEEP_DAILY
+        value: "14"
+      - key: ALO186_BACKUP_KEEP_WEEKLY
+        value: "8"
+      - key: ALO186_BACKUP_KEEP_MONTHLY
+        value: "12"

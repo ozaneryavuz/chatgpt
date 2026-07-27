@@ -1,0 +1,61 @@
+name: ALO186 aylık yedek restore tatbikatı
+
+on:
+  schedule:
+    - cron: "0 4 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: vars.ALO186_RESTORE_DRILL_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: restore_test
+          POSTGRES_USER: restore_test
+          POSTGRES_PASSWORD: restore_test_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U restore_test -d restore_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Backup doğrulama imajını oluştur
+        run: docker build -f alo186/sureklilik-api/ops/backup/Dockerfile -t alo186-backup:drill alo186/sureklilik-api
+      - name: Son yedeği izole PostgreSQL'e geri yükle
+        env:
+          RESTIC_REPOSITORY: ${{ secrets.ALO186_RESTIC_REPOSITORY }}
+          RESTIC_PASSWORD: ${{ secrets.ALO186_RESTIC_PASSWORD }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.ALO186_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.ALO186_R2_SECRET_ACCESS_KEY }}
+        run: |
+          docker run --rm --network host \
+            -e RESTIC_REPOSITORY \
+            -e RESTIC_PASSWORD \
+            -e AWS_ACCESS_KEY_ID \
+            -e AWS_SECRET_ACCESS_KEY \
+            -e AWS_DEFAULT_REGION=auto \
+            -e ALO186_RESTORE_DATABASE_URL='postgresql://restore_test:restore_test_password@127.0.0.1:5432/restore_test' \
+            -e ALO186_RESTORE_CONFIRM=RESTORE \
+            alo186-backup:drill /usr/local/bin/verify-restore
+      - name: Restore sonrası temel şema kontrolü
+        env:
+          PGPASSWORD: restore_test_password
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client
+          psql -h 127.0.0.1 -U restore_test -d restore_test -v ON_ERROR_STOP=1 <<'SQL'
+          SELECT COUNT(*) AS table_count
+          FROM information_schema.tables
+          WHERE table_schema = 'public';
+          SELECT version_num FROM alembic_version;
+          SQL

@@ -1,0 +1,80 @@
+groups:
+  - name: alo186-api
+    interval: 30s
+    rules:
+      - alert: Alo186ApiHigh5xxRatio
+        expr: |
+          sum(rate(alo186_http_requests_total{status=~"5.."}[5m]))
+          /
+          clamp_min(sum(rate(alo186_http_requests_total[5m])), 0.001)
+          > 0.05
+        for: 10m
+        labels:
+          severity: critical
+          service: alo186-continuity-api
+        annotations:
+          summary: "ALO186 API 5xx oranı %5 üzerinde"
+          description: "Son 10 dakikada API isteklerinin %5'ten fazlası 5xx döndü."
+          runbook_url: "https://github.com/ozaneryavuz/chatgpt/blob/main/alo186/infra/production/PRODUCTION_RUNBOOK.md#api-5xx"
+
+      - alert: Alo186ApiMeanLatencyHigh
+        expr: |
+          sum(rate(alo186_http_request_duration_seconds_sum[5m]))
+          /
+          clamp_min(sum(rate(alo186_http_requests_total[5m])), 0.001)
+          > 1
+        for: 15m
+        labels:
+          severity: warning
+          service: alo186-continuity-api
+        annotations:
+          summary: "ALO186 API ortalama yanıt süresi 1 saniye üzerinde"
+          description: "Son 15 dakikada ortalama istek süresi 1 saniyeyi aştı."
+          runbook_url: "https://github.com/ozaneryavuz/chatgpt/blob/main/alo186/infra/production/PRODUCTION_RUNBOOK.md#yüksek-gecikme"
+
+      - alert: Alo186ApiRequestsStalled
+        expr: alo186_http_requests_in_flight > 50
+        for: 5m
+        labels:
+          severity: warning
+          service: alo186-continuity-api
+        annotations:
+          summary: "ALO186 API bekleyen istek sayısı yüksek"
+          description: "Beş dakikadır 50'den fazla istek işlemde görünüyor."
+          runbook_url: "https://github.com/ozaneryavuz/chatgpt/blob/main/alo186/infra/production/PRODUCTION_RUNBOOK.md#yüksek-gecikme"
+
+      - alert: Alo186ApiProcessRestartedFrequently
+        expr: changes(alo186_uptime_seconds[30m]) > 2
+        for: 0m
+        labels:
+          severity: warning
+          service: alo186-continuity-api
+        annotations:
+          summary: "ALO186 API sık yeniden başladı"
+          description: "Son 30 dakikada API process uptime değeri ikiden fazla kez sıfırlandı."
+          runbook_url: "https://github.com/ozaneryavuz/chatgpt/blob/main/alo186/infra/production/PRODUCTION_RUNBOOK.md#sık-yeniden-başlama"
+
+  - name: alo186-synthetic
+    interval: 60s
+    rules:
+      - alert: Alo186ApiSyntheticDown
+        expr: probe_success{job="alo186-api"} == 0
+        for: 3m
+        labels:
+          severity: critical
+          service: alo186-continuity-api
+        annotations:
+          summary: "ALO186 API dışarıdan erişilemiyor"
+          description: "Blackbox veya Grafana Synthetic Monitoring üç dakikadır başarısız."
+          runbook_url: "https://github.com/ozaneryavuz/chatgpt/blob/main/alo186/infra/production/PRODUCTION_RUNBOOK.md#api-erişilemiyor"
+
+      - alert: Alo186TlsExpirySoon
+        expr: probe_ssl_earliest_cert_expiry{job=~"alo186-.*"} - time() < 21 * 24 * 60 * 60
+        for: 15m
+        labels:
+          severity: warning
+          service: alo186
+        annotations:
+          summary: "ALO186 TLS sertifikasının süresi 21 günden az"
+          description: "www veya api sertifikası yenilenmeden önce kontrol gerekiyor."
+          runbook_url: "https://github.com/ozaneryavuz/chatgpt/blob/main/alo186/infra/production/PRODUCTION_RUNBOOK.md#tls-yenileme"

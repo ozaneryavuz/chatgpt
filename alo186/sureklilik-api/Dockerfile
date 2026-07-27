@@ -15,8 +15,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY alembic.ini .
 COPY alembic ./alembic
 COPY app ./app
+COPY scripts ./scripts
 COPY entrypoint.sh ./entrypoint.sh
-RUN chmod 0755 ./entrypoint.sh && chown -R alo186:alo186 /app
+RUN chmod 0755 ./entrypoint.sh ./scripts/*.sh && chown -R alo186:alo186 /app
 
 USER alo186
 EXPOSE 8000

@@ -1,0 +1,37 @@
+name: ALO186 production synthetic monitor
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  synthetic:
+    if: vars.ALO186_SYNTHETIC_MONITOR_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Web, API ve TLS kontrolleri
+        env:
+          WEB_BASE: ${{ vars.ALO186_SYNTHETIC_WEB_BASE || 'https://www.alo186.com' }}
+          API_BASE: ${{ vars.ALO186_SYNTHETIC_API_BASE || 'https://api.alo186.com' }}
+        run: |
+          python alo186/infra/observability/synthetic_check.py \
+            --web-base "$WEB_BASE" \
+            --api-base "$API_BASE" \
+            --output synthetic-report.json
+      - name: Raporu sakla
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-production-synthetic-${{ github.run_id }}
+          path: synthetic-report.json
+          if-no-files-found: warn
+          retention-days: 30

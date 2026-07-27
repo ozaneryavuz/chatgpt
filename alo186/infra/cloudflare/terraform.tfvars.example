@@ -1,0 +1,18 @@
+# Bu dosyayı terraform.tfvars olarak kopyalayın; gerçek token/ID değerlerini repoya yazmayın.
+cloudflare_api_token = "REPLACE_WITH_LEAST_PRIVILEGE_TOKEN"
+zone_id             = "REPLACE_WITH_ALO186_ZONE_ID"
+zone_name           = "alo186.com"
+
+render_api_hostname = "alo186-continuity-api.onrender.com"
+# Render custom-domain doğrulaması bitene kadar false.
+api_proxied         = false
+
+# Postmark panelindeki gerçek CNAME değerleriyle doldurun.
+postmark_dkim_name                = ""
+postmark_dkim_content             = ""
+postmark_return_path_name         = ""
+postmark_return_path_content      = ""
+
+# Mevcut DMARC kaydı yoksa true yapın; önce p=none gözlem politikası kullanın.
+manage_dmarc = false
+dmarc_content = "v=DMARC1; p=none; rua=mailto:dmarc@alo186.com; adkim=s; aspf=s"
