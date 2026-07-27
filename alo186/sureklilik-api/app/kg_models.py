@@ -112,6 +112,10 @@ class KnowledgeVerificationRun(Base):
         Index("ix_kg_verification_source_status", "source_id", "status"),
     )
 
+    def __init__(self, **kwargs):
+        kwargs.setdefault("id", new_id())
+        super().__init__(**kwargs)
+
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
     scope_key: Mapped[str] = mapped_column(String(90), default="global", index=True)
     organization_id: Mapped[str | None] = mapped_column(
