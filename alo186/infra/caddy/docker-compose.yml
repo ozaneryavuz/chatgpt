@@ -20,7 +20,7 @@ services:
         condition: service_healthy
 
   api:
-    image: ghcr.io/REPLACE_WITH_OWNER/alo186-continuity-api:REPLACE_WITH_TAG
+    image: ${ALO186_API_IMAGE:-ghcr.io/example/alo186-continuity-api:latest}
     restart: unless-stopped
     env_file: ${ALO186_ENV_FILE:-.env.production.example}
     expose:
