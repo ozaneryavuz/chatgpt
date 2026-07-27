@@ -2,6 +2,22 @@
 
 Bu belge, kaynak kodu ve otomasyonları gerçek Render, Cloudflare, Postmark, R2, Sentry ve Grafana kaynaklarına bağlamak için uygulanacak tek kontrollü sıradır.
 
+## 0. Kaynak kalite kapısı
+
+Provider hesabı oluşturulmadan ve ücretli kaynak açılmadan önce PR üzerinde şu kontrollerin tamamı yeşil olmalıdır:
+
+- Render Blueprint resmî JSON Schema
+- ALO186 Render semantik doğrulaması
+- PostgreSQL URL ve metrics auth regresyonları
+- ShellCheck
+- Caddy 2.11.4 config ve Compose
+- VPS ve Render Grafana Alloy config
+- API ve backup Docker build
+- Terraform validate
+- Secret generator ve production preflight
+
+Bu kapı, sağlayıcı maliyeti doğmadan önce hatalı konfigürasyonu yakalamak için zorunludur.
+
 ## 1. GitHub Environment
 
 Repository Settings → Environments altında:
