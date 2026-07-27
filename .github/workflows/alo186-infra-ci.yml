@@ -79,12 +79,16 @@ jobs:
             alo186/sureklilik-api/ops/backup/backup_to_r2.sh \
             alo186/sureklilik-api/ops/backup/verify_restore.sh \
             alo186/infra/production/check_email_dns.sh
-      - name: Caddy 2.11.4 yapılandırması
+      - name: Caddy 2.11.4 Caddyfile doğrulaması
         run: |
           docker run --rm \
             -v "$PWD/alo186/infra/caddy/Caddyfile:/etc/caddy/Caddyfile:ro" \
             caddy:2.11.4-alpine validate --config /etc/caddy/Caddyfile
-          docker compose -f alo186/infra/caddy/docker-compose.yml config >/dev/null
+      - name: Caddy fallback Compose doğrulaması
+        env:
+          ALO186_API_IMAGE: ghcr.io/example/alo186-continuity-api:latest
+          ALO186_ENV_FILE: .env.production.example
+        run: docker compose -f alo186/infra/caddy/docker-compose.yml config >/dev/null
       - name: VPS Grafana Alloy yapılandırması
         env:
           ALO186_API_METRICS_TARGET: api.alo186.com
