@@ -29,7 +29,7 @@ jobs:
       POSTMARK_DKIM_HOST: ${{ vars.POSTMARK_DKIM_HOST }}
       POSTMARK_DKIM_VALUE: ${{ secrets.POSTMARK_DKIM_VALUE }}
       POSTMARK_RETURN_PATH_HOST: ${{ vars.POSTMARK_RETURN_PATH_HOST }}
-      POSTMARK_RETURN_PATH_VALUE: ${{ vars.POSTMARK_RETURN_PATH_VALUE }}
+      POSTMARK_RETURN_PATH_VALUE: ${{ secrets.POSTMARK_RETURN_PATH_VALUE }}
     steps:
       - uses: actions/checkout@v4
       - name: Gerekli değerleri doğrula
@@ -55,13 +55,29 @@ jobs:
           set -euo pipefail
           sudo apt-get update -qq
           sudo apt-get install -y -qq dnsutils
+
           for attempt in {1..18}; do
-            cname="$(dig +short CNAME api.alo186.com | tr -d '\n')"
-            if [[ -n "$cname" ]]; then
-              echo "api.alo186.com → $cname"
-              exit 0
+            if [[ "${{ inputs.proxy_api }}" == "true" ]]; then
+              a_records="$(dig +short A api.alo186.com | sed '/^$/d')"
+              aaaa_records="$(dig +short AAAA api.alo186.com | sed '/^$/d')"
+              if [[ -n "$a_records$aaaa_records" ]]; then
+                echo "api.alo186.com Cloudflare edge adresleriyle çözümleniyor:"
+                printf '%s\n%s\n' "$a_records" "$aaaa_records" | sed '/^$/d'
+                exit 0
+              fi
+            else
+              cname="$(dig +short CNAME api.alo186.com | tr -d '\n')"
+              if [[ -n "$cname" ]]; then
+                echo "api.alo186.com → $cname"
+                exit 0
+              fi
             fi
             sleep 10
           done
-          echo 'CNAME yayılımı 3 dakika içinde doğrulanamadı.' >&2
+
+          if [[ "${{ inputs.proxy_api }}" == "true" ]]; then
+            echo 'Cloudflare proxied A/AAAA yayılımı 3 dakika içinde doğrulanamadı.' >&2
+          else
+            echo 'CNAME yayılımı 3 dakika içinde doğrulanamadı.' >&2
+          fi
           exit 1
