@@ -1,0 +1,46 @@
+name: ALO186 davet routerını main API'ye bağla
+
+on:
+  push:
+    branches: [feat/alo186-saas-v04-invites]
+    paths:
+      - 'alo186/sureklilik-api/.patch-invite-router-trigger'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/alo186-saas-v04-invites
+          fetch-depth: 0
+      - name: Router importu ve include_router ekle
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('alo186/sureklilik-api/app/main.py')
+          text = path.read_text(encoding='utf-8')
+          import_line = 'from .invitation_router import router as invitation_router\n'
+          if import_line not in text:
+              anchor = 'from .deps import OrgContext, get_current_user, get_db, get_org_context, require_roles\n'
+              if anchor not in text:
+                  raise SystemExit('deps import anchor bulunamadı')
+              text = text.replace(anchor, anchor + import_line, 1)
+          include_line = 'app.include_router(invitation_router)\n\n'
+          if include_line not in text:
+              anchor = 'app.add_middleware(TrustedHostMiddleware, allowed_hosts=list(settings.allowed_hosts))\n'
+              if anchor not in text:
+                  raise SystemExit('middleware anchor bulunamadı')
+              text = text.replace(anchor, include_line + anchor, 1)
+          path.write_text(text, encoding='utf-8')
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add alo186/sureklilik-api/app/main.py
+          git commit -m 'feat(alo186): ekip daveti routerını APIye bağla'
+          git push origin HEAD:feat/alo186-saas-v04-invites
