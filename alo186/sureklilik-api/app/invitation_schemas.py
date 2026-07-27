@@ -17,6 +17,7 @@ class InvitationCreate(BaseModel):
 class InvitationAcceptRequest(BaseModel):
     token: str = Field(min_length=20, max_length=300)
     password: str | None = Field(default=None, min_length=10, max_length=200)
+    mfa_code: str | None = Field(default=None, min_length=6, max_length=32)
 
 
 class InvitationOut(BaseModel):
