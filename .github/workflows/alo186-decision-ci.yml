@@ -1,0 +1,52 @@
+name: ALO186 karar motoru kalite kontrolü
+
+on:
+  push:
+    branches: [main, feat/alo186-karar-motoru-v2]
+    paths:
+      - 'alo186/karar-motoru/**'
+      - 'alo186/tests/test_decision_rules.js'
+      - '.github/workflows/alo186-decision-ci.yml'
+  pull_request:
+    paths:
+      - 'alo186/karar-motoru/**'
+      - 'alo186/tests/test_decision_rules.js'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Karar kuralı ve güvenlik regresyon testleri
+        run: node alo186/tests/test_decision_rules.js
+      - name: JavaScript sözdizimi
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r file; do
+            node --check "$file"
+          done < <(find alo186/karar-motoru -name '*.js' -type f | sort)
+      - name: HTML ve SEO temel kontrolü
+        shell: bash
+        run: |
+          set -euo pipefail
+          file=alo186/karar-motoru/index.html
+          grep -qi '<!doctype html>' "$file"
+          grep -qi '<title>' "$file"
+          grep -qi 'meta name="description"' "$file"
+          grep -qi 'rel="canonical"' "$file"
+          grep -qi 'application/ld+json' "$file"
+          grep -qi './rules.js' "$file"
+      - name: Kritik gelir güvenliği kontrolü
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q "revenueAllowed:false" alo186/karar-motoru/rules.js
+          grep -q "tel:112" alo186/karar-motoru/rules.js
+          grep -q "fallen_conductor" alo186/karar-motoru/rules.js
