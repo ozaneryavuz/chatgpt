@@ -97,7 +97,7 @@ def load_settings() -> Settings:
 
     settings = Settings(
         environment=environment,
-        database_url=os.getenv("ALO186_DATABASE_URL", "sqlite:///./alo186_continuity.db"),
+        database_url=_secret("ALO186_DATABASE_URL", "sqlite:///./alo186_continuity.db") or "",
         token_secret=token_secret,
         data_encryption_key=data_encryption_key,
         token_ttl_seconds=_env_int("ALO186_TOKEN_TTL_SECONDS", 28_800),
