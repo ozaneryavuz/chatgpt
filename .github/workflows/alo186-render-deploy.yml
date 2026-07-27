@@ -1,0 +1,63 @@
+name: ALO186 Render manual deploy ve smoke test
+
+on:
+  workflow_dispatch:
+    inputs:
+      clear_cache:
+        description: Render build cache temizlensin
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+environment: alo186-production
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy hook ön kontrolü
+        env:
+          DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: test -n "$DEPLOY_HOOK"
+      - name: Render deploy tetikle
+        env:
+          DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="$DEPLOY_HOOK"
+          if [[ "${{ inputs.clear_cache }}" == "true" ]]; then
+            separator='?'
+            [[ "$url" == *\?* ]] && separator='&'
+            url="${url}${separator}clearCache=true"
+          fi
+          curl --fail --silent --show-error --max-time 30 -X POST "$url"
+      - name: Readiness bekle
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in {1..60}; do
+            if curl --fail --silent --show-error --max-time 10 https://api.alo186.com/health/ready >/tmp/ready.json; then
+              cat /tmp/ready.json
+              exit 0
+            fi
+            echo "Readiness bekleniyor: $attempt/60"
+            sleep 10
+          done
+          echo 'Render deploy sonrasında readiness 10 dakika içinde dönmedi.' >&2
+          exit 1
+      - name: Production smoke
+        run: >-
+          python - <<'PY'
+          import json, urllib.request
+          for path in ('/health/live', '/health/ready'):
+              with urllib.request.urlopen('https://api.alo186.com' + path, timeout=20) as response:
+                  data = json.load(response)
+                  assert response.status == 200
+                  assert data['status'] in {'ok', 'ready'}
+                  assert response.headers.get('X-Request-ID')
+          print('Render deployment smoke başarılı.')
+          PY
