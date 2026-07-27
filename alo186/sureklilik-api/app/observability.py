@@ -19,6 +19,8 @@ except ImportError:  # pragma: no cover - minimal geliştirme ortamı
     sentry_sdk = None
     FastApiIntegration = LoggingIntegration = SqlalchemyIntegration = None
 
+_sentry_configured = False
+
 
 class JsonFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
@@ -60,9 +62,10 @@ def configure_logging() -> None:
 def configure_sentry() -> bool:
     """Sentry'yi PII göndermeden ve örnekleme oranı görünür biçimde başlatır."""
 
+    global _sentry_configured
     if not settings.sentry_dsn or sentry_sdk is None:
         return False
-    if sentry_sdk.Hub.current.client is not None:
+    if _sentry_configured:
         return True
     sentry_sdk.init(
         dsn=settings.sentry_dsn,
@@ -78,6 +81,7 @@ def configure_sentry() -> bool:
             LoggingIntegration(level=logging.INFO, event_level=logging.ERROR),
         ],
     )
+    _sentry_configured = True
     return True
 
 
