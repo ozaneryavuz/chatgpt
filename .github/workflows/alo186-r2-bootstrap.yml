@@ -1,0 +1,59 @@
+name: ALO186 R2 backup bucket bootstrap
+
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: Bucket'ları gerçekten oluştur
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+environment: alo186-production
+
+jobs:
+  r2:
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: auto
+      ALO186_R2_ENDPOINT: ${{ vars.ALO186_R2_ENDPOINT }}
+      RESTIC_BUCKET: ${{ vars.ALO186_R2_RESTIC_BUCKET }}
+      VAULT_BUCKET: ${{ vars.ALO186_R2_VAULT_BUCKET }}
+    steps:
+      - name: Değerleri doğrula
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$AWS_ACCESS_KEY_ID"
+          test -n "$AWS_SECRET_ACCESS_KEY"
+          test -n "$ALO186_R2_ENDPOINT"
+          test -n "$RESTIC_BUCKET"
+          test -n "$VAULT_BUCKET"
+          echo "İstenen bucket'lar: $RESTIC_BUCKET, $VAULT_BUCKET"
+      - name: Bucket dry-run / create
+        shell: bash
+        run: |
+          set -euo pipefail
+          for bucket in "$RESTIC_BUCKET" "$VAULT_BUCKET"; do
+            if aws --endpoint-url "$ALO186_R2_ENDPOINT" --region auto s3api head-bucket --bucket "$bucket" >/dev/null 2>&1; then
+              echo "SAME   $bucket"
+            elif [[ "${{ inputs.apply }}" == "true" ]]; then
+              aws --endpoint-url "$ALO186_R2_ENDPOINT" --region auto s3api create-bucket --bucket "$bucket"
+              echo "CREATE $bucket"
+            else
+              echo "WOULD CREATE $bucket"
+            fi
+          done
+      - name: Bucket erişimini doğrula
+        if: ${{ inputs.apply }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          aws --endpoint-url "$ALO186_R2_ENDPOINT" --region auto s3api head-bucket --bucket "$RESTIC_BUCKET"
+          aws --endpoint-url "$ALO186_R2_ENDPOINT" --region auto s3api head-bucket --bucket "$VAULT_BUCKET"
+          echo 'Vault retention lock Cloudflare panelinde ayrıca etkinleştirilmelidir.'
