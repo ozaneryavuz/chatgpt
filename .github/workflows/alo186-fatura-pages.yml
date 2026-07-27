@@ -1,10 +1,10 @@
-name: Publish ALO186 Fatura Zekâ Merkezi
+name: Publish ALO186 Ürün Modülleri
 
 on:
   push:
     branches: [main]
     paths:
-      - "alo186/fatura-analizi/**"
+      - "alo186/**"
       - ".github/workflows/alo186-fatura-pages.yml"
   workflow_dispatch:
 
@@ -25,10 +25,10 @@ jobs:
         uses: actions/checkout@v4
       - name: Configure Pages
         uses: actions/configure-pages@v5
-      - name: Upload static site
+      - name: Upload ALO186 static modules
         uses: actions/upload-pages-artifact@v3
         with:
-          path: alo186/fatura-analizi
+          path: alo186
 
   deploy:
     environment:
