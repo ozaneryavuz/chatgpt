@@ -4,11 +4,11 @@ import hashlib
 import json
 from collections import defaultdict, deque
 from datetime import datetime, timedelta, timezone
-from typing import Any, Iterable
+from typing import Any
 from urllib.parse import quote
 
-from sqlalchemy import and_, func, or_, select
-from sqlalchemy.orm import Session
+from sqlalchemy import and_, or_, select
+from sqlalchemy.orm import Session, aliased
 
 from .kg_models import KnowledgeAssertion, KnowledgeEntity, KnowledgeSource, KnowledgeVerificationRun
 from .models import utcnow
@@ -19,6 +19,7 @@ JSON_LD_CONTEXT: dict[str, Any] = {
     "name": "https://schema.org/name",
     "description": "https://schema.org/description",
     "url": {"@id": "https://schema.org/url", "@type": "@id"},
+    "value": "https://schema.org/value",
     "partOf": {"@type": "@id"},
     "servedBy": {"@type": "@id"},
     "hasOfficialChannel": {"@type": "@id"},
@@ -52,6 +53,10 @@ def json_loads(value: str | None, default: Any) -> Any:
         return json.loads(value)
     except (TypeError, ValueError):
         return default
+
+
+def _aware(value: datetime) -> datetime:
+    return value if value.tzinfo else value.replace(tzinfo=timezone.utc)
 
 
 def assertion_fingerprint(
@@ -370,17 +375,29 @@ def entity_bundle(
         if item
     }
     source_ids = {assertion.source_id for assertion in assertions}
-    entities = {
-        item.id: item
-        for item in db.scalars(select(KnowledgeEntity).where(KnowledgeEntity.id.in_(entity_ids))).all()
-    } if entity_ids else {}
-    sources = {
-        item.id: item
-        for item in db.scalars(select(KnowledgeSource).where(KnowledgeSource.id.in_(source_ids))).all()
-    } if source_ids else {}
+    entity_stmt = select(KnowledgeEntity).where(KnowledgeEntity.id.in_(entity_ids))
+    source_stmt = select(KnowledgeSource).where(KnowledgeSource.id.in_(source_ids))
+    if public_only:
+        entity_stmt = entity_stmt.where(
+            KnowledgeEntity.scope_key == GLOBAL_SCOPE,
+            KnowledgeEntity.is_public.is_(True),
+        )
+        source_stmt = source_stmt.where(KnowledgeSource.scope_key == GLOBAL_SCOPE)
+    elif organization_id:
+        entity_stmt = entity_stmt.where(entity_query_for_org(organization_id))
+        source_stmt = source_stmt.where(source_query_for_org(organization_id))
+    entities = {item.id: item for item in db.scalars(entity_stmt).all()} if entity_ids else {}
+    sources = {item.id: item for item in db.scalars(source_stmt).all()} if source_ids else {}
+    visible_assertions = [
+        item
+        for item in assertions
+        if item.subject_entity_id in entities
+        and (item.object_entity_id is None or item.object_entity_id in entities)
+        and item.source_id in sources
+    ]
     return {
         "entity": serialize_entity(entity),
-        "assertions": [serialize_assertion(item) for item in assertions],
+        "assertions": [serialize_assertion(item) for item in visible_assertions],
         "included_entities": [serialize_entity(item) for key, item in entities.items() if key != entity.id],
         "sources": [serialize_source(item) for item in sources.values()],
     }
@@ -397,21 +414,20 @@ def to_jsonld(bundle: dict[str, Any], *, public_base_url: str) -> dict[str, Any]
             continue
         if assertion["object_entity_id"]:
             target = included.get(assertion["object_entity_id"], {})
-            value: Any = {
+            value: dict[str, Any] = {
                 "@id": f"{public_base_url.rstrip('/')}/kg/{quote(target.get('canonical_key', assertion['object_entity_id']), safe=':-._~')}",
                 "@type": target.get("kind"),
                 "name": target.get("name"),
             }
         else:
-            value = assertion["literal_value"]
+            literal = assertion["literal_value"]
+            value = dict(literal) if isinstance(literal, dict) else {"value": literal}
         source = sources.get(assertion["source_id"])
-        if isinstance(value, dict):
-            value = dict(value)
-            value["confidence"] = assertion["confidence"]
-            if assertion["verified_at"]:
-                value["verifiedAt"] = assertion["verified_at"]
-            if source and source.get("url"):
-                value["source"] = source["url"]
+        value["confidence"] = assertion["confidence"]
+        if assertion["verified_at"]:
+            value["verifiedAt"] = assertion["verified_at"]
+        if source and source.get("url"):
+            value["source"] = source["url"]
         predicates[assertion["predicate"]].append(value)
     document: dict[str, Any] = {
         "@context": JSON_LD_CONTEXT,
@@ -438,9 +454,19 @@ def _edge_rows(
         KnowledgeAssertion.object_entity_id.is_not(None),
     )
     if public_only:
-        stmt = stmt.where(
-            KnowledgeAssertion.scope_key == GLOBAL_SCOPE,
-            KnowledgeAssertion.is_public.is_(True),
+        subject = aliased(KnowledgeEntity)
+        object_entity = aliased(KnowledgeEntity)
+        stmt = (
+            stmt.join(subject, subject.id == KnowledgeAssertion.subject_entity_id)
+            .join(object_entity, object_entity.id == KnowledgeAssertion.object_entity_id)
+            .where(
+                KnowledgeAssertion.scope_key == GLOBAL_SCOPE,
+                KnowledgeAssertion.is_public.is_(True),
+                subject.scope_key == GLOBAL_SCOPE,
+                subject.is_public.is_(True),
+                object_entity.scope_key == GLOBAL_SCOPE,
+                object_entity.is_public.is_(True),
+            )
         )
     elif organization_id:
         stmt = stmt.where(assertion_query_for_org(organization_id))
@@ -478,10 +504,17 @@ def find_path(
             for item in path:
                 ids.add(item["from"])
                 ids.add(item["to"])
-            entities = {
-                item.id: serialize_entity(item)
-                for item in db.scalars(select(KnowledgeEntity).where(KnowledgeEntity.id.in_(ids))).all()
-            }
+            entity_stmt = select(KnowledgeEntity).where(KnowledgeEntity.id.in_(ids))
+            if public_only:
+                entity_stmt = entity_stmt.where(
+                    KnowledgeEntity.scope_key == GLOBAL_SCOPE,
+                    KnowledgeEntity.is_public.is_(True),
+                )
+            elif organization_id:
+                entity_stmt = entity_stmt.where(entity_query_for_org(organization_id))
+            entities = {item.id: serialize_entity(item) for item in db.scalars(entity_stmt).all()}
+            if set(ids) != set(entities):
+                return None
             return {"depth": len(path), "path": path, "entities": list(entities.values())}
         if len(path) >= max_depth:
             continue
@@ -555,18 +588,26 @@ def graph_health(
     stale = [
         item
         for item in active_assertions
-        if item.verified_at is None
-        or (item.verified_at if item.verified_at.tzinfo else item.verified_at.replace(tzinfo=timezone.utc)) < cutoff
+        if item.verified_at is None or _aware(item.verified_at) < cutoff
     ]
     expired = [
         item
         for item in active_assertions
-        if item.valid_to is not None
-        and (item.valid_to if item.valid_to.tzinfo else item.valid_to.replace(tzinfo=timezone.utc)) < now
+        if item.valid_to is not None and _aware(item.valid_to) < now
     ]
     low_confidence = [item for item in active_assertions if item.confidence < 0.5]
     source_unhealthy = [item for item in sources if item.status not in {"active", "ok"}]
-    verification_failures = [item for item in verifications if item.status not in {"ok", "unchanged", "verified"}]
+    latest_verifications: dict[tuple[str, str | None, str | None], KnowledgeVerificationRun] = {}
+    for item in verifications:
+        key = (item.source_id, item.target_entity_id, item.target_assertion_id)
+        current = latest_verifications.get(key)
+        if current is None or _aware(item.checked_at) > _aware(current.checked_at):
+            latest_verifications[key] = item
+    verification_failures = [
+        item
+        for item in latest_verifications.values()
+        if item.status not in {"ok", "unchanged", "verified"}
+    ]
     literal_groups: dict[tuple[str, str], set[str]] = defaultdict(set)
     for item in active_assertions:
         if item.literal_json is not None:
