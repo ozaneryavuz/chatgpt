@@ -1,0 +1,48 @@
+name: Validate ALO186 Tools
+
+on:
+  pull_request:
+    paths:
+      - "alo186/**"
+      - ".github/scripts/validate_alo186.py"
+      - ".github/workflows/alo186-validate.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alo186/**"
+      - ".github/scripts/validate_alo186.py"
+      - ".github/workflows/alo186-validate.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check JavaScript syntax
+        shell: bash
+        run: |
+          while IFS= read -r -d '' file; do
+            echo "Checking $file"
+            node --check "$file"
+          done < <(find alo186 -name 'app.js' -print0)
+
+      - name: Validate HTML references and DOM ids
+        run: python .github/scripts/validate_alo186.py
+
+      - name: Smoke-test static routes
+        shell: bash
+        run: |
+          python -m http.server 8000 --directory alo186 >/tmp/alo186-http.log 2>&1 &
+          server_pid=$!
+          trap 'kill $server_pid' EXIT
+          sleep 2
+          for route in / /karar-motoru/ /kesinti-maliyet-hesaplayici/ /yedek-guc-hesaplayici/ /fatura-analizi/; do
+            echo "GET $route"
+            curl --fail --silent --show-error "http://127.0.0.1:8000$route" >/dev/null
+          done
