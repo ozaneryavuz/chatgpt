@@ -1,0 +1,25 @@
+# ALO186 local secrets and environment
+.env
+.env.*
+!.env.example
+**/generated/
+**/secrets/*.txt
+**/*.tfstate
+**/*.tfstate.*
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+
+# Local databases and backups
+*.db
+*.sqlite
+*.dump
+*.dump.sha256
+backups/
+
+# Tool caches
+.terraform/
+.alloy-data/
