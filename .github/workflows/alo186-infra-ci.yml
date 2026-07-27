@@ -15,6 +15,7 @@ on:
       - "alo186/sureklilik-api/scripts/**"
       - "alo186/sureklilik-api/ops/backup/**"
       - "alo186/sureklilik-api/tests/test_database_url.py"
+      - "alo186/sureklilik-api/tests/test_metrics_auth.py"
       - ".github/workflows/alo186-infra-ci.yml"
       - ".github/workflows/alo186-production-synthetic.yml"
       - ".github/workflows/alo186-backup-restore-drill.yml"
@@ -53,7 +54,7 @@ jobs:
         run: check-jsonschema --schemafile https://render.com/schema/render.yaml.json render.yaml
       - name: Render Blueprint ALO186 semantik kuralları
         run: python alo186/infra/production/validate_render.py render.yaml
-      - name: Python sözdizimi ve DB URL regresyon testi
+      - name: Python sözdizimi, DB URL ve metrics auth regresyonları
         env:
           PYTHONPATH: alo186/sureklilik-api
           ALO186_ENV: test
@@ -65,7 +66,9 @@ jobs:
             alo186/infra \
             alo186/sureklilik-api/app \
             alo186/sureklilik-api/scripts
-          pytest -q alo186/sureklilik-api/tests/test_database_url.py
+          pytest -q \
+            alo186/sureklilik-api/tests/test_database_url.py \
+            alo186/sureklilik-api/tests/test_metrics_auth.py
       - name: ShellCheck
         run: |
           sudo apt-get update -qq
