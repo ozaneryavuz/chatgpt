@@ -26,39 +26,57 @@ jobs:
           set -euo pipefail
           python - <<'PY'
           from pathlib import Path
+          import re
 
           main_path = Path('alo186/sureklilik-api/app/main.py')
           text = main_path.read_text(encoding='utf-8')
-          replacements = [
-              ('from contextlib import asynccontextmanager', 'from contextlib import asynccontextmanager\nfrom datetime import timezone'),
-              ('from sqlalchemy import select', 'from sqlalchemy import func, select'),
-              (
-                  '''    if membership:\n        membership.role = payload.role\n    else:\n''',
-                  '''    if membership:\n        if membership.role == Role.admin and payload.role != Role.admin:\n            admin_count = db.scalar(\n                select(func.count(Membership.id)).where(\n                    Membership.organization_id == organization_id,\n                    Membership.role == Role.admin,\n                )\n            ) or 0\n            if admin_count <= 1:\n                raise HTTPException(\n                    status_code=409,\n                    detail="Kuruluşun son yöneticisinin rolü düşürülemez.",\n                )\n        membership.role = payload.role\n    else:\n''',
-              ),
-              (
-                  '    asset.last_test_at = tested_at\n',
-                  '    if asset.last_test_at is None or tested_at > asset.last_test_at:\n        asset.last_test_at = tested_at\n',
-              ),
-              (
-                  '''    if asset.last_test_at is None or tested_at > asset.last_test_at:\n        asset.last_test_at = tested_at\n''',
-                  '''    normalized_tested_at = (\n        tested_at.replace(tzinfo=timezone.utc)\n        if tested_at.tzinfo is None\n        else tested_at.astimezone(timezone.utc)\n    )\n    normalized_last_test_at = (\n        None\n        if asset.last_test_at is None\n        else (\n            asset.last_test_at.replace(tzinfo=timezone.utc)\n            if asset.last_test_at.tzinfo is None\n            else asset.last_test_at.astimezone(timezone.utc)\n        )\n    )\n    if normalized_last_test_at is None or normalized_tested_at > normalized_last_test_at:\n        asset.last_test_at = tested_at\n''',
-              ),
-              (
-                  '''    if not incident:\n        raise HTTPException(status_code=404, detail="Olay bulunamadı.")\n    missing = [task.title for task in incident.tasks if task.is_required and task.status != TaskStatus.completed]\n''',
-                  '''    if not incident:\n        raise HTTPException(status_code=404, detail="Olay bulunamadı.")\n    if incident.status == IncidentStatus.closed:\n        return incident\n    missing = [task.title for task in incident.tasks if task.is_required and task.status != TaskStatus.completed]\n''',
-              ),
-              (
-                  '''    if incident.status == IncidentStatus.closed:\n        return incident\n''',
-                  '''    if incident.status == IncidentStatus.closed:\n        if incident.ended_at is not None and incident.ended_at.tzinfo is None:\n            incident.ended_at = incident.ended_at.replace(tzinfo=timezone.utc)\n        return incident\n''',
-              ),
-          ]
-          for old, new in replacements:
-              if old not in text:
-                  if new in text:
-                      continue
-                  raise SystemExit(f'Beklenen kod parçası bulunamadı:\n{old}')
-              text = text.replace(old, new, 1)
+
+          if 'from datetime import timezone' not in text:
+              text = text.replace(
+                  'from contextlib import asynccontextmanager',
+                  'from contextlib import asynccontextmanager\nfrom datetime import timezone',
+                  1,
+              )
+          if 'from sqlalchemy import func, select' not in text:
+              text = text.replace('from sqlalchemy import select', 'from sqlalchemy import func, select', 1)
+
+          old_membership = '''    if membership:\n        membership.role = payload.role\n    else:\n'''
+          new_membership = '''    if membership:\n        if membership.role == Role.admin and payload.role != Role.admin:\n            admin_count = db.scalar(\n                select(func.count(Membership.id)).where(\n                    Membership.organization_id == organization_id,\n                    Membership.role == Role.admin,\n                )\n            ) or 0\n            if admin_count <= 1:\n                raise HTTPException(\n                    status_code=409,\n                    detail="Kuruluşun son yöneticisinin rolü düşürülemez.",\n                )\n        membership.role = payload.role\n    else:\n'''
+          if old_membership in text:
+              text = text.replace(old_membership, new_membership, 1)
+          elif new_membership not in text:
+              raise SystemExit('Üyelik guard bloğu bulunamadı.')
+
+          asset_block = '''    normalized_tested_at = (\n        tested_at.replace(tzinfo=timezone.utc)\n        if tested_at.tzinfo is None\n        else tested_at.astimezone(timezone.utc)\n    )\n    normalized_last_test_at = (\n        None\n        if asset.last_test_at is None\n        else (\n            asset.last_test_at.replace(tzinfo=timezone.utc)\n            if asset.last_test_at.tzinfo is None\n            else asset.last_test_at.astimezone(timezone.utc)\n        )\n    )\n    if normalized_last_test_at is None or normalized_tested_at > normalized_last_test_at:\n        asset.last_test_at = tested_at\n'''
+          pattern = re.compile(
+              r'    if asset\.last_test_at is None or tested_at > asset\.last_test_at:\n.*?'
+              r'    db\.add\(test\)\n',
+              re.S,
+          )
+          if pattern.search(text):
+              text = pattern.sub(asset_block + '    db.add(test)\n', text, count=1)
+          elif asset_block not in text:
+              simple = '    asset.last_test_at = tested_at\n    db.add(test)\n'
+              if simple not in text:
+                  raise SystemExit('Varlık test tarihi bloğu bulunamadı.')
+              text = text.replace(simple, asset_block + '    db.add(test)\n', 1)
+
+          old_close = '''    if not incident:\n        raise HTTPException(status_code=404, detail="Olay bulunamadı.")\n    missing = [task.title for task in incident.tasks if task.is_required and task.status != TaskStatus.completed]\n'''
+          close_guard = '''    if not incident:\n        raise HTTPException(status_code=404, detail="Olay bulunamadı.")\n    if incident.status == IncidentStatus.closed:\n        if incident.ended_at is not None and incident.ended_at.tzinfo is None:\n            incident.ended_at = incident.ended_at.replace(tzinfo=timezone.utc)\n        return incident\n    missing = [task.title for task in incident.tasks if task.is_required and task.status != TaskStatus.completed]\n'''
+          if old_close in text:
+              text = text.replace(old_close, close_guard, 1)
+          else:
+              close_pattern = re.compile(
+                  r'    if not incident:\n        raise HTTPException\(status_code=404, detail="Olay bulunamadı\."\)\n'
+                  r'    if incident\.status == IncidentStatus\.closed:\n.*?'
+                  r'    missing = \[task\.title for task in incident\.tasks if task\.is_required and task\.status != TaskStatus\.completed\]\n',
+                  re.S,
+              )
+              if close_pattern.search(text):
+                  text = close_pattern.sub(close_guard, text, count=1)
+              elif close_guard not in text:
+                  raise SystemExit('Olay kapanış guard bloğu bulunamadı.')
+
           main_path.write_text(text, encoding='utf-8')
           PY
 
