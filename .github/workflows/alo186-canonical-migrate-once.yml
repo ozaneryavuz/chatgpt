@@ -1,0 +1,88 @@
+name: ALO186 canonical www tek seferlik geçiş
+
+on:
+  push:
+    branches: [fix/alo186-canonical-www]
+    paths:
+      - 'alo186/deployment/normalize-canonical.trigger'
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/alo186-canonical-www
+          fetch-depth: 0
+      - name: Eski modülleri www canonical standardına taşı
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import json
+
+          roots = [
+              Path('alo186/fatura-analizi'),
+              Path('alo186/yedek-guc-hesaplayici'),
+              Path('alo186/kesinti-maliyet-hesaplayici'),
+          ]
+          changed = []
+          for root in roots:
+              for path in root.rglob('*'):
+                  if not path.is_file() or path.suffix.lower() not in {'.html','.js','.css','.md','.json','.xml'}:
+                      continue
+                  text = path.read_text(encoding='utf-8')
+                  updated = text.replace('https://alo186.com', 'https://www.alo186.com')
+                  if updated != text:
+                      path.write_text(updated, encoding='utf-8')
+                      changed.append(str(path))
+
+          manifest_path = Path('alo186/deployment/routing-manifest.json')
+          manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+          for route in manifest['routes']:
+              if route.get('normalizationPending'):
+                  route.pop('canonicalUrl', None)
+                  route.pop('includeInSitemap', None)
+                  route.pop('normalizationPending', None)
+          manifest['generatedAt'] = '2026-07-27'
+          manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+
+          sitemap_path = Path('alo186/sitemap.xml')
+          sitemap = sitemap_path.read_text(encoding='utf-8')
+          entries = [
+              '  <url><loc>https://www.alo186.com/fatura-analizi</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>',
+              '  <url><loc>https://www.alo186.com/hesaplama/yedek-guc</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>',
+              '  <url><loc>https://www.alo186.com/hesaplama/kesinti-maliyeti</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>',
+          ]
+          for entry in entries:
+              if entry not in sitemap:
+                  sitemap = sitemap.replace('</urlset>', entry + '\n</urlset>')
+          sitemap_path.write_text(sitemap, encoding='utf-8')
+
+          print('Canonical güncellenen dosyalar:')
+          print('\n'.join(changed) or 'Yok')
+          PY
+      - name: Sonucu doğrula
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -R --line-number --fixed-strings 'https://alo186.com' \
+            alo186/fatura-analizi alo186/yedek-guc-hesaplayici alo186/kesinti-maliyet-hesaplayici
+          node alo186/tests/test_release_manifest.js
+      - name: Değişiklikleri dala kaydet
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add alo186/fatura-analizi alo186/yedek-guc-hesaplayici alo186/kesinti-maliyet-hesaplayici alo186/deployment/routing-manifest.json alo186/sitemap.xml
+          if git diff --cached --quiet; then
+            echo 'Değişiklik bulunmadı.'
+          else
+            git commit -m 'fix(alo186): canonical URLleri www hostunda tekilleştir'
+            git push origin HEAD:fix/alo186-canonical-www
+          fi
