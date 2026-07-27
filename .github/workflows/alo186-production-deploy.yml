@@ -6,6 +6,10 @@ on:
     paths:
       - "alo186/**"
       - ".github/workflows/alo186-production-deploy.yml"
+  pull_request:
+    paths:
+      - "alo186/**"
+      - ".github/workflows/alo186-production-deploy.yml"
   workflow_dispatch:
 
 permissions:
@@ -59,7 +63,7 @@ jobs:
 
   deploy:
     name: Onaylı production deploy
-    if: vars.ALO186_PRODUCTION_DEPLOY_ENABLED == 'true'
+    if: github.event_name != 'pull_request' && vars.ALO186_PRODUCTION_DEPLOY_ENABLED == 'true'
     needs: build
     runs-on: ubuntu-latest
     environment:
