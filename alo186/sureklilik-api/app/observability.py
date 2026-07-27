@@ -8,6 +8,17 @@ import uuid
 from collections import defaultdict
 from datetime import datetime, timezone
 
+from .config import settings
+
+try:  # Gözlemlenebilirlik temel API davranışını engellememeli.
+    import sentry_sdk
+    from sentry_sdk.integrations.fastapi import FastApiIntegration
+    from sentry_sdk.integrations.logging import LoggingIntegration
+    from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+except ImportError:  # pragma: no cover - minimal geliştirme ortamı
+    sentry_sdk = None
+    FastApiIntegration = LoggingIntegration = SqlalchemyIntegration = None
+
 
 class JsonFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
@@ -44,6 +55,30 @@ def configure_logging() -> None:
     root.handlers.clear()
     root.addHandler(handler)
     root.setLevel(logging.INFO)
+
+
+def configure_sentry() -> bool:
+    """Sentry'yi PII göndermeden ve örnekleme oranı görünür biçimde başlatır."""
+
+    if not settings.sentry_dsn or sentry_sdk is None:
+        return False
+    if sentry_sdk.Hub.current.client is not None:
+        return True
+    sentry_sdk.init(
+        dsn=settings.sentry_dsn,
+        environment=settings.environment,
+        release=settings.release,
+        send_default_pii=False,
+        attach_stacktrace=True,
+        traces_sample_rate=settings.sentry_traces_sample_rate,
+        profiles_sample_rate=0.0,
+        integrations=[
+            FastApiIntegration(transaction_style="endpoint"),
+            SqlalchemyIntegration(),
+            LoggingIntegration(level=logging.INFO, event_level=logging.ERROR),
+        ],
+    )
+    return True
 
 
 def request_id(value: str | None) -> str:
