@@ -250,6 +250,8 @@ services:
         sync: false
       - key: RESTIC_PASSWORD
         sync: false
+      - key: ALO186_VAULT_ENCRYPTION_KEY
+        sync: false
       - key: ALO186_BACKUP_HEARTBEAT_URL
         sync: false
       - key: ALO186_BACKUP_KEEP_DAILY
