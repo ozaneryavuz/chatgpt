@@ -5,7 +5,7 @@ from datetime import timedelta
 from sqlalchemy import func, select
 
 from app.db import SessionLocal
-from app.models import EmailOutbox, Membership, OrganizationInvitation, Role, User, utcnow
+from app.models import AuditLog, EmailOutbox, OrganizationInvitation, User, utcnow
 from app.notifications import read_payload
 
 PASSWORD = "Guvenli-Davet-Parolasi-2026"
@@ -263,12 +263,13 @@ def test_invitation_list_and_audit_records(client):
     assert listed.json()[0]["role"] == "admin"
 
     with SessionLocal() as db:
-        audit_actions = {
-            row.action
-            for row in db.execute(
-                select(Membership).where(Membership.organization_id == admin["organization"]["id"])
-            ).scalars()
-        }
-        assert audit_actions is not None
+        audit_actions = set(
+            db.scalars(
+                select(AuditLog.action).where(
+                    AuditLog.organization_id == admin["organization"]["id"]
+                )
+            ).all()
+        )
+        assert "invitation.created" in audit_actions
         user = db.scalar(select(User).where(User.email == "list-invite-6@example.com"))
         assert user is None
