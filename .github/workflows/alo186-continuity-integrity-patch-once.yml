@@ -1,0 +1,170 @@
+name: ALO186 süreklilik API bütünlük düzeltmesi
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/alo186-continuity-integrity-patch-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/alo186-continuity-api-integrity
+          fetch-depth: 0
+
+      - name: API guardlarını ve regresyon testlerini uygula
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          main_path = Path('alo186/sureklilik-api/app/main.py')
+          text = main_path.read_text(encoding='utf-8')
+          replacements = [
+              (
+                  'from sqlalchemy import select',
+                  'from sqlalchemy import func, select',
+              ),
+              (
+                  '''    if membership:\n        membership.role = payload.role\n    else:\n''',
+                  '''    if membership:\n        if membership.role == Role.admin and payload.role != Role.admin:\n            admin_count = db.scalar(\n                select(func.count(Membership.id)).where(\n                    Membership.organization_id == organization_id,\n                    Membership.role == Role.admin,\n                )\n            ) or 0\n            if admin_count <= 1:\n                raise HTTPException(\n                    status_code=409,\n                    detail="Kuruluşun son yöneticisinin rolü düşürülemez.",\n                )\n        membership.role = payload.role\n    else:\n''',
+              ),
+              (
+                  '    asset.last_test_at = tested_at\n',
+                  '    if asset.last_test_at is None or tested_at > asset.last_test_at:\n        asset.last_test_at = tested_at\n',
+              ),
+              (
+                  '''    if not incident:\n        raise HTTPException(status_code=404, detail="Olay bulunamadı.")\n    missing = [task.title for task in incident.tasks if task.is_required and task.status != TaskStatus.completed]\n''',
+                  '''    if not incident:\n        raise HTTPException(status_code=404, detail="Olay bulunamadı.")\n    if incident.status == IncidentStatus.closed:\n        return incident\n    missing = [task.title for task in incident.tasks if task.is_required and task.status != TaskStatus.completed]\n''',
+              ),
+          ]
+          for old, new in replacements:
+              if old not in text:
+                  raise SystemExit(f'Beklenen kod parçası bulunamadı:\n{old}')
+              text = text.replace(old, new, 1)
+          main_path.write_text(text, encoding='utf-8')
+
+          test_path = Path('alo186/sureklilik-api/tests/test_api.py')
+          tests = test_path.read_text(encoding='utf-8')
+          marker = 'def test_integrity_guards('
+          if marker not in tests:
+              tests += r'''
+
+
+def test_integrity_guards(client):
+    admin = register(client, "integrity-admin@example.com", "Bütünlük Tesisi")
+    admin_headers = headers(admin)
+
+    demote = client.post(
+        f"/api/v1/organizations/{admin['organization']['id']}/members",
+        headers=admin_headers,
+        json={"email": "integrity-admin@example.com", "role": "viewer"},
+    )
+    assert demote.status_code == 409, demote.text
+    assert "son yöneticisinin" in demote.json()["detail"]
+
+    location = client.post(
+        "/api/v1/locations",
+        headers=admin_headers,
+        json={"name": "Bütünlük Lokasyonu", "facility_type": "business"},
+    ).json()
+    asset = client.post(
+        "/api/v1/assets",
+        headers=admin_headers,
+        json={
+            "location_id": location["id"],
+            "kind": "generator",
+            "name": "Bütünlük Jeneratörü",
+            "rated_power_kva": 250,
+            "test_interval_days": 7,
+        },
+    ).json()
+
+    newer_at = "2026-07-27T12:00:00Z"
+    older_at = "2026-07-20T12:00:00Z"
+    first_test = client.post(
+        f"/api/v1/assets/{asset['id']}/tests",
+        headers=admin_headers,
+        json={"result": "passed", "tested_at": newer_at},
+    )
+    assert first_test.status_code == 200, first_test.text
+    backfill = client.post(
+        f"/api/v1/assets/{asset['id']}/tests",
+        headers=admin_headers,
+        json={"result": "passed", "tested_at": older_at},
+    )
+    assert backfill.status_code == 200, backfill.text
+    assets = client.get("/api/v1/assets", headers=admin_headers).json()
+    stored = next(item for item in assets if item["id"] == asset["id"])
+    assert stored["last_test_at"].startswith("2026-07-27T12:00:00")
+
+    incident = client.post(
+        "/api/v1/incidents",
+        headers=admin_headers,
+        json={
+            "location_id": location["id"],
+            "kind": "outage",
+            "summary": "İdempotent kapanış testi",
+        },
+    ).json()
+    for task in incident["tasks"]:
+        if task["is_required"]:
+            completed = client.post(
+                f"/api/v1/incidents/{incident['id']}/tasks/{task['id']}/complete",
+                headers=admin_headers,
+            )
+            assert completed.status_code == 200, completed.text
+
+    first_close = client.post(
+        f"/api/v1/incidents/{incident['id']}/close",
+        headers=admin_headers,
+        json={"closure_note": "İlk kapanış"},
+    )
+    assert first_close.status_code == 200, first_close.text
+    first_payload = first_close.json()
+
+    repeated_close = client.post(
+        f"/api/v1/incidents/{incident['id']}/close",
+        headers=admin_headers,
+        json={"closure_note": "Tekrarlanan kapanış"},
+    )
+    assert repeated_close.status_code == 200, repeated_close.text
+    repeated_payload = repeated_close.json()
+    assert repeated_payload["ended_at"] == first_payload["ended_at"]
+    assert repeated_payload["summary"] == first_payload["summary"]
+    assert "Tekrarlanan kapanış" not in repeated_payload["summary"]
+
+    audit = client.get("/api/v1/audit-logs", headers=admin_headers).json()
+    close_entries = [
+        item for item in audit
+        if item["action"] == "incident.closed" and item["entity_id"] == incident["id"]
+    ]
+    assert len(close_entries) == 1
+'''
+              test_path.write_text(tests, encoding='utf-8')
+          PY
+
+      - name: Python sözdizimi ön kontrolü
+        run: python -m compileall -q alo186/sureklilik-api/app alo186/sureklilik-api/tests
+
+      - name: Değişiklikleri düzeltme dalına kaydet
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add alo186/sureklilik-api/app/main.py alo186/sureklilik-api/tests/test_api.py
+          if git diff --cached --quiet; then
+            echo 'Değişiklik bulunmadı.'
+          else
+            git commit -m 'fix(alo186): süreklilik API veri bütünlüğü guardlarını ekle'
+            git push origin HEAD:fix/alo186-continuity-api-integrity
+          fi
