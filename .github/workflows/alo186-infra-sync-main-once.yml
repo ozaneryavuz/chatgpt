@@ -1,0 +1,30 @@
+name: ALO186 infra branch main sync once
+
+on:
+  push:
+    branches: [infra/alo186-production-stack]
+    paths:
+      - '.github/alo186-infra-sync-main.trigger'
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: infra/alo186-production-stack
+          fetch-depth: 0
+      - name: Main dalını merge et ve yardımcı dosyaları kaldır
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git fetch origin main
+          git merge --no-edit origin/main
+          git rm .github/workflows/alo186-infra-sync-main-once.yml .github/alo186-infra-sync-main.trigger
+          git commit -m 'chore(infra): main dalını production stack ile senkronize et'
+          git push origin HEAD:infra/alo186-production-stack
