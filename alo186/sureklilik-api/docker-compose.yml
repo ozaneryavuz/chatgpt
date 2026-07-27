@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: alo186
+      POSTGRES_USER: alo186
+      POSTGRES_PASSWORD: change-me
+    volumes:
+      - alo186_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U alo186 -d alo186"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    environment:
+      ALO186_DATABASE_URL: postgresql+psycopg://alo186:change-me@db:5432/alo186
+      ALO186_TOKEN_SECRET: replace-with-at-least-32-random-characters
+      ALO186_ALLOWED_ORIGINS: https://www.alo186.com
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  alo186_pgdata:

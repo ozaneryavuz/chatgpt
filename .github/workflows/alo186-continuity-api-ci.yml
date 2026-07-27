@@ -1,0 +1,49 @@
+name: ALO186 süreklilik API kalite kontrolü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/sureklilik-api/**'
+      - '.github/workflows/alo186-continuity-api-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/sureklilik-api/**'
+      - '.github/workflows/alo186-continuity-api-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: alo186/sureklilik-api/requirements.txt
+      - name: Bağımlılıkları kur
+        run: pip install -q -r alo186/sureklilik-api/requirements.txt
+      - name: API testleri
+        working-directory: alo186/sureklilik-api
+        env:
+          ALO186_TOKEN_SECRET: test-secret-at-least-32-characters-long
+          PYTHONPATH: .
+        shell: bash
+        run: |
+          set +e
+          pytest -q --tb=short > pytest-output.txt 2>&1
+          code=$?
+          cat pytest-output.txt
+          exit $code
+      - name: Test çıktısını yükle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: continuity-api-pytest
+          path: alo186/sureklilik-api/pytest-output.txt
+          if-no-files-found: error
+      - name: Python sözdizimi
+        run: python -m compileall -q alo186/sureklilik-api/app
