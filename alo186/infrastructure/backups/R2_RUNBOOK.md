@@ -4,7 +4,7 @@
 
 1. **Render PostgreSQL PITR** — hızlı operasyonel geri dönüş.
 2. **Cloudflare R2 Restic deposu** — günlük, client-side şifreli mantıksal yedek.
-3. **R2 aylık vault bucket** — ayın ilk günü ham dump + checksum; retention lock ile ayrı hata alanı.
+3. **R2 aylık vault bucket** — ayın ilk günü Restic'ten ayrı anahtarla şifrelenmiş dump + checksum; retention lock ile ayrı hata alanı.
 
 Bu katmanlardan hiçbiri diğerinin yerine geçmez.
 
@@ -14,7 +14,7 @@ Bu katmanlardan hiçbiri diğerinin yerine geçmez.
 |---|---:|---:|
 | Yanlış kayıt/silme | PITR penceresi içinde dakikalar | 60 dakika |
 | Render DB kaybı | Son günlük R2 yedeği, en çok 24 saat | 2 saat |
-| R2 Restic repository bozulması | Aylık vault | 31 gün | 4 saat |
+| R2 Restic repository bozulması | Aylık şifreli vault | 31 gün | 4 saat |
 | Tam sağlayıcı kaybı | R2 + portable Compose/Caddy | 24 saat | 4–8 saat |
 
 ## R2 bucket tasarımı
@@ -27,7 +27,8 @@ Bu katmanlardan hiçbiri diğerinin yerine geçmez.
 
 ### `alo186-db-monthly-vault`
 
-- Ayın ilk günü dump ve SHA-256 checksum alır.
+- Ayın ilk günü OpenSSL AES-256-CBC/PBKDF2 ile istemci tarafında şifrelenmiş dump ve şifreli dosyanın SHA-256 checksum'unu alır.
+- Restic parolasından ayrı `ALO186_VAULT_ENCRYPTION_KEY` kullanır.
 - Cloudflare Bucket Lock ile en az 180 gün silme koruması önerilir.
 - Günlük Restic token'ından ayrı access token tercih edilir.
 - Uygulama servisi bu bucket'a erişmez.
@@ -41,8 +42,11 @@ ALO186_R2_VAULT_BUCKET=alo186-db-monthly-vault
 AWS_ACCESS_KEY_ID=...
 AWS_SECRET_ACCESS_KEY=...
 RESTIC_PASSWORD=...
+ALO186_VAULT_ENCRYPTION_KEY=...
 ALO186_BACKUP_HEARTBEAT_URL=...
 ```
+
+Restic ve vault anahtarları aynı olmamalı; ikisi de çevrimdışı kurtarma kasasında sürümlü tutulmalıdır.
 
 ## Günlük akış
 
@@ -55,7 +59,7 @@ ALO186_BACKUP_HEARTBEAT_URL=...
 5. 14 günlük / 8 haftalık / 12 aylık / 3 yıllık retention
 6. `restic check`
 7. Pazar günleri data subset doğrulaması
-8. Ayın ilk günü vault kopyası
+8. Ayın ilk günü ayrı anahtarla şifrelenmiş vault kopyası
 9. Başarı/fail heartbeat
 
 ## Restore tatbikatı
@@ -85,6 +89,21 @@ Tatbikatta:
 
 dokümante edilir.
 
+## Aylık vault kurtarma
+
+Vault yalnız Restic deposu birlikte kullanılamaz hale geldiğinde son savunma hattıdır.
+
+```bash
+openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 \
+  -in alo186-YYYYMMDDTHHMMSSZ.dump.enc \
+  -out alo186-restored.dump \
+  -pass env:ALO186_VAULT_ENCRYPTION_KEY
+
+pg_restore --list alo186-restored.dump
+```
+
+Ardından yalnız izole bir PostgreSQL veritabanına restore edilir. Şifre çözülmüş dump işlem bitince güvenli biçimde silinir.
+
 ## Kurtarma karar ağacı
 
 ```text
@@ -101,8 +120,8 @@ Ana DB tamamen kullanılamıyor
 → DNS/API trafiğini aç
 
 Restic repo okunamıyor
-→ monthly vault dump
-→ checksum
+→ monthly vault şifreli dump
+→ checksum + decrypt
 → yeni DB restore
 → repository yeniden oluştur
 ```
