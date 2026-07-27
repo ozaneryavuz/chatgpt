@@ -11,6 +11,9 @@ RUN pip install --no-cache-dir -r requirements.txt \
     && adduser --system --ingroup alo186 --home /app alo186
 
 COPY --chown=alo186:alo186 app ./app
+COPY --chown=alo186:alo186 migrations ./migrations
+COPY --chown=alo186:alo186 alembic.ini ./alembic.ini
+COPY --chown=alo186:alo186 scripts ./scripts
 USER alo186
 
 EXPOSE 8000
