@@ -78,6 +78,39 @@ def password_reset_email(db: Session, *, user_id: str, email: str, token: str) -
     )
 
 
+def invitation_email(
+    db: Session,
+    *,
+    organization_id: str,
+    email: str,
+    organization_name: str,
+    role: str,
+    notify_incidents: bool,
+    token: str,
+    expires_seconds: int,
+) -> EmailOutbox:
+    return queue_email(
+        db,
+        organization_id=organization_id,
+        to_email=email,
+        template="organization_invitation",
+        subject=f"{organization_name} sizi ALO186 ekibine davet etti",
+        payload={
+            "email": email,
+            "organization_name": organization_name,
+            "organization_id": organization_id,
+            "role": role,
+            "notify_incidents": notify_incidents,
+            "url": f"{settings.public_base_url}/invitations/accept?token={token}",
+            "preview_api_url": f"{settings.public_base_url}/api/v1/invitations/preview",
+            "accept_new_api_url": f"{settings.public_base_url}/api/v1/invitations/accept-new",
+            "accept_existing_api_url": f"{settings.public_base_url}/api/v1/invitations/accept-existing",
+            "token": token,
+            "expires_seconds": expires_seconds,
+        },
+    )
+
+
 def incident_email(
     db: Session,
     *,
@@ -118,6 +151,19 @@ def render_message(message: EmailOutbox) -> tuple[str, str]:
             "ALO186 parola sıfırlama\n\n"
             f"Parola sıfırlama bağlantısı: {payload['url']}\n\n"
             "Bu talebi siz oluşturmadıysanız bağlantıyı kullanmayın."
+        )
+    elif message.template == "organization_invitation":
+        role_labels = {"admin": "Yönetici", "technician": "Teknik ekip", "viewer": "Görüntüleyici"}
+        role = role_labels.get(str(payload["role"]), str(payload["role"]))
+        notification = "açık" if bool(payload.get("notify_incidents")) else "kapalı"
+        text = (
+            "ALO186 ekip daveti\n\n"
+            f"Kuruluş: {payload['organization_name']}\n"
+            f"Rol: {role}\n"
+            f"Olay bildirimleri: {notification}\n\n"
+            f"Davet bağlantısı: {payload['url']}\n\n"
+            f"Bağlantı yaklaşık {max(1, int(payload['expires_seconds']) // 86400)} gün geçerlidir. "
+            "Bu daveti beklemiyorsanız bağlantıyı kullanmayın."
         )
     elif message.template == "incident_event":
         text = (

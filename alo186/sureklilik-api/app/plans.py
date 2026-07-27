@@ -6,7 +6,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from .models import Asset, CriticalLoad, Location, Membership, Organization, utcnow
+from .models import Asset, CriticalLoad, Location, Membership, Organization, OrganizationInvitation, utcnow
 
 PLAN_LIMITS: dict[str, dict[str, int | None]] = {
     "pilot": {"locations": 3, "members": 3, "critical_loads": 25, "assets": 10},
@@ -49,6 +49,25 @@ def ensure_subscription_writable(organization: Organization) -> None:
 
 
 def resource_count(db: Session, organization_id: str, resource: str) -> int:
+    if resource == "members":
+        members = int(
+            db.scalar(
+                select(func.count(Membership.id)).where(Membership.organization_id == organization_id)
+            )
+            or 0
+        )
+        pending_invitations = int(
+            db.scalar(
+                select(func.count(OrganizationInvitation.id)).where(
+                    OrganizationInvitation.organization_id == organization_id,
+                    OrganizationInvitation.accepted_at.is_(None),
+                    OrganizationInvitation.revoked_at.is_(None),
+                    OrganizationInvitation.expires_at > utcnow(),
+                )
+            )
+            or 0
+        )
+        return members + pending_invitations
     model = RESOURCE_MODELS[resource]
     return int(
         db.scalar(select(func.count(model.id)).where(model.organization_id == organization_id)) or 0
