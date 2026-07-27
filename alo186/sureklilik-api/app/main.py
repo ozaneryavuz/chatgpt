@@ -30,6 +30,7 @@ from .auth_service import (
 from .config import settings
 from .db import check_db, init_db
 from .deps import OrgContext, get_current_user, get_db, get_org_context, require_roles
+from .invitation_router import router as invitation_router
 from .models import (
     Asset,
     AssetTest,
@@ -121,6 +122,8 @@ app = FastAPI(
     ),
     lifespan=lifespan,
 )
+
+app.include_router(invitation_router)
 
 app.add_middleware(TrustedHostMiddleware, allowed_hosts=list(settings.allowed_hosts))
 app.add_middleware(
