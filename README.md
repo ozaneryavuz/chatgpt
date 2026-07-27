@@ -3,6 +3,7 @@
 ## ALO186 geliştirmeleri
 
 - [ALO186 ücretsiz araçlar merkezi](./alo186/)
+- [Tam Türkiye EDAŞ Arama Motoru](./alo186/turkiye-arama/)
 - [Elektrik Hesaplama Merkezi](./alo186/hesaplama/)
 - [186 mı, 112 mi, elektrikçi mi? karar motoru](./alo186/karar-motoru/)
 - [Elektrik Faturası Zekâ Merkezi](./alo186/fatura-analizi/)
@@ -12,6 +13,10 @@
 - [Kesinti hazırlık planı](./alo186/hesaplama/kesinti-hazirlik-plani/)
 - [UPS ve Power Station Yedek Güç Hesaplayıcısı](./alo186/yedek-guc-hesaplayici/)
 - [Elektrik Kesintisi Maliyet Hesaplayıcısı](./alo186/kesinti-maliyet-hesaplayici/)
+
+### Tam Türkiye EDAŞ Arama Motoru
+
+81 il, 973 ilçe, 21 dağıtım şirketi, İstanbul Avrupa/Anadolu yakası ayrımı, Türkçe karakter toleransı, şirket alias'ları ve 112/186/elektrikçi işlem niyetlerini tek arama kutusunda birleştirir. İlçe verisi alınamazsa il ve şirket araması yerel yedek katalogla çalışmaya devam eder.
 
 ### Karar motoru
 
