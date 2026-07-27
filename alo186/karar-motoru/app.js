@@ -79,8 +79,7 @@
   }
 
   function progressInfo() {
-    const problem = state.problem ? rules.getProblem(state.problem) : null;
-    const total = problem && problem.requiresScope ? 4 : 3;
+    const total = 4;
     const map = { danger: 1, category: 2, problem: 3, scope: 4 };
     return { current: map[screen], total };
   }
@@ -168,7 +167,10 @@
     $('resultEyebrow').textContent = result.eyebrow;
     $('resultTitle').textContent = result.title;
     $('resultSummary').textContent = result.summary;
-    $('actionGrid').innerHTML = result.actions.map((action) => `<a class="action-link ${action.kind || ''}" href="${action.href}">${action.label}</a>`).join('');
+    const visibleActions = result.revenueAllowed === false
+      ? result.actions.filter((action) => !action.href.includes('/iletisim?konu=') && !action.label.toLocaleLowerCase('tr-TR').includes('teknik hizmet'))
+      : result.actions;
+    $('actionGrid').innerHTML = visibleActions.map((action) => `<a class="action-link ${action.kind || ''}" href="${action.href}">${action.label}</a>`).join('');
     $('actionGrid').querySelectorAll('a').forEach(a => a.addEventListener('click', () => emit('electrical_decision_action_clicked', { problem: result.problemId, route: result.level, action: a.textContent.trim(), revenue_allowed: result.revenueAllowed })));
     fillList('stepList', result.steps && result.steps.length ? result.steps : ['Tehlikeli bölüme müdahale etmeyin.', 'Önerilen kanalı kullanın.', 'Kayıt numarasını saklayın.']);
     fillList('prepList', result.prep && result.prep.length ? result.prep : ['İl ve ilçe', 'Sorunun başlama zamanı', 'Güvenli gözlem notu']);
