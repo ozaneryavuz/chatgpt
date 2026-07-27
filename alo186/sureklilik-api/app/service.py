@@ -103,12 +103,31 @@ def _aware(value: datetime | None) -> datetime | None:
     return value.astimezone(timezone.utc)
 
 
+def _is_duplicate_close_email(item: EmailOutbox, incident_ids: set[str]) -> bool:
+    if item.template != "incident_event" or not incident_ids:
+        return False
+    try:
+        # Import işlev içinde tutulur; notifications modülünün model importlarıyla
+        # servis katmanı arasında başlangıç zamanı döngüsü oluşmasını önler.
+        from .notifications import read_payload
+
+        payload = read_payload(item)
+        return (
+            str(payload.get("incident_id", "")) in incident_ids
+            and str(payload.get("action", "")) == "Olay kapatıldı"
+        )
+    except Exception:
+        # Şifreli payload okunamıyorsa başka bir olaya ait bildirimi yanlışlıkla
+        # düşürmek yerine outbox kaydını korur; worker hata kaydı üretecektir.
+        return False
+
+
 @event.listens_for(Session, "before_flush")
 def enforce_integrity_guards(session: Session, _flush_context, _instances) -> None:
     """API dışındaki yazma yollarında da kritik bütünlük kurallarını korur.
 
-    Main dalında eklenen integrity testlerini endpoint koduna bağımlı bırakmadan;
-    CLI, worker ve gelecekteki servis katmanı yazmalarına da uygular.
+    CLI, worker ve gelecekteki servis katmanı yazmalarında da son yönetici,
+    test tarihi ve olay kapanışı kurallarını uygular.
     """
 
     repeated_closed_incidents: dict[str, str] = {}
@@ -159,16 +178,13 @@ def enforce_integrity_guards(session: Session, _flush_context, _instances) -> No
                     repeated_closed_incidents[item.id] = item.organization_id
 
     if repeated_closed_incidents:
+        incident_ids = set(repeated_closed_incidents)
         for item in list(session.new):
             if (
                 isinstance(item, AuditLog)
                 and item.action == "incident.closed"
-                and item.entity_id in repeated_closed_incidents
+                and item.entity_id in incident_ids
             ):
                 session.expunge(item)
-            elif (
-                isinstance(item, EmailOutbox)
-                and item.organization_id in repeated_closed_incidents.values()
-                and item.template == "incident_event"
-            ):
+            elif isinstance(item, EmailOutbox) and _is_duplicate_close_email(item, incident_ids):
                 session.expunge(item)
