@@ -1,4 +1,4 @@
-name: ALO186 Live Lighthouse Audit
+name: ALO186 Live Technical Quality Audit
 
 on:
   pull_request:
@@ -8,10 +8,14 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: alo186-live-quality-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  lighthouse-mobile:
+  live-quality:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 35
 
     steps:
       - name: Check out repository
@@ -22,223 +26,88 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Capture response headers and HTML
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p artifacts
-          curl --fail --silent --show-error --location \
-            --dump-header artifacts/headers.txt \
-            --output artifacts/home.html \
-            https://alo186.com/
-          wc -c artifacts/home.html | tee artifacts/html-size.txt
+      - name: Run static crawl, indexability, canonical, schema and link checks
+        run: python3 .github/scripts/alo186_live_static_audit.py
 
-      - name: Run three mobile Lighthouse audits
+      - name: Install browser audit dependencies
+        run: npm install --no-save playwright-core@1.54.1 axe-core@4.10.3
+
+      - name: Run mobile and desktop browser audits
+        run: node .github/scripts/alo186_live_browser_audit.mjs
+
+      - name: Run repeated root Lighthouse audits
         shell: bash
         run: |
           set -euo pipefail
-          google-chrome --version || google-chrome-stable --version || true
-          for run in 1 2 3; do
-            npx --yes lighthouse@latest https://alo186.com/ \
+          mkdir -p artifacts/lighthouse
+          for profile in mobile desktop; do
+            for run in 1 2 3; do
+              extra=()
+              if [[ "$profile" == "desktop" ]]; then extra+=(--preset=desktop); fi
+              npx --yes lighthouse@latest https://www.alo186.com/ \
+                --only-categories=performance,accessibility,best-practices,seo \
+                --output=json \
+                --output-path="artifacts/lighthouse/root-${profile}-${run}.json" \
+                --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" \
+                --throttling-method=simulate \
+                --quiet "${extra[@]}"
+            done
+          done
+
+      - name: Run representative mobile Lighthouse audits
+        shell: bash
+        run: |
+          set -euo pipefail
+          declare -A pages=(
+            [kesinti]="https://www.alo186.com/elektrik-kesintisi"
+            [il-mugla]="https://www.alo186.com/il/mugla"
+            [rehber]="https://www.alo186.com/sektor-rehberi/planli-elektrik-kesintisi-sorgulama"
+            [haberler]="https://www.alo186.com/haberler"
+            [iletisim]="https://www.alo186.com/iletisim"
+          )
+          for name in "${!pages[@]}"; do
+            npx --yes lighthouse@latest "${pages[$name]}" \
               --only-categories=performance,accessibility,best-practices,seo \
               --output=json \
-              --output-path="artifacts/lighthouse-mobile-${run}.json" \
+              --output-path="artifacts/lighthouse/${name}-mobile.json" \
               --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" \
               --throttling-method=simulate \
               --quiet
           done
 
-      - name: Build audit summary
+      - name: Build Lighthouse summary
         shell: bash
         run: |
           node <<'NODE'
           const fs = require('fs');
           const path = require('path');
-
-          const dir = 'artifacts';
-          const files = fs.readdirSync(dir)
-            .filter((name) => /^lighthouse-mobile-\d+\.json$/.test(name))
-            .sort();
-
-          if (files.length === 0) {
-            throw new Error('No Lighthouse JSON files found.');
-          }
-
-          const reports = files.map((name) => {
-            const json = JSON.parse(fs.readFileSync(path.join(dir, name), 'utf8'));
-            const audits = json.audits || {};
-            const categories = json.categories || {};
-            const metric = (id) => audits[id]?.numericValue ?? null;
-            const display = (id) => audits[id]?.displayValue ?? null;
-
-            return {
-              file: name,
-              json,
-              scores: {
-                performance: Math.round((categories.performance?.score ?? 0) * 100),
-                accessibility: Math.round((categories.accessibility?.score ?? 0) * 100),
-                bestPractices: Math.round((categories['best-practices']?.score ?? 0) * 100),
-                seo: Math.round((categories.seo?.score ?? 0) * 100),
-              },
-              metrics: {
-                fcpMs: metric('first-contentful-paint'),
-                lcpMs: metric('largest-contentful-paint'),
-                speedIndexMs: metric('speed-index'),
-                tbtMs: metric('total-blocking-time'),
-                cls: metric('cumulative-layout-shift'),
-                ttiMs: metric('interactive'),
-                serverResponseMs: metric('server-response-time'),
-              },
-              metricDisplay: {
-                fcp: display('first-contentful-paint'),
-                lcp: display('largest-contentful-paint'),
-                speedIndex: display('speed-index'),
-                tbt: display('total-blocking-time'),
-                cls: display('cumulative-layout-shift'),
-                tti: display('interactive'),
-                serverResponse: display('server-response-time'),
-              },
-            };
+          const dir = 'artifacts/lighthouse';
+          const files = fs.readdirSync(dir).filter(n => n.endsWith('.json')).sort();
+          const rows = files.map(file => {
+            const report = JSON.parse(fs.readFileSync(path.join(dir,file),'utf8'));
+            const c = report.categories || {}, a = report.audits || {};
+            const score = id => Math.round((c[id]?.score ?? 0)*100);
+            const metric = id => a[id]?.numericValue ?? null;
+            return { file, url: report.finalDisplayedUrl || report.finalUrl, performance: score('performance'), accessibility: score('accessibility'), bestPractices: score('best-practices'), seo: score('seo'), fcpMs: metric('first-contentful-paint'), lcpMs: metric('largest-contentful-paint'), tbtMs: metric('total-blocking-time'), cls: metric('cumulative-layout-shift'), speedIndexMs: metric('speed-index'), console: a['errors-in-console']?.details?.items ?? [], failedAudits: Object.values(a).filter(x => typeof x.score === 'number' && x.score < 1 && !['notApplicable','manual','informative'].includes(x.scoreDisplayMode)).map(x => ({id:x.id,title:x.title,score:x.score,displayValue:x.displayValue ?? null})).slice(0,40) };
           });
-
-          const sorted = [...reports].sort((a, b) => a.scores.performance - b.scores.performance);
-          const median = sorted[Math.floor(sorted.length / 2)];
-          const audits = median.json.audits || {};
-
-          const excludedModes = new Set(['notApplicable', 'manual', 'informative']);
-          const failedAudits = Object.values(audits)
-            .filter((audit) =>
-              typeof audit.score === 'number' &&
-              audit.score < 1 &&
-              !excludedModes.has(audit.scoreDisplayMode)
-            )
-            .map((audit) => ({
-              id: audit.id,
-              title: audit.title,
-              score: audit.score,
-              displayValue: audit.displayValue ?? null,
-              numericValue: audit.numericValue ?? null,
-              numericUnit: audit.numericUnit ?? null,
-              savingsMs: audit.details?.overallSavingsMs ?? audit.numericSavingsMs ?? null,
-              savingsBytes: audit.details?.overallSavingsBytes ?? audit.numericSavingsBytes ?? null,
-            }))
-            .sort((a, b) => {
-              const scoreDiff = (a.score ?? 1) - (b.score ?? 1);
-              if (scoreDiff !== 0) return scoreDiff;
-              return (b.savingsMs ?? 0) - (a.savingsMs ?? 0);
-            })
-            .slice(0, 40);
-
-          const requests = audits['network-requests']?.details?.items ?? [];
-          const largestResources = [...requests]
-            .map((item) => ({
-              url: item.url,
-              resourceType: item.resourceType,
-              statusCode: item.statusCode,
-              transferSize: item.transferSize ?? 0,
-              resourceSize: item.resourceSize ?? 0,
-              startTime: item.startTime ?? null,
-              endTime: item.endTime ?? null,
-            }))
-            .sort((a, b) => b.transferSize - a.transferSize)
-            .slice(0, 30);
-
-          const diagnostics = audits.diagnostics?.details?.items?.[0] ?? {};
-          const lcpRelated = Object.values(audits)
-            .filter((audit) => /largest-contentful|lcp-/i.test(audit.id || ''))
-            .map((audit) => ({
-              id: audit.id,
-              title: audit.title,
-              score: audit.score,
-              displayValue: audit.displayValue ?? null,
-              details: audit.details?.items?.slice?.(0, 5) ?? null,
-            }));
-
-          const summary = {
-            target: 'https://alo186.com/',
-            generatedAt: new Date().toISOString(),
-            lighthouseVersion: median.json.lighthouseVersion,
-            userAgent: median.json.userAgent,
-            fetchTime: median.json.fetchTime,
-            runs: reports.map(({ file, scores, metrics, metricDisplay }) => ({
-              file,
-              scores,
-              metrics,
-              metricDisplay,
-            })),
-            medianRun: {
-              file: median.file,
-              scores: median.scores,
-              metrics: median.metrics,
-              metricDisplay: median.metricDisplay,
-            },
-            diagnostics: {
-              numRequests: diagnostics.numRequests ?? null,
-              numScripts: diagnostics.numScripts ?? null,
-              numStylesheets: diagnostics.numStylesheets ?? null,
-              numFonts: diagnostics.numFonts ?? null,
-              numTasks: diagnostics.numTasks ?? null,
-              numTasksOver10ms: diagnostics.numTasksOver10ms ?? null,
-              numTasksOver50ms: diagnostics.numTasksOver50ms ?? null,
-              totalByteWeight: diagnostics.totalByteWeight ?? null,
-              mainDocumentTransferSize: diagnostics.mainDocumentTransferSize ?? null,
-              totalTaskTime: diagnostics.totalTaskTime ?? null,
-              maxRtt: diagnostics.maxRtt ?? null,
-              maxServerLatency: diagnostics.maxServerLatency ?? null,
-            },
-            failedAudits,
-            largestResources,
-            lcpRelated,
-          };
-
-          fs.writeFileSync(path.join(dir, 'summary.json'), JSON.stringify(summary, null, 2));
-
-          const kb = (value) => value == null ? '—' : `${(value / 1024).toFixed(1)} KiB`;
-          const ms = (value) => value == null ? '—' : `${Math.round(value)} ms`;
-          const lines = [];
-          lines.push('# ALO186 mobile Lighthouse summary');
-          lines.push('');
-          lines.push(`Generated: ${summary.generatedAt}`);
-          lines.push(`Lighthouse: ${summary.lighthouseVersion}`);
-          lines.push('');
-          lines.push('## Runs');
-          lines.push('');
-          lines.push('| Run | Performance | Accessibility | Best practices | SEO | FCP | LCP | TBT | CLS | Speed Index |');
-          lines.push('|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|');
-          for (const run of summary.runs) {
-            lines.push(`| ${run.file} | ${run.scores.performance} | ${run.scores.accessibility} | ${run.scores.bestPractices} | ${run.scores.seo} | ${ms(run.metrics.fcpMs)} | ${ms(run.metrics.lcpMs)} | ${ms(run.metrics.tbtMs)} | ${run.metrics.cls ?? '—'} | ${ms(run.metrics.speedIndexMs)} |`);
+          const roots = rows.filter(r => r.file.startsWith('root-'));
+          const medians = {};
+          for (const profile of ['mobile','desktop']) {
+            const group = roots.filter(r => r.file.includes(`-${profile}-`)).sort((a,b)=>a.performance-b.performance);
+            if (group.length) medians[profile] = group[Math.floor(group.length/2)];
           }
-          lines.push('');
-          lines.push('## Median run diagnostics');
-          lines.push('');
-          lines.push(`- Requests: ${summary.diagnostics.numRequests ?? '—'}`);
-          lines.push(`- Scripts: ${summary.diagnostics.numScripts ?? '—'}`);
-          lines.push(`- Stylesheets: ${summary.diagnostics.numStylesheets ?? '—'}`);
-          lines.push(`- Fonts: ${summary.diagnostics.numFonts ?? '—'}`);
-          lines.push(`- Total transfer: ${kb(summary.diagnostics.totalByteWeight)}`);
-          lines.push(`- Main document transfer: ${kb(summary.diagnostics.mainDocumentTransferSize)}`);
-          lines.push(`- Main-thread task time: ${ms(summary.diagnostics.totalTaskTime)}`);
-          lines.push('');
-          lines.push('## Failed or partial audits');
-          lines.push('');
-          for (const audit of failedAudits.slice(0, 25)) {
-            const extras = [audit.displayValue, audit.savingsMs ? `save ~${ms(audit.savingsMs)}` : null, audit.savingsBytes ? `save ~${kb(audit.savingsBytes)}` : null].filter(Boolean).join('; ');
-            lines.push(`- **${audit.title}** \`${audit.id}\` — score ${audit.score}${extras ? `; ${extras}` : ''}`);
-          }
-          lines.push('');
-          lines.push('## Largest transferred resources');
-          lines.push('');
-          for (const item of largestResources.slice(0, 20)) {
-            lines.push(`- ${kb(item.transferSize)} — ${item.resourceType || 'Other'} — ${item.url}`);
-          }
-          fs.writeFileSync(path.join(dir, 'summary.md'), lines.join('\n') + '\n');
+          const summary = { generatedAt:new Date().toISOString(), rows, medians };
+          fs.writeFileSync('artifacts/lighthouse-summary.json', JSON.stringify(summary,null,2));
+          const ms = v => v == null ? '—' : `${Math.round(v)} ms`;
+          const lines = ['# ALO186 Lighthouse özeti','','| Dosya | Perf | A11y | BP | SEO | FCP | LCP | TBT | CLS |','|---|---:|---:|---:|---:|---:|---:|---:|---:|',...rows.map(r=>`| ${r.file} | ${r.performance} | ${r.accessibility} | ${r.bestPractices} | ${r.seo} | ${ms(r.fcpMs)} | ${ms(r.lcpMs)} | ${ms(r.tbtMs)} | ${r.cls ?? '—'} |`)];
+          fs.writeFileSync('artifacts/lighthouse-summary.md', lines.join('\n')+'\n');
           console.log(lines.join('\n'));
           NODE
 
-      - name: Upload Lighthouse artifacts
+      - name: Upload audit artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: alo186-mobile-lighthouse
+          name: alo186-live-technical-quality
           path: artifacts/
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 14
