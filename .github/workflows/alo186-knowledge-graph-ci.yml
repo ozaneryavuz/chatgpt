@@ -1,0 +1,182 @@
+name: ALO186 Knowledge Graph kalite kontrolü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/sureklilik-api/app/kg_*.py'
+      - 'alo186/sureklilik-api/app/knowledge_*.py'
+      - 'alo186/sureklilik-api/alembic/versions/*knowledge_graph.py'
+      - 'alo186/sureklilik-api/tests/test_knowledge_*.py'
+      - 'alo186/sureklilik-api/KNOWLEDGE_GRAPH.md'
+      - 'alo186/infra/observability/**'
+      - 'alo186/infra/production/validate_render.py'
+      - 'render.yaml'
+      - '.github/workflows/alo186-knowledge-graph-ci.yml'
+  push:
+    branches: [main, feat/alo186-knowledge-graph-v1]
+    paths:
+      - 'alo186/sureklilik-api/app/kg_*.py'
+      - 'alo186/sureklilik-api/app/knowledge_*.py'
+      - 'alo186/sureklilik-api/alembic/versions/*knowledge_graph.py'
+      - 'alo186/sureklilik-api/tests/test_knowledge_*.py'
+      - 'alo186/sureklilik-api/KNOWLEDGE_GRAPH.md'
+      - 'alo186/infra/observability/**'
+      - 'alo186/infra/production/validate_render.py'
+      - 'render.yaml'
+      - '.github/workflows/alo186-knowledge-graph-ci.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-knowledge-graph-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: '3.12'
+  ALO186_ENV: test
+  ALO186_TOKEN_SECRET: test-secret-at-least-32-characters-long
+  ALO186_DATA_ENCRYPTION_KEY: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+  ALO186_ALLOWED_ORIGINS: http://testserver
+  ALO186_ALLOWED_HOSTS: testserver,localhost,127.0.0.1
+  ALO186_PUBLIC_BASE_URL: http://testserver
+  ALO186_EMAIL_VERIFICATION_REQUIRED: 'false'
+  ALO186_EXPOSE_TEST_TOKENS: 'true'
+  ALO186_EMAIL_BACKEND: console
+  ALO186_GLOBAL_RATE_LIMIT: '10000'
+  ALO186_AUTH_RATE_LIMIT: '1000'
+  ALO186_METRICS_TOKEN: test-metrics-token
+
+jobs:
+  sqlite-api:
+    name: SQLite graph API, provenance ve seed testleri
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: alo186/sureklilik-api/requirements.txt
+      - run: pip install -q -r alo186/sureklilik-api/requirements.txt
+      - name: Knowledge Graph testleri
+        working-directory: alo186/sureklilik-api
+        env:
+          ALO186_AUTO_CREATE_SCHEMA: 'true'
+          PYTHONPATH: .
+        run: pytest -q --tb=short tests/test_knowledge_graph.py tests/test_knowledge_seed.py
+      - name: Python compile
+        run: python -m compileall -q alo186/sureklilik-api/app alo186/sureklilik-api/alembic
+
+  migration:
+    name: Knowledge Graph Alembic migration
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: alo186/sureklilik-api/requirements.txt
+      - run: pip install -q -r alo186/sureklilik-api/requirements.txt
+      - name: SQLite head migration ve tablo/index kontrolü
+        working-directory: alo186/sureklilik-api
+        env:
+          ALO186_DATABASE_URL: sqlite:///./kg-migration-test.db
+          ALO186_AUTO_CREATE_SCHEMA: 'false'
+          PYTHONPATH: .
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f kg-migration-test.db
+          alembic upgrade head
+          alembic current
+          alembic check
+          python - <<'PY'
+          from sqlalchemy import create_engine, inspect
+          engine = create_engine('sqlite:///./kg-migration-test.db')
+          inspector = inspect(engine)
+          names = set(inspector.get_table_names())
+          expected = {'kg_entities','kg_sources','kg_assertions','kg_verification_runs'}
+          assert expected <= names, expected - names
+          indexes = {item['name'] for item in inspector.get_indexes('kg_assertions')}
+          assert 'ix_kg_assertions_subject_predicate' in indexes
+          assert 'ix_kg_assertions_scope_status' in indexes
+          assert 'ix_kg_assertions_public_status' in indexes
+          print('Knowledge Graph migration doğrulandı.')
+          PY
+
+  postgres:
+    name: PostgreSQL 16 graph integration
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: alo186_kg_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d alo186_kg_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: alo186/sureklilik-api/requirements.txt
+      - run: pip install -q -r alo186/sureklilik-api/requirements.txt
+      - name: PostgreSQL migration
+        working-directory: alo186/sureklilik-api
+        env:
+          ALO186_DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/alo186_kg_test
+          ALO186_AUTO_CREATE_SCHEMA: 'false'
+          PYTHONPATH: .
+        run: alembic upgrade head
+      - name: PostgreSQL Knowledge Graph testleri
+        working-directory: alo186/sureklilik-api
+        env:
+          ALO186_DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/alo186_kg_test
+          ALO186_AUTO_CREATE_SCHEMA: 'false'
+          PYTHONPATH: .
+        run: pytest -q --tb=short tests/test_knowledge_graph.py tests/test_knowledge_seed.py
+
+  operations:
+    name: Render, monitoring ve seed operasyon kontrolü
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: pip install -q pyyaml
+      - name: Render semantik kontrolü
+        run: python alo186/infra/production/validate_render.py render.yaml
+      - name: Alert ve Alloy YAML/Python kontrolü
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import yaml
+          with open('alo186/infra/observability/alerts.yml', encoding='utf-8') as handle:
+              data = yaml.safe_load(handle)
+          groups = {item['name']: item for item in data['groups']}
+          assert 'alo186-knowledge-graph' in groups
+          names = {rule['alert'] for rule in groups['alo186-knowledge-graph']['rules']}
+          assert {'Alo186KnowledgeGraphHealthLow','Alo186KnowledgeGraphEmpty','Alo186KnowledgeGraphStaleAssertions','Alo186KnowledgeGraphConflictingClaims'} <= names
+          PY
+          python -m py_compile alo186/infra/observability/synthetic_check.py
+          sh -n alo186/sureklilik-api/scripts/render_predeploy.sh
+      - name: Knowledge Graph operasyon işaretleri
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'ALO186_KG_SEED_PUBLIC' render.yaml
+          grep -q 'app.knowledge_seed sync-public' render.yaml
+          grep -q '/api/v1/kg/public/health' alo186/infra/observability/synthetic_check.py
+          grep -q 'alo186_kg_health_score' alo186/infra/observability/alerts.yml
