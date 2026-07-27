@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
@@ -202,6 +202,18 @@ def add_member(
         )
     )
     if membership:
+        if membership.role == Role.admin and payload.role != Role.admin:
+            admin_count = db.scalar(
+                select(func.count(Membership.id)).where(
+                    Membership.organization_id == organization_id,
+                    Membership.role == Role.admin,
+                )
+            ) or 0
+            if admin_count <= 1:
+                raise HTTPException(
+                    status_code=409,
+                    detail="Kuruluşun son yöneticisinin rolü düşürülemez.",
+                )
         membership.role = payload.role
     else:
         membership = Membership(user_id=user.id, organization_id=organization_id, role=payload.role)
@@ -322,7 +334,8 @@ def add_asset_test(
         tested_at=tested_at,
         created_by_user_id=context.user.id,
     )
-    asset.last_test_at = tested_at
+    if asset.last_test_at is None or tested_at > asset.last_test_at:
+        asset.last_test_at = tested_at
     db.add(test)
     db.flush()
     write_audit(db, organization_id=context.organization_id, user_id=context.user.id, action="asset_test.created", entity_type="asset_test", entity_id=test.id, details={"asset_id": asset.id, "result": test.result})
@@ -386,6 +399,8 @@ def close_incident(
     incident = db.scalar(incident_query(context.organization_id).where(Incident.id == incident_id))
     if not incident:
         raise HTTPException(status_code=404, detail="Olay bulunamadı.")
+    if incident.status == IncidentStatus.closed:
+        return incident
     missing = [task.title for task in incident.tasks if task.is_required and task.status != TaskStatus.completed]
     if missing:
         raise HTTPException(status_code=409, detail={"message": "Zorunlu görevler tamamlanmadan olay kapatılamaz.", "missing_tasks": missing})
