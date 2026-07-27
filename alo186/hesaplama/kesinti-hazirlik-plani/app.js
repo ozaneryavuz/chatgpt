@@ -55,9 +55,14 @@ function addRoute(container,label,href,eventName){
 
 function renderRoutes(){
   const container=$('routeLinks');container.innerHTML='';
+  const medical=$('medical').checked;
   addRoute(container,'Resmî kesinti kanalını bul','https://www.alo186.com/elektrik-kesintisi','official-outage');
-  if($('internet').checked)addRoute(container,'Modem ve ONT yedekleme hesabı','https://www.alo186.com/hesaplama/modem-internet-yedekleme/','modem-backup');
-  if($('cold').checked||$('security').checked)addRoute(container,'UPS çalışma süresini hesapla','https://www.alo186.com/hesaplama/ups-suresi/','ups-runtime');
+  if(medical){
+    addRoute(container,'112 / 186 ayrımını kontrol et','https://www.alo186.com/acil-numaralar','emergency-numbers');
+  }else{
+    if($('internet').checked)addRoute(container,'Modem ve ONT yedekleme hesabı','https://www.alo186.com/hesaplama/modem-internet-yedekleme/','modem-backup');
+    if($('cold').checked||$('security').checked)addRoute(container,'UPS çalışma süresini hesapla','https://www.alo186.com/hesaplama/ups-suresi/','ups-runtime');
+  }
   if($('generator').checked||$('pump').checked||$('elevator').checked||['site','business','hotel'].includes($('profile').value))addRoute(container,'Süreklilik panelini aç','https://www.alo186.com/sureklilik-paneli/','continuity-panel');
 }
 
@@ -97,13 +102,13 @@ function collectPlan(reviewedAt=new Date().toISOString()){
 function savePlan(eventName){
   try{
     const data=collectPlan();localStorage.setItem(storageKey,JSON.stringify(data));setReviewDisplay(data.reviewedAt,data.reviewCycle);
-    Alo186Track(eventName,{profile:data.profile,review_cycle_days:Number(data.reviewCycle),task_count:data.tasks.length});
+    Alo186Track(eventName,{profile:data.profile,review_cycle_days:Number(data.reviewCycle),task_count:data.tasks.length,medical_plan:Boolean(data.flags.medical)});
   }catch(e){$('reviewStatus').textContent='Tarayıcı depolamasına erişilemedi. Planı PDF olarak kaydedebilirsiniz.';$('reviewStatus').className='warning';}
 }
 
 $('generateBtn').addEventListener('click',()=>{
   const tasks=buildTasks();showPlan(tasks);setReviewDisplay(null,$('reviewCycle').value);
-  Alo186Track('outage_plan_generated',{profile:$('profile').value,duration:Number($('duration').value),task_count:tasks.length,context:$('context').value});
+  Alo186Track('outage_plan_generated',{profile:$('profile').value,duration:Number($('duration').value),task_count:tasks.length,context:$('context').value,medical_plan:$('medical').checked});
 });
 
 $('saveBtn').addEventListener('click',()=>savePlan('outage_plan_saved'));
@@ -117,6 +122,6 @@ $('loadBtn').addEventListener('click',()=>{
     $('context').value=d.context||'standard';$('reviewCycle').value=d.reviewCycle||'90';
     Object.entries(d.flags||{}).forEach(([k,v])=>{if($(k))$(k).checked=v});
     showPlan(Array.isArray(d.tasks)&&d.tasks.length?d.tasks:buildTasks(),d.checked||[]);setReviewDisplay(d.reviewedAt,d.reviewCycle||90);
-    Alo186Track('outage_plan_loaded',{profile:d.profile||'home',review_due:d.reviewedAt?nextReviewDate(d.reviewedAt,d.reviewCycle||90)<=new Date():false});
+    Alo186Track('outage_plan_loaded',{profile:d.profile||'home',review_due:d.reviewedAt?nextReviewDate(d.reviewedAt,d.reviewCycle||90)<=new Date():false,medical_plan:Boolean(d.flags&&d.flags.medical)});
   }catch(e){alert('Kayıtlı plan okunamadı. Yeni bir plan oluşturun.');}
 });
