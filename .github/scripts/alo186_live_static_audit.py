@@ -11,11 +11,12 @@ from html.parser import HTMLParser
 from pathlib import Path
 from xml.etree import ElementTree
 
-ORIGIN = "https://www.alo186.com"
+ORIGIN = "https://alo186.com"
+CANONICAL_HOST = "alo186.com"
 OUT = Path("artifacts/live-quality")
 OUT.mkdir(parents=True, exist_ok=True)
 CTX = ssl.create_default_context()
-UA = "ALO186-Quality-Audit/1.0"
+UA = "ALO186-Quality-Audit/1.1"
 
 
 def normalized(value, base=ORIGIN):
@@ -169,6 +170,14 @@ def issue(level, category, url, message, evidence=None): issues.append({"level":
 if robots["status"] != 200: issue("P0", "indexability", f"{ORIGIN}/robots.txt", f"robots.txt HTTP {robots['status']}")
 if not re.search(r"^\s*Sitemap:", robots.get("body", ""), re.I | re.M): issue("P1", "indexability", f"{ORIGIN}/robots.txt", "Sitemap yönergesi eksik")
 if not any(item["status"] == 200 and item["page_count"] for item in maps): issue("P0", "indexability", f"{ORIGIN}/sitemap.xml", "Geçerli ve URL içeren sitemap bulunamadı")
+
+apex_probe, www_probe = fetch("https://alo186.com/"), fetch("https://www.alo186.com/")
+if apex_probe["status"] == 200 and www_probe["status"] == 200:
+    apex_host = urllib.parse.urlsplit(apex_probe.get("final") or "").hostname
+    www_host = urllib.parse.urlsplit(www_probe.get("final") or "").hostname
+    if apex_host == "alo186.com" and www_host == "www.alo186.com":
+        issue("P2", "redirect", "https://www.alo186.com/", "www ve apex ana sayfaları ayrı ayrı HTTP 200 sunuyor; sitemap/robots/canonical ile uyumlu olacak şekilde www → apex 301 önerilir")
+
 listed_norm = {normalized(url) for url in listed}
 for page in pages:
     url = page.get("final") or page["requested"]
@@ -178,7 +187,7 @@ for page in pages:
         if not page["description"]: issue("P2", "seo", url, "Meta description eksik")
         if not page["canonical"]: issue("P1", "canonical", url, "Canonical eksik")
         elif not same_site(page["canonical"]): issue("P0", "canonical", url, "Canonical site dışına işaret ediyor", page["canonical"])
-        elif urllib.parse.urlsplit(page["canonical"]).hostname != "www.alo186.com": issue("P1", "canonical", url, "Canonical www standardına uymuyor", page["canonical"])
+        elif urllib.parse.urlsplit(page["canonical"]).hostname != CANONICAL_HOST: issue("P1", "canonical", url, "Canonical, robots ve sitemap tarafından seçilen apex hostla uyumlu değil", page["canonical"])
         if page["robots"] and "noindex" in page["robots"].lower() and normalized(page["requested"]) in listed_norm: issue("P0", "indexability", url, "Sitemap içindeki sayfa noindex")
         if not page["viewport"]: issue("P1", "mobile", url, "Viewport meta etiketi eksik")
         if page["h1_count"] != 1: issue("P1", "semantics", url, f"H1 sayısı {page['h1_count']}")
@@ -193,7 +202,7 @@ for result in link_results:
     if result["status"] == 0 or result["status"] >= 400: issue("P0" if not result["status"] or result["status"] >= 500 else "P1", "broken-link", result["requested"], f"İç bağlantı HTTP {result['status'] or 'error'}", result.get("error"))
 order = {"P0": 0, "P1": 1, "P2": 2}
 issues.sort(key=lambda item: (order.get(item["level"], 9), item["category"], item["url"]))
-report = {"generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "origin": ORIGIN, "counts": {"sitemap_pages": len(listed), "crawled_pages": len(pages), "links": len(link_results), "P0": sum(x["level"]=="P0" for x in issues), "P1": sum(x["level"]=="P1" for x in issues), "P2": sum(x["level"]=="P2" for x in issues)}, "robots": {"status": robots["status"], "final": robots.get("final"), "body": robots.get("body", "")[:5000]}, "sitemaps": maps, "pages": pages, "links": [{"requested": x["requested"], "final": x.get("final"), "status": x["status"], "ms": x["ms"], "error": x.get("error")} for x in link_results], "issues": issues}
+report = {"generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "origin": ORIGIN, "canonical_host": CANONICAL_HOST, "counts": {"sitemap_pages": len(listed), "crawled_pages": len(pages), "links": len(link_results), "P0": sum(x["level"]=="P0" for x in issues), "P1": sum(x["level"]=="P1" for x in issues), "P2": sum(x["level"]=="P2" for x in issues)}, "host_probes": {"apex": {"status": apex_probe["status"], "final": apex_probe.get("final")}, "www": {"status": www_probe["status"], "final": www_probe.get("final")}}, "robots": {"status": robots["status"], "final": robots.get("final"), "body": robots.get("body", "")[:5000]}, "sitemaps": maps, "pages": pages, "links": [{"requested": x["requested"], "final": x.get("final"), "status": x["status"], "ms": x["ms"], "error": x.get("error")} for x in link_results], "issues": issues}
 (OUT / "static-report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
 lines = ["# ALO186 canlı statik kalite denetimi", "", f"- Sitemap URL: {len(listed)}", f"- Taranan sayfa: {len(pages)}", f"- İç bağlantı: {len(link_results)}", f"- Sorun: P0 {report['counts']['P0']}, P1 {report['counts']['P1']}, P2 {report['counts']['P2']}", "", "## Öncelikli sorunlar", ""]
 lines += [f"- **{item['level']} · {item['category']}** — {item['message']} — {item['url']}" for item in issues[:150]]
