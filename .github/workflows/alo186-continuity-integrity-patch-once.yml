@@ -30,6 +30,7 @@ jobs:
           main_path = Path('alo186/sureklilik-api/app/main.py')
           text = main_path.read_text(encoding='utf-8')
           replacements = [
+              ('from contextlib import asynccontextmanager', 'from contextlib import asynccontextmanager\nfrom datetime import timezone'),
               ('from sqlalchemy import select', 'from sqlalchemy import func, select'),
               (
                   '''    if membership:\n        membership.role = payload.role\n    else:\n''',
@@ -40,8 +41,16 @@ jobs:
                   '    if asset.last_test_at is None or tested_at > asset.last_test_at:\n        asset.last_test_at = tested_at\n',
               ),
               (
+                  '''    if asset.last_test_at is None or tested_at > asset.last_test_at:\n        asset.last_test_at = tested_at\n''',
+                  '''    normalized_tested_at = (\n        tested_at.replace(tzinfo=timezone.utc)\n        if tested_at.tzinfo is None\n        else tested_at.astimezone(timezone.utc)\n    )\n    normalized_last_test_at = (\n        None\n        if asset.last_test_at is None\n        else (\n            asset.last_test_at.replace(tzinfo=timezone.utc)\n            if asset.last_test_at.tzinfo is None\n            else asset.last_test_at.astimezone(timezone.utc)\n        )\n    )\n    if normalized_last_test_at is None or normalized_tested_at > normalized_last_test_at:\n        asset.last_test_at = tested_at\n''',
+              ),
+              (
                   '''    if not incident:\n        raise HTTPException(status_code=404, detail="Olay bulunamadı.")\n    missing = [task.title for task in incident.tasks if task.is_required and task.status != TaskStatus.completed]\n''',
                   '''    if not incident:\n        raise HTTPException(status_code=404, detail="Olay bulunamadı.")\n    if incident.status == IncidentStatus.closed:\n        return incident\n    missing = [task.title for task in incident.tasks if task.is_required and task.status != TaskStatus.completed]\n''',
+              ),
+              (
+                  '''    if incident.status == IncidentStatus.closed:\n        return incident\n''',
+                  '''    if incident.status == IncidentStatus.closed:\n        if incident.ended_at is not None and incident.ended_at.tzinfo is None:\n            incident.ended_at = incident.ended_at.replace(tzinfo=timezone.utc)\n        return incident\n''',
               ),
           ]
           for old, new in replacements:
@@ -66,6 +75,6 @@ jobs:
           if git diff --cached --quiet; then
             echo 'Değişiklik bulunmadı.'
           else
-            git commit -m 'fix(alo186): süreklilik API veri bütünlüğü guardlarını ekle'
+            git commit -m 'fix(alo186): süreklilik API zaman ve idempotency guardlarını tamamla'
             git push origin HEAD:fix/alo186-continuity-api-integrity
           fi
