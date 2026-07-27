@@ -1,0 +1,32 @@
+name: ALO186 Tools Test
+
+on:
+  push:
+    paths:
+      - 'alo186/hesaplama/**'
+      - '.github/workflows/alo186-tools-test.yml'
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/**'
+      - '.github/workflows/alo186-tools-test.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run calculator tests
+        run: node alo186/hesaplama/tests/test_calc_core.js
+      - name: Check required pages
+        run: |
+          test -f alo186/hesaplama/index.html
+          test -f alo186/hesaplama/ups-suresi/index.html
+          test -f alo186/hesaplama/ev-sarj-suresi/index.html
+          test -f alo186/hesaplama/kablo-gerilim-dusumu/index.html
+          test -f alo186/hesaplama/kesinti-hazirlik-plani/index.html
