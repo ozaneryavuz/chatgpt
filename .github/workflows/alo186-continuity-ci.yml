@@ -1,0 +1,53 @@
+name: ALO186 süreklilik paneli kalite kontrolü
+
+on:
+  push:
+    branches: [main, feat/alo186-sureklilik-paneli]
+    paths:
+      - 'alo186/sureklilik-paneli/**'
+      - 'alo186/tests/test_continuity_store.js'
+      - '.github/workflows/alo186-continuity-ci.yml'
+  pull_request:
+    paths:
+      - 'alo186/sureklilik-paneli/**'
+      - 'alo186/tests/test_continuity_store.js'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Veri ve olay motoru testleri
+        run: node alo186/tests/test_continuity_store.js
+      - name: JavaScript sözdizimi
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r file; do
+            node --check "$file"
+          done < <(find alo186/sureklilik-paneli -name '*.js' -type f | sort)
+      - name: HTML ve SEO temel kontrolü
+        shell: bash
+        run: |
+          set -euo pipefail
+          file=alo186/sureklilik-paneli/index.html
+          grep -qi '<!doctype html>' "$file"
+          grep -qi '<title>' "$file"
+          grep -qi 'meta name="description"' "$file"
+          grep -qi 'rel="canonical"' "$file"
+          grep -qi 'application/ld+json' "$file"
+          grep -qi 'Local-first pilot' "$file"
+      - name: Gizlilik ve kapsam sınırı
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q "localStorage" alo186/sureklilik-paneli/app.js
+          grep -q "auditLog" alo186/sureklilik-paneli/store.js
+          grep -q "closedWithIncompleteP1" alo186/sureklilik-paneli/store.js
+          ! grep -qi 'T.C. kimlik' alo186/sureklilik-paneli/index.html
