@@ -3,8 +3,15 @@ set -eu
 
 umask 077
 
+if [ -n "${ALO186_DATABASE_URL_FILE:-}" ]; then
+  if [ -n "${ALO186_DATABASE_URL:-}" ]; then
+    echo "ALO186_DATABASE_URL ve ALO186_DATABASE_URL_FILE aynı anda kullanılamaz." >&2
+    exit 1
+  fi
+  ALO186_DATABASE_URL=$(cat "$ALO186_DATABASE_URL_FILE")
+fi
 if [ -z "${ALO186_DATABASE_URL:-}" ]; then
-  echo "ALO186_DATABASE_URL zorunludur." >&2
+  echo "ALO186_DATABASE_URL veya ALO186_DATABASE_URL_FILE zorunludur." >&2
   exit 1
 fi
 
