@@ -1,0 +1,38 @@
+services:
+  caddy:
+    image: caddy:2.10.0-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks: [edge, backend]
+    depends_on:
+      api:
+        condition: service_healthy
+
+  api:
+    image: ghcr.io/REPLACE_WITH_OWNER/alo186-continuity-api:REPLACE_WITH_TAG
+    restart: unless-stopped
+    env_file: .env.production
+    expose:
+      - "8000"
+    networks: [backend]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=3)"]
+      interval: 20s
+      timeout: 5s
+      retries: 6
+
+volumes:
+  caddy_data:
+  caddy_config:
+
+networks:
+  edge:
+  backend:
+    internal: true
