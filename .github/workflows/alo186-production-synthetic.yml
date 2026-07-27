@@ -1,0 +1,51 @@
+name: ALO186 production synthetic monitoring
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  synthetic:
+    if: ${{ vars.ALO186_PRODUCTION_MONITOR_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: DNS, TLS, API health ve SMTP STARTTLS kontrolü
+        env:
+          API_BASE_URL: ${{ vars.ALO186_API_BASE_URL || 'https://api.alo186.com' }}
+          SMTP_HOST: ${{ vars.ALO186_SMTP_HOST || 'smtp.postmarkapp.com' }}
+        run: |
+          set -euo pipefail
+          python alo186/sureklilik-api/ops/monitoring/synthetic_check.py \
+            --base-url "$API_BASE_URL" \
+            --smtp-host "$SMTP_HOST" \
+            --smtp-port 587 \
+            --output synthetic-result.json
+      - name: GitHub özetini oluştur
+        if: always()
+        run: |
+          {
+            echo '## ALO186 production synthetic'
+            echo
+            echo '```json'
+            cat synthetic-result.json 2>/dev/null || echo '{"ok":false,"error":"result file missing"}'
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: alo186-production-synthetic-${{ github.run_id }}
+          path: synthetic-result.json
+          if-no-files-found: warn
+          retention-days: 30
+
+  disabled-notice:
+    if: ${{ vars.ALO186_PRODUCTION_MONITOR_ENABLED != 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo 'ALO186_PRODUCTION_MONITOR_ENABLED=true ayarlanıncaya kadar production synthetic kontrollü olarak pasif.' >> "$GITHUB_STEP_SUMMARY"
