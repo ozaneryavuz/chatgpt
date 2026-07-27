@@ -1,0 +1,73 @@
+name: ALO186 R2 backup repository bootstrap
+
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: R2 bucket ve Restic deposunu gerçekten oluştur
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    environment: alo186-production
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: auto
+      ALO186_R2_ENDPOINT: ${{ vars.ALO186_R2_ENDPOINT }}
+      ALO186_R2_BUCKET: ${{ vars.ALO186_R2_BUCKET }}
+      RESTIC_PASSWORD: ${{ secrets.RESTIC_PASSWORD }}
+    steps:
+      - name: Değerleri doğrula
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$AWS_ACCESS_KEY_ID"
+          test -n "$AWS_SECRET_ACCESS_KEY"
+          test -n "$ALO186_R2_ENDPOINT"
+          test -n "$ALO186_R2_BUCKET"
+          test -n "$RESTIC_PASSWORD"
+      - name: Restic kur
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq restic
+      - name: Bucket dry-run veya oluştur
+        shell: bash
+        run: |
+          set -euo pipefail
+          if aws --endpoint-url "$ALO186_R2_ENDPOINT" --region auto s3api head-bucket --bucket "$ALO186_R2_BUCKET" >/dev/null 2>&1; then
+            echo "SAME   $ALO186_R2_BUCKET"
+          elif [[ "${{ inputs.apply }}" == "true" ]]; then
+            aws --endpoint-url "$ALO186_R2_ENDPOINT" --region auto s3api create-bucket --bucket "$ALO186_R2_BUCKET"
+            echo "CREATE $ALO186_R2_BUCKET"
+          else
+            echo "WOULD CREATE $ALO186_R2_BUCKET"
+          fi
+      - name: Restic repository dry-run veya init
+        shell: bash
+        run: |
+          set -euo pipefail
+          export RESTIC_REPOSITORY="s3:${ALO186_R2_ENDPOINT%/}/${ALO186_R2_BUCKET}"
+          if restic snapshots --compact >/dev/null 2>&1; then
+            echo 'SAME   Restic repository mevcut.'
+          elif [[ "${{ inputs.apply }}" == "true" ]]; then
+            restic init
+            restic check
+          else
+            echo 'WOULD INIT Restic repository.'
+          fi
+      - name: Uygulama sonrası erişimi doğrula
+        if: ${{ inputs.apply }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          export RESTIC_REPOSITORY="s3:${ALO186_R2_ENDPOINT%/}/${ALO186_R2_BUCKET}"
+          aws --endpoint-url "$ALO186_R2_ENDPOINT" --region auto s3api head-bucket --bucket "$ALO186_R2_BUCKET"
+          restic snapshots --compact
+          restic check
