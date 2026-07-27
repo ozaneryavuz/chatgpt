@@ -22,7 +22,7 @@ services:
   api:
     image: ghcr.io/REPLACE_WITH_OWNER/alo186-continuity-api:REPLACE_WITH_TAG
     restart: unless-stopped
-    env_file: .env.production
+    env_file: ${ALO186_ENV_FILE:-.env.production.example}
     expose:
       - "8000"
     networks: [backend]
