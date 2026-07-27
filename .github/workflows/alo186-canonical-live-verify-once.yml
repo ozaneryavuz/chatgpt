@@ -1,0 +1,102 @@
+name: ALO186 canonical canlı doğrulama
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/alo186-canonical-live-verify-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Kaynak canonical ve sitemap doğrulaması
+        run: |
+          set -euo pipefail
+          ! grep -R --line-number --fixed-strings 'https://alo186.com' \
+            alo186/fatura-analizi alo186/yedek-guc-hesaplayici alo186/kesinti-maliyet-hesaplayici
+          node alo186/tests/test_release_manifest.js
+
+      - name: Kök host yönlendirmelerini ve www sayfalarını kontrol et
+        id: live
+        shell: bash
+        run: |
+          set -u
+          report=canonical-live-report.md
+          : > "$report"
+          echo '## Canonical host canlı doğrulama' >> "$report"
+          echo '' >> "$report"
+          echo '| Kök URL | İlk HTTP | Location | www nihai HTTP | Sonuç |' >> "$report"
+          echo '|---|---:|---|---:|---|' >> "$report"
+
+          paths=(
+            '/fatura-analizi'
+            '/hesaplama/yedek-guc'
+            '/hesaplama/kesinti-maliyeti'
+          )
+          all_ok=1
+          for path in "${paths[@]}"; do
+            root="https://alo186.com${path}"
+            www="https://www.alo186.com${path}"
+            headers=$(curl -sS -I --max-time 20 "$root" 2>/dev/null || true)
+            root_code=$(printf '%s\n' "$headers" | awk 'toupper($1) ~ /^HTTP\// {code=$2} END {print code+0}')
+            location=$(printf '%s\n' "$headers" | awk 'BEGIN{IGNORECASE=1} /^location:/ {sub(/\r$/,"",$2); print $2; exit}')
+            www_code=$(curl -sS -L -o /dev/null --max-time 20 -w '%{http_code}' "$www" 2>/dev/null || echo 000)
+            ok=0
+            if [[ "$root_code" =~ ^(301|308)$ ]] && [[ "$location" == "$www" ]] && [[ "$www_code" == "200" ]]; then
+              ok=1
+              result='✅'
+            else
+              all_ok=0
+              result='❌'
+            fi
+            echo "| \`$root\` | $root_code | \`$location\` | $www_code | $result |" >> "$report"
+          done
+          echo '' >> "$report"
+          echo "all_ok=$all_ok" >> "$GITHUB_OUTPUT"
+
+      - name: Issue 15 raporunu güncelle
+        uses: actions/github-script@v7
+        env:
+          ALL_OK: ${{ steps.live.outputs.all_ok }}
+        with:
+          script: |
+            const fs = require('fs');
+            const marker = '<!-- alo186-canonical-live -->';
+            let body = marker + '\n' + fs.readFileSync('canonical-live-report.md', 'utf8');
+            body += '\nKaynak canonical, JSON-LD, manifest ve sitemap testleri başarıyla geçti.\n';
+            const allOk = process.env.ALL_OK === '1';
+            body += allOk
+              ? '\n**Sonuç:** Kök host tek 301/308 ile www canonical adrese yönleniyor ve www rotaları HTTP 200 dönüyor.\n'
+              : '\n**Sonuç:** En az bir canlı yönlendirme/HTTP kontrolü henüz kabul kriterini karşılamıyor. Issue açık kalmalıdır.\n';
+
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: 15,
+              per_page: 100
+            });
+            const existing = comments.find(c => c.body && c.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({owner: context.repo.owner, repo: context.repo.repo, comment_id: existing.id, body});
+            } else {
+              await github.rest.issues.createComment({owner: context.repo.owner, repo: context.repo.repo, issue_number: 15, body});
+            }
+            if (allOk) {
+              await github.rest.issues.update({owner: context.repo.owner, repo: context.repo.repo, issue_number: 15, state: 'closed', state_reason: 'completed'});
+            }
+
+      - name: Canlı yönlendirme başarısızsa workflow'u başarısız işaretle
+        if: steps.live.outputs.all_ok != '1'
+        run: exit 1
