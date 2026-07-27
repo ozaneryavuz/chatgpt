@@ -6,6 +6,7 @@ RUN apk add --no-cache \
     ca-certificates \
     coreutils \
     curl \
+    openssl \
     restic \
     tzdata
 
