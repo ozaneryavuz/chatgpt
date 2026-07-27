@@ -121,7 +121,8 @@
       actual, n, total, avg, weighted, lowForecast, highForecast, midpoint,
       limit, risk, riskClass, riskRatio, crossingIndex, crossingMonth, applicationDate,
       remaining: Math.max(0, limit - total), anomalies,
-      freeConsumerEligible: midpoint >= FREE_CONSUMER_LIMIT
+      freeConsumerActual: total >= FREE_CONSUMER_LIMIT,
+      freeConsumerForecast: midpoint >= FREE_CONSUMER_LIMIT
     };
   }
 
@@ -148,8 +149,10 @@
     if (groupKey !== "residential") {
       actions.push("İşletmelerde yalnız toplam kWh değil; maksimum talep, reaktif değerler ve faaliyet birimi başına tüketim birlikte değerlendirilmelidir.");
     }
-    if (result.freeConsumerEligible) {
-      actions.push("Yıllık 500 kWh serbest tüketici limitini aşıyor görünüyorsunuz; tedarikçi seçme hakkının koşullarını EPDK sayfasından inceleyin.");
+    if (result.freeConsumerActual) {
+      actions.push("Girilen takvim yılı toplamınız 500 kWh serbest tüketici limitini aşmış görünüyor; tedarikçi seçme hakkının koşullarını EPDK sayfasından inceleyin.");
+    } else if (result.freeConsumerForecast) {
+      actions.push("Yıl sonu tahmini 500 kWh serbest tüketici limitini aşıyor; hak kazanma durumu için gerçekleşen takvim yılı toplamını izleyin.");
     }
     return actions;
   }
@@ -258,7 +261,11 @@
     $("remainingToLimit").textContent = result.remaining > 0 ? formatKwh(result.remaining, 1) : "Limit mevcut veride aşılmış";
     $("crossingMonth").textContent = result.crossingMonth || "Tahmin aralığında görünmüyor";
     $("applicationDate").textContent = result.applicationDate || "Öngörülmüyor";
-    $("eligibleFreeConsumer").textContent = result.freeConsumerEligible ? "500 kWh eşiği aşılmış görünüyor" : "Henüz 500 kWh altında";
+    $("eligibleFreeConsumer").textContent = result.freeConsumerActual
+      ? "Girilen toplam 500 kWh eşiğini aştı"
+      : result.freeConsumerForecast
+        ? "Yıl sonu tahmini 500 kWh eşiğini aşıyor"
+        : "Girilen toplam ve tahmin 500 kWh altında";
     renderAnomalies(result);
     renderActions(result, groupKey);
     requestAnimationFrame(() => drawChart(result));
