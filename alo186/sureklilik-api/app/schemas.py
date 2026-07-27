@@ -1,15 +1,23 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_serializer
 
 from .models import IncidentStatus, Priority, Role, TaskStatus
 
 
 class ApiModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
+
+    @field_serializer("*", when_used="json", check_fields=False)
+    def serialize_utc_datetimes(self, value):
+        """SQLite dahil bütün backend'lerde UTC tarihleri aynı `Z` biçiminde döndürür."""
+        if isinstance(value, datetime):
+            aware = value if value.tzinfo is not None else value.replace(tzinfo=timezone.utc)
+            return aware.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+        return value
 
 
 class RegisterRequest(BaseModel):
@@ -67,7 +75,7 @@ class MembershipOut(ApiModel):
     notify_incidents: bool
 
 
-class AuthResponse(BaseModel):
+class AuthResponse(ApiModel):
     access_token: str
     token_type: str = "bearer"
     user: UserOut
@@ -247,7 +255,7 @@ class AuditOut(ApiModel):
     created_at: datetime
 
 
-class BillingUsageOut(BaseModel):
+class BillingUsageOut(ApiModel):
     plan: str
     subscription_status: str
     plan_expires_at: datetime | None
