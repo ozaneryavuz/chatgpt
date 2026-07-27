@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
+from datetime import timezone
 
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -335,6 +336,21 @@ def add_asset_test(
         created_by_user_id=context.user.id,
     )
     if asset.last_test_at is None or tested_at > asset.last_test_at:
+        normalized_tested_at = (
+        tested_at.replace(tzinfo=timezone.utc)
+        if tested_at.tzinfo is None
+        else tested_at.astimezone(timezone.utc)
+    )
+    normalized_last_test_at = (
+        None
+        if asset.last_test_at is None
+        else (
+            asset.last_test_at.replace(tzinfo=timezone.utc)
+            if asset.last_test_at.tzinfo is None
+            else asset.last_test_at.astimezone(timezone.utc)
+        )
+    )
+    if normalized_last_test_at is None or normalized_tested_at > normalized_last_test_at:
         asset.last_test_at = tested_at
     db.add(test)
     db.flush()
@@ -400,6 +416,8 @@ def close_incident(
     if not incident:
         raise HTTPException(status_code=404, detail="Olay bulunamadı.")
     if incident.status == IncidentStatus.closed:
+        if incident.ended_at is not None and incident.ended_at.tzinfo is None:
+            incident.ended_at = incident.ended_at.replace(tzinfo=timezone.utc)
         return incident
     missing = [task.title for task in incident.tasks if task.is_required and task.status != TaskStatus.completed]
     if missing:
