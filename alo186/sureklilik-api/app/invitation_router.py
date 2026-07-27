@@ -22,7 +22,7 @@ from .invitations import (
     invitation_status,
     revoke_invitation,
 )
-from .models import OrganizationInvitation, Role, User
+from .models import Organization, OrganizationInvitation, Role, User
 from .rate_limit import enforce_auth_rate
 from .schemas import OrganizationOut, UserOut
 
@@ -142,7 +142,7 @@ def cancel_invitation(
 def preview_invitation(token: str, request: Request, db: Session = Depends(get_db)):
     enforce_auth_rate(request, token[:16])
     invitation = invitation_by_token(db, token)
-    organization = invitation.organization or db.get(__import__("app.models", fromlist=["Organization"]).Organization, invitation.organization_id)
+    organization = invitation.organization or db.get(Organization, invitation.organization_id)
     if not organization:
         raise HTTPException(status_code=400, detail="Davet edilen kuruluş bulunamadı.")
     existing_user = db.scalar(select(User.id).where(User.email == invitation.email)) is not None
