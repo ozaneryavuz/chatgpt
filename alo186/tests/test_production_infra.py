@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import json
-import os
 import stat
 import subprocess
 import sys
@@ -56,6 +54,7 @@ def test_render_blueprint_contract() -> None:
         "AWS_ACCESS_KEY_ID",
         "AWS_SECRET_ACCESS_KEY",
         "RESTIC_PASSWORD",
+        "ALO186_VAULT_ENCRYPTION_KEY",
         "ALO186_BACKUP_HEARTBEAT_URL",
     ):
         assert backup_env[key].get("sync") is False
@@ -97,7 +96,12 @@ def test_no_repository_secrets_and_backup_contract() -> None:
         (ROOT / "alo186/infrastructure/secrets/secret-inventory.yaml").read_text(encoding="utf-8")
     )
     keys = {item["key"] for item in inventory["secrets"]}
-    assert {"ALO186_TOKEN_SECRET", "RESTIC_PASSWORD", "CLOUDFLARE_API_TOKEN"} <= keys
+    assert {
+        "ALO186_TOKEN_SECRET",
+        "RESTIC_PASSWORD",
+        "ALO186_VAULT_ENCRYPTION_KEY",
+        "CLOUDFLARE_API_TOKEN",
+    } <= keys
 
     backup = (ROOT / "alo186/sureklilik-api/infra/backup/run_backup.sh").read_text(
         encoding="utf-8"
@@ -107,6 +111,8 @@ def test_no_repository_secrets_and_backup_contract() -> None:
     assert "restic backup" in backup
     assert "restic check" in backup
     assert "ALO186_R2_VAULT_BUCKET" in backup
+    assert "ALO186_VAULT_ENCRYPTION_KEY" in backup
+    assert "openssl enc -aes-256-cbc" in backup
     assert "/fail" in backup
 
     restore = (ROOT / "alo186/sureklilik-api/infra/backup/restore_verify.sh").read_text(
@@ -132,6 +138,7 @@ def test_secret_generator_permissions() -> None:
         assert "ALO186_TOKEN_SECRET=" in content
         assert "ALO186_DATA_ENCRYPTION_KEY=" in content
         assert "RESTIC_PASSWORD=" in content
+        assert "ALO186_VAULT_ENCRYPTION_KEY=" in content
         assert len(content.split("ALO186_TOKEN_SECRET=", 1)[1].splitlines()[0]) >= 40
 
 
@@ -158,11 +165,22 @@ def test_dns_and_monitoring_are_safe_by_default() -> None:
     assert "GRAFANA_CLOUD_API_KEY" in alloy
     assert "insecure_skip_verify" not in alloy
 
+    caddy_compose = (
+        ROOT / "alo186/sureklilik-api/infra/caddy/docker-compose.edge.yml"
+    ).read_text(encoding="utf-8")
+    assert "caddy:2.11.4-alpine" in caddy_compose
+    assert "caddy:2-alpine" not in caddy_compose
+
 
 def test_secret_inventory_is_metadata_only() -> None:
     inventory_path = ROOT / "alo186/infrastructure/secrets/secret-inventory.yaml"
     text = inventory_path.read_text(encoding="utf-8")
-    forbidden = ("sk_live_", "AKIA", "BEGIN PRIVATE KEY", "postgresql://alo186:")
+    forbidden = (
+        "sk" + "_live_",
+        "AK" + "IA",
+        "BEGIN " + "PRIVATE KEY",
+        "postgresql://alo186:",
+    )
     assert not any(value in text for value in forbidden)
 
 
