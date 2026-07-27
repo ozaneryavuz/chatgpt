@@ -12,7 +12,7 @@
 <main><section class="trust-banner"><strong>Yaklaşık sonuç verir.</strong> Motorlu cihazların kalkış gücü, akü kimyası ve gerçek cihaz tüketimi sonucu önemli ölçüde değiştirebilir.</section>
 <section class="hero"><div class="hero-copy"><span class="eyebrow">Kesintide ne kadar dayanır?</span><h1>UPS veya güç kaynağınızın <em>çalışma süresini</em> hesaplayın.</h1>
 <p>Toplam watt yükünü, batarya kapasitesini ve verim varsayımlarını girin. Elinizdeki ürünün yaklaşık süresini veya hedef süre için gereken kapasiteyi görün.</p></div>
-<aside class="hero-card"><span>Temel ilişki</span><strong>Wh ÷ W = saat</strong><small>Verim, deşarj ve yaşlanma katsayılarıyla düzeltilir.</small></aside></section>
+<aside class="hero-card"><span>Temel ilişki</span><strong>Wh ÷ W = saat</strong><small>Verim, deşarj ve yaşlanma katsayılarıyla düzeltilir.</small><button class="btn btn-secondary hidden" id="restoreBtn" type="button">Son hesabı aç</button></aside></section>
 <section id="arac" class="layout"><div class="panel"><div class="section-title"><div><span class="step">1</span><h2>Yük ve hedefi girin</h2></div></div>
 <div class="preset-grid">
 <button class="preset" data-w="20">Modem + ONT<br><b>20 W</b></button><button class="preset" data-w="65">Laptop<br><b>65 W</b></button>
@@ -40,6 +40,7 @@
 <article class="metric"><span>Çözüm sınıfı</span><strong id="rClass">—</strong><small id="rConfidence">—</small></article>
 </div><div class="result-grid"><article class="result-card"><h3>Teknik karar özeti</h3><ul id="summaryList"></ul></article>
 <article class="result-card"><h3>Sonraki adım</h3><p id="nextStep"></p><div class="actions"><button class="btn btn-secondary" id="copyBtn">Özeti kopyala</button><button class="btn btn-secondary" data-print>PDF / yazdır</button></div></article></div>
+<div id="productRoute" class="business-cta hidden"><div><span class="eyebrow">İsteğe bağlı ve sonuçtan sonra</span><h3 id="productTitle">Teknik ihtiyacınıza uygun ürün sınıfını karşılaştırın.</h3><p id="productText">Önce watt, Wh, çıkış gücü ve bağlantı uyumunu doğrulayın. Bağlantı sizi ALO186 ürün seçim merkezine götürür; Amazon bağlantıları açıkça reklam / satış ortaklığı olarak işaretlenir. Fiyat, stok, satıcı, puan ve garanti yalnız Amazon’un güncel sayfasından doğrulanır.</p></div><a class="btn btn-primary" id="productLink" href="https://www.alo186.com/amazon-elektrik-urunleri?from=ups-calculator&amp;plan=bilgisayar-modem">Seçim merkezini aç</a></div>
 <div class="business-cta"><div><span class="eyebrow">Otel, site veya işletme?</span><h3>UPS, jeneratör ve kritik yük koordinasyonu için profesyonel ön değerlendirme alın.</h3><p>Üç faz, sabit tesisat, asansör, pompa, soğuk oda veya 2 kW üzeri yüklerde proje kontrolü gerekir.</p></div><a class="btn btn-primary" href="https://www.alo186.com/iletisim?konu=yedek-guc">Ön değerlendirme oluştur</a></div>
 </section>
 <section class="content-section faq"><details><summary>VA ile Wh aynı şey mi?</summary><p>Hayır. VA güç kapasitesini, Wh enerji kapasitesini ifade eder. Çalışma süresi için Wh; yükü kaldırma için W/VA gerekir.</p></details>
