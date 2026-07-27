@@ -30,6 +30,20 @@ jobs:
         working-directory: alo186/sureklilik-api
         env:
           ALO186_TOKEN_SECRET: test-secret-at-least-32-characters-long
-        run: pytest -q --tb=short
+          PYTHONPATH: .
+        shell: bash
+        run: |
+          set +e
+          pytest -q --tb=short > pytest-output.txt 2>&1
+          code=$?
+          cat pytest-output.txt
+          exit $code
+      - name: Test çıktısını yükle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: continuity-api-pytest
+          path: alo186/sureklilik-api/pytest-output.txt
+          if-no-files-found: error
       - name: Python sözdizimi
         run: python -m compileall -q alo186/sureklilik-api/app
