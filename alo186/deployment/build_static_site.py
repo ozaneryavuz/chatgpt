@@ -7,6 +7,12 @@ import shutil
 from pathlib import Path
 
 
+LEGACY_ASSET_DIRECTORIES = (
+    # Karar motoru CSS tabanı bu klasöre relatif @import kullanıyor.
+    "yedek-guc-hesaplayici",
+)
+
+
 def copy_route(repo_root: Path, output: Path, route: dict) -> None:
     source = repo_root / route["source"]
     if not source.is_file():
@@ -45,6 +51,13 @@ def build(repo_root: Path, output: Path, commit_sha: str = "local") -> dict:
     for route in manifest["routes"]:
         copy_route(repo_root, output, route)
 
+    # Canonical HTML üretmeyen ancak mevcut relatif CSS/JS bağımlılıklarını sağlayan
+    # uyumluluk klasörleri. İçlerindeki index sayfaları kendi canonical URL'lerini taşır.
+    for directory in LEGACY_ASSET_DIRECTORIES:
+        source = repo_root / "alo186" / directory
+        if source.is_dir():
+            shutil.copytree(source, output / directory, dirs_exist_ok=True)
+
     for root_file in ("robots.txt", "sitemap.xml"):
         shutil.copy2(repo_root / "alo186" / root_file, output / root_file)
 
@@ -58,6 +71,7 @@ def build(repo_root: Path, output: Path, commit_sha: str = "local") -> dict:
         "commit": commit_sha,
         "canonicalHost": manifest["canonicalHost"],
         "routeCount": len(manifest["routes"]),
+        "legacyAssetDirectories": list(LEGACY_ASSET_DIRECTORIES),
         "routes": [
             {
                 "canonicalPath": item["canonicalPath"],
