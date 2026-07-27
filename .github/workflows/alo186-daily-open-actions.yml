@@ -1,0 +1,141 @@
+name: ALO186 açık aksiyon günlük görevi
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: alo186-daily-open-actions
+  cancel-in-progress: true
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Kod ve ürün testlerini çalıştır
+        id: tests
+        shell: bash
+        run: |
+          set -u
+          report=alo186-daily-report.md
+          : > "$report"
+          echo '<!-- alo186-daily-monitor -->' >> "$report"
+          echo '## ALO186 günlük geliştirme ve yayın kontrolü' >> "$report"
+          echo '' >> "$report"
+          echo '| Test | Sonuç |' >> "$report"
+          echo '|---|---|' >> "$report"
+
+          failed=0
+          run_test() {
+            label="$1"
+            command="$2"
+            if bash -lc "$command" >/tmp/alo186-test.log 2>&1; then
+              echo "| $label | ✅ Başarılı |" >> "$report"
+            else
+              failed=1
+              last_line=$(tail -n 1 /tmp/alo186-test.log | tr '|' '/' | tr '\n' ' ')
+              echo "| $label | ❌ $last_line |" >> "$report"
+            fi
+          }
+
+          run_test 'Hesap motoru' 'node alo186/tests/test_calc_core.js'
+          run_test 'Türkiye EDAŞ araması' 'node alo186/tests/test_turkiye_search.js'
+          run_test '25 sorun karar kuralları' 'node alo186/tests/test_decision_rules.js'
+          run_test 'Ürün eşleştirme' 'node alo186/tests/test_product_matcher.js'
+          run_test 'Süreklilik paneli store' 'node alo186/tests/test_continuity_store.js'
+          run_test 'Yayın / canonical manifesti' 'node alo186/tests/test_release_manifest.js'
+
+          echo '' >> "$report"
+          echo "failed=$failed" >> "$GITHUB_OUTPUT"
+
+      - name: Canlı rotaları ön kontrol et
+        shell: bash
+        run: |
+          set -u
+          report=alo186-daily-report.md
+          echo '### Canlı rota ön kontrolü' >> "$report"
+          echo '' >> "$report"
+          echo '| Rota | HTTP | Nihai URL | Süre |' >> "$report"
+          echo '|---|---:|---|---:|' >> "$report"
+
+          urls=(
+            'https://www.alo186.com/elektrik-portali'
+            'https://www.alo186.com/edas-bul'
+            'https://www.alo186.com/karar-motoru'
+            'https://www.alo186.com/hesaplama/'
+            'https://www.alo186.com/akilli-urun-secimi'
+            'https://www.alo186.com/isletme-surekliligi'
+          )
+
+          for url in "${urls[@]}"; do
+            result=$(curl -L -sS -o /dev/null --max-time 20 -w '%{http_code}|%{url_effective}|%{time_total}' "$url" 2>/dev/null || echo '000|-|20')
+            IFS='|' read -r code effective elapsed <<< "$result"
+            echo "| \`$url\` | $code | \`$effective\` | ${elapsed}s |" >> "$report"
+          done
+          echo '' >> "$report"
+          echo '> Canlı rota kontrolü kod testlerini bloke etmez; hosting ve route entegrasyon sorunlarını görünür kılar.' >> "$report"
+          echo '' >> "$report"
+
+      - name: Epic raporunu güncelle
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const marker = '<!-- alo186-daily-monitor -->';
+            let body = fs.readFileSync('alo186-daily-report.md', 'utf8');
+            const tracked = [5, 6, 15, 17];
+            body += '\n### Açık aksiyonlar\n\n| Issue | Durum | Son güncelleme |\n|---|---|---|\n';
+            for (const issueNumber of tracked) {
+              const { data: issue } = await github.rest.issues.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber
+              });
+              const state = issue.state === 'open' ? '🟠 Açık' : '✅ Kapalı';
+              body += `| [#${issue.number} ${issue.title}](${issue.html_url}) | ${state} | ${issue.updated_at} |\n`;
+            }
+            const turkeyTime = new Intl.DateTimeFormat('tr-TR', {
+              dateStyle: 'full',
+              timeStyle: 'long',
+              timeZone: 'Europe/Istanbul'
+            }).format(new Date());
+            body += `\nSon çalışma: **${turkeyTime}** · Commit: \`${context.sha.slice(0, 8)}\`\n`;
+
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: 2,
+              per_page: 100
+            });
+            const existing = comments.find(comment => comment.body && comment.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: 2,
+                body
+              });
+            }
+
+      - name: Test hatası varsa görevi başarısız işaretle
+        if: steps.tests.outputs.failed == '1'
+        shell: bash
+        run: exit 1
