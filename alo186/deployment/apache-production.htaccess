@@ -1,0 +1,36 @@
+Options -Indexes
+DirectoryIndex index.html
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+# Tek canonical host: kök alan adındaki aynı path tek yönlendirmeyle www'ye gider.
+RewriteCond %{HTTP_HOST} !^www\.alo186\.com$ [NC]
+RewriteRule ^ https://www.alo186.com%{REQUEST_URI} [R=301,L,NE]
+
+# Extensionless canonical araç rotaları directory redirect oluşturmadan index dosyasını sunar.
+RewriteRule ^elektrik-portali/?$ elektrik-portali/index.html [L]
+RewriteRule ^edas-bul/?$ edas-bul/index.html [L]
+RewriteRule ^karar-motoru/?$ karar-motoru/index.html [L]
+RewriteRule ^hesaplama/?$ hesaplama/index.html [L]
+RewriteRule ^akilli-urun-secimi/?$ akilli-urun-secimi/index.html [L]
+RewriteRule ^isletme-surekliligi/?$ isletme-surekliligi/index.html [L]
+RewriteRule ^fatura-analizi/?$ fatura-analizi/index.html [L]
+RewriteRule ^hesaplama/yedek-guc/?$ hesaplama/yedek-guc/index.html [L]
+RewriteRule ^hesaplama/kesinti-maliyeti/?$ hesaplama/kesinti-maliyeti/index.html [L]
+</IfModule>
+
+<IfModule mod_headers.c>
+Header always set X-Content-Type-Options "nosniff"
+Header always set X-Frame-Options "SAMEORIGIN"
+Header always set Referrer-Policy "strict-origin-when-cross-origin"
+Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+</IfModule>
+
+<IfModule mod_expires.c>
+ExpiresActive On
+ExpiresByType text/css "access plus 7 days"
+ExpiresByType application/javascript "access plus 7 days"
+ExpiresByType image/svg+xml "access plus 30 days"
+ExpiresByType image/webp "access plus 30 days"
+</IfModule>
