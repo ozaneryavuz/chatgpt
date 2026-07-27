@@ -11,17 +11,18 @@
     {"source": "alo186/hesaplama/ev-sarj-suresi/index.html", "canonicalPath": "/hesaplama/ev-sarj-suresi/", "type": "calculator"},
     {"source": "alo186/hesaplama/kablo-gerilim-dusumu/index.html", "canonicalPath": "/hesaplama/kablo-gerilim-dusumu/", "type": "calculator"},
     {"source": "alo186/hesaplama/kesinti-hazirlik-plani/index.html", "canonicalPath": "/hesaplama/kesinti-hazirlik-plani/", "type": "tool"},
-    {"source": "alo186/fatura-analizi/index.html", "canonicalPath": "/fatura-analizi", "type": "calculator"},
+    {"source": "alo186/fatura-analizi/index.html", "canonicalPath": "/fatura-analizi", "canonicalUrl": "https://alo186.com/fatura-analizi", "includeInSitemap": false, "type": "calculator", "normalizationPending": true},
     {"source": "alo186/urun-eslestirme/index.html", "canonicalPath": "/akilli-urun-secimi", "type": "tool"},
     {"source": "alo186/sureklilik-paneli/index.html", "canonicalPath": "/isletme-surekliligi", "type": "business-tool"},
-    {"source": "alo186/yedek-guc-hesaplayici/index.html", "canonicalPath": "/hesaplama/yedek-guc", "type": "calculator"},
-    {"source": "alo186/kesinti-maliyet-hesaplayici/index.html", "canonicalPath": "/hesaplama/kesinti-maliyeti", "type": "calculator"}
+    {"source": "alo186/yedek-guc-hesaplayici/index.html", "canonicalPath": "/hesaplama/yedek-guc", "canonicalUrl": "https://alo186.com/hesaplama/yedek-guc", "includeInSitemap": false, "type": "calculator", "normalizationPending": true},
+    {"source": "alo186/kesinti-maliyet-hesaplayici/index.html", "canonicalPath": "/hesaplama/kesinti-maliyeti", "canonicalUrl": "https://alo186.com/hesaplama/kesinti-maliyeti", "includeInSitemap": false, "type": "calculator", "normalizationPending": true}
   ],
   "requiredIntegrations": [
     "canonical URL must resolve with HTTP 200",
     "source folder must not be independently indexed on production",
-    "route must be present in sitemap.xml",
+    "route must be present in sitemap.xml unless includeInSitemap is false",
     "navigation and internal links must use canonicalPath",
-    "GA4 events must be verified after production deployment"
+    "GA4 events must be verified after production deployment",
+    "normalizationPending routes must be migrated to canonicalHost before inclusion in the www sitemap"
   ]
 }
