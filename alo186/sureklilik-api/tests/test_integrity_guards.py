@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from test_api import headers, register
 
-# PR #16 Codex bulgularının tekrar oluşmasını engelleyen veri bütünlüğü testleri.
+# PR #16 Codex bulgularını; UTC karşılaştırma ve idempotency dahil yeniden oluşmadan yakalar.
 
 
 def test_last_admin_cannot_demote_self(client):
