@@ -7,6 +7,11 @@
 - [Elektrik Faturası Zekâ Merkezi](./alo186/fatura-analizi/)
 - [UPS ve Power Station Yedek Güç Hesaplayıcısı](./alo186/yedek-guc-hesaplayici/)
 - [Elektrik Kesintisi Maliyet Hesaplayıcısı](./alo186/kesinti-maliyet-hesaplayici/)
+- [Yeni Elektrik Hesaplama Merkezi](./alo186/hesaplama/)
+  - [UPS / power station çalışma süresi](./alo186/hesaplama/ups-suresi/)
+  - [Elektrikli araç şarj süresi ve maliyeti](./alo186/hesaplama/ev-sarj-suresi/)
+  - [Kablo gerilim düşümü ön hesabı](./alo186/hesaplama/kablo-gerilim-dusumu/)
+  - [Elektrik kesintisi hazırlık planı](./alo186/hesaplama/kesinti-hazirlik-plani/)
 
 ### Karar motoru
 
@@ -23,3 +28,7 @@ Cihazların sürekli ve kalkış gücünü birlikte değerlendirir; hedef sürey
 ### Kesinti Maliyet Hesaplayıcısı
 
 Ev, site, otel ve işletmeler için ciro kaybı, personel bekleme, stok/gıda kaybı, jeneratör yakıtı, yeniden başlatma ve cihaz hasarı kalemlerini olay başı ve yıllık toplamda hesaplar; süreklilik yatırımı için öncelikli aksiyonlar üretir.
+
+### Elektrik Hesaplama Merkezi
+
+Yeni merkez; UPS süresi, EV şarj süresi ve maliyeti, kablo gerilim düşümü ile kişiselleştirilmiş kesinti hazırlık planını ortak responsive tasarım ve test edilen deterministik hesap motoruyla sunar. Araçlar verileri tarayıcı içinde işler, teknik varsayımları görünür kılar ve profesyonel proje gerektiren durumları ayrı biçimde uyarır.
