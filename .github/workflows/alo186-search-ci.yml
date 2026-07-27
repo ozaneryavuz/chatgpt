@@ -1,0 +1,44 @@
+name: ALO186 Türkiye arama kalite kontrolü
+
+on:
+  push:
+    branches: [main, feat/alo186-turkiye-arama]
+    paths:
+      - 'alo186/turkiye-arama/**'
+      - 'alo186/tests/test_turkiye_search.js'
+      - '.github/workflows/alo186-search-ci.yml'
+  pull_request:
+    paths:
+      - 'alo186/turkiye-arama/**'
+      - 'alo186/tests/test_turkiye_search.js'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Arama ve EDAŞ eşleştirme testleri
+        run: node alo186/tests/test_turkiye_search.js
+      - name: JavaScript sözdizimi
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r file; do
+            node --check "$file"
+          done < <(find alo186/turkiye-arama -name '*.js' -type f | sort)
+      - name: HTML ve SEO temel kontrolü
+        shell: bash
+        run: |
+          set -euo pipefail
+          file=alo186/turkiye-arama/index.html
+          grep -qi '<!doctype html>' "$file"
+          grep -qi '<title>' "$file"
+          grep -qi 'meta name="description"' "$file"
+          grep -qi 'rel="canonical"' "$file"
+          grep -qi 'application/ld+json' "$file"
