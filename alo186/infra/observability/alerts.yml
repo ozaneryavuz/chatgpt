@@ -54,6 +54,53 @@ groups:
           description: "Son 30 dakikada API process uptime değeri ikiden fazla kez sıfırlandı."
           runbook_url: "https://github.com/ozaneryavuz/chatgpt/blob/main/alo186/infra/production/PRODUCTION_RUNBOOK.md#sık-yeniden-başlama"
 
+  - name: alo186-knowledge-graph
+    interval: 60s
+    rules:
+      - alert: Alo186KnowledgeGraphHealthLow
+        expr: alo186_kg_health_score{scope="public"} < 85
+        for: 30m
+        labels:
+          severity: warning
+          service: alo186-knowledge-graph
+        annotations:
+          summary: "ALO186 public Knowledge Graph sağlık skoru 85 altında"
+          description: "Kaynak, güncellik, çakışma veya orphan entity metrikleri graph kalitesini düşürdü."
+          runbook_url: "https://github.com/ozaneryavuz/chatgpt/blob/main/alo186/sureklilik-api/KNOWLEDGE_GRAPH.md#graph-health"
+
+      - alert: Alo186KnowledgeGraphEmpty
+        expr: alo186_kg_entities{scope="public"} < 100
+        for: 15m
+        labels:
+          severity: critical
+          service: alo186-knowledge-graph
+        annotations:
+          summary: "ALO186 public Knowledge Graph boş veya eksik"
+          description: "Public graph entity sayısı 100'ün altına düştü; seed/migration ve veri kaynağı kontrol edilmeli."
+          runbook_url: "https://github.com/ozaneryavuz/chatgpt/blob/main/alo186/sureklilik-api/KNOWLEDGE_GRAPH.md#seed-ve-senkronizasyon"
+
+      - alert: Alo186KnowledgeGraphStaleAssertions
+        expr: alo186_kg_stale_assertions{scope="public"} > 100
+        for: 2h
+        labels:
+          severity: warning
+          service: alo186-knowledge-graph
+        annotations:
+          summary: "ALO186 Knowledge Graph içinde 100'den fazla eski iddia var"
+          description: "30 günlük varsayılan güncellik eşiğini aşan public assertion sayısı yüksek."
+          runbook_url: "https://github.com/ozaneryavuz/chatgpt/blob/main/alo186/sureklilik-api/KNOWLEDGE_GRAPH.md#graph-health"
+
+      - alert: Alo186KnowledgeGraphConflictingClaims
+        expr: alo186_kg_conflicting_claims{scope="public"} > 0
+        for: 15m
+        labels:
+          severity: warning
+          service: alo186-knowledge-graph
+        annotations:
+          summary: "ALO186 public Knowledge Graph çakışan aktif iddialar içeriyor"
+          description: "Aynı subject/predicate için farklı aktif literal değerler tespit edildi."
+          runbook_url: "https://github.com/ozaneryavuz/chatgpt/blob/main/alo186/sureklilik-api/KNOWLEDGE_GRAPH.md#çakışma-yönetimi"
+
   - name: alo186-synthetic
     interval: 60s
     rules:
