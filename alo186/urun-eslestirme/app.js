@@ -63,15 +63,19 @@
   }
 
   function requirementMarkup(id,category){
-    if(id==='powerbank')return `<div class="form-grid"><label class="field"><span>Minimum kapasite</span><select id="minCapacity"><option value="10000">10.000 mAh</option><option value="20000" selected>20.000 mAh</option></select></label><label class="field"><span>Minimum çıkış gücü</span><select id="minOutput"><option value="10">10 W — temel telefon</option><option value="25" selected>25 W — hızlı telefon/tablet</option><option value="65">65 W — uyumlu dizüstü</option><option value="100">100 W — yüksek güçlü dizüstü</option></select></label><label class="check-item field full"><input id="needWireless" type="checkbox"><span><b>Kablosuz şarj gerekli</b><br><small>Kablolu gücü ayrıca kontrol edin.</small></span></label></div>`;
-    if(id==='surge_strip')return `<div class="form-grid"><label class="field"><span>Minimum priz sayısı</span><select id="minOutlets"><option value="1">1</option><option value="5" selected>5</option><option value="6">6</option></select></label><label class="field"><span>Minimum enerji sönümleme</span><select id="minJoules"><option value="250">250 J</option><option value="900" selected>900 J</option><option value="1000">1.000 J</option></select></label><label class="check-item field full"><input id="needUsb" type="checkbox"><span><b>USB çıkışı gerekli</b><br><small>USB özelliklerinin hızlı şarj protokolünü ayrıca doğrulayın.</small></span></label></div>`;
+    if(id==='powerbank')return `<div class="form-grid"><label class="field"><span>Minimum kapasite</span><select data-field="minCapacity"><option value="10000">10.000 mAh</option><option value="20000" selected>20.000 mAh</option></select></label><label class="field"><span>Minimum çıkış gücü</span><select data-field="minOutput"><option value="10">10 W — temel telefon</option><option value="25" selected>25 W — hızlı telefon/tablet</option><option value="65">65 W — uyumlu dizüstü</option><option value="100">100 W — yüksek güçlü dizüstü</option></select></label><label class="check-item field full"><input data-field="needWireless" type="checkbox"><span><b>Kablosuz şarj gerekli</b><br><small>Kablolu gücü ayrıca kontrol edin.</small></span></label></div>`;
+    if(id==='surge_strip')return `<div class="form-grid"><label class="field"><span>Minimum priz sayısı</span><select data-field="minOutlets"><option value="1">1</option><option value="5" selected>5</option><option value="6">6</option></select></label><label class="field"><span>Minimum enerji sönümleme</span><select data-field="minJoules"><option value="250">250 J</option><option value="900" selected>900 J</option><option value="1000">1.000 J</option></select></label><label class="check-item field full"><input data-field="needUsb" type="checkbox"><span><b>USB çıkışı gerekli</b><br><small>USB özelliklerinin hızlı şarj protokolünü ayrıca doğrulayın.</small></span></label></div>`;
     const checks=guideChecks[id]||[];
     return `<p>${escapeHtml(category.description)}</p><div class="guide-list">${checks.map(([title,text])=>`<div class="guide-item"><b>${escapeHtml(title)}</b><span>${escapeHtml(text)}</span></div>`).join('')}</div>`;
   }
 
+  function field(name){
+    return $('requirementFields').querySelector(`[data-field="${name}"]`);
+  }
+
   function requirements(){
-    if(selectedCategory==='powerbank')return {minCapacityMah:Number(document.getElementById('minCapacity').value),minOutputW:Number(document.getElementById('minOutput').value),wireless:document.getElementById('needWireless').checked};
-    if(selectedCategory==='surge_strip')return {minOutlets:Number(document.getElementById('minOutlets').value),minJoules:Number(document.getElementById('minJoules').value),usb:document.getElementById('needUsb').checked};
+    if(selectedCategory==='powerbank')return {minCapacityMah:Number(field('minCapacity').value),minOutputW:Number(field('minOutput').value),wireless:field('needWireless').checked};
+    if(selectedCategory==='surge_strip')return {minOutlets:Number(field('minOutlets').value),minJoules:Number(field('minJoules').value),usb:field('needUsb').checked};
     return {};
   }
 
@@ -109,8 +113,8 @@
 
   function renderGuide(result){
     const checks=guideChecks[selectedCategory]||[];
-    $('guideResult').innerHTML=`<span class="eyebrow">Rehberli seçim</span><h3>Ürün adından önce bu alanları doğrulayın</h3><div class="guide-list">${checks.map(([title,text])=>`<div class="guide-item"><b>${escapeHtml(title)}</b><span>${escapeHtml(text)}</span></div>`).join('')}</div>${result.professionalSelectionRequired?`<div class="professional-note"><b>Profesyonel seçim sınırı:</b> Bu kategoride bağlantı, tesisat, standart veya ölçüm uyumu yanlış ürün riskini artırır. Sonuç bir uygunluk onayı değildir.</div>`:''}<div class="actions"><a class="btn btn-primary" id="guideAmazonLink" href="${escapeAttr(result.searchUrl)}" target="_blank" rel="sponsored nofollow noopener">Amazon’da teknik ifadelerle ara</a>${result.professionalSelectionRequired?'<a class="btn btn-secondary" href="https://www.alo186.com/iletisim?konu=urun-teknik-secim">Teknik ön değerlendirme</a>':''}</div>`;
-    const link=document.getElementById('guideAmazonLink');
+    $('guideResult').innerHTML=`<span class="eyebrow">Rehberli seçim</span><h3>Ürün adından önce bu alanları doğrulayın</h3><div class="guide-list">${checks.map(([title,text])=>`<div class="guide-item"><b>${escapeHtml(title)}</b><span>${escapeHtml(text)}</span></div>`).join('')}</div>${result.professionalSelectionRequired?`<div class="professional-note"><b>Profesyonel seçim sınırı:</b> Bu kategoride bağlantı, tesisat, standart veya ölçüm uyumu yanlış ürün riskini artırır. Sonuç bir uygunluk onayı değildir.</div>`:''}<div class="actions"><a class="btn btn-primary" data-guide-amazon href="${escapeAttr(result.searchUrl)}" target="_blank" rel="sponsored nofollow noopener">Amazon’da teknik ifadelerle ara</a>${result.professionalSelectionRequired?'<a class="btn btn-secondary" href="https://www.alo186.com/iletisim?konu=urun-teknik-secim">Teknik ön değerlendirme</a>':''}</div>`;
+    const link=$('guideResult').querySelector('[data-guide-amazon]');
     if(link)link.addEventListener('click',()=>emit('affiliate_category_clicked',{category:selectedCategory,placement:'smart_matcher_guide'}));
   }
 
