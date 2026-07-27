@@ -1,0 +1,53 @@
+name: ALO186 yayın ve canonical kalite kontrolü
+
+on:
+  push:
+    branches: [main, feat/alo186-release-hub]
+    paths:
+      - 'alo186/index.html'
+      - 'alo186/sitemap.xml'
+      - 'alo186/robots.txt'
+      - 'alo186/deployment/**'
+      - 'alo186/tests/test_release_manifest.js'
+      - '.github/workflows/alo186-release-ci.yml'
+  pull_request:
+    paths:
+      - 'alo186/index.html'
+      - 'alo186/sitemap.xml'
+      - 'alo186/robots.txt'
+      - 'alo186/deployment/**'
+      - 'alo186/tests/test_release_manifest.js'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Yayın manifesti ve canonical testleri
+        run: node alo186/tests/test_release_manifest.js
+      - name: XML ve robots temel kontrolü
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import xml.etree.ElementTree as ET
+          ET.parse('alo186/sitemap.xml')
+          print('sitemap.xml geçerli XML')
+          PY
+          grep -q 'Sitemap: https://www.alo186.com/sitemap.xml' alo186/robots.txt
+      - name: Yayın merkezi HTML kontrolü
+        shell: bash
+        run: |
+          set -euo pipefail
+          file=alo186/index.html
+          grep -qi '<!doctype html>' "$file"
+          grep -qi '<title>' "$file"
+          grep -qi 'meta name="description"' "$file"
+          grep -qi 'rel="canonical"' "$file"
+          grep -qi 'application/ld+json' "$file"
