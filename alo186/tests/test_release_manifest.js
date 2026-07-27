@@ -28,7 +28,7 @@ for(const route of manifest.routes){
   }
 }
 
-for(const required of ['./turkiye-arama/','./karar-motoru/','./hesaplama/','./urun-eslestirme/','./sureklilik-paneli/'){
+for(const required of ['./turkiye-arama/','./karar-motoru/','./hesaplama/','./urun-eslestirme/','./sureklilik-paneli/']){
   assert(hub.includes(`href="${required}"`),`Yayın merkezinde bağlantı eksik: ${required}`);
 }
 
