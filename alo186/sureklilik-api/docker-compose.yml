@@ -2,28 +2,72 @@ services:
   db:
     image: postgres:16-alpine
     environment:
-      POSTGRES_DB: alo186
-      POSTGRES_USER: alo186
-      POSTGRES_PASSWORD: change-me
+      POSTGRES_DB: ${POSTGRES_DB:-alo186}
+      POSTGRES_USER: ${POSTGRES_USER:-alo186}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
     volumes:
       - alo186_pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U alo186 -d alo186"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-alo186} -d ${POSTGRES_DB:-alo186}"]
       interval: 5s
       timeout: 5s
       retries: 10
 
   api:
     build: .
+    env_file:
+      - .env
     environment:
-      ALO186_DATABASE_URL: postgresql+psycopg://alo186:change-me@db:5432/alo186
-      ALO186_TOKEN_SECRET: replace-with-at-least-32-random-characters
-      ALO186_ALLOWED_ORIGINS: https://www.alo186.com
+      ALO186_ENV: ${ALO186_ENV:-development}
+      ALO186_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-alo186}:${POSTGRES_PASSWORD:-change-me}@db:5432/${POSTGRES_DB:-alo186}
+      ALO186_AUTO_CREATE_SCHEMA: "false"
+      ALO186_RUN_MIGRATIONS: "true"
     ports:
       - "8000:8000"
     depends_on:
       db:
         condition: service_healthy
 
+  email-worker:
+    build: .
+    env_file:
+      - .env
+    environment:
+      ALO186_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-alo186}:${POSTGRES_PASSWORD:-change-me}@db:5432/${POSTGRES_DB:-alo186}
+      ALO186_AUTO_CREATE_SCHEMA: "false"
+      ALO186_RUN_MIGRATIONS: "false"
+    command: ["python", "-m", "app.worker", "email-loop", "--interval", "15"]
+    depends_on:
+      api:
+        condition: service_healthy
+
+  retention-worker:
+    build: .
+    env_file:
+      - .env
+    environment:
+      ALO186_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-alo186}:${POSTGRES_PASSWORD:-change-me}@db:5432/${POSTGRES_DB:-alo186}
+      ALO186_AUTO_CREATE_SCHEMA: "false"
+      ALO186_RUN_MIGRATIONS: "false"
+    command: ["sh", "-c", "while true; do python -m app.worker retention-once; sleep 86400; done"]
+    depends_on:
+      api:
+        condition: service_healthy
+
+  backup:
+    image: postgres:16-alpine
+    environment:
+      ALO186_DATABASE_URL: postgresql://${POSTGRES_USER:-alo186}:${POSTGRES_PASSWORD:-change-me}@db:5432/${POSTGRES_DB:-alo186}
+      ALO186_BACKUP_DIR: /backups
+      ALO186_BACKUP_RETENTION_DAYS: ${ALO186_BACKUP_RETENTION_DAYS:-14}
+    volumes:
+      - ./scripts:/scripts:ro
+      - alo186_backups:/backups
+    command: ["sh", "-c", "while true; do sh /scripts/backup_postgres.sh; sleep 86400; done"]
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   alo186_pgdata:
+  alo186_backups:
