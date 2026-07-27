@@ -1,0 +1,53 @@
+name: ALO186 ürün eşleştirme kalite kontrolü
+
+on:
+  push:
+    branches: [main, feat/alo186-urun-eslestirme]
+    paths:
+      - 'alo186/urun-eslestirme/**'
+      - 'alo186/tests/test_product_matcher.js'
+      - '.github/workflows/alo186-product-ci.yml'
+  pull_request:
+    paths:
+      - 'alo186/urun-eslestirme/**'
+      - 'alo186/tests/test_product_matcher.js'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Katalog ve eşleştirme testleri
+        run: node alo186/tests/test_product_matcher.js
+      - name: JavaScript sözdizimi
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r file; do
+            node --check "$file"
+          done < <(find alo186/urun-eslestirme -name '*.js' -type f | sort)
+      - name: HTML ve affiliate açıklaması
+        shell: bash
+        run: |
+          set -euo pipefail
+          file=alo186/urun-eslestirme/index.html
+          grep -qi '<!doctype html>' "$file"
+          grep -qi '<title>' "$file"
+          grep -qi 'meta name="description"' "$file"
+          grep -qi 'rel="canonical"' "$file"
+          grep -qi 'application/ld+json' "$file"
+          grep -qi 'satış ortaklığı' "$file"
+          grep -qi 'rel="sponsored nofollow noopener"' alo186/urun-eslestirme/app.js
+      - name: Güvenlik ve veri bütünlüğü
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q "professionalSelectionRequired" alo186/urun-eslestirme/matcher-core.js
+          grep -q "statik fiyat" alo186/tests/test_product_matcher.js
+          grep -q "alo186hazirlik-21" alo186/urun-eslestirme/catalog.js
