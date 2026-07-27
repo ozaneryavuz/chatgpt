@@ -78,6 +78,35 @@ def password_reset_email(db: Session, *, user_id: str, email: str, token: str) -
     )
 
 
+def organization_invitation_email(
+    db: Session,
+    *,
+    organization_id: str,
+    email: str,
+    organization_name: str,
+    role: str,
+    token: str,
+    expires_seconds: int,
+) -> EmailOutbox:
+    return queue_email(
+        db,
+        organization_id=organization_id,
+        to_email=email,
+        template="organization_invitation",
+        subject=f"{organization_name} sizi ALO186 ekibine davet etti",
+        payload={
+            "email": email,
+            "organization_name": organization_name,
+            "role": role,
+            "url": f"{settings.public_base_url}/davet?token={token}",
+            "api_preview_url": f"{settings.public_base_url}/api/v1/invitations/{token}",
+            "api_accept_url": f"{settings.public_base_url}/api/v1/invitations/accept",
+            "token": token,
+            "expires_seconds": expires_seconds,
+        },
+    )
+
+
 def incident_email(
     db: Session,
     *,
@@ -118,6 +147,16 @@ def render_message(message: EmailOutbox) -> tuple[str, str]:
             "ALO186 parola sıfırlama\n\n"
             f"Parola sıfırlama bağlantısı: {payload['url']}\n\n"
             "Bu talebi siz oluşturmadıysanız bağlantıyı kullanmayın."
+        )
+    elif message.template == "organization_invitation":
+        days = max(1, int(payload["expires_seconds"]) // 86_400)
+        text = (
+            "ALO186 ekip daveti\n\n"
+            f"Kuruluş: {payload['organization_name']}\n"
+            f"Rol: {payload['role']}\n"
+            f"Davet edilen e-posta: {payload['email']}\n\n"
+            f"Daveti kabul et: {payload['url']}\n\n"
+            f"Bağlantı yaklaşık {days} gün geçerlidir. Bu daveti beklemiyorsanız bağlantıyı kullanmayın."
         )
     elif message.template == "incident_event":
         text = (
