@@ -5,10 +5,14 @@ ErrorDocument 404 /404.html
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
-  # Tek canonical host ve HTTPS. Proxy/CDN X-Forwarded-Proto gönderiyorsa döngüyü önler.
-  RewriteCond %{HTTP:X-Forwarded-Proto} !https [NC]
-  RewriteCond %{HTTPS} !=on [OR]
+  # Önce canonical hostu tekilleştir.
   RewriteCond %{HTTP_HOST} !^www\.alo186\.com$ [NC]
+  RewriteRule ^ https://www.alo186.com%{REQUEST_URI} [R=301,L,NE]
+
+  # Ardından doğrudan HTTP isteklerini HTTPS'e taşı. CDN/proxy X-Forwarded-Proto
+  # gönderiyorsa HTTPS isteğinde yönlendirme döngüsü oluşmasını önler.
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https [NC]
   RewriteRule ^ https://www.alo186.com%{REQUEST_URI} [R=301,L,NE]
 
   # Uzantısız canonical URL'leri klasör indexlerine çözer.
