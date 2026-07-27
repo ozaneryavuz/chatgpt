@@ -64,7 +64,7 @@ jobs:
         env:
           ALO186_AUTO_CREATE_SCHEMA: 'true'
           PYTHONPATH: .
-        run: pytest -q --tb=short tests/test_knowledge_graph.py tests/test_knowledge_seed.py
+        run: pytest -q --tb=short tests/test_knowledge_graph.py tests/test_knowledge_graph_review_fixes.py tests/test_knowledge_seed.py
       - name: Python compile
         run: python -m compileall -q alo186/sureklilik-api/app alo186/sureklilik-api/alembic
 
@@ -103,6 +103,8 @@ jobs:
           assert 'ix_kg_assertions_subject_predicate' in indexes
           assert 'ix_kg_assertions_scope_status' in indexes
           assert 'ix_kg_assertions_public_status' in indexes
+          verification_indexes = {item['name'] for item in inspector.get_indexes('kg_verification_runs')}
+          assert 'ix_kg_verification_runs_status' in verification_indexes
           print('Knowledge Graph migration doğrulandı.')
           PY
 
@@ -144,7 +146,7 @@ jobs:
           ALO186_DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/alo186_kg_test
           ALO186_AUTO_CREATE_SCHEMA: 'false'
           PYTHONPATH: .
-        run: pytest -q --tb=short tests/test_knowledge_graph.py tests/test_knowledge_seed.py
+        run: pytest -q --tb=short tests/test_knowledge_graph.py tests/test_knowledge_graph_review_fixes.py tests/test_knowledge_seed.py
 
   operations:
     name: Render, monitoring ve seed operasyon kontrolü
