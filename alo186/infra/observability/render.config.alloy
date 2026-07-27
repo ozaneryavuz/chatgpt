@@ -21,12 +21,12 @@ prometheus.remote_write "grafana_cloud" {
       batch_send_deadline  = "5s"
       retry_on_http_429    = true
     }
+  }
 
-    wal {
-      truncate_frequency = "2h"
-      min_keepalive_time = "5m"
-      max_keepalive_time = "12h"
-    }
+  wal {
+    truncate_frequency = "2h"
+    min_keepalive_time = "5m"
+    max_keepalive_time = "12h"
   }
 }
 
