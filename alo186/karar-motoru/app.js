@@ -35,7 +35,7 @@
     $('validation').textContent = '';
     $('questionArea').innerHTML = `
       <div class="question">
-        ${screen !== 'danger' ? '<button type="button" class="back-button" id="backBtn">← Geri</button>' : ''}
+        ${screen !== 'danger' ? '<button type="button" class="back-button">← Geri</button>' : ''}
         <h2>${model.title}</h2>
         <p>${model.description}</p>
         <div class="option-grid ${screen === 'problem' ? 'problem-grid' : ''}">
@@ -49,7 +49,7 @@
     $('questionArea').querySelectorAll('.option-button').forEach((button) => {
       button.addEventListener('click', () => choose(button.dataset.value));
     });
-    const back = $('backBtn');
+    const back = $('questionArea').querySelector('.back-button');
     if (back) back.addEventListener('click', goBack);
     const first = $('questionArea').querySelector('.option-button');
     if (first) first.focus({ preventScroll: true });
