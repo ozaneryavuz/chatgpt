@@ -6,12 +6,12 @@ from fastapi import HTTPException, Request, status
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from .auth_service import create_session
+from .auth_service import create_session, verify_user_mfa
 from .config import settings
 from .models import Membership, Organization, OrganizationInvitation, Role, User, utcnow
 from .notifications import organization_invitation_email
 from .plans import plan_limits
-from .security import create_one_time_token, hash_one_time_token, hash_password
+from .security import create_one_time_token, hash_one_time_token, hash_password, verify_password
 
 
 def _aware(value):
@@ -149,6 +149,7 @@ def accept_invitation(
     *,
     raw_token: str,
     password: str | None,
+    mfa_code: str | None,
     request: Request,
 ) -> tuple[User, Membership, Organization, str, bool]:
     invitation = invitation_by_token(db, raw_token, lock=True)
@@ -176,6 +177,12 @@ def accept_invitation(
     elif not user.is_active or user.deleted_at is not None:
         raise HTTPException(status_code=409, detail="Bu e-posta için etkin kullanıcı hesabı bulunmuyor.")
     else:
+        if not password or not verify_password(password, user.password_hash):
+            raise HTTPException(
+                status_code=401,
+                detail={"code": "EXISTING_ACCOUNT_AUTH_REQUIRED", "message": "Mevcut hesap parolası gerekli."},
+            )
+        verify_user_mfa(user, mfa_code)
         user.is_email_verified = True
         user.email_verified_at = user.email_verified_at or utcnow()
 
