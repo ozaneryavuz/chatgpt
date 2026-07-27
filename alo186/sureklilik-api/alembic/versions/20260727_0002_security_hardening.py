@@ -43,12 +43,36 @@ def upgrade() -> None:
     with op.batch_alter_table("memberships") as batch:
         batch.add_column(sa.Column("notify_incidents", sa.Boolean(), nullable=False, server_default=sa.true()))
 
-    with op.batch_alter_table("asset_tests") as batch:
+    with op.batch_alter_table("asset_tests", recreate="always") as batch:
+        batch.drop_constraint("fk_asset_tests_created_by_user_id_users", type_="foreignkey")
         batch.alter_column("created_by_user_id", existing_type=sa.String(length=36), nullable=True)
-    with op.batch_alter_table("incidents") as batch:
+        batch.create_foreign_key(
+            "fk_asset_tests_created_by_user_id_users",
+            "users",
+            ["created_by_user_id"],
+            ["id"],
+            ondelete="SET NULL",
+        )
+    with op.batch_alter_table("incidents", recreate="always") as batch:
+        batch.drop_constraint("fk_incidents_created_by_user_id_users", type_="foreignkey")
         batch.alter_column("created_by_user_id", existing_type=sa.String(length=36), nullable=True)
-    with op.batch_alter_table("audit_logs") as batch:
+        batch.create_foreign_key(
+            "fk_incidents_created_by_user_id_users",
+            "users",
+            ["created_by_user_id"],
+            ["id"],
+            ondelete="SET NULL",
+        )
+    with op.batch_alter_table("audit_logs", recreate="always") as batch:
+        batch.drop_constraint("fk_audit_logs_user_id_users", type_="foreignkey")
         batch.alter_column("user_id", existing_type=sa.String(length=36), nullable=True)
+        batch.create_foreign_key(
+            "fk_audit_logs_user_id_users",
+            "users",
+            ["user_id"],
+            ["id"],
+            ondelete="SET NULL",
+        )
 
     op.create_table(
         "auth_sessions",
@@ -120,12 +144,33 @@ def downgrade() -> None:
     op.drop_table("auth_tokens")
     op.drop_table("auth_sessions")
 
-    with op.batch_alter_table("audit_logs") as batch:
+    with op.batch_alter_table("audit_logs", recreate="always") as batch:
+        batch.drop_constraint("fk_audit_logs_user_id_users", type_="foreignkey")
         batch.alter_column("user_id", existing_type=sa.String(length=36), nullable=False)
-    with op.batch_alter_table("incidents") as batch:
+        batch.create_foreign_key(
+            "fk_audit_logs_user_id_users",
+            "users",
+            ["user_id"],
+            ["id"],
+        )
+    with op.batch_alter_table("incidents", recreate="always") as batch:
+        batch.drop_constraint("fk_incidents_created_by_user_id_users", type_="foreignkey")
         batch.alter_column("created_by_user_id", existing_type=sa.String(length=36), nullable=False)
-    with op.batch_alter_table("asset_tests") as batch:
+        batch.create_foreign_key(
+            "fk_incidents_created_by_user_id_users",
+            "users",
+            ["created_by_user_id"],
+            ["id"],
+        )
+    with op.batch_alter_table("asset_tests", recreate="always") as batch:
+        batch.drop_constraint("fk_asset_tests_created_by_user_id_users", type_="foreignkey")
         batch.alter_column("created_by_user_id", existing_type=sa.String(length=36), nullable=False)
+        batch.create_foreign_key(
+            "fk_asset_tests_created_by_user_id_users",
+            "users",
+            ["created_by_user_id"],
+            ["id"],
+        )
 
     with op.batch_alter_table("memberships") as batch:
         batch.drop_column("notify_incidents")
