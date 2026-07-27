@@ -40,3 +40,12 @@ def init_db() -> None:
 def check_db() -> None:
     with engine.connect() as connection:
         connection.execute(text("SELECT 1"))
+
+
+def database_ready() -> bool:
+    """Production readiness endpointi için geriye uyumlu, yan etkisiz DB kontrolü."""
+    try:
+        check_db()
+        return True
+    except Exception:
+        return False
