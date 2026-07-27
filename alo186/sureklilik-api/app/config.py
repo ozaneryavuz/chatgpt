@@ -60,6 +60,19 @@ class Settings:
     trust_proxy_headers: bool
     auto_create_schema: bool
     log_level: str
+    require_email_verification: bool
+    email_verification_ttl_seconds: int
+    password_reset_ttl_seconds: int
+    login_max_failures: int
+    login_lock_seconds: int
+    public_app_url: str
+    email_backend: str
+    email_from: str
+    smtp_host: str
+    smtp_port: int
+    smtp_username: str
+    smtp_password: str
+    smtp_use_tls: bool
 
     @property
     def is_production(self) -> bool:
@@ -69,6 +82,8 @@ class Settings:
 def validate_settings(value: Settings) -> Settings:
     if value.environment not in {"development", "test", "staging", "production"}:
         raise RuntimeError("ALO186_ENV development, test, staging veya production olmalıdır.")
+    if value.email_backend not in {"console", "smtp"}:
+        raise RuntimeError("ALO186_EMAIL_BACKEND console veya smtp olmalıdır.")
     if value.is_production:
         if value.token_secret == _DEVELOPMENT_SECRET or len(value.token_secret) < 32:
             raise RuntimeError(
@@ -84,6 +99,12 @@ def validate_settings(value: Settings) -> Settings:
             raise RuntimeError(
                 "Production ortamında ALO186_AUTO_CREATE_SCHEMA kapalı olmalı; migration uygulanmalıdır."
             )
+        if value.require_email_verification and value.email_backend != "smtp":
+            raise RuntimeError(
+                "Production e-posta doğrulaması için ALO186_EMAIL_BACKEND=smtp zorunludur."
+            )
+        if value.email_backend == "smtp" and (not value.smtp_host or not value.email_from):
+            raise RuntimeError("SMTP backend için ALO186_SMTP_HOST ve ALO186_EMAIL_FROM zorunludur.")
     return value
 
 
@@ -108,6 +129,26 @@ def load_settings(environ: Mapping[str, str] | None = None) -> Settings:
             default=environment != "production",
         ),
         log_level=env.get("ALO186_LOG_LEVEL", "INFO").strip().upper(),
+        require_email_verification=_as_bool(
+            env.get("ALO186_REQUIRE_EMAIL_VERIFICATION"),
+            default=environment == "production",
+        ),
+        email_verification_ttl_seconds=_as_int(
+            env.get("ALO186_EMAIL_VERIFICATION_TTL_SECONDS"), 86_400
+        ),
+        password_reset_ttl_seconds=_as_int(
+            env.get("ALO186_PASSWORD_RESET_TTL_SECONDS"), 3_600
+        ),
+        login_max_failures=_as_int(env.get("ALO186_LOGIN_MAX_FAILURES"), 5),
+        login_lock_seconds=_as_int(env.get("ALO186_LOGIN_LOCK_SECONDS"), 900),
+        public_app_url=env.get("ALO186_PUBLIC_APP_URL", "https://www.alo186.com").rstrip("/"),
+        email_backend=env.get("ALO186_EMAIL_BACKEND", "console").strip().lower(),
+        email_from=env.get("ALO186_EMAIL_FROM", "ALO186 <noreply@alo186.com>").strip(),
+        smtp_host=env.get("ALO186_SMTP_HOST", "").strip(),
+        smtp_port=_as_int(env.get("ALO186_SMTP_PORT"), 587),
+        smtp_username=env.get("ALO186_SMTP_USERNAME", "").strip(),
+        smtp_password=_read_value(env, "ALO186_SMTP_PASSWORD", ""),
+        smtp_use_tls=_as_bool(env.get("ALO186_SMTP_USE_TLS"), True),
     )
     return validate_settings(value)
 
