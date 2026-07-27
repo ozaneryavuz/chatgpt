@@ -200,7 +200,7 @@ class AssetTest(Base):
     result: Mapped[str] = mapped_column(String(30))
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     tested_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
-    created_by_user_id: Mapped[str] = mapped_column(ForeignKey("users.id"))
+    created_by_user_id: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
 
 
 class Incident(Base):
@@ -214,7 +214,7 @@ class Incident(Base):
     summary: Mapped[str | None] = mapped_column(Text, nullable=True)
     started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     ended_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    created_by_user_id: Mapped[str] = mapped_column(ForeignKey("users.id"))
+    created_by_user_id: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
     tasks: Mapped[list["IncidentTask"]] = relationship(back_populates="incident", cascade="all, delete-orphan")
@@ -241,7 +241,7 @@ class AuditLog(Base):
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
     organization_id: Mapped[str] = mapped_column(ForeignKey("organizations.id", ondelete="CASCADE"), index=True)
-    user_id: Mapped[str] = mapped_column(ForeignKey("users.id"))
+    user_id: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     action: Mapped[str] = mapped_column(String(80))
     entity_type: Mapped[str] = mapped_column(String(80))
     entity_id: Mapped[str] = mapped_column(String(36))
