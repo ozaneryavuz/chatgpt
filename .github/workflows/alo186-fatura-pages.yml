@@ -71,17 +71,26 @@ jobs:
           test -f _site/isletme-surekliligi/index.html
           test -f _site/fatura-analizi/index.html
 
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
+      - name: Her çalışmada statik yayın paketini sakla
+        uses: actions/upload-artifact@v4
         with:
-          enablement: true
+          name: alo186-static-site
+          path: _site
+          if-no-files-found: error
+          retention-days: 14
 
-      - name: Upload ALO186 static modules
+      - name: Configure Pages
+        if: vars.ALO186_GITHUB_PAGES_ENABLED == 'true'
+        uses: actions/configure-pages@v5
+
+      - name: Upload GitHub Pages artifact
+        if: vars.ALO186_GITHUB_PAGES_ENABLED == 'true'
         uses: actions/upload-pages-artifact@v3
         with:
           path: _site
 
   deploy:
+    if: vars.ALO186_GITHUB_PAGES_ENABLED == 'true'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
