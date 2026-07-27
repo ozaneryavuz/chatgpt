@@ -6,7 +6,7 @@ import time
 
 from .db import SessionLocal
 from .notifications import process_outbox
-from .observability import configure_logging
+from .observability import configure_logging, configure_sentry
 from .privacy import purge_due_data
 
 logger = logging.getLogger(__name__)
@@ -28,6 +28,7 @@ def retention_once() -> dict[str, int]:
 
 def main() -> None:
     configure_logging()
+    configure_sentry()
     parser = argparse.ArgumentParser(description="ALO186 background worker")
     parser.add_argument("command", choices=["email-once", "email-loop", "retention-once"])
     parser.add_argument("--limit", type=int, default=50)
