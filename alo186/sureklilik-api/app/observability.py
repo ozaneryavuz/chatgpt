@@ -47,7 +47,7 @@ def configure_logging() -> None:
 
 
 def request_id(value: str | None) -> str:
-    if value and 8 <= len(value) <= 80 and all(ch.isalnum() or ch in "-_." for ch in value):
+    if value and 8 <= len(value) <= 80 and all(ch.isalnum() or ch in "-_ .".replace(" ", "") for ch in value):
         return value
     return str(uuid.uuid4())
 
@@ -59,6 +59,7 @@ class RequestMetrics:
         self._request_count: dict[tuple[str, str, int], int] = defaultdict(int)
         self._duration_sum: dict[tuple[str, str], float] = defaultdict(float)
         self._in_flight = 0
+        self._gauges: dict[tuple[str, tuple[tuple[str, str], ...]], float] = {}
 
     def enter(self) -> None:
         with self._lock:
@@ -70,6 +71,13 @@ class RequestMetrics:
             self._request_count[(method, safe_path, int(status_code))] += 1
             self._duration_sum[(method, safe_path)] += max(0.0, duration_seconds)
             self._in_flight = max(0, self._in_flight - 1)
+
+    def set_gauge(self, name: str, value: float, *, labels: dict[str, str] | None = None) -> None:
+        if not name.startswith("alo186_") or not all(ch.isalnum() or ch in "_:" for ch in name):
+            raise ValueError("Prometheus gauge adı alo186_ ile başlamalı ve güvenli karakterlerden oluşmalıdır.")
+        label_tuple = tuple(sorted((str(key), str(item)) for key, item in (labels or {}).items()))
+        with self._lock:
+            self._gauges[(name, label_tuple)] = float(value)
 
     def render_prometheus(self) -> str:
         with self._lock:
@@ -97,6 +105,16 @@ class RequestMetrics:
                 lines.append(
                     f'alo186_http_request_duration_seconds_sum{{method="{_escape(method)}",path="{_escape(path)}"}} {duration:.6f}'
                 )
+            emitted_types: set[str] = set()
+            for (name, labels), value in sorted(self._gauges.items()):
+                if name not in emitted_types:
+                    lines.append(f"# HELP {name} ALO186 application gauge.")
+                    lines.append(f"# TYPE {name} gauge")
+                    emitted_types.add(name)
+                label_text = ""
+                if labels:
+                    label_text = "{" + ",".join(f'{key}="{_escape(item)}"' for key, item in labels) + "}"
+                lines.append(f"{name}{label_text} {value:.6f}")
             return "\n".join(lines) + "\n"
 
 
