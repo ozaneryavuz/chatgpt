@@ -83,7 +83,7 @@ jobs:
         run: |
           docker run --rm \
             -v "$PWD/alo186/infra/caddy/Caddyfile:/etc/caddy/Caddyfile:ro" \
-            caddy:2.11.4-alpine validate --config /etc/caddy/Caddyfile
+            caddy:2.11.4-alpine caddy validate --config /etc/caddy/Caddyfile
       - name: Caddy fallback Compose doğrulaması
         env:
           ALO186_API_IMAGE: ghcr.io/example/alo186-continuity-api:latest
