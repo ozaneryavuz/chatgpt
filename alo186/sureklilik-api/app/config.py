@@ -25,6 +25,16 @@ def _env_int(name: str, default: int) -> int:
         raise RuntimeError(f"{name} tam sayı olmalıdır.") from exc
 
 
+def _env_float(name: str, default: float) -> float:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    try:
+        return float(raw)
+    except ValueError as exc:
+        raise RuntimeError(f"{name} ondalık sayı olmalıdır.") from exc
+
+
 def _csv(name: str, default: str = "") -> tuple[str, ...]:
     return tuple(item.strip() for item in os.getenv(name, default).split(",") if item.strip())
 
@@ -41,6 +51,21 @@ def _secret(name: str, default: str | None = None) -> str | None:
         except OSError as exc:
             raise RuntimeError(f"{name}_FILE okunamadı: {path}") from exc
     return direct if direct is not None else default
+
+
+def normalize_database_url(value: str) -> str:
+    """Yönetilen sağlayıcıların standart PostgreSQL URL'lerini psycopg3 lehçesine çevirir.
+
+    Render gibi sağlayıcılar `postgresql://` veya tarihsel olarak `postgres://`
+    bağlantı dizesi verir. SQLAlchemy tarafında sürücüyü açıkça psycopg3 olarak
+    seçmek, psycopg2 bağımlılığına istemeden geri düşülmesini önler.
+    """
+
+    if value.startswith("postgres://"):
+        return "postgresql+psycopg://" + value[len("postgres://") :]
+    if value.startswith("postgresql://"):
+        return "postgresql+psycopg://" + value[len("postgresql://") :]
+    return value
 
 
 def _derived_fernet_key(secret: str) -> str:
@@ -81,6 +106,9 @@ class Settings:
     audit_retention_days: int
     outbox_retention_days: int
     metrics_token: str | None
+    sentry_dsn: str | None
+    sentry_traces_sample_rate: float
+    release: str
 
     @property
     def is_production(self) -> bool:
@@ -95,10 +123,13 @@ def load_settings() -> Settings:
     ) or ""
     explicit_encryption_key = _secret("ALO186_DATA_ENCRYPTION_KEY")
     data_encryption_key = explicit_encryption_key or _derived_fernet_key(token_secret)
+    database_url = normalize_database_url(
+        _secret("ALO186_DATABASE_URL", "sqlite:///./alo186_continuity.db") or ""
+    )
 
     settings = Settings(
         environment=environment,
-        database_url=_secret("ALO186_DATABASE_URL", "sqlite:///./alo186_continuity.db") or "",
+        database_url=database_url,
         token_secret=token_secret,
         data_encryption_key=data_encryption_key,
         token_ttl_seconds=_env_int("ALO186_TOKEN_TTL_SECONDS", 28_800),
@@ -132,6 +163,12 @@ def load_settings() -> Settings:
         audit_retention_days=_env_int("ALO186_AUDIT_RETENTION_DAYS", 730),
         outbox_retention_days=_env_int("ALO186_OUTBOX_RETENTION_DAYS", 30),
         metrics_token=_secret("ALO186_METRICS_TOKEN"),
+        sentry_dsn=_secret("ALO186_SENTRY_DSN"),
+        sentry_traces_sample_rate=_env_float(
+            "ALO186_SENTRY_TRACES_SAMPLE_RATE",
+            0.05 if environment == "production" else 0.0,
+        ),
+        release=os.getenv("ALO186_RELEASE", "development").strip() or "development",
     )
     validate_settings(settings, explicit_encryption_key=explicit_encryption_key)
     return settings
@@ -159,6 +196,8 @@ def validate_settings(value: Settings, *, explicit_encryption_key: str | None) -
         raise RuntimeError("Rate limit değerleri sıfırdan büyük olmalıdır.")
     if value.max_request_bytes < 16_384:
         raise RuntimeError("ALO186_MAX_REQUEST_BYTES en az 16384 olmalıdır.")
+    if not 0.0 <= value.sentry_traces_sample_rate <= 1.0:
+        raise RuntimeError("ALO186_SENTRY_TRACES_SAMPLE_RATE 0 ile 1 arasında olmalıdır.")
 
     if value.is_production:
         if value.database_url.startswith("sqlite"):
