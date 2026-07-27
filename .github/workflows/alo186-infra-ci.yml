@@ -1,0 +1,100 @@
+name: ALO186 production infrastructure kalite kontrolü
+
+on:
+  push:
+    branches: [main, ops/alo186-production-infra-v1]
+    paths:
+      - "render.yaml"
+      - "alo186/infra/**"
+      - "alo186/sureklilik-api/Dockerfile"
+      - "alo186/sureklilik-api/entrypoint.sh"
+      - "alo186/sureklilik-api/requirements.txt"
+      - "alo186/sureklilik-api/app/application.py"
+      - "alo186/sureklilik-api/app/sentry_integration.py"
+      - "alo186/sureklilik-api/scripts/**"
+      - "alo186/sureklilik-api/ops/backup/**"
+      - ".github/workflows/alo186-infra-ci.yml"
+      - ".github/workflows/alo186-production-synthetic.yml"
+      - ".github/workflows/alo186-backup-restore-drill.yml"
+  pull_request:
+    paths:
+      - "render.yaml"
+      - "alo186/infra/**"
+      - "alo186/sureklilik-api/**"
+      - ".github/workflows/alo186-infra-ci.yml"
+      - ".github/workflows/alo186-production-synthetic.yml"
+      - ".github/workflows/alo186-backup-restore-drill.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Doğrulama araçları
+        run: pip install --disable-pip-version-check pyyaml check-jsonschema
+      - name: Render Blueprint resmi JSON Schema
+        run: check-jsonschema --schemafile https://render.com/schema/render.yaml.json render.yaml
+      - name: Render Blueprint ALO186 semantik kuralları
+        run: python alo186/infra/production/validate_render.py render.yaml
+      - name: Python sözdizimi
+        run: |
+          python -m compileall -q \
+            alo186/infra \
+            alo186/sureklilik-api/app \
+            alo186/sureklilik-api/scripts
+      - name: ShellCheck
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq shellcheck
+          shellcheck \
+            alo186/sureklilik-api/entrypoint.sh \
+            alo186/sureklilik-api/scripts/render_predeploy.sh \
+            alo186/sureklilik-api/ops/backup/backup_to_r2.sh \
+            alo186/sureklilik-api/ops/backup/verify_restore.sh
+      - name: Caddy yapılandırması
+        run: |
+          docker run --rm \
+            -v "$PWD/alo186/infra/caddy/Caddyfile:/etc/caddy/Caddyfile:ro" \
+            caddy:2.10.0-alpine caddy validate --config /etc/caddy/Caddyfile
+      - name: API Docker image
+        run: docker build -t alo186-continuity-api:ci alo186/sureklilik-api
+      - name: Backup Docker image
+        run: docker build -f alo186/sureklilik-api/ops/backup/Dockerfile -t alo186-backup:ci alo186/sureklilik-api
+
+  terraform:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.11.4"
+      - name: Terraform format
+        run: terraform fmt -check -recursive alo186/infra/cloudflare
+      - name: Terraform init
+        run: terraform -chdir=alo186/infra/cloudflare init -backend=false -input=false
+      - name: Terraform validate
+        run: terraform -chdir=alo186/infra/cloudflare validate
+
+  backup-script-dry-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Secret üretici izin kontrolü
+        run: |
+          mkdir -p /tmp/alo186-secrets
+          python alo186/sureklilik-api/scripts/generate_production_secrets.py \
+            --format shell \
+            --output /tmp/alo186-secrets/production.env
+          test "$(stat -c '%a' /tmp/alo186-secrets/production.env)" = "600"
+          grep -q '^ALO186_TOKEN_SECRET=' /tmp/alo186-secrets/production.env
+          grep -q '^ALO186_DATA_ENCRYPTION_KEY=' /tmp/alo186-secrets/production.env
+          ! grep -qi 'replace' /tmp/alo186-secrets/production.env
