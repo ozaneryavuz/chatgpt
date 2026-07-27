@@ -29,8 +29,10 @@
 
     if(num(a.capacityMah)<minCapacity)failures.push(`Kapasite ${minCapacity} mAh altı.`);
     if(needWireless&&!a.wireless)failures.push('Kablosuz şarj gereksinimini karşılamıyor.');
-    if(a.maxOutputW===null||a.maxOutputW===undefined)unknowns.push('Maksimum çıkış gücü bilinmiyor.');
-    else if(num(a.maxOutputW)<minOutput)failures.push(`Çıkış gücü ${minOutput} W gereksiniminin altında.`);
+    if(a.maxOutputW===null||a.maxOutputW===undefined){
+      if(minOutput>10)failures.push(`${minOutput} W çıkış gereksinimi, teknik değer bilinmediği için doğrulanamıyor.`);
+      else unknowns.push('Maksimum çıkış gücü bilinmiyor.');
+    }else if(num(a.maxOutputW)<minOutput)failures.push(`Çıkış gücü ${minOutput} W gereksiniminin altında.`);
 
     if(failures.length)return {eligible:false,score:0,reasons,unknowns,failures};
 
@@ -58,8 +60,10 @@
 
     if(num(a.outlets)<minOutlets)failures.push(`${minOutlets} priz gereksinimini karşılamıyor.`);
     if(needUsb&&num(a.usbPorts)<1)failures.push('USB çıkışı gereksinimini karşılamıyor.');
-    if(a.joules===null||a.joules===undefined)unknowns.push('Joule değeri bilinmiyor.');
-    else if(num(a.joules)<minJoules)failures.push(`${minJoules} J minimumunun altında.`);
+    if(a.joules===null||a.joules===undefined){
+      if(minJoules>250)failures.push(`${minJoules} J gereksinimi, joule değeri bilinmediği için doğrulanamıyor.`);
+      else unknowns.push('Joule değeri bilinmiyor.');
+    }else if(num(a.joules)<minJoules)failures.push(`${minJoules} J minimumunun altında.`);
 
     if(failures.length)return {eligible:false,score:0,reasons,unknowns,failures};
 
