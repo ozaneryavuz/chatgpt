@@ -53,6 +53,12 @@ services:
         value: "false"
       - key: ALO186_RUN_MIGRATIONS
         value: "false"
+      - key: ALO186_KG_SEED_PUBLIC
+        value: "true"
+      - key: ALO186_KG_SEED_STRICT
+        value: "false"
+      - key: ALO186_KG_SEED_TIMEOUT
+        value: "30"
       - key: ALO186_EMAIL_VERIFICATION_REQUIRED
         value: "true"
       - key: ALO186_EXPOSE_TEST_TOKENS
@@ -170,7 +176,7 @@ services:
     rootDir: alo186/sureklilik-api
     dockerfilePath: ./Dockerfile
     dockerContext: .
-    dockerCommand: python -m app.worker retention-once
+    dockerCommand: sh -c 'python -m app.worker retention-once && python -m app.knowledge_seed sync-public --timeout 30'
     schedule: "15 2 * * *"
     autoDeployTrigger: checksPass
     envVars:

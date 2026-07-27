@@ -111,12 +111,28 @@ def validate(path: Path) -> dict[str, object]:
         elif not (item.get("generateValue") or item.get("sync") is False or item.get("fromService")):
             failures.append(f"API secret güvenli kaynakta değil: {key}")
 
+    for key, expected in {
+        "ALO186_KG_SEED_PUBLIC": "true",
+        "ALO186_KG_SEED_STRICT": "false",
+        "ALO186_KG_SEED_TIMEOUT": "30",
+    }.items():
+        item = api_env.get(key)
+        if not item or str(item.get("value", "")).lower() != expected:
+            failures.append(f"API Knowledge Graph ayarı eksik veya hatalı: {key}={expected}")
+
     backup = service_by_name.get("alo186-r2-backup-cron") or {}
     backup_env = env_map(backup)
     for key in ("RESTIC_REPOSITORY", "RESTIC_PASSWORD", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY"):
         item = backup_env.get(key)
         if not item or item.get("sync") is not False:
             failures.append(f"Backup secret kullanıcı tarafından sync:false olarak girilmeli: {key}")
+
+    retention = service_by_name.get("alo186-retention-cron") or {}
+    retention_command = str(retention.get("dockerCommand", ""))
+    if "app.worker retention-once" not in retention_command:
+        failures.append("Retention cron retention-once çalıştırmalı.")
+    if "app.knowledge_seed sync-public" not in retention_command:
+        failures.append("Retention cron günlük Knowledge Graph sync çalıştırmalı.")
 
     if api.get("autoDeployTrigger") != "checksPass":
         warnings.append("API autoDeployTrigger checksPass değil.")
