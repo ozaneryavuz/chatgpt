@@ -32,5 +32,5 @@ Kalkış gücü, toplam sürekli yüke en büyük tek cihazın ilave kalkış y�
 
 ## Yayın hedefi
 
-- Canlı rota: `https://alo186.com/hesaplama/yedek-guc`
+- Canlı rota: `https://www.alo186.com/hesaplama/yedek-guc`
 - GitHub Pages: depo içindeki `alo186/` dizini yayımlandığında `/yedek-guc-hesaplayici/`

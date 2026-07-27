@@ -192,15 +192,15 @@
   function solutionFor(result) {
     const wh = result.mode === "need" ? result.requiredWh : result.existingWh;
     if (result.dcFriendly && result.totalLoad <= 80 && wh <= 300 && !result.pureSine) {
-      return { key:"mini_ups", label:"DC mini UPS / modem yedeği", href:"https://alo186.com/amazon-elektrik-urunleri?kategori=modem-ups", cta:"Mini UPS rehberini aç" };
+      return { key:"mini_ups", label:"DC mini UPS / modem yedeği", href:"https://www.alo186.com/amazon-elektrik-urunleri?kategori=modem-ups", cta:"Mini UPS rehberini aç" };
     }
     if (result.totalLoad <= 300 && wh <= 700 && result.surgeLoad <= 1000) {
-      return { key:"small_station", label:"Küçük taşınabilir güç istasyonu", href:"https://alo186.com/amazon-elektrik-urunleri?kategori=tasinabilir-guc-istasyonu", cta:"Güç istasyonu rehberini aç" };
+      return { key:"small_station", label:"Küçük taşınabilir güç istasyonu", href:"https://www.alo186.com/amazon-elektrik-urunleri?kategori=tasinabilir-guc-istasyonu", cta:"Güç istasyonu rehberini aç" };
     }
     if (result.totalLoad <= 1200 && wh <= 2500 && result.surgeLoad <= 3500) {
-      return { key:"medium_station", label:"Orta sınıf güç istasyonu / UPS", href:"https://alo186.com/amazon-elektrik-urunleri?kategori=tasinabilir-guc-istasyonu", cta:"Uygun çözüm sınıfını gör" };
+      return { key:"medium_station", label:"Orta sınıf güç istasyonu / UPS", href:"https://www.alo186.com/amazon-elektrik-urunleri?kategori=tasinabilir-guc-istasyonu", cta:"Uygun çözüm sınıfını gör" };
     }
-    return { key:"professional", label:"Profesyonel UPS / inverter-batarya sistemi", href:"https://alo186.com/iletisim?konu=yedek-guc-projelendirme", cta:"Teknik ön değerlendirme al" };
+    return { key:"professional", label:"Profesyonel UPS / inverter-batarya sistemi", href:"https://www.alo186.com/iletisim?konu=yedek-guc-projelendirme", cta:"Teknik ön değerlendirme al" };
   }
 
   function renderResult(r) {
