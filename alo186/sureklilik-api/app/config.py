@@ -25,6 +25,16 @@ def _env_int(name: str, default: int) -> int:
         raise RuntimeError(f"{name} tam sayı olmalıdır.") from exc
 
 
+def _env_float(name: str, default: float) -> float:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    try:
+        return float(raw)
+    except ValueError as exc:
+        raise RuntimeError(f"{name} ondalık sayı olmalıdır.") from exc
+
+
 def _csv(name: str, default: str = "") -> tuple[str, ...]:
     return tuple(item.strip() for item in os.getenv(name, default).split(",") if item.strip())
 
@@ -45,6 +55,21 @@ def _secret(name: str, default: str | None = None) -> str | None:
 
 def _derived_fernet_key(secret: str) -> str:
     return base64.urlsafe_b64encode(hashlib.sha256(secret.encode("utf-8")).digest()).decode("ascii")
+
+
+def normalize_database_url(value: str) -> str:
+    """Render/Heroku-style PostgreSQL URLs use the default driver name.
+
+    The project intentionally installs psycopg3, so production URLs are normalized
+    to SQLAlchemy's explicit ``postgresql+psycopg`` dialect. SQLite and already
+    explicit SQLAlchemy URLs are returned unchanged.
+    """
+
+    if value.startswith("postgres://"):
+        return "postgresql+psycopg://" + value[len("postgres://") :]
+    if value.startswith("postgresql://"):
+        return "postgresql+psycopg://" + value[len("postgresql://") :]
+    return value
 
 
 @dataclass(frozen=True)
@@ -81,6 +106,9 @@ class Settings:
     audit_retention_days: int
     outbox_retention_days: int
     metrics_token: str | None
+    sentry_dsn: str | None
+    sentry_traces_sample_rate: float
+    release: str | None
 
     @property
     def is_production(self) -> bool:
@@ -98,7 +126,9 @@ def load_settings() -> Settings:
 
     settings = Settings(
         environment=environment,
-        database_url=_secret("ALO186_DATABASE_URL", "sqlite:///./alo186_continuity.db") or "",
+        database_url=normalize_database_url(
+            _secret("ALO186_DATABASE_URL", "sqlite:///./alo186_continuity.db") or ""
+        ),
         token_secret=token_secret,
         data_encryption_key=data_encryption_key,
         token_ttl_seconds=_env_int("ALO186_TOKEN_TTL_SECONDS", 28_800),
@@ -132,6 +162,9 @@ def load_settings() -> Settings:
         audit_retention_days=_env_int("ALO186_AUDIT_RETENTION_DAYS", 730),
         outbox_retention_days=_env_int("ALO186_OUTBOX_RETENTION_DAYS", 30),
         metrics_token=_secret("ALO186_METRICS_TOKEN"),
+        sentry_dsn=_secret("ALO186_SENTRY_DSN"),
+        sentry_traces_sample_rate=_env_float("ALO186_SENTRY_TRACES_SAMPLE_RATE", 0.0),
+        release=os.getenv("ALO186_RELEASE") or None,
     )
     validate_settings(settings, explicit_encryption_key=explicit_encryption_key)
     return settings
@@ -159,6 +192,8 @@ def validate_settings(value: Settings, *, explicit_encryption_key: str | None) -
         raise RuntimeError("Rate limit değerleri sıfırdan büyük olmalıdır.")
     if value.max_request_bytes < 16_384:
         raise RuntimeError("ALO186_MAX_REQUEST_BYTES en az 16384 olmalıdır.")
+    if not 0.0 <= value.sentry_traces_sample_rate <= 1.0:
+        raise RuntimeError("ALO186_SENTRY_TRACES_SAMPLE_RATE 0 ile 1 arasında olmalıdır.")
 
     if value.is_production:
         if value.database_url.startswith("sqlite"):
