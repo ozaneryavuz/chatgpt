@@ -1,0 +1,185 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: alo186
+      POSTGRES_USER: alo186
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    secrets:
+      - postgres_password
+    volumes:
+      - alo186_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U alo186 -d alo186"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    networks: [backend]
+
+  api:
+    build: .
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    cap_drop: ["ALL"]
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      ALO186_ENV: production
+      ALO186_DATABASE_URL_FILE: /run/secrets/database_url
+      ALO186_TOKEN_SECRET_FILE: /run/secrets/token_secret
+      ALO186_DATA_ENCRYPTION_KEY_FILE: /run/secrets/data_encryption_key
+      ALO186_SMTP_PASSWORD_FILE: /run/secrets/smtp_password
+      ALO186_METRICS_TOKEN_FILE: /run/secrets/metrics_token
+      ALO186_ALLOWED_ORIGINS: https://www.alo186.com
+      ALO186_ALLOWED_HOSTS: api.alo186.com,localhost,127.0.0.1
+      ALO186_PUBLIC_BASE_URL: https://www.alo186.com
+      ALO186_AUTO_CREATE_SCHEMA: "false"
+      ALO186_RUN_MIGRATIONS: "true"
+      ALO186_EMAIL_VERIFICATION_REQUIRED: "true"
+      ALO186_EXPOSE_TEST_TOKENS: "false"
+      ALO186_EMAIL_BACKEND: smtp
+      ALO186_SMTP_HOST: ${ALO186_SMTP_HOST:?ALO186_SMTP_HOST zorunludur}
+      ALO186_SMTP_PORT: ${ALO186_SMTP_PORT:-587}
+      ALO186_SMTP_USERNAME: ${ALO186_SMTP_USERNAME:-}
+      ALO186_SMTP_FROM_EMAIL: ${ALO186_SMTP_FROM_EMAIL:-noreply@alo186.com}
+      ALO186_SMTP_USE_TLS: "true"
+      ALO186_TRUST_PROXY_HEADERS: "true"
+      ALO186_GLOBAL_RATE_LIMIT: ${ALO186_GLOBAL_RATE_LIMIT:-240}
+      ALO186_AUTH_RATE_LIMIT: ${ALO186_AUTH_RATE_LIMIT:-10}
+      ALO186_RATE_LIMIT_WINDOW_SECONDS: ${ALO186_RATE_LIMIT_WINDOW_SECONDS:-900}
+      ALO186_MAX_REQUEST_BYTES: ${ALO186_MAX_REQUEST_BYTES:-1048576}
+      ALO186_DELETION_GRACE_DAYS: ${ALO186_DELETION_GRACE_DAYS:-30}
+      ALO186_AUDIT_RETENTION_DAYS: ${ALO186_AUDIT_RETENTION_DAYS:-730}
+      ALO186_OUTBOX_RETENTION_DAYS: ${ALO186_OUTBOX_RETENTION_DAYS:-30}
+    secrets:
+      - database_url
+      - token_secret
+      - data_encryption_key
+      - smtp_password
+      - metrics_token
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [backend]
+
+  email-worker:
+    build: .
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+    cap_drop: ["ALL"]
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      ALO186_ENV: production
+      ALO186_DATABASE_URL_FILE: /run/secrets/database_url
+      ALO186_TOKEN_SECRET_FILE: /run/secrets/token_secret
+      ALO186_DATA_ENCRYPTION_KEY_FILE: /run/secrets/data_encryption_key
+      ALO186_SMTP_PASSWORD_FILE: /run/secrets/smtp_password
+      ALO186_ALLOWED_ORIGINS: https://www.alo186.com
+      ALO186_ALLOWED_HOSTS: api.alo186.com,localhost,127.0.0.1
+      ALO186_PUBLIC_BASE_URL: https://www.alo186.com
+      ALO186_AUTO_CREATE_SCHEMA: "false"
+      ALO186_RUN_MIGRATIONS: "false"
+      ALO186_EMAIL_VERIFICATION_REQUIRED: "true"
+      ALO186_EMAIL_BACKEND: smtp
+      ALO186_SMTP_HOST: ${ALO186_SMTP_HOST:?ALO186_SMTP_HOST zorunludur}
+      ALO186_SMTP_PORT: ${ALO186_SMTP_PORT:-587}
+      ALO186_SMTP_USERNAME: ${ALO186_SMTP_USERNAME:-}
+      ALO186_SMTP_FROM_EMAIL: ${ALO186_SMTP_FROM_EMAIL:-noreply@alo186.com}
+      ALO186_SMTP_USE_TLS: "true"
+    secrets:
+      - database_url
+      - token_secret
+      - data_encryption_key
+      - smtp_password
+    command: ["python", "-m", "app.worker", "email-loop", "--interval", "15"]
+    depends_on:
+      api:
+        condition: service_healthy
+    networks: [backend]
+
+  retention-worker:
+    build: .
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+    cap_drop: ["ALL"]
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      ALO186_ENV: production
+      ALO186_DATABASE_URL_FILE: /run/secrets/database_url
+      ALO186_TOKEN_SECRET_FILE: /run/secrets/token_secret
+      ALO186_DATA_ENCRYPTION_KEY_FILE: /run/secrets/data_encryption_key
+      ALO186_ALLOWED_ORIGINS: https://www.alo186.com
+      ALO186_ALLOWED_HOSTS: api.alo186.com,localhost,127.0.0.1
+      ALO186_PUBLIC_BASE_URL: https://www.alo186.com
+      ALO186_AUTO_CREATE_SCHEMA: "false"
+      ALO186_RUN_MIGRATIONS: "false"
+      ALO186_EMAIL_VERIFICATION_REQUIRED: "true"
+      ALO186_EMAIL_BACKEND: smtp
+      ALO186_SMTP_HOST: ${ALO186_SMTP_HOST:?ALO186_SMTP_HOST zorunludur}
+      ALO186_SMTP_FROM_EMAIL: ${ALO186_SMTP_FROM_EMAIL:-noreply@alo186.com}
+    secrets:
+      - database_url
+      - token_secret
+      - data_encryption_key
+    command: ["sh", "-c", "while true; do python -m app.worker retention-once; sleep 86400; done"]
+    depends_on:
+      api:
+        condition: service_healthy
+    networks: [backend]
+
+  backup:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+    cap_drop: ["ALL"]
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      ALO186_DATABASE_URL_FILE: /run/secrets/database_url
+      ALO186_BACKUP_DIR: /backups
+      ALO186_BACKUP_RETENTION_DAYS: ${ALO186_BACKUP_RETENTION_DAYS:-14}
+    secrets:
+      - database_url
+    volumes:
+      - ./scripts:/scripts:ro
+      - alo186_backups:/backups
+    command: ["sh", "-c", "while true; do sh /scripts/backup_postgres.sh; sleep 86400; done"]
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [backend]
+
+secrets:
+  postgres_password:
+    file: ./secrets/postgres_password.txt
+  database_url:
+    file: ./secrets/database_url.txt
+  token_secret:
+    file: ./secrets/token_secret.txt
+  data_encryption_key:
+    file: ./secrets/data_encryption_key.txt
+  smtp_password:
+    file: ./secrets/smtp_password.txt
+  metrics_token:
+    file: ./secrets/metrics_token.txt
+
+volumes:
+  alo186_pgdata:
+  alo186_backups:
+
+networks:
+  backend:
+    driver: bridge

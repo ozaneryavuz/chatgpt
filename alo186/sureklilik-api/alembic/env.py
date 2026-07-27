@@ -9,9 +9,8 @@ from app.config import settings
 from app.db import Base
 from app import models  # noqa: F401
 
-
 config = context.config
-config.set_main_option("sqlalchemy.url", settings.database_url)
+config.set_main_option("sqlalchemy.url", settings.database_url.replace("%", "%%"))
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
@@ -26,7 +25,6 @@ def run_migrations_offline() -> None:
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
         compare_type=True,
-        render_as_batch=settings.database_url.startswith("sqlite"),
     )
     with context.begin_transaction():
         context.run_migrations()

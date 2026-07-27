@@ -1,14 +1,23 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
+from typing import Any
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_serializer
 
 from .models import IncidentStatus, Priority, Role, TaskStatus
 
 
 class ApiModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
+
+    @field_serializer("*", when_used="json", check_fields=False)
+    def serialize_utc_datetimes(self, value):
+        """SQLite dahil bütün backend'lerde UTC tarihleri aynı `Z` biçiminde döndürür."""
+        if isinstance(value, datetime):
+            aware = value if value.tzinfo is not None else value.replace(tzinfo=timezone.utc)
+            return aware.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+        return value
 
 
 class RegisterRequest(BaseModel):
@@ -20,12 +29,34 @@ class RegisterRequest(BaseModel):
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
+    mfa_code: str | None = Field(default=None, min_length=6, max_length=32)
+
+
+class GenericMessage(BaseModel):
+    message: str
+    test_token: str | None = None
+
+
+class TokenConfirmRequest(BaseModel):
+    token: str = Field(min_length=20, max_length=300)
+
+
+class PasswordResetRequest(BaseModel):
+    email: EmailStr
+
+
+class PasswordResetConfirm(BaseModel):
+    token: str = Field(min_length=20, max_length=300)
+    new_password: str = Field(min_length=10, max_length=200)
 
 
 class UserOut(ApiModel):
     id: str
     email: EmailStr
     is_active: bool
+    is_email_verified: bool
+    mfa_enabled: bool
+    deletion_requested_at: datetime | None = None
 
 
 class OrganizationOut(ApiModel):
@@ -33,29 +64,77 @@ class OrganizationOut(ApiModel):
     name: str
     slug: str
     plan: str
+    subscription_status: str
+    plan_expires_at: datetime | None
+    is_active: bool
 
 
 class MembershipOut(ApiModel):
     organization: OrganizationOut
     role: Role
+    notify_incidents: bool
 
 
-class AuthResponse(BaseModel):
+class AuthResponse(ApiModel):
     access_token: str
     token_type: str = "bearer"
     user: UserOut
     organization: OrganizationOut
+    email_verification_required: bool = False
+
+
+class SessionOut(ApiModel):
+    id: str
+    created_at: datetime
+    last_seen_at: datetime
+    expires_at: datetime
+    revoked_at: datetime | None
+
+
+class MfaSetupOut(BaseModel):
+    secret: str
+    provisioning_uri: str
+
+
+class MfaCodeRequest(BaseModel):
+    code: str = Field(min_length=6, max_length=32)
+
+
+class MfaEnableOut(BaseModel):
+    enabled: bool = True
+    recovery_codes: list[str]
+
+
+class MfaDisableRequest(BaseModel):
+    password: str
+    code: str = Field(min_length=6, max_length=32)
+
+
+class MfaRecoveryRegenerateRequest(MfaDisableRequest):
+    pass
+
+
+class AccountDeletionRequest(BaseModel):
+    password: str
+    confirmation: str = Field(pattern="^HESABIMI SIL$")
+
+
+class OrganizationDeletionRequest(BaseModel):
+    password: str
+    organization_name: str
 
 
 class MemberCreate(BaseModel):
     email: EmailStr
     role: Role
+    notify_incidents: bool = True
 
 
 class MemberOut(BaseModel):
     user_id: str
     email: EmailStr
     role: Role
+    notify_incidents: bool
 
 
 class LocationCreate(BaseModel):
@@ -129,7 +208,7 @@ class AssetTestOut(ApiModel):
     result: str
     notes: str | None
     tested_at: datetime
-    created_by_user_id: str
+    created_by_user_id: str | None
 
 
 class IncidentCreate(BaseModel):
@@ -158,7 +237,7 @@ class IncidentOut(ApiModel):
     summary: str | None
     started_at: datetime
     ended_at: datetime | None
-    created_by_user_id: str
+    created_by_user_id: str | None
     tasks: list[TaskOut] = []
 
 
@@ -168,9 +247,22 @@ class CloseIncidentRequest(BaseModel):
 
 class AuditOut(ApiModel):
     id: str
-    user_id: str
+    user_id: str | None
     action: str
     entity_type: str
     entity_id: str
     details_json: str | None
     created_at: datetime
+
+
+class BillingUsageOut(ApiModel):
+    plan: str
+    subscription_status: str
+    plan_expires_at: datetime | None
+    usage: dict[str, int]
+    limits: dict[str, int | None]
+    remaining: dict[str, int | None]
+
+
+class PrivacyExportOut(BaseModel):
+    data: dict[str, Any]

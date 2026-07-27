@@ -14,55 +14,190 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: alo186-continuity-api-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: '3.12'
+  ALO186_ENV: test
+  ALO186_TOKEN_SECRET: test-secret-at-least-32-characters-long
+  ALO186_DATA_ENCRYPTION_KEY: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+  ALO186_ALLOWED_ORIGINS: http://testserver
+  ALO186_ALLOWED_HOSTS: testserver,localhost,127.0.0.1
+  ALO186_PUBLIC_BASE_URL: http://testserver
+  ALO186_EMAIL_VERIFICATION_REQUIRED: 'false'
+  ALO186_EXPOSE_TEST_TOKENS: 'true'
+  ALO186_EMAIL_BACKEND: console
+  ALO186_GLOBAL_RATE_LIMIT: '10000'
+  ALO186_AUTH_RATE_LIMIT: '1000'
+  ALO186_METRICS_TOKEN: test-metrics-token
+
 jobs:
-  test:
+  sqlite-test:
+    name: SQLite API ve güvenlik testleri
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
           cache-dependency-path: alo186/sureklilik-api/requirements.txt
       - name: Bağımlılıkları kur
         run: pip install -q -r alo186/sureklilik-api/requirements.txt
-      - name: API, güvenlik ve migration testleri
+      - name: API testleri
         working-directory: alo186/sureklilik-api
         env:
-          ALO186_ENV: test
-          ALO186_TOKEN_SECRET: test-secret-at-least-32-characters-long
-          ALO186_ALLOWED_HOSTS: localhost,127.0.0.1,testserver
           ALO186_AUTO_CREATE_SCHEMA: 'true'
           PYTHONPATH: .
         shell: bash
         run: |
           set +e
-          pytest -q --tb=short > pytest-output.txt 2>&1
+          pytest -q --tb=short > pytest-output-sqlite.txt 2>&1
           code=$?
-          cat pytest-output.txt
+          cat pytest-output-sqlite.txt
           exit $code
       - name: Test çıktısını yükle
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: continuity-api-pytest
-          path: alo186/sureklilik-api/pytest-output.txt
+          name: continuity-api-pytest-sqlite
+          path: alo186/sureklilik-api/pytest-output-sqlite.txt
           if-no-files-found: error
       - name: Python sözdizimi
-        run: python -m compileall -q alo186/sureklilik-api/app alo186/sureklilik-api/migrations
-      - name: Alembic revision bütünlüğü
+        run: python -m compileall -q alo186/sureklilik-api/app alo186/sureklilik-api/alembic
+      - name: Shell script sözdizimi
+        run: |
+          sh -n alo186/sureklilik-api/entrypoint.sh
+          sh -n alo186/sureklilik-api/scripts/backup_postgres.sh
+          sh -n alo186/sureklilik-api/scripts/restore_postgres.sh
+
+  migration-test:
+    name: Alembic baseline ve head migration
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: alo186/sureklilik-api/requirements.txt
+      - run: pip install -q -r alo186/sureklilik-api/requirements.txt
+      - name: V0.2 baseline ve v0.3 head yükseltmesi
         working-directory: alo186/sureklilik-api
         env:
-          ALO186_ENV: test
-          ALO186_DATABASE_URL: sqlite:///./ci-alembic.db
-          ALO186_TOKEN_SECRET: test-secret-at-least-32-characters-long
+          ALO186_DATABASE_URL: sqlite:///./migration-test.db
           ALO186_AUTO_CREATE_SCHEMA: 'false'
           PYTHONPATH: .
+        shell: bash
         run: |
-          alembic -c alembic.ini heads
-          alembic -c alembic.ini upgrade head
-          alembic -c alembic.ini current
-      - name: Operasyon scriptleri sözdizimi
-        run: bash -n alo186/sureklilik-api/scripts/*.sh
-      - name: Docker image build
-        run: docker build -t alo186-continuity-api:ci alo186/sureklilik-api
+          set -euo pipefail
+          exec > >(tee migration-output.txt) 2>&1
+          rm -f migration-test.db
+          alembic upgrade 20260727_0001
+          python - <<'PY'
+          from sqlalchemy import create_engine, inspect
+          engine = create_engine('sqlite:///./migration-test.db')
+          names = set(inspect(engine).get_table_names())
+          assert {'users','organizations','memberships','locations','incidents'} <= names
+          assert 'auth_sessions' not in names
+          print('v0.2 baseline doğrulandı')
+          PY
+          alembic upgrade head
+          python - <<'PY'
+          from sqlalchemy import create_engine, inspect
+          engine = create_engine('sqlite:///./migration-test.db')
+          inspector = inspect(engine)
+          names = set(inspector.get_table_names())
+          assert {'auth_sessions','auth_tokens','email_outbox'} <= names
+          user_columns = {item['name'] for item in inspector.get_columns('users')}
+          assert {'is_email_verified','token_version','mfa_enabled','deletion_requested_at'} <= user_columns
+          print('v0.3 head doğrulandı')
+          PY
+          alembic current
+          alembic check
+      - name: Migration çıktısını yükle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: continuity-api-migration-output
+          path: alo186/sureklilik-api/migration-output.txt
+          if-no-files-found: error
+
+  postgres-test:
+    name: PostgreSQL migration ve entegrasyon testleri
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: alo186_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d alo186_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: alo186/sureklilik-api/requirements.txt
+      - run: pip install -q -r alo186/sureklilik-api/requirements.txt
+      - name: PostgreSQL migration
+        working-directory: alo186/sureklilik-api
+        env:
+          ALO186_DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/alo186_test
+          ALO186_AUTO_CREATE_SCHEMA: 'false'
+          PYTHONPATH: .
+        run: alembic upgrade head
+      - name: PostgreSQL API testleri
+        working-directory: alo186/sureklilik-api
+        env:
+          ALO186_DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/alo186_test
+          ALO186_AUTO_CREATE_SCHEMA: 'false'
+          PYTHONPATH: .
+        shell: bash
+        run: |
+          set +e
+          pytest -q --tb=short > pytest-output-postgres.txt 2>&1
+          code=$?
+          cat pytest-output-postgres.txt
+          exit $code
+      - name: PostgreSQL test çıktısını yükle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: continuity-api-pytest-postgres
+          path: alo186/sureklilik-api/pytest-output-postgres.txt
+          if-no-files-found: error
+
+  container-build:
+    name: Container ve production compose doğrulaması
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Docker imajını oluştur
+        working-directory: alo186/sureklilik-api
+        run: docker build -t alo186-continuity-api:test .
+      - name: Compose dosyalarını doğrula
+        working-directory: alo186/sureklilik-api
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp .env.example .env
+          mkdir -p secrets
+          printf 'postgres-test-password' > secrets/postgres_password.txt
+          printf 'postgresql+psycopg://alo186:postgres-test-password@db:5432/alo186' > secrets/database_url.txt
+          printf 'production-token-secret-at-least-32-characters-long' > secrets/token_secret.txt
+          printf 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=' > secrets/data_encryption_key.txt
+          printf 'smtp-password' > secrets/smtp_password.txt
+          printf 'metrics-token' > secrets/metrics_token.txt
+          ALO186_SMTP_HOST=smtp.example.com docker compose -f docker-compose.production.yml config --quiet
+          docker compose config --quiet

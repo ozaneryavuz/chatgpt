@@ -1,45 +1,40 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/sh
+set -eu
 
-if [[ $# -ne 1 ]]; then
-  echo "Kullanım: $0 <backup.dump>" >&2
-  exit 2
+if [ "$#" -ne 1 ]; then
+  echo "Kullanım: $0 /backups/alo186-YYYYMMDDTHHMMSSZ.dump" >&2
+  exit 1
 fi
-
-backup="$1"
-checksum="$backup.sha256"
-DATABASE_URL="${ALO186_DATABASE_URL:-}"
-
-if [[ -n "${ALO186_DATABASE_URL_FILE:-}" ]]; then
-  DATABASE_URL="$(tr -d '\r\n' < "$ALO186_DATABASE_URL_FILE")"
+if [ -n "${ALO186_DATABASE_URL_FILE:-}" ]; then
+  if [ -n "${ALO186_DATABASE_URL:-}" ]; then
+    echo "ALO186_DATABASE_URL ve ALO186_DATABASE_URL_FILE aynı anda kullanılamaz." >&2
+    exit 1
+  fi
+  ALO186_DATABASE_URL=$(cat "$ALO186_DATABASE_URL_FILE")
 fi
-if [[ -z "$DATABASE_URL" ]]; then
+if [ -z "${ALO186_DATABASE_URL:-}" ]; then
   echo "ALO186_DATABASE_URL veya ALO186_DATABASE_URL_FILE zorunludur." >&2
-  exit 3
-fi
-if [[ ! -f "$backup" || ! -f "$checksum" ]]; then
-  echo "Backup veya checksum dosyası bulunamadı." >&2
-  exit 4
-fi
-if ! command -v pg_restore >/dev/null 2>&1; then
-  echo "pg_restore bulunamadı. PostgreSQL client araçlarını kurun." >&2
-  exit 5
+  exit 1
 fi
 
-sha256sum --check "$checksum"
+BACKUP_FILE=$1
+CHECKSUM_FILE="$BACKUP_FILE.sha256"
+DATABASE_URL=$(printf '%s' "$ALO186_DATABASE_URL" | sed 's#postgresql+psycopg://#postgresql://#')
 
-if [[ "${ALO186_RESTORE_CONFIRM:-}" != "RESTORE" ]]; then
-  echo "Geri yükleme yıkıcıdır. ALO186_RESTORE_CONFIRM=RESTORE ayarlayın." >&2
-  exit 6
+if [ ! -f "$BACKUP_FILE" ]; then
+  echo "Yedek dosyası bulunamadı: $BACKUP_FILE" >&2
+  exit 1
+fi
+if [ -f "$CHECKSUM_FILE" ]; then
+  (cd "$(dirname "$BACKUP_FILE")" && sha256sum -c "$(basename "$CHECKSUM_FILE")")
+else
+  echo "Uyarı: checksum dosyası bulunamadı." >&2
 fi
 
-pg_restore \
-  --clean \
-  --if-exists \
-  --no-owner \
-  --no-privileges \
-  --exit-on-error \
-  --dbname="$DATABASE_URL" \
-  "$backup"
+if [ "${ALO186_RESTORE_CONFIRM:-}" != "YES-RESTORE-ALO186" ]; then
+  echo "Geri yükleme yıkıcıdır. ALO186_RESTORE_CONFIRM=YES-RESTORE-ALO186 ayarlayın." >&2
+  exit 1
+fi
 
-echo "Geri yükleme tamamlandı: $backup"
+pg_restore --clean --if-exists --no-owner --no-privileges --dbname "$DATABASE_URL" "$BACKUP_FILE"
+echo "Geri yükleme tamamlandı: $BACKUP_FILE"
