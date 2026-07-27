@@ -23,6 +23,15 @@ jobs:
         with:
           node-version: '22'
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: alo186/sureklilik-api/requirements.txt
+
+      - name: Süreklilik API bağımlılıklarını kur
+        run: pip install -q -r alo186/sureklilik-api/requirements.txt
+
       - name: Kod ve ürün testlerini çalıştır
         id: tests
         shell: bash
@@ -54,6 +63,7 @@ jobs:
           run_test '25 sorun karar kuralları' 'node alo186/tests/test_decision_rules.js'
           run_test 'Ürün eşleştirme' 'node alo186/tests/test_product_matcher.js'
           run_test 'Süreklilik paneli store' 'node alo186/tests/test_continuity_store.js'
+          run_test 'Süreklilik SaaS API' 'cd alo186/sureklilik-api && ALO186_TOKEN_SECRET=test-secret-at-least-32-characters-long PYTHONPATH=. pytest -q'
           run_test 'Yayın / canonical manifesti' 'node alo186/tests/test_release_manifest.js'
 
           echo '' >> "$report"
@@ -76,6 +86,9 @@ jobs:
             'https://www.alo186.com/hesaplama/'
             'https://www.alo186.com/akilli-urun-secimi'
             'https://www.alo186.com/isletme-surekliligi'
+            'https://www.alo186.com/fatura-analizi'
+            'https://www.alo186.com/hesaplama/yedek-guc'
+            'https://www.alo186.com/hesaplama/kesinti-maliyeti'
           )
 
           for url in "${urls[@]}"; do
@@ -94,7 +107,7 @@ jobs:
             const fs = require('fs');
             const marker = '<!-- alo186-daily-monitor -->';
             let body = fs.readFileSync('alo186-daily-report.md', 'utf8');
-            const tracked = [5, 6, 15, 17];
+            const tracked = [5, 6, 15, 21];
             body += '\n### Açık aksiyonlar\n\n| Issue | Durum | Son güncelleme |\n|---|---|---|\n';
             for (const issueNumber of tracked) {
               const { data: issue } = await github.rest.issues.get({
