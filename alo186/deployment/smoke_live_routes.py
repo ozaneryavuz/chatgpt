@@ -1,0 +1,147 @@
+from __future__ import annotations
+
+import argparse
+import json
+import ssl
+import time
+from html.parser import HTMLParser
+from urllib.error import HTTPError, URLError
+from urllib.parse import urljoin
+from urllib.request import Request, build_opener, HTTPRedirectHandler
+
+
+ROUTES = [
+    ("/elektrik-portali", "ALO186", "https://www.alo186.com/elektrik-portali"),
+    ("/edas-bul", "EDAŞ", "https://www.alo186.com/edas-bul"),
+    ("/karar-motoru", "186 mı", "https://www.alo186.com/karar-motoru"),
+    ("/hesaplama/", "Hesaplama", "https://www.alo186.com/hesaplama/"),
+    ("/akilli-urun-secimi", "Ürün", "https://www.alo186.com/akilli-urun-secimi"),
+    ("/isletme-surekliligi", "Sürekliliği", "https://www.alo186.com/isletme-surekliligi"),
+    ("/fatura-analizi", "Faturası", "https://www.alo186.com/fatura-analizi"),
+    ("/hesaplama/yedek-guc", "Yedek Güç", "https://www.alo186.com/hesaplama/yedek-guc"),
+    ("/hesaplama/kesinti-maliyeti", "Kesinti", "https://www.alo186.com/hesaplama/kesinti-maliyeti"),
+]
+
+
+class PageParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.in_title = False
+        self.title_parts: list[str] = []
+        self.canonical: str | None = None
+        self.assets: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        values = dict(attrs)
+        if tag == "title":
+            self.in_title = True
+        if tag == "link" and values.get("rel") == "canonical":
+            self.canonical = values.get("href")
+        if tag == "link" and values.get("rel") == "stylesheet" and values.get("href"):
+            self.assets.append(values["href"] or "")
+        if tag == "script" and values.get("src"):
+            self.assets.append(values["src"] or "")
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "title":
+            self.in_title = False
+
+    def handle_data(self, data: str) -> None:
+        if self.in_title:
+            self.title_parts.append(data)
+
+    @property
+    def title(self) -> str:
+        return "".join(self.title_parts).strip()
+
+
+def fetch(url: str, timeout: int = 20) -> tuple[int, str, bytes, dict[str, str], float]:
+    request = Request(url, headers={"User-Agent": "ALO186-Production-Smoke/1.0", "Accept": "text/html,*/*"})
+    started = time.perf_counter()
+    with build_opener(HTTPRedirectHandler()).open(request, timeout=timeout) as response:
+        body = response.read()
+        duration = time.perf_counter() - started
+        headers = {key.lower(): value for key, value in response.headers.items()}
+        return response.status, response.geturl(), body, headers, duration
+
+
+def normalize_url(value: str) -> str:
+    return value.rstrip("/")
+
+
+def run(base_url: str, check_assets: bool = True) -> dict:
+    base_url = base_url.rstrip("/")
+    results: list[dict] = []
+    failures: list[str] = []
+    for path, marker, canonical in ROUTES:
+        url = f"{base_url}{path}"
+        try:
+            status, final_url, body, headers, duration = fetch(url)
+            text = body.decode("utf-8", errors="replace")
+            parser = PageParser()
+            parser.feed(text)
+            row = {
+                "path": path,
+                "status": status,
+                "finalUrl": final_url,
+                "durationMs": round(duration * 1000, 1),
+                "title": parser.title,
+                "canonical": parser.canonical,
+                "contentType": headers.get("content-type"),
+            }
+            if status != 200:
+                failures.append(f"{path}: HTTP {status}")
+            if marker.lower() not in (parser.title + " " + text[:20000]).lower():
+                failures.append(f"{path}: beklenen içerik işareti yok: {marker}")
+            if not parser.canonical or normalize_url(parser.canonical) != normalize_url(canonical):
+                failures.append(f"{path}: canonical yanlış: {parser.canonical!r}")
+            if normalize_url(final_url).startswith("https://alo186.com"):
+                failures.append(f"{path}: www olmayan final URL: {final_url}")
+            if check_assets:
+                asset_rows = []
+                for reference in parser.assets[:12]:
+                    asset_url = urljoin(final_url, reference)
+                    asset_status, asset_final, _asset_body, asset_headers, asset_duration = fetch(asset_url)
+                    asset_rows.append({
+                        "url": asset_final,
+                        "status": asset_status,
+                        "contentType": asset_headers.get("content-type"),
+                        "durationMs": round(asset_duration * 1000, 1),
+                    })
+                    if asset_status != 200:
+                        failures.append(f"{path}: asset HTTP {asset_status}: {reference}")
+                    if reference.endswith(".js") and "javascript" not in (asset_headers.get("content-type") or ""):
+                        failures.append(f"{path}: JS MIME yanlış: {reference}")
+                    if reference.endswith(".css") and "css" not in (asset_headers.get("content-type") or ""):
+                        failures.append(f"{path}: CSS MIME yanlış: {reference}")
+                row["assets"] = asset_rows
+            results.append(row)
+        except (HTTPError, URLError, TimeoutError, ssl.SSLError) as exc:
+            failures.append(f"{path}: erişim hatası: {exc}")
+            results.append({"path": path, "error": str(exc)})
+
+    for root_path in ("/robots.txt", "/sitemap.xml"):
+        try:
+            status, final_url, _body, headers, duration = fetch(f"{base_url}{root_path}")
+            results.append({"path": root_path, "status": status, "finalUrl": final_url, "contentType": headers.get("content-type"), "durationMs": round(duration * 1000, 1)})
+            if status != 200:
+                failures.append(f"{root_path}: HTTP {status}")
+        except Exception as exc:  # noqa: BLE001
+            failures.append(f"{root_path}: erişim hatası: {exc}")
+
+    output = {"ok": not failures, "baseUrl": base_url, "results": results, "failures": failures}
+    if failures:
+        raise SystemExit(json.dumps(output, ensure_ascii=False, indent=2))
+    return output
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="ALO186 canlı canonical rota smoke testi.")
+    parser.add_argument("--base-url", default="https://www.alo186.com")
+    parser.add_argument("--skip-assets", action="store_true")
+    args = parser.parse_args()
+    print(json.dumps(run(args.base_url, check_assets=not args.skip_assets), ensure_ascii=False, indent=2))
+
+
+if __name__ == "__main__":
+    main()

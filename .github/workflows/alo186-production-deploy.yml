@@ -1,0 +1,154 @@
+name: ALO186 üretim yayın paketi ve opsiyonel deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "alo186/**"
+      - ".github/workflows/alo186-production-deploy.yml"
+  pull_request:
+    paths:
+      - "alo186/**"
+      - ".github/workflows/alo186-production-deploy.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  build:
+    name: Canonical production bundle
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: ALO186 statik ürün testleri
+        shell: bash
+        run: |
+          set -euo pipefail
+          node alo186/tests/test_calc_core.js
+          node alo186/tests/test_turkiye_search.js
+          node alo186/tests/test_decision_rules.js
+          node alo186/tests/test_product_matcher.js
+          node alo186/tests/test_continuity_store.js
+          node alo186/tests/test_release_manifest.js
+      - name: Üretim bundle oluştur
+        run: |
+          python alo186/deployment/build_static_site.py \
+            --output _production_site \
+            --commit "${GITHUB_SHA}"
+      - name: Bundle smoke testi
+        run: python alo186/deployment/smoke_static_site.py --bundle _production_site
+      - name: Arşiv ve checksum
+        shell: bash
+        run: |
+          set -euo pipefail
+          tar -C _production_site -czf alo186-production-site.tar.gz .
+          sha256sum alo186-production-site.tar.gz > alo186-production-site.tar.gz.sha256
+      - name: Üretim paketini sakla
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-production-site
+          path: |
+            _production_site
+            alo186-production-site.tar.gz
+            alo186-production-site.tar.gz.sha256
+          if-no-files-found: error
+          retention-days: 30
+
+  deploy:
+    name: Onaylı production deploy
+    if: github.event_name != 'pull_request' && vars.ALO186_PRODUCTION_DEPLOY_ENABLED == 'true'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: alo186-production
+      url: https://www.alo186.com/elektrik-portali
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: alo186-production-site
+          path: release
+      - name: SSH / rsync ile yayınla
+        if: vars.ALO186_DEPLOY_METHOD == 'ssh'
+        env:
+          DEPLOY_HOST: ${{ secrets.ALO186_DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.ALO186_DEPLOY_USER }}
+          DEPLOY_PATH: ${{ vars.ALO186_DEPLOY_PATH }}
+          SSH_KEY: ${{ secrets.ALO186_DEPLOY_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.ALO186_DEPLOY_KNOWN_HOSTS }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          : "${DEPLOY_HOST:?ALO186_DEPLOY_HOST eksik}"
+          : "${DEPLOY_USER:?ALO186_DEPLOY_USER eksik}"
+          : "${DEPLOY_PATH:?ALO186_DEPLOY_PATH eksik}"
+          : "${SSH_KEY:?ALO186_DEPLOY_SSH_KEY eksik}"
+          : "${KNOWN_HOSTS:?ALO186_DEPLOY_KNOWN_HOSTS eksik}"
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_ed25519 ~/.ssh/known_hosts
+          rsync -rlvz --checksum --protect-args \
+            -e "ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=yes" \
+            release/_production_site/ "${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH%/}/"
+      - name: FTPS ile yayınla
+        if: vars.ALO186_DEPLOY_METHOD == 'ftps'
+        env:
+          DEPLOY_HOST: ${{ secrets.ALO186_DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.ALO186_DEPLOY_USER }}
+          DEPLOY_PASSWORD: ${{ secrets.ALO186_DEPLOY_PASSWORD }}
+          DEPLOY_PATH: ${{ vars.ALO186_DEPLOY_PATH }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          : "${DEPLOY_HOST:?ALO186_DEPLOY_HOST eksik}"
+          : "${DEPLOY_USER:?ALO186_DEPLOY_USER eksik}"
+          : "${DEPLOY_PASSWORD:?ALO186_DEPLOY_PASSWORD eksik}"
+          : "${DEPLOY_PATH:?ALO186_DEPLOY_PATH eksik}"
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp
+          lftp -u "$DEPLOY_USER,$DEPLOY_PASSWORD" "ftps://$DEPLOY_HOST" <<LFTP
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set net:max-retries 2
+          set net:timeout 20
+          mirror --reverse --only-newer --parallel=2 --verbose release/_production_site/ ${DEPLOY_PATH%/}/
+          bye
+          LFTP
+      - name: Deploy yöntemi doğrulaması
+        if: vars.ALO186_DEPLOY_METHOD != 'ssh' && vars.ALO186_DEPLOY_METHOD != 'ftps'
+        run: |
+          echo "ALO186_DEPLOY_METHOD yalnız ssh veya ftps olabilir." >&2
+          exit 1
+      - name: CDN yayılımını bekle ve canlı smoke testi
+        shell: bash
+        run: |
+          set -euo pipefail
+          success=0
+          for attempt in 1 2 3 4 5 6; do
+            echo "Canlı smoke denemesi: $attempt"
+            if python alo186/deployment/smoke_live_routes.py --base-url https://www.alo186.com > live-smoke.json 2>&1; then
+              success=1
+              cat live-smoke.json
+              break
+            fi
+            cat live-smoke.json || true
+            sleep 20
+          done
+          test "$success" -eq 1
+      - name: Canlı smoke raporunu sakla
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-live-smoke
+          path: live-smoke.json
+          if-no-files-found: warn
+          retention-days: 30
