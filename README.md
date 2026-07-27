@@ -8,7 +8,8 @@
 - [Elektrik Hesaplama Merkezi](./alo186/hesaplama/)
 - [Akıllı Ürün Eşleştirme ve Affiliate Katalog](./alo186/urun-eslestirme/)
 - [Otel, Site ve İşletme Elektrik Sürekliliği Paneli](./alo186/sureklilik-paneli/)
-- [Elektrik Sürekliliği SaaS API v0.2](./alo186/sureklilik-api/)
+- [Elektrik Sürekliliği SaaS API v0.4.1](./alo186/sureklilik-api/)
+- [ALO186 Production Stack](./alo186/infrastructure/)
 - [Elektrik Faturası Zekâ Merkezi](./alo186/fatura-analizi/)
 - [UPS ve Power Station süre hesabı](./alo186/hesaplama/ups-suresi/)
 - [EV şarj süresi ve maliyet hesabı](./alo186/hesaplama/ev-sarj-suresi/)
@@ -33,9 +34,13 @@ Powerbank ve akım korumalı grup priz kategorilerinde teknik minimumları karş
 
 Otel, apartman/site ve küçük işletmeler için local-first pilot panelidir. Çoklu lokasyon, kritik yük, jeneratör/UPS testleri, kesinti olayı, görev, zaman çizelgesi, maliyet, audit log, JSON yedek ve PDF çıktısı sunar.
 
-### Elektrik Sürekliliği SaaS API v0.2
+### Elektrik Sürekliliği SaaS API v0.4.1
 
-Local-first paneli çok kullanıcılı ürüne taşıyan FastAPI/PostgreSQL temelidir. Scrypt parola güvenliği, süreli imzalı oturum, kuruluş/tenant izolasyonu, admin-teknik ekip-görüntüleyici rolleri, kritik yükler, varlık testleri, P1 yüklere göre otomatik olay görevleri, zorunlu görev kapanış koruması ve kuruluş bazlı audit log sağlar. Docker Compose, SQLite test ortamı ve GitHub Actions kalite kontrolü içerir.
+Local-first paneli çok kullanıcılı ürüne taşıyan FastAPI/PostgreSQL temelidir. Scrypt parola güvenliği, e-posta doğrulama, parola sıfırlama, MFA, iptal edilebilir oturumlar, davet tabanlı ekip onboarding'i, kuruluş/tenant izolasyonu, roller, kritik yükler, varlık testleri, olay görevleri, plan limitleri, KVKK export/silme, outbox worker, audit log ve Sentry gözlemlenebilirliği sağlar.
+
+### ALO186 Production Stack
+
+Managed Core + Portable Escape Hatch yaklaşımıyla Frankfurt Render Blueprint, paid PostgreSQL/PITR, Postmark SMTP, Render/GitHub secret modeli, Render managed TLS ve Caddy fallback, Cloudflare/Natro DNS akışı, şifreli R2 Restic yedeği, aylık vault, Sentry, Grafana Alloy, sentetik monitoring ve production readiness gate içerir.
 
 ### Elektrik Faturası Zekâ Merkezi
 
@@ -61,11 +66,12 @@ GitHub görevleri:
 - #3 Tam Türkiye il–ilçe–EDAŞ arama motoru — tamamlandı
 - #4 25 elektrik sorunu karar motoru — tamamlandı
 - #5 Doğrulanmış ürün eşleştirme ve affiliate — v1 yayımlandı, katalog genişlemesi sürüyor
-- #6 Otel/site/işletme sürekliliği paneli — local-first pilot ve SaaS API v0.2 yayımlandı; üretim sertleştirmesi sürüyor
+- #6 Otel/site/işletme sürekliliği paneli — local-first pilot ve SaaS API yayımlandı; production deployment sürüyor
 - #7 Kullanıcı fayda hesaplayıcıları v1 — tamamlandı
+- #29 Managed production infrastructure — kaynak ve otomasyon uygulanıyor
 
 ## Yayın
 
 `.github/workflows/alo186-fatura-pages.yml` ana daldaki `alo186/**` değişikliklerinde bütün statik ALO186 modüllerini GitHub Pages artifact'ına paketler.
 
-Canlı `alo186.com` entegrasyonunda kaynak klasörler ile canonical rotalar `alo186/deployment/routing-manifest.json` üzerinden eşleştirilmelidir.
+Canlı `alo186.com` entegrasyonunda kaynak klasörler ile canonical rotalar `alo186/deployment/routing-manifest.json` üzerinden eşleştirilmelidir. API production altyapısı `alo186/infrastructure/` ve `alo186/sureklilik-api/infra/` altında sürümlenir.
