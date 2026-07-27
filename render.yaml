@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://json.schemastore.org/render.json
+# yaml-language-server: $schema=https://render.com/schema/render.yaml.json
 previews:
   generation: off
 
@@ -133,6 +133,8 @@ services:
         value: "false"
       - key: ALO186_EMAIL_VERIFICATION_REQUIRED
         value: "true"
+      - key: ALO186_EXPOSE_TEST_TOKENS
+        value: "false"
       - key: ALO186_EMAIL_BACKEND
         value: smtp
       - key: ALO186_SMTP_HOST
@@ -198,6 +200,30 @@ services:
         value: "false"
       - key: ALO186_RUN_MIGRATIONS
         value: "false"
+      - key: ALO186_EMAIL_VERIFICATION_REQUIRED
+        value: "true"
+      - key: ALO186_EXPOSE_TEST_TOKENS
+        value: "false"
+      - key: ALO186_EMAIL_BACKEND
+        value: smtp
+      - key: ALO186_SMTP_HOST
+        value: smtp.postmarkapp.com
+      - key: ALO186_SMTP_PORT
+        value: "587"
+      - key: ALO186_SMTP_USERNAME
+        fromService:
+          type: web
+          name: alo186-continuity-api
+          envVarKey: ALO186_SMTP_USERNAME
+      - key: ALO186_SMTP_PASSWORD
+        fromService:
+          type: web
+          name: alo186-continuity-api
+          envVarKey: ALO186_SMTP_PASSWORD
+      - key: ALO186_SMTP_FROM_EMAIL
+        value: noreply@alo186.com
+      - key: ALO186_SMTP_USE_TLS
+        value: "true"
       - key: ALO186_AUDIT_RETENTION_DAYS
         value: "730"
       - key: ALO186_OUTBOX_RETENTION_DAYS
