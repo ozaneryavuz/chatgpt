@@ -18,16 +18,16 @@ STATIC_PATHS = (
     "/akilli-urun-secimi",
     "/isletme-surekliligi",
 )
-API_PATHS = ("/health/live", "/health/ready")
+API_PATHS = ("/health/live", "/health/ready", "/api/v1/kg/public/health")
 
 
 def fetch(url: str, timeout: float) -> dict[str, object]:
     started = time.perf_counter()
-    request = Request(url, headers={"User-Agent": "ALO186-Synthetic/1.0", "Accept": "application/json,text/html,*/*"})
+    request = Request(url, headers={"User-Agent": "ALO186-Synthetic/1.1", "Accept": "application/json,text/html,*/*"})
     try:
         with urlopen(request, timeout=timeout) as response:
             body = response.read(64_000)
-            return {
+            result: dict[str, object] = {
                 "ok": response.status == 200,
                 "status": response.status,
                 "finalUrl": response.geturl(),
@@ -35,6 +35,20 @@ def fetch(url: str, timeout: float) -> dict[str, object]:
                 "durationMs": round((time.perf_counter() - started) * 1000, 1),
                 "bytesRead": len(body),
             }
+            if url.endswith("/api/v1/kg/public/health") and response.status == 200:
+                try:
+                    payload = json.loads(body.decode("utf-8"))
+                    score = float(payload.get("score", 0))
+                    result["knowledgeGraphScore"] = score
+                    result["knowledgeGraphEntities"] = int(payload.get("entities", 0))
+                    result["knowledgeGraphAssertions"] = int(payload.get("assertions", 0))
+                    result["ok"] = score >= 70 and int(payload.get("entities", 0)) > 0
+                    if not result["ok"]:
+                        result["error"] = "Knowledge Graph boş veya health skoru 70 altında."
+                except (ValueError, TypeError, json.JSONDecodeError) as exc:
+                    result["ok"] = False
+                    result["error"] = f"Knowledge Graph health cevabı okunamadı: {exc}"
+            return result
     except (HTTPError, URLError, TimeoutError) as exc:
         return {
             "ok": False,
@@ -90,7 +104,7 @@ def run(web_base: str, api_base: str, timeout: float) -> dict[str, object]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="ALO186 web/API/TLS synthetic kontrolü")
+    parser = argparse.ArgumentParser(description="ALO186 web/API/TLS/Knowledge Graph synthetic kontrolü")
     parser.add_argument("--web-base", default="https://www.alo186.com")
     parser.add_argument("--api-base", default="https://api.alo186.com")
     parser.add_argument("--timeout", type=float, default=15.0)
