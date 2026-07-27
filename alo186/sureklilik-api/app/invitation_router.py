@@ -172,6 +172,7 @@ def accept_organization_invitation(
             db,
             raw_token=payload.token,
             password=payload.password,
+            mfa_code=payload.mfa_code,
             request=request,
         )
         invitation = db.scalar(
