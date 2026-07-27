@@ -11,8 +11,8 @@ services:
     repo: https://github.com/ozaneryavuz/chatgpt
     branch: main
     rootDir: alo186/sureklilik-api
-    dockerfilePath: alo186/sureklilik-api/Dockerfile
-    dockerContext: alo186/sureklilik-api
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     dockerCommand: >-
       sh -c 'export ALO186_RELEASE="${RENDER_GIT_COMMIT:-render-production}" &&
       exec uvicorn app.application:app --host 0.0.0.0 --port "${PORT:-10000}"
@@ -94,8 +94,8 @@ services:
     repo: https://github.com/ozaneryavuz/chatgpt
     branch: main
     rootDir: alo186/sureklilik-api
-    dockerfilePath: alo186/sureklilik-api/Dockerfile
-    dockerContext: alo186/sureklilik-api
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     dockerCommand: >-
       sh -c 'export ALO186_RELEASE="${RENDER_GIT_COMMIT:-render-production}" &&
       exec python -m app.worker email-loop --interval 15 --limit 50'
@@ -166,8 +166,8 @@ services:
     repo: https://github.com/ozaneryavuz/chatgpt
     branch: main
     rootDir: alo186/sureklilik-api
-    dockerfilePath: alo186/sureklilik-api/Dockerfile
-    dockerContext: alo186/sureklilik-api
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     dockerCommand: python -m app.worker retention-once
     schedule: "17 2 * * *"
     autoDeployTrigger: checksPass
@@ -228,8 +228,8 @@ services:
     repo: https://github.com/ozaneryavuz/chatgpt
     branch: main
     rootDir: alo186/sureklilik-api
-    dockerfilePath: alo186/sureklilik-api/infra/backup/Dockerfile
-    dockerContext: alo186/sureklilik-api
+    dockerfilePath: ./infra/backup/Dockerfile
+    dockerContext: .
     dockerCommand: /opt/alo186/run_backup.sh
     schedule: "37 2 * * *"
     autoDeployTrigger: checksPass
@@ -271,8 +271,8 @@ services:
     repo: https://github.com/ozaneryavuz/chatgpt
     branch: main
     rootDir: alo186/sureklilik-api
-    dockerfilePath: alo186/sureklilik-api/infra/monitoring/Dockerfile
-    dockerContext: alo186/sureklilik-api
+    dockerfilePath: ./infra/monitoring/Dockerfile
+    dockerContext: .
     dockerCommand: >-
       run /etc/alloy/config.alloy --storage.path=/tmp/alloy
     autoDeployTrigger: checksPass
