@@ -35,6 +35,7 @@ Araç dosyayı `0600` izinle oluşturur ve değerleri terminale yazmaz.
 - `AWS_ACCESS_KEY_ID`
 - `AWS_SECRET_ACCESS_KEY`
 - `RESTIC_PASSWORD`
+- `ALO186_VAULT_ENCRYPTION_KEY`
 - `ALO186_BACKUP_HEARTBEAT_URL`
 
 `ALO186_TOKEN_SECRET` ve `ALO186_METRICS_TOKEN` Blueprint tarafından üretilebilir.
@@ -49,17 +50,29 @@ Araç dosyayı `0600` izinle oluşturur ve değerleri terminale yazmaz.
 - `CLOUDFLARE_ZONE_ID`
 - `RENDER_API_KEY`
 - `RENDER_SERVICE_ID`
+- `RENDER_DEPLOY_HOOK_URL`
+- `POSTMARK_SMTP_USERNAME`
+- `POSTMARK_SMTP_PASSWORD`
+- `R2_ACCESS_KEY_ID`
+- `R2_SECRET_ACCESS_KEY`
+- `RESTIC_PASSWORD`
 
 Önerilen variable'lar:
 
 - `ALO186_PRODUCTION_MONITOR_ENABLED=false` — canlı doğrulama sonrası `true`
 - `ALO186_RENDER_API_HOSTNAME`
+- `ALO186_R2_ENDPOINT`
+- `ALO186_R2_RESTIC_BUCKET`
+- `ALO186_R2_VAULT_BUCKET`
+- `POSTMARK_DKIM_HOST`
+- `POSTMARK_RETURN_PATH_HOST`
 
 ## Rotasyon kuralları
 
 - Token secret rotasyonu bütün oturumları iptal eder; bakım penceresinde yapılır.
 - Data encryption key doğrudan değiştirilemez; önce eski anahtarla çöz, yeni anahtarla şifrele migration'ı gerekir.
 - Restic parolası değiştirilirse eski snapshot'lara erişim parolası kurtarma kasasında korunur.
+- Vault encryption key değişirse eski aylık arşivlerin anahtar geçmişi kurtarma kasasında korunur.
 - R2, Cloudflare, Grafana, Render ve SMTP token'ları en az yetkiyle ve ayrı ayrı oluşturulur.
 - Ayrılan personelin erişimleri aynı iş günü içinde iptal edilir.
 
