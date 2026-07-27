@@ -335,8 +335,7 @@ def add_asset_test(
         tested_at=tested_at,
         created_by_user_id=context.user.id,
     )
-    if asset.last_test_at is None or tested_at > asset.last_test_at:
-        normalized_tested_at = (
+    normalized_tested_at = (
         tested_at.replace(tzinfo=timezone.utc)
         if tested_at.tzinfo is None
         else tested_at.astimezone(timezone.utc)
