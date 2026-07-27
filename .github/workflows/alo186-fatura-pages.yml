@@ -24,7 +24,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: ALO186 testlerini çalıştır
+      - name: ALO186 statik araç testlerini çalıştır
         shell: bash
         run: |
           set -euo pipefail
@@ -35,34 +35,15 @@ jobs:
           node alo186/tests/test_continuity_store.js
           node alo186/tests/test_release_manifest.js
 
-      - name: Canonical rotalarla statik yayın paketini hazırla
+      - name: Preview ve üretim overlay paketlerini hazırla
         shell: bash
         run: |
           set -euo pipefail
-          rm -rf _site
-          mkdir -p _site
-          cp -a alo186/. _site/
+          chmod +x alo186/deployment/build_static_site.sh
+          alo186/deployment/build_static_site.sh _site preview
+          alo186/deployment/build_static_site.sh _overlay overlay
 
-          copy_route() {
-            source_path="$1"
-            target_path="$2"
-            rm -rf "_site/$target_path"
-            mkdir -p "_site/$(dirname "$target_path")"
-            cp -a "$source_path" "_site/$target_path"
-          }
-
-          mkdir -p _site/elektrik-portali
-          cp alo186/index.html _site/elektrik-portali/index.html
-          cp alo186/styles.css _site/elektrik-portali/styles.css
-
-          copy_route alo186/turkiye-arama edas-bul
-          copy_route alo186/urun-eslestirme akilli-urun-secimi
-          copy_route alo186/sureklilik-paneli isletme-surekliligi
-          copy_route alo186/yedek-guc-hesaplayici hesaplama/yedek-guc
-          copy_route alo186/kesinti-maliyet-hesaplayici hesaplama/kesinti-maliyeti
-
-          touch _site/.nojekyll
-
+          test -f _site/index.html
           test -f _site/elektrik-portali/index.html
           test -f _site/edas-bul/index.html
           test -f _site/karar-motoru/index.html
@@ -70,14 +51,30 @@ jobs:
           test -f _site/akilli-urun-secimi/index.html
           test -f _site/isletme-surekliligi/index.html
           test -f _site/fatura-analizi/index.html
+          test -f _overlay/.htaccess
+          test -f _overlay/SHA256SUMS
+          test ! -e _site/sureklilik-api
+          test ! -e _site/tests
+          test ! -e _overlay/sureklilik-api
+          test ! -e _overlay/tests
 
-      - name: Her çalışmada statik yayın paketini sakla
+      - name: GitHub Pages ön izleme paketini sakla
         uses: actions/upload-artifact@v4
         with:
-          name: alo186-static-site
+          name: alo186-pages-preview
           path: _site
           if-no-files-found: error
-          retention-days: 14
+          include-hidden-files: true
+          retention-days: 30
+
+      - name: Natro / mevcut hosting üretim overlay paketini sakla
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-production-overlay
+          path: _overlay
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
 
       - name: Configure Pages
         if: vars.ALO186_GITHUB_PAGES_ENABLED == 'true'
