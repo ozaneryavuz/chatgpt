@@ -56,6 +56,7 @@ class Settings:
     token_ttl_seconds: int
     email_token_ttl_seconds: int
     password_reset_ttl_seconds: int
+    invitation_ttl_seconds: int
     allowed_origins: tuple[str, ...]
     allowed_hosts: tuple[str, ...]
     public_base_url: str
@@ -103,6 +104,7 @@ def load_settings() -> Settings:
         token_ttl_seconds=_env_int("ALO186_TOKEN_TTL_SECONDS", 28_800),
         email_token_ttl_seconds=_env_int("ALO186_EMAIL_TOKEN_TTL_SECONDS", 86_400),
         password_reset_ttl_seconds=_env_int("ALO186_PASSWORD_RESET_TTL_SECONDS", 3_600),
+        invitation_ttl_seconds=_env_int("ALO186_INVITATION_TTL_SECONDS", 604_800),
         allowed_origins=_csv("ALO186_ALLOWED_ORIGINS", "http://localhost:8000"),
         allowed_hosts=_csv("ALO186_ALLOWED_HOSTS", "localhost,127.0.0.1,testserver"),
         public_base_url=os.getenv("ALO186_PUBLIC_BASE_URL", "http://localhost:8000").rstrip("/"),
@@ -146,7 +148,12 @@ def validate_settings(value: Settings, *, explicit_encryption_key: str | None) -
         raise RuntimeError("ALO186_DATA_ENCRYPTION_KEY geçerli urlsafe base64 olmalıdır.") from exc
     if len(raw_key) != 32:
         raise RuntimeError("ALO186_DATA_ENCRYPTION_KEY çözülünce 32 byte olmalıdır.")
-    if value.token_ttl_seconds <= 0 or value.email_token_ttl_seconds <= 0:
+    if (
+        value.token_ttl_seconds <= 0
+        or value.email_token_ttl_seconds <= 0
+        or value.password_reset_ttl_seconds <= 0
+        or value.invitation_ttl_seconds <= 0
+    ):
         raise RuntimeError("Token süreleri sıfırdan büyük olmalıdır.")
     if value.global_rate_limit <= 0 or value.auth_rate_limit <= 0:
         raise RuntimeError("Rate limit değerleri sıfırdan büyük olmalıdır.")
