@@ -47,7 +47,7 @@ def configure_logging() -> None:
 
 
 def request_id(value: str | None) -> str:
-    if value and 8 <= len(value) <= 80 and all(ch.isalnum() or ch in "-_ .".replace(" ", "") for ch in value):
+    if value and 8 <= len(value) <= 80 and all(ch.isalnum() or ch in "-_." for ch in value):
         return value
     return str(uuid.uuid4())
 
