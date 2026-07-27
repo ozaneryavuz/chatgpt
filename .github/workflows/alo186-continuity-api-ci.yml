@@ -93,6 +93,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          exec > >(tee migration-output.txt) 2>&1
           rm -f migration-test.db
           alembic upgrade 20260727_0001
           python - <<'PY'
@@ -116,6 +117,13 @@ jobs:
           PY
           alembic current
           alembic check
+      - name: Migration çıktısını yükle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: continuity-api-migration-output
+          path: alo186/sureklilik-api/migration-output.txt
+          if-no-files-found: error
 
   postgres-test:
     name: PostgreSQL migration ve entegrasyon testleri
