@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from test_api import headers, register
 
+# PR #16 Codex bulgularının tekrar oluşmasını engelleyen veri bütünlüğü testleri.
+
 
 def test_last_admin_cannot_demote_self(client):
     admin = register(client, "guard-admin@example.com", "Yönetici Guard Tesisi")
