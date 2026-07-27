@@ -2,7 +2,7 @@ name: ALO186 production infrastructure kalite kontrolü
 
 on:
   push:
-    branches: [main, ops/alo186-production-infra-v1]
+    branches: [main, ops/alo186-production-infra-v1, ops/alo186-production-infra-v2]
     paths:
       - "render.yaml"
       - "alo186/infra/**"
@@ -10,20 +10,24 @@ on:
       - "alo186/sureklilik-api/entrypoint.sh"
       - "alo186/sureklilik-api/requirements.txt"
       - "alo186/sureklilik-api/app/application.py"
+      - "alo186/sureklilik-api/app/config.py"
       - "alo186/sureklilik-api/app/sentry_integration.py"
       - "alo186/sureklilik-api/scripts/**"
       - "alo186/sureklilik-api/ops/backup/**"
+      - "alo186/sureklilik-api/tests/test_database_url.py"
       - ".github/workflows/alo186-infra-ci.yml"
       - ".github/workflows/alo186-production-synthetic.yml"
       - ".github/workflows/alo186-backup-restore-drill.yml"
+      - ".github/workflows/alo186-dns-reconcile.yml"
+      - ".github/workflows/alo186-r2-bootstrap.yml"
+      - ".github/workflows/alo186-render-deploy.yml"
+      - ".github/workflows/alo186-production-readiness.yml"
   pull_request:
     paths:
       - "render.yaml"
       - "alo186/infra/**"
       - "alo186/sureklilik-api/**"
-      - ".github/workflows/alo186-infra-ci.yml"
-      - ".github/workflows/alo186-production-synthetic.yml"
-      - ".github/workflows/alo186-backup-restore-drill.yml"
+      - ".github/workflows/alo186-*.yml"
   workflow_dispatch:
 
 permissions:
@@ -32,24 +36,36 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Doğrulama araçları
-        run: pip install --disable-pip-version-check pyyaml check-jsonschema
+          cache: pip
+          cache-dependency-path: alo186/sureklilik-api/requirements.txt
+      - name: Doğrulama ve API bağımlılıkları
+        run: |
+          python -m pip install --upgrade pip
+          pip install --disable-pip-version-check -r alo186/sureklilik-api/requirements.txt
+          pip install --disable-pip-version-check pyyaml check-jsonschema
       - name: Render Blueprint resmi JSON Schema
         run: check-jsonschema --schemafile https://render.com/schema/render.yaml.json render.yaml
       - name: Render Blueprint ALO186 semantik kuralları
         run: python alo186/infra/production/validate_render.py render.yaml
-      - name: Python sözdizimi
+      - name: Python sözdizimi ve DB URL regresyon testi
+        env:
+          PYTHONPATH: alo186/sureklilik-api
+          ALO186_ENV: test
+          ALO186_TOKEN_SECRET: test-secret-at-least-32-characters-long
+          ALO186_AUTO_CREATE_SCHEMA: "true"
+          ALO186_EXPOSE_TEST_TOKENS: "true"
         run: |
           python -m compileall -q \
             alo186/infra \
             alo186/sureklilik-api/app \
             alo186/sureklilik-api/scripts
+          pytest -q alo186/sureklilik-api/tests/test_database_url.py
       - name: ShellCheck
         run: |
           sudo apt-get update -qq
@@ -58,13 +74,15 @@ jobs:
             alo186/sureklilik-api/entrypoint.sh \
             alo186/sureklilik-api/scripts/render_predeploy.sh \
             alo186/sureklilik-api/ops/backup/backup_to_r2.sh \
-            alo186/sureklilik-api/ops/backup/verify_restore.sh
-      - name: Caddy yapılandırması
+            alo186/sureklilik-api/ops/backup/verify_restore.sh \
+            alo186/infra/production/check_email_dns.sh
+      - name: Caddy 2.11.4 yapılandırması
         run: |
           docker run --rm \
             -v "$PWD/alo186/infra/caddy/Caddyfile:/etc/caddy/Caddyfile:ro" \
-            caddy:2.10.0-alpine caddy validate --config /etc/caddy/Caddyfile
-      - name: Grafana Alloy yapılandırması
+            caddy:2.11.4-alpine caddy validate --config /etc/caddy/Caddyfile
+          docker compose -f alo186/infra/caddy/docker-compose.yml config >/dev/null
+      - name: VPS Grafana Alloy yapılandırması
         env:
           ALO186_API_METRICS_TARGET: api.alo186.com
           ALO186_METRICS_TOKEN: ci-metrics-token
@@ -84,10 +102,25 @@ jobs:
             -e GRAFANA_CLOUD_API_KEY \
             -v "$PWD/alo186/infra/observability/config.alloy:/etc/alloy/config.alloy:ro" \
             grafana/alloy:v1.18.0 validate /etc/alloy/config.alloy
+      - name: Render Alloy image ve config
+        run: |
+          docker build -t alo186-alloy:ci alo186/infra/observability
+          docker run --rm \
+            -e ALO186_API_METRICS_TARGET=alo186-continuity-api.onrender.com \
+            -e ALO186_METRICS_TOKEN=ci-metrics-token \
+            -e GRAFANA_CLOUD_PROMETHEUS_URL=https://prometheus.example.invalid/api/prom/push \
+            -e GRAFANA_CLOUD_PROMETHEUS_USERNAME=1 \
+            -e GRAFANA_CLOUD_API_KEY=ci-api-key \
+            alo186-alloy:ci validate /etc/alloy/config.alloy
       - name: API Docker image
         run: docker build -t alo186-continuity-api:ci alo186/sureklilik-api
       - name: Backup Docker image
         run: docker build -f alo186/sureklilik-api/ops/backup/Dockerfile -t alo186-backup:ci alo186/sureklilik-api
+      - name: Operasyon araçları smoke test
+        run: |
+          python alo186/infra/cloudflare/reconcile_dns.py --help
+          python alo186/infra/production/smtp_probe.py --help
+          python alo186/infra/observability/synthetic_check.py --help
 
   terraform:
     runs-on: ubuntu-latest
@@ -108,9 +141,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Secret üretici izin kontrolü
+      - name: Secret üretici güvenli varsayılan ve izin kontrolü
+        shell: bash
         run: |
+          set -euo pipefail
           mkdir -p /tmp/alo186-secrets
+          if python alo186/sureklilik-api/scripts/generate_production_secrets.py >/tmp/unsafe-out 2>/tmp/unsafe-err; then
+            echo 'Secret üretici --output olmadan başarılı olmamalı.' >&2
+            exit 1
+          fi
           python alo186/sureklilik-api/scripts/generate_production_secrets.py \
             --format shell \
             --output /tmp/alo186-secrets/production.env
@@ -126,7 +165,7 @@ jobs:
           . /tmp/alo186-secrets/production.env
           set +a
           export ALO186_ENV=production
-          export ALO186_DATABASE_URL='postgresql+psycopg://alo186:secret@db.internal/alo186'
+          export ALO186_DATABASE_URL='postgresql://alo186:secret@db.internal/alo186'
           export ALO186_ALLOWED_ORIGINS='https://www.alo186.com'
           export ALO186_ALLOWED_HOSTS='api.alo186.com,localhost,127.0.0.1'
           export ALO186_PUBLIC_BASE_URL='https://www.alo186.com'
