@@ -26,10 +26,13 @@ jobs:
           cache-dependency-path: alo186/sureklilik-api/requirements.txt
       - name: Bağımlılıkları kur
         run: pip install -q -r alo186/sureklilik-api/requirements.txt
-      - name: API testleri
+      - name: API, güvenlik ve migration testleri
         working-directory: alo186/sureklilik-api
         env:
+          ALO186_ENV: test
           ALO186_TOKEN_SECRET: test-secret-at-least-32-characters-long
+          ALO186_ALLOWED_HOSTS: localhost,127.0.0.1,testserver
+          ALO186_AUTO_CREATE_SCHEMA: 'true'
           PYTHONPATH: .
         shell: bash
         run: |
@@ -46,4 +49,20 @@ jobs:
           path: alo186/sureklilik-api/pytest-output.txt
           if-no-files-found: error
       - name: Python sözdizimi
-        run: python -m compileall -q alo186/sureklilik-api/app
+        run: python -m compileall -q alo186/sureklilik-api/app alo186/sureklilik-api/migrations
+      - name: Alembic revision bütünlüğü
+        working-directory: alo186/sureklilik-api
+        env:
+          ALO186_ENV: test
+          ALO186_DATABASE_URL: sqlite:///./ci-alembic.db
+          ALO186_TOKEN_SECRET: test-secret-at-least-32-characters-long
+          ALO186_AUTO_CREATE_SCHEMA: 'false'
+          PYTHONPATH: .
+        run: |
+          alembic -c alembic.ini heads
+          alembic -c alembic.ini upgrade head
+          alembic -c alembic.ini current
+      - name: Operasyon scriptleri sözdizimi
+        run: bash -n alo186/sureklilik-api/scripts/*.sh
+      - name: Docker image build
+        run: docker build -t alo186-continuity-api:ci alo186/sureklilik-api
