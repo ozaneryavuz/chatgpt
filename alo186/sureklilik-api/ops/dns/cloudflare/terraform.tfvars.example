@@ -1,0 +1,19 @@
+cloudflare_zone_id = "YOUR_ZONE_ID"
+zone_name         = "alo186.com"
+api_origin_hostname = "alo186-api.onrender.com"
+proxy_api = false
+
+# CLOUDFLARE_API_TOKEN ortam değişkeni veya güvenli tfvars ile verilir.
+# Postmark panelindeki gerçek kayıt isimlerini ve değerlerini buraya girin.
+smtp_dns_records = {
+  postmark_dkim = {
+    type    = "TXT"
+    name    = "REPLACE_DKIM_HOST.alo186.com"
+    content = "REPLACE_DKIM_VALUE"
+  }
+  postmark_return_path = {
+    type    = "CNAME"
+    name    = "pm-bounces.alo186.com"
+    content = "REPLACE_RETURN_PATH_TARGET"
+  }
+}
