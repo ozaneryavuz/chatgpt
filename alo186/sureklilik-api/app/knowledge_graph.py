@@ -150,6 +150,11 @@ def _tenant_assertion(db: Session, assertion_id: str, context: OrgContext) -> Kn
     return assertion
 
 
+def _forbid_global(scope_key: str, entity_name: str) -> None:
+    if scope_key == GLOBAL_SCOPE:
+        raise HTTPException(status_code=403, detail=f"Global Knowledge Graph {entity_name} tenant API ile değiştirilemez.")
+
+
 @router.get("/public/search")
 def search_public_graph(
     q: str = Query(min_length=2, max_length=120),
@@ -164,14 +169,12 @@ def search_public_graph(
 @router.get("/public/entities/{canonical_key}/jsonld")
 def public_entity_jsonld(canonical_key: str, db: Session = Depends(get_db)) -> dict[str, Any]:
     entity = _public_entity(db, canonical_key)
-    bundle = entity_bundle(db, entity=entity, public_only=True)
-    return to_jsonld(bundle, public_base_url=settings.public_base_url)
+    return to_jsonld(entity_bundle(db, entity=entity, public_only=True), public_base_url=settings.public_base_url)
 
 
 @router.get("/public/entities/{canonical_key}")
 def public_entity(canonical_key: str, db: Session = Depends(get_db)) -> dict[str, Any]:
-    entity = _public_entity(db, canonical_key)
-    return entity_bundle(db, entity=entity, public_only=True)
+    return entity_bundle(db, entity=_public_entity(db, canonical_key), public_only=True)
 
 
 @router.get("/public/path")
@@ -183,13 +186,7 @@ def public_graph_path(
 ) -> dict[str, Any]:
     start = _public_entity(db, from_key)
     end = _public_entity(db, to_key)
-    result = find_path(
-        db,
-        start_entity_id=start.id,
-        end_entity_id=end.id,
-        public_only=True,
-        max_depth=max_depth,
-    )
+    result = find_path(db, start_entity_id=start.id, end_entity_id=end.id, public_only=True, max_depth=max_depth)
     if result is None:
         raise HTTPException(status_code=404, detail="Belirtilen derinlikte graph yolu bulunamadı.")
     return result
@@ -278,8 +275,7 @@ def patch_tenant_entity(
     db: Session = Depends(get_db),
 ) -> dict[str, Any]:
     entity = _tenant_entity(db, entity_id, context)
-    if entity.scope_key == GLOBAL_SCOPE:
-        raise HTTPException(status_code=403, detail="Global Knowledge Graph varlığı tenant API ile değiştirilemez.")
+    _forbid_global(entity.scope_key, "varlığı")
     values = payload.model_dump(exclude_unset=True)
     if "name" in values:
         entity.name = values["name"]
@@ -310,8 +306,7 @@ def retire_tenant_entity(
     db: Session = Depends(get_db),
 ) -> Response:
     entity = _tenant_entity(db, entity_id, context)
-    if entity.scope_key == GLOBAL_SCOPE:
-        raise HTTPException(status_code=403, detail="Global Knowledge Graph varlığı tenant API ile silinemez.")
+    _forbid_global(entity.scope_key, "varlığı")
     entity.status = "retired"
     entity.updated_at = utcnow()
     write_audit(
@@ -408,8 +403,7 @@ def patch_tenant_assertion(
     db: Session = Depends(get_db),
 ) -> dict[str, Any]:
     assertion = _tenant_assertion(db, assertion_id, context)
-    if assertion.scope_key == GLOBAL_SCOPE:
-        raise HTTPException(status_code=403, detail="Global Knowledge Graph iddiası tenant API ile değiştirilemez.")
+    _forbid_global(assertion.scope_key, "iddiası")
     values = payload.model_dump(exclude_unset=True)
     if "confidence" in values:
         assertion.confidence = values["confidence"]
@@ -442,8 +436,7 @@ def retire_tenant_assertion(
     db: Session = Depends(get_db),
 ) -> Response:
     assertion = _tenant_assertion(db, assertion_id, context)
-    if assertion.scope_key == GLOBAL_SCOPE:
-        raise HTTPException(status_code=403, detail="Global Knowledge Graph iddiası tenant API ile silinemez.")
+    _forbid_global(assertion.scope_key, "iddiası")
     assertion.status = "retired"
     assertion.updated_at = utcnow()
     write_audit(
@@ -510,6 +503,9 @@ def create_verification(
     entity = _tenant_entity(db, payload.target_entity_id, context) if payload.target_entity_id else None
     assertion = _tenant_assertion(db, payload.target_assertion_id, context) if payload.target_assertion_id else None
     checked_at = payload.checked_at or utcnow()
+    details = dict(payload.details)
+    if source.scope_key == GLOBAL_SCOPE or (assertion and assertion.scope_key == GLOBAL_SCOPE):
+        details["global_target_read_only"] = True
     run = KnowledgeVerificationRun(
         scope_key=org_scope(context.organization_id),
         organization_id=context.organization_id,
@@ -520,15 +516,16 @@ def create_verification(
         checked_at=checked_at,
         duration_ms=payload.duration_ms,
         content_hash=payload.content_hash,
-        details_json=json.dumps(payload.details, ensure_ascii=False, sort_keys=True),
+        details_json=json.dumps(details, ensure_ascii=False, sort_keys=True),
         created_by_user_id=context.user.id,
     )
     db.add(run)
-    source.last_checked_at = checked_at
-    source.status = "active" if payload.status in {"ok", "unchanged", "verified"} else payload.status
-    if payload.content_hash:
-        source.content_hash = payload.content_hash
-    if assertion:
+    if source.scope_key != GLOBAL_SCOPE:
+        source.last_checked_at = checked_at
+        source.status = "active" if payload.status in {"ok", "unchanged", "verified"} else payload.status
+        if payload.content_hash:
+            source.content_hash = payload.content_hash
+    if assertion and assertion.scope_key != GLOBAL_SCOPE:
         assertion.verified_at = checked_at
         if payload.status in {"changed", "invalid", "error"}:
             assertion.status = "disputed"
@@ -539,7 +536,11 @@ def create_verification(
         action="kg.verification.created",
         entity_type="kg_verification",
         entity_id=run.id,
-        details={"status": run.status, "source_id": source.id},
+        details={
+            "status": run.status,
+            "source_id": source.id,
+            "global_target_read_only": details.get("global_target_read_only", False),
+        },
     )
     db.commit()
     return {
@@ -551,7 +552,7 @@ def create_verification(
         "checked_at": run.checked_at,
         "duration_ms": run.duration_ms,
         "content_hash": run.content_hash,
-        "details": payload.details,
+        "details": details,
     }
 
 
