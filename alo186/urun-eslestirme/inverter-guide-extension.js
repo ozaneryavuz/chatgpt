@@ -39,7 +39,8 @@
 
   function enablePostCalculationAffiliate() {
     const params = new URLSearchParams(location.search);
-    if (!selectedInverter() || params.get('hesaplandi') !== '1') return;
+    const verifiedHandoff = params.get('hesaplandi') === '1' || params.get('kaynak') === 'inverter-uygunluk';
+    if (!selectedInverter() || !verifiedHandoff) return;
     const target = document.getElementById('guideResult');
     const catalog = window.Alo186ProductCatalog;
     if (!target || !catalog) return;
