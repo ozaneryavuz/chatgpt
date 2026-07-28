@@ -29,10 +29,12 @@ def public_url(base_path: str, route: str) -> str:
 def insert_after_grid_open(text: str, card: str) -> tuple[str, bool]:
     if CARD_MARKER in text:
         return text, False
-    match = re.search(r'<section\b[^>]*class=["\'][^"\']*\bgrid\b[^"\']*["\'][^>]*>', text, re.I)
-    if not match:
-        return text, False
-    return text[: match.end()] + "\n" + card + text[match.end() :], True
+    for match in re.finditer(r'<section\b[^>]*>', text, re.I):
+        class_match = re.search(r'class=["\']([^"\']*)["\']', match.group(0), re.I)
+        if not class_match or "grid" not in class_match.group(1).split():
+            continue
+        return text[: match.end()] + "\n" + card + text[match.end() :], True
+    return text, False
 
 
 def outcome_card(base_path: str, gateway: bool = False) -> str:
