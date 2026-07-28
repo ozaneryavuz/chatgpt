@@ -33,6 +33,24 @@
       ['Dalga biçimi','Kombi, motor ve hassas cihazlarda saf sinüs gereksinimini doğrulayın.'],
       ['Batarya ve girişler','LiFePO₄ çevrim ömrü, AC/DC/solar giriş sınırları ve konektör uyumunu kontrol edin.']
     ],
+    ups_battery:[
+      ['UPS model numarası','UPS gövdesindeki tam model kodunu üretici seçicisinde kullanın; yalnız akü üzerindeki kodla karar vermeyin.'],
+      ['RBC / kartuş kodu','Üreticinin model için verdiği tam yedek kartuş veya batarya modülü kodunu doğrulayın.'],
+      ['Set ve bağlantılar','Seri içindeki bütün akülerin, kablo demeti, sigorta, sensör ve konektör setinin kapsamını kontrol edin.'],
+      ['Değişim güvenliği','Şişme, sızıntı, koku, aşırı ısı veya kullanıcı değişimine kapalı modelde ürünü açmayın; yetkili servise ilerleyin.']
+    ],
+    ev_cable:[
+      ['Konnektör ve kullanım tipi','Araç girişi ile soketli şarj noktasının Type 2–Type 2 Mode 3 / Case B kullanımını desteklediğini doğrulayın.'],
+      ['Faz ve akım','Araç, istasyon ve kablonun monofaze/trifaze ile 16 A veya 32 A sınırlarının en düşüğünü esas alın.'],
+      ['Hedef güç','7,4 / 11 / 22 kW beklentisini araç AC şarj cihazı, istasyon ve kablonun ortak sınırıyla kontrol edin.'],
+      ['Fiziksel güvenlik','Hasar, kilit sorunu, uzatma, çoklayıcı veya doğrulanmamış adaptör varsa kabloyu kullanmayın.']
+    ],
+    solar_panel_power_station:[
+      ['Soğuk hava Voc','Seri panel toplam açık devre gerilimini sıcaklık katsayısıyla hesaplayın; mutlak cihaz sınırına ulaşmayın.'],
+      ['MPPT çalışma aralığı','Toplam Vmp değerinin power station veya şarj kontrol cihazının MPPT aralığında kaldığını doğrulayın.'],
+      ['Akım sınırları','Paralel dizilerde Imp ve Isc değerlerini toplayın; giriş ve kısa devre akımı sınırlarını aşmayın.'],
+      ['Konnektör ve polarite','Fiziksel olarak takılan adaptörü elektriksel uyum sanmayın; konnektör, kablo, polarite ve üretici desteğini doğrulayın.']
+    ],
     outlet_tester:[
       ['Gösterge kapsamı','LED deseninin hangi temel bağlantı hatalarını gösterebildiğini okuyun.'],
       ['RCD testi','Test akımı ve uyumlu nominal kaçak akım değeri belirtilmeli.'],
@@ -144,7 +162,9 @@
 
   function renderGuide(result){
     const checks=guideChecks[selectedCategory]||[];
+    const category=result.category||catalog.getCategory(selectedCategory)||{};
     const checklist=`<div class="guide-list">${checks.map(([title,text])=>`<div class="guide-item"><b>${escapeHtml(title)}</b><span>${escapeHtml(text)}</span></div>`).join('')}</div>`;
+    const source=category.sourceUrl?`<div class="verification"><b>Birincil teknik kaynak:</b> <a href="${escapeAttr(category.sourceUrl)}" target="_blank" rel="external nofollow noopener">${escapeHtml(category.sourceLabel||'Üretici teknik dokümanı')}</a>. Kaynak ürün uygunluğu veya satıcı onayı değildir; tam model belgesi önceliklidir.</div>`:'';
     const professional=result.professionalSelectionRequired?`<div class="professional-note"><b>Profesyonel seçim sınırı:</b> Bu kategoride bağlantı, tesisat, standart veya ölçüm uyumu yanlış ürün riskini artırır. Sonuç bir uygunluk onayı değildir.</div>`:'';
     let actions='';
 
@@ -153,10 +173,11 @@
       actions=`<div class="decision-gate"><b>Satın alma bağlantısı neden gösterilmiyor?</b><p>${result.affiliatePolicy==='professional_only'?'Bu ölçüm kategorisinde yanlış cihaz güvenli olmayan bir sonuca yol açabilir. Önce uzman ölçümü veya güvenli yönlendirme gerekir.':'Güç, enerji, gerilim veya bağlantı uyumu hesaplanmadan ürün aramak yanlış seçim ve iade riskini artırır.'}</p></div><div class="actions"><a class="btn btn-primary" data-next-step href="${escapeAttr(next.url)}">${escapeHtml(next.label)}</a>${result.professionalSelectionRequired?'<a class="btn btn-secondary" href="https://www.alo186.com/iletisim?konu=urun-teknik-secim">Teknik ön değerlendirme</a>':''}</div>`;
       emit('affiliate_exposure_blocked',{category:selectedCategory,reason:result.affiliatePolicy});
     }else{
-      actions=`<div class="decision-gate"><label class="check-item"><input type="checkbox" data-guide-confirm><span><b>Kontrol listesini ürün sayfasında yeniden doğrulayacağım.</b><br><small>Fiyat, stok, satıcı, garanti ve nihai teknik özellik yalnız Amazon’un güncel sayfasında doğrulanır.</small></span></label><div class="actions"><a class="btn btn-primary disabled-link" data-guide-amazon aria-disabled="true" tabindex="-1" href="${escapeAttr(result.searchUrl)}" target="_blank" rel="sponsored nofollow noopener">Amazon’da teknik ifadelerle ara</a></div></div>`;
+      const acknowledgement=category.affiliateAck||'Kontrol listesini ürün sayfasında yeniden doğrulayacağım.';
+      actions=`<div class="decision-gate"><label class="check-item"><input type="checkbox" data-guide-confirm><span><b>${escapeHtml(acknowledgement)}</b><br><small>Fiyat, stok, satıcı, garanti ve nihai teknik özellik yalnız Amazon’un güncel sayfasında doğrulanır. Satın almamak geçerli sonuçtur.</small></span></label><div class="actions"><a class="btn btn-primary disabled-link" data-guide-amazon aria-disabled="true" tabindex="-1" href="${escapeAttr(result.searchUrl)}" target="_blank" rel="sponsored nofollow noopener">Amazon’da teknik ifadelerle ara</a></div></div>`;
     }
 
-    $('guideResult').innerHTML=`<span class="eyebrow">Rehberli seçim</span><h3>Ürün adından önce bu alanları doğrulayın</h3>${checklist}${professional}${actions}`;
+    $('guideResult').innerHTML=`<span class="eyebrow">Rehberli seçim</span><h3>Ürün adından önce bu alanları doğrulayın</h3>${checklist}${source}${professional}${actions}`;
     const nextStep=$('guideResult').querySelector('[data-next-step]');
     if(nextStep)nextStep.addEventListener('click',()=>emit('free_tool_route_opened',{category:selectedCategory,affiliate_policy:result.affiliatePolicy}));
     const confirm=$('guideResult').querySelector('[data-guide-confirm]');
