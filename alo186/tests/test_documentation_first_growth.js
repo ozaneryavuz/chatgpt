@@ -36,7 +36,6 @@ assert(ui.includes("window.addEventListener('click',interceptAffiliate,true)"),'
 assert(ui.includes('Soru paketini kopyala'),'Satıcı/üretici soru paketi kopyalama CTA’sı eksik.');
 assert(ui.includes('14 günlük yeniden kontrol oluştur'),'Tekrar ziyaret CTA’sı eksik.');
 assert(ui.includes('Teknik veri hazırlık skorunu aç'),'B2B teknik veri hizmeti CTA’sı eksik.');
-assert(ui.includes("rel")===false||true,'noop');
 assert(!/amazon\.(?:com|com\.tr)\/dp\//i.test(ui),'Belge katmanı doğrudan ürün URL’si içermemeli.');
 assert(!/type="(?:email|tel|text)"|<textarea/i.test(ui),'Belge katmanı kişisel veri veya serbest metin alanı oluşturmamalı.');
 
