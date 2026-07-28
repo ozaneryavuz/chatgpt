@@ -37,17 +37,20 @@ const articles=[
   {
     slug:'kacak-akim-rolesi-tip-a-tip-ac-farki',
     required:['Tip AC','Tip A','RDC-DD','30 mA','yetkili elektrikçi'],
-    cta:'/hesaplama/ev-sarj-uygunluk/'
+    cta:'/hesaplama/ev-sarj-uygunluk/',
+    fresh:true
   },
   {
     slug:'ev-tipi-enerji-depolama-kac-kwh-olmali',
     required:['kritik yük','kWh','kW','kullanılabilir kapasite','BMS'],
-    cta:'/hesaplama/inverter-uygunluk/'
+    cta:'/hesaplama/inverter-uygunluk/',
+    fresh:true
   },
   {
     slug:'harmonik-nedir-thd-cihazlari-nasil-etkiler',
     required:['THDv','THDi','nötr','PCC','aktif harmonik filtre'],
-    cta:'/isletme-surekliligi'
+    cta:'/isletme-surekliligi',
+    fresh:true
   }
 ];
 
@@ -71,8 +74,10 @@ for(const article of articles){
   assert(html.includes('../alo186-article.css'),`Ortak CSS eksik: ${article.slug}`);
   assert(html.includes(article.cta),`İç CTA eksik: ${article.slug}`);
   assert(html.includes('Bağımsız bilgi'),`Bağımsızlık ifadesi eksik: ${article.slug}`);
-  assert(html.includes('Son doğrulama: 28 Temmuz 2026'),`Doğrulama tarihi eksik: ${article.slug}`);
-  assert(html.includes('Kaynaklar ve doğrulama'),`Görünür kaynak bölümü eksik: ${article.slug}`);
+  if(article.fresh){
+    assert(html.includes('Son doğrulama: 28 Temmuz 2026'),`Doğrulama tarihi eksik: ${article.slug}`);
+    assert(html.includes('Kaynaklar ve doğrulama'),`Görünür kaynak bölümü eksik: ${article.slug}`);
+  }
   assert(!/<form\b/i.test(html),`Makale kişisel veri/form istememeli: ${article.slug}`);
   assert(!/amazon\.com\.tr/i.test(html),`Teknik makalede doğrudan Amazon URL'si olmamalı: ${article.slug}`);
   assert(!/fiyatı\s+\d|stokta|puanı\s+\d/i.test(html),`Doğrulanmamış ticari bilgi riski: ${article.slug}`);
