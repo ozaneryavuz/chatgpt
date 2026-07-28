@@ -62,28 +62,75 @@ jobs:
             --bundle /tmp/alo186-canonical
 
       - name: Custom-domain ve github.io alt-yol modlarını birlikte test et
+        id: dual_mode
         shell: bash
         run: |
-          set -euo pipefail
+          set -uo pipefail
+          rm -rf /tmp/alo186-pages-diagnostics
+          mkdir -p /tmp/alo186-pages-diagnostics
+          custom_status=0
+          project_status=0
+
           cp -a /tmp/alo186-canonical /tmp/alo186-pages-custom
           python alo186/deployment/prepare_github_pages.py \
             --site /tmp/alo186-pages-custom \
             --base-path '' \
             --repository "$GITHUB_REPOSITORY" \
-            --commit "$GITHUB_SHA"
-          python alo186/deployment/smoke_github_pages.py \
-            --site /tmp/alo186-pages-custom \
-            --base-path ''
+            --commit "$GITHUB_SHA" \
+            > /tmp/alo186-pages-diagnostics/custom-prepare.json 2> /tmp/alo186-pages-diagnostics/custom-prepare.err || custom_status=$?
+          if [ "$custom_status" -eq 0 ]; then
+            python alo186/deployment/smoke_github_pages.py \
+              --site /tmp/alo186-pages-custom \
+              --base-path '' \
+              > /tmp/alo186-pages-diagnostics/custom-smoke.json 2> /tmp/alo186-pages-diagnostics/custom-smoke.err || custom_status=$?
+          fi
 
           cp -a /tmp/alo186-canonical /tmp/alo186-pages-project
           python alo186/deployment/prepare_github_pages.py \
             --site /tmp/alo186-pages-project \
             --base-path '/chatgpt' \
             --repository "$GITHUB_REPOSITORY" \
-            --commit "$GITHUB_SHA"
-          python alo186/deployment/smoke_github_pages.py \
-            --site /tmp/alo186-pages-project \
-            --base-path '/chatgpt'
+            --commit "$GITHUB_SHA" \
+            > /tmp/alo186-pages-diagnostics/project-prepare.json 2> /tmp/alo186-pages-diagnostics/project-prepare.err || project_status=$?
+          if [ "$project_status" -eq 0 ]; then
+            python alo186/deployment/smoke_github_pages.py \
+              --site /tmp/alo186-pages-project \
+              --base-path '/chatgpt' \
+              > /tmp/alo186-pages-diagnostics/project-smoke.json 2> /tmp/alo186-pages-diagnostics/project-smoke.err || project_status=$?
+          fi
+
+          {
+            echo "custom_status=$custom_status"
+            echo "project_status=$project_status"
+            echo "custom_file_count=$(find /tmp/alo186-pages-custom -type f | wc -l | tr -d ' ')"
+            echo "project_file_count=$(find /tmp/alo186-pages-project -type f | wc -l | tr -d ' ')"
+          } | tee /tmp/alo186-pages-diagnostics/status.txt
+
+          for log in /tmp/alo186-pages-diagnostics/*.err /tmp/alo186-pages-diagnostics/*-smoke.json; do
+            [ -f "$log" ] || continue
+            if [ -s "$log" ]; then
+              echo "===== $log ====="
+              cat "$log"
+            fi
+          done
+
+          if [ "$custom_status" -ne 0 ] || [ "$project_status" -ne 0 ]; then
+            exit 1
+          fi
+
+      - name: Dual-mode tanı paketini sakla
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-github-pages-dual-mode-diagnostics
+          path: |
+            /tmp/alo186-pages-diagnostics
+            /tmp/alo186-pages-custom/pages-release.json
+            /tmp/alo186-pages-custom/route-bridges.json
+            /tmp/alo186-pages-project/pages-release.json
+            /tmp/alo186-pages-project/route-bridges.json
+          if-no-files-found: warn
+          retention-days: 7
 
       - name: GitHub Pages ayarlarını oku
         id: pages
