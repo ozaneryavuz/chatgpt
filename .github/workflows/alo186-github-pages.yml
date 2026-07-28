@@ -1,0 +1,172 @@
+name: ALO186 GitHub Pages — sunucusuz canlı yayın
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/**'
+      - '.github/workflows/alo186-github-pages.yml'
+  pull_request:
+    paths:
+      - 'alo186/**'
+      - '.github/workflows/alo186-github-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: alo186-github-pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    outputs:
+      pages_ready: ${{ steps.pages_mode.outputs.pages_ready }}
+      base_path: ${{ steps.pages_mode.outputs.base_path }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Kaynak güvenlik ve yayın sözleşmeleri
+        shell: bash
+        run: |
+          set -euo pipefail
+          node alo186/tests/test_portal_hardening.js
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_authority_content.js
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Canonical statik siteyi oluştur
+        shell: bash
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-canonical
+
+      - name: Custom-domain ve github.io alt-yol modlarını birlikte test et
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp -a /tmp/alo186-canonical /tmp/alo186-pages-custom
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-pages-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-pages-custom \
+            --base-path ''
+
+          cp -a /tmp/alo186-canonical /tmp/alo186-pages-project
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-pages-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-pages-project \
+            --base-path '/chatgpt'
+
+      - name: GitHub Pages ayarlarını oku
+        id: pages
+        if: github.event_name != 'pull_request'
+        continue-on-error: true
+        uses: actions/configure-pages@v5
+
+      - name: Gerçek yayın modunu seç
+        id: pages_mode
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          CONFIGURE_OUTCOME: ${{ steps.pages.outcome }}
+          CONFIGURED_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT_NAME" != 'pull_request' ] && [ "$CONFIGURE_OUTCOME" = 'success' ]; then
+            printf 'pages_ready=true\n' >> "$GITHUB_OUTPUT"
+            printf 'base_path=%s\n' "$CONFIGURED_BASE_PATH" >> "$GITHUB_OUTPUT"
+          else
+            printf 'pages_ready=false\n' >> "$GITHUB_OUTPUT"
+            printf 'base_path=/chatgpt\n' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Yayınlanacak Pages artifactını hazırla
+        shell: bash
+        env:
+          PAGES_BASE_PATH: ${{ steps.pages_mode.outputs.base_path }}
+        run: |
+          set -euo pipefail
+          cp -a /tmp/alo186-canonical /tmp/alo186-pages-site
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-pages-site \
+            --base-path "$PAGES_BASE_PATH" \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-pages-site \
+            --base-path "$PAGES_BASE_PATH"
+
+      - name: Pages önizleme artifactını sakla
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-github-pages-preview
+          path: /tmp/alo186-pages-site
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
+
+      - name: GitHub Pages artifactını yükle
+        if: github.event_name != 'pull_request' && steps.pages_mode.outputs.pages_ready == 'true'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: /tmp/alo186-pages-site
+
+      - name: Yayın özeti
+        shell: bash
+        env:
+          PAGES_READY: ${{ steps.pages_mode.outputs.pages_ready }}
+          BASE_PATH: ${{ steps.pages_mode.outputs.base_path }}
+        run: |
+          {
+            echo '## ALO186 GitHub Pages'
+            echo
+            echo "- Pages yapılandırması hazır: **$PAGES_READY**"
+            echo "- Build base path: \`$BASE_PATH\`"
+            echo '- Hosting modu: GitHub Pages — Natro web hosting veya CDN gerektirmez.'
+            echo '- Kritik elektrik rehberleri service worker ile çevrimdışı önbelleğe alınır.'
+            if [ "$PAGES_READY" != 'true' ]; then
+              echo
+              echo '> Bir defalık işlem: Repository Settings → Pages → Source: GitHub Actions seçilmelidir. Build ve testler tamamlanmış, yayın adımı güvenli biçimde beklemeye alınmıştır.'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  deploy:
+    if: github.event_name != 'pull_request' && needs.build.outputs.pages_ready == 'true'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: GitHub Pages'e yayınla
+        id: deployment
+        uses: actions/deploy-pages@v4
