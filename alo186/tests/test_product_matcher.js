@@ -3,7 +3,7 @@ const catalog=require('../urun-eslestirme/catalog.js');
 const matcher=require('../urun-eslestirme/matcher-core.js');
 
 assert.strictEqual(catalog.affiliateTag,'alo186hazirlik-21');
-assert.strictEqual(catalog.categories.length,7,'Yedi ihtiyaç kategorisi bulunmalı.');
+assert.strictEqual(catalog.categories.length,8,'Sekiz ihtiyaç kategorisi bulunmalı.');
 assert(catalog.productsFor('powerbank').length>=3,'Powerbank kataloğunda en az üç ürün olmalı.');
 assert(catalog.productsFor('surge_strip').length>=3,'Grup priz kataloğunda en az üç ürün olmalı.');
 
@@ -39,6 +39,12 @@ assert(result.matches[0].unknowns.length>0,'Bilinmeyen teknik alan görünür ol
 result=matcher.match('mini_ups',{});
 assert.strictEqual(result.mode,'guide');
 assert.strictEqual(result.professionalSelectionRequired,true);
+assert(result.searchUrl.includes('tag=alo186hazirlik-21'));
+
+result=matcher.match('generator',{});
+assert.strictEqual(result.mode,'guide');
+assert.strictEqual(result.professionalSelectionRequired,true);
+assert(result.searchUrl.includes('inverter+jenerat%C3%B6r'));
 assert(result.searchUrl.includes('tag=alo186hazirlik-21'));
 
 result=matcher.match('emergency_light',{});
