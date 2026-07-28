@@ -1,0 +1,119 @@
+name: ALO186 akım korumalı priz uygunluk kalite kontrolü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/akim-korumali-priz-uygunluk/**'
+      - 'alo186/hesaplama/index.html'
+      - 'alo186/urun-eslestirme/catalog.js'
+      - 'alo186/urun-eslestirme/journey-retention-core.js'
+      - 'alo186/deployment/routing-manifest.json'
+      - 'alo186/sitemap.xml'
+      - '.github/workflows/alo186-surge-strip-suitability.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/akim-korumali-priz-uygunluk/**'
+      - 'alo186/hesaplama/index.html'
+      - 'alo186/urun-eslestirme/catalog.js'
+      - 'alo186/urun-eslestirme/journey-retention-core.js'
+      - 'alo186/deployment/routing-manifest.json'
+      - 'alo186/sitemap.xml'
+      - '.github/workflows/alo186-surge-strip-suitability.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-surge-strip-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Modül senaryoları
+        run: node alo186/hesaplama/akim-korumali-priz-uygunluk/test.js
+
+      - name: JavaScript sözdizimi
+        run: |
+          node --check alo186/hesaplama/akim-korumali-priz-uygunluk/core.js
+          node --check alo186/hesaplama/akim-korumali-priz-uygunluk/app.js
+          node --check alo186/urun-eslestirme/catalog.js
+          node --check alo186/urun-eslestirme/journey-retention-core.js
+
+      - name: Ürün kapısı, yolculuk ve yayın sözleşmesi
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const assert=require('assert');
+          const catalog=require('./alo186/urun-eslestirme/catalog.js');
+          const journey=require('./alo186/urun-eslestirme/journey-retention-core.js');
+          const category=catalog.getCategory('surge_strip');
+          assert(category);
+          assert.equal(category.mode,'guide');
+          assert.equal(category.affiliatePolicy,'after_tool');
+          assert.equal(category.nextStepUrl,'https://www.alo186.com/hesaplama/akim-korumali-priz-uygunluk/');
+          assert.equal(catalog.productsFor('surge_strip').length,4);
+          const route=journey.getJourney('surge_strip');
+          assert(route);
+          assert.equal(route.calculate.url,'/hesaplama/akim-korumali-priz-uygunluk/');
+          assert.equal(route.compare.url,'/akilli-urun-secimi?kategori=surge_strip');
+          console.log('Surge strip ürün kapısı ve tekrar ziyaret yolculuğu başarılı.');
+          NODE
+          grep -q 'alo186/hesaplama/akim-korumali-priz-uygunluk/index.html' alo186/deployment/routing-manifest.json
+          grep -q 'https://www.alo186.com/hesaplama/akim-korumali-priz-uygunluk/' alo186/sitemap.xml
+          grep -q '29 çekirdek araç' alo186/hesaplama/index.html
+          grep -q './akim-korumali-priz-uygunluk/' alo186/hesaplama/index.html
+
+      - name: Gizlilik ve affiliate güven sözleşmesi
+        shell: bash
+        run: |
+          set -euo pipefail
+          file='alo186/hesaplama/akim-korumali-priz-uygunluk/index.html'
+          grep -q 'Şeffaf satış ortaklığı' "$file"
+          grep -q 'Satın almama sonucu' "$file"
+          grep -q '/akilli-urun-secimi?kategori=surge_strip' "$file"
+          grep -q 'ALO186 EDAŞ, kamu kurumu' "$file"
+          if grep -Eqi 'amazon\.(com|com\.tr)/' "$file"; then
+            echo 'Modülde doğrudan Amazon bağlantısı bulundu.' >&2
+            exit 1
+          fi
+          if grep -Eqi 'type="(email|tel|text)"|name="(name|email|phone|address|subscription|identity|plate|serial|freeText)' "$file"; then
+            echo 'Modülde kişisel veri veya serbest metin alanı bulundu.' >&2
+            exit 1
+          fi
+
+      - name: Cihaz hasarı süre güvenlik kapısı
+        run: python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Production bundle ve smoke testi
+        run: |
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-surge-strip-site \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-surge-strip-site
+          test -f /tmp/alo186-surge-strip-site/hesaplama/akim-korumali-priz-uygunluk/index.html
+          test -f /tmp/alo186-surge-strip-site/hesaplama/akim-korumali-priz-uygunluk/core.js
+          test -f /tmp/alo186-surge-strip-site/hesaplama/akim-korumali-priz-uygunluk/app.js
+
+      - name: Doğrulanmış production artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-surge-strip-suitability-production
+          path: /tmp/alo186-surge-strip-site
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
