@@ -1,0 +1,63 @@
+name: ALO186 one-shot authority 72 integration
+
+on:
+  push:
+    branches:
+      - content/alo186-authority-72-guides-20260728
+    paths:
+      - 'alo186/deployment/apply_authority_72.py'
+      - '.github/workflows/alo186-authority-72-autopatch.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: alo186-authority-72-autopatch
+  cancel-in-progress: false
+
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: content/alo186-authority-72-guides-20260728
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Manifest, sitemap ve authority testini güncelle
+        run: python alo186/deployment/apply_authority_72.py
+
+      - name: İçerik ve güvenlik testleri
+        run: |
+          node alo186/tests/test_authority_content.js
+          node alo186/tests/test_release_manifest.js
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Production bundle ve smoke
+        run: |
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-authority-72 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-authority-72
+          test -f /tmp/alo186-authority-72/haberler/ev-sarj-istasyonu-tip-b-rcd-rdc-dd-secimi/index.html
+          test -f /tmp/alo186-authority-72/haberler/topraklama-direnci-ariza-cevrim-empedansi-farki/index.html
+          test -f /tmp/alo186-authority-72/haberler/detuned-reaktor-aktif-harmonik-filtre-farki/index.html
+
+      - name: Geçici otomasyon dosyalarını kaldır ve kaynak değişikliklerini kaydet
+        shell: bash
+        run: |
+          set -euo pipefail
+          git rm alo186/deployment/apply_authority_72.py .github/workflows/alo186-authority-72-autopatch.yml
+          git config user.name 'ALO186 Content Automation'
+          git config user.email 'actions@users.noreply.github.com'
+          git add alo186/deployment/routing-manifest.json alo186/sitemap.xml alo186/tests/test_authority_content.js
+          git commit -m 'Content: integrate 72-guide authority inventory'
+          git push origin HEAD:content/alo186-authority-72-guides-20260728
