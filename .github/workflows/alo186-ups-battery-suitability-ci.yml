@@ -48,10 +48,10 @@ jobs:
           for block in blocks: json.loads(block)
           ET.parse('alo186/sitemap.xml')
           manifest=json.loads(pathlib.Path('alo186/deployment/routing-manifest.json').read_text())
-          assert manifest['version'] >= 17
+          assert manifest['version'] >= 19
           assert any(r['canonicalPath']=='/hesaplama/ups-aku-degisim-uygunluk/' for r in manifest['routes'])
           center=pathlib.Path('alo186/hesaplama/index.html').read_text()
           assert './ups-aku-degisim-uygunluk/' in center
-          assert '24 çekirdek araç' in center
+          assert '25 çekirdek araç' in center
           print('JSON-LD, sitemap, merkez ve routing doğrulandı.')
           PY
