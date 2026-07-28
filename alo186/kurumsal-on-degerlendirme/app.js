@@ -1,114 +1,118 @@
 (() => {
   'use strict';
 
+  const core = window.Alo186CorporateReadiness;
   const labels = {
-    facility: {
-      hotel: 'Otel / tatil tesisi',
-      site: 'Site / apartman / villa projesi',
-      restaurant: 'Restoran / mağaza / soğuk zincir',
-      office: 'Ofis / küçük işletme',
-      industrial: 'Atölye / üretim tesisi'
-    },
-    problem: {
-      outage: 'Tekrarlayan elektrik kesintisi',
-      voltage: 'Düşük/yüksek gerilim ve cihaz riski',
-      backup: 'UPS/jeneratör kapasitesi belirsiz',
-      energy: 'GES, batarya veya enerji maliyeti',
-      ev: 'EV şarj ve güç kapasitesi',
-      audit: 'Genel elektrik sürekliliği ve risk incelemesi'
-    },
-    backup: {
-      none: 'Yok / bilinmiyor',
-      ups: 'UPS',
-      generator: 'Jeneratör',
-      both: 'UPS + jeneratör',
-      solar_storage: 'GES / batarya / hibrit sistem'
-    },
-    scope: {
-      remote: 'Uzaktan doküman ön incelemesi',
-      comparison: 'Yedek güç ve maliyet karşılaştırması',
-      site: 'Yerinde keşif ve teknik rapor',
-      roadmap: '90 günlük süreklilik yol haritası'
-    }
+    facility: {hotel:'Otel / tatil tesisi',site:'Site / apartman / villa projesi',restaurant:'Restoran / mağaza / soğuk zincir',office:'Ofis / küçük işletme',industrial:'Atölye / üretim tesisi'},
+    problem: {outage:'Tekrarlayan elektrik kesintisi',voltage:'Düşük/yüksek gerilim ve cihaz riski',backup:'UPS/jeneratör kapasitesi belirsiz',energy:'GES, batarya veya enerji maliyeti',ev:'EV şarj ve güç kapasitesi',audit:'Genel elektrik sürekliliği ve risk incelemesi'},
+    backup: {none:'Yok / bilinmiyor',ups:'UPS',generator:'Jeneratör',both:'UPS + jeneratör',solar_storage:'GES / batarya / hibrit sistem'},
+    scope: {remote:'Uzaktan doküman ön incelemesi',comparison:'Yedek güç ve maliyet karşılaştırması',site:'Yerinde keşif ve teknik rapor',roadmap:'90 günlük süreklilik yol haritası'},
+    urgency: {urgent:'0–30 gün içinde karar gerekli',soon:'30–90 gün içinde değerlendirme',planning:'Yıllık plan / bütçe hazırlığı'},
+    evidence: {none:'Belge ve yük listesi henüz yok',partial:'Bazı fatura, etiket veya kayıtlar var',ready:'Tek hat, yük listesi ve kayıtlar hazır'}
   };
 
   const byId = (id) => document.getElementById(id);
-  const safeChoice = (group, id) => {
+  let currentBrief = '';
+  let currentSelection = null;
+
+  function safeChoice(group, id) {
     const value = String(byId(id).value || '');
     return Object.prototype.hasOwnProperty.call(labels[group], value) ? value : Object.keys(labels[group])[0];
-  };
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>'"]/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
+  }
 
   function track(name, data = {}) {
     const allowed = {};
-    for (const key of ['facility', 'problem', 'backup', 'scope']) {
+    for (const key of ['facility','problem','backup','scope','urgency','evidence','readiness_band']) {
       if (typeof data[key] === 'string' && data[key].length < 60) allowed[key] = data[key];
     }
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({ event: name, ...allowed });
   }
 
+  async function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(text);
+    const area = document.createElement('textarea');
+    area.value = text;
+    area.setAttribute('readonly', '');
+    area.style.position = 'fixed';
+    area.style.opacity = '0';
+    document.body.appendChild(area);
+    area.select();
+    document.execCommand('copy');
+    area.remove();
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     const form = byId('serviceForm');
     const link = byId('mailLink');
+    const copyButton = byId('copyBriefBtn');
+    const printButton = byId('printBriefBtn');
 
     form.addEventListener('submit', (event) => {
       event.preventDefault();
       const selection = {
-        facility: safeChoice('facility', 'facility'),
-        problem: safeChoice('problem', 'problem'),
-        backup: safeChoice('backup', 'backup'),
-        scope: safeChoice('scope', 'scope')
+        facility: safeChoice('facility','facility'),
+        problem: safeChoice('problem','problem'),
+        backup: safeChoice('backup','backup'),
+        scope: safeChoice('scope','scope'),
+        urgency: safeChoice('urgency','urgency'),
+        evidence: safeChoice('evidence','evidence')
       };
-      const readable = {
-        facility: labels.facility[selection.facility],
-        problem: labels.problem[selection.problem],
-        backup: labels.backup[selection.backup],
-        scope: labels.scope[selection.scope]
-      };
+      const readable = Object.fromEntries(Object.keys(selection).map((key) => [key, labels[key][selection[key]]]));
+      const assessment = core.assess(selection);
+      currentSelection = { ...selection, readiness_band: assessment.band };
+      currentBrief = core.brief(readable, assessment);
 
-      byId('resultTitle').textContent = `${readable.facility} için ücretli ön değerlendirme talebi hazır.`;
-      byId('resultText').textContent = 'Aşağıdaki kapsam e-posta taslağına eklenecek. İletişim bilgisi veya dosya eklemek sizin tercihinizdir.';
+      byId('resultTitle').textContent = `${readable.facility} için nitelikli ön değerlendirme özeti hazır.`;
+      byId('resultText').textContent = 'Skor bir teklif veya uygunluk onayı değildir; ilk görüşmede hangi belgelerin hazırlanması gerektiğini gösterir.';
+      byId('readiness').classList.remove('hidden');
+      byId('readinessScore').textContent = `${assessment.score}/100`;
+      byId('readinessLabel').textContent = assessment.label;
+      byId('readiness').dataset.band = assessment.band;
       byId('summary').innerHTML = [
-        ['Tesis türü', readable.facility],
-        ['Ana problem', readable.problem],
-        ['Mevcut yedek kaynak', readable.backup],
-        ['İstenen kapsam', readable.scope]
-      ].map(([title, value]) => `<div><strong>${title}</strong>${value}</div>`).join('');
+        ['Tesis türü',readable.facility],['Ana problem',readable.problem],['Mevcut yedek kaynak',readable.backup],['İstenen kapsam',readable.scope],['Karar zamanı',readable.urgency],['Belge hazırlığı',readable.evidence]
+      ].map(([title,value]) => `<div><strong>${escapeHtml(title)}</strong>${escapeHtml(value)}</div>`).join('');
+      byId('documentPanel').classList.remove('hidden');
+      byId('documentList').innerHTML = assessment.docs.map((item) => `<li>${escapeHtml(item)}</li>`).join('');
+      byId('nextStep').textContent = assessment.next;
 
       const subject = `ALO186 ücretli teknik ön değerlendirme talebi — ${readable.facility}`;
-      const body = [
-        'Merhaba,',
-        '',
-        'ALO186 Kurumsal Elektrik Sürekliliği Ön Değerlendirmesi için bilgi rica ediyorum.',
-        '',
-        `Tesis türü: ${readable.facility}`,
-        `Ana problem: ${readable.problem}`,
-        `Mevcut yedek kaynak: ${readable.backup}`,
-        `İstenen kapsam: ${readable.scope}`,
-        '',
-        'Çalışmaya başlamadan önce kapsam, ücret, teslim biçimi ve gerekiyorsa saha koşullarının yazılı olarak teyit edilmesini rica ederim.',
-        '',
-        'Not: Bu e-posta resmî arıza/şikâyet kaydı değildir.'
-      ].join('\n');
-
+      const body = ['Merhaba,','',currentBrief,'','Çalışmaya başlamadan önce kapsam, ücret, teslim biçimi ve gerekiyorsa saha koşullarının yazılı olarak teyit edilmesini rica ederim.'].join('\n');
       link.href = `mailto:bilgi@alo186.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
       link.classList.remove('disabled');
-      link.setAttribute('aria-disabled', 'false');
+      link.setAttribute('aria-disabled','false');
       link.tabIndex = 0;
-      track('paid_assessment_request_prepared', selection);
+      copyButton.disabled = false;
+      printButton.disabled = false;
+      byId('actionStatus').textContent = `${assessment.label}. ${assessment.next}`;
+      track('paid_assessment_readiness_scored', currentSelection);
+      track('paid_assessment_request_prepared', currentSelection);
     });
 
     link.addEventListener('click', (event) => {
-      if (link.getAttribute('aria-disabled') === 'true') {
-        event.preventDefault();
-        return;
+      if (link.getAttribute('aria-disabled') === 'true') { event.preventDefault(); return; }
+      track('paid_assessment_email_opened', currentSelection || {});
+    });
+
+    copyButton.addEventListener('click', async () => {
+      if (!currentBrief) return;
+      try {
+        await copyText(currentBrief);
+        byId('actionStatus').textContent = 'Kapsam özeti panoya kopyalandı. Kişisel veri eklenmedi.';
+        track('paid_assessment_brief_copied', currentSelection || {});
+      } catch (error) {
+        byId('actionStatus').textContent = 'Kopyalama başarısız oldu; yazdır/PDF seçeneğini kullanın.';
       }
-      track('paid_assessment_email_opened', {
-        facility: safeChoice('facility', 'facility'),
-        problem: safeChoice('problem', 'problem'),
-        backup: safeChoice('backup', 'backup'),
-        scope: safeChoice('scope', 'scope')
-      });
+    });
+
+    printButton.addEventListener('click', () => {
+      if (!currentBrief) return;
+      track('paid_assessment_brief_printed', currentSelection || {});
+      window.print();
     });
   });
 })();
