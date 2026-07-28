@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://www.alo186.com/schemas/electrical-continuity-passport-v1.schema.json",
+  "title": "ALO186 Electrical Continuity Passport v1",
+  "description": "Kişisel veri içermeyen elektrik sürekliliği ön değerlendirme ve kanıt değişim formatı.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "schemaVersion",
+    "documentType",
+    "generatedAt",
+    "validUntil",
+    "facilityType",
+    "criticalLoadCategories",
+    "backupSystems",
+    "scores",
+    "maturity",
+    "classification",
+    "evidence",
+    "actions",
+    "limitations",
+    "privacy",
+    "source"
+  ],
+  "properties": {
+    "schema": {"const": "https://www.alo186.com/schemas/electrical-continuity-passport-v1.schema.json"},
+    "schemaVersion": {"const": "1.0.0"},
+    "documentType": {"const": "ElectricalContinuityPassport"},
+    "generatedAt": {"type": "string", "format": "date-time"},
+    "validUntil": {"type": "string", "format": "date-time"},
+    "facilityType": {"enum": ["hotel", "site", "business", "other"]},
+    "criticalLoadCategories": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"enum": ["communications", "refrigeration", "safety-lighting", "access-security", "pumps", "production"]}
+    },
+    "backupSystems": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"enum": ["generator", "ups", "battery-inverter", "power-station"]}
+    },
+    "scores": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["passport", "evidence", "maturity"],
+      "properties": {
+        "passport": {"type": "integer", "minimum": 0, "maximum": 100},
+        "evidence": {"type": "integer", "minimum": 0, "maximum": 100},
+        "maturity": {"type": ["integer", "null"], "minimum": 0, "maximum": 100}
+      }
+    },
+    "maturity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["band"],
+      "properties": {"band": {"type": ["string", "null"], "maxLength": 80}}
+    },
+    "classification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label"],
+      "properties": {
+        "id": {"enum": ["controlled", "developing", "fragile", "high-risk", "critical-gaps"]},
+        "label": {"type": "string", "minLength": 3, "maxLength": 80}
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "status", "weight", "earned"],
+        "properties": {
+          "id": {"enum": ["critical-load-inventory", "single-line-diagram", "emergency-contacts", "backup-capacity-record", "backup-test-record", "transfer-test", "protection-test", "grounding-measurement", "outage-log", "recovery-drill"]},
+          "status": {"enum": ["current", "due", "planned", "missing"]},
+          "weight": {"type": "integer", "minimum": 1, "maximum": 20},
+          "earned": {"type": "number", "minimum": 0, "maximum": 20}
+        }
+      }
+    },
+    "actions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["p0", "p1", "p2"],
+      "properties": {
+        "p0": {"$ref": "#/$defs/actionList"},
+        "p1": {"$ref": "#/$defs/actionList"},
+        "p2": {"$ref": "#/$defs/actionList"}
+      }
+    },
+    "limitations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["isCertification", "isElectricalProject", "isOfficialInspection", "requiresFieldVerification"],
+      "properties": {
+        "isCertification": {"const": false},
+        "isElectricalProject": {"const": false},
+        "isOfficialInspection": {"const": false},
+        "requiresFieldVerification": {"const": true}
+      }
+    },
+    "privacy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["containsPersonalData", "containsFreeText", "medicalOrLifeSupportFlagIncluded", "immediateDangerFlagIncluded"],
+      "properties": {
+        "containsPersonalData": {"const": false},
+        "containsFreeText": {"const": false},
+        "medicalOrLifeSupportFlagIncluded": {"const": false},
+        "immediateDangerFlagIncluded": {"const": false}
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["publisher", "url"],
+      "properties": {
+        "publisher": {"const": "ALO186"},
+        "url": {"const": "https://www.alo186.com/hesaplama/elektrik-surekliligi-pasaportu/"}
+      }
+    }
+  },
+  "$defs": {
+    "actionList": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "title", "action", "status"],
+        "properties": {
+          "id": {"type": "string", "minLength": 2, "maxLength": 80},
+          "title": {"type": "string", "minLength": 2, "maxLength": 160},
+          "action": {"type": "string", "minLength": 5, "maxLength": 320},
+          "status": {"enum": ["current", "due", "planned", "missing"]}
+        }
+      }
+    }
+  }
+}
