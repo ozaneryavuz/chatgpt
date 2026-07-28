@@ -68,9 +68,9 @@ if [ "$MODE" = "preview" ]; then
 HTML
 fi
 
-# Canlı site apex hostu canonical kabul eder. Kaynak modüllerde kalmış eski www
-# mutlak URL'lerini yalnız yayın artifact'ında tek seferde normalize et; haricî
-# bağlantıları ve göreli rotaları değiştirme.
+# Kaynak modüllerin mevcut CI sözleşmesi hâlen www originini kullanıyor; canlı site
+# apex hostu canonical kabul ettiği için yalnız dağıtılabilir artifact içindeki mutlak
+# ALO186 URL'lerini tek seferde normalize et. Haricî bağlantılara ve göreli rotalara dokunma.
 find "$DESTINATION" -type f \( \
   -name '*.html' -o -name '*.xml' -o -name '*.txt' -o -name '*.json' -o \
   -name '*.js' -o -name '*.css' -o -name '.htaccess' \
