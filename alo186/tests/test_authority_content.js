@@ -4,162 +4,36 @@ const path=require('path');
 
 const repoRoot=path.resolve(__dirname,'../..');
 const articles=[
-  {
-    slug:'ev-sarj-cihazi-icin-ev-tesisati-uygun-mu',
-    required:['EPDK','IEC 60364-7-722','RDC-DD','yetkili'],
-    cta:'/hesaplama/ev-sarj-suresi/'
-  },
-  {
-    slug:'ges-elektrik-kesintisinde-calisir-mi',
-    required:['anti-islanding','ada modu','batarya','yetkili'],
-    cta:'/urun-rehberleri/ges-malzemeleri'
-  },
-  {
-    slug:'jenerator-transfer-salteri-neden-gerekir',
-    required:['geri besleme','transfer','erkek–erkek','yetkili'],
-    cta:'/isletme-surekliligi'
-  },
-  {
-    slug:'elektrik-kesintisi-cihaz-hasari-edas-basvurusu',
-    required:['EPDK','10 iş günü','servis raporu','dağıtım şirketi'],
-    cta:'/edas-bul'
-  },
-  {
-    slug:'prizde-topraklama-var-mi-priz-test-cihazi',
-    required:['toprak elektrodu','çevrim empedansı','RCD','yetkili'],
-    cta:'/karar-motoru'
-  },
-  {
-    slug:'saf-sinus-modifiye-sinus-inverter-farki',
-    required:['aktif PFC','kalkış gücü','saf sinüs','tıbbi cihaz'],
-    cta:'/hesaplama/ups-suresi/'
-  },
-  {
-    slug:'kacak-akim-rolesi-tip-a-tip-ac-farki',
-    required:['Tip AC','Tip A','RDC-DD','30 mA','yetkili elektrikçi'],
-    cta:'/hesaplama/ev-sarj-uygunluk/',
-    fresh:true
-  },
-  {
-    slug:'ev-tipi-enerji-depolama-kac-kwh-olmali',
-    required:['kritik yük','kWh','kW','kullanılabilir kapasite','BMS'],
-    cta:'/hesaplama/inverter-uygunluk/',
-    fresh:true
-  },
-  {
-    slug:'harmonik-nedir-thd-cihazlari-nasil-etkiler',
-    required:['THDv','THDi','nötr','PCC','aktif harmonik filtre'],
-    cta:'/isletme-surekliligi',
-    fresh:true
-  },
-  {
-    slug:'ups-online-line-interactive-offline-farki',
-    required:['line-interactive','online çift dönüşüm','transfer süresi','AVR','bypass'],
-    cta:'/hesaplama/ups-suresi/',
-    fresh:true
-  },
-  {
-    slug:'parafudr-gerilim-koruma-rolesi-farki',
-    required:['SPD','gerilim izleme rölesi','sürekli aşırı gerilim','kontaktör','Tip 1'],
-    cta:'/hesaplama/parafudr-risk-testi/',
-    fresh:true
-  },
-  {
-    slug:'vpp-sanal-guc-santrali-nedir',
-    required:['VPP','Toplayıcılık Lisansı','Talep Tarafı Katılımı','telemetri','gelir garantisi'],
-    cta:'/isletme-surekliligi',
-    fresh:true
-  },
-  {
-    slug:'kacak-akim-rolesi-neden-surekli-atar',
-    required:['birikimli kaçak akım','nötr karışması','yetkili elektrikçi','köprülemek','112'],
-    cta:'/karar-motoru',
-    fresh:true
-  },
-  {
-    slug:'ev-sarjinda-dinamik-yuk-yonetimi',
-    required:['dinamik yük yönetimi','akım trafoları','fail-safe','güç artışı','EPDK'],
-    cta:'/hesaplama/ev-sarj-uygunluk/',
-    fresh:true
-  },
-  {
-    slug:'planli-elektrik-kesintisi-ne-kadar-once-bildirilir',
-    required:['48 saat','kalıcı veri saklayıcısı','bildirimli kesinti','dağıtım şirketi','ALO186 resmî kesinti kaydı almaz'],
-    cta:'/hesaplama/kesinti-gunlugu/',
-    fresh:true
-  },
-  {
-    slug:'topraklama-direnci-kac-ohm-olmali',
-    required:['RA × IΔn ≤ 50 V','toprak elektrodu direnci','PE sürekliliği','arıza çevrim empedansı','yetkili elektrikçi'],
-    cta:'/karar-motoru',
-    fresh:true
-  },
-  {
-    slug:'notr-kopmasi-nasil-anlasilir',
-    required:['nötr kopması','yıldız noktası','112','186','neutral cable break'],
-    cta:'/hesaplama/gerilim-koruma-cozum-secici/',
-    fresh:true
-  },
-  {
-    slug:'lisanssiz-ges-mahsuplasma-ihtiyac-fazlasi',
-    required:['öz tüketim','mahsuplaşma','ihtiyaç fazlası','YEKDEM','gelir garantisi'],
-    cta:'/fatura-analizi',
-    fresh:true
-  },
-  {
-    slug:'ups-akusu-ne-zaman-degisir',
-    required:['self-test','3–5 yıl','20–25°C','runtime','eski ve yeni batarya'],
-    cta:'/hesaplama/ekipman-bakim-plani/',
-    fresh:true
-  },
-  {
-    slug:'jenerator-ups-birlikte-calisir-mi',
-    required:['jeneratör','UPS','online çift dönüşüm','frekans','harmonik','transfer'],
-    cta:'/hesaplama/jenerator-gucu-secimi/',
-    fresh:true
-  },
-  {
-    slug:'gunes-paneli-inverter-clipping-dc-ac-orani',
-    required:['DC/AC oranı','clipping','PVWatts','MPPT','yıllık enerji'],
-    cta:'/fatura-analizi',
-    fresh:true
-  },
-  {
-    slug:'elektrik-panosunda-termal-kamera-kontrolu',
-    required:['emisivite','gevşek bağlantı','ark parlaması','yetkili personel','sürekli termal izleme'],
-    cta:'/hesaplama/ekipman-bakim-plani/',
-    fresh:true
-  },
-  {
-    slug:'faz-dengesizligi-faz-kaybi-motoru-nasil-etkiler',
-    required:['faz sırası','faz kaybı','gerilim dengesizliği','akım dengesizliği','motor koruma rölesi'],
-    cta:'/karar-motoru',
-    fresh:true
-  },
-  {
-    slug:'kompanzasyon-panosu-reaktif-guc-neden-bozulur',
-    required:['akım trafosu','kondansatör kademesi','detuned','rezonans','deşarj süresi'],
-    cta:'/isletme-surekliligi',
-    fresh:true
-  },
-  {
-    slug:'ges-fazlasi-ile-elektrikli-arac-sarji',
-    required:['PV fazlası','tek faz–üç faz geçişi','Eco Mode','fail-safe','öz tüketim'],
-    cta:'/hesaplama/ev-sarj-uygunluk/',
-    fresh:true
-  },
-  {
-    slug:'lifepo4-ev-bataryasi-guvenligi-bms-termal-kacak',
-    required:['LiFePO4','BMS','termal kaçak','UL 9540A','DC sigorta'],
-    cta:'/hesaplama/ekipman-bakim-plani/',
-    fresh:true
-  },
-  {
-    slug:'paralel-ups-n-arti-1-yedeklilik-nedir',
-    required:['N+1','paralel UPS','yük paylaşımı','ortak bypass','tek hata noktası'],
-    cta:'/hesaplama/ups-suresi/',
-    fresh:true
-  }
+  {slug:'ev-sarj-cihazi-icin-ev-tesisati-uygun-mu',required:['EPDK','IEC 60364-7-722','RDC-DD','yetkili'],cta:'/hesaplama/ev-sarj-suresi/'},
+  {slug:'ges-elektrik-kesintisinde-calisir-mi',required:['anti-islanding','ada modu','batarya','yetkili'],cta:'/urun-rehberleri/ges-malzemeleri'},
+  {slug:'jenerator-transfer-salteri-neden-gerekir',required:['geri besleme','transfer','erkek–erkek','yetkili'],cta:'/isletme-surekliligi'},
+  {slug:'elektrik-kesintisi-cihaz-hasari-edas-basvurusu',required:['EPDK','10 iş günü','servis raporu','dağıtım şirketi'],cta:'/edas-bul'},
+  {slug:'prizde-topraklama-var-mi-priz-test-cihazi',required:['toprak elektrodu','çevrim empedansı','RCD','yetkili'],cta:'/karar-motoru'},
+  {slug:'saf-sinus-modifiye-sinus-inverter-farki',required:['aktif PFC','kalkış gücü','saf sinüs','tıbbi cihaz'],cta:'/hesaplama/ups-suresi/'},
+  {slug:'kacak-akim-rolesi-tip-a-tip-ac-farki',required:['Tip AC','Tip A','RDC-DD','30 mA','yetkili elektrikçi'],cta:'/hesaplama/ev-sarj-uygunluk/',fresh:true},
+  {slug:'ev-tipi-enerji-depolama-kac-kwh-olmali',required:['kritik yük','kWh','kW','kullanılabilir kapasite','BMS'],cta:'/hesaplama/inverter-uygunluk/',fresh:true},
+  {slug:'harmonik-nedir-thd-cihazlari-nasil-etkiler',required:['THDv','THDi','nötr','PCC','aktif harmonik filtre'],cta:'/isletme-surekliligi',fresh:true},
+  {slug:'ups-online-line-interactive-offline-farki',required:['line-interactive','online çift dönüşüm','transfer süresi','AVR','bypass'],cta:'/hesaplama/ups-suresi/',fresh:true},
+  {slug:'parafudr-gerilim-koruma-rolesi-farki',required:['SPD','gerilim izleme rölesi','sürekli aşırı gerilim','kontaktör','Tip 1'],cta:'/hesaplama/parafudr-risk-testi/',fresh:true},
+  {slug:'vpp-sanal-guc-santrali-nedir',required:['VPP','Toplayıcılık Lisansı','Talep Tarafı Katılımı','telemetri','gelir garantisi'],cta:'/isletme-surekliligi',fresh:true},
+  {slug:'kacak-akim-rolesi-neden-surekli-atar',required:['birikimli kaçak akım','nötr karışması','yetkili elektrikçi','köprülemek','112'],cta:'/karar-motoru',fresh:true},
+  {slug:'ev-sarjinda-dinamik-yuk-yonetimi',required:['dinamik yük yönetimi','akım trafoları','fail-safe','güç artışı','EPDK'],cta:'/hesaplama/ev-sarj-uygunluk/',fresh:true},
+  {slug:'planli-elektrik-kesintisi-ne-kadar-once-bildirilir',required:['48 saat','kalıcı veri saklayıcısı','bildirimli kesinti','dağıtım şirketi','ALO186 resmî kesinti kaydı almaz'],cta:'/hesaplama/kesinti-gunlugu/',fresh:true},
+  {slug:'topraklama-direnci-kac-ohm-olmali',required:['RA × IΔn ≤ 50 V','toprak elektrodu direnci','PE sürekliliği','arıza çevrim empedansı','yetkili elektrikçi'],cta:'/karar-motoru',fresh:true},
+  {slug:'notr-kopmasi-nasil-anlasilir',required:['nötr kopması','yıldız noktası','112','186','neutral cable break'],cta:'/hesaplama/gerilim-koruma-cozum-secici/',fresh:true},
+  {slug:'lisanssiz-ges-mahsuplasma-ihtiyac-fazlasi',required:['öz tüketim','mahsuplaşma','ihtiyaç fazlası','YEKDEM','gelir garantisi'],cta:'/fatura-analizi',fresh:true},
+  {slug:'ups-akusu-ne-zaman-degisir',required:['self-test','3–5 yıl','20–25°C','runtime','eski ve yeni batarya'],cta:'/hesaplama/ekipman-bakim-plani/',fresh:true},
+  {slug:'jenerator-ups-birlikte-calisir-mi',required:['jeneratör','UPS','online çift dönüşüm','frekans','harmonik','transfer'],cta:'/hesaplama/jenerator-gucu-secimi/',fresh:true},
+  {slug:'gunes-paneli-inverter-clipping-dc-ac-orani',required:['DC/AC oranı','clipping','PVWatts','MPPT','yıllık enerji'],cta:'/fatura-analizi',fresh:true},
+  {slug:'elektrik-panosunda-termal-kamera-kontrolu',required:['emisivite','gevşek bağlantı','ark parlaması','yetkili personel','sürekli termal izleme'],cta:'/hesaplama/ekipman-bakim-plani/',fresh:true},
+  {slug:'faz-dengesizligi-faz-kaybi-motoru-nasil-etkiler',required:['faz sırası','faz kaybı','gerilim dengesizliği','akım dengesizliği','motor koruma rölesi'],cta:'/karar-motoru',fresh:true},
+  {slug:'kompanzasyon-panosu-reaktif-guc-neden-bozulur',required:['akım trafosu','kondansatör kademesi','detuned','rezonans','deşarj süresi'],cta:'/isletme-surekliligi',fresh:true},
+  {slug:'ges-fazlasi-ile-elektrikli-arac-sarji',required:['PV fazlası','tek faz–üç faz geçişi','Eco Mode','fail-safe','öz tüketim'],cta:'/hesaplama/ev-sarj-uygunluk/',fresh:true},
+  {slug:'lifepo4-ev-bataryasi-guvenligi-bms-termal-kacak',required:['LiFePO4','BMS','termal kaçak','UL 9540A','DC sigorta'],cta:'/hesaplama/ekipman-bakim-plani/',fresh:true},
+  {slug:'paralel-ups-n-arti-1-yedeklilik-nedir',required:['N+1','paralel UPS','yük paylaşımı','ortak bypass','tek hata noktası'],cta:'/hesaplama/ups-suresi/',fresh:true},
+  {slug:'parafudr-gostergesi-kirmizi-ne-demek',required:['durum göstergesi','kırmızı','koruma modülü','yetkili elektrikçi','parafudr risk testi'],cta:'/hesaplama/ekipman-bakim-plani/',fresh:true},
+  {slug:'jenerator-saatte-kac-litre-yakar',required:['yük yüzdesi','litre/saat','üretici tüketim tablosu','standby','prime'],cta:'/hesaplama/jenerator-gucu-secimi/',fresh:true},
+  {slug:'ges-inverter-sebeke-gerilimi-yuksek-hatasi',required:['şebeke gerilimi','şebeke empedansı','on dakikalık ortalama','ülke ayarı','dağıtım şirketi'],cta:'/edas-bul',fresh:true}
 ];
 
 for(const article of articles){
