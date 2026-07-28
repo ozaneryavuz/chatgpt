@@ -1,0 +1,116 @@
+name: ALO186 passport sync once
+
+on:
+  push:
+    branches: [feat/passport-20260728-1122]
+    paths:
+      - '.github/alo186-passport-sync.trigger'
+      - '.github/workflows/alo186-passport-sync-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/passport-20260728-1122
+          fetch-depth: 0
+      - name: Pasaport modülünü önceki geliştirme dalından al
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin feat/passport-20260728-1101
+          git checkout origin/feat/passport-20260728-1101 -- \
+            alo186/hesaplama/elektrik-surekliligi-pasaportu \
+            alo186/tests/test_continuity_passport.js
+      - name: Güncel yayın dosyalarına güvenli ekleme yap
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import json
+
+          manifest_path = Path('alo186/deployment/routing-manifest.json')
+          manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+          route = {
+              'source': 'alo186/hesaplama/elektrik-surekliligi-pasaportu/index.html',
+              'canonicalPath': '/hesaplama/elektrik-surekliligi-pasaportu/',
+              'type': 'business-tool',
+          }
+          if not any(item.get('canonicalPath') == route['canonicalPath'] for item in manifest['routes']):
+              insert_at = next(
+                  (index + 1 for index, item in enumerate(manifest['routes']) if item.get('canonicalPath') == '/hesaplama/elektrik-surekliligi-olgunluk-skoru/'),
+                  4,
+              )
+              manifest['routes'].insert(insert_at, route)
+              manifest['version'] = int(manifest.get('version', 0)) + 1
+          manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+
+          sitemap_path = Path('alo186/sitemap.xml')
+          sitemap = sitemap_path.read_text(encoding='utf-8')
+          passport_url = 'https://www.alo186.com/hesaplama/elektrik-surekliligi-pasaportu/'
+          passport_entry = f'  <url><loc>{passport_url}</loc><lastmod>2026-07-28</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>'
+          if passport_url not in sitemap:
+              anchor = '  <url><loc>https://www.alo186.com/hesaplama/elektrik-surekliligi-olgunluk-skoru/</loc>'
+              line_start = sitemap.find(anchor)
+              if line_start < 0:
+                  raise SystemExit('Sitemap olgunluk rotası bulunamadı.')
+              line_end = sitemap.find('\n', line_start)
+              sitemap = sitemap[:line_end + 1] + passport_entry + '\n' + sitemap[line_end + 1:]
+              sitemap_path.write_text(sitemap, encoding='utf-8')
+
+          hub_path = Path('alo186/hesaplama/index.html')
+          hub = hub_path.read_text(encoding='utf-8')
+          hub = hub.replace('22 çekirdek araç', '23 çekirdek araç')
+          hub = hub.replace('Olgunluk, karşılaştırma, teknik hesap', 'Pasaport, olgunluk, karşılaştırma, teknik hesap')
+          hub = hub.replace('Elektrik sürekliliği olgunluk skoru,', 'Elektrik sürekliliği pasaportu ve olgunluk skoru,')
+          hub = hub.replace('Elektrik sürekliliği olgunluğundan', 'Elektrik sürekliliği pasaportu ve olgunluğundan')
+          card = '<a class="tool-card" href="./elektrik-surekliligi-pasaportu/"><span class="eyebrow">Kanıt dosyası · P0/P1/P2 · JSON/PDF</span><h2>Elektrik Sürekliliği Pasaportu</h2><p>Kritik yük, yedek kaynak ve 10 teknik kanıt alanını tek makine-okunur dosyada toplayın; eksikleri önceliklendirin ve panel aktarımına hazırlayın.</p><b>Kanıt pasaportunu oluştur →</b></a>'
+          if './elektrik-surekliligi-pasaportu/' not in hub:
+              anchor = '<a class="tool-card" href="./elektrik-surekliligi-olgunluk-skoru/"'
+              start = hub.find(anchor)
+              if start < 0:
+                  raise SystemExit('Hesaplama merkezi olgunluk kartı bulunamadı.')
+              end = hub.find('</a>', start)
+              hub = hub[:end + 4] + '\n' + card + hub[end + 4:]
+          hub_path.write_text(hub, encoding='utf-8')
+
+          workflow_path = Path('.github/workflows/alo186-fatura-pages.yml')
+          workflow = workflow_path.read_text(encoding='utf-8')
+          if 'node alo186/tests/test_continuity_passport.js' not in workflow:
+              workflow = workflow.replace(
+                  '          node alo186/tests/test_continuity_store.js\n',
+                  '          node alo186/tests/test_continuity_store.js\n          node alo186/tests/test_continuity_passport.js\n',
+              )
+          file_checks = (
+              '          test -f _site/hesaplama/elektrik-surekliligi-pasaportu/index.html\n'
+              '          test -f _site/hesaplama/elektrik-surekliligi-pasaportu/passport.schema.json\n'
+          )
+          if 'elektrik-surekliligi-pasaportu/index.html' not in workflow:
+              workflow = workflow.replace('          test -f _site/hesaplama/index.html\n', '          test -f _site/hesaplama/index.html\n' + file_checks)
+          workflow_path.write_text(workflow, encoding='utf-8')
+          PY
+      - name: Yerel regresyonları çalıştır
+        shell: bash
+        run: |
+          set -euo pipefail
+          node alo186/tests/test_continuity_passport.js
+          node alo186/tests/test_release_manifest.js
+          chmod +x alo186/deployment/build_static_site.sh
+          alo186/deployment/build_static_site.sh /tmp/alo186-passport-preview preview
+          test -f /tmp/alo186-passport-preview/hesaplama/elektrik-surekliligi-pasaportu/index.html
+          test -f /tmp/alo186-passport-preview/hesaplama/elektrik-surekliligi-pasaportu/passport.schema.json
+      - name: Değişiklikleri kaydet ve yardımcı workflow'u kaldır
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/alo186-passport-sync-once.yml .github/alo186-passport-sync.trigger
+          git add alo186 .github/workflows/alo186-fatura-pages.yml
+          git commit -m 'feat(alo186): Elektrik Sürekliliği Pasaportu v1'
+          git push origin HEAD:feat/passport-20260728-1122
