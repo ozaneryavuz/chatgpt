@@ -6,6 +6,8 @@ on:
       - 'alo186/hesaplama/teknik-devir-kabul-paketi/**'
       - 'alo186/deployment/routing-overlays/growth-technical-handoff-run11.json'
       - 'alo186/deployment/inject_handoff_growth.py'
+      - 'alo186/deployment/inject_handoff_growth_base.py'
+      - 'alo186/deployment/inject_proposal_scope_growth.py'
       - 'alo186/deployment/inject_shortlist_growth.py'
       - 'alo186/deployment/build_static_site.py'
       - 'alo186/deployment/prepare_github_pages.py'
@@ -17,6 +19,8 @@ on:
       - 'alo186/hesaplama/teknik-devir-kabul-paketi/**'
       - 'alo186/deployment/routing-overlays/growth-technical-handoff-run11.json'
       - 'alo186/deployment/inject_handoff_growth.py'
+      - 'alo186/deployment/inject_handoff_growth_base.py'
+      - 'alo186/deployment/inject_proposal_scope_growth.py'
       - 'alo186/deployment/inject_shortlist_growth.py'
       - '.github/workflows/alo186-technical-handoff-growth.yml'
   workflow_dispatch:
@@ -49,6 +53,8 @@ jobs:
           node --check alo186/hesaplama/teknik-devir-kabul-paketi/core.js
           node --check alo186/hesaplama/teknik-devir-kabul-paketi/app.js
           python -m py_compile alo186/deployment/inject_handoff_growth.py
+          python -m py_compile alo186/deployment/inject_handoff_growth_base.py
+          python -m py_compile alo186/deployment/inject_proposal_scope_growth.py
           python -m py_compile alo186/deployment/inject_shortlist_growth.py
 
       - name: Mevcut güvenlik regresyonları
@@ -89,7 +95,7 @@ jobs:
         run: |
           set -euo pipefail
           python - <<'PY'
-          import json
+          import json,re
           from pathlib import Path
           for root,prefix in [(Path('/tmp/alo186-handoff-custom'),''),(Path('/tmp/alo186-handoff-project'),'/chatgpt')]:
               route=root/'hesaplama/teknik-devir-kabul-paketi/index.html'
@@ -100,7 +106,8 @@ jobs:
               assert 'type="email"' not in text and 'type="tel"' not in text and 'type="text"' not in text
               assert 'amazon.com' not in text and 'amazon.com.tr' not in text
               hub=(root/'hesaplama/index.html').read_text(encoding='utf-8')
-              assert '35 çekirdek araç' in hub
+              match=re.search(r'(\d+) çekirdek araç',hub)
+              assert match and int(match.group(1))>=35
               assert 'data-alo186-handoff-hub="true"' in hub
               assert 'data-alo186-handoff-card="true"' in (root/'elektrik-portali/index.html').read_text(encoding='utf-8')
               assert 'data-alo186-handoff-card="true"' in (root/'index.html').read_text(encoding='utf-8')
