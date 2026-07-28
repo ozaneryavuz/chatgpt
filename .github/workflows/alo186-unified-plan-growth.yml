@@ -129,10 +129,9 @@ jobs:
               hub=(root/'hesaplama/index.html').read_text(encoding='utf-8')
               assert '32 çekirdek araç' in hub
               assert 'data-alo186-plan-hub-card="true"' in hub
-              portal=(root/'elektrik-portali/index.html').read_text(encoding='utf-8')
-              gateway=(root/'index.html').read_text(encoding='utf-8')
-              assert 'data-alo186-plan-card="true"' in portal
-              assert 'data-alo186-plan-card="true"' in gateway
+              common=(root/'hesaplama/common.js').read_text(encoding='utf-8')
+              assert 'data-alo186-plan-runtime-card' in common
+              assert 'data-alo186-outcome-runtime-card' in common
               assert '<loc>https://www.alo186.com/hesaplama/elektrik-planim/</loc>' in (root/'sitemap.xml').read_text(encoding='utf-8')
               release=json.loads((root/'pages-release.json').read_text(encoding='utf-8'))
               assert release['outcomeRuntime']['version']==2
