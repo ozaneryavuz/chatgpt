@@ -1,0 +1,99 @@
+name: ALO186 hızlı gelir dönüşümü kalite kontrolü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/kesinti-hazirlik-atolyesi/**'
+      - 'alo186/kurumsal-on-degerlendirme/**'
+      - 'alo186/tedarikci-isbirligi/**'
+      - 'alo186/index.html'
+      - 'alo186/styles.css'
+      - 'alo186/deployment/routing-manifest.json'
+      - 'alo186/sitemap.xml'
+      - 'alo186/tests/test_fast_revenue_funnel.js'
+      - 'alo186/tests/test_portal_hardening.js'
+      - '.github/workflows/alo186-fast-revenue-funnel.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/kesinti-hazirlik-atolyesi/**'
+      - 'alo186/kurumsal-on-degerlendirme/**'
+      - 'alo186/tedarikci-isbirligi/**'
+      - 'alo186/index.html'
+      - 'alo186/styles.css'
+      - 'alo186/deployment/routing-manifest.json'
+      - 'alo186/sitemap.xml'
+      - 'alo186/tests/test_fast_revenue_funnel.js'
+      - 'alo186/tests/test_portal_hardening.js'
+      - '.github/workflows/alo186-fast-revenue-funnel.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-fast-revenue-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Gelir akışı, portal ve yayın sözleşmeleri
+        run: |
+          node alo186/tests/test_fast_revenue_funnel.js
+          node alo186/tests/test_portal_hardening.js
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_authority_content.js
+
+      - name: JavaScript sözdizimi
+        run: |
+          node --check alo186/kesinti-hazirlik-atolyesi/app.js
+          node --check alo186/kurumsal-on-degerlendirme/app.js
+          node --check alo186/tedarikci-isbirligi/app.js
+
+      - name: Cihaz hasarı süre güvenlik kapısı
+        run: python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Production bundle oluştur ve smoke testini çalıştır
+        run: |
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-fast-revenue-site \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-fast-revenue-site
+
+      - name: Production artifact gelir sözleşmeleri
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f /tmp/alo186-fast-revenue-site/kesintiye-hazirlik-atolyesi/index.html
+          test -f /tmp/alo186-fast-revenue-site/kurumsal-elektrik-surekliligi-on-degerlendirme/index.html
+          test -f /tmp/alo186-fast-revenue-site/tedarikci-ve-uretici-isbirligi/index.html
+          grep -q 'Satış ortaklığı açıklaması' /tmp/alo186-fast-revenue-site/kesintiye-hazirlik-atolyesi/index.html
+          grep -q 'Ücretli profesyonel hizmet' /tmp/alo186-fast-revenue-site/kurumsal-elektrik-surekliligi-on-degerlendirme/index.html
+          grep -q 'Ödeme; organik teknik sıralamayı' /tmp/alo186-fast-revenue-site/tedarikci-ve-uretici-isbirligi/index.html
+          grep -q '26 kişisel veri istemeyen araç' /tmp/alo186-fast-revenue-site/elektrik-portali/index.html
+          grep -q '45 kaynak doğrulamalı rehber' /tmp/alo186-fast-revenue-site/elektrik-portali/index.html
+          grep -q 'Akıllı Priz ve Enerji Ölçer Uygunluğu' /tmp/alo186-fast-revenue-site/elektrik-portali/index.html
+          ! grep -Eqi 'amazon\.(com|com\.tr)/' /tmp/alo186-fast-revenue-site/kesintiye-hazirlik-atolyesi/index.html
+          ! grep -Eqi 'type="(email|tel|text)"' /tmp/alo186-fast-revenue-site/kurumsal-elektrik-surekliligi-on-degerlendirme/index.html
+          ! grep -Eqi 'type="(email|tel|text)"' /tmp/alo186-fast-revenue-site/tedarikci-ve-uretici-isbirligi/index.html
+
+      - name: Doğrulanmış gelir paketi artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-fast-revenue-production
+          path: /tmp/alo186-fast-revenue-site
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
