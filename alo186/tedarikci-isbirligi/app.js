@@ -11,6 +11,7 @@
   const byId = (id) => document.getElementById(id);
   let currentBrief = '';
   let currentSelection = null;
+  let documentationGapCount = 0;
 
   function safeChoice(group, id) {
     const value = String(byId(id).value || '');
@@ -23,9 +24,10 @@
 
   function track(name, data = {}) {
     const clean = {};
-    for (const key of ['category','type','readiness','goal','readiness_band']) {
+    for (const key of ['category','type','readiness','goal','readiness_band','source']) {
       if (typeof data[key] === 'string' && data[key].length < 60) clean[key] = data[key];
     }
+    if (Number.isFinite(data.gap_count)) clean.gap_count = data.gap_count;
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({ event: name, ...clean });
   }
@@ -47,8 +49,36 @@
     return [...document.querySelectorAll('[data-document]:checked')].map((input) => input.value);
   }
 
+  function safeParam(params, name, group, fallback) {
+    const value = String(params.get(name) || '');
+    return Object.prototype.hasOwnProperty.call(labels[group], value) ? value : fallback;
+  }
+
+  function applyDocumentationPrefill() {
+    const params = new URLSearchParams(location.search);
+    if (params.get('source') !== 'documentation_gap') return;
+    const category = safeParam(params, 'category', 'category', 'portable');
+    const type = safeParam(params, 'type', 'type', 'document');
+    const readiness = safeParam(params, 'readiness', 'readiness', 'partial');
+    const goal = safeParam(params, 'goal', 'goal', 'accuracy');
+    const fields = String(params.get('fields') || '').split(',').map((item) => item.replace(/[^a-z0-9_]/gi, '')).filter(Boolean).slice(0, 8);
+    documentationGapCount = fields.length;
+    byId('category').value = category;
+    byId('type').value = type;
+    byId('readiness').value = readiness;
+    byId('goal').value = goal;
+
+    const notice = document.createElement('div');
+    notice.className = 'policy';
+    notice.setAttribute('role','status');
+    notice.innerHTML = `<strong>Ürün merkezindeki teknik veri boşluğundan geldiniz.</strong> Ürün alanı ve doküman kalite kontrolü hedefi otomatik seçildi. ${documentationGapCount ? `${documentationGapCount} eksik teknik alan için soru paketi ürün merkezinde oluşturuldu.` : 'Teknik veri paketi eksik veya güncel değil.'} Bu bağlantı ürün, fiyat, ASIN, iletişim veya kişisel veri taşımaz.`;
+    byId('partnerForm').insertAdjacentElement('beforebegin', notice);
+    track('supplier_documentation_gap_prefilled', {source:'documentation_gap',category,type,readiness,goal,gap_count:documentationGapCount});
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     byId('documentChecks').innerHTML = core.documents.map((item) => `<label class="document-check"><input type="checkbox" value="${escapeHtml(item.id)}" data-document><span><strong>${escapeHtml(item.label)}</strong><small>Hazır ve güncel resmî kaynak</small></span></label>`).join('');
+    applyDocumentationPrefill();
 
     const form = byId('partnerForm');
     const link = byId('mailLink');
@@ -71,8 +101,9 @@
         goal: labels.goal[selection.goal]
       };
       const assessment = core.assess(selection);
-      currentSelection = {...selection,readiness_band:assessment.band};
+      currentSelection = {...selection,readiness_band:assessment.band,source:documentationGapCount?'documentation_gap':'direct',gap_count:documentationGapCount};
       currentBrief = core.brief(readable,assessment);
+      if (documentationGapCount) currentBrief += `\n\nÜrün merkezinden aktarılan eksik teknik alan sayısı: ${documentationGapCount}. Alan adları ve ürün kimliği bu talebe taşınmadı; marka bağımsız soru paketi ayrıca paylaşılabilir.`;
 
       byId('resultTitle').textContent = `${readable.category} için teknik hazırlık özeti hazır.`;
       byId('resultText').textContent = 'Skor, kaynak paketinin değerlendirmeye ne kadar hazır olduğunu gösterir; yayın, ürün uygunluğu veya iş birliği kabulü değildir.';
