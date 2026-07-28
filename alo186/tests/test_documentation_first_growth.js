@@ -28,7 +28,7 @@ assert(core.includes('const reviewDays=14'),'14 günlük tekrar ziyaret süresi 
 assert(core.includes('const retentionDays=45'),'Belge kontrol saklama süresi eksik.');
 assert(core.includes("source:'documentation_gap'"),'Tedarikçi veri boşluğu handoff kaynağı eksik.');
 assert(core.includes("type:'document'"),'Doküman kalite kontrolü handoff türü eksik.');
-assert(core.includes('Fiyat, stok, puan, garanti, satıcı, ASIN'),'Dışa aktarma gizlilik açıklaması eksik.');
+assert(core.includes("privacy:'Kişisel veri, ASIN"),'Dışa aktarma gizlilik açıklaması eksik.');
 
 assert(ui.includes('Teknik belge kapsamı ve satıcı soru paketi'),'Belge laboratuvarı görünür başlığı eksik.');
 assert(ui.includes('documentation_affiliate_blocked'),'Kritik belge eksikliğinde affiliate engelleme olayı eksik.');
