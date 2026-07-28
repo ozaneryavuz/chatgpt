@@ -81,7 +81,7 @@ assert(panelIndex.includes('./drill-handoff-bridge.js'));
 assert(bridge.includes('store.validateDrillHandoff'));
 assert(bridge.includes('store.importDrillHandoff'));
 assert(bridge.includes('continuity_drill_handoff_detected'));
-assert(drillApp.includes('enforceNoneExclusivity'));
+assert(drillApp.includes('enforceExclusiveNone'));
 assert(drillApp.includes('Panele git ve bulguları içe aktar'));
 assert(drillApp.includes('https://www.alo186.com/isletme-surekliligi'));
 
