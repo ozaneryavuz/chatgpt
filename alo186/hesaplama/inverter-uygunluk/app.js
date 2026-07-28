@@ -17,6 +17,13 @@
     if (typeof window.Alo186Track === 'function') window.Alo186Track(name, params || {});
   }
 
+  function setAffiliateEnabled(enabled) {
+    const link = $('productGuideLink');
+    link.setAttribute('aria-disabled', enabled ? 'false' : 'true');
+    link.tabIndex = enabled ? 0 : -1;
+    link.classList.toggle('is-disabled', !enabled);
+  }
+
   function addLoad(preset) {
     loads.push({
       name: preset.name,
@@ -116,6 +123,8 @@
     $('productResult').classList.toggle('hidden', result.route !== 'product-guide');
     $('professionalResult').classList.toggle('hidden', result.route !== 'professional');
     if (result.route === 'professional') list('professionalReasons', result.professionalReasons);
+    $('affiliateConfirm').checked = false;
+    setAffiliateEnabled(false);
 
     $('results').classList.remove('hidden');
     $('results').focus();
@@ -132,13 +141,18 @@
     loads = [];
     $('inverterForm').reset();
     $('depthOfDischargePct').value = 50;
+    $('bms').disabled = true;
+    $('bms').value = 'not-applicable';
     $('results').classList.add('hidden');
     $('validation').textContent = '';
+    $('affiliateConfirm').checked = false;
+    setAffiliateEnabled(false);
     renderLoads();
   }
 
   renderPresets();
   renderLoads();
+  setAffiliateEnabled(false);
 
   $('presetGrid').addEventListener('click', function (event) {
     const button = event.target.closest('[data-preset]');
@@ -160,9 +174,10 @@
   });
 
   $('chemistry').addEventListener('change', function () {
-    $('depthOfDischargePct').value = $('chemistry').value === 'lithium' ? 80 : 50;
-    $('bms').disabled = $('chemistry').value !== 'lithium';
-    if ($('chemistry').value !== 'lithium') $('bms').value = 'not-applicable';
+    const lithium = $('chemistry').value === 'lithium';
+    $('depthOfDischargePct').value = lithium ? 80 : 50;
+    $('bms').disabled = !lithium;
+    $('bms').value = lithium ? 'unknown' : 'not-applicable';
   });
 
   $('inverterForm').addEventListener('submit', function (event) {
@@ -177,7 +192,15 @@
   });
 
   $('resetBtn').addEventListener('click', reset);
-  $('productGuideLink').addEventListener('click', function () {
+  $('affiliateConfirm').addEventListener('change', function () {
+    setAffiliateEnabled(this.checked && lastResult && lastResult.route === 'product-guide');
+    if (this.checked) emit('inverter_affiliate_checklist_acknowledged', { source: 'inverter_suitability' });
+  });
+  $('productGuideLink').addEventListener('click', function (event) {
+    if (this.getAttribute('aria-disabled') === 'true') {
+      event.preventDefault();
+      return;
+    }
     emit('inverter_product_route_opened', {
       band: lastResult ? lastResult.band.key : 'unknown',
       source: 'inverter_suitability'
