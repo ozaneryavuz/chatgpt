@@ -73,7 +73,9 @@
   loadRuntime('Alo186EvidenceWallet','data-alo186-evidence-wallet');
   loadRuntime('Alo186IntentActionRouter','data-alo186-intent-router');
 
-  if(/\/(akilli-urun-secimi|amazon-elektrik-urunleri)\/?$/.test(location.pathname)&&!document.querySelector('script[data-alo186-outcome-trust-core]')){
+  const productCenter=/\/(akilli-urun-secimi|amazon-elektrik-urunleri)\/?$/.test(location.pathname);
+
+  if(productCenter&&!document.querySelector('script[data-alo186-outcome-trust-core]')){
     const coreScript=document.createElement('script');
     coreScript.src=new URL('../urun-eslestirme/outcome-trust-circuit-core.js',commonUrl).href;
     coreScript.dataset.alo186OutcomeTrustCore='true';
@@ -86,6 +88,21 @@
       document.head.appendChild(uiScript);
     },{once:true});
     document.head.appendChild(coreScript);
+  }
+
+  if(productCenter&&!document.querySelector('script[data-alo186-documentation-core]')){
+    const documentationCore=document.createElement('script');
+    documentationCore.src=new URL('../urun-eslestirme/documentation-growth-core.js',commonUrl).href;
+    documentationCore.dataset.alo186DocumentationCore='true';
+    documentationCore.addEventListener('load',()=>{
+      if(document.querySelector('script[data-alo186-documentation-ui]'))return;
+      const documentationUi=document.createElement('script');
+      documentationUi.src=new URL('../urun-eslestirme/documentation-growth.js',commonUrl).href;
+      documentationUi.dataset.alo186DocumentationUi='true';
+      documentationUi.defer=true;
+      document.head.appendChild(documentationUi);
+    },{once:true});
+    document.head.appendChild(documentationCore);
   }
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',injectGrowthCards,{once:true});
