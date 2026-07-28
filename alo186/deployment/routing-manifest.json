@@ -1,5 +1,5 @@
 {
-  "version": 12,
+  "version": 13,
   "canonicalHost": "https://www.alo186.com",
   "generatedAt": "2026-07-28",
   "routes": [
@@ -55,7 +55,10 @@
     {"source":"alo186/haberler/kompanzasyon-panosu-reaktif-guc-neden-bozulur/index.html","canonicalPath":"/haberler/kompanzasyon-panosu-reaktif-guc-neden-bozulur","type":"article"},
     {"source":"alo186/haberler/ges-fazlasi-ile-elektrikli-arac-sarji/index.html","canonicalPath":"/haberler/ges-fazlasi-ile-elektrikli-arac-sarji","type":"article"},
     {"source":"alo186/haberler/lifepo4-ev-bataryasi-guvenligi-bms-termal-kacak/index.html","canonicalPath":"/haberler/lifepo4-ev-bataryasi-guvenligi-bms-termal-kacak","type":"article"},
-    {"source":"alo186/haberler/paralel-ups-n-arti-1-yedeklilik-nedir/index.html","canonicalPath":"/haberler/paralel-ups-n-arti-1-yedeklilik-nedir","type":"article"}
+    {"source":"alo186/haberler/paralel-ups-n-arti-1-yedeklilik-nedir/index.html","canonicalPath":"/haberler/paralel-ups-n-arti-1-yedeklilik-nedir","type":"article"},
+    {"source":"alo186/haberler/parafudr-gostergesi-kirmizi-ne-demek/index.html","canonicalPath":"/haberler/parafudr-gostergesi-kirmizi-ne-demek","type":"article"},
+    {"source":"alo186/haberler/jenerator-saatte-kac-litre-yakar/index.html","canonicalPath":"/haberler/jenerator-saatte-kac-litre-yakar","type":"article"},
+    {"source":"alo186/haberler/ges-inverter-sebeke-gerilimi-yuksek-hatasi/index.html","canonicalPath":"/haberler/ges-inverter-sebeke-gerilimi-yuksek-hatasi","type":"article"}
   ],
   "requiredIntegrations": [
     "canonical URL must resolve with HTTP 200",
