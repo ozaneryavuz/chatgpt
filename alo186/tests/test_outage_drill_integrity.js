@@ -50,6 +50,9 @@ const now = new Date("2026-07-28T09:00:00Z");
   assert(app.includes("invalidateResult"));
   assert(app.includes('form.addEventListener("change"'));
   assert(app.includes("latestResult = null"));
+  assert(app.includes("Panele git ve bulguları içe aktar"));
 }
 
-console.log("Elektrik kesintisi tatbikatı bütünlük korumaları: 4 regresyon grubu başarılı.");
+require("./test_drill_panel_handoff.js");
+
+console.log("Elektrik kesintisi tatbikatı bütünlük korumaları ve panel handoff regresyonları başarılı.");

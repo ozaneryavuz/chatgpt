@@ -3,12 +3,48 @@
   if(typeof module==='object'&&module.exports){module.exports=api;}
   root.Alo186ContinuityStore=api;
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
+  'use strict';
+
   const SCHEMA_VERSION=2;
   const HANDOFF_VERSION=1;
   const HANDOFF_MAX_AGE_MS=7*24*60*60*1000;
+  const DRILL_HANDOFF_SCHEMA='alo186.continuity-drill-handoff.v1';
   const FACILITY_TYPES=new Set(['hotel','site','business','other']);
   const DIMENSIONS=new Set(['critical-loads','documentation','backup','testing','maintenance','incident','ownership','improvement']);
   const HORIZONS={day30:30,day60:60,day90:90};
+  const DRILL_SCENARIOS=new Set(['grid-outage','generator-failure','short-autonomy','voltage-anomaly','critical-load-loss']);
+  const DRILL_BANDS=new Set(['controlled','developing','fragile','uncontrolled']);
+  const DRILL_WINDOWS=new Set(['5','15','60']);
+  const DRILL_PRIORITIES=new Set(['P0','P1','P2']);
+  const DRILL_STATUSES=new Set(['missing','partial']);
+  const DRILL_HORIZON_DAYS={5:30,15:60,60:90};
+  const DRILL_PRIORITY_SCORE={P0:9,P1:6,P2:3};
+  const DRILL_GAP_CATALOG=Object.freeze({
+    'scope-check':{title:'Kesintinin kapsamını güvenli biçimde doğrulama prosedürünü tamamla',dimension:'incident'},
+    'hazard-check':{title:'Can güvenliği tehlike kontrolünü görev ve kanıtla standartlaştır',dimension:'incident'},
+    'life-safety-status':{title:'Yangın ve acil aydınlatma durum doğrulamasını kanıtla',dimension:'critical-loads'},
+    'role-activation':{title:'Birincil ve yedek tatbikat rollerini ata',dimension:'ownership'},
+    'time-record':{title:'Standart tatbikat başlangıç ve zaman kaydını oluştur',dimension:'documentation'},
+    'backup-status':{title:'Yedek kaynağın hazır veya başarısız durumunu test kaydıyla doğrula',dimension:'backup'},
+    'critical-load-status':{title:'Kritik yüklerin çalışır, sınırlı ve kayıp durumlarını sınıflandır',dimension:'critical-loads'},
+    'official-record':{title:'186, yönetim ve yetkili servis kayıt rotasını dokümante et',dimension:'incident'},
+    'load-priority':{title:'Kritik olmayan yükleri azaltma sırasını onaylı prosedüre bağla',dimension:'critical-loads'},
+    'offline-comms':{title:'Çevrimdışı iletişim ve durum paylaşım planını erişilebilir yap',dimension:'documentation'},
+    'autonomy-estimate':{title:'Yakıt, batarya veya UPS kullanılabilir otonomisini gerçek yükle doğrula',dimension:'backup'},
+    'authorized-escalation':{title:'Yetkili servis ve teknik ekip escalation rotasını doğrula',dimension:'ownership'},
+    'continuity-fallback':{title:'Azaltılmış kapasite veya kontrollü durdurma planını oluştur',dimension:'incident'},
+    'stakeholder-update':{title:'Doğrulanmış bilgiye dayalı yönetim ve kullanıcı bildirim şablonunu hazırla',dimension:'documentation'},
+    'closure-owner':{title:'Tatbikat bulgularının hedef tarih, sahip ve kanıtla kapanmasını izle',dimension:'improvement'},
+    'transfer-observation':{title:'Transfer ve geri dönüş davranışını yetkili ekip gözetiminde test et',dimension:'testing'},
+    'generator-manual-start-boundary':{title:'Jeneratör ve ATS manuel müdahale yetki sınırını yazılılaştır',dimension:'ownership'},
+    'autonomy-recheck':{title:'UPS ve batarya otonomisini yaş, test kaydı ve gerçek yükle yeniden ölç',dimension:'testing'},
+    'unsafe-load-stop':{title:'Anormal gerilimde hassas yükleri güvenli durdurma sınırını tanımla',dimension:'incident'},
+    'critical-service-fallback':{title:'Su, iletişim veya soğuk zincir için alternatif hizmet planını doğrula',dimension:'critical-loads'},
+    'critical-without-backup':{title:'Kritik yükler için kabul edilebilir kesinti ve yedekleme çözüm sınıfını planla',dimension:'backup'},
+    'roles-not-assigned':{title:'Her kritik görev için birincil ve yedek rol ata',dimension:'ownership'},
+    'offline-contacts-missing':{title:'112, 186, yönetim, teknik ekip ve servis listesini çevrimdışı erişilebilir yap',dimension:'documentation'},
+    'record-template-missing':{title:'Başlangıç, kapsam, karar, kayıt numarası, maliyet ve kapanış şablonunu oluştur',dimension:'documentation'}
+  });
 
   function nowIso(){return new Date().toISOString();}
   function id(prefix='id'){
@@ -23,7 +59,7 @@
     return {
       schemaVersion:SCHEMA_VERSION,
       organization:{name:'',profile:'hotel',createdAt:nowIso(),updatedAt:nowIso()},
-      locations:[],criticalLoads:[],assets:[],tests:[],incidents:[],improvementActions:[],maturityImports:[],auditLog:[]
+      locations:[],criticalLoads:[],assets:[],tests:[],incidents:[],improvementActions:[],maturityImports:[],drillImports:[],auditLog:[]
     };
   }
 
@@ -138,6 +174,40 @@
     return {state:next,added,duplicate:false,importId:payload.importId};
   }
 
+  function validateDrillHandoff(raw,at=Date.now()){
+    if(!raw||typeof raw!=='object'||raw.schema!==DRILL_HANDOFF_SCHEMA||raw.version!==HANDOFF_VERSION)return {valid:false,reason:'Tatbikat aktarım sürümü geçersiz.'};
+    const created=Date.parse(raw.createdAt||''),expires=Date.parse(raw.expiresAt||'');
+    if(!Number.isFinite(created)||!Number.isFinite(expires)||created>at+300000||expires<=at||expires-created>HANDOFF_MAX_AGE_MS+300000)return {valid:false,reason:'Tatbikat aktarım süresi geçersiz veya dolmuş.'};
+    const facilityType=FACILITY_TYPES.has(raw.facilityType)?raw.facilityType:'other';
+    const scenarioId=cleanText(raw.scenarioId,60),score=Math.round(number(raw.score,-1)),band=cleanText(raw.band,40);
+    if(!DRILL_SCENARIOS.has(scenarioId))return {valid:false,reason:'Tatbikat senaryosu geçersiz.'};
+    if(score<0||score>100||!DRILL_BANDS.has(band))return {valid:false,reason:'Tatbikat skoru veya bandı geçersiz.'};
+    if(!Array.isArray(raw.gaps)||raw.gaps.length>40)return {valid:false,reason:'Tatbikat boşluk listesi geçersiz.'};
+    const seen=new Set(),actions=[];
+    for(const item of raw.gaps){
+      const gapId=cleanText(item&&item.id,80),window=String(item&&item.window||''),priority=cleanText(item&&item.priority,4),status=cleanText(item&&item.status,12),meta=DRILL_GAP_CATALOG[gapId];
+      if(!meta||!DRILL_WINDOWS.has(window)||!DRILL_PRIORITIES.has(priority)||!DRILL_STATUSES.has(status))return {valid:false,reason:'Tatbikat boşluk kaydı allowlist dışında.'};
+      if(seen.has(gapId))continue;seen.add(gapId);
+      actions.push({questionId:`drill:${gapId}`,gapId,dimension:meta.dimension,text:meta.title,horizonDays:DRILL_HORIZON_DAYS[window],priority:DRILL_PRIORITY_SCORE[priority],drillPriority:priority,status,window});
+    }
+    const suggestionValues=new Set(['current','planned','due']),passportEvidenceSuggestions={};
+    Object.entries(raw.passportEvidenceSuggestions&&typeof raw.passportEvidenceSuggestions==='object'?raw.passportEvidenceSuggestions:{}).forEach(([key,value])=>{const cleanKey=cleanText(key,60);if(cleanKey&&suggestionValues.has(value))passportEvidenceSuggestions[cleanKey]=value;});
+    const importId=`drill-${created}-${score}-${scenarioId}`;
+    return {valid:true,value:{schema:DRILL_HANDOFF_SCHEMA,version:HANDOFF_VERSION,importId,createdAt:new Date(created).toISOString(),expiresAt:new Date(expires).toISOString(),facilityType,scenarioId,score,band,actions,passportEvidenceSuggestions}};
+  }
+
+  function importDrillHandoff(state,raw,at=Date.now()){
+    const checked=validateDrillHandoff(raw,at);if(!checked.valid)throw new Error(checked.reason);
+    const next=hydrate(clone(state)),payload=checked.value;
+    if(next.drillImports.some(x=>x.importId===payload.importId))return {state:next,added:0,duplicate:true,importId:payload.importId};
+    const existing=new Set(next.improvementActions.map(x=>`${x.sourceQuestionId}|${x.horizonDays}|${x.title}`));let added=0;
+    payload.actions.forEach(item=>{const key=`${item.questionId}|${item.horizonDays}|${item.text}`;if(existing.has(key))return;next.improvementActions.push({id:id('improve'),title:item.text,dimension:item.dimension,horizonDays:item.horizonDays,priority:item.priority,status:'open',completed:false,completedAt:null,source:'outage-drill',sourceQuestionId:item.questionId,sourceImportId:payload.importId,drillPriority:item.drillPriority,drillWindow:item.window,gapStatus:item.status,createdAt:nowIso()});existing.add(key);added++;});
+    next.drillImports.unshift({importId:payload.importId,score:payload.score,band:payload.band,facilityType:payload.facilityType,scenarioId:payload.scenarioId,passportEvidenceSuggestions:payload.passportEvidenceSuggestions,importedAt:nowIso(),actionCount:added});next.drillImports=next.drillImports.slice(0,20);
+    if(!next.organization.name&&!next.locations.length&&['hotel','site','business'].includes(payload.facilityType))next.organization.profile=payload.facilityType;
+    audit(next,'outage_drill_imported','drill_import',payload.importId,{score:payload.score,band:payload.band,facilityType:payload.facilityType,scenarioId:payload.scenarioId,added});
+    return {state:next,added,duplicate:false,importId:payload.importId};
+  }
+
   function toggleImprovementAction(state,actionId,completed=true){
     const next=hydrate(clone(state)),action=next.improvementActions.find(x=>x.id===actionId);if(!action)throw new Error('İyileştirme aksiyonu bulunamadı.');
     action.completed=Boolean(completed);action.status=action.completed?'completed':'open';action.completedAt=action.completed?nowIso():null;audit(next,'improvement_action_updated','improvement_action',action.id,{completed:action.completed,horizonDays:action.horizonDays,dimension:action.dimension});return {state:next,action};
@@ -155,8 +225,8 @@
 
   function hydrate(raw){
     const base=createState();if(!raw||typeof raw!=='object')return base;
-    return {...base,...raw,schemaVersion:SCHEMA_VERSION,organization:{...base.organization,...(raw.organization||{})},locations:Array.isArray(raw.locations)?raw.locations:[],criticalLoads:Array.isArray(raw.criticalLoads)?raw.criticalLoads:[],assets:Array.isArray(raw.assets)?raw.assets:[],tests:Array.isArray(raw.tests)?raw.tests:[],incidents:Array.isArray(raw.incidents)?raw.incidents:[],improvementActions:Array.isArray(raw.improvementActions)?raw.improvementActions:[],maturityImports:Array.isArray(raw.maturityImports)?raw.maturityImports:[],auditLog:Array.isArray(raw.auditLog)?raw.auditLog:[]};
+    return {...base,...raw,schemaVersion:SCHEMA_VERSION,organization:{...base.organization,...(raw.organization||{})},locations:Array.isArray(raw.locations)?raw.locations:[],criticalLoads:Array.isArray(raw.criticalLoads)?raw.criticalLoads:[],assets:Array.isArray(raw.assets)?raw.assets:[],tests:Array.isArray(raw.tests)?raw.tests:[],incidents:Array.isArray(raw.incidents)?raw.incidents:[],improvementActions:Array.isArray(raw.improvementActions)?raw.improvementActions:[],maturityImports:Array.isArray(raw.maturityImports)?raw.maturityImports:[],drillImports:Array.isArray(raw.drillImports)?raw.drillImports:[],auditLog:Array.isArray(raw.auditLog)?raw.auditLog:[]};
   }
 
-  return {SCHEMA_VERSION,HANDOFF_VERSION,HANDOFF_MAX_AGE_MS,createState,configureOrganization,addLocation,addCriticalLoad,addAsset,recordTest,startIncident,addIncidentEvent,toggleIncidentTask,addIncidentCost,closeIncident,validateMaturityHandoff,importMaturityHandoff,toggleImprovementAction,improvementProgress,incidentCostTotal,taskProgress,metrics,hydrate,clone};
+  return {SCHEMA_VERSION,HANDOFF_VERSION,HANDOFF_MAX_AGE_MS,DRILL_HANDOFF_SCHEMA,DRILL_GAP_CATALOG,createState,configureOrganization,addLocation,addCriticalLoad,addAsset,recordTest,startIncident,addIncidentEvent,toggleIncidentTask,addIncidentCost,closeIncident,validateMaturityHandoff,importMaturityHandoff,validateDrillHandoff,importDrillHandoff,toggleImprovementAction,improvementProgress,incidentCostTotal,taskProgress,metrics,hydrate,clone};
 });
