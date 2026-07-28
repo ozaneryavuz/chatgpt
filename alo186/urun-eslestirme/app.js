@@ -31,6 +31,13 @@
       ['Dalga biçimi','Kombi, motor ve hassas cihazlarda saf sinüs gereksinimini doğrulayın.'],
       ['Batarya ve girişler','LiFePO₄ çevrim ömrü, AC/DC/solar giriş sınırları ve konektör uyumunu kontrol edin.']
     ],
+    generator:[
+      ['Sürekli ve kalkış gücü','Hesap sonucundaki asgari sürekli W ve kalkış W değerlerinin ikisini de ürün etiketinde doğrulayın.'],
+      ['Gerilim, frekans ve faz','230 V / 50 Hz ve monofaze ihtiyacınızı doğrulayın; trifaze seçim profesyonel projelendirme gerektirir.'],
+      ['CO ve dış ortam güvenliği','Yakıtlı jeneratörü yalnız açık havada kullanın; CO algılama özelliği temel yerleşim kurallarının yerine geçmez.'],
+      ['Bağlantı biçimi','Bina devreleri için prize ters besleme yapmayın; uygun transfer sistemi yetkili elektrikçi tarafından kurulmalıdır.'],
+      ['İşletme koşulları','Gürültü, yakıt, çalışma süresi, rakım/sıcaklık düşümü, bakım ve yetkili servis koşullarını karşılaştırın.']
+    ],
     outlet_tester:[
       ['Gösterge kapsamı','LED deseninin hangi temel bağlantı hatalarını gösterebildiğini okuyun.'],
       ['RCD testi','Test akımı ve uyumlu nominal kaçak akım değeri belirtilmeli.'],
