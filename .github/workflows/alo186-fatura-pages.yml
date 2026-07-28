@@ -6,6 +6,10 @@ on:
     paths:
       - "alo186/**"
       - ".github/workflows/alo186-fatura-pages.yml"
+  pull_request:
+    paths:
+      - "alo186/**"
+      - ".github/workflows/alo186-fatura-pages.yml"
   workflow_dispatch:
 
 permissions:
@@ -14,7 +18,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: pages-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -52,7 +56,14 @@ jobs:
           test -f _site/isletme-surekliligi/index.html
           test -f _site/fatura-analizi/index.html
           test -f _overlay/.htaccess
+          test -f _overlay/tailwindcss
           test -f _overlay/SHA256SUMS
+          test ! -s _overlay/tailwindcss || grep -q 'Temporary compatibility stylesheet' _overlay/tailwindcss
+          grep -q 'Strict-Transport-Security' _overlay/.htaccess
+          grep -q 'X-Content-Type-Options' _overlay/.htaccess
+          grep -q 'Content-Security-Policy' _overlay/.htaccess
+          grep -q 'ForceType text/css' _overlay/.htaccess
+          grep -q 'tailwindcss' _overlay/SHA256SUMS
           test ! -e _site/sureklilik-api
           test ! -e _site/tests
           test ! -e _overlay/sureklilik-api
@@ -77,17 +88,17 @@ jobs:
           retention-days: 30
 
       - name: Configure Pages
-        if: vars.ALO186_GITHUB_PAGES_ENABLED == 'true'
+        if: vars.ALO186_GITHUB_PAGES_ENABLED == 'true' && github.event_name != 'pull_request'
         uses: actions/configure-pages@v5
 
       - name: Upload GitHub Pages artifact
-        if: vars.ALO186_GITHUB_PAGES_ENABLED == 'true'
+        if: vars.ALO186_GITHUB_PAGES_ENABLED == 'true' && github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v3
         with:
           path: _site
 
   deploy:
-    if: vars.ALO186_GITHUB_PAGES_ENABLED == 'true'
+    if: vars.ALO186_GITHUB_PAGES_ENABLED == 'true' && github.event_name != 'pull_request'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
