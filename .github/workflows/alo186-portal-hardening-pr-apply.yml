@@ -1,0 +1,54 @@
+name: ALO186 portal hardening PR apply
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/alo186-portal-hardening.trigger'
+      - '.github/workflows/alo186-portal-hardening-pr-apply.yml'
+      - 'alo186/deployment/apply_portal_hardening.py'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.head_ref == 'fix/alo186-portal-hardening-main-20260728'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/alo186-portal-hardening-main-20260728
+          fetch-depth: 0
+      - name: Kaynak düzeltme dalını getir
+        run: git fetch origin fix/alo186-complete-missing-hardening-v2-20260728
+      - name: Güncel main üzerine portal paketini uygula
+        run: python alo186/deployment/apply_portal_hardening.py
+      - name: Test ve paket doğrulaması
+        shell: bash
+        run: |
+          set -euo pipefail
+          node alo186/tests/test_portal_hardening.js
+          node alo186/tests/test_release_manifest.js
+          chmod +x alo186/deployment/build_static_site.sh
+          alo186/deployment/build_static_site.sh _site preview
+          alo186/deployment/build_static_site.sh _overlay overlay
+          test -f _site/elektrik-portali/index.html
+          test -f _site/hesaplama/elektrik-kesintisi-tatbikati/index.html
+          grep -q 'Cihaz hasarında başvuru süresi 10 iş günüdür' _site/elektrik-portali/index.html
+          grep -q 'mod_substitute.c' _overlay/.htaccess
+      - name: Geçici yardımcıları kaldır ve sonucu dala kaydet
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm -f \
+            .github/alo186-portal-hardening.trigger \
+            .github/workflows/alo186-portal-hardening-autofix-once.yml \
+            .github/workflows/alo186-portal-hardening-pr-apply.yml \
+            alo186/deployment/apply_portal_hardening.py
+          git add .github/workflows/alo186-fatura-pages.yml alo186/deployment/apache.htaccess alo186/index.html alo186/styles.css alo186/tests/test_portal_hardening.js alo186/tests/test_release_manifest.js
+          git commit -m 'fix(alo186): portal hardening paketini güncel main ile birleştir'
+          git push origin HEAD:fix/alo186-portal-hardening-main-20260728
