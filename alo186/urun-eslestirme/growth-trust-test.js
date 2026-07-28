@@ -39,8 +39,9 @@ assert.equal(outletTester.professionalSelectionRequired,true);
 assert.match(outletTester.nextStep.url,/karar-motoru/);
 
 const emergencyLight=matcher.match('emergency_light',{}, {now:freshNow});
-assert.equal(emergencyLight.affiliatePolicy,'after_checklist');
+assert.equal(emergencyLight.affiliatePolicy,'after_tool');
 assert.equal(emergencyLight.professionalSelectionRequired,false);
+assert.match(emergencyLight.nextStep.url,/acil-aydinlatma-sure-uygunluk/);
 
 const smokeAlarm=matcher.match('smoke_alarm',{}, {now:freshNow});
 assert.equal(smokeAlarm.affiliatePolicy,'after_checklist');
