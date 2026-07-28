@@ -1,0 +1,32 @@
+name: ALO186 Cihaz Hasarı Süre Güvenlik Kapısı
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/**'
+      - '.github/workflows/alo186-device-damage-deadline-guard.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/**'
+      - '.github/workflows/alo186-device-damage-deadline-guard.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  device-damage-deadline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Validate device-damage application deadline
+        run: python alo186/tests/device_damage_deadline_guard.py
