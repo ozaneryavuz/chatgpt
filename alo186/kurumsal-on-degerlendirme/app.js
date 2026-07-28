@@ -79,7 +79,7 @@
       const body = [
         'Merhaba,',
         '',
-        'ALO186 Kurumsal Elektrik Sürekliliği Ön Değerlirmesi için bilgi rica ediyorum.',
+        'ALO186 Kurumsal Elektrik Sürekliliği Ön Değerlendirmesi için bilgi rica ediyorum.',
         '',
         `Tesis türü: ${readable.facility}`,
         `Ana problem: ${readable.problem}`,
