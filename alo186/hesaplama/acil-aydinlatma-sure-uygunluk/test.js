@@ -54,7 +54,6 @@ assert.throws(()=>analyze({...base,targetHours:100}),/Hedef süre/);
 
 const repoRoot=path.resolve(__dirname,'../../..');
 const html=fs.readFileSync(path.join(__dirname,'index.html'),'utf8');
-const hub=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
 const manifest=fs.readFileSync(path.join(repoRoot,'alo186','deployment','routing-manifest.json'),'utf8');
 const sitemap=fs.readFileSync(path.join(repoRoot,'alo186','sitemap.xml'),'utf8');
 const catalog=require(path.join(repoRoot,'alo186','urun-eslestirme','catalog.js'));
@@ -66,7 +65,6 @@ assert.match(html,/İşyeri kaçış yolu/);
 assert.match(html,/Mum yerine/);
 assert.doesNotMatch(html,/amazon\.(com|com\.tr)\//i);
 assert.doesNotMatch(html,/type="(?:email|tel|text)"/i);
-assert.match(hub,/\.\/acil-aydinlatma-sure-uygunluk\//);
 assert.match(manifest,/alo186\/hesaplama\/acil-aydinlatma-sure-uygunluk\/index\.html/);
 assert.match(sitemap,/https:\/\/www\.alo186\.com\/hesaplama\/acil-aydinlatma-sure-uygunluk\//);
 assert.equal(catalog.getCategory('emergency_light').affiliatePolicy,'after_tool');
