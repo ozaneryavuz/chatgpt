@@ -1,0 +1,14 @@
+{
+  "id": "/",
+  "name": "ALO186 Bağımsız Elektrik Bilgi Ağı",
+  "short_name": "ALO186",
+  "description": "Elektrik kesintisi, EDAŞ yönlendirmesi, güvenlik rehberleri ve kişisel veri istemeyen teknik karar araçları.",
+  "lang": "tr-TR",
+  "dir": "ltr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#071631",
+  "theme_color": "#071631",
+  "categories": ["utilities", "education"]
+}
