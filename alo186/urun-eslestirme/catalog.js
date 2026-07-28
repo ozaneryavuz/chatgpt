@@ -22,6 +22,7 @@
     {id:'emergency_light',name:'Şarjlı acil aydınlatma',mode:'guide',risk:'consumer',description:'Düşük mod çalışma süresi, fiziksel düğme, pil göstergesi ve asma/taşıma biçimini kontrol edin.',searchQuery:'şarjlı acil durum lambası kamp lambası'},
     {id:'smoke_alarm',name:'Fotoelektrik duman alarmı',mode:'guide',risk:'safety',description:'EN 14604 işareti, test düğmesi, düşük pil uyarısı, ses seviyesi ve son kullanım bilgisini doğrulayın.',searchQuery:'EN 14604 fotoelektrik duman dedektörü'},
     {id:'power_station',name:'Taşınabilir güç istasyonu',mode:'guide',risk:'compatibility',description:'Wh kapasitesi, sürekli/tepe güç, dalga biçimi, batarya kimyası ve şarj girişleri yük hesabıyla birlikte seçilmelidir.',searchQuery:'LiFePO4 taşınabilir güç istasyonu power station'},
+    {id:'generator',name:'Taşınabilir jeneratör',mode:'guide',risk:'safety',description:'Sürekli ve kalkış W, faz, çıkış kalitesi, CO güvenliği, gürültü, yakıt ve servis koşulları güç hesabıyla birlikte doğrulanmalıdır.',searchQuery:'inverter jeneratör CO sensörü sürekli kalkış watt'},
     {id:'outlet_tester',name:'Priz ve RCD test cihazı',mode:'guide',risk:'measurement',description:'Gösterge yalnız temel bağlantı hatalarını ön kontrol eder; izolasyon, topraklama direnci ve koruma açma testi yerine geçmez.',searchQuery:'priz test cihazı RCD tester'}
   ];
 
@@ -65,7 +66,7 @@
     {
       id:'cata-ct9186',category:'surge_strip',asin:'B09YTYTZ4J',name:'Cata CT-9186 Tekli Akım Korumalı Priz 918 J',brand:'Cata',status:'verified_listing',verifiedAt,
       attributes:{outlets:1,joules:918,maxCurrentA:null,maxPowerW:4000,usbPorts:0,cableM:0},
-      strengths:['918 joule','Tek cihaz için kompakt kullanım','LED gösterge'],limits:['Tek priz','4000 W ifadesi ürün sayfasında tekrar doğrulanmalı','Pano tipi SPD yerine geçmez'],
+      strengths:['918 joule','Tek cihaz için kompakt kullanım','LED gösterge'],limits:['Tek priz','4000 W ifadesi ürün sayfasında tekrar doğrulanmalı','Pano tipi koruma yerine geçmez'],
       sourceNote:'ASIN, 918 J ve 4000 W ürün başlığı/açıklamasından kontrol edildi.',url:amazonProductUrl('B09YTYTZ4J')
     }
   ];
