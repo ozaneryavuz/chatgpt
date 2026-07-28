@@ -25,6 +25,7 @@ on:
 
 permissions:
   contents: read
+  issues: write
 
 concurrency:
   group: alo186-production-${{ github.ref }}
@@ -94,6 +95,10 @@ jobs:
         vars.ALO186_PRODUCTION_DEPLOY_ENABLED == 'true' ||
         (github.event_name == 'workflow_dispatch' && inputs.force_deploy == true) ||
         (github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy alo186]'))
+      ) &&
+      (
+        vars.ALO186_DEPLOY_METHOD == 'ssh' ||
+        vars.ALO186_DEPLOY_METHOD == 'ftps'
       )
     needs: build
     runs-on: ubuntu-latest
@@ -116,6 +121,37 @@ jobs:
             echo "- Reason: ${{ inputs.deploy_reason || 'main push / tagged hotfix' }}"
             echo "- Method: ${{ vars.ALO186_DEPLOY_METHOD }}"
           } >> "$GITHUB_STEP_SUMMARY"
+      - name: Deploy yapılandırması ön kontrolü
+        env:
+          DEPLOY_METHOD: ${{ vars.ALO186_DEPLOY_METHOD }}
+          DEPLOY_HOST: ${{ secrets.ALO186_DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.ALO186_DEPLOY_USER }}
+          DEPLOY_PATH: ${{ vars.ALO186_DEPLOY_PATH }}
+          SSH_KEY: ${{ secrets.ALO186_DEPLOY_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.ALO186_DEPLOY_KNOWN_HOSTS }}
+          DEPLOY_PASSWORD: ${{ secrets.ALO186_DEPLOY_PASSWORD }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          missing=()
+          for name in DEPLOY_HOST DEPLOY_USER DEPLOY_PATH; do
+            [[ -n "${!name:-}" ]] || missing+=("$name")
+          done
+          if [[ "$DEPLOY_METHOD" == "ssh" ]]; then
+            [[ -n "${SSH_KEY:-}" ]] || missing+=("ALO186_DEPLOY_SSH_KEY")
+            [[ -n "${KNOWN_HOSTS:-}" ]] || missing+=("ALO186_DEPLOY_KNOWN_HOSTS")
+          elif [[ "$DEPLOY_METHOD" == "ftps" ]]; then
+            [[ -n "${DEPLOY_PASSWORD:-}" ]] || missing+=("ALO186_DEPLOY_PASSWORD")
+          fi
+          if ((${#missing[@]})); then
+            printf '::error title=ALO186 deploy configuration missing::Eksik alanlar: %s\n' "${missing[*]}"
+            {
+              echo "### Deploy durduruldu"
+              echo "Eksik secret/variable adları: \`${missing[*]}\`"
+              echo "Secret değerleri loglanmadı. GitHub Environment \`alo186-production\` içinde tamamlayın."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
       - name: SSH / rsync ile yayınla
         if: vars.ALO186_DEPLOY_METHOD == 'ssh'
         env:
@@ -127,11 +163,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          : "${DEPLOY_HOST:?ALO186_DEPLOY_HOST eksik}"
-          : "${DEPLOY_USER:?ALO186_DEPLOY_USER eksik}"
-          : "${DEPLOY_PATH:?ALO186_DEPLOY_PATH eksik}"
-          : "${SSH_KEY:?ALO186_DEPLOY_SSH_KEY eksik}"
-          : "${KNOWN_HOSTS:?ALO186_DEPLOY_KNOWN_HOSTS eksik}"
           install -m 700 -d ~/.ssh
           printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
           printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
@@ -149,10 +180,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          : "${DEPLOY_HOST:?ALO186_DEPLOY_HOST eksik}"
-          : "${DEPLOY_USER:?ALO186_DEPLOY_USER eksik}"
-          : "${DEPLOY_PASSWORD:?ALO186_DEPLOY_PASSWORD eksik}"
-          : "${DEPLOY_PATH:?ALO186_DEPLOY_PATH eksik}"
           sudo apt-get update -qq
           sudo apt-get install -y -qq lftp
           lftp -u "$DEPLOY_USER,$DEPLOY_PASSWORD" "ftps://$DEPLOY_HOST" <<LFTP
@@ -164,11 +191,6 @@ jobs:
           mirror --reverse --overwrite --parallel=2 --verbose release/_production_site/ ${DEPLOY_PATH%/}/
           bye
           LFTP
-      - name: Deploy yöntemi doğrulaması
-        if: vars.ALO186_DEPLOY_METHOD != 'ssh' && vars.ALO186_DEPLOY_METHOD != 'ftps'
-        run: |
-          echo "ALO186_DEPLOY_METHOD yalnız ssh veya ftps olabilir." >&2
-          exit 1
       - name: CDN yayılımını bekle, canlı smoke ve release drift testi
         shell: bash
         run: |
@@ -198,6 +220,28 @@ jobs:
             sleep 20
           done
           test "$success" -eq 1
+      - name: Deploy hatasını P0 issue üzerinde görünür kıl
+        if: failure()
+        uses: actions/github-script@v7
+        env:
+          DEPLOY_METHOD: ${{ vars.ALO186_DEPLOY_METHOD }}
+        with:
+          script: |
+            const marker = '<!-- alo186-production-deploy-failure -->';
+            const issueNumber = 21;
+            const body = `${marker}\n## Production deploy başarısız\n\n- Commit: \`${context.sha}\`\n- Yöntem: \`${process.env.DEPLOY_METHOD || 'tanımsız'}\`\n- Run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}\n\nSecret değerleri loglanmadı. GitHub Environment ve hosting erişimini kontrol edin.`;
+            const {data: comments} = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              per_page: 100
+            });
+            const existing = comments.find(item => item.body && item.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({owner: context.repo.owner, repo: context.repo.repo, comment_id: existing.id, body});
+            } else {
+              await github.rest.issues.createComment({owner: context.repo.owner, repo: context.repo.repo, issue_number: issueNumber, body});
+            }
       - name: Canlı doğrulama raporlarını sakla
         if: always()
         uses: actions/upload-artifact@v4
@@ -209,6 +253,56 @@ jobs:
             live-release-drift.stdout
           if-no-files-found: warn
           retention-days: 30
+
+  deploy-config-blocked:
+    name: Deploy yapılandırması eksik — yayın yapılmadı
+    if: >-
+      github.event_name != 'pull_request' &&
+      (
+        vars.ALO186_PRODUCTION_DEPLOY_ENABLED == 'true' ||
+        (github.event_name == 'workflow_dispatch' && inputs.force_deploy == true) ||
+        (github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy alo186]'))
+      ) &&
+      vars.ALO186_DEPLOY_METHOD != 'ssh' &&
+      vars.ALO186_DEPLOY_METHOD != 'ftps'
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Yapılandırma engelini özetle
+        run: |
+          {
+            echo "### ALO186 production deploy bloke edildi"
+            echo "Canonical bundle başarıyla üretildi; canlı dosya aktarımı yapılmadı."
+            echo "\`ALO186_DEPLOY_METHOD\` yalnız \`ssh\` veya \`ftps\` olmalıdır."
+            echo "Gerekli hosting secret ve variable'ları GitHub Environment \`alo186-production\` içinde tanımlayın."
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "::warning title=ALO186 deploy blocked::ALO186_DEPLOY_METHOD ssh veya ftps olarak yapılandırılmadı; yayın yapılmadı."
+      - name: P0 hosting issue yorumunu oluştur veya güncelle
+        uses: actions/github-script@v7
+        env:
+          DEPLOY_METHOD: ${{ vars.ALO186_DEPLOY_METHOD }}
+        with:
+          script: |
+            const marker = '<!-- alo186-production-deploy-blocked -->';
+            const issueNumber = 21;
+            const body = `${marker}\n## Production deploy yapılandırma nedeniyle bloke\n\n- Commit: \`${context.sha}\`\n- Tanımlı yöntem: \`${process.env.DEPLOY_METHOD || 'boş'}\`\n- Run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}\n\nBundle doğrulandı fakat canlı hosting aktarımı yapılmadı. \`ALO186_DEPLOY_METHOD=ssh|ftps\`, deploy path ve ilgili hosting secret'ları \`alo186-production\` Environment içinde tamamlanmalıdır.`;
+            const {data: comments} = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              per_page: 100
+            });
+            const existing = comments.find(item => item.body && item.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({owner: context.repo.owner, repo: context.repo.repo, comment_id: existing.id, body});
+            } else {
+              await github.rest.issues.createComment({owner: context.repo.owner, repo: context.repo.repo, issue_number: issueNumber, body});
+            }
+      - name: Manuel zorunlu deploy isteğini başarısız say
+        if: github.event_name == 'workflow_dispatch' && inputs.force_deploy == true
+        run: |
+          echo "Manuel force_deploy istendi ancak deploy yöntemi tanımlı değil." >&2
+          exit 1
 
   deploy-status:
     name: Deploy kapısı durumu
