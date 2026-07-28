@@ -72,9 +72,12 @@ const articles=[
   {slug:'batarya-soc-soh-farki-kapasite-saglik-nasil-anlasilir',required:['State of Charge','State of Health','kullanılabilir kapasite','iç direnç','yüzde 80'],cta:'/hesaplama/inverter-uygunluk/',fresh:true,portalOptional:true},
   {slug:'kacak-akim-rolesi-tip-s-selektivite-nedir',required:['Tip S','seçicilik','IΔn','zaman gecikmesi','yetkili elektrikçi'],cta:'/karar-motoru',fresh:true,portalOptional:true},
   {slug:'jenerator-dusuk-yuk-wet-stacking-nedir',required:['wet stacking','%30','load bank','egzoz slobber','yetkili servis'],cta:'/hesaplama/jenerator-gucu-secimi/',fresh:true,portalOptional:true},
-  {slug:'ups-aku-string-dengesizligi-zayif-aku-nasil-anlasilir',required:['battery string','iç direnç','eski ve yeni','tüm string','yetkili UPS servisi'],cta:'/hesaplama/ups-aku-degisim-uygunluk/',fresh:true,portalOptional:true}
+  {slug:'ups-aku-string-dengesizligi-zayif-aku-nasil-anlasilir',required:['battery string','iç direnç','eski ve yeni','tüm string','yetkili UPS servisi'],cta:'/hesaplama/ups-aku-degisim-uygunluk/',fresh:true,portalOptional:true},
+  {slug:'ev-sarj-istasyonu-tip-b-rcd-rdc-dd-secimi',required:['Tip B','Tip A','RDC-DD','6 mA DC','30 mA','yetkili elektrikçi'],cta:'/hesaplama/ev-sarj-uygunluk/',fresh:true,portalOptional:true},
+  {slug:'topraklama-direnci-ariza-cevrim-empedansi-farki',required:['RA','Ze','Zs','R1 + R2','otomatik açma','RCD'],cta:'/karar-motoru',fresh:true,portalOptional:true},
+  {slug:'detuned-reaktor-aktif-harmonik-filtre-farki',required:['detuned reaktör','aktif harmonik filtre','rezonans','5. harmonik','THDi','tuning frequency'],cta:'/isletme-surekliligi',fresh:true,portalOptional:true}
 ];
-assert.strictEqual(articles.length,69,'İçerik kalite testi 69 teknik makaleyi kapsamalı.');
+assert.strictEqual(articles.length,72,'İçerik kalite testi 72 teknik makaleyi kapsamalı.');
 
 for(const article of articles){
   const file=path.join(repoRoot,'alo186/haberler',article.slug,'index.html');
@@ -117,7 +120,7 @@ assert(cssText.includes('prefers-reduced-motion'),'Azaltılmış hareket desteğ
 const sitemap=fs.readFileSync(path.join(repoRoot,'alo186/sitemap.xml'),'utf8');
 const routing=JSON.parse(fs.readFileSync(path.join(repoRoot,'alo186/deployment/routing-manifest.json'),'utf8'));
 const portal=fs.readFileSync(path.join(repoRoot,'alo186/index.html'),'utf8');
-assert.strictEqual(routing.routes.filter(route=>route.type==='article').length,69,'Routing manifest 69 teknik makale içermeli.');
+assert.strictEqual(routing.routes.filter(route=>route.type==='article').length,72,'Routing manifest 72 teknik makale içermeli.');
 assert(portal.includes('kaynak doğrulamalı rehberler'),'Portal kaynak doğrulamalı rehber ailesini görünür göstermeli; routing ve sitemap tam makale envanterini doğrular.');
 for(const article of articles){
   const canonicalPath=`/haberler/${article.slug}`;
