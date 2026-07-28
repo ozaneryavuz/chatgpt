@@ -121,6 +121,8 @@
 
   function renderResult(result) {
     latestResult = result;
+    panelBtn.textContent = "7 günlük panel aktarımını hazırla";
+    delete panelBtn.dataset.handoffReady;
     scoreValue.textContent = `${result.score}/100`;
     bandValue.textContent = result.classification.label;
     bandValue.className = `status ${result.classification.tone}`;
@@ -174,13 +176,14 @@
   }
 
   function saveHandoff() {
-    if (panelBtn.dataset.handoffReady === "true") {
-      window.location.href = "https://www.alo186.com/isletme-surekliligi";
-      return;
-    }
     if (!latestResult) return;
     try {
       localStorage.setItem("alo186.continuity-drill-handoff.v1", JSON.stringify(latestResult.handoff));
+      if (panelBtn.dataset.handoffReady === "true") {
+        emit("continuity_drill_handoff_refreshed", { score_band: latestResult.classification.id, p0_count: latestResult.p0Count });
+        window.location.href = "https://www.alo186.com/isletme-surekliligi";
+        return;
+      }
       panelBtn.dataset.handoffReady = "true";
       panelBtn.textContent = "Panele git ve bulguları içe aktar";
       emit("continuity_drill_handoff_saved", { score_band: latestResult.classification.id, p0_count: latestResult.p0Count });
