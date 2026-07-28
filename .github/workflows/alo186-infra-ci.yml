@@ -54,7 +54,7 @@ jobs:
         run: check-jsonschema --schemafile https://render.com/schema/render.yaml.json render.yaml
       - name: Render Blueprint ALO186 semantik kuralları
         run: python alo186/infra/production/validate_render.py render.yaml
-      - name: Python sözdizimi, DB URL ve metrics auth regresyonları
+      - name: Python sözdizimi, DB URL, metrics auth ve hukuki içerik regresyonları
         env:
           PYTHONPATH: alo186/sureklilik-api
           ALO186_ENV: test
@@ -68,7 +68,8 @@ jobs:
             alo186/sureklilik-api/scripts
           pytest -q \
             alo186/sureklilik-api/tests/test_database_url.py \
-            alo186/sureklilik-api/tests/test_metrics_auth.py
+            alo186/sureklilik-api/tests/test_metrics_auth.py \
+            alo186/infra/observability/test_synthetic_legal_content.py
       - name: ShellCheck
         run: |
           sudo apt-get update -qq
