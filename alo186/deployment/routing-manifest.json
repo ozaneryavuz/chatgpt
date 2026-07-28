@@ -1,5 +1,5 @@
 {
-  "version": 10,
+  "version": 11,
   "canonicalHost": "https://www.alo186.com",
   "generatedAt": "2026-07-28",
   "routes": [
@@ -19,6 +19,7 @@
     {"source":"alo186/hesaplama/ev-sarj-suresi/index.html","canonicalPath":"/hesaplama/ev-sarj-suresi/","type":"calculator"},
     {"source":"alo186/hesaplama/ev-sarj-uygunluk/index.html","canonicalPath":"/hesaplama/ev-sarj-uygunluk/","type":"tool"},
     {"source":"alo186/hesaplama/kablo-gerilim-dusumu/index.html","canonicalPath":"/hesaplama/kablo-gerilim-dusumu/","type":"calculator"},
+    {"source":"alo186/hesaplama/uzatma-kablosu-uygunluk/index.html","canonicalPath":"/hesaplama/uzatma-kablosu-uygunluk/","type":"tool"},
     {"source":"alo186/hesaplama/kesinti-hazirlik-plani/index.html","canonicalPath":"/hesaplama/kesinti-hazirlik-plani/","type":"tool"},
     {"source":"alo186/hesaplama/ekipman-bakim-plani/index.html","canonicalPath":"/hesaplama/ekipman-bakim-plani/","type":"tool"},
     {"source":"alo186/hesaplama/parafudr-risk-testi/index.html","canonicalPath":"/hesaplama/parafudr-risk-testi/","type":"tool"},
