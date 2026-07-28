@@ -60,9 +60,12 @@ const articles=[
   {slug:'ev-sarj-kablosu-prizi-isiniyor-ne-yapilmali',required:['thermal derating','Wall plug temperature high','Charge handle temperature high','Wall Connector wiring','112'],cta:'/hesaplama/ev-sarj-kablosu-uygunluk/',fresh:true,portalOptional:true},
   {slug:'ev-sarj-gucu-neden-dusuk-yavas-sarj',required:['onboard charger','tek faz','üç faz','dinamik yük yönetimi','thermal derating'],cta:'/hesaplama/ev-sarj-uygunluk/',fresh:true,portalOptional:true},
   {slug:'ges-inverter-sicakta-guc-dusuruyor-temperature-derating',required:['temperature derating','soğutma kanatları','havalandırma','doğrudan güneş ışınımı','yetkili GES personeli'],cta:'/hesaplama/ekipman-bakim-plani/',fresh:true,portalOptional:true},
-  {slug:'ups-akusu-sarj-olmuyor-batarya-dolmuyor',required:['battery disconnected','10 saat','24 saat','bypass','self-test'],cta:'/hesaplama/ups-aku-degisim-uygunluk/',fresh:true,portalOptional:true}
+  {slug:'ups-akusu-sarj-olmuyor-batarya-dolmuyor',required:['battery disconnected','10 saat','24 saat','bypass','self-test'],cta:'/hesaplama/ups-aku-degisim-uygunluk/',fresh:true,portalOptional:true},
+  {slug:'elektrik-gerilimi-dusuk-yuksek-edas-olcum-talebi',required:['teknik kalite','bir haftalık ölçüm','15 iş günü','dağıtım şirketi','ALO186 resmî kayıt almaz'],cta:'/edas-bul',fresh:true,portalOptional:true},
+  {slug:'ups-sebeke-varken-bataryaya-geciyor',required:['input sensitivity','Boost','Trim','THD','firmware'],cta:'/hesaplama/gerilim-koruma-cozum-secici/',fresh:true,portalOptional:true},
+  {slug:'jenerator-calisiyor-elektrik-uretmiyor-ne-yapilmali',required:['main line circuit breaker','GFCI','bilinen sağlam','yetkili servis','erkek–erkek'],cta:'/hesaplama/ekipman-bakim-plani/',fresh:true,portalOptional:true}
 ];
-assert.strictEqual(articles.length,57,'İçerik kalite testi 57 teknik makaleyi kapsamalı.');
+assert.strictEqual(articles.length,60,'İçerik kalite testi 60 teknik makaleyi kapsamalı.');
 
 for(const article of articles){
   const file=path.join(repoRoot,'alo186/haberler',article.slug,'index.html');
@@ -105,8 +108,8 @@ assert(cssText.includes('prefers-reduced-motion'),'Azaltılmış hareket desteğ
 const sitemap=fs.readFileSync(path.join(repoRoot,'alo186/sitemap.xml'),'utf8');
 const routing=JSON.parse(fs.readFileSync(path.join(repoRoot,'alo186/deployment/routing-manifest.json'),'utf8'));
 const portal=fs.readFileSync(path.join(repoRoot,'alo186/index.html'),'utf8');
-assert.strictEqual(routing.routes.filter(route=>route.type==='article').length,57,'Routing manifest 57 teknik makale içermeli.');
-assert(portal.includes('45 kaynak doğrulamalı rehber'),'Portal mevcut 45 kartı görünür göstermeli; yeni on iki rehber sitemap ve konu içi bağlantılarla yayınlanır.');
+assert.strictEqual(routing.routes.filter(route=>route.type==='article').length,60,'Routing manifest 60 teknik makale içermeli.');
+assert(portal.includes('45 kaynak doğrulamalı rehber'),'Portal mevcut 45 kartı görünür göstermeli; yeni on beş rehber sitemap ve konu içi bağlantılarla yayınlanır.');
 for(const article of articles){
   const canonicalPath=`/haberler/${article.slug}`;
   assert(sitemap.includes(`https://www.alo186.com${canonicalPath}`),`Sitemap eksik: ${article.slug}`);
