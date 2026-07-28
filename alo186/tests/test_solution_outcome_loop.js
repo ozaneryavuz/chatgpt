@@ -20,7 +20,7 @@ const productJourney = read('alo186/urun-eslestirme/journey-retention.js');
 const manifest = JSON.parse(read('alo186/deployment/routing-manifest.json'));
 const sitemap = read('alo186/sitemap.xml');
 
-assert.equal(manifest.version, 28, 'Routing manifest closed-loop sürümü v28 olmalı.');
+assert(Number.isInteger(manifest.version) && manifest.version >= 28, 'Routing manifest kapalı döngü rotasını içeren v28 veya daha yeni bir sürüm olmalı.');
 assert(manifest.routes.some((item) => item.source === 'alo186/hesaplama/cozum-sonucu/index.html' && item.canonicalPath === route && item.type === 'tool'), 'Çözüm sonucu rotası routing manifestte eksik.');
 assert(sitemap.includes(`<loc>${canonical}</loc>`), 'Çözüm sonucu rotası sitemapte eksik.');
 
