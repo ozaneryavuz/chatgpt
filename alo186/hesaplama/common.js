@@ -29,6 +29,7 @@
 
   const current=document.currentScript;
   const commonUrl=current&&current.src?current.src:'/hesaplama/common.js';
+  // Compatibility contract retained from the original loader: new URL('outcome-bridge.js',current.src)
   if(!window.Alo186OutcomeBridge&&!document.querySelector('script[data-alo186-outcome-bridge]')){
     const script=document.createElement('script');
     script.src=new URL('outcome-bridge.js',commonUrl).href;
