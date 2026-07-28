@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import re
 from pathlib import Path
 
 MARKER = 'data-alo186-common-runtime="true"'
@@ -16,6 +18,58 @@ def normalize_base_path(value: str) -> str:
     return "/" + cleaned.strip("/")
 
 
+def public_url(base_path: str, route: str) -> str:
+    route = "/" + route.lstrip("/")
+    return f"{base_path}{route}" if base_path else route
+
+
+def add_offline_route(site: Path, base_path: str) -> bool:
+    sw_path = site / "sw.js"
+    if not sw_path.is_file():
+        raise FileNotFoundError(f"GitHub Pages service worker eksik: {sw_path}")
+    outcome_url = public_url(base_path, "/hesaplama/cozum-sonucu/")
+    text = sw_path.read_text(encoding="utf-8")
+    match = re.search(r"const CRITICAL=(\[.*?\]);", text, re.S)
+    if not match:
+        raise RuntimeError("Service worker CRITICAL rota dizisi bulunamadı")
+    critical = json.loads(match.group(1))
+    if outcome_url in critical:
+        return False
+    critical.append(outcome_url)
+    updated = text[: match.start(1)] + json.dumps(critical, ensure_ascii=False) + text[match.end(1) :]
+    sw_path.write_text(updated, encoding="utf-8")
+    return True
+
+
+def update_pages_release(site: Path, base_path: str, injected: int, pending_injected: int) -> None:
+    release_path = site / "pages-release.json"
+    if not release_path.is_file():
+        return
+    release = json.loads(release_path.read_text(encoding="utf-8"))
+    release["outcomeRuntime"] = {
+        "version": 1,
+        "basePath": base_path,
+        "injectedPages": injected,
+        "pendingContextInjected": pending_injected,
+        "pendingRecordLimit": 6,
+        "pendingTtlDays": 45,
+        "offlineOutcomeRoute": public_url(base_path, "/hesaplama/cozum-sonucu/"),
+    }
+    release["offlineCriticalRouteCount"] = int(release.get("offlineCriticalRouteCount") or 0) + 1
+    release_path.write_text(json.dumps(release, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def recompute_checksums(site: Path) -> None:
+    checksum_path = site / "checksums.sha256"
+    if checksum_path.exists():
+        checksum_path.unlink()
+    lines = []
+    for path in sorted(item for item in site.rglob("*") if item.is_file()):
+        digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        lines.append(f"{digest}  {path.relative_to(site).as_posix()}")
+    checksum_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
 def inject(site: Path, base_path: str) -> dict:
     base_path = normalize_base_path(base_path)
     common = site / "hesaplama" / "common.js"
@@ -28,8 +82,8 @@ def inject(site: Path, base_path: str) -> dict:
     if not pending_context.is_file():
         raise FileNotFoundError(f"Bekleyen çözüm bağlamı tüketicisi eksik: {pending_context}")
 
-    common_url = f"{base_path}/hesaplama/common.js" if base_path else "/hesaplama/common.js"
-    pending_url = f"{base_path}/hesaplama/cozum-sonucu/pending-context.js" if base_path else "/hesaplama/cozum-sonucu/pending-context.js"
+    common_url = public_url(base_path, "/hesaplama/common.js")
+    pending_url = public_url(base_path, "/hesaplama/cozum-sonucu/pending-context.js")
     injected = 0
     already_present = 0
     pending_injected = 0
@@ -58,6 +112,10 @@ def inject(site: Path, base_path: str) -> dict:
     if missing_body:
         raise RuntimeError("Outcome runtime için </body> bulunamayan HTML: " + ", ".join(missing_body[:20]))
 
+    offline_added = add_offline_route(site, base_path)
+    update_pages_release(site, base_path, injected, pending_injected)
+    recompute_checksums(site)
+
     result = {
         "ok": True,
         "basePath": base_path,
@@ -66,6 +124,7 @@ def inject(site: Path, base_path: str) -> dict:
         "injectedPages": injected,
         "alreadyPresent": already_present,
         "pendingContextInjected": pending_injected,
+        "offlineOutcomeRouteAdded": offline_added,
         "totalPages": injected + already_present,
     }
     return result
