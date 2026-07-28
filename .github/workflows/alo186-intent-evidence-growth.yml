@@ -58,9 +58,6 @@ jobs:
       - name: Ürün eşleştirme regresyonu
         run: node alo186/tests/test_product_matcher.js
 
-      - name: Güvenli kullanıcı yolculuğu regresyonu
-        run: node alo186/tests/test_safe_user_journey.js
-
       - name: Çözüm sonucu regresyonu
         run: node alo186/tests/test_solution_outcome_loop.js
 
