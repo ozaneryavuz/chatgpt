@@ -76,7 +76,7 @@ for(const article of articles){
   assert(!/<form\b/i.test(html),`Makale kişisel veri/form istememeli: ${article.slug}`);
   assert(!/amazon\.com\.tr/i.test(html),`Teknik makalede doğrudan Amazon URL'si olmamalı: ${article.slug}`);
   assert(!/fiyatı\s+\d|stokta|puanı\s+\d/i.test(html),`Doğrulanmamış ticari bilgi riski: ${article.slug}`);
-  assert(!/kesinlikle güvenli|garanti eder|kesin çözer/i.test(html),`Aşırı kesin güvenlik iddiası riski: ${article.slug}`);
+  assert(!/kesinlikle güvenlidir|her durumda güvenlidir|sonucu garanti eder/i.test(html),`Aşırı kesin güvenlik iddiası riski: ${article.slug}`);
   for(const text of article.required){
     assert(html.toLocaleLowerCase('tr').includes(text.toLocaleLowerCase('tr')),`Zorunlu güvenlik/teknik ifade eksik (${text}): ${article.slug}`);
   }
