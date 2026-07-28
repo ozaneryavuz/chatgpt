@@ -1,0 +1,96 @@
+name: ALO186 acil aydınlatma uygunluğu kalite kontrolü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/acil-aydinlatma-sure-uygunluk/**'
+      - 'alo186/hesaplama/index.html'
+      - 'alo186/urun-eslestirme/catalog.js'
+      - 'alo186/deployment/routing-manifest.json'
+      - 'alo186/sitemap.xml'
+      - '.github/workflows/alo186-emergency-light-suitability.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/acil-aydinlatma-sure-uygunluk/**'
+      - 'alo186/hesaplama/index.html'
+      - 'alo186/urun-eslestirme/catalog.js'
+      - 'alo186/deployment/routing-manifest.json'
+      - 'alo186/sitemap.xml'
+      - '.github/workflows/alo186-emergency-light-suitability.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-emergency-light-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Modül hesap, güvenlik ve entegrasyon testleri
+        run: node alo186/hesaplama/acil-aydinlatma-sure-uygunluk/test.js
+
+      - name: JavaScript sözdizimi
+        run: |
+          node --check alo186/hesaplama/acil-aydinlatma-sure-uygunluk/core.js
+          node --check alo186/hesaplama/acil-aydinlatma-sure-uygunluk/app.js
+          node --check alo186/urun-eslestirme/catalog.js
+
+      - name: Genel yayın ve güvenlik regresyonları
+        run: |
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_calc_core.js
+          node alo186/tests/test_product_matcher.js
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Production bundle oluştur
+        run: |
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-emergency-light-site \
+            --commit "$GITHUB_SHA"
+
+      - name: Production bundle smoke testi
+        run: |
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-emergency-light-site
+
+      - name: Production artifact sözleşmeleri
+        shell: bash
+        run: |
+          set -euo pipefail
+          route='/tmp/alo186-emergency-light-site/hesaplama/acil-aydinlatma-sure-uygunluk'
+          test -f "$route/index.html"
+          test -f "$route/core.js"
+          test -f "$route/app.js"
+          test -f "$route/styles.css"
+          grep -q 'Acil Aydınlatma Süre ve Uygunluk Testi' "$route/index.html"
+          grep -q 'Satış ortaklığı açıklaması' "$route/index.html"
+          grep -q 'İşyeri kaçış yolu' "$route/index.html"
+          grep -q 'Mum yerine' "$route/index.html"
+          grep -q '28 çekirdek araç' /tmp/alo186-emergency-light-site/hesaplama/index.html
+          grep -q 'acil-aydinlatma-sure-uygunluk' /tmp/alo186-emergency-light-site/sitemap.xml
+          ! grep -Eqi 'amazon\.(com|com\.tr)/' "$route/index.html"
+          ! grep -Eqi 'type="(email|tel|text)"' "$route/index.html"
+          test ! -e "$route/test.js"
+
+      - name: Doğrulanmış production artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-emergency-light-production
+          path: /tmp/alo186-emergency-light-site
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
