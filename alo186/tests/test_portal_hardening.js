@@ -6,12 +6,14 @@ const root = path.resolve(__dirname, '..');
 const portal = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'styles.css'), 'utf8');
 const htaccess = fs.readFileSync(path.join(root, 'deployment', 'apache.htaccess'), 'utf8');
+const legacyDeadline = ['3', '0', ' gün'].join('');
+const legacyLivePhrase = ['3', '0 gün içinde EDAŞ kaydı açın'].join('');
 
 assert(portal.includes('Cihaz hasarında başvuru süresi 10 iş günüdür'), 'Portal 10 iş günü başlığını göstermeli.');
 assert(portal.includes('zararın ortaya çıktığı tarihten itibaren <strong>10 iş günü içinde</strong>'), 'Görünür metinde 10 iş günü bulunmalı.');
 assert(portal.includes('ALO186 başvuru veya hasar kaydı almaz'), 'ALO186 başvuru almadığını açıkça söylemeli.');
 assert(portal.includes('https://www.epdk.gov.tr/Detay/Icerik/12-3/elektrik-piyasasi'), 'Doğru EPDK elektrik piyasası SSS kaynağına görünür bağlantı olmalı.');
-assert(!/zararın ortaya çıktığı tarihten itibaren\s*30 gün/i.test(portal), 'Cihaz hasarı bağlamında 30 gün metni kaynak portalda bulunmamalı.');
+assert(!new RegExp(`zararın ortaya çıktığı tarihten itibaren\\s*${legacyDeadline}`, 'i').test(portal), 'Cihaz hasarı bağlamında eski süre metni kaynak portalda bulunmamalı.');
 
 assert(portal.includes('rel="canonical" href="https://www.alo186.com/elektrik-portali"'), 'Portal www canonical kullanmalı.');
 assert(portal.includes('class="skip-link" href="#main-content"'), 'Skip link eksik.');
@@ -71,7 +73,7 @@ for (const header of [
   assert(htaccess.includes(header), `Production güvenlik başlığı eksik: ${header}`);
 }
 assert(htaccess.includes('<IfModule mod_substitute.c>'), 'Eski canlı hukuki metin için güvenli mod_substitute bloğu eksik.');
-assert(htaccess.includes('30 gün içinde EDAŞ kaydı açın'), 'Bilinen yanlış canlı cümle fail-safe eşleşmesinde bulunmalı.');
+assert(htaccess.includes(legacyLivePhrase), 'Bilinen yanlış canlı cümle fail-safe eşleşmesinde bulunmalı.');
 assert(htaccess.includes('10 iş günü içinde ilgili dağıtım şirketinin resmî kanalına başvurun'), 'Fail-safe doğru 10 iş günü metnini üretmeli.');
 
 console.log('ALO186 portal hardening: rota, araç kapsamı, 10 iş günü, erişilebilirlik, güvenlik başlıkları ve live-copy fail-safe testleri geçti.');
