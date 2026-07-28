@@ -69,11 +69,12 @@ assert.doesNotMatch(html, /amazon\.com\.tr/i);
 assert.doesNotMatch(html, /type="(?:email|tel)"/i);
 assert.doesNotMatch(html, /abone numarası|T\.C\.|açık adres/i);
 assert.match(hub, /\.\/jenerator-gucu-secimi\//);
-assert.match(portal, /\.\/hesaplama\/jenerator-gucu-secimi\//);
+assert.match(portal, /href="\/hesaplama\/jenerator-gucu-secimi\//);
+assert.doesNotMatch(portal, /href="\.\/hesaplama\/jenerator-gucu-secimi\//);
 assert.match(manifest, /alo186\/hesaplama\/jenerator-gucu-secimi\/index\.html/);
 assert.match(sitemap, /https:\/\/www\.alo186\.com\/hesaplama\/jenerator-gucu-secimi\//);
 assert.ok(catalog.getCategory('generator'));
 assert.equal(catalog.getCategory('generator').mode, 'guide');
 assert.equal(catalog.getCategory('generator').risk, 'safety');
 
-console.log('Jeneratör güç seçimi: hesap, güvenlik, gizlilik, affiliate ve yayın rotası testleri başarılı.');
+console.log('Jeneratör güç seçimi: hesap, güvenlik, gizlilik, affiliate ve canonical yayın rotası testleri başarılı.');
