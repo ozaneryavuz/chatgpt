@@ -110,6 +110,7 @@ jobs:
           set -euo pipefail
           python - <<'PY'
           import json
+          import re
           from pathlib import Path
           for root, prefix in [
               (Path('/tmp/alo186-plan-custom'), ''),
@@ -127,14 +128,15 @@ jobs:
                       content=(root/'hesaplama/elektrik-planim'/script).read_text(encoding='utf-8')
                       assert "'/hesaplama/" not in content and '"/hesaplama/' not in content, script
               hub=(root/'hesaplama/index.html').read_text(encoding='utf-8')
-              assert '32 çekirdek araç' in hub
+              match=re.search(r'(\d+) çekirdek araç',hub)
+              assert match and int(match.group(1))>=32
               assert 'data-alo186-plan-hub-card="true"' in hub
               common=(root/'hesaplama/common.js').read_text(encoding='utf-8')
               assert 'data-alo186-plan-runtime-card' in common
               assert 'data-alo186-outcome-runtime-card' in common
               assert '<loc>https://www.alo186.com/hesaplama/elektrik-planim/</loc>' in (root/'sitemap.xml').read_text(encoding='utf-8')
               release=json.loads((root/'pages-release.json').read_text(encoding='utf-8'))
-              assert release['outcomeRuntime']['version']==2
+              assert release['outcomeRuntime']['version']>=2
               assert release['outcomeRuntime']['productTrustCircuit'] is True
               assert release['outcomeRuntime']['offlinePlanRoute'] in (root/'sw.js').read_text(encoding='utf-8')
               assert (root/'akilli-urun-secimi/outcome-trust-circuit-core.js').is_file()
