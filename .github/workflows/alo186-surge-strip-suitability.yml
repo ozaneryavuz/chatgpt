@@ -5,6 +5,8 @@ on:
     paths:
       - 'alo186/hesaplama/akim-korumali-grup-priz-uygunluk/**'
       - 'alo186/hesaplama/index.html'
+      - 'alo186/urun-eslestirme/catalog.js'
+      - 'alo186/urun-eslestirme/journey-retention-core.js'
       - 'alo186/deployment/routing-manifest.json'
       - 'alo186/sitemap.xml'
       - 'alo186/tests/**'
@@ -18,6 +20,8 @@ on:
     paths:
       - 'alo186/hesaplama/akim-korumali-grup-priz-uygunluk/**'
       - 'alo186/hesaplama/index.html'
+      - 'alo186/urun-eslestirme/catalog.js'
+      - 'alo186/urun-eslestirme/journey-retention-core.js'
       - 'alo186/deployment/routing-manifest.json'
       - 'alo186/sitemap.xml'
       - '.github/workflows/alo186-surge-strip-suitability.yml'
@@ -46,10 +50,32 @@ jobs:
       - name: Modül senaryo, güvenlik ve yayın testleri
         run: node alo186/hesaplama/akim-korumali-grup-priz-uygunluk/test.js
 
+      - name: Ürün kapısı ve tekrar ziyaret yolculuğu
+        run: |
+          node <<'NODE'
+          const assert=require('assert');
+          const catalog=require('./alo186/urun-eslestirme/catalog.js');
+          const journey=require('./alo186/urun-eslestirme/journey-retention-core.js');
+          const category=catalog.getCategory('surge_strip');
+          assert(category);
+          assert.equal(category.mode,'guide');
+          assert.equal(category.affiliatePolicy,'after_tool');
+          assert.equal(category.nextStepUrl,'https://www.alo186.com/hesaplama/akim-korumali-grup-priz-uygunluk/');
+          assert.equal(catalog.productsFor('surge_strip').length,4);
+          const route=journey.getJourney('surge_strip');
+          assert(route);
+          assert.equal(route.calculate.url,'/hesaplama/akim-korumali-grup-priz-uygunluk/');
+          assert.equal(route.compare.url,'/akilli-urun-secimi?kategori=surge_strip');
+          assert.equal(route.maintenance.length,3);
+          console.log('Surge strip affiliate kapısı ve tekrar ziyaret yolculuğu başarılı.');
+          NODE
+
       - name: JavaScript sözdizimi
         run: |
           node --check alo186/hesaplama/akim-korumali-grup-priz-uygunluk/core.js
           node --check alo186/hesaplama/akim-korumali-grup-priz-uygunluk/app.js
+          node --check alo186/urun-eslestirme/catalog.js
+          node --check alo186/urun-eslestirme/journey-retention-core.js
 
       - name: Genel canonical ve cihaz hasarı güvenlik kapıları
         run: |
@@ -88,6 +114,8 @@ jobs:
           grep -q 'Satış ortaklığı açıklaması' "/tmp/alo186-surge-strip-pages/$route/index.html"
           grep -q '29 çekirdek araç' /tmp/alo186-surge-strip-pages/hesaplama/index.html
           grep -q 'akim-korumali-grup-priz-uygunluk' /tmp/alo186-surge-strip-pages/sitemap.xml
+          grep -q 'affiliatePolicy.*after_tool' /tmp/alo186-surge-strip-pages/akilli-urun-secimi/catalog.js
+          grep -q 'akim-korumali-grup-priz-uygunluk' /tmp/alo186-surge-strip-pages/akilli-urun-secimi/journey-retention-core.js
           ! grep -Eqi 'amazon\.(com|com\.tr)/' "/tmp/alo186-surge-strip-pages/$route/index.html"
           ! grep -Eqi 'type="(email|tel|text)"' "/tmp/alo186-surge-strip-pages/$route/index.html"
 
