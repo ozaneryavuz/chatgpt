@@ -63,6 +63,7 @@ jobs:
 
       - name: Custom-domain ve github.io alt-yol modlarını birlikte test et
         id: dual_mode
+        continue-on-error: true
         shell: bash
         run: |
           set -uo pipefail
@@ -105,6 +106,10 @@ jobs:
             echo "custom_file_count=$(find /tmp/alo186-pages-custom -type f | wc -l | tr -d ' ')"
             echo "project_file_count=$(find /tmp/alo186-pages-project -type f | wc -l | tr -d ' ')"
           } | tee /tmp/alo186-pages-diagnostics/status.txt
+          {
+            echo "custom_status=$custom_status"
+            echo "project_status=$project_status"
+          } >> "$GITHUB_OUTPUT"
 
           for log in /tmp/alo186-pages-diagnostics/*.err /tmp/alo186-pages-diagnostics/*-smoke.json; do
             [ -f "$log" ] || continue
@@ -131,6 +136,14 @@ jobs:
             /tmp/alo186-pages-project/route-bridges.json
           if-no-files-found: warn
           retention-days: 7
+
+      - name: Dual-mode test sonucunu uygula
+        if: steps.dual_mode.outcome == 'failure'
+        shell: bash
+        run: |
+          echo "Custom-domain status: ${{ steps.dual_mode.outputs.custom_status }}" >&2
+          echo "Project-base status: ${{ steps.dual_mode.outputs.project_status }}" >&2
+          exit 1
 
       - name: GitHub Pages ayarlarını oku
         id: pages
