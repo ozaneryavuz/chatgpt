@@ -11,12 +11,17 @@
   const originalValidate=store.validateMaturityHandoff.bind(store);
   const originalImport=store.importMaturityHandoff.bind(store);
 
-  store.validateMaturityHandoff=(raw,at)=>raw&&raw.schema===DRILL_SCHEMA?store.validateDrillHandoff(raw,at):originalValidate(raw,at);
-  store.importMaturityHandoff=(state,raw,at)=>raw&&raw.schema===DRILL_SCHEMA?store.importDrillHandoff(state,raw,at):originalImport(state,raw,at);
-
   function parse(key){
     try{return JSON.parse(localStorage.getItem(key)||'null');}catch(_error){return null;}
   }
+
+  store.validateMaturityHandoff=(raw,at)=>raw&&raw.schema===DRILL_SCHEMA?store.validateDrillHandoff(raw,at):originalValidate(raw,at);
+  store.importMaturityHandoff=(state,raw,at)=>{
+    if(!raw||raw.schema!==DRILL_SCHEMA)return originalImport(state,raw,at);
+    const sourcePayload=parse(MATURITY_KEY);
+    const candidate=sourcePayload&&sourcePayload.schema===DRILL_SCHEMA?sourcePayload:raw;
+    return store.importDrillHandoff(state,candidate,at);
+  };
 
   function validPending(){
     const raw=parse(MATURITY_KEY);
@@ -49,14 +54,20 @@
     const actions=new Map((Array.isArray(state.improvementActions)?state.improvementActions:[]).map(item=>[item.id,item]));
     document.querySelectorAll('[data-improvement-toggle]').forEach(input=>{
       const action=actions.get(input.dataset.actionId),small=input.closest('label')?.querySelector('small');
-      if(action?.source==='outage-drill'&&small)small.textContent=`${small.textContent.split(' · ')[0]} · Kesinti Tatbikatı bulgusu`;
+      if(action?.source==='outage-drill'&&small){
+        const desired=`${small.textContent.split(' · ')[0]} · Kesinti Tatbikatı bulgusu`;
+        if(small.textContent!==desired)small.textContent=desired;
+      }
     });
     const imports=[
       ...(Array.isArray(state.maturityImports)?state.maturityImports:[]).map(item=>({...item,type:'maturity'})),
       ...(Array.isArray(state.drillImports)?state.drillImports:[]).map(item=>({...item,type:'drill'}))
     ].sort((a,b)=>new Date(b.importedAt)-new Date(a.importedAt));
     const latest=imports[0],source=document.getElementById('improvementSource');
-    if(latest?.type==='drill'&&source)source.textContent=`${latest.score}/100 · Kesinti Tatbikatı · ${formatDate(latest.importedAt)}`;
+    if(latest?.type==='drill'&&source){
+      const desired=`${latest.score}/100 · Kesinti Tatbikatı · ${formatDate(latest.importedAt)}`;
+      if(source.textContent!==desired)source.textContent=desired;
+    }
   }
 
   document.addEventListener('DOMContentLoaded',()=>{
