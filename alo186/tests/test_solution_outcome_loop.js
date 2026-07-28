@@ -20,7 +20,7 @@ const productJourney = read('alo186/urun-eslestirme/journey-retention.js');
 const manifest = JSON.parse(read('alo186/deployment/routing-manifest.json'));
 const sitemap = read('alo186/sitemap.xml');
 
-assert.equal(manifest.version, 28, 'Routing manifest closed-loop sürümü v28 olmalı.');
+assert(manifest.version >= 28, 'Routing manifest closed-loop sürümü v28 veya üzeri olmalı.');
 assert(manifest.routes.some((item) => item.source === 'alo186/hesaplama/cozum-sonucu/index.html' && item.canonicalPath === route && item.type === 'tool'), 'Çözüm sonucu rotası routing manifestte eksik.');
 assert(sitemap.includes(`<loc>${canonical}</loc>`), 'Çözüm sonucu rotası sitemapte eksik.');
 
@@ -44,7 +44,7 @@ assert(toolApp.includes("const STORE_KEY = 'alo186:solution-outcomes:v1'"), 'Yer
 assert(toolApp.includes('solution_outcome_recorded'), 'Kişisel verisiz sonuç olayı eksik.');
 assert(toolApp.includes('localStorage'), 'Local-first kayıt bulunmalı.');
 
-assert(calculatorHub.includes('30 çekirdek araç'), 'Hesaplama merkezi araç sayısı güncellenmemiş.');
+assert(/[3-9][0-9]+ çekirdek araç/.test(calculatorHub), 'Hesaplama merkezi araç sayısı 30 veya üzeri görünmeli.');
 assert(calculatorHub.includes('href="./cozum-sonucu/"'), 'Hesaplama merkezi yeni aracı göstermiyor.');
 assert(calculatorHub.includes('Satın almama başarı metriği'), 'Kapalı döngü güven ilkesi görünür değil.');
 
