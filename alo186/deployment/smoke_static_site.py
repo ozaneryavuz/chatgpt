@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import fnmatch
 import hashlib
 import json
 import re
@@ -32,7 +33,48 @@ REQUIRED_APACHE_TOKENS = (
     "AddOutputFilterByType SUBSTITUTE text/html application/xhtml+xml",
     "zararın ortaya çıktığı tarihten itibaren 10 iş günü içinde",
     "10 iş günü içinde ilgili dağıtım şirketinin resmî kanalına başvurun",
-    'ForceType text/css',
+    "ForceType text/css",
+)
+FORBIDDEN_PUBLIC_DIRECTORIES = {
+    ".git",
+    ".github",
+    "__pycache__",
+    "node_modules",
+    "tests",
+    "test",
+    "fixtures",
+    "reports",
+    "audits",
+    "artifacts",
+    "docs",
+    "documentation",
+    "deployment",
+    "infra",
+}
+FORBIDDEN_PUBLIC_FILE_PATTERNS = (
+    "README*",
+    "CHANGELOG*",
+    "package.json",
+    "package-lock.json",
+    "pnpm-lock.yaml",
+    "yarn.lock",
+    "test.js",
+    "*.test.js",
+    "*-test.js",
+    "*_test.js",
+    "*.spec.js",
+    "*-spec.js",
+    "*.md",
+    "*.py",
+    "*.pyc",
+    "*.sh",
+    "*.yml",
+    "*.yaml",
+    "*.sql",
+    "*.log",
+    "*.bak",
+    "*.map",
+    ".DS_Store",
 )
 DAMAGE_TERMS = re.compile(r"\b(cihaz|teçhizat|techizat|hasar|zarar)\w*\b", re.IGNORECASE)
 APPLICATION_TERMS = re.compile(
@@ -71,8 +113,14 @@ def resolve_asset(bundle: Path, html_path: Path, reference: str) -> Path | None:
 
 
 def file_sha256(path: Path) -> str:
-    digest = hashlib.sha256(path.read_bytes()).hexdigest()
-    return digest
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def is_forbidden_public_file(path: Path, bundle: Path) -> bool:
+    relative = path.relative_to(bundle)
+    if set(relative.parts[:-1]) & FORBIDDEN_PUBLIC_DIRECTORIES:
+        return True
+    return any(fnmatch.fnmatch(path.name, pattern) for pattern in FORBIDDEN_PUBLIC_FILE_PATTERNS)
 
 
 def wrong_damage_deadline_contexts(text: str) -> list[str]:
@@ -127,6 +175,14 @@ def smoke(bundle: Path, repo_root: Path) -> dict:
         if not (bundle / required).is_file():
             failures.append(f"Kök yayın dosyası eksik: {required}")
 
+    forbidden_files = [
+        path.relative_to(bundle).as_posix()
+        for path in sorted(bundle.rglob("*"))
+        if path.is_file() and is_forbidden_public_file(path, bundle)
+    ]
+    if forbidden_files:
+        failures.append("Public bundle iç kaynak/test dosyası taşıyor: " + ", ".join(forbidden_files[:50]))
+
     htaccess_path = bundle / ".htaccess"
     if htaccess_path.is_file():
         htaccess = htaccess_path.read_text(encoding="utf-8")
@@ -149,6 +205,10 @@ def smoke(bundle: Path, repo_root: Path) -> dict:
         for header in REQUIRED_SECURITY_HEADERS:
             if header not in release.get("securityHeaders", []):
                 failures.append(f"Release güvenlik başlığı envanteri eksik: {header}")
+        policy = release.get("publicArtifactPolicy") or {}
+        for key in ("sourceDocsExcluded", "testsExcluded", "packageMetadataExcluded"):
+            if policy.get(key) is not True:
+                failures.append(f"Release public artifact politikası eksik: {key}")
 
     robots_path = bundle / "robots.txt"
     if robots_path.is_file():
@@ -176,6 +236,7 @@ def smoke(bundle: Path, repo_root: Path) -> dict:
         "assetReferencesChecked": checked_assets,
         "requiredRootFiles": list(REQUIRED_ROOT_FILES),
         "requiredSecurityHeaders": list(REQUIRED_SECURITY_HEADERS),
+        "forbiddenPublicFileCount": len(forbidden_files),
         "failures": failures,
     }
     if failures:

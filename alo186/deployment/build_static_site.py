@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import fnmatch
 import hashlib
 import json
 import re
@@ -44,12 +45,77 @@ REQUIRED_APACHE_TOKENS = (
     "zararın ortaya çıktığı tarihten itibaren 10 iş günü içinde",
     "10 iş günü içinde ilgili dağıtım şirketinin resmî kanalına başvurun",
 )
+
+# Public artifact yalnız tarayıcıda çalışan üretim dosyalarını taşımalıdır. Kaynak
+# açıklamaları, testler, fixture'lar, deployment/infra dosyaları ve paket metadata'sı
+# web kökünde yayımlanmaz.
+FORBIDDEN_PUBLIC_DIRECTORIES = {
+    ".git",
+    ".github",
+    "__pycache__",
+    "node_modules",
+    "tests",
+    "test",
+    "fixtures",
+    "reports",
+    "audits",
+    "artifacts",
+    "docs",
+    "documentation",
+    "deployment",
+    "infra",
+}
+FORBIDDEN_PUBLIC_FILE_PATTERNS = (
+    "README*",
+    "CHANGELOG*",
+    "package.json",
+    "package-lock.json",
+    "pnpm-lock.yaml",
+    "yarn.lock",
+    "test.js",
+    "*.test.js",
+    "*-test.js",
+    "*_test.js",
+    "*.spec.js",
+    "*-spec.js",
+    "*.md",
+    "*.py",
+    "*.pyc",
+    "*.sh",
+    "*.yml",
+    "*.yaml",
+    "*.sql",
+    "*.log",
+    "*.bak",
+    "*.map",
+    ".DS_Store",
+)
+
 DAMAGE_TERMS = re.compile(r"\b(cihaz|teçhizat|techizat|hasar|zarar)\w*\b", re.IGNORECASE)
 APPLICATION_TERMS = re.compile(
     r"\b(başvur|basvur|talep|tazmin|dağıtım şirket|dagitim sirket|edaş|edas)\w*",
     re.IGNORECASE,
 )
 WRONG_DEADLINE = re.compile(r"\b30\s*gün\b", re.IGNORECASE)
+
+
+def is_forbidden_public_name(name: str) -> bool:
+    return any(fnmatch.fnmatch(name, pattern) for pattern in FORBIDDEN_PUBLIC_FILE_PATTERNS)
+
+
+def public_copy_ignore(_directory: str, names: list[str]) -> set[str]:
+    ignored: set[str] = set()
+    for name in names:
+        if name in FORBIDDEN_PUBLIC_DIRECTORIES or is_forbidden_public_name(name):
+            ignored.add(name)
+    return ignored
+
+
+def is_forbidden_public_path(path: Path, output: Path) -> bool:
+    relative = path.relative_to(output)
+    if set(relative.parts[:-1]) & FORBIDDEN_PUBLIC_DIRECTORIES:
+        return True
+    return is_forbidden_public_name(path.name)
 
 
 def copy_route(repo_root: Path, output: Path, route: dict) -> None:
@@ -69,7 +135,12 @@ def copy_route(repo_root: Path, output: Path, route: dict) -> None:
                 shutil.copy2(asset, target / asset_name)
         return
 
-    shutil.copytree(source.parent, target, dirs_exist_ok=True)
+    shutil.copytree(
+        source.parent,
+        target,
+        dirs_exist_ok=True,
+        ignore=public_copy_ignore,
+    )
 
 
 def copy_file(repo_root: Path, output: Path, source_name: str, target_name: str) -> None:
@@ -99,10 +170,18 @@ def normalize_canonical_host(output: Path) -> None:
             path.write_text(text.replace(LEGACY_HOST, CANONICAL_HOST), encoding="utf-8")
 
 
+def find_forbidden_public_files(output: Path) -> list[str]:
+    return [
+        path.relative_to(output).as_posix()
+        for path in sorted(output.rglob("*"))
+        if path.is_file() and is_forbidden_public_path(path, output)
+    ]
+
+
 def find_wrong_damage_deadlines(output: Path) -> list[str]:
     violations: list[str] = []
     for path in iter_text_files(output):
-        # .htaccess intentionally contains the legacy phrases as fixed-string
+        # .htaccess intentionally contains legacy phrases as fixed-string
         # mod_substitute search patterns. It is an output-safety rule, not user-facing
         # legal content, so it must not be classified as a deadline violation.
         if path.name == ".htaccess":
@@ -136,6 +215,12 @@ def validate_bundle(output: Path, manifest: dict) -> None:
     for _source_name, target_name in (*SHARED_STATIC_ASSETS, *ROOT_STATIC_FILES):
         if not (output / target_name).is_file():
             failures.append(f"Kök/ortak yayın dosyası eksik: {target_name}")
+
+    forbidden_files = find_forbidden_public_files(output)
+    if forbidden_files:
+        failures.append(
+            "Public artifact iç kaynak/test dosyası taşıyor: " + ", ".join(forbidden_files[:50])
+        )
 
     legacy_locations: list[str] = []
     for path in iter_text_files(output):
@@ -202,11 +287,16 @@ def build(repo_root: Path, output: Path, commit_sha: str = "local") -> dict:
         copy_file(repo_root, output, source_name, target_name)
 
     # Canonical HTML üretmeyen ancak mevcut relatif CSS/JS bağımlılıklarını sağlayan
-    # uyumluluk klasörleri. İçlerindeki index sayfaları kendi canonical URL'lerini taşır.
+    # uyumluluk klasörleri de aynı public-only kuralıyla kopyalanır.
     for directory in LEGACY_ASSET_DIRECTORIES:
         source = repo_root / "alo186" / directory
         if source.is_dir():
-            shutil.copytree(source, output / directory, dirs_exist_ok=True)
+            shutil.copytree(
+                source,
+                output / directory,
+                dirs_exist_ok=True,
+                ignore=public_copy_ignore,
+            )
 
     for source_name, target_name in ROOT_STATIC_FILES:
         copy_file(repo_root, output, source_name, target_name)
@@ -216,7 +306,7 @@ def build(repo_root: Path, output: Path, commit_sha: str = "local") -> dict:
     validate_bundle(output, manifest)
 
     release = {
-        "schemaVersion": 2,
+        "schemaVersion": 3,
         "commit": commit_sha,
         "canonicalHost": manifest["canonicalHost"],
         "routeCount": len(manifest["routes"]),
@@ -225,6 +315,11 @@ def build(repo_root: Path, output: Path, commit_sha: str = "local") -> dict:
         "rootStaticFiles": [target for _, target in ROOT_STATIC_FILES],
         "securityHeaders": list(REQUIRED_SECURITY_HEADERS),
         "deviceDamageDeadline": "10 iş günü",
+        "publicArtifactPolicy": {
+            "sourceDocsExcluded": True,
+            "testsExcluded": True,
+            "packageMetadataExcluded": True,
+        },
         "routes": [
             {
                 "canonicalPath": item["canonicalPath"],
