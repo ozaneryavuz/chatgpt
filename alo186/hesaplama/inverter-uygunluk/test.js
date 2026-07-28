@@ -4,6 +4,7 @@ const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 const core = require('./core.js');
+const catalog = require('../../urun-eslestirme/catalog.js');
 
 function base(overrides) {
   return Object.assign({
@@ -111,6 +112,10 @@ function base(overrides) {
 (function testPublishingContract() {
   const html = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
   const app = fs.readFileSync(path.join(__dirname, 'app.js'), 'utf8');
+  const productHtml = fs.readFileSync(path.join(__dirname, '../../urun-eslestirme/index.html'), 'utf8');
+  const extension = fs.readFileSync(path.join(__dirname, '../../urun-eslestirme/inverter-guide-extension.js'), 'utf8');
+  const inverterCategory = catalog.getCategory('inverter');
+
   assert(html.includes('https://www.alo186.com/hesaplama/inverter-uygunluk/'));
   assert(html.includes('"@type":"WebApplication"'));
   assert(html.includes('Kişisel veri yok'));
@@ -123,6 +128,16 @@ function base(overrides) {
   assert(app.includes('inverter_suitability_calculated'));
   assert(app.includes('inverter_affiliate_checklist_acknowledged'));
   assert(app.includes('setAffiliateEnabled(false)'));
+
+  assert(inverterCategory);
+  assert.equal(inverterCategory.mode, 'guide');
+  assert.equal(inverterCategory.affiliatePolicy, 'after_tool');
+  assert.equal(inverterCategory.nextStepUrl, 'https://www.alo186.com/hesaplama/inverter-uygunluk/');
+  assert(productHtml.includes('inverter-guide-extension.js'));
+  assert(productHtml.includes('9 ihtiyaç alanı'));
+  assert(extension.includes("params.get('kaynak') === 'inverter-uygunluk'"));
+  assert(extension.includes('aria-disabled="true"'));
+  assert(extension.includes('rel="sponsored nofollow noopener"'));
 })();
 
 console.log('Inverter uygunluk testleri başarılı.');
