@@ -123,6 +123,24 @@ const articles=[
     required:['DC/AC oranı','clipping','PVWatts','MPPT','yıllık enerji'],
     cta:'/fatura-analizi',
     fresh:true
+  },
+  {
+    slug:'parafudr-gostergesi-kirmizi-ne-demek',
+    required:['durum göstergesi','kırmızı','koruma modülü','yetkili elektrikçi','parafudr risk testi'],
+    cta:'/hesaplama/ekipman-bakim-plani/',
+    fresh:true
+  },
+  {
+    slug:'jenerator-saatte-kac-litre-yakar',
+    required:['yük yüzdesi','litre/saat','üretici tüketim tablosu','standby','prime'],
+    cta:'/hesaplama/jenerator-gucu-secimi/',
+    fresh:true
+  },
+  {
+    slug:'ges-inverter-sebeke-gerilimi-yuksek-hatasi',
+    required:['şebeke gerilimi','şebeke empedansı','on dakikalık ortalama','ülke ayarı','dağıtım şirketi'],
+    cta:'/edas-bul',
+    fresh:true
   }
 ];
 
