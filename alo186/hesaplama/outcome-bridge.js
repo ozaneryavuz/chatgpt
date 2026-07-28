@@ -78,8 +78,10 @@
   function sanitizePath(value) {
     if (!value) return '';
     try {
-      const parsed = new URL(String(value), 'https://www.alo186.com');
+      const raw = String(value).trim();
+      const parsed = new URL(raw, 'https://www.alo186.com');
       if (!['https:', 'http:'].includes(parsed.protocol)) return '';
+      if (/^https?:\/\//i.test(raw) && !['www.alo186.com', 'alo186.com'].includes(parsed.hostname.toLowerCase())) return '';
       const path = parsed.pathname.replace(/\/{2,}/g, '/').slice(0, 180);
       return /^\/[a-zA-Z0-9_\-/.]*$/.test(path) ? path : '';
     } catch (_) {
@@ -235,6 +237,11 @@
     return after.length !== before.length;
   }
 
+  function clear() {
+    writeStore([]);
+    return true;
+  }
+
   function dismiss(id, nowValue = new Date()) {
     const now = nowValue instanceof Date ? nowValue : new Date(nowValue);
     let changed = false;
@@ -323,13 +330,14 @@
     const action = normalizeEnum(anchor.dataset.outcomeAction || inferActionFromTarget(href, anchor.getAttribute('rel')), ACTIONS, null, 'free_tool');
     if (!action || /^tel:112$/i.test(href)) return;
     const path = (root.location && root.location.pathname) || '/';
+    const external = /^https?:\/\//i.test(href) && !/alo186\.com/i.test(href);
     const context = {
       ...(activeContext || {}),
       source: anchor.dataset.outcomeSource || (activeContext && activeContext.source) || inferSourceFromPath(path),
       category: anchor.dataset.outcomeCategory || (activeContext && activeContext.category) || inferCategoryFromPath(path),
       action,
       originPath: path,
-      recommendedPath: href,
+      recommendedPath: external ? '/akilli-urun-secimi' : href,
       safety: anchor.dataset.outcomeSafety === 'true'
     };
     const pending = start(context);
@@ -348,7 +356,8 @@
     if (!root.document || !root.location) return null;
     const currentPath = sanitizePath(root.location.pathname);
     if (currentPath.includes(OUTCOME_PATH)) return null;
-    const pending = eligible(nowValue).find((record) => record.originPath !== currentPath) || eligible(nowValue)[0];
+    const candidates = eligible(nowValue);
+    const pending = candidates.find((record) => record.originPath !== currentPath) || candidates[0];
     const existing = root.document.getElementById('alo186OutcomePrompt');
     if (!pending) {
       if (existing) existing.remove();
@@ -404,6 +413,7 @@
     start,
     get,
     complete,
+    clear,
     dismiss,
     eligible,
     buildOutcomeUrl,
