@@ -11,9 +11,24 @@ on:
       - "alo186/**"
       - ".github/workflows/alo186-production-deploy.yml"
   workflow_dispatch:
+    inputs:
+      force_deploy:
+        description: "Repository değişkeni kapalı olsa da onaylı production environment üzerinden deploy et"
+        required: false
+        type: boolean
+        default: false
+      deploy_reason:
+        description: "Deploy gerekçesi / değişiklik kaydı"
+        required: false
+        type: string
+        default: "manual production verification"
 
 permissions:
   contents: read
+
+concurrency:
+  group: alo186-production-${{ github.ref }}
+  cancel-in-progress: false
 
 env:
   PYTHON_VERSION: "3.12"
@@ -37,6 +52,12 @@ jobs:
           node alo186/tests/test_product_matcher.js
           node alo186/tests/test_continuity_store.js
           node alo186/tests/test_release_manifest.js
+          python alo186/tests/device_damage_deadline_guard.py
+          python alo186/tests/test_active_production_contract.py
+          python -m py_compile \
+            alo186/deployment/build_static_site.py \
+            alo186/deployment/smoke_static_site.py \
+            alo186/deployment/smoke_live_routes.py
       - name: Üretim bundle oluştur
         run: |
           python alo186/deployment/build_static_site.py \
@@ -63,7 +84,13 @@ jobs:
 
   deploy:
     name: Onaylı production deploy
-    if: github.event_name != 'pull_request' && vars.ALO186_PRODUCTION_DEPLOY_ENABLED == 'true'
+    if: >-
+      github.event_name != 'pull_request' &&
+      (
+        vars.ALO186_PRODUCTION_DEPLOY_ENABLED == 'true' ||
+        (github.event_name == 'workflow_dispatch' && inputs.force_deploy == true) ||
+        (github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy alo186]'))
+      )
     needs: build
     runs-on: ubuntu-latest
     environment:
@@ -75,6 +102,16 @@ jobs:
         with:
           name: alo186-production-site
           path: release
+      - name: Deploy kapsamını kaydet
+        shell: bash
+        run: |
+          {
+            echo "### ALO186 production deploy"
+            echo "- Event: ${{ github.event_name }}"
+            echo "- Commit: ${GITHUB_SHA}"
+            echo "- Reason: ${{ inputs.deploy_reason || 'main push / tagged hotfix' }}"
+            echo "- Method: ${{ vars.ALO186_DEPLOY_METHOD }}"
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: SSH / rsync ile yayınla
         if: vars.ALO186_DEPLOY_METHOD == 'ssh'
         env:
@@ -120,7 +157,7 @@ jobs:
           set ssl:verify-certificate true
           set net:max-retries 2
           set net:timeout 20
-          mirror --reverse --only-newer --parallel=2 --verbose release/_production_site/ ${DEPLOY_PATH%/}/
+          mirror --reverse --overwrite --parallel=2 --verbose release/_production_site/ ${DEPLOY_PATH%/}/
           bye
           LFTP
       - name: Deploy yöntemi doğrulaması
@@ -152,3 +189,23 @@ jobs:
           path: live-smoke.json
           if-no-files-found: warn
           retention-days: 30
+
+  deploy-status:
+    name: Deploy kapısı durumu
+    if: >-
+      github.event_name != 'pull_request' &&
+      !(
+        vars.ALO186_PRODUCTION_DEPLOY_ENABLED == 'true' ||
+        (github.event_name == 'workflow_dispatch' && inputs.force_deploy == true) ||
+        (github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy alo186]'))
+      )
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skipped deploy'u görünür kıl
+        run: |
+          {
+            echo "### ALO186 deploy çalıştırılmadı"
+            echo "Production bundle doğrulandı ancak deploy kapısı kapalı."
+            echo "Etkinleştirmek için ALO186_PRODUCTION_DEPLOY_ENABLED=true, workflow_dispatch force_deploy=true veya kontrollü [deploy alo186] commit etiketi gerekir."
+          } >> "$GITHUB_STEP_SUMMARY"
