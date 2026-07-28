@@ -1,0 +1,150 @@
+name: ALO186 içerik niyeti ve canonical birleştirme kalite kontrolü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/haberler/**'
+      - 'alo186/deployment/content-consolidations.json'
+      - 'alo186/deployment/apply_content_consolidation.py'
+      - 'alo186/deployment/inject_shortlist_growth.py'
+      - 'alo186/deployment/routing-manifest.json'
+      - 'alo186/deployment/routing-overlays/**'
+      - 'alo186/tests/test_content_intent_consolidation.py'
+      - '.github/workflows/alo186-content-intent-consolidation.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/**'
+      - 'alo186/deployment/content-consolidations.json'
+      - 'alo186/deployment/apply_content_consolidation.py'
+      - 'alo186/deployment/inject_shortlist_growth.py'
+      - 'alo186/deployment/routing-manifest.json'
+      - 'alo186/deployment/routing-overlays/**'
+      - 'alo186/tests/test_content_intent_consolidation.py'
+      - '.github/workflows/alo186-content-intent-consolidation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-content-intent-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Aynı arama niyeti ve bildirilmeyen kanibalizasyon kontrolü
+        run: python alo186/tests/test_content_intent_consolidation.py
+
+      - name: Mevcut içerik, canonical ve cihaz hasarı regresyonları
+        run: |
+          node alo186/tests/test_authority_content.js
+          node alo186/tests/test_release_manifest.js
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Canonical üretim paketini oluştur ve temel smoke testini çalıştır
+        run: |
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-consolidation-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-consolidation-canonical
+
+      - name: Legacy Apache için gerçek 301 ve canonical alias paketi
+        run: |
+          cp -a /tmp/alo186-consolidation-canonical /tmp/alo186-consolidation-apache
+          python alo186/deployment/apply_content_consolidation.py \
+            --site /tmp/alo186-consolidation-apache \
+            --base-path '' \
+            > /tmp/alo186-consolidation-apache.json
+          grep -q 'R=301,L,NE' /tmp/alo186-consolidation-apache/.htaccess
+          grep -q 'lifepo4-batarya-sogukta-sarj-edilir-mi' /tmp/alo186-consolidation-apache/.htaccess
+          grep -q 'elektrik-gerilimi-dusuk-yuksek-edas-olcum-talebi' /tmp/alo186-consolidation-apache/.htaccess
+
+      - name: GitHub Pages custom-domain artifactını birleştir
+        run: |
+          cp -a /tmp/alo186-consolidation-canonical /tmp/alo186-consolidation-custom
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-consolidation-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-consolidation-custom \
+            --base-path ''
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-consolidation-custom \
+            --base-path ''
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-consolidation-custom \
+            --base-path ''
+
+      - name: GitHub Pages project-path artifactını birleştir
+        run: |
+          cp -a /tmp/alo186-consolidation-canonical /tmp/alo186-consolidation-project
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-consolidation-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-consolidation-project \
+            --base-path '/chatgpt'
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-consolidation-project \
+            --base-path '/chatgpt'
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-consolidation-project \
+            --base-path '/chatgpt'
+
+      - name: Sitemap, alias, release ve base-path sözleşmeleri
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          pairs = [
+              ('lifepo4-batarya-sogukta-sarj-edilir-mi', 'lifepo4-dusuk-sicaklikta-sarj-edilir-mi'),
+              ('elektrik-gerilimi-dusuk-yuksek-edas-olcum-talebi', 'dusuk-yuksek-voltaj-edas-teknik-kalite-olcumu'),
+          ]
+          for root, prefix in [
+              (Path('/tmp/alo186-consolidation-custom'), ''),
+              (Path('/tmp/alo186-consolidation-project'), '/chatgpt'),
+          ]:
+              sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
+              release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
+              pages=json.loads((root/'pages-release.json').read_text(encoding='utf-8'))
+              assert release['contentConsolidation']['aliasCount']==2
+              assert pages['contentConsolidation']['aliasesExcludedFromSitemap'] is True
+              assert release['routeCount']==len(release['routes'])
+              for alias, canonical in pairs:
+                  alias_path=root/'haberler'/alias/'index.html'
+                  text=alias_path.read_text(encoding='utf-8')
+                  assert 'name="robots" content="noindex,follow"' in text
+                  assert f'rel="canonical" href="https://www.alo186.com/haberler/{canonical}"' in text
+                  assert f'url={prefix}/haberler/{canonical}' in text
+                  assert f'https://www.alo186.com/haberler/{alias}' not in sitemap
+                  assert f'https://www.alo186.com/haberler/{canonical}' in sitemap
+          PY
+
+      - name: Doğrulanmış canonical birleştirme artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-content-consolidated-pages
+          path: /tmp/alo186-consolidation-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
