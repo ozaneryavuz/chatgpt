@@ -52,6 +52,7 @@ jobs:
           assert any(r['canonicalPath']=='/hesaplama/ups-aku-degisim-uygunluk/' for r in manifest['routes'])
           center=pathlib.Path('alo186/hesaplama/index.html').read_text()
           assert './ups-aku-degisim-uygunluk/' in center
-          assert '25 çekirdek araç' in center
+          count=re.search(r'<strong>(\d+) çekirdek araç</strong>',center)
+          assert count and int(count.group(1)) >= 25
           print('JSON-LD, sitemap, merkez ve routing doğrulandı.')
           PY
