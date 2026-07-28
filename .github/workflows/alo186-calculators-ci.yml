@@ -2,7 +2,7 @@ name: ALO186 hesaplayıcı kalite kontrolü
 
 on:
   push:
-    branches: [main, feat/alo186-kullanici-fayda-v1]
+    branches: [main, feat/alo186-kullanici-fayda-v1, 'feature/**']
     paths:
       - 'alo186/hesaplama/**'
       - 'alo186/tests/**'
@@ -40,6 +40,7 @@ jobs:
           node alo186/hesaplama/jenerator-gucu-secimi/test.js
           node alo186/hesaplama/ev-sarj-uygunluk/test.js
           node alo186/hesaplama/kesinti-gunlugu/test.js
+          node alo186/hesaplama/inverter-uygunluk/test.js
       - name: Kesinti günlüğü güven ve veri minimizasyonu sözleşmesi
         shell: bash
         run: |
