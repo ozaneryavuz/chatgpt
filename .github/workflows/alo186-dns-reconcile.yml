@@ -56,6 +56,7 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq dnsutils
 
+          expected="$(printf '%s' "$ALO186_RENDER_API_HOSTNAME" | sed 's/\.$//' | tr '[:upper:]' '[:lower:]')"
           for attempt in {1..18}; do
             if [[ "${{ inputs.proxy_api }}" == "true" ]]; then
               a_records="$(dig +short A api.alo186.com | sed '/^$/d')"
@@ -66,10 +67,15 @@ jobs:
                 exit 0
               fi
             else
-              cname="$(dig +short CNAME api.alo186.com | tr -d '\n')"
-              if [[ -n "$cname" ]]; then
-                echo "api.alo186.com → $cname"
+              cname="$(dig +short CNAME api.alo186.com | head -n1 | sed 's/\.$//' | tr '[:upper:]' '[:lower:]')"
+              if [[ "$cname" == "$expected" ]]; then
+                echo "api.alo186.com → $cname (beklenen Render hedefi)"
                 exit 0
+              fi
+              if [[ -n "$cname" ]]; then
+                echo "CNAME henüz beklenen hedefte değil: mevcut=$cname beklenen=$expected"
+              else
+                echo "CNAME henüz çözümlenmiyor: beklenen=$expected"
               fi
             fi
             sleep 10
@@ -78,6 +84,6 @@ jobs:
           if [[ "${{ inputs.proxy_api }}" == "true" ]]; then
             echo 'Cloudflare proxied A/AAAA yayılımı 3 dakika içinde doğrulanamadı.' >&2
           else
-            echo 'CNAME yayılımı 3 dakika içinde doğrulanamadı.' >&2
+            echo "CNAME 3 dakika içinde beklenen Render hedefine ulaşmadı: $expected" >&2
           fi
           exit 1
