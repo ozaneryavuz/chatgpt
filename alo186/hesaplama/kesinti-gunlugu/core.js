@@ -100,7 +100,7 @@
     };
     const totalMinutes = sum(normalized, (entry) => entry.durationMinutes);
     const longestMinutes = normalized.reduce((max, entry) => Math.max(max, entry.durationMinutes), 0);
-    const longDurationEntries = normalized.filter((entry) => entry.durationMinutes >= 720);
+    const longDurationEntries = normalized.filter((entry) => entry.durationMinutes > 720);
     const damageEntries = normalized.filter((entry) => entry.deviceDamage);
     const officialRecordCount = normalized.filter((entry) => entry.officialRecord).length;
     const annualSignals = {
