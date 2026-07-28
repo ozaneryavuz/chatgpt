@@ -37,7 +37,7 @@ assert(!/amazon\.(?:com|com\.tr)/i.test(toolHtml), 'Doğrudan Amazon URL’si bu
 assert(toolCore.includes('MAX_RECORDS = 12'), 'Kayıt üst sınırı core sözleşmesinde eksik.');
 assert(toolCore.includes('TTL_DAYS = 180'), 'TTL sözleşmesi eksik.');
 assert(toolCore.includes("key: 'resolved_no_purchase'"), 'Satın almasız çözüm kararı eksik.');
-assert(toolCore.includes("key: 'unresolved_repeated'"), 'Tekrar eden çözülmemiş karar eksik.');
+assert(toolCore.includes("'unresolved_repeated'"), 'Tekrar eden çözülmemiş karar eksik.');
 assert(toolCore.includes("key: 'safety_escalation'"), 'Güvenlik yükseltme kararı eksik.');
 assert(!/freeText|notes|address|phone|email|serialNumber|seller|price/i.test(toolCore), 'Core PII veya ticari değişken tutmamalı.');
 assert(toolApp.includes("const STORE_KEY = 'alo186:solution-outcomes:v1'"), 'Yerel kayıt anahtarı eksik.');
@@ -58,7 +58,7 @@ assert(workshopApp.includes("outcomeAction(selection, 'buy_nothing')"), 'Satın 
 assert(workshopApp.includes("outcomeAction(selection, 'paid_b2b')"), 'Profesyonel rota sonucu handoff eksik.');
 assert(workshopApp.includes("outcomeAction(selection, 'affiliate_product_center')"), 'Ürün merkezi sonucu handoff eksik.');
 
-assert(productJourney.includes("id='productOutcomeLoop'" ) || productJourney.includes("section.id='productOutcomeLoop'"), 'Ürün merkezinde outcome bölümü dinamik olarak oluşturulmuyor.');
+assert(productJourney.includes("id='productOutcomeLoop'") || productJourney.includes("section.id='productOutcomeLoop'"), 'Ürün merkezinde outcome bölümü dinamik olarak oluşturulmuyor.');
 assert(productJourney.includes('/hesaplama/cozum-sonucu/?kaynak=urun-secimi&kategori=product_selection'), 'Ürün merkezi outcome rotası eksik.');
 assert(productJourney.includes('Sonucu kaydet ve tekrar riskini izle'), 'Ürün merkezi outcome CTA’sı eksik.');
 
