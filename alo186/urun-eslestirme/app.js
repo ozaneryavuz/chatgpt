@@ -4,6 +4,8 @@
   const $=id=>document.getElementById(id);
   const catalog=window.Alo186ProductCatalog;
   const matcher=window.Alo186ProductMatcher;
+  const storageKey='alo186_product_decision_v1';
+  const reviewDays=30;
   let selectedCategory=null;
 
   const guideChecks={
@@ -48,7 +50,7 @@
     $('categoryGrid').querySelectorAll('[data-category]').forEach(button=>button.addEventListener('click',()=>selectCategory(button.dataset.category)));
   }
 
-  function selectCategory(id){
+  function selectCategory(id,options={}){
     selectedCategory=id;
     const category=catalog.getCategory(id);
     document.querySelectorAll('[data-category]').forEach(button=>button.setAttribute('aria-pressed',button.dataset.category===id?'true':'false'));
@@ -58,8 +60,8 @@
     $('matchBtn').textContent=category.mode==='direct'?'Uygun seçenekleri göster':'Kontrol listesini göster';
     $('validation').textContent='';
     $('results').classList.add('hidden');
-    emit('product_category_selected',{category:id,mode:category.mode,risk:category.risk});
-    $('requirements').scrollIntoView({behavior:'smooth',block:'nearest'});
+    emit('product_category_selected',{category:id,mode:category.mode,risk:category.risk,affiliate_policy:category.affiliatePolicy});
+    if(!options.noScroll)$('requirements').scrollIntoView({behavior:'smooth',block:'nearest'});
   }
 
   function requirementMarkup(id,category){
@@ -79,27 +81,55 @@
     return {};
   }
 
-  function runMatch(){
+  function applyRequirements(categoryId,req={}){
+    if(categoryId==='powerbank'){
+      if(field('minCapacity'))field('minCapacity').value=String(req.minCapacityMah||20000);
+      if(field('minOutput'))field('minOutput').value=String(req.minOutputW||25);
+      if(field('needWireless'))field('needWireless').checked=Boolean(req.wireless);
+    }
+    if(categoryId==='surge_strip'){
+      if(field('minOutlets'))field('minOutlets').value=String(req.minOutlets||5);
+      if(field('minJoules'))field('minJoules').value=String(req.minJoules||900);
+      if(field('needUsb'))field('needUsb').checked=Boolean(req.usb);
+    }
+  }
+
+  function runMatch(options={}){
     $('validation').textContent='';
     if(!selectedCategory){$('validation').textContent='Önce bir ihtiyaç seçin.';return;}
     try{
       const req=requirements();
-      const result=matcher.match(selectedCategory,req);
+      const result=matcher.match(selectedCategory,req,{now:new Date()});
       $('results').classList.remove('hidden');
       $('resultTitle').textContent=result.category.name;
       $('requirementsChip').textContent=matcher.requirementsSummary(selectedCategory,req);
-      $('resultText').textContent=result.mode==='direct'?`${result.matches.length} teknik eşleşme bulundu. Fiyat ve stok Amazon’da doğrulanır.`:'Bu kategoride ürün adından önce aşağıdaki teknik kontrol listesini tamamlayın.';
+      if(result.mode==='direct'){
+        if(result.matches.length)$('resultText').textContent=`${result.matches.length} güncel teknik eşleşme bulundu. Fiyat, stok, satıcı ve garanti Amazon’da doğrulanır.`;
+        else if(result.staleProductCount)$('resultText').textContent='Doğrulama süresi geçen kartlar satış bağlantısından kaldırıldı. Katalog yenilenene kadar yalnız teknik gereksinimleri kullanın.';
+        else $('resultText').textContent='Bu minimumları karşılayan güncel doğrulanmış kart bulunamadı. Gereksinimi düşürmeden genel aramada teknik değerleri yeniden doğrulayın.';
+      }else{
+        $('resultText').textContent=result.affiliatePolicy==='professional_only'?'Bu kategoride ürün aramasından önce profesyonel ölçüm veya güvenli yönlendirme gerekir.':'Ürün adından önce aşağıdaki teknik kontrol listesini tamamlayın.';
+      }
       $('directResult').classList.toggle('hidden',result.mode!=='direct');
       $('guideResult').classList.toggle('hidden',result.mode!=='guide');
-      if(result.mode==='direct')renderProducts(result,req);else renderGuide(result);
-      $('results').scrollIntoView({behavior:'smooth',block:'start'});
-      emit('product_match_completed',{category:selectedCategory,mode:result.mode,match_count:result.matches.length,professional_required:result.professionalSelectionRequired});
+      if(result.mode==='direct')renderProducts(result);else renderGuide(result);
+      saveDecision(selectedCategory,req);
+      renderSavedDecision();
+      if(!options.noScroll)$('results').scrollIntoView({behavior:'smooth',block:'start'});
+      emit('product_match_completed',{category:selectedCategory,mode:result.mode,match_count:result.matches.length,professional_required:result.professionalSelectionRequired,affiliate_policy:result.affiliatePolicy,stale_product_count:result.staleProductCount||0,restored:Boolean(options.restored)});
     }catch(error){$('validation').textContent=error.message;}
   }
 
-  function renderProducts(result,req){
+  function renderProducts(result){
     if(!result.matches.length){
-      $('directResult').innerHTML=`<div class="empty-products"><h3>Bu minimumları karşılayan doğrulanmış kart bulunamadı.</h3><p>Genel aramada teknik alanları ve satıcı bilgisini yeniden doğrulayın.</p><a class="btn btn-primary" href="${escapeAttr(result.searchUrl)}" target="_blank" rel="sponsored nofollow noopener">Amazon’da filtreli aramayı aç</a></div>`;
+      if(result.staleProductCount){
+        $('directResult').innerHTML=`<div class="empty-products stale-note"><h3>Eski doğrulamayla ürün yönlendirmiyoruz.</h3><p>${result.staleProductCount} kartın teknik kontrol tarihi ${catalog.verificationMaxAgeDays} günlük sınırı geçti. Katalog yenilenene kadar doğrudan affiliate bağlantısı gösterilmez.</p><a class="btn btn-secondary" href="https://www.alo186.com/yayin-ilkeleri">Doğrulama yöntemini gör</a></div>`;
+        emit('affiliate_exposure_blocked',{category:selectedCategory,reason:'stale_catalog',stale_product_count:result.staleProductCount});
+      }else{
+        $('directResult').innerHTML=`<div class="empty-products"><h3>Bu minimumları karşılayan doğrulanmış kart bulunamadı.</h3><p>ALO186 bir ürünü sırf sonuç üretmek için önermez. Genel aramada teknik alanları ve satıcı bilgisini yeniden doğrulayın.</p><a class="btn btn-primary" data-filtered-search href="${escapeAttr(result.searchUrl)}" target="_blank" rel="sponsored nofollow noopener">Amazon’da filtreli aramayı aç</a></div>`;
+        const link=$('directResult').querySelector('[data-filtered-search]');
+        if(link)link.addEventListener('click',()=>emit('affiliate_category_clicked',{category:selectedCategory,placement:'no_verified_match'}));
+      }
       return;
     }
     $('directResult').innerHTML=result.matches.map(item=>productCard(item)).join('');
@@ -108,25 +138,103 @@
 
   function productCard(item){
     const p=item.product;
-    return `<article class="product-card"><div class="product-head"><span class="rank-label">${escapeHtml(item.label)}</span><h3>${escapeHtml(p.name)}</h3><span class="product-brand">${escapeHtml(p.brand)} · ASIN ${escapeHtml(p.asin)}</span></div><div class="score-row"><strong>${item.score}/100</strong><span>Uygunluk · güven ${escapeHtml(item.confidence||'Orta')}</span></div><div class="product-body"><div><h4>Neden eşleşti?</h4><ul>${item.reasons.map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul></div><div><h4>Güçlü yanlar</h4><ul>${p.strengths.map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul></div><div><h4>Sınırlar</h4><ul>${p.limits.map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul></div>${item.unknowns.length?`<div class="unknowns"><b>Yeniden doğrulayın:</b> ${item.unknowns.map(escapeHtml).join(' ')}</div>`:''}<div class="verification">Teknik liste kontrolü: ${escapeHtml(p.verifiedAt)}<br>${escapeHtml(p.sourceNote)}</div></div><div class="product-actions"><a class="btn btn-primary" data-product="${escapeAttr(p.id)}" data-asin="${escapeAttr(p.asin)}" data-score="${item.score}" href="${escapeAttr(p.url)}" target="_blank" rel="sponsored nofollow noopener">Amazon ürün sayfasını aç</a></div></article>`;
+    const ageText=item.freshness&&Number.isFinite(item.freshness.ageDays)?` · ${item.freshness.ageDays} gün önce`:'';
+    return `<article class="product-card"><div class="product-head"><span class="rank-label">${escapeHtml(item.label)}</span><h3>${escapeHtml(p.name)}</h3><span class="product-brand">${escapeHtml(p.brand)} · ASIN ${escapeHtml(p.asin)}</span></div><div class="score-row"><strong>${item.score}/100</strong><span>Uygunluk · güven ${escapeHtml(item.confidence||'Orta')}</span></div><div class="product-body"><div><h4>Neden eşleşti?</h4><ul>${item.reasons.map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul></div><div><h4>Güçlü yanlar</h4><ul>${p.strengths.map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul></div><div><h4>Sınırlar</h4><ul>${p.limits.map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul></div>${item.unknowns.length?`<div class="unknowns"><b>Yeniden doğrulayın:</b> ${item.unknowns.map(escapeHtml).join(' ')}</div>`:''}<div class="verification">Teknik liste kontrolü: ${escapeHtml(p.verifiedAt)}${escapeHtml(ageText)}<br>${escapeHtml(p.sourceNote)}</div></div><div class="product-actions"><a class="btn btn-primary" data-product="${escapeAttr(p.id)}" data-asin="${escapeAttr(p.asin)}" data-score="${item.score}" href="${escapeAttr(p.url)}" target="_blank" rel="sponsored nofollow noopener">Amazon ürün sayfasını aç</a></div></article>`;
   }
 
   function renderGuide(result){
     const checks=guideChecks[selectedCategory]||[];
-    $('guideResult').innerHTML=`<span class="eyebrow">Rehberli seçim</span><h3>Ürün adından önce bu alanları doğrulayın</h3><div class="guide-list">${checks.map(([title,text])=>`<div class="guide-item"><b>${escapeHtml(title)}</b><span>${escapeHtml(text)}</span></div>`).join('')}</div>${result.professionalSelectionRequired?`<div class="professional-note"><b>Profesyonel seçim sınırı:</b> Bu kategoride bağlantı, tesisat, standart veya ölçüm uyumu yanlış ürün riskini artırır. Sonuç bir uygunluk onayı değildir.</div>`:''}<div class="actions"><a class="btn btn-primary" data-guide-amazon href="${escapeAttr(result.searchUrl)}" target="_blank" rel="sponsored nofollow noopener">Amazon’da teknik ifadelerle ara</a>${result.professionalSelectionRequired?'<a class="btn btn-secondary" href="https://www.alo186.com/iletisim?konu=urun-teknik-secim">Teknik ön değerlendirme</a>':''}</div>`;
+    const checklist=`<div class="guide-list">${checks.map(([title,text])=>`<div class="guide-item"><b>${escapeHtml(title)}</b><span>${escapeHtml(text)}</span></div>`).join('')}</div>`;
+    const professional=result.professionalSelectionRequired?`<div class="professional-note"><b>Profesyonel seçim sınırı:</b> Bu kategoride bağlantı, tesisat, standart veya ölçüm uyumu yanlış ürün riskini artırır. Sonuç bir uygunluk onayı değildir.</div>`:'';
+    let actions='';
+
+    if(result.affiliatePolicy==='after_tool'||result.affiliatePolicy==='professional_only'){
+      const next=result.nextStep||{url:'https://www.alo186.com/karar-motoru/',label:'Ücretsiz ön kontrolü aç'};
+      actions=`<div class="decision-gate"><b>Satın alma bağlantısı neden gösterilmiyor?</b><p>${result.affiliatePolicy==='professional_only'?'Bu ölçüm kategorisinde yanlış cihaz güvenli olmayan bir sonuca yol açabilir. Önce uzman ölçümü veya güvenli yönlendirme gerekir.':'Güç, enerji, gerilim veya bağlantı uyumu hesaplanmadan ürün aramak yanlış seçim ve iade riskini artırır.'}</p></div><div class="actions"><a class="btn btn-primary" data-next-step href="${escapeAttr(next.url)}">${escapeHtml(next.label)}</a>${result.professionalSelectionRequired?'<a class="btn btn-secondary" href="https://www.alo186.com/iletisim?konu=urun-teknik-secim">Teknik ön değerlendirme</a>':''}</div>`;
+      emit('affiliate_exposure_blocked',{category:selectedCategory,reason:result.affiliatePolicy});
+    }else{
+      actions=`<div class="decision-gate"><label class="check-item"><input type="checkbox" data-guide-confirm><span><b>Kontrol listesini ürün sayfasında yeniden doğrulayacağım.</b><br><small>Fiyat, stok, satıcı, garanti ve nihai teknik özellik yalnız Amazon’un güncel sayfasında doğrulanır.</small></span></label><div class="actions"><a class="btn btn-primary disabled-link" data-guide-amazon aria-disabled="true" tabindex="-1" href="${escapeAttr(result.searchUrl)}" target="_blank" rel="sponsored nofollow noopener">Amazon’da teknik ifadelerle ara</a></div></div>`;
+    }
+
+    $('guideResult').innerHTML=`<span class="eyebrow">Rehberli seçim</span><h3>Ürün adından önce bu alanları doğrulayın</h3>${checklist}${professional}${actions}`;
+    const nextStep=$('guideResult').querySelector('[data-next-step]');
+    if(nextStep)nextStep.addEventListener('click',()=>emit('free_tool_route_opened',{category:selectedCategory,affiliate_policy:result.affiliatePolicy}));
+    const confirm=$('guideResult').querySelector('[data-guide-confirm]');
     const link=$('guideResult').querySelector('[data-guide-amazon]');
-    if(link)link.addEventListener('click',()=>emit('affiliate_category_clicked',{category:selectedCategory,placement:'smart_matcher_guide'}));
+    if(confirm&&link){
+      confirm.addEventListener('change',()=>{
+        const enabled=confirm.checked;
+        link.classList.toggle('disabled-link',!enabled);
+        link.setAttribute('aria-disabled',enabled?'false':'true');
+        link.tabIndex=enabled?0:-1;
+        emit('affiliate_checklist_acknowledged',{category:selectedCategory,acknowledged:enabled});
+      });
+      link.addEventListener('click',event=>{
+        if(link.getAttribute('aria-disabled')==='true'){event.preventDefault();return;}
+        emit('affiliate_category_clicked',{category:selectedCategory,placement:'smart_matcher_guide_after_checklist'});
+      });
+    }
+  }
+
+  function readDecision(){
+    try{
+      const raw=localStorage.getItem(storageKey);
+      if(!raw)return null;
+      const data=JSON.parse(raw);
+      if(!data||!catalog.getCategory(data.category)||typeof data.savedAt!=='string')return null;
+      return data;
+    }catch(_error){return null;}
+  }
+
+  function saveDecision(category,req){
+    try{
+      const savedAt=new Date();
+      const reviewAt=new Date(savedAt.getTime()+reviewDays*86400000);
+      localStorage.setItem(storageKey,JSON.stringify({category,requirements:req,savedAt:savedAt.toISOString(),reviewAt:reviewAt.toISOString()}));
+    }catch(_error){/* Depolama kapalıysa araç çalışmaya devam eder. */}
+  }
+
+  function renderSavedDecision(){
+    const section=$('savedDecision');
+    if(!section)return;
+    const data=readDecision();
+    if(!data){section.classList.add('hidden');return;}
+    const category=catalog.getCategory(data.category);
+    const reviewAt=new Date(data.reviewAt||data.savedAt);
+    const due=Number.isFinite(reviewAt.getTime())&&reviewAt.getTime()<=Date.now();
+    $('savedDecisionText').textContent=`${category.name} için son teknik seçim cihazınızda saklandı. ${due?'Kontrol tarihi geldi; teknik bilgiler ve ihtiyacınız değişmiş olabilir.':`Yeniden kontrol: ${formatDate(reviewAt)}.`}`;
+    $('restoreDecisionBtn').textContent=due?'Seçimi şimdi yeniden kontrol et':'Son seçimi geri yükle';
+    section.classList.remove('hidden');
+  }
+
+  function restoreDecision(){
+    const data=readDecision();
+    if(!data)return;
+    selectCategory(data.category,{noScroll:true});
+    applyRequirements(data.category,data.requirements||{});
+    runMatch({restored:true});
+    emit('product_decision_restored',{category:data.category});
+  }
+
+  function clearDecision(){
+    try{localStorage.removeItem(storageKey);}catch(_error){/* no-op */}
+    renderSavedDecision();
+    emit('product_decision_cleared');
   }
 
   function reset(){selectedCategory=null;document.querySelectorAll('[data-category]').forEach(button=>button.setAttribute('aria-pressed','false'));$('requirements').classList.add('hidden');$('results').classList.add('hidden');$('validation').textContent='';window.scrollTo({top:$('matcher').offsetTop-80,behavior:'smooth'});}
+  function formatDate(value){return new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'long',year:'numeric'}).format(value);}
   function escapeHtml(value){return String(value??'').replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));}
   function escapeAttr(value){return escapeHtml(value).replace(/'/g,'&#39;');}
 
   document.addEventListener('DOMContentLoaded',()=>{
     if(!catalog||!matcher){$('validation').textContent='Ürün kataloğu yüklenemedi.';return;}
     renderCategories();
-    $('matchBtn').addEventListener('click',runMatch);
+    renderSavedDecision();
+    $('matchBtn').addEventListener('click',()=>runMatch());
     $('resetBtn').addEventListener('click',reset);
+    if($('restoreDecisionBtn'))$('restoreDecisionBtn').addEventListener('click',restoreDecision);
+    if($('clearDecisionBtn'))$('clearDecisionBtn').addEventListener('click',clearDecision);
     const query=new URLSearchParams(location.search).get('kategori');
     if(query&&catalog.getCategory(query))selectCategory(query);
   });
