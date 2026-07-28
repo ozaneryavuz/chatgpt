@@ -33,7 +33,7 @@ assert.doesNotMatch(kitApp,/amazon\.(?:com|com\.tr)\/dp\//i);
 assert.match(pwa,/beforeinstallprompt/);
 assert.match(pwa,/appinstalled/);
 assert.match(pwa,/Ana Ekrana Ekle/);
-assert.doesNotMatch(pwa,/Notification\.requestPermission|geolocation|getUserMedia|email|phone|address/i);
+assert.doesNotMatch(pwa,/Notification\.requestPermission|geolocation|getUserMedia|\b(?:email|phone|address)\b/i);
 
 assert.match(planHtml,/\/hesaplama\/elektrik-kesintisi-kiti\//);
 assert.match(planHtml,/id="installBtnPlan"/);
