@@ -10,6 +10,14 @@
   function escapeAttr(value){return escapeHtml(value).replace(/`/g,'&#96;');}
   function selectedCategory(){const active=document.querySelector('[data-category][aria-pressed="true"]');return active?active.dataset.category:null;}
   function emit(name,params={}){if(core.hasForbiddenEventData(params))return;const clean=core.sanitizeEvent(params);if(typeof window.Alo186Track==='function')window.Alo186Track(name,clean);else{window.dataLayer=window.dataLayer||[];window.dataLayer.push({event:name,...clean});}}
+  function ensurePanels(){
+    if(!$('qualifiedSearch')){
+      const results=$('results');
+      if(!results)return false;
+      results.insertAdjacentHTML('afterend',`<section id="qualifiedSearch" class="content-section qualified-search hidden" aria-live="polite"><div class="panel"><span class="eyebrow">Şeffaf satış ortaklığı araması</span><h2 id="qualifiedSearchTitle">Teknik arama oluşturucu</h2><p id="qualifiedSearchIntro">Önce teknik uygunluğu doğrulayın.</p><div id="qualifiedSearchFields" class="qualified-search-fields"></div><div class="qualified-checks"><label class="check-item"><input type="checkbox" id="qualifiedToolConfirmed"><span><b id="qualifiedToolLabel">Teknik kontrolü tamamladım.</b><br><small>Bu onay bir ürün sertifikası değildir.</small></span></label><label class="check-item"><input type="checkbox" id="qualifiedExistingInsufficient"><span><b>Mevcut ekipmanım ihtiyacı karşılamıyor.</b><br><small>Mevcut ürün yeterliyse yeni ürün araması açılmaz.</small></span></label><label class="check-item"><input type="checkbox" id="qualifiedAffiliateAccepted"><span><b>Bağlantının satış ortaklığı bağlantısı olduğunu anladım.</b><br><small>Nitelikli satın alımdan komisyon kazanılabilir; kullanıcıya ek maliyet yansımaz.</small></span></label></div><p id="qualifiedSearchQuery" class="qualified-search-query"></p><div class="qualified-disclosure"><strong>Reklam / satış ortaklığı:</strong> Bu araç ürün önermeden, yalnız seçtiğiniz teknik ifadelerle Amazon araması oluşturur. Fiyat, stok, satıcı, teslimat, puan, garanti ve nihai teknik özellik Amazon’un güncel sayfasında yeniden doğrulanır.</div><div class="actions"><a id="qualifiedAffiliateLink" class="btn btn-primary disabled-link" aria-disabled="true" tabindex="-1" target="_blank" rel="sponsored nofollow noopener">Amazon’da teknik aramayı aç</a><button id="qualifiedNoPurchaseBtn" class="btn btn-secondary" type="button">Şimdilik satın alma</button></div><p id="qualifiedSearchStatus" class="qualified-search-status" role="status">Güvenli arama için bütün adımları tamamlayın.</p></div></section><section id="professionalConversion" class="content-section professional-conversion hidden" aria-live="polite"><div class="panel"><span class="paid-label">Ücretli profesyonel hizmet</span><h2 id="professionalConversionTitle">Profesyonel teknik kapsam</h2><p id="professionalConversionText"></p><p><strong>Bağımsızlık:</strong> ALO186 resmî kurum, EDAŞ veya ürün satıcısı değildir. Hazırlık skoru ücretsizdir; teknik inceleme ancak kapsam ve ücret yazılı teyit edildikten sonra başlar.</p><div class="actions"><a id="professionalConversionLink" class="btn btn-primary" href="/kurumsal-elektrik-surekliligi-on-degerlendirme">Kişisel verisiz hazırlık skorunu aç</a><a class="btn btn-secondary" href="/hesaplama/">Ücretsiz araçlara dön</a></div></div></section>`);
+    }
+    return Boolean($('qualifiedSearch')&&$('professionalConversion'));
+  }
   function selections(){const values={};$('qualifiedSearchFields').querySelectorAll('[data-qualified-field]').forEach(field=>values[field.dataset.qualifiedField]=field.value);return values;}
   function confirmations(){return{toolConfirmed:$('qualifiedToolConfirmed').checked,checklistConfirmed:$('qualifiedToolConfirmed').checked,existingInsufficient:$('qualifiedExistingInsufficient').checked,affiliateAccepted:$('qualifiedAffiliateAccepted').checked};}
   function categoryIntro(category){const c=catalog.getCategory(category);if(!c)return'';if(c.affiliatePolicy==='after_tool')return'Ücretsiz teknik aracı tamamladıktan sonra yalnız doğruladığınız minimumlarla arama oluşturun.';if(c.affiliatePolicy==='after_checklist')return'Güvenlik ve ürün etiketi kontrolünü tamamladıktan sonra yalnız kapalı teknik seçeneklerle arama oluşturun.';return'Teknik minimumları belirledikten sonra doğrulanmış kart bulunamazsa daha dar bir arama oluşturun.';}
@@ -23,14 +31,16 @@
   function hideProfessionalRoute(){$('professionalConversion').classList.add('hidden');}
   function renderForCurrentResult(){const category=selectedCategory();if(!category)return;hideQualifiedSearch();hideProfessionalRoute();if(core.isProfessional(category)||catalog.getCategory(category).affiliatePolicy==='professional_only')showProfessionalRoute(category);else showQualifiedSearch(category);}
   function noPurchase(){if(!activeCategory)return;$('qualifiedSearchStatus').textContent='Satın almama seçildi. Mevcut ekipmanı kullanmaya devam edin veya yeniden kontrol tarihi oluşturun.';emit('qualified_affiliate_no_purchase',{category:activeCategory,status:'selected',placement:'qualified_search'});}
-
-  document.addEventListener('DOMContentLoaded',()=>{
-    if(!$('qualifiedSearch')||!$('professionalConversion'))return;
+  function init(){
+    if(window.Alo186ConversionGrowthInitialized)return;
+    if(!ensurePanels()||!$('matchBtn'))return;
+    window.Alo186ConversionGrowthInitialized=true;
     $('matchBtn').addEventListener('click',()=>setTimeout(renderForCurrentResult,0));
     document.addEventListener('click',event=>{const categoryButton=event.target.closest('[data-category],[data-intent-category]');if(categoryButton){hideQualifiedSearch();hideProfessionalRoute();}});
     ['qualifiedToolConfirmed','qualifiedExistingInsufficient','qualifiedAffiliateAccepted'].forEach(id=>$(id).addEventListener('change',updateGate));
     $('qualifiedAffiliateLink').addEventListener('click',event=>{if($('qualifiedAffiliateLink').getAttribute('aria-disabled')==='true'){event.preventDefault();return;}emit('qualified_affiliate_search_opened',{category:activeCategory,status:'opened',placement:'qualified_search',affiliate_policy:catalog.getCategory(activeCategory).affiliatePolicy,search_profile:activeCategory});});
     $('qualifiedNoPurchaseBtn').addEventListener('click',noPurchase);
     $('professionalConversionLink').addEventListener('click',()=>{const category=selectedCategory();emit('professional_conversion_opened',{category,status:'opened',professional_route:'corporate_readiness'});});
-  });
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
