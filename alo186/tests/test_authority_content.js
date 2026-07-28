@@ -69,6 +69,24 @@ const articles=[
     required:['VPP','Toplayıcılık Lisansı','Talep Tarafı Katılımı','telemetri','gelir garantisi'],
     cta:'/isletme-surekliligi',
     fresh:true
+  },
+  {
+    slug:'kacak-akim-rolesi-neden-surekli-atar',
+    required:['birikimli kaçak akım','nötr karışması','yetkili elektrikçi','köprülemek','112'],
+    cta:'/karar-motoru',
+    fresh:true
+  },
+  {
+    slug:'ev-sarjinda-dinamik-yuk-yonetimi',
+    required:['dinamik yük yönetimi','akım trafoları','fail-safe','güç artışı','EPDK'],
+    cta:'/hesaplama/ev-sarj-uygunluk/',
+    fresh:true
+  },
+  {
+    slug:'planli-elektrik-kesintisi-ne-kadar-once-bildirilir',
+    required:['48 saat','kalıcı veri saklayıcısı','bildirimli kesinti','dağıtım şirketi','ALO186 resmî kesinti kaydı almaz'],
+    cta:'/hesaplama/kesinti-gunlugu/',
+    fresh:true
   }
 ];
 

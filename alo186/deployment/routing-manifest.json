@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "canonicalHost": "https://www.alo186.com",
   "generatedAt": "2026-07-28",
   "routes": [
@@ -35,7 +35,10 @@
     {"source":"alo186/haberler/harmonik-nedir-thd-cihazlari-nasil-etkiler/index.html","canonicalPath":"/haberler/harmonik-nedir-thd-cihazlari-nasil-etkiler","type":"article"},
     {"source":"alo186/haberler/ups-online-line-interactive-offline-farki/index.html","canonicalPath":"/haberler/ups-online-line-interactive-offline-farki","type":"article"},
     {"source":"alo186/haberler/parafudr-gerilim-koruma-rolesi-farki/index.html","canonicalPath":"/haberler/parafudr-gerilim-koruma-rolesi-farki","type":"article"},
-    {"source":"alo186/haberler/vpp-sanal-guc-santrali-nedir/index.html","canonicalPath":"/haberler/vpp-sanal-guc-santrali-nedir","type":"article"}
+    {"source":"alo186/haberler/vpp-sanal-guc-santrali-nedir/index.html","canonicalPath":"/haberler/vpp-sanal-guc-santrali-nedir","type":"article"},
+    {"source":"alo186/haberler/kacak-akim-rolesi-neden-surekli-atar/index.html","canonicalPath":"/haberler/kacak-akim-rolesi-neden-surekli-atar","type":"article"},
+    {"source":"alo186/haberler/ev-sarjinda-dinamik-yuk-yonetimi/index.html","canonicalPath":"/haberler/ev-sarjinda-dinamik-yuk-yonetimi","type":"article"},
+    {"source":"alo186/haberler/planli-elektrik-kesintisi-ne-kadar-once-bildirilir/index.html","canonicalPath":"/haberler/planli-elektrik-kesintisi-ne-kadar-once-bildirilir","type":"article"}
   ],
   "requiredIntegrations": [
     "canonical URL must resolve with HTTP 200",
