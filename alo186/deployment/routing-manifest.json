@@ -21,7 +21,10 @@
     {"source":"alo186/kesinti-maliyet-hesaplayici/index.html","canonicalPath":"/hesaplama/kesinti-maliyeti","type":"calculator"},
     {"source":"alo186/haberler/ev-sarj-cihazi-icin-ev-tesisati-uygun-mu/index.html","canonicalPath":"/haberler/ev-sarj-cihazi-icin-ev-tesisati-uygun-mu","type":"article"},
     {"source":"alo186/haberler/ges-elektrik-kesintisinde-calisir-mi/index.html","canonicalPath":"/haberler/ges-elektrik-kesintisinde-calisir-mi","type":"article"},
-    {"source":"alo186/haberler/jenerator-transfer-salteri-neden-gerekir/index.html","canonicalPath":"/haberler/jenerator-transfer-salteri-neden-gerekir","type":"article"}
+    {"source":"alo186/haberler/jenerator-transfer-salteri-neden-gerekir/index.html","canonicalPath":"/haberler/jenerator-transfer-salteri-neden-gerekir","type":"article"},
+    {"source":"alo186/haberler/elektrik-kesintisi-cihaz-hasari-edas-basvurusu/index.html","canonicalPath":"/haberler/elektrik-kesintisi-cihaz-hasari-edas-basvurusu","type":"article"},
+    {"source":"alo186/haberler/prizde-topraklama-var-mi-priz-test-cihazi/index.html","canonicalPath":"/haberler/prizde-topraklama-var-mi-priz-test-cihazi","type":"article"},
+    {"source":"alo186/haberler/saf-sinus-modifiye-sinus-inverter-farki/index.html","canonicalPath":"/haberler/saf-sinus-modifiye-sinus-inverter-farki","type":"article"}
   ],
   "requiredIntegrations": [
     "canonical URL must resolve with HTTP 200",
