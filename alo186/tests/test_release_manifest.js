@@ -28,12 +28,15 @@ for(const route of manifest.routes){
   }
 }
 
-for(const required of ['./turkiye-arama/','./karar-motoru/','./hesaplama/','./urun-eslestirme/','./sureklilik-paneli/']){
-  assert(hub.includes(`href="${required}"`),`Yayın merkezinde bağlantı eksik: ${required}`);
+for(const required of ['/edas-bul','/karar-motoru','/hesaplama/','/akilli-urun-secimi','/isletme-surekliligi']){
+  assert(hub.includes(`href="${required}"`),`Yayın merkezinde canonical bağlantı eksik: ${required}`);
+}
+for(const stale of ['./turkiye-arama/','./karar-motoru/','./urun-eslestirme/','./sureklilik-paneli/']){
+  assert(!hub.includes(`href="${stale}"`),`Kaynak klasör adı production rotası olarak kalmış: ${stale}`);
 }
 
 const robots=fs.readFileSync(path.join(repoRoot,'alo186/robots.txt'),'utf8');
 assert(robots.includes('Sitemap: https://www.alo186.com/sitemap.xml'));
 assert(robots.includes('Allow: /'));
 
-console.log('ALO186 yayın manifesti, canonical ve sitemap testleri başarılı.');
+console.log('ALO186 yayın manifesti, canonical, portal bağlantıları ve sitemap testleri başarılı.');

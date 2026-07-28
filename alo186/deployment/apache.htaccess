@@ -51,6 +51,19 @@ ErrorDocument 404 /404.html
   AddType application/xml .xml
 </IfModule>
 
+# Canlı ana sayfa/portal başka bir yayın şablonundan eski hukuki metni üretirse,
+# kaynak şablon düzeltilip tüm cache katmanları temizlenene kadar yalnız bilinen iki
+# hatalı cihaz-hasarı cümlesini güvenli 10 iş günü metniyle değiştir. mod_substitute
+# bulunmayan hostinglerde bu blok devre dışı kalır ve sunucuyu bozmaz.
+<IfModule mod_substitute.c>
+  <IfModule mod_filter.c>
+    AddOutputFilterByType SUBSTITUTE text/html
+  </IfModule>
+  SubstituteMaxLineLength 10m
+  Substitute "s|zararın ortaya çıktığı tarihten itibaren 30 gün içinde EDAŞ kaydı açın|zararın ortaya çıktığı tarihten itibaren 10 iş günü içinde ilgili dağıtım şirketinin resmî kanalına başvurun|ni"
+  Substitute "s|zararın ortaya çıktığı tarihten itibaren 30 gün içinde ilgili dağıtım şirketine kayıtlı başvuru yapmalı|zararın ortaya çıktığı tarihten itibaren 10 iş günü içinde ilgili dağıtım şirketinin resmî kanalına başvurmalı|ni"
+</IfModule>
+
 # Canlı ana sayfadaki çözümlenemeyen `@import "tailwindcss"` isteği kaynak
 # şablondan kaldırılana kadar görünümü değiştirmeyen, boş bir CSS yanıtı ver.
 <Files "tailwindcss">
