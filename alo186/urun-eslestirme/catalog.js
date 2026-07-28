@@ -23,6 +23,27 @@
     {id:'emergency_light',name:'Şarjlı acil aydınlatma',mode:'guide',risk:'consumer',affiliatePolicy:'after_checklist',description:'Düşük mod çalışma süresi, fiziksel düğme, pil göstergesi ve asma/taşıma biçimini kontrol edin.',searchQuery:'şarjlı acil durum lambası kamp lambası'},
     {id:'smoke_alarm',name:'Fotoelektrik duman alarmı',mode:'guide',risk:'safety',affiliatePolicy:'after_checklist',description:'EN 14604 işareti, test düğmesi, düşük pil uyarısı, ses seviyesi ve son kullanım bilgisini doğrulayın.',searchQuery:'EN 14604 fotoelektrik duman dedektörü'},
     {id:'power_station',name:'Taşınabilir güç istasyonu',mode:'guide',risk:'compatibility',affiliatePolicy:'after_tool',nextStepUrl:'https://www.alo186.com/hesaplama/ups-suresi/',nextStepLabel:'Önce yük ve çalışma süresini hesapla',description:'Wh kapasitesi, sürekli/tepe güç, dalga biçimi, batarya kimyası ve şarj girişleri yük hesabıyla birlikte seçilmelidir.',searchQuery:'LiFePO4 taşınabilir güç istasyonu power station'},
+    {
+      id:'ups_battery',name:'UPS yedek aküsü ve batarya kartuşu',mode:'guide',risk:'compatibility',affiliatePolicy:'after_checklist',
+      description:'UPS’in tam model numarası ve üreticinin önerdiği RBC/kartuş kodu doğrulanmadan yalnız voltaj ve Ah benzerliğine göre akü seçilmemelidir.',
+      searchQuery:'UPS replacement battery cartridge RBC yedek akü',
+      sourceUrl:'https://www.se.com/us/en/work/products/tools/ups-replacement-battery-selector/',sourceLabel:'Schneider Electric UPS Replacement Battery Selector',
+      affiliateAck:'UPS’in tam modelini ve üreticinin önerdiği RBC/kartuş kodunu doğruladım; yalnız aynı kod ve bağlantı setini karşılaştıracağım.'
+    },
+    {
+      id:'ev_cable',name:'Type 2 EV şarj kablosu',mode:'guide',risk:'compatibility',affiliatePolicy:'after_checklist',
+      description:'Araç girişi, şarj noktası soketi, Mode 3/Case B, monofaze-trifaze yapı, 16/32 A sınırı ve kablo uzunluğu birlikte doğrulanmalıdır.',
+      searchQuery:'Type 2 Type 2 Mode 3 32A EV şarj kablosu',
+      sourceUrl:'https://www.phoenixcontact.com/en-pc/products/ac-charging-cable-ev-t2g3pc-3ac32a-40m60ehbk01-1627136',sourceLabel:'Phoenix Contact Type 2 Mode 3 teknik verisi',
+      affiliateAck:'Araç, şarj noktası ve kablonun Type 2, faz, akım ve hedef güç uyumunu hesaplayıcıda doğruladım; uzatma veya belirsiz adaptör kullanmayacağım.'
+    },
+    {
+      id:'solar_panel_power_station',name:'Power station için güneş paneli',mode:'guide',risk:'compatibility',affiliatePolicy:'after_checklist',
+      description:'Panel wattından önce toplam soğuk hava Voc, Vmp, Isc/Imp, MPPT aralığı, konnektör ve polarite tam cihaz modeliyle eşleştirilmelidir.',
+      searchQuery:'power station uyumlu katlanabilir güneş paneli MC4 XT60',
+      sourceUrl:'https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_75-10_up_to_100-20/en/technical-specifications.html',sourceLabel:'Victron Energy MPPT gerilim ve akım sınırları',
+      affiliateAck:'Toplam soğuk hava Voc, Vmp, Isc/Imp, giriş gücü, konnektör ve polariteyi power station’ın tam model kılavuzunda doğruladım.'
+    },
     {id:'generator',name:'Taşınabilir jeneratör',mode:'guide',risk:'safety',affiliatePolicy:'after_tool',nextStepUrl:'https://www.alo186.com/hesaplama/jenerator-gucu-secimi/',nextStepLabel:'Önce sürekli ve kalkış gücünü hesapla',description:'Sürekli ve kalkış W, faz, bağlantı biçimi, CO güvenliği, gürültü, yakıt ve servis koşulları güç hesabıyla birlikte doğrulanmalıdır.',searchQuery:'inverter jeneratör CO sensörü sürekli kalkış watt'},
     {id:'inverter',name:'Saf sinüs inverter ve batarya sistemi',mode:'guide',risk:'compatibility',affiliatePolicy:'after_tool',nextStepUrl:'https://www.alo186.com/hesaplama/inverter-uygunluk/',nextStepLabel:'Önce inverter ve batarya hesabını yap',description:'Sürekli/tepe W, saf sinüs, 12/24/48 V DC gerilim, batarya akımı, BMS ve koruma doğrulanmadan ürün seçilmemelidir.',searchQuery:'saf sinüs inverter 12V 24V sürekli tepe watt'},
     {id:'outlet_tester',name:'Priz ve RCD test cihazı',mode:'guide',risk:'measurement',affiliatePolicy:'professional_only',nextStepUrl:'https://www.alo186.com/karar-motoru/',nextStepLabel:'Önce güvenli yönlendirmeyi aç',description:'Gösterge yalnız temel bağlantı hatalarını ön kontrol eder; izolasyon, topraklama direnci ve koruma açma testi yerine geçmez.',searchQuery:'priz test cihazı RCD tester'}
