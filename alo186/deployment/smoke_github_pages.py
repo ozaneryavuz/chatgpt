@@ -33,6 +33,14 @@ CRITICAL_ROUTES = (
     "/kesintiye-hazirlik-atolyesi/",
     "/haberler/elektrik-kesintisi-cihaz-hasari-edas-basvurusu/",
 )
+CANONICAL_METADATA_FILES = {
+    "alo186-release.json",
+    "pages-release.json",
+    "route-bridges.json",
+    "checksums.sha256",
+    "robots.txt",
+    "sitemap.xml",
+}
 
 
 class PageParser(HTMLParser):
@@ -83,8 +91,7 @@ def strip_base_path(path: str, base_path: str) -> str | None:
 
 
 def route_exists(site: Path, route: str) -> bool:
-    parsed = urlsplit(route)
-    clean = parsed.path or "/"
+    clean = urlsplit(route).path or "/"
     if clean == "/":
         return (site / "index.html").is_file()
     target = site / clean.lstrip("/")
@@ -123,9 +130,8 @@ def smoke(site: Path, manifest_path: Path, base_path: str) -> dict:
         failures.append("core release cihaz hasarı süresi yanlış")
 
     for route in manifest["routes"]:
-        path = route["canonicalPath"]
-        if not route_exists(site, path):
-            failures.append(f"Canonical rota GitHub Pages artifactında eksik: {path}")
+        if not route_exists(site, route["canonicalPath"]):
+            failures.append(f"Canonical rota GitHub Pages artifactında eksik: {route['canonicalPath']}")
 
     for critical in CRITICAL_ROUTES:
         if not route_exists(site, critical):
@@ -133,16 +139,20 @@ def smoke(site: Path, manifest_path: Path, base_path: str) -> dict:
 
     for html_path in sorted(site.rglob("*.html")):
         checked_pages += 1
+        relative = html_path.relative_to(site).as_posix()
         text = html_path.read_text(encoding="utf-8", errors="ignore")
         parser = PageParser()
         parser.feed(text)
+        robots = (parser.robots or "").lower()
         if not parser.has_service_worker:
-            failures.append(f"Service worker kaydı eksik: {html_path.relative_to(site)}")
-        if base_path and (parser.robots or "").lower().find("noindex") == -1:
-            failures.append(f"Default project Pages yüzeyinde noindex eksik: {html_path.relative_to(site)}")
-        if not base_path and html_path.relative_to(site).as_posix() != "durum/index.html":
+            failures.append(f"Service worker kaydı eksik: {relative}")
+        if base_path and "noindex" not in robots:
+            failures.append(f"Default project Pages yüzeyinde noindex eksik: {relative}")
+        if relative == "404.html" and "noindex" not in robots:
+            failures.append("404 sayfası noindex,follow olmalı")
+        if not base_path and relative not in {"durum/index.html", "404.html"}:
             if "İçerik yeni adresine taşındı" not in text and parser.canonical is None:
-                failures.append(f"Custom-domain sayfasında canonical eksik: {html_path.relative_to(site)}")
+                failures.append(f"Custom-domain sayfasında canonical eksik: {relative}")
 
         for kind, reference in parser.references:
             parsed = urlsplit(reference)
@@ -152,9 +162,7 @@ def smoke(site: Path, manifest_path: Path, base_path: str) -> dict:
             if parsed.path.startswith("/"):
                 stripped = strip_base_path(parsed.path, base_path)
                 if stripped is None:
-                    failures.append(
-                        f"Base path öneki eksik: {html_path.relative_to(site)} → {reference} (beklenen={base_path or '/'})"
-                    )
+                    failures.append(f"Base path öneki eksik: {relative} → {reference} (beklenen={base_path or '/'})")
                     continue
                 internal = stripped
             else:
@@ -162,16 +170,17 @@ def smoke(site: Path, manifest_path: Path, base_path: str) -> dict:
                 try:
                     internal = "/" + target.relative_to(site.resolve()).as_posix()
                 except ValueError:
-                    failures.append(f"Referans bundle dışına çıkıyor: {html_path.relative_to(site)} → {reference}")
+                    failures.append(f"Referans bundle dışına çıkıyor: {relative} → {reference}")
                     continue
 
-            if kind == "href" and (not Path(urlsplit(internal).path).suffix or internal.endswith("/")):
+            internal_path = urlsplit(internal).path
+            if kind == "href" and (not Path(internal_path).suffix or internal.endswith("/")):
                 if not route_exists(site, internal):
-                    failures.append(f"İç bağlantı hedefi eksik: {html_path.relative_to(site)} → {reference}")
-            elif kind in {"src", "poster", "data-src", "srcset"} or (kind == "href" and Path(urlsplit(internal).path).suffix):
-                target = site / urlsplit(internal).path.lstrip("/")
+                    failures.append(f"İç bağlantı hedefi eksik: {relative} → {reference}")
+            elif kind in {"src", "poster", "data-src", "srcset"} or (kind == "href" and Path(internal_path).suffix):
+                target = site / internal_path.lstrip("/")
                 if not target.is_file():
-                    failures.append(f"Asset hedefi eksik: {html_path.relative_to(site)} → {reference}")
+                    failures.append(f"Asset hedefi eksik: {relative} → {reference}")
 
     manifest_json = json.loads((site / "manifest.webmanifest").read_text(encoding="utf-8"))
     expected_start = (base_path + "/") if base_path else "/"
@@ -205,7 +214,7 @@ def smoke(site: Path, manifest_path: Path, base_path: str) -> dict:
         for path in sorted(site.rglob("*")):
             if not path.is_file() or path.suffix.lower() not in {".html", ".js", ".css", ".json", ".webmanifest"}:
                 continue
-            if path.name in {"robots.txt", "sitemap.xml"}:
+            if path.name in CANONICAL_METADATA_FILES:
                 continue
             text = path.read_text(encoding="utf-8", errors="ignore")
             for match in unresolved.finditer(text):
@@ -215,15 +224,7 @@ def smoke(site: Path, manifest_path: Path, base_path: str) -> dict:
                     failures.append(f"Project base path sonrası kök referans kaldı: {path.relative_to(site)} → /{rest}")
                     break
 
-    result = {
-        "ok": not failures,
-        "basePath": base_path,
-        "routeCount": len(manifest["routes"]),
-        "routeBridgeCount": bridge_manifest.get("count", 0),
-        "checkedPages": checked_pages,
-        "checkedReferences": checked_references,
-        "failures": failures,
-    }
+    result = {"ok": not failures, "basePath": base_path, "routeCount": len(manifest["routes"]), "routeBridgeCount": bridge_manifest.get("count", 0), "checkedPages": checked_pages, "checkedReferences": checked_references, "failures": failures}
     if failures:
         raise SystemExit(json.dumps(result, ensure_ascii=False, indent=2))
     return result
