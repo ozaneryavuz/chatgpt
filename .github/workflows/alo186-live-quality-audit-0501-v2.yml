@@ -1,0 +1,220 @@
+name: ALO186 Live Quality Audit 0501 v2
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install tools
+        run: |
+          python -m pip install --disable-pip-version-check requests beautifulsoup4 lxml
+          npm install --no-save playwright@1.55.0 @axe-core/playwright@4.10.2 lighthouse@12.8.2
+          npx playwright install --with-deps chromium
+      - name: Static crawl
+        continue-on-error: true
+        shell: bash
+        run: |
+          mkdir -p artifacts/screenshots artifacts/lighthouse
+          cat > /tmp/static_audit.py <<'PY'
+          import json, re, sys, time
+          from concurrent.futures import ThreadPoolExecutor, as_completed
+          from urllib.parse import urljoin, urlparse, urldefrag
+          import requests
+          from bs4 import BeautifulSoup
+          from lxml import etree
+
+          ORIGIN='https://alo186.com'
+          session=requests.Session(); session.headers.update({'User-Agent':'ALO186-Quality-Audit/2026-07-28'})
+          TIMEOUT=25
+          def req(url, allow=True, stream=False):
+              try:
+                  r=session.get(url, timeout=TIMEOUT, allow_redirects=allow, stream=stream)
+                  return r, None
+              except Exception as e: return None, repr(e)
+          def host_probe(url):
+              first, e1=req(url, False, True); final, e2=req(url, True, True)
+              return {'url':url,'first_status':getattr(first,'status_code',None),'location':first.headers.get('location') if first else None,'final_status':getattr(final,'status_code',None),'final_url':getattr(final,'url',None),'error':e1 or e2}
+          def parse_sitemap(url, seen=None):
+              seen=seen or set()
+              if url in seen: return []
+              seen.add(url); r,e=req(url)
+              if not r or r.status_code>=400: return []
+              try: root=etree.fromstring(r.content)
+              except Exception: return []
+              name=etree.QName(root).localname
+              locs=[str(x).strip() for x in root.xpath('//*[local-name()="loc"]/text()')]
+              if name=='sitemapindex':
+                  out=[]
+                  for loc in locs: out.extend(parse_sitemap(loc,seen))
+                  return out
+              return locs
+          def absurl(v,base):
+              try: return urldefrag(urljoin(base,v))[0]
+              except Exception: return None
+          def internal(u):
+              try: return urlparse(u).hostname in ('alo186.com','www.alo186.com')
+              except Exception: return False
+          def page_audit(url):
+              first,e0=req(url,False,True); r,e=req(url)
+              if not r: return {'url':url,'error':e}
+              out={'url':url,'first_status':getattr(first,'status_code',None),'first_location':first.headers.get('location') if first else None,'status':r.status_code,'final_url':r.url,'content_type':r.headers.get('content-type',''),'bytes':len(r.content),'headers':{k:r.headers.get(k) for k in ['strict-transport-security','x-content-type-options','content-security-policy','referrer-policy','permissions-policy','cache-control']}}
+              if 'text/html' not in out['content_type']: return out
+              s=BeautifulSoup(r.text,'lxml')
+              can=[absurl(x.get('href',''),r.url) for x in s.select('link[rel~=canonical]') if x.get('href')]
+              h1=[x.get_text(' ',strip=True) for x in s.find_all('h1')]
+              robots=(s.find('meta',attrs={'name':re.compile('^robots$',re.I)}) or {}).get('content','') if s.find('meta',attrs={'name':re.compile('^robots$',re.I)}) else ''
+              jerr=[]; jcount=0
+              for x in s.select('script[type="application/ld+json"]'):
+                  raw=x.get_text(strip=True)
+                  if not raw: continue
+                  try: json.loads(raw); jcount+=1
+                  except Exception as ex: jerr.append(str(ex))
+              imgs=[]
+              for x in s.find_all('img'):
+                  imgs.append({'src':absurl(x.get('src',''),r.url),'alt':x.get('alt'),'width':x.get('width'),'height':x.get('height'),'loading':x.get('loading')})
+              links=[]
+              for x in s.find_all('a',href=True):
+                  u=absurl(x['href'],r.url)
+                  if u and internal(u): links.append(u)
+              ids=[x.get('id') for x in s.find_all(attrs={'id':True})]
+              dup=sorted({x for x in ids if ids.count(x)>1})
+              text=' '.join(s.get_text(' ',strip=True).split())
+              pii=[]
+              for x in s.select('input,textarea,select'):
+                  blob=' '.join([str(x.get('name','')),str(x.get('placeholder','')),str(x.get('autocomplete',''))])
+                  if re.search(r'tc|kimlik|adres|abon|telefon|phone|email|e-posta',blob,re.I): pii.append(blob)
+              out['parsed']={'canonicals':can,'h1':h1,'robots':robots,'jsonld_count':jcount,'jsonld_errors':jerr,'images':imgs,'internal_links':sorted(set(links)),'duplicate_ids':dup,'pii_inputs':pii,'suspicious_official':bool(re.search(r'resm[iî]\s+(başvuru|kayıt)\s+(oluştur|al)|alo186\s+(başvurunuzu|ihbarınızı)\s+alır',text,re.I)),'has_10_business_days':bool(re.search(r'10\s*(iş|is)\s*gün',text,re.I)),'has_30_day_damage_claim':bool(re.search(r'(cihaz|teçhizat|hasar).{0,180}30\s*gün|30\s*gün.{0,180}(cihaz|teçhizat|hasar)',text,re.I))}
+              return out
+          def simple_check(url):
+              r,e=req(url,False,True)
+              return {'url':url,'status':getattr(r,'status_code',None),'location':r.headers.get('location') if r else None,'content_type':r.headers.get('content-type') if r else None,'error':e}
+
+          report={'generated_at':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),'host_probes':[host_probe(x) for x in ['https://alo186.com/','https://www.alo186.com/','http://alo186.com/','http://www.alo186.com/']]}
+          report['robots']=simple_check(ORIGIN+'/robots.txt'); report['sitemap']=simple_check(ORIGIN+'/sitemap.xml')
+          urls=sorted(set(parse_sitemap(ORIGIN+'/sitemap.xml'))); report['sitemap_url_count']=len(urls)
+          pages=[]
+          with ThreadPoolExecutor(max_workers=10) as ex:
+              fut={ex.submit(page_audit,u):u for u in urls}
+              for f in as_completed(fut):
+                  try: pages.append(f.result())
+                  except Exception as e: pages.append({'url':fut[f],'error':repr(e)})
+          report['pages']=sorted(pages,key=lambda x:x.get('url',''))
+          links=sorted({u for p in pages for u in p.get('parsed',{}).get('internal_links',[])})
+          imgs=sorted({i.get('src') for p in pages for i in p.get('parsed',{}).get('images',[]) if i.get('src')})
+          report['internal_link_count']=len(links); report['image_url_count']=len(imgs)
+          with ThreadPoolExecutor(max_workers=12) as ex: report['links']=list(ex.map(simple_check,links))
+          with ThreadPoolExecutor(max_workers=12) as ex: report['images']=list(ex.map(simple_check,imgs))
+          with open('artifacts/static-audit.json','w') as f: json.dump(report,f,ensure_ascii=False,indent=2)
+          print(json.dumps({'sitemap_urls':len(urls),'internal_links':len(links),'images':len(imgs)},ensure_ascii=False))
+          PY
+          python /tmp/static_audit.py 2>&1 | tee artifacts/static-audit.log
+      - name: Browser, responsive and axe audit
+        continue-on-error: true
+        shell: bash
+        run: |
+          cat > /tmp/browser_audit.mjs <<'NODE'
+          import fs from 'node:fs';
+          import { chromium } from 'playwright';
+          import AxeBuilder from '@axe-core/playwright';
+          const routes=['/','/elektrik-portali','/elektrik-kesintisi','/haberler','/iletisim','/acil-numaralar'];
+          const views=[{name:'mobile',width:390,height:844,isMobile:true,hasTouch:true},{name:'desktop',width:1440,height:1000,isMobile:false,hasTouch:false}];
+          const out=[];
+          let browser;
+          try {
+            browser=await chromium.launch({headless:true});
+            for(const v of views){
+              const ctx=await browser.newContext({viewport:{width:v.width,height:v.height},isMobile:v.isMobile,hasTouch:v.hasTouch});
+              for(const route of routes){
+                const page=await ctx.newPage(); const consoleErrors=[]; const pageErrors=[];
+                page.on('console',m=>{if(m.type()==='error')consoleErrors.push(m.text())}); page.on('pageerror',e=>pageErrors.push(String(e)));
+                try{
+                  const response=await page.goto('https://alo186.com'+route,{waitUntil:'domcontentloaded',timeout:45000});
+                  await page.waitForTimeout(2000);
+                  const metrics=await page.evaluate(()=>{
+                    const vis=el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);return r.width>0&&r.height>0&&s.visibility!=='hidden'&&s.display!=='none'&&Number(s.opacity)!==0};
+                    const targets=[...document.querySelectorAll('a,button,input,select,textarea,[role="button"]')].filter(vis).map(el=>{const r=el.getBoundingClientRect();return{tag:el.tagName,text:(el.innerText||el.getAttribute('aria-label')||el.getAttribute('name')||'').trim().slice(0,100),width:Math.round(r.width),height:Math.round(r.height)}}).filter(x=>x.width<44||x.height<44).slice(0,100);
+                    const ids=[...document.querySelectorAll('[id]')].map(x=>x.id); return{url:location.href,title:document.title,scrollWidth:document.documentElement.scrollWidth,clientWidth:document.documentElement.clientWidth,overflowPx:Math.max(0,document.documentElement.scrollWidth-document.documentElement.clientWidth),failedImages:[...document.images].filter(i=>i.complete&&i.naturalWidth===0).map(i=>i.currentSrc||i.src),pendingImages:[...document.images].filter(i=>!i.complete).map(i=>i.currentSrc||i.src),duplicateIds:[...new Set(ids.filter((x,i)=>ids.indexOf(x)!==i))],h1Count:document.querySelectorAll('h1').length,smallTargets:targets};
+                  });
+                  let violations=[]; try{const a=await new AxeBuilder({page}).analyze();violations=a.violations.map(x=>({id:x.id,impact:x.impact,description:x.description,nodes:x.nodes.length,helpUrl:x.helpUrl}))}catch(e){violations=[{id:'axe-error',impact:'unknown',description:String(e),nodes:0}]}
+                  const name=route==='/'?'home':route.slice(1).replaceAll('/','-'); const shot=`artifacts/screenshots/${v.name}-${name}.png`;
+                  try{await page.screenshot({path:shot,fullPage:true})}catch(e){}
+                  out.push({viewport:v.name,route,status:response?.status()??null,metrics,consoleErrors,pageErrors,axeViolations:violations,screenshot:shot});
+                }catch(e){out.push({viewport:v.name,route,error:String(e),consoleErrors,pageErrors})}
+                await page.close();
+              }
+              await ctx.close();
+            }
+          }catch(e){out.push({fatal:String(e)})}finally{if(browser)await browser.close()}
+          fs.writeFileSync('artifacts/browser-audit.json',JSON.stringify(out,null,2));
+          console.log(JSON.stringify({scenarios:out.length}));
+          NODE
+          node /tmp/browser_audit.mjs 2>&1 | tee artifacts/browser-audit.log
+      - name: Lighthouse home mobile 1
+        continue-on-error: true
+        run: npx lighthouse https://alo186.com/ --only-categories=performance,accessibility,best-practices,seo --output=json --output-path=artifacts/lighthouse/mobile-home-1.json --chrome-flags='--headless --no-sandbox --disable-dev-shm-usage' --throttling-method=simulate --quiet
+      - name: Lighthouse home mobile 2
+        continue-on-error: true
+        run: npx lighthouse https://alo186.com/ --only-categories=performance,accessibility,best-practices,seo --output=json --output-path=artifacts/lighthouse/mobile-home-2.json --chrome-flags='--headless --no-sandbox --disable-dev-shm-usage' --throttling-method=simulate --quiet
+      - name: Lighthouse home mobile 3
+        continue-on-error: true
+        run: npx lighthouse https://alo186.com/ --only-categories=performance,accessibility,best-practices,seo --output=json --output-path=artifacts/lighthouse/mobile-home-3.json --chrome-flags='--headless --no-sandbox --disable-dev-shm-usage' --throttling-method=simulate --quiet
+      - name: Lighthouse home desktop
+        continue-on-error: true
+        run: npx lighthouse https://alo186.com/ --preset=desktop --only-categories=performance,accessibility,best-practices,seo --output=json --output-path=artifacts/lighthouse/desktop-home.json --chrome-flags='--headless --no-sandbox --disable-dev-shm-usage' --throttling-method=simulate --quiet
+      - name: Lighthouse key mobile pages
+        continue-on-error: true
+        shell: bash
+        run: |
+          npx lighthouse https://alo186.com/elektrik-portali --only-categories=performance,accessibility,best-practices,seo --output=json --output-path=artifacts/lighthouse/mobile-elektrik-portali.json --chrome-flags='--headless --no-sandbox --disable-dev-shm-usage' --throttling-method=simulate --quiet || true
+          npx lighthouse https://alo186.com/elektrik-kesintisi --only-categories=performance,accessibility,best-practices,seo --output=json --output-path=artifacts/lighthouse/mobile-elektrik-kesintisi.json --chrome-flags='--headless --no-sandbox --disable-dev-shm-usage' --throttling-method=simulate --quiet || true
+          npx lighthouse https://alo186.com/haberler --only-categories=performance,accessibility,best-practices,seo --output=json --output-path=artifacts/lighthouse/mobile-haberler.json --chrome-flags='--headless --no-sandbox --disable-dev-shm-usage' --throttling-method=simulate --quiet || true
+      - name: Summarize
+        if: always()
+        shell: bash
+        run: |
+          cat > /tmp/summary.py <<'PY'
+          import json, os, glob
+          def load(p,d):
+              try:return json.load(open(p))
+              except:return d
+          s=load('artifacts/static-audit.json',{}); b=load('artifacts/browser-audit.json',[])
+          l=[]
+          for p in sorted(glob.glob('artifacts/lighthouse/*.json')):
+              try:
+                  r=json.load(open(p)); a=r.get('audits',{}); c=r.get('categories',{}); n=lambda x:a.get(x,{}).get('numericValue')
+                  l.append({'file':os.path.basename(p),'url':r.get('finalUrl'),'scores':{k:round(c.get(k,{}).get('score',0)*100) for k in ['performance','accessibility','best-practices','seo']},'metrics':{'fcp_ms':n('first-contentful-paint'),'lcp_ms':n('largest-contentful-paint'),'tbt_ms':n('total-blocking-time'),'cls':n('cumulative-layout-shift'),'speed_index_ms':n('speed-index')},'console_errors':a.get('errors-in-console',{}).get('details',{}).get('items',[])})
+              except Exception as e:l.append({'file':os.path.basename(p),'error':repr(e)})
+          pages=s.get('pages',[]); links=s.get('links',[]); imgs=s.get('images',[])
+          summary={'generated_at':s.get('generated_at'),'scope':{'sitemap_urls':s.get('sitemap_url_count',0),'internal_links':s.get('internal_link_count',0),'images':s.get('image_url_count',0),'browser_scenarios':len(b)},'host_probes':s.get('host_probes',[]),'counts':{'bad_pages':sum(1 for x in pages if x.get('error') or (x.get('status') or 0)>=400),'broken_links':sum(1 for x in links if x.get('error') or (x.get('status') or 0)>=400),'bad_images':sum(1 for x in imgs if x.get('error') or (x.get('status') or 0)>=400 or not (x.get('content_type') or '').startswith('image/')),'canonical_not_one':sum(1 for x in pages if x.get('parsed') is not None and len(x['parsed'].get('canonicals',[]))!=1),'h1_not_one':sum(1 for x in pages if x.get('parsed') is not None and len(x['parsed'].get('h1',[]))!=1),'jsonld_errors':sum(1 for x in pages if x.get('parsed',{}).get('jsonld_errors')),'damage_30_day_pages':sum(1 for x in pages if x.get('parsed',{}).get('has_30_day_damage_claim')),'suspicious_official_pages':sum(1 for x in pages if x.get('parsed',{}).get('suspicious_official')),'pii_input_pages':sum(1 for x in pages if x.get('parsed',{}).get('pii_inputs')),'overflow_scenarios':sum(1 for x in b if x.get('metrics',{}).get('overflowPx',0)>2),'browser_image_failures':sum(1 for x in b if x.get('metrics',{}).get('failedImages') or x.get('metrics',{}).get('pendingImages')),'browser_console_errors':sum(len(x.get('consoleErrors',[])) for x in b),'axe_violation_records':sum(len(x.get('axeViolations',[])) for x in b),'mobile_small_targets':sum(len(x.get('metrics',{}).get('smallTargets',[])) for x in b if x.get('viewport')=='mobile')},'missing_headers':{h:sum(1 for x in pages if not x.get('headers',{}).get(h)) for h in ['strict-transport-security','x-content-type-options','content-security-policy','referrer-policy','permissions-policy']},'damage_30_day_urls':[x.get('final_url') for x in pages if x.get('parsed',{}).get('has_30_day_damage_claim')],'broken_link_items':[x for x in links if x.get('error') or (x.get('status') or 0)>=400][:100],'bad_image_items':[x for x in imgs if x.get('error') or (x.get('status') or 0)>=400 or not (x.get('content_type') or '').startswith('image/')][:100],'browser':b,'lighthouse':l}
+          json.dump(summary,open('artifacts/summary.json','w'),ensure_ascii=False,indent=2)
+          lines=['# ALO186 canlı kalite özeti','',f"Sitemap: {summary['scope']['sitemap_urls']} · İç link: {summary['scope']['internal_links']} · Görsel: {summary['scope']['images']} · Tarayıcı senaryosu: {summary['scope']['browser_scenarios']}",'','## Hata sayıları','']
+          for k,v in summary['counts'].items():lines.append(f'- {k}: {v}')
+          lines+=['','## Eksik güvenlik başlıkları','']+[f'- {k}: {v}' for k,v in summary['missing_headers'].items()]
+          lines+=['','## Lighthouse','','| Dosya | Perf | Eriş | En iyi | SEO | LCP | TBT | CLS |','|---|---:|---:|---:|---:|---:|---:|---:|']
+          for x in l:
+              if 'scores' in x:lines.append(f"| {x['file']} | {x['scores']['performance']} | {x['scores']['accessibility']} | {x['scores']['best-practices']} | {x['scores']['seo']} | {round(x['metrics']['lcp_ms'] or 0)} ms | {round(x['metrics']['tbt_ms'] or 0)} ms | {x['metrics']['cls']} |")
+          lines+=['','## Host yönlendirmeleri','']+[f"- {x.get('url')} → {x.get('first_status')} {x.get('location') or ''}; final {x.get('final_status')} {x.get('final_url') or ''}" for x in summary['host_probes']]
+          if summary['damage_30_day_urls']:lines+=['','## 30 gün cihaz hasarı ifadesi','']+[f'- {x}' for x in summary['damage_30_day_urls']]
+          open('artifacts/summary.md','w').write('\n'.join(lines)+'\n');print('\n'.join(lines))
+          PY
+          python /tmp/summary.py
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-live-quality-0501-v2
+          path: artifacts/
+          if-no-files-found: warn
+          retention-days: 7
