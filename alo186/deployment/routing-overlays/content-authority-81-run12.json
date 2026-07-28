@@ -1,0 +1,21 @@
+{
+  "version": 37,
+  "generatedAt": "2026-07-29",
+  "routes": [
+    {
+      "source": "alo186/haberler/topraklama-espotansiyel-kusaklama-farki/index.html",
+      "canonicalPath": "/haberler/topraklama-espotansiyel-kusaklama-farki",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/k-faktorlu-trafo-harmonik-yuk-derating/index.html",
+      "canonicalPath": "/haberler/k-faktorlu-trafo-harmonik-yuk-derating",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/lifepo4-hucre-dengeleme-aktif-pasif-bms/index.html",
+      "canonicalPath": "/haberler/lifepo4-hucre-dengeleme-aktif-pasif-bms",
+      "type": "article"
+    }
+  ]
+}
