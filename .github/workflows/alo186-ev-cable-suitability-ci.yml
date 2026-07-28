@@ -1,6 +1,15 @@
 name: ALO186 EV Cable Suitability CI
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'alo186/hesaplama/ev-sarj-kablosu-uygunluk/**'
+      - 'alo186/hesaplama/index.html'
+      - 'alo186/deployment/routing-manifest.json'
+      - 'alo186/sitemap.xml'
+      - '.github/workflows/alo186-ev-cable-suitability-ci.yml'
   pull_request:
     paths:
       - 'alo186/hesaplama/ev-sarj-kablosu-uygunluk/**'
