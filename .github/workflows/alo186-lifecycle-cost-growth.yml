@@ -1,0 +1,130 @@
+name: ALO186 yaşam döngüsü maliyeti ve güvenli gelir
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/elektrik-cozumu-yasam-dongusu-maliyeti/**'
+      - 'alo186/deployment/inject_lifecycle_cost_growth.py'
+      - 'alo186/deployment/inject_handoff_growth.py'
+      - 'alo186/deployment/inject_shortlist_growth.py'
+      - 'alo186/deployment/routing-overlays/growth-lifecycle-cost-run13.json'
+      - 'alo186/tests/test_lifecycle_cost_growth.js'
+      - '.github/workflows/alo186-lifecycle-cost-growth.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/elektrik-cozumu-yasam-dongusu-maliyeti/**'
+      - 'alo186/deployment/inject_lifecycle_cost_growth.py'
+      - 'alo186/deployment/inject_handoff_growth.py'
+      - 'alo186/deployment/inject_shortlist_growth.py'
+      - 'alo186/deployment/routing-overlays/growth-lifecycle-cost-run13.json'
+      - 'alo186/tests/test_lifecycle_cost_growth.js'
+      - '.github/workflows/alo186-lifecycle-cost-growth.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-lifecycle-cost-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Yaşam döngüsü maliyet karar senaryoları
+        run: node alo186/hesaplama/elektrik-cozumu-yasam-dongusu-maliyeti/test.js
+
+      - name: Routing ve güven sözleşmeleri
+        run: node alo186/tests/test_lifecycle_cost_growth.js
+
+      - name: Mevcut büyüme regresyonları
+        run: |
+          node alo186/hesaplama/teknik-teklif-kapsam-karsilastirma/test.js
+          node alo186/hesaplama/teknik-devir-kabul-paketi/test.js
+          node alo186/hesaplama/teknik-urun-karsilastirma/test.js
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Sözdizimi
+        run: |
+          node --check alo186/hesaplama/elektrik-cozumu-yasam-dongusu-maliyeti/core.js
+          node --check alo186/hesaplama/elektrik-cozumu-yasam-dongusu-maliyeti/app.js
+          python -m py_compile alo186/deployment/inject_lifecycle_cost_growth.py
+          python -m py_compile alo186/deployment/inject_handoff_growth.py
+
+      - name: Canonical production bundle
+        run: |
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-lifecycle-canonical --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-lifecycle-canonical
+
+      - name: Custom-domain artifact
+        run: |
+          cp -a /tmp/alo186-lifecycle-canonical /tmp/alo186-lifecycle-custom
+          python alo186/deployment/prepare_github_pages.py --site /tmp/alo186-lifecycle-custom --base-path '' --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py --site /tmp/alo186-lifecycle-custom --base-path ''
+          python alo186/deployment/inject_shortlist_growth.py --site /tmp/alo186-lifecycle-custom --base-path ''
+          python alo186/deployment/smoke_github_pages.py --site /tmp/alo186-lifecycle-custom --base-path ''
+
+      - name: Project-path artifact
+        run: |
+          cp -a /tmp/alo186-lifecycle-canonical /tmp/alo186-lifecycle-project
+          python alo186/deployment/prepare_github_pages.py --site /tmp/alo186-lifecycle-project --base-path '/chatgpt' --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py --site /tmp/alo186-lifecycle-project --base-path '/chatgpt'
+          python alo186/deployment/inject_shortlist_growth.py --site /tmp/alo186-lifecycle-project --base-path '/chatgpt'
+          python alo186/deployment/smoke_github_pages.py --site /tmp/alo186-lifecycle-project --base-path '/chatgpt'
+
+      - name: Artifact kabul sözleşmeleri
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          for root,prefix in [(Path('/tmp/alo186-lifecycle-custom'),''),(Path('/tmp/alo186-lifecycle-project'),'/chatgpt')]:
+              route=root/'hesaplama/elektrik-cozumu-yasam-dongusu-maliyeti/index.html'
+              assert route.is_file()
+              text=route.read_text(encoding='utf-8')
+              assert 'Elektrik Çözümü Yaşam Döngüsü Maliyeti' in text
+              assert 'ALO186 fiyat sağlamaz' in text
+              assert 'amazon.com' not in text and 'amazon.com.tr' not in text
+              assert 'type="email"' not in text and 'type="tel"' not in text and '<textarea' not in text
+              hub=(root/'hesaplama/index.html').read_text(encoding='utf-8')
+              assert '37 çekirdek araç' in hub
+              assert 'data-alo186-lifecycle-hub="true"' in hub
+              expected=f'{prefix}/hesaplama/elektrik-cozumu-yasam-dongusu-maliyeti/'
+              assert f'href="{expected}"' in hub
+              assert 'data-alo186-lifecycle-card="true"' in (root/'elektrik-portali/index.html').read_text(encoding='utf-8')
+              assert 'data-alo186-lifecycle-card="true"' in (root/'index.html').read_text(encoding='utf-8')
+              proposal=(root/'hesaplama/teknik-teklif-kapsam-karsilastirma/index.html').read_text(encoding='utf-8')
+              handoff=(root/'hesaplama/teknik-devir-kabul-paketi/index.html').read_text(encoding='utf-8')
+              assert 'data-alo186-lifecycle-section="proposal"' in proposal
+              assert 'data-alo186-lifecycle-section="handoff"' in handoff
+              release=json.loads((root/'pages-release.json').read_text(encoding='utf-8'))
+              assert release['lifecycleCostDecision']['scenarioCount']==3
+              assert release['lifecycleCostDecision']['publishedPrices'] is False
+              manifest=json.loads((root/'manifest.webmanifest').read_text(encoding='utf-8'))
+              assert any(x.get('url')==expected for x in manifest.get('shortcuts',[]))
+              assert expected in (root/'sw.js').read_text(encoding='utf-8')
+              assert 'elektrik-cozumu-yasam-dongusu-maliyeti' in (root/'sitemap.xml').read_text(encoding='utf-8')
+          PY
+
+      - name: Doğrulanmış yaşam döngüsü artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-lifecycle-cost-pages
+          path: /tmp/alo186-lifecycle-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
