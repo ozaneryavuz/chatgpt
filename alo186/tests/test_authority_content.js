@@ -36,9 +36,12 @@ const articles=[
   {slug:'ges-inverter-sebeke-gerilimi-yuksek-hatasi',required:['şebeke gerilimi','şebeke empedansı','on dakikalık ortalama','ülke ayarı','dağıtım şirketi'],cta:'/edas-bul',fresh:true},
   {slug:'power-station-gunes-paneli-nasil-secilir',required:['Voc','Vmp','Isc','Imp','MPPT','polarite'],cta:'/hesaplama/gunes-paneli-power-station-uygunluk/',fresh:true},
   {slug:'tip-2-ev-sarj-kablosu-nasil-secilir',required:['Type 2','Mode 3','16 A','32 A','uzatma kablosu'],cta:'/hesaplama/ev-sarj-uygunluk/',fresh:true},
-  {slug:'kacak-akim-rolesi-test-dugmesi-ne-siklikla',required:['TEST düğmesi','altı aylık','aylık','IΔn','köprülemek'],cta:'/hesaplama/ekipman-bakim-plani/',fresh:true}
+  {slug:'kacak-akim-rolesi-test-dugmesi-ne-siklikla',required:['TEST düğmesi','altı aylık','aylık','IΔn','köprülemek'],cta:'/hesaplama/ekipman-bakim-plani/',fresh:true},
+  {slug:'elektrik-sayaci-arizali-mi-fatura-itirazi',required:['EPDK','1 yıl','%30','dağıtım şirketi','tedarik şirketi'],cta:'/fatura-analizi',fresh:true},
+  {slug:'v2l-v2h-v2g-farki-cift-yonlu-sarj',required:['V2L','V2H','V2G','ISO 15118-20','gelir garantisi'],cta:'/hesaplama/ev-sarj-uygunluk/',fresh:true},
+  {slug:'batarya-c-rate-dod-kullanilabilir-kapasite',required:['C-rate','DoD','SoC','kullanılabilir kWh','çevrim ömrü'],cta:'/hesaplama/inverter-uygunluk/',fresh:true}
 ];
-assert.strictEqual(articles.length,33,'İçerik kalite testi 33 teknik makaleyi kapsamalı.');
+assert.strictEqual(articles.length,36,'İçerik kalite testi 36 teknik makaleyi kapsamalı.');
 
 for(const article of articles){
   const file=path.join(repoRoot,'alo186/haberler',article.slug,'index.html');
@@ -80,8 +83,8 @@ assert(cssText.includes('prefers-reduced-motion'),'Azaltılmış hareket desteğ
 const sitemap=fs.readFileSync(path.join(repoRoot,'alo186/sitemap.xml'),'utf8');
 const routing=JSON.parse(fs.readFileSync(path.join(repoRoot,'alo186/deployment/routing-manifest.json'),'utf8'));
 const portal=fs.readFileSync(path.join(repoRoot,'alo186/index.html'),'utf8');
-assert.strictEqual(routing.routes.filter(route=>route.type==='article').length,33,'Routing manifest 33 teknik makale içermeli.');
-assert(portal.includes('33 kaynak doğrulamalı teknik rehber'),'Portal görünür makale sayısı 33 olmalı.');
+assert.strictEqual(routing.routes.filter(route=>route.type==='article').length,36,'Routing manifest 36 teknik makale içermeli.');
+assert(portal.includes('36 kaynak doğrulamalı teknik rehber'),'Portal görünür makale sayısı 36 olmalı.');
 for(const article of articles){
   const canonicalPath=`/haberler/${article.slug}`;
   assert(sitemap.includes(`https://www.alo186.com${canonicalPath}`),`Sitemap eksik: ${article.slug}`);
