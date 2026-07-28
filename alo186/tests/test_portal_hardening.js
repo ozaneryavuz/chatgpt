@@ -18,10 +18,12 @@ assert(!new RegExp(`zararın ortaya çıktığı tarihten itibaren\\s*${oldDurat
 assert(portal.includes('rel="canonical" href="https://www.alo186.com/elektrik-portali"'), 'Portal www canonical kullanmalı.');
 assert(portal.includes('class="skip-link" href="#main-content"'), 'Skip link eksik.');
 assert(portal.includes('<main id="main-content"'), 'Skip link ana hedefi eksik.');
-assert(portal.includes('42 kaynak doğrulamalı teknik rehber'), 'Portal güncel 42 rehber kapsamını göstermeli.');
-assert(portal.includes('25 kişisel veri istemeyen araç'), 'Portal güncel 25 araç kapsamını göstermeli.');
-assert(portal.includes('Modem ve ONT Mini UPS Hesabı'), 'Yüksek niyetli modem/ONT mini UPS kartı portalda bulunmalı.');
-assert(portal.includes('12 V modem, ONT ve ağ cihazları'), 'Mini UPS kartı kullanıcı ihtiyacını açıkça anlatmalı.');
+assert(portal.includes('45 kaynak doğrulamalı rehber'), 'Portal güncel 45 rehber kapsamını göstermeli.');
+assert(portal.includes('26 kişisel veri istemeyen araç'), 'Portal güncel 26 araç kapsamını göstermeli.');
+assert(portal.includes('Akıllı Priz ve Enerji Ölçer Uygunluğu'), '26. araç olan akıllı priz/enerji ölçer portalda bulunmalı.');
+assert(portal.includes('Kaçak akım rölesi kaç amper ve kaç mA?'), '45. içerik kümesindeki RCD etiketi rehberi portalda bulunmalı.');
+assert(portal.includes('Nötr ile toprak arası kaç volt olmalı?'), 'Nötr-toprak rehberi portalda bulunmalı.');
+assert(portal.includes('GES inverter AFCI alarmı nedir?'), 'AFCI/DC ark rehberi portalda bulunmalı.');
 
 const staleRoutes = [
   'href="./turkiye-arama/"',
@@ -49,18 +51,29 @@ const requiredRoutes = [
   '/hesaplama/elektrik-kesintisi-tatbikati/',
   '/hesaplama/modem-internet-yedekleme/',
   '/hesaplama/powerbank-usb-c-uygunluk/',
+  '/hesaplama/akilli-priz-enerji-olcer-uygunluk/',
   '/hesaplama/gunes-paneli-power-station-uygunluk/',
-  '/hesaplama/ev-sarj-kablosu-uygunluk/'
+  '/hesaplama/ev-sarj-kablosu-uygunluk/',
+  '/kesintiye-hazirlik-atolyesi',
+  '/kurumsal-elektrik-surekliligi-on-degerlendirme',
+  '/tedarikci-ve-uretici-isbirligi'
 ];
 for (const route of requiredRoutes) {
   assert(portal.includes(`href="${route}"`), `Portal kartı/rota eksik: ${route}`);
 }
+
+for (const label of ['Satış ortaklığı', 'Ücretli profesyonel hizmet', 'Sponsorlu iş birliği']) {
+  assert(portal.includes(label), `Ticari ilişki etiketi eksik: ${label}`);
+}
+assert(portal.includes('Ödeme organik teknik sıralamayı satın alamaz'), 'Sponsorlu iş birliğinde organik sıralama koruması görünür olmalı.');
 
 for (const token of [
   '.skip-link',
   'a:focus-visible',
   'min-height:44px',
   '.legal-alert',
+  '.revenue-sprint',
+  '.money-tag',
   'overflow-wrap:anywhere',
   '@media(prefers-reduced-motion:reduce)'
 ]) {
@@ -83,4 +96,4 @@ assert(htaccess.includes('AddOutputFilterByType SUBSTITUTE text/html application
 assert(htaccess.includes(oldLivePhrase), 'Bilinen yanlış canlı cümle fail-safe eşleşmesinde bulunmalı.');
 assert(htaccess.includes('10 iş günü içinde ilgili dağıtım şirketinin resmî kanalına başvurun'), 'Fail-safe doğru 10 iş günü metnini üretmeli.');
 
-console.log('ALO186 portal hardening: 42 rehber, 25 araç, modem mini UPS, canonical rotalar, 10 iş günü, erişilebilirlik ve aktif production korumaları geçti.');
+console.log('ALO186 portal hardening: 45 rehber, 26 araç, üç şeffaf gelir kanalı, canonical rotalar, 10 iş günü ve erişilebilirlik sözleşmeleri geçti.');
