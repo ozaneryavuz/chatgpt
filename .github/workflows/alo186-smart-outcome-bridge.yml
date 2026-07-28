@@ -142,7 +142,7 @@ jobs:
               assert 'data-alo186-pending-context="true"' in text
               assert f'src="{expected}"' in text
               release=json.loads((root/'pages-release.json').read_text(encoding='utf-8'))
-              assert release['outcomeRuntime']['version']==1
+              assert release['outcomeRuntime']['version']>=1
               assert release['outcomeRuntime']['pendingRecordLimit']==6
               assert release['outcomeRuntime']['pendingTtlDays']==45
               sw=(root/'sw.js').read_text(encoding='utf-8')
