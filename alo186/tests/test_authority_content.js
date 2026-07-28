@@ -18,6 +18,21 @@ const articles=[
     slug:'jenerator-transfer-salteri-neden-gerekir',
     required:['geri besleme','transfer','erkek–erkek','yetkili'],
     cta:'/isletme-surekliligi'
+  },
+  {
+    slug:'elektrik-kesintisi-cihaz-hasari-edas-basvurusu',
+    required:['EPDK','10 iş günü','servis raporu','dağıtım şirketi'],
+    cta:'/edas-bul'
+  },
+  {
+    slug:'prizde-topraklama-var-mi-priz-test-cihazi',
+    required:['toprak elektrodu','çevrim empedansı','RCD','yetkili'],
+    cta:'/karar-motoru'
+  },
+  {
+    slug:'saf-sinus-modifiye-sinus-inverter-farki',
+    required:['aktif PFC','kalkış gücü','saf sinüs','tıbbi cihaz'],
+    cta:'/hesaplama/ups-suresi/'
   }
 ];
 
@@ -53,4 +68,14 @@ assert(cssText.includes('@media(max-width:820px)'), 'Mobil breakpoint eksik.');
 assert(cssText.includes(':focus-visible'), 'Klavye odak stili eksik.');
 assert(cssText.includes('prefers-reduced-motion'), 'Azaltılmış hareket desteği eksik.');
 
-console.log('ALO186 içerik otoritesi makaleleri SEO, erişilebilirlik ve güvenlik testlerini geçti.');
+const sitemap=fs.readFileSync(path.join(repoRoot,'alo186/sitemap.xml'),'utf8');
+const routing=JSON.parse(fs.readFileSync(path.join(repoRoot,'alo186/deployment/routing-manifest.json'),'utf8'));
+const portal=fs.readFileSync(path.join(repoRoot,'alo186/index.html'),'utf8');
+for(const article of articles){
+  const canonicalPath=`/haberler/${article.slug}`;
+  assert(sitemap.includes(`https://www.alo186.com${canonicalPath}`),`Sitemap eksik: ${article.slug}`);
+  assert(routing.routes.some(route=>route.canonicalPath===canonicalPath&&route.type==='article'),`Routing manifest eksik: ${article.slug}`);
+  assert(portal.includes(`href="${canonicalPath}"`),`Portal kartı eksik: ${article.slug}`);
+}
+
+console.log('ALO186 içerik otoritesi makaleleri SEO, erişilebilirlik, routing ve güvenlik testlerini geçti.');
