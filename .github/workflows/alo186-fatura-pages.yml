@@ -1,4 +1,4 @@
-name: Publish ALO186 Ürün Modülleri
+name: Build ALO186 legacy preview and rollback artifacts
 
 on:
   push:
@@ -14,16 +14,15 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: pages-${{ github.ref }}
+  group: alo186-legacy-artifacts-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -40,7 +39,7 @@ jobs:
           node alo186/tests/test_continuity_passport.js
           node alo186/tests/test_release_manifest.js
 
-      - name: Preview ve üretim overlay paketlerini hazırla
+      - name: Eski hosting için yalnız rollback paketlerini hazırla
         shell: bash
         run: |
           set -euo pipefail
@@ -53,61 +52,36 @@ jobs:
           test -f _site/edas-bul/index.html
           test -f _site/karar-motoru/index.html
           test -f _site/hesaplama/index.html
-          test -f _site/hesaplama/elektrik-surekliligi-pasaportu/index.html
-          test -f _site/hesaplama/elektrik-surekliligi-pasaportu/passport.schema.json
           test -f _site/akilli-urun-secimi/index.html
           test -f _site/isletme-surekliligi/index.html
-          test -f _site/fatura-analizi/index.html
           test -f _overlay/.htaccess
-          test -f _overlay/tailwindcss
           test -f _overlay/SHA256SUMS
-          test ! -s _overlay/tailwindcss || grep -q 'Temporary compatibility stylesheet' _overlay/tailwindcss
-          grep -q 'Strict-Transport-Security' _overlay/.htaccess
-          grep -q 'X-Content-Type-Options' _overlay/.htaccess
-          grep -q 'Content-Security-Policy' _overlay/.htaccess
-          grep -q 'ForceType text/css' _overlay/.htaccess
-          grep -q 'tailwindcss' _overlay/SHA256SUMS
-          test ! -e _site/sureklilik-api
           test ! -e _site/tests
-          test ! -e _overlay/sureklilik-api
           test ! -e _overlay/tests
 
-      - name: GitHub Pages ön izleme paketini sakla
+      - name: Eski preview paketini sakla
         uses: actions/upload-artifact@v4
         with:
-          name: alo186-pages-preview
+          name: alo186-legacy-preview
           path: _site
           if-no-files-found: error
           include-hidden-files: true
-          retention-days: 30
+          retention-days: 14
 
-      - name: Natro / mevcut hosting üretim overlay paketini sakla
+      - name: Eski hosting rollback overlay paketini sakla
         uses: actions/upload-artifact@v4
         with:
-          name: alo186-production-overlay
+          name: alo186-legacy-hosting-rollback
           path: _overlay
           if-no-files-found: error
           include-hidden-files: true
-          retention-days: 30
+          retention-days: 14
 
-      - name: Configure Pages
-        if: vars.ALO186_GITHUB_PAGES_ENABLED == 'true' && github.event_name != 'pull_request'
-        uses: actions/configure-pages@v5
-
-      - name: Upload GitHub Pages artifact
-        if: vars.ALO186_GITHUB_PAGES_ENABLED == 'true' && github.event_name != 'pull_request'
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: _site
-
-  deploy:
-    if: vars.ALO186_GITHUB_PAGES_ENABLED == 'true' && github.event_name != 'pull_request'
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Mimari not
+        run: |
+          {
+            echo '## ALO186 eski hosting artifactı'
+            echo
+            echo 'Bu workflow yalnız geri dönüş/karşılaştırma paketi üretir.'
+            echo 'Canlı birincil yayın `.github/workflows/alo186-github-pages.yml` üzerinden GitHub Pages’e yapılır.'
+          } >> "$GITHUB_STEP_SUMMARY"
