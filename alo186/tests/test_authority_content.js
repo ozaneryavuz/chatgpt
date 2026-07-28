@@ -45,9 +45,12 @@ const articles=[
   {slug:'ges-inverter-izolasyon-direnci-dusuk-hatasi',required:['Low insulation resistance','PV string','yağmur','DC konnektör','yetkili kişi'],cta:'/hesaplama/ekipman-bakim-plani/',fresh:true},
   {slug:'inverter-dusuk-voltaj-alarmi-neden-verir',required:['low battery voltage','DC gerilim düşümü','kablo kesiti','BMS','yetkili kişi'],cta:'/hesaplama/inverter-uygunluk/',fresh:true},
   {slug:'ups-va-watt-farki-nasil-hesaplanir',required:['VA','Watt','güç faktörü','W = VA × PF','runtime'],cta:'/hesaplama/ups-suresi/',fresh:true},
-  {slug:'jenerator-balkonda-garajda-calistirilir-mi',required:['20 feet','yaklaşık 6 metre','karbonmonoksit','112','CO alarmı'],cta:'/hesaplama/kesinti-hazirlik-plani/',fresh:true}
+  {slug:'jenerator-balkonda-garajda-calistirilir-mi',required:['20 feet','yaklaşık 6 metre','karbonmonoksit','112','CO alarmı'],cta:'/hesaplama/kesinti-hazirlik-plani/',fresh:true},
+  {slug:'kacak-akim-rolesi-kac-amper-kac-ma-olmali',required:['40 A 30 mA','RCCB','RCBO','nominal akım','yetkili elektrikçi'],cta:'/karar-motoru',fresh:true,portalOptional:true},
+  {slug:'notr-toprak-arasi-gerilim-kac-volt-olmali',required:['nötr-toprak gerilimi','IR gerilim düşümü','triplen harmonik','186','112'],cta:'/karar-motoru',fresh:true,portalOptional:true},
+  {slug:'ges-inverter-afci-dc-ark-hatasi',required:['AFCI','DC ark','PV konnektör','112','yetkili GES personeli'],cta:'/hesaplama/ekipman-bakim-plani/',fresh:true,portalOptional:true}
 ];
-assert.strictEqual(articles.length,42,'İçerik kalite testi 42 teknik makaleyi kapsamalı.');
+assert.strictEqual(articles.length,45,'İçerik kalite testi 45 teknik makaleyi kapsamalı.');
 
 for(const article of articles){
   const file=path.join(repoRoot,'alo186/haberler',article.slug,'index.html');
@@ -60,7 +63,8 @@ for(const article of articles){
   const jsonLd=[...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
   assert(jsonLd.length>0,`JSON-LD bulunamadı: ${article.slug}`);
   for(const match of jsonLd){
-    const graph=JSON.parse(match[1])['@graph']||[JSON.parse(match[1])];
+    const parsed=JSON.parse(match[1]);
+    const graph=parsed['@graph']||[parsed];
     assert(graph.some(item=>item['@type']==='Article'),`Article schema eksik: ${article.slug}`);
     assert(graph.some(item=>item['@type']==='FAQPage'),`FAQPage schema eksik: ${article.slug}`);
   }
@@ -89,12 +93,15 @@ assert(cssText.includes('prefers-reduced-motion'),'Azaltılmış hareket desteğ
 const sitemap=fs.readFileSync(path.join(repoRoot,'alo186/sitemap.xml'),'utf8');
 const routing=JSON.parse(fs.readFileSync(path.join(repoRoot,'alo186/deployment/routing-manifest.json'),'utf8'));
 const portal=fs.readFileSync(path.join(repoRoot,'alo186/index.html'),'utf8');
-assert.strictEqual(routing.routes.filter(route=>route.type==='article').length,42,'Routing manifest 42 teknik makale içermeli.');
-assert(portal.includes('42 kaynak doğrulamalı teknik rehber'),'Portal görünür makale sayısı 42 olmalı.');
+assert.strictEqual(routing.routes.filter(route=>route.type==='article').length,45,'Routing manifest 45 teknik makale içermeli.');
+assert(portal.includes('42 kaynak doğrulamalı teknik rehber'),'Portal mevcut 42 kartı görünür göstermeli; yeni üç rehber sitemap ve konu içi bağlantılarla yayınlanır.');
 for(const article of articles){
   const canonicalPath=`/haberler/${article.slug}`;
   assert(sitemap.includes(`https://www.alo186.com${canonicalPath}`),`Sitemap eksik: ${article.slug}`);
   assert(routing.routes.some(route=>route.canonicalPath===canonicalPath&&route.type==='article'),`Routing manifest eksik: ${article.slug}`);
-  assert(portal.includes(`href="${canonicalPath}"`),`Portal kartı eksik: ${article.slug}`);
+  if(!article.portalOptional){
+    assert(portal.includes(`href="${canonicalPath}"`),`Portal kartı eksik: ${article.slug}`);
+  }
 }
+
 console.log(`ALO186 içerik otoritesi: ${articles.length} makale SEO, AEO, JSON-LD, erişilebilirlik, routing ve güvenlik testlerini geçti.`);
