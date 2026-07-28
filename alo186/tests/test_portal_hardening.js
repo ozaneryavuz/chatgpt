@@ -11,7 +11,7 @@ const htaccess = fs.readFileSync(path.join(root, 'deployment', 'apache.htaccess'
 assert(portal.includes('Cihaz hasarında başvuru süresi 10 iş günüdür'), 'Portal 10 iş günü başlığını göstermeli.');
 assert(portal.includes('zararın ortaya çıktığı tarihten itibaren <strong>10 iş günü içinde</strong>'), 'Görünür metinde 10 iş günü bulunmalı.');
 assert(portal.includes('ALO186 başvuru veya hasar kaydı almaz'), 'ALO186 başvuru almadığını açıkça söylemeli.');
-assert(portal.includes('www.epdk.gov.tr'), 'Birincil EPDK kaynağına görünür bağlantı olmalı.');
+assert(portal.includes('https://www.epdk.gov.tr/Detay/Icerik/12-3/elektrik-piyasasi'), 'Doğru EPDK elektrik piyasası SSS kaynağına görünür bağlantı olmalı.');
 assert(!/zararın ortaya çıktığı tarihten itibaren\s*30 gün/i.test(portal), 'Cihaz hasarı bağlamında 30 gün metni kaynak portalda bulunmamalı.');
 
 // Canonical, erişilebilir atlama bağlantısı ve ana içerik hedefi.
