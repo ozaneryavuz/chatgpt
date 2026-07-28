@@ -90,7 +90,8 @@
     document.head.appendChild(coreScript);
   }
 
-  if(productCenter&&!document.querySelector('script[data-alo186-documentation-core]')){
+  function loadDocumentationLayer(){
+    if(!productCenter||document.querySelector('script[data-alo186-documentation-core]'))return;
     const documentationCore=document.createElement('script');
     documentationCore.src=new URL('../urun-eslestirme/documentation-growth-core.js',commonUrl).href;
     documentationCore.dataset.alo186DocumentationCore='true';
@@ -105,6 +106,11 @@
     document.head.appendChild(documentationCore);
   }
 
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',injectGrowthCards,{once:true});
-  else injectGrowthCards();
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',injectGrowthCards,{once:true});
+    document.addEventListener('DOMContentLoaded',loadDocumentationLayer,{once:true});
+  }else{
+    injectGrowthCards();
+    loadDocumentationLayer();
+  }
 })();
