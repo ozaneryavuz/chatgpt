@@ -87,6 +87,24 @@ const articles=[
     required:['48 saat','kalıcı veri saklayıcısı','bildirimli kesinti','dağıtım şirketi','ALO186 resmî kesinti kaydı almaz'],
     cta:'/hesaplama/kesinti-gunlugu/',
     fresh:true
+  },
+  {
+    slug:'topraklama-direnci-kac-ohm-olmali',
+    required:['RA × IΔn ≤ 50 V','toprak elektrodu direnci','PE sürekliliği','arıza çevrim empedansı','yetkili elektrikçi'],
+    cta:'/karar-motoru',
+    fresh:true
+  },
+  {
+    slug:'notr-kopmasi-nasil-anlasilir',
+    required:['nötr kopması','yıldız noktası','112','186','neutral cable break'],
+    cta:'/hesaplama/gerilim-koruma-cozum-secici/',
+    fresh:true
+  },
+  {
+    slug:'lisanssiz-ges-mahsuplasma-ihtiyac-fazlasi',
+    required:['öz tüketim','mahsuplaşma','ihtiyaç fazlası','YEKDEM','gelir garantisi'],
+    cta:'/fatura-analizi',
+    fresh:true
   }
 ];
 
