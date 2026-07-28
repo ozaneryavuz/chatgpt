@@ -3,9 +3,10 @@ const catalog=require('../urun-eslestirme/catalog.js');
 const matcher=require('../urun-eslestirme/matcher-core.js');
 
 assert.strictEqual(catalog.affiliateTag,'alo186hazirlik-21');
-assert.strictEqual(catalog.categories.length,7,'Yedi ihtiyaç kategorisi bulunmalı.');
+assert.strictEqual(catalog.categories.length,8,'Sekiz ihtiyaç kategorisi bulunmalı.');
 assert(catalog.productsFor('powerbank').length>=3,'Powerbank kataloğunda en az üç ürün olmalı.');
 assert(catalog.productsFor('surge_strip').length>=3,'Grup priz kataloğunda en az üç ürün olmalı.');
+assert.strictEqual(catalog.productsFor('generator').length,0,'Jeneratör kategorisi doğrulanmamış ürün kartı taşımamalı.');
 
 const asins=catalog.products.map(p=>p.asin);
 assert.strictEqual(new Set(asins).size,asins.length,'ASIN değerleri benzersiz olmalı.');
@@ -39,6 +40,14 @@ assert(result.matches[0].unknowns.length>0,'Bilinmeyen teknik alan görünür ol
 result=matcher.match('mini_ups',{});
 assert.strictEqual(result.mode,'guide');
 assert.strictEqual(result.professionalSelectionRequired,true);
+assert.strictEqual(result.affiliatePolicy,'after_tool');
+assert(result.searchUrl.includes('tag=alo186hazirlik-21'));
+
+result=matcher.match('generator',{});
+assert.strictEqual(result.mode,'guide');
+assert.strictEqual(result.professionalSelectionRequired,true);
+assert.strictEqual(result.affiliatePolicy,'after_tool');
+assert.strictEqual(result.nextStep.url,'https://www.alo186.com/hesaplama/jenerator-gucu-secimi/');
 assert(result.searchUrl.includes('tag=alo186hazirlik-21'));
 
 result=matcher.match('emergency_light',{});
