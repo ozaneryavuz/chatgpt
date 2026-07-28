@@ -11,7 +11,7 @@
   function emit(name,params={}){if(typeof window.Alo186Track==='function')window.Alo186Track(name,params);}
   function values(){const data={};ids.forEach(id=>data[id]=$(id).value);['manualVerified','connectorKnown','factoryCable'].forEach(id=>data[id]=$(id).checked);return data;}
   function setValues(data){ids.forEach(id=>{if(data[id]!=null)$(id).value=String(data[id]);});['manualVerified','connectorKnown','factoryCable'].forEach(id=>{$(id).checked=Boolean(data[id]);});}
-  const escapeHtml=value=>String(value).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[ch]));
+  const escapeHtml=value=>String(value).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const list=items=>items.map(item=>`<li>${escapeHtml(item)}</li>`).join('');
   const fmt=(value,digits=1)=>Number(value).toLocaleString('tr-TR',{maximumFractionDigits:digits});
   function updateAffiliate(){const enabled=$('affiliateAck').checked;const link=$('productCenterLink');link.classList.toggle('disabled-link',!enabled);link.setAttribute('aria-disabled',enabled?'false':'true');link.tabIndex=enabled?0:-1;}
