@@ -50,6 +50,7 @@ jobs:
           node alo186/tests/test_release_manifest.js
           node alo186/tests/test_authority_content.js
           python alo186/tests/device_damage_deadline_guard.py
+          python alo186/tests/test_github_pages_bootstrap.py
 
       - name: Canonical statik siteyi oluştur
         shell: bash
@@ -157,11 +158,58 @@ jobs:
           echo "Project-base status: ${{ steps.dual_mode.outputs.project_status }}" >&2
           exit 1
 
+      - name: Pages yönetici tokenı durumunu belirle
+        id: pages_admin
+        if: github.event_name != 'pull_request'
+        shell: bash
+        env:
+          PAGES_ADMIN_TOKEN: ${{ secrets.ALO186_PAGES_ADMIN_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -n "$PAGES_ADMIN_TOKEN" ]; then
+            echo 'token_present=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'token_present=false' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Pages workflow modunu ve www custom domainini otomatik hazırla
+        id: pages_bootstrap
+        if: github.event_name != 'pull_request' && steps.pages_admin.outputs.token_present == 'true'
+        shell: bash
+        env:
+          ALO186_PAGES_ADMIN_TOKEN: ${{ secrets.ALO186_PAGES_ADMIN_TOKEN }}
+        run: |
+          set -euo pipefail
+          python alo186/deployment/bootstrap_github_pages.py \
+            --repository "$GITHUB_REPOSITORY" \
+            --custom-domain www.alo186.com \
+            > /tmp/alo186-pages-bootstrap.json
+          cat /tmp/alo186-pages-bootstrap.json
+
+      - name: Pages bootstrap tanısını sakla
+        if: always() && github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-github-pages-bootstrap
+          path: /tmp/alo186-pages-bootstrap.json
+          if-no-files-found: ignore
+          retention-days: 30
+
       - name: GitHub Pages ayarlarını oku
         id: pages
         if: github.event_name != 'pull_request'
         continue-on-error: true
         uses: actions/configure-pages@v5
+
+      - name: Yönetici tokenı kullanıldıysa Pages ayarını zorunlu doğrula
+        if: >-
+          github.event_name != 'pull_request' &&
+          steps.pages_admin.outputs.token_present == 'true' &&
+          steps.pages.outcome != 'success'
+        shell: bash
+        run: |
+          echo 'ALO186_PAGES_ADMIN_TOKEN ile bootstrap çalıştı fakat configure-pages doğrulaması başarısız.' >&2
+          exit 1
 
       - name: Gerçek yayın modunu seç
         id: pages_mode
@@ -219,18 +267,22 @@ jobs:
         env:
           PAGES_READY: ${{ steps.pages_mode.outputs.pages_ready }}
           BASE_PATH: ${{ steps.pages_mode.outputs.base_path }}
+          ADMIN_TOKEN_PRESENT: ${{ steps.pages_admin.outputs.token_present }}
+          BOOTSTRAP_OUTCOME: ${{ steps.pages_bootstrap.outcome }}
         run: |
           {
             echo '## ALO186 GitHub Pages'
             echo
             echo "- Pages yapılandırması hazır: **$PAGES_READY**"
             echo "- Build base path: \`$BASE_PATH\`"
+            echo "- Yönetici bootstrap tokenı mevcut: **${ADMIN_TOKEN_PRESENT:-false}**"
+            echo "- Otomatik bootstrap sonucu: **${BOOTSTRAP_OUTCOME:-skipped}**"
             echo '- Hosting modu: GitHub Pages — Natro web hosting veya CDN gerektirmez.'
             echo '- Kritik elektrik rehberleri service worker ile çevrimdışı önbelleğe alınır.'
             echo '- Ortak çözüm sonucu runtimeı bütün HTML rotalarına enjekte edilir.'
             if [ "$PAGES_READY" != 'true' ]; then
               echo
-              echo '> Bir defalık işlem: Repository Settings → Pages → Source: GitHub Actions seçilmelidir. Build ve testler tamamlanmış, yayın adımı güvenli biçimde beklemeye alınmıştır.'
+              echo '> Bir defalık seçeneklerden biri uygulanmalı: Settings → Pages → Source: GitHub Actions; veya Administration(write)+Pages(write) yetkili fine-grained PAT, ALO186_PAGES_ADMIN_TOKEN repository secretı olarak eklenmelidir.'
             fi
           } >> "$GITHUB_STEP_SUMMARY"
 
