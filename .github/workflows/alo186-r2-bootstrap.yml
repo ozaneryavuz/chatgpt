@@ -37,31 +37,81 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq restic
-      - name: Bucket dry-run veya oluştur
+      - name: Bucket erişimini sınıflandır ve dry-run veya oluştur
+        id: bucket
         shell: bash
         run: |
           set -euo pipefail
-          if aws --endpoint-url "$ALO186_R2_ENDPOINT" --region auto s3api head-bucket --bucket "$ALO186_R2_BUCKET" >/dev/null 2>&1; then
+          set +e
+          bucket_error="$(aws --endpoint-url "$ALO186_R2_ENDPOINT" --region auto \
+            s3api head-bucket --bucket "$ALO186_R2_BUCKET" 2>&1 >/dev/null)"
+          bucket_status=$?
+          set -e
+
+          if [[ "$bucket_status" -eq 0 ]]; then
             echo "SAME   $ALO186_R2_BUCKET"
-          elif [[ "${{ inputs.apply }}" == "true" ]]; then
-            aws --endpoint-url "$ALO186_R2_ENDPOINT" --region auto s3api create-bucket --bucket "$ALO186_R2_BUCKET"
-            echo "CREATE $ALO186_R2_BUCKET"
-          else
-            echo "WOULD CREATE $ALO186_R2_BUCKET"
+            echo 'exists=true' >> "$GITHUB_OUTPUT"
+            exit 0
           fi
+
+          if grep -Eqi '(\(404\)|NoSuchBucket|Not Found)' <<<"$bucket_error"; then
+            echo 'exists=false' >> "$GITHUB_OUTPUT"
+            if [[ "${{ inputs.apply }}" == "true" ]]; then
+              aws --endpoint-url "$ALO186_R2_ENDPOINT" --region auto \
+                s3api create-bucket --bucket "$ALO186_R2_BUCKET"
+              aws --endpoint-url "$ALO186_R2_ENDPOINT" --region auto \
+                s3api head-bucket --bucket "$ALO186_R2_BUCKET"
+              echo "CREATE $ALO186_R2_BUCKET"
+              echo 'created=true' >> "$GITHUB_OUTPUT"
+            else
+              echo "WOULD CREATE $ALO186_R2_BUCKET"
+              echo 'created=false' >> "$GITHUB_OUTPUT"
+            fi
+            exit 0
+          fi
+
+          echo 'R2 bucket yokluğu doğrulanamadı; credential, yetki veya endpoint hatası olabilir.' >&2
+          printf '%s\n' "$bucket_error" | head -c 2000 >&2
+          exit 1
       - name: Restic repository dry-run veya init
         shell: bash
         run: |
           set -euo pipefail
           export RESTIC_REPOSITORY="s3:${ALO186_R2_ENDPOINT%/}/${ALO186_R2_BUCKET}"
-          if restic snapshots --compact >/dev/null 2>&1; then
-            echo 'SAME   Restic repository mevcut.'
-          elif [[ "${{ inputs.apply }}" == "true" ]]; then
-            restic init
-            restic check
-          else
-            echo 'WOULD INIT Restic repository.'
+
+          if [[ "${{ steps.bucket.outputs.exists }}" != "true" && "${{ inputs.apply }}" != "true" ]]; then
+            echo 'WOULD INIT Restic repository after bucket creation.'
+            exit 0
           fi
+
+          set +e
+          config_error="$(aws --endpoint-url "$ALO186_R2_ENDPOINT" --region auto \
+            s3api head-object --bucket "$ALO186_R2_BUCKET" --key config 2>&1 >/dev/null)"
+          config_status=$?
+          set -e
+
+          if [[ "$config_status" -eq 0 ]]; then
+            restic snapshots --compact
+            restic check
+            echo 'SAME   Restic repository mevcut ve erişilebilir.'
+            exit 0
+          fi
+
+          if grep -Eqi '(\(404\)|NoSuchKey|Not Found)' <<<"$config_error"; then
+            if [[ "${{ inputs.apply }}" == "true" ]]; then
+              restic init
+              restic snapshots --compact
+              restic check
+              echo 'CREATE Restic repository.'
+            else
+              echo 'WOULD INIT Restic repository.'
+            fi
+            exit 0
+          fi
+
+          echo 'Restic config nesnesinin yokluğu doğrulanamadı; R2 erişim veya yetki hatası olabilir.' >&2
+          printf '%s\n' "$config_error" | head -c 2000 >&2
+          exit 1
       - name: Uygulama sonrası erişimi doğrula
         if: ${{ inputs.apply }}
         shell: bash
@@ -69,5 +119,6 @@ jobs:
           set -euo pipefail
           export RESTIC_REPOSITORY="s3:${ALO186_R2_ENDPOINT%/}/${ALO186_R2_BUCKET}"
           aws --endpoint-url "$ALO186_R2_ENDPOINT" --region auto s3api head-bucket --bucket "$ALO186_R2_BUCKET"
+          aws --endpoint-url "$ALO186_R2_ENDPOINT" --region auto s3api head-object --bucket "$ALO186_R2_BUCKET" --key config
           restic snapshots --compact
           restic check
