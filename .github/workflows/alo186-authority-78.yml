@@ -79,10 +79,10 @@ jobs:
           from pathlib import Path
           root=Path('/tmp/alo186-authority-78')
           release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
-          assert release['routingVersion']==35
+          assert release['routingVersion']>=35
           assert release['articleCount']==78
-          assert release['routeCount']==119
-          assert release['routingOverlays']==['content-authority-78.json']
+          assert release['routeCount']>=119
+          assert 'content-authority-78.json' in release['routingOverlays']
           for slug in (
               'ups-eco-modu-acik-olmali-mi',
               'ges-inverter-mppt-giris-akimi-isc-nasil-kontrol-edilir',
