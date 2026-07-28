@@ -42,6 +42,26 @@ jobs:
           node alo186/hesaplama/kesinti-gunlugu/test.js
           node alo186/hesaplama/inverter-uygunluk/test.js
           node alo186/hesaplama/ekipman-bakim-plani/test.js
+          node alo186/hesaplama/yedek-guc-cozum-secici/test.js
+      - name: Yedek güç çözüm seçici güven ve affiliate sözleşmesi
+        shell: bash
+        run: |
+          set -euo pipefail
+          file='alo186/hesaplama/yedek-guc-cozum-secici/index.html'
+          grep -q 'Çözüm sınıfı ön değerlendirmesidir' "$file"
+          grep -q 'Reklam / satış ortaklığı açıklaması' "$file"
+          grep -q 'Ticari ürün yönlendirmesi kapatıldı' "$file"
+          grep -q 'Kişisel veri yok' "$file"
+          grep -q 'yedek-guc-cozum-secici' alo186/deployment/routing-manifest.json
+          grep -q 'hesaplama/yedek-guc-cozum-secici/' alo186/sitemap.xml
+          if grep -Eqi 'amazon\.(com\.tr|com)/' "$file"; then
+            echo 'Yedek güç çözüm seçicide doğrudan Amazon bağlantısı bulundu.' >&2
+            exit 1
+          fi
+          if grep -Eqi 'type="(email|tel|text)"|name="(address|phone|email|subscription|tc|identity)' "$file"; then
+            echo 'Yedek güç çözüm seçicide kişisel veri alanı bulundu.' >&2
+            exit 1
+          fi
       - name: Kesinti günlüğü güven ve veri minimizasyonu sözleşmesi
         shell: bash
         run: |
