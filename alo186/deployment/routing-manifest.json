@@ -1,5 +1,5 @@
 {
-  "version": 29,
+  "version": 30,
   "canonicalHost": "https://www.alo186.com",
   "generatedAt": "2026-07-28",
   "routes": [
@@ -100,7 +100,10 @@
     {"source":"alo186/haberler/ev-sarj-kablosu-prizi-isiniyor-ne-yapilmali/index.html","canonicalPath":"/haberler/ev-sarj-kablosu-prizi-isiniyor-ne-yapilmali","type":"article"},
     {"source":"alo186/haberler/ev-sarj-gucu-neden-dusuk-yavas-sarj/index.html","canonicalPath":"/haberler/ev-sarj-gucu-neden-dusuk-yavas-sarj","type":"article"},
     {"source":"alo186/haberler/ges-inverter-sicakta-guc-dusuruyor-temperature-derating/index.html","canonicalPath":"/haberler/ges-inverter-sicakta-guc-dusuruyor-temperature-derating","type":"article"},
-    {"source":"alo186/haberler/ups-akusu-sarj-olmuyor-batarya-dolmuyor/index.html","canonicalPath":"/haberler/ups-akusu-sarj-olmuyor-batarya-dolmuyor","type":"article"}
+    {"source":"alo186/haberler/ups-akusu-sarj-olmuyor-batarya-dolmuyor/index.html","canonicalPath":"/haberler/ups-akusu-sarj-olmuyor-batarya-dolmuyor","type":"article"},
+    {"source":"alo186/haberler/elektrik-gerilimi-dusuk-yuksek-edas-olcum-talebi/index.html","canonicalPath":"/haberler/elektrik-gerilimi-dusuk-yuksek-edas-olcum-talebi","type":"article"},
+    {"source":"alo186/haberler/ups-sebeke-varken-bataryaya-geciyor/index.html","canonicalPath":"/haberler/ups-sebeke-varken-bataryaya-geciyor","type":"article"},
+    {"source":"alo186/haberler/jenerator-calisiyor-elektrik-uretmiyor-ne-yapilmali/index.html","canonicalPath":"/haberler/jenerator-calisiyor-elektrik-uretmiyor-ne-yapilmali","type":"article"}
   ],
   "requiredIntegrations": [
     "canonical URL must resolve with HTTP 200",
