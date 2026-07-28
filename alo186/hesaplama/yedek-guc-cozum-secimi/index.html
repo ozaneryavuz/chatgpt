@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>UPS mi, Power Station mı, Jeneratör mü? Çözüm Seçimi | ALO186</title>
+  <meta name="description" content="Kesintisiz geçiş, yük gücü, çalışma süresi, taşınabilirlik, yakıt ve sabit tesisat koşullarına göre UPS, power station, inverter-batarya ve jeneratör seçeneklerini karşılaştırın.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta name="theme-color" content="#071631">
+  <link rel="canonical" href="https://www.alo186.com/hesaplama/yedek-guc-cozum-secimi/">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"ALO186 Yedek Güç Çözümü Seçim Sihirbazı","applicationCategory":"UtilitiesApplication","operatingSystem":"Web","url":"https://www.alo186.com/hesaplama/yedek-guc-cozum-secimi/","description":"UPS, power station, inverter-batarya, jeneratör ve hibrit yedek güç seçeneklerini kullanım ihtiyacına göre karşılaştıran ücretsiz araç.","offers":{"@type":"Offer","price":"0","priceCurrency":"TRY"},"publisher":{"@type":"Organization","name":"ALO186","url":"https://www.alo186.com"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"UPS ile power station arasındaki temel fark nedir?","acceptedAnswer":{"@type":"Answer","text":"UPS özellikle geçiş süresi ve bağlı yükün kesintisiz çalışması için tasarlanır. Power station taşınabilir enerji kapasitesine odaklanır; geçiş davranışı modele göre ayrıca doğrulanmalıdır."}},{"@type":"Question","name":"Uzun kesintide jeneratör her zaman en doğru çözüm müdür?","acceptedAnswer":{"@type":"Answer","text":"Hayır. Yük gücü, açık hava imkânı, yakıt, gürültü, transfer düzeni ve kesintisiz geçiş ihtiyacı birlikte değerlendirilmelidir. Bazı işletmelerde UPS veya batarya ile jeneratörün katmanlı kullanımı gerekir."}},{"@type":"Question","name":"Bu araç kesin ürün seçimi yapar mı?","acceptedAnswer":{"@type":"Answer","text":"Hayır. Araç çözüm sınıfı için ön karşılaştırma sunar. Ürün teknik verileri, güç ve enerji hesabı, bağlantı düzeni ve üretici talimatları ayrıca doğrulanmalıdır."}}]}]}</script>
+</head>
+<body>
+  <a class="skip-link" href="#selector">Araca geç</a>
+  <header class="site-header"><div class="header-inner"><a class="brand" href="https://www.alo186.com" aria-label="ALO186 ana sayfa"><span class="brand-mark" aria-hidden="true">186</span><span><strong>ALO186</strong><small>Bağımsız elektrik bilgi ağı</small></span></a><nav aria-label="Üst menü"><a href="/elektrik-kesintisi">Kesinti</a><a href="/hesaplama/">Hesaplayıcılar</a><a href="/akilli-urun-secimi">Ürün karar merkezi</a></nav></div></header>
+
+  <main>
+    <section class="trust-banner" aria-label="Güvenlik ve bağımsızlık açıklaması"><strong>Ürün satışı veya resmî yönlendirme değildir.</strong> Araç kişisel veri istemez; çözüm sınıfını karşılaştırır. Sabit tesisat, trifaze, motorlu, yüksek güçlü ve tıbbi yüklerde profesyonel tasarım gerekir.</section>
+
+    <section class="hero"><div><span class="eyebrow">UPS · power station · inverter-batarya · jeneratör</span><h1>Hangi yedek güç çözümü <em>ihtiyacınıza uyuyor?</em></h1><p>Yalnız watt değerine bakmak yerine geçiş süresi, hedef çalışma süresi, taşınabilirlik, yakıt ve tesisat sınırını birlikte değerlendirin.</p><div class="chips"><span>Tarayıcıda çalışır</span><span>Kişisel veri yok</span><span>Fiyat veya stok iddiası yok</span></div></div><aside><strong>Önce çözüm sınıfı</strong><p>Ardından ilgili güç ve süre hesabına geçin. Ürün merkezi yalnız düşük riskli taşınabilir sonuçlarda açılır.</p><button type="button" class="secondary" id="restoreBtn" hidden>Son değerlendirmeyi yükle</button></aside></section>
+
+    <section id="selector" class="tool-layout">
+      <form id="solutionForm" class="tool-card">
+        <div class="heading"><div><span class="step">1</span><h2>Kullanım ve yük profilini seçin</h2></div><button type="button" class="text-button" id="exampleBtn">Ev-ofis örneği</button></div>
+        <div class="form-grid">
+          <label><span>Kullanım alanı</span><select id="context" required><option value="home">Ev</option><option value="homeoffice">Ev-ofis / küçük ofis</option><option value="business">İşletme</option><option value="hotel_site">Otel / site / ortak alan</option><option value="medical">Tıbbi veya yaşam destek yükü</option></select></label>
+          <label><span>Öncelikli yük tipi</span><select id="loadProfile" required><option value="internet">Modem, ONT ve ağ cihazları</option><option value="electronics">Bilgisayar, sunucu ve hassas elektronik</option><option value="refrigeration">Buzdolabı veya soğutma</option><option value="motor">Pompa, klima veya motor</option><option value="mixed">Karışık ev / işletme yükleri</option></select></label>
+          <label><span>Yaklaşık sürekli güç</span><select id="powerBand" required><option value="p150">150 W’a kadar</option><option value="p600">151–600 W</option><option value="p1500">601–1.500 W</option><option value="p3000">1.501–3.000 W</option><option value="high_unknown">3.000 W üzeri veya bilinmiyor</option></select></label>
+          <label><span>Kesintiye tolerans</span><select id="continuity" required><option value="zero">Kesinti olmamalı / kritik elektronik</option><option value="seconds">Kısa geçiş kabul edilebilir</option><option value="manual">Kapatıp yeniden başlatmak kabul edilebilir</option></select></label>
+          <label><span>Hedef çalışma süresi</span><select id="duration" required><option value="d2">2 saate kadar</option><option value="d6">2–6 saat</option><option value="d12">6–12 saat</option><option value="long">12 saatten uzun</option></select></label>
+          <label><span>Bağlantı biçimi</span><select id="installation" required><option value="portable">Prizden çalışan taşınabilir cihazlar</option><option value="selected">Binada seçili devreler</option><option value="whole">Bütün bina / ana pano</option></select></label>
+          <label><span>Yakıtlı cihaz için güvenli açık alan</span><select id="outdoorFuel" required><option value="no">Yok / yakıt ve gürültü istemiyorum</option><option value="yes">Var; açık hava ve egzoz mesafesi sağlanabilir</option></select></label>
+          <label class="check"><input type="checkbox" id="threePhase"><span>Trifaze yük veya tesisat bulunuyor</span></label>
+        </div>
+        <div id="validation" class="validation" role="alert" aria-live="polite"></div>
+        <div class="actions"><button class="primary" type="submit">Çözüm sınıfını karşılaştır</button><button class="secondary" type="button" id="clearBtn">Temizle</button></div>
+      </form>
+
+      <aside class="method-card"><span class="step">i</span><h2>Karar sırası</h2><ol><li>Can güvenliği ve yük kritiklik düzeyi</li><li>Kesintisiz geçiş ihtiyacı</li><li>Sürekli ve kalkış gücü</li><li>Hedef enerji süresi</li><li>Taşınabilir veya sabit bağlantı</li><li>Yakıt, egzoz ve gürültü sınırı</li></ol><p>Sonuç bir marka veya ürün modeli önermez.</p></aside>
+    </section>
+
+    <section id="results" class="results" hidden aria-live="polite">
+      <div class="results-head"><div><span class="eyebrow">Ön değerlendirme sonucu</span><h2>Yedek güç yol haritanız</h2></div><div><button class="secondary" type="button" id="copyBtn">Özeti kopyala</button><button class="secondary" type="button" id="printBtn">PDF / yazdır</button></div></div>
+      <div class="metrics"><article class="accent"><span>Birincil seçenek</span><strong id="primaryLabel">—</strong><small id="primarySummary">—</small></article><article><span>İkinci seçenek</span><strong id="secondaryLabel">—</strong><small id="secondarySummary">—</small></article><article><span>Karar seviyesi</span><strong id="resultStatus">—</strong><small>Kesin ürün veya proje onayı değildir</small></article></div>
+      <div class="result-grid"><article><h3>Neden bu sonuç?</h3><ul id="reasonList"></ul></article><article><h3>Satın almadan önce</h3><ul id="checkList"></ul></article></div>
+      <div id="professionalWarning" class="warning" hidden><strong>Profesyonel doğrulama gerekli</strong><ul id="professionalList"></ul></div>
+      <div class="next"><div><span class="eyebrow">Ücretsiz teknik adım</span><h3>Güç ve süre hesabını tamamlayın</h3><p>Çözüm sınıfından sonra gerçek W, tepe W ve Wh ihtiyacını hesaplayın.</p></div><a id="calculatorLink" class="primary link" href="/hesaplama/yedek-guc">Teknik hesabı tamamla</a></div>
+      <div id="commercialRoute" class="commercial" hidden><div><span class="eyebrow">Reklam / satış ortaklığı açıklaması</span><h3>Düşük riskli taşınabilir ürünleri karşılaştırın</h3><p>Ürün karar merkezindeki Amazon bağlantıları satış ortaklığı niteliğindedir. Kullanıcıya ek maliyet yansımaz. Fiyat, stok, puan, teslimat ve garanti yalnız satıcının güncel sayfasında doğrulanır.</p><label class="check"><input type="checkbox" id="productAck"><span>Teknik minimumları ürün sayfasında ayrıca kontrol edeceğim.</span></label></div><a id="productLink" class="secondary link disabled" aria-disabled="true">Ürün karar merkezini aç</a></div>
+    </section>
+
+    <section class="content"><h2>Çözümler hangi durumda öne çıkar?</h2><div class="comparison"><article><h3>Online UPS</h3><p>Kesintiye toleransı düşük elektronik yüklerde sıfır transfer süreli çift dönüşüm topolojisi öne çıkabilir.</p></article><article><h3>Power station</h3><p>Taşınabilirlik, sessizlik ve yakıtsız kullanım önemlidir; UPS geçiş işlevi model bazında doğrulanır.</p></article><article><h3>İnverter + batarya</h3><p>Uzun süre ve yeniden şarj edilebilir enerji sağlar; DC koruma ve sabit sistem bağlantısı profesyonel tasarım ister.</p></article><article><h3>Jeneratör</h3><p>Uzun süreli ve yüksek güçlü yüklerde değerlendirilebilir; yalnız açık havada ve güvenli transfer düzeniyle kullanılmalıdır.</p></article></div>
+      <div class="sources"><h3>Teknik kaynaklar</h3><ul><li><a href="https://www.eaton.com/my/en-us/products/backup-power-ups-surge-it-power-distribution/backup-power-ups/online-ups-products.html" rel="nofollow noopener" target="_blank">Eaton — online UPS ve sıfır transfer süresi</a></li><li><a href="https://www.generac.com/residential-products/portable-generator-transfer-switches/" rel="nofollow noopener" target="_blank">Generac — jeneratör transfer sistemleri</a></li><li><a href="https://www.cdc.gov/carbon-monoxide/about/index.html" rel="nofollow noopener" target="_blank">CDC — taşınabilir jeneratör ve karbonmonoksit güvenliği</a></li></ul><p>Son teknik doğrulama: 28 Temmuz 2026.</p></div>
+    </section>
+  </main>
+
+  <footer><div><strong>ALO186</strong><p>Bağımsız bilgi platformudur; EDAŞ, kamu kurumu, ürün satıcısı veya proje onay mercii değildir.</p></div><nav aria-label="Alt menü"><a href="/yayin-ilkeleri">Yayın ilkeleri</a><a href="/amazon-satis-ortakligi-aciklamasi">Satış ortaklığı açıklaması</a><a href="/gizlilik">Gizlilik</a></nav></footer>
+  <noscript><div class="noscript">Bu karar aracı JavaScript gerektirir.</div></noscript>
+  <script src="./core.js"></script><script src="./app.js" defer></script>
+</body>
+</html>
