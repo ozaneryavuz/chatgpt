@@ -1,0 +1,155 @@
+name: ALO186 portal hardening tek seferlik main uyarlaması
+
+on:
+  push:
+    branches: [fix/alo186-portal-hardening-main-20260728]
+    paths:
+      - '.github/alo186-portal-hardening.trigger'
+      - '.github/workflows/alo186-portal-hardening-autofix-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/alo186-portal-hardening-main-20260728
+          fetch-depth: 0
+      - name: Eski düzeltme dalını getir
+        run: git fetch origin fix/alo186-complete-missing-hardening-v2-20260728
+      - name: Portal düzeltmelerini güncel main üzerine uygula
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import subprocess
+
+          source_branch = 'origin/fix/alo186-complete-missing-hardening-v2-20260728'
+
+          def source(path: str) -> str:
+              return subprocess.check_output(['git', 'show', f'{source_branch}:{path}'], text=True, encoding='utf-8')
+
+          # Main dalında sonradan değişmeyen iki dosyada doğrulanmış sürümü doğrudan koru.
+          Path('alo186/styles.css').write_text(source('alo186/styles.css'), encoding='utf-8')
+          Path('alo186/tests/test_release_manifest.js').write_text(source('alo186/tests/test_release_manifest.js'), encoding='utf-8')
+
+          portal_test = source('alo186/tests/test_portal_hardening.js')
+          portal_test = portal_test.replace("'/hesaplama/elektrik-surekliligi-pasaportu/',", "'/hesaplama/elektrik-surekliligi-pasaportu/',\n  '/hesaplama/elektrik-kesintisi-tatbikati/',")
+          portal_test = portal_test.replace("/2[3-9]\\+? kişisel veri istemeyen araç/", "/25\\+? kişisel veri istemeyen araç/")
+          portal_test = portal_test.replace("Portal güncel 23+ araç kapsamını göstermeli.", "Portal güncel 25+ araç kapsamını göstermeli.")
+          portal_test = portal_test.replace("assert(!portal.includes('19 kişisel veri istemeyen araç')", "assert(!portal.includes('19 kişisel veri istemeyen araç')")
+          if "42 teknik rehber" not in portal_test:
+              portal_test = portal_test.replace(
+                  "assert(/25\\+? kişisel veri istemeyen araç/.test(portal), 'Portal güncel 25+ araç kapsamını göstermeli.');",
+                  "assert(/25\\+? kişisel veri istemeyen araç/.test(portal), 'Portal güncel 25+ araç kapsamını göstermeli.');\nassert(portal.includes('42 teknik rehber'), 'Portal güncel 42 teknik rehber kapsamını göstermeli.');"
+              )
+          Path('alo186/tests/test_portal_hardening.js').write_text(portal_test, encoding='utf-8')
+
+          workflow = Path('.github/workflows/alo186-fatura-pages.yml')
+          text = workflow.read_text(encoding='utf-8')
+          if 'node alo186/tests/test_portal_hardening.js' not in text:
+              text = text.replace('          node alo186/tests/test_release_manifest.js\n', '          node alo186/tests/test_release_manifest.js\n          node alo186/tests/test_portal_hardening.js\n', 1)
+          if "grep -q 'mod_substitute.c' _overlay/.htaccess" not in text:
+              text = text.replace("          grep -q 'Content-Security-Policy' _overlay/.htaccess\n", "          grep -q 'Content-Security-Policy' _overlay/.htaccess\n          grep -q 'mod_substitute.c' _overlay/.htaccess\n          grep -q '10 iş günü içinde ilgili dağıtım şirketinin resmî kanalına başvurun' _overlay/.htaccess\n", 1)
+          if 'test -f _site/hesaplama/elektrik-kesintisi-tatbikati/index.html' not in text:
+              text = text.replace('          test -f _site/hesaplama/elektrik-surekliligi-pasaportu/passport.schema.json\n', '          test -f _site/hesaplama/elektrik-surekliligi-pasaportu/passport.schema.json\n          test -f _site/hesaplama/elektrik-kesintisi-tatbikati/index.html\n', 1)
+          workflow.write_text(text, encoding='utf-8')
+
+          htaccess = Path('alo186/deployment/apache.htaccess')
+          text = htaccess.read_text(encoding='utf-8')
+          if '<IfModule mod_substitute.c>' not in text:
+              block = '''# Canlı ana sayfa/portal başka bir yayın şablonundan eski hukuki metni üretirse,\n# kaynak şablon düzeltilip tüm cache katmanları temizlenene kadar yalnız bilinen iki\n# hatalı cihaz-hasarı cümlesini güvenli 10 iş günü metniyle değiştir. mod_substitute\n# bulunmayan hostinglerde bu blok devre dışı kalır ve sunucuyu bozmaz.\n<IfModule mod_substitute.c>\n  <IfModule mod_filter.c>\n    AddOutputFilterByType SUBSTITUTE text/html\n  </IfModule>\n  SubstituteMaxLineLength 10m\n  Substitute "s|zararın ortaya çıktığı tarihten itibaren 30 gün içinde EDAŞ kaydı açın|zararın ortaya çıktığı tarihten itibaren 10 iş günü içinde ilgili dağıtım şirketinin resmî kanalına başvurun|ni"\n  Substitute "s|zararın ortaya çıktığı tarihten itibaren 30 gün içinde ilgili dağıtım şirketine kayıtlı başvuru yapmalı|zararın ortaya çıktığı tarihten itibaren 10 iş günü içinde ilgili dağıtım şirketinin resmî kanalına başvurmalı|ni"\n</IfModule>\n\n'''
+              marker = '# Canlı ana sayfadaki çözümlenemeyen `@import "tailwindcss"` isteği kaynak\n'
+              if marker not in text:
+                  raise SystemExit('apache.htaccess ekleme işareti bulunamadı')
+              text = text.replace(marker, block + marker, 1)
+          htaccess.write_text(text, encoding='utf-8')
+
+          portal = Path('alo186/index.html')
+          text = portal.read_text(encoding='utf-8')
+          text = text.replace(
+              'content="81 il ve 973 ilçede EDAŞ bulun; 42 teknik rehberle inverter düşük voltajı, UPS VA/Watt seçimi, jeneratör CO güvenliği, GES, V2X, batarya, EV ve RCD konularını öğrenin."',
+              'content="81 il ve 973 ilçede EDAŞ bulun; 25+ kişisel veri istemeyen araç ve 42 teknik rehberle doğru kanal, kesinti, sayaç, V2X, batarya, EV, GES, UPS ve elektrik güvenliği kararlarını yönetin."'
+          )
+          text = text.replace(
+              '"description":"EDAŞ arama, hesaplama araçları ve 42 kaynak doğrulamalı teknik rehber: inverter düşük voltajı, UPS VA/Watt, jeneratör karbonmonoksit güvenliği, dağıtım/tedarik ayrımı, GES, V2X, batarya, EV ve RCD."',
+              '"description":"EDAŞ arama, 25+ kişisel veri istemeyen hesaplama ve karar aracı ile 42 kaynak doğrulamalı teknik rehber: dağıtım/tedarik ayrımı, kesintide gıda güvenliği, GES izolasyon hatası, sayaç, V2X, batarya, EV, RCD, GES ve UPS."'
+          )
+          if 'class="skip-link" href="#main-content"' not in text:
+              text = text.replace('<body>\n', '<body>\n  <a class="skip-link" href="#main-content">İçeriğe geç</a>\n', 1)
+          text = text.replace('<main class="wrap">', '<main id="main-content" class="wrap">', 1)
+          text = text.replace(
+              'Vatandaş için doğru 112/186/EDAŞ yönlendirmesi ve kesinti günlüğü; tüketici için teknik hesap ve ürün seçimi; otel, site ve işletmeler için 42 kaynak doğrulamalı teknik rehber, olgunluk skoru ve süreklilik pilot paneli.',
+              'Vatandaş için doğru 112/186/EDAŞ yönlendirmesi ve kesinti günlüğü; tüketici için 25+ kişisel veri istemeyen teknik araç; otel, site ve işletmeler için 42 kaynak doğrulamalı rehber, olgunluk skoru, kanıt pasaportu, kesinti tatbikatı ve süreklilik pilot paneli.'
+          )
+          if 'id="cihaz-hasari-suresi"' not in text:
+              hero_end = '</p></section>\n    <section class="grid"'
+              legal = '''</p></section>\n\n    <section class="legal-alert" aria-labelledby="cihaz-hasari-suresi">\n      <div><span class="tag">Güncel tüketici süresi</span><h2 id="cihaz-hasari-suresi">Cihaz hasarında başvuru süresi 10 iş günüdür</h2><p>Dağıtım şebekesinden kaynaklandığını düşündüğünüz cihaz hasarı için zararın ortaya çıktığı tarihten itibaren <strong>10 iş günü içinde</strong> ilgili dağıtım şirketinin resmî kanalına başvurun. Olay zamanı, cihaz bilgisi, fotoğraflar, servis raporu ve şirketin yazılı kararını saklayın. ALO186 başvuru veya hasar kaydı almaz.</p></div>\n      <div class="legal-actions"><a class="action-link" href="/haberler/elektrik-kesintisi-cihaz-hasari-edas-basvurusu">Belge ve başvuru rehberini aç →</a><a class="action-link secondary" href="https://www.epdk.gov.tr/Detay/Icerik/12-3/elektrik-piyasasi" rel="external noopener">EPDK kaynağını doğrula ↗</a></div>\n    </section>\n\n    <section class="grid"'''
+              if hero_end not in text:
+                  raise SystemExit('Portal hero ekleme işareti bulunamadı')
+              text = text.replace(hero_end, legal, 1)
+
+          replacements = {
+              'href="./turkiye-arama/"': 'href="/edas-bul"',
+              'href="./karar-motoru/"': 'href="/karar-motoru"',
+              'href="./hesaplama/"': 'href="/hesaplama/"',
+              'href="./hesaplama/kesinti-gunlugu/"': 'href="/hesaplama/kesinti-gunlugu/"',
+              'href="./hesaplama/inverter-uygunluk/"': 'href="/hesaplama/inverter-uygunluk/"',
+              'href="./hesaplama/ev-sarj-uygunluk/"': 'href="/hesaplama/ev-sarj-uygunluk/"',
+              'href="./hesaplama/jenerator-gucu-secimi/"': 'href="/hesaplama/jenerator-gucu-secimi/"',
+              'href="./hesaplama/parafudr-risk-testi/"': 'href="/hesaplama/parafudr-risk-testi/"',
+              'href="./hesaplama/gerilim-koruma-cozum-secici/"': 'href="/hesaplama/gerilim-koruma-cozum-secici/"',
+              'href="./urun-eslestirme/"': 'href="/akilli-urun-secimi"',
+              'href="./sureklilik-paneli/"': 'href="/isletme-surekliligi"',
+              'href="./hesaplama/elektrik-surekliligi-olgunluk-skoru/"': 'href="/hesaplama/elektrik-surekliligi-olgunluk-skoru/"',
+              'href="./fatura-analizi/"': 'href="/fatura-analizi"',
+              'href="./yedek-guc-hesaplayici/"': 'href="/hesaplama/yedek-guc"',
+              'href="./kesinti-maliyet-hesaplayici/"': 'href="/hesaplama/kesinti-maliyeti"',
+          }
+          for old, new in replacements.items():
+              text = text.replace(old, new)
+          text = text.replace('19 kişisel veri istemeyen araç', '25+ kişisel veri istemeyen araç')
+          text = text.replace('Olgunluk, güneş paneli uyumu, gerilim koruma, kesinti günlüğü, UPS süresi, jeneratör, inverter, EV şarjı, gerilim düşümü ve fatura araçlarını tek merkezden kullanın.', 'Pasaport, kesinti tatbikatı, olgunluk, güneş paneli uyumu, gerilim koruma, kesinti günlüğü, UPS, jeneratör, inverter, EV şarjı, kablo ve fatura araçlarını tek merkezden kullanın.')
+
+          if '/hesaplama/elektrik-surekliligi-pasaportu/' not in text:
+              anchor = '<a class="card" href="/hesaplama/elektrik-surekliligi-olgunluk-skoru/"'
+              start = text.find(anchor)
+              if start < 0:
+                  raise SystemExit('Olgunluk kartı bulunamadı')
+              end = text.find('</a>', start) + 4
+              cards = '''\n      <a class="card" href="/hesaplama/elektrik-surekliligi-pasaportu/"><span class="tag">Kanıt dosyası · P0/P1/P2 · JSON/PDF</span><h2>Elektrik Sürekliliği Pasaportu</h2><p>Kritik yük, yedek kaynak ve 10 teknik kanıt alanını kişisel veri vermeden toplayın; eksikleri önceliklendirin ve panel aktarımına hazırlayın.</p><b>Kanıt pasaportunu oluştur →</b></a>\n      <a class="card" href="/hesaplama/elektrik-kesintisi-tatbikati/"><span class="tag">İlk 5/15/60 dakika · tatbikat · SaaS handoff</span><h2>Elektrik Kesintisi Tatbikatı</h2><p>Şebeke, jeneratör, UPS, gerilim veya kritik yük kaybı senaryosunda ilk saat görevlerini skorlayın; P0/P1/P2 planı ve panel aktarımı oluşturun.</p><b>Tatbikatı başlat →</b></a>\n      <a class="card" href="/hesaplama/powerbank-usb-c-uygunluk/"><span class="tag">mAh → Wh · USB-C PD · gerçek şarj sayısı</span><h2>Powerbank ve USB-C Uygunluğu</h2><p>Powerbank enerjisini, aktarım kaybını, port/kablo gücünü ve çoklu port paylaşımını cihaz ihtiyacıyla karşılaştırın.</p><b>Powerbank testini aç →</b></a>\n      <a class="card" href="/hesaplama/gunes-paneli-power-station-uygunluk/"><span class="tag">Voc · Vmp · Isc · Imp · MPPT</span><h2>Güneş Paneli ve Power Station Uyumu</h2><p>Seri-paralel panel dizisini, soğuk hava Voc değerini, PV giriş akım/güç sınırlarını ve yaklaşık şarj süresini birlikte kontrol edin.</p><b>PV giriş uyumunu aç →</b></a>\n      <a class="card" href="/hesaplama/ev-sarj-kablosu-uygunluk/"><span class="tag">Type 2 · Mode 3 · 16/20/32 A · faz</span><h2>EV Şarj Kablosu Uygunluk Testi</h2><p>Araç, soketli şarj noktası ve Type 2 kablonun faz, akım, hedef güç, uzunluk ve fiziksel güvenlik uyumunu birlikte değerlendirin.</p><b>Kablo uygunluğunu test et →</b></a>'''
+              text = text[:end] + cards + text[end:]
+          portal.write_text(text, encoding='utf-8')
+          PY
+      - name: Test ve production paket doğrulaması
+        shell: bash
+        run: |
+          set -euo pipefail
+          node alo186/tests/test_portal_hardening.js
+          node alo186/tests/test_release_manifest.js
+          chmod +x alo186/deployment/build_static_site.sh
+          alo186/deployment/build_static_site.sh _site preview
+          alo186/deployment/build_static_site.sh _overlay overlay
+          test -f _site/elektrik-portali/index.html
+          test -f _site/hesaplama/elektrik-kesintisi-tatbikati/index.html
+          grep -q 'Cihaz hasarında başvuru süresi 10 iş günüdür' _site/elektrik-portali/index.html
+          grep -q 'mod_substitute.c' _overlay/.htaccess
+      - name: Değişiklikleri dala kaydet
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/workflows/alo186-fatura-pages.yml alo186/deployment/apache.htaccess alo186/index.html alo186/styles.css alo186/tests/test_portal_hardening.js alo186/tests/test_release_manifest.js
+          if git diff --cached --quiet; then
+            echo 'Uygulanacak değişiklik bulunmadı.'
+          else
+            git commit -m 'fix(alo186): portal hardening paketini güncel main ile birleştir'
+            git push origin HEAD:fix/alo186-portal-hardening-main-20260728
+          fi
