@@ -1,5 +1,5 @@
 {
-  "version": 30,
+  "version": 31,
   "canonicalHost": "https://www.alo186.com",
   "generatedAt": "2026-07-28",
   "routes": [
@@ -106,7 +106,10 @@
     {"source":"alo186/haberler/jenerator-calisiyor-elektrik-uretmiyor-ne-yapilmali/index.html","canonicalPath":"/haberler/jenerator-calisiyor-elektrik-uretmiyor-ne-yapilmali","type":"article"},
     {"source":"alo186/haberler/lifepo4-batarya-sogukta-sarj-edilir-mi/index.html","canonicalPath":"/haberler/lifepo4-batarya-sogukta-sarj-edilir-mi","type":"article"},
     {"source":"alo186/haberler/parafudr-baglanti-kablosu-neden-kisa-olmali/index.html","canonicalPath":"/haberler/parafudr-baglanti-kablosu-neden-kisa-olmali","type":"article"},
-    {"source":"alo186/haberler/jenerator-devreye-girince-kacak-akim-rolesi-neden-atar/index.html","canonicalPath":"/haberler/jenerator-devreye-girince-kacak-akim-rolesi-neden-atar","type":"article"}
+    {"source":"alo186/haberler/jenerator-devreye-girince-kacak-akim-rolesi-neden-atar/index.html","canonicalPath":"/haberler/jenerator-devreye-girince-kacak-akim-rolesi-neden-atar","type":"article"},
+    {"source":"alo186/haberler/elektrik-sayaci-degisti-eski-yeni-endeks-fatura-kontrolu/index.html","canonicalPath":"/haberler/elektrik-sayaci-degisti-eski-yeni-endeks-fatura-kontrolu","type":"article"},
+    {"source":"alo186/haberler/notr-akimi-faz-akimindan-yuksek-neden-olur/index.html","canonicalPath":"/haberler/notr-akimi-faz-akimindan-yuksek-neden-olur","type":"article"},
+    {"source":"alo186/haberler/batarya-soc-soh-farki-kapasite-saglik-nasil-anlasilir/index.html","canonicalPath":"/haberler/batarya-soc-soh-farki-kapasite-saglik-nasil-anlasilir","type":"article"}
   ],
   "requiredIntegrations": [
     "canonical URL must resolve with HTTP 200",
