@@ -13,13 +13,13 @@ const overlays=fs.readdirSync(routingRoot)
   .map(name=>({name,...JSON.parse(fs.readFileSync(path.join(routingRoot,name),'utf8'))}));
 
 assert.equal(base.version,34,'Base routing manifest beklenen v34 olmalı.');
-assert(overlays.some(item=>item.name==='content-authority-78.json'),'78 rehberlik önceki authority overlay eksik.');
-assert(overlays.some(item=>item.name==='growth-technical-handoff-run11.json'),'Teknik devir büyüme overlay eksik.');
-const current=overlays.find(item=>item.name==='content-authority-81-run12.json');
-assert(current,'Run 12 içerik otoritesi overlay eksik.');
-assert.equal(current.version,37,'Run 12 routing sürümü v37 olmalı.');
+assert(overlays.some(item=>item.name==='content-authority-81-run12.json'),'81 rehberlik önceki authority overlay eksik.');
+assert(overlays.some(item=>item.name==='growth-proposal-scope-run12.json'),'Teknik teklif kapsamı büyüme overlay eksik.');
+const current=overlays.find(item=>item.name==='content-authority-84-run13.json');
+assert(current,'Run 13 içerik otoritesi overlay eksik.');
+assert.equal(current.version,38,'Etkili routing sürümü v38 olmalı.');
 assert.equal(current.generatedAt,'2026-07-29');
-assert.equal(current.routes.length,3,'Run 12 overlay tam üç yeni rota taşımalı.');
+assert.equal(current.routes.length,3,'Run 13 overlay tam üç yeni rota taşımalı.');
 
 const effective=[...base.routes];
 for(const overlay of overlays) effective.push(...overlay.routes);
@@ -31,25 +31,25 @@ for(const route of effective){
   canonical.add(route.canonicalPath);
   sources.add(route.source);
 }
-assert(Math.max(...overlays.map(item=>item.version))>=37,'En yüksek routing overlay sürümü en az v37 olmalı.');
-assert(effective.filter(route=>route.type==='article').length>=81,'Etkili routing en az 81 teknik makale taşımalı.');
-assert(effective.length>=123,'Etkili routing en az 123 canonical rota taşımalı.');
+assert.equal(Math.max(...overlays.map(item=>item.version)),38,'En yüksek routing overlay sürümü v38 olmalı.');
+assert.equal(effective.filter(route=>route.type==='article').length,84,'Etkili routing 84 teknik makale taşımalı.');
+assert.equal(effective.length,127,'Etkili routing 127 canonical rota taşımalı.');
 
 const articles=[
   {
-    slug:'topraklama-espotansiyel-kusaklama-farki',
-    required:['eşpotansiyel kuşaklama','ana topraklama terminali','PE iletkeni','dokunma gerilimi','ek eşpotansiyel kuşaklama'],
+    slug:'rcd-rccb-rcbo-farki',
+    required:['RCCB','RCBO','MCB','IΔn','kesme kapasitesi','nötr bağlantısı'],
     cta:'/hesaplama/teknik-devir-kabul-paketi/'
   },
   {
-    slug:'k-faktorlu-trafo-harmonik-yuk-derating',
-    required:['K faktörü','K-rated','K4','K13','THDi','TDD','derating','harmonik spektrum'],
-    cta:'/haberler/detuned-reaktor-aktif-harmonik-filtre-farki'
+    slug:'dusuk-yuksek-voltaj-edas-teknik-kalite-olcumu',
+    required:['teknik kalite','bir haftalık ölçüm','15 iş günü','başvuru numarası','EPDK','186'],
+    cta:'/edas-bul'
   },
   {
-    slug:'lifepo4-hucre-dengeleme-aktif-pasif-bms',
-    required:['aktif balancing','pasif balancing','0,01 V','1,8 A','hücre voltaj farkı','BMS'],
-    cta:'/hesaplama/inverter-uygunluk/'
+    slug:'lifepo4-dusuk-sicaklikta-sarj-edilir-mi',
+    required:['LiFePO₄','lityum kaplama','Allowed-To-Charge','+5°C','BMS','ısıtıcı'],
+    cta:'/hesaplama/teknik-devir-kabul-paketi/'
   }
 ];
 
@@ -75,6 +75,7 @@ for(const article of articles){
     const graph=parsed['@graph']||[parsed];
     assert(graph.some(item=>item['@type']==='Article'),`Article schema eksik: ${article.slug}`);
     assert(graph.some(item=>item['@type']==='FAQPage'),`FAQPage schema eksik: ${article.slug}`);
+    assert(graph.some(item=>item['@type']==='BreadcrumbList'),`BreadcrumbList schema eksik: ${article.slug}`);
     const articleNode=graph.find(item=>item['@type']==='Article');
     assert(Array.isArray(articleNode.about)&&articleNode.about.some(item=>item['@type']==='DefinedTerm'),`DefinedTerm eksik: ${article.slug}`);
   }
@@ -89,4 +90,4 @@ for(const article of articles){
   }
 }
 
-console.log('ALO186 içerik otoritesi run 12 tabanı: en az 81 kaynak doğrulamalı makale ve 123 canonical rota sözleşmesi başarılı.');
+console.log('ALO186 içerik otoritesi run 13: 84 kaynak doğrulamalı makale ve 127 canonical rota sözleşmesi başarılı.');

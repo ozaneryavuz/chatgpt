@@ -1,0 +1,21 @@
+{
+  "version": 38,
+  "generatedAt": "2026-07-29",
+  "routes": [
+    {
+      "source": "alo186/haberler/rcd-rccb-rcbo-farki/index.html",
+      "canonicalPath": "/haberler/rcd-rccb-rcbo-farki",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/dusuk-yuksek-voltaj-edas-teknik-kalite-olcumu/index.html",
+      "canonicalPath": "/haberler/dusuk-yuksek-voltaj-edas-teknik-kalite-olcumu",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/lifepo4-dusuk-sicaklikta-sarj-edilir-mi/index.html",
+      "canonicalPath": "/haberler/lifepo4-dusuk-sicaklikta-sarj-edilir-mi",
+      "type": "article"
+    }
+  ]
+}
