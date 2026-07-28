@@ -39,7 +39,7 @@ jobs:
           grep -q 'EDAŞ veya kamu kurumu değildir' alo186/urun-eslestirme/index.html
           grep -q 'Fiyat, stok, satıcı' alo186/urun-eslestirme/index.html
           grep -q 'modem-internet-yedekleme' alo186/urun-eslestirme/catalog.js
-          grep -q 'hesaplama/ups-suresi' alo186/urun-eslestirme/catalog.js
+          grep -q 'power-station-kapasite-eps-uygunluk' alo186/urun-eslestirme/catalog.js
           grep -q 'karar-motoru' alo186/urun-eslestirme/catalog.js
           grep -q 'no_verified_match_requires_ack' alo186/urun-eslestirme/growth-intent-brief.js
           grep -q 'alo186_product_briefs_v1' alo186/urun-eslestirme/growth-intent-brief.js

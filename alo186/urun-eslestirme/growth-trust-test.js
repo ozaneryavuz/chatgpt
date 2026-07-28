@@ -31,7 +31,7 @@ assert.match(miniUps.nextStep.url,/modem-internet-yedekleme/);
 
 const powerStation=matcher.match('power_station',{}, {now:freshNow});
 assert.equal(powerStation.affiliatePolicy,'after_tool');
-assert.match(powerStation.nextStep.url,/ups-suresi/);
+assert.match(powerStation.nextStep.url,/power-station-kapasite-eps-uygunluk/);
 
 const outletTester=matcher.match('outlet_tester',{}, {now:freshNow});
 assert.equal(outletTester.affiliatePolicy,'professional_only');
