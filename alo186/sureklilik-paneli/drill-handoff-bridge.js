@@ -18,15 +18,16 @@
     try{return JSON.parse(localStorage.getItem(key)||'null');}catch(_error){return null;}
   }
 
-  function validMaturity(){
-    const raw=parse(MATURITY_KEY),checked=originalValidate(raw);
+  function validPending(){
+    const raw=parse(MATURITY_KEY);
+    const checked=raw&&raw.schema===DRILL_SCHEMA?store.validateDrillHandoff(raw):originalValidate(raw);
     if(checked.valid)return true;
     try{localStorage.removeItem(MATURITY_KEY);}catch(_error){}
     return false;
   }
 
   function bridgeDrill(){
-    if(validMaturity())return false;
+    if(validPending())return false;
     const raw=parse(DRILL_KEY),checked=store.validateDrillHandoff(raw);
     if(!checked.valid){try{localStorage.removeItem(DRILL_KEY);}catch(_error){}return false;}
     try{
