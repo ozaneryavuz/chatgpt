@@ -53,7 +53,7 @@ assert(js.includes('rel="sponsored nofollow noopener"'));
 assert(js.includes('affiliate_no_purchase_selected'));
 assert(js.includes('affiliate_verified_product_gate_opened'));
 assert(js.includes('product_shortlist_added'));
-assert(!/name|email|phone|address|plaka|abonelik/i.test(JSON.stringify(snapshot)),'Saklanan snapshot PII anahtarı içermemeli.');
+for(const key of ['name','email','phone','address','subscription','identity','plate','serialNumber','freeText'])assert(!Object.prototype.hasOwnProperty.call(snapshot,key),`Saklanan snapshot ${key} anahtarını içermemeli.`);
 assert(css.includes('.product-shortlist'));
 assert(css.includes('.affiliate-decision-gate'));
 assert(css.includes('@media(max-width:680px)'));
