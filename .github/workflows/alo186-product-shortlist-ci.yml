@@ -1,0 +1,33 @@
+name: ALO186 Product Shortlist Quality
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/urun-eslestirme/**'
+      - '.github/workflows/alo186-product-shortlist-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  shortlist-quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript syntax
+        run: |
+          node --check alo186/urun-eslestirme/decision-shortlist-core.js
+          node --check alo186/urun-eslestirme/decision-shortlist.js
+      - name: Shortlist, privacy and affiliate gate tests
+        run: node alo186/urun-eslestirme/decision-shortlist.test.js
+      - name: Trust contract
+        run: |
+          ! grep -RniE 'name="(name|email|phone|address|plate|subscription)"' alo186/urun-eslestirme/index.html
+          ! grep -Rni 'amazon.com.tr' alo186/urun-eslestirme/decision-shortlist.js
+          grep -q 'sponsored nofollow noopener' alo186/urun-eslestirme/decision-shortlist.js
+          grep -q 'Satın almamak geçerli' alo186/urun-eslestirme/index.html
