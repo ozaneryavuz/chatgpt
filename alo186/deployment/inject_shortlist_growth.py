@@ -6,6 +6,7 @@ import json
 import re
 from pathlib import Path
 
+from apply_content_consolidation import apply as apply_content_consolidation
 from inject_handoff_growth import run as run_handoff_growth
 
 CANONICAL = "https://www.alo186.com/hesaplama/teknik-urun-karsilastirma/"
@@ -105,7 +106,11 @@ def update_manifest(site: Path, base_path: str) -> None:
 
 
 def raise_count(text: str) -> str:
-    return re.sub(r"\d+ çekirdek araç", "34 çekirdek araç", text, count=1)
+    match = re.search(r"(\d+) çekirdek araç", text)
+    if not match:
+        return text
+    current = int(match.group(1))
+    return text[: match.start(1)] + str(max(current, 34)) + text[match.end(1) :]
 
 
 def insert_hub(site: Path, base_path: str) -> int:
@@ -151,7 +156,7 @@ def insert_product(site: Path, base_path: str) -> int:
     if marker in text:
         text = text.replace(marker, section + marker, 1)
     else:
-        text = text.replace('</main>', section + '</main>', 1)
+        text = text.replace("</main>", section + "</main>", 1)
     path.write_text(text, encoding="utf-8")
     return 1
 
@@ -160,7 +165,7 @@ def recompute(site: Path) -> None:
     path = site / "checksums.sha256"
     if path.exists():
         path.unlink()
-    lines = [f"{hashlib.sha256(item.read_bytes()).hexdigest()}  {item.relative_to(site).as_posix()}" for item in sorted(x for x in site.rglob('*') if x.is_file())]
+    lines = [f"{hashlib.sha256(item.read_bytes()).hexdigest()}  {item.relative_to(site).as_posix()}" for item in sorted(x for x in site.rglob("*") if x.is_file())]
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
@@ -180,7 +185,16 @@ def run(site: Path, base_path: str) -> dict:
     update_pages_release(site, base_path, offline_added, cards)
     recompute(site)
     handoff = run_handoff_growth(site, base_path)
-    return {"ok": True, "basePath": base_path, "cardsInjected": cards, "offlineAdded": offline_added, "route": public_url(base_path, CANONICAL_PATH), "technicalHandoff": handoff}
+    consolidation = apply_content_consolidation(site, base_path)
+    return {
+        "ok": True,
+        "basePath": base_path,
+        "cardsInjected": cards,
+        "offlineAdded": offline_added,
+        "route": public_url(base_path, CANONICAL_PATH),
+        "technicalHandoff": handoff,
+        "contentConsolidation": consolidation,
+    }
 
 
 def main() -> None:
