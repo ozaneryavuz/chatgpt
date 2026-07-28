@@ -3,9 +3,43 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import urlparse
+
+
+CANONICAL_HOST = "https://www.alo186.com"
+LEGACY_HOST = "https://alo186.com"
+REQUIRED_ROOT_FILES = (
+    "robots.txt",
+    "sitemap.xml",
+    ".htaccess",
+    "404.html",
+    "tailwindcss",
+    "alo186-release.json",
+    "checksums.sha256",
+)
+REQUIRED_SECURITY_HEADERS = (
+    "Strict-Transport-Security",
+    "X-Content-Type-Options",
+    "Content-Security-Policy",
+    "Referrer-Policy",
+    "Permissions-Policy",
+)
+REQUIRED_APACHE_TOKENS = (
+    "RewriteRule ^ https://www.alo186.com%{REQUEST_URI}",
+    "AddOutputFilterByType SUBSTITUTE text/html application/xhtml+xml",
+    "zararın ortaya çıktığı tarihten itibaren 10 iş günü içinde",
+    "10 iş günü içinde ilgili dağıtım şirketinin resmî kanalına başvurun",
+    'ForceType text/css',
+)
+DAMAGE_TERMS = re.compile(r"\b(cihaz|teçhizat|techizat|hasar|zarar)\w*\b", re.IGNORECASE)
+APPLICATION_TERMS = re.compile(
+    r"\b(başvur|basvur|talep|tazmin|dağıtım şirket|dagitim sirket|edaş|edas)\w*",
+    re.IGNORECASE,
+)
+WRONG_DEADLINE = re.compile(r"\b30\s*gün\b", re.IGNORECASE)
 
 
 class AssetParser(HTMLParser):
@@ -41,21 +75,41 @@ def file_sha256(path: Path) -> str:
     return digest
 
 
+def wrong_damage_deadline_contexts(text: str) -> list[str]:
+    normalized = re.sub(r"\s+", " ", text)
+    contexts: list[str] = []
+    for match in WRONG_DEADLINE.finditer(normalized):
+        start = max(0, match.start() - 260)
+        end = min(len(normalized), match.end() + 260)
+        context = normalized[start:end]
+        if DAMAGE_TERMS.search(context) and APPLICATION_TERMS.search(context):
+            contexts.append(context[:520])
+    return contexts
+
+
 def smoke(bundle: Path, repo_root: Path) -> dict:
     manifest = json.loads((repo_root / "alo186/deployment/routing-manifest.json").read_text(encoding="utf-8"))
     failures: list[str] = []
     checked_assets = 0
+
+    if manifest.get("canonicalHost") != CANONICAL_HOST:
+        failures.append(f"Manifest canonicalHost yanlış: {manifest.get('canonicalHost')!r}")
 
     for route in manifest["routes"]:
         target = bundle / route["canonicalPath"].strip("/") / "index.html"
         if not target.exists():
             failures.append(f"Route index eksik: {route['canonicalPath']}")
             continue
+        html = target.read_text(encoding="utf-8")
         parser = AssetParser()
-        parser.feed(target.read_text(encoding="utf-8"))
+        parser.feed(html)
         expected = f"{manifest['canonicalHost']}{route['canonicalPath']}"
         if parser.canonical != expected:
             failures.append(f"Canonical eşleşmiyor: {route['canonicalPath']} → {parser.canonical!r}")
+        if LEGACY_HOST in html:
+            failures.append(f"Eski apex origin route HTML içinde kaldı: {route['canonicalPath']}")
+        for context in wrong_damage_deadline_contexts(html):
+            failures.append(f"{route['canonicalPath']}: yanlış cihaz hasarı süresi → {context}")
         for reference in parser.assets:
             asset = resolve_asset(bundle, target, reference)
             if asset is None:
@@ -69,9 +123,44 @@ def smoke(bundle: Path, repo_root: Path) -> dict:
             if not (bundle / inside).is_file():
                 failures.append(f"Asset eksik: {route['canonicalPath']} → {reference}")
 
-    for required in ("robots.txt", "sitemap.xml", ".htaccess", "alo186-release.json", "checksums.sha256"):
+    for required in REQUIRED_ROOT_FILES:
         if not (bundle / required).is_file():
             failures.append(f"Kök yayın dosyası eksik: {required}")
+
+    htaccess_path = bundle / ".htaccess"
+    if htaccess_path.is_file():
+        htaccess = htaccess_path.read_text(encoding="utf-8")
+        for header in REQUIRED_SECURITY_HEADERS:
+            if header not in htaccess:
+                failures.append(f"Aktif .htaccess güvenlik başlığı eksik: {header}")
+        for token in REQUIRED_APACHE_TOKENS:
+            if token not in htaccess:
+                failures.append(f"Aktif .htaccess sözleşmesi eksik: {token}")
+    else:
+        failures.append("Aktif .htaccess okunamadı")
+
+    release_path = bundle / "alo186-release.json"
+    if release_path.is_file():
+        release = json.loads(release_path.read_text(encoding="utf-8"))
+        if release.get("canonicalHost") != CANONICAL_HOST:
+            failures.append(f"Release canonicalHost yanlış: {release.get('canonicalHost')!r}")
+        if release.get("deviceDamageDeadline") != "10 iş günü":
+            failures.append("Release cihaz hasarı süresi sözleşmesi eksik")
+        for header in REQUIRED_SECURITY_HEADERS:
+            if header not in release.get("securityHeaders", []):
+                failures.append(f"Release güvenlik başlığı envanteri eksik: {header}")
+
+    robots_path = bundle / "robots.txt"
+    if robots_path.is_file():
+        robots = robots_path.read_text(encoding="utf-8")
+        if f"Sitemap: {CANONICAL_HOST}/sitemap.xml" not in robots:
+            failures.append("robots.txt canonical sitemap adresi yanlış")
+
+    sitemap_path = bundle / "sitemap.xml"
+    if sitemap_path.is_file():
+        sitemap = sitemap_path.read_text(encoding="utf-8")
+        if CANONICAL_HOST not in sitemap or LEGACY_HOST in sitemap:
+            failures.append("sitemap canonical origin sözleşmesi başarısız")
 
     checksum_path = bundle / "checksums.sha256"
     if checksum_path.exists():
@@ -85,6 +174,8 @@ def smoke(bundle: Path, repo_root: Path) -> dict:
         "ok": not failures,
         "routeCount": len(manifest["routes"]),
         "assetReferencesChecked": checked_assets,
+        "requiredRootFiles": list(REQUIRED_ROOT_FILES),
+        "requiredSecurityHeaders": list(REQUIRED_SECURITY_HEADERS),
         "failures": failures,
     }
     if failures:
