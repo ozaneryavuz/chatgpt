@@ -47,7 +47,7 @@ POSTMARK_RETURN_PATH_VALUE
 R2_ACCESS_KEY_ID
 R2_SECRET_ACCESS_KEY
 RESTIC_PASSWORD
-RENDER_DEPLOY_HOOK_URL
+RENDER_API_KEY
 ```
 
 ### GitHub Environment variables
@@ -59,6 +59,7 @@ ALO186_R2_BUCKET
 ALO186_SMTP_TEST_RECIPIENT
 POSTMARK_DKIM_HOST
 POSTMARK_RETURN_PATH_HOST
+RENDER_SERVICE_ID
 ```
 
 ### Repository variables
@@ -114,7 +115,7 @@ GRAFANA_CLOUD_API_KEY
 - R2 key: yalnız ALO186 backup bucket read/write/list.
 - Postmark token: yalnız ALO186 transactional server.
 - Grafana token: yalnız metrics publish.
-- Render deploy hook: yalnız API servisi deploy.
+- Render API key: yalnız gerekli workspace/service deploy ve deploy-status erişimi; kişisel geniş yetkili anahtar yerine mümkün olan en dar kapsam.
 - Sentry DSN public ingestion anahtarıdır; yine de repository'ye yazılmaz.
 
 ## 4. Aktivasyon sırası
@@ -132,8 +133,9 @@ Dosya 0600 izniyle üretilir. Değerleri Render'a taşıyın ve şirket parola k
 ### B. R2
 
 1. `ALO186 R2 backup repository bootstrap` workflow'unu `apply=false` çalıştırın.
-2. Beklenen bucket adı doğruysa korumalı onayla `apply=true` çalıştırın.
-3. Restic repository init ve check yeşil olmalıdır.
+2. Yalnız açık 404/NoSuchBucket sonucu “oluşturulacak” olarak kabul edilir; 400/403, credential, yetki veya endpoint hatası workflow'u kırmalıdır.
+3. Beklenen bucket adı doğruysa korumalı onayla `apply=true` çalıştırın.
+4. Restic repository init ve check yeşil olmalıdır.
 
 ### C. Render
 
@@ -141,15 +143,18 @@ Dosya 0600 izniyle üretilir. Değerleri Render'a taşıyın ve şirket parola k
 2. Paid PostgreSQL ve bütün servisler Frankfurt olarak doğrulanır.
 3. `sync:false` değerleri girilir.
 4. İlk deploy ve Alembic pre-deploy tamamlanır.
-5. Render hostname üzerinde `/health/live` ve `/health/ready` kontrol edilir.
-6. API servisinde deploy hook oluşturulup GitHub Environment'a eklenir.
+5. Render hostname üzerinde `/health/live`, `/health/ready` ve `/api/v1/kg/public/health` kontrol edilir.
+6. Render servisinin `srv-...` kimliği `RENDER_SERVICE_ID` variable olarak eklenir.
+7. Render API key `RENDER_API_KEY` secret olarak eklenir.
+8. `ALO186 Render manual deploy ve smoke test` workflow'u belirli commit için deploy oluşturur, dönen `dep-...` kimliğini izler ve yalnız aynı deploy `live` olduğunda smoke teste geçer.
 
 ### D. Postmark
 
 1. Sender domain eklenir.
-2. DKIM ve Return-Path değerleri GitHub Environment'a eklenir.
-3. SPF ikinci kayıt açmadan mevcut kayıtla birleştirilir.
-4. DMARC önce `p=none` ile başlatılır.
+2. DKIM ve Return-Path host/değerleri GitHub Environment'a eklenir.
+3. Readiness gate, DKIM ve Return-Path hostları boşsa başarısız olmalıdır; sessizce atlamamalıdır.
+4. SPF ikinci kayıt açmadan mevcut kayıtla birleştirilir.
+5. DMARC önce `p=none` ile başlatılır.
 
 ### E. DNS
 
@@ -157,7 +162,8 @@ Dosya 0600 izniyle üretilir. Değerleri Render'a taşıyın ve şirket parola k
 2. Dry-run yalnız beklenen `api`, DMARC, DKIM ve Return-Path değişikliklerini göstermelidir.
 3. Render custom domain eklenmişse `apply=true` çalıştırılır.
 4. İlk doğrulama Cloudflare DNS-only yapılır.
-5. Render TLS verified olduktan sonra proxy ancak ayrıca test edilerek açılır.
+5. DNS-only doğrulamada çözümlenen CNAME, normalize edilmiş `ALO186_RENDER_API_HOSTNAME` değeriyle birebir eşleşmelidir.
+6. Render TLS verified olduktan sonra proxy ancak ayrıca test edilerek açılır.
 
 ### F. Monitoring
 
@@ -172,7 +178,8 @@ Dosya 0600 izniyle üretilir. Değerleri Render'a taşıyın ve şirket parola k
 
 - Cloudflare DNS dry-run
 - SMTP TLS/auth
-- SPF/DMARC/DKIM/Return-Path
+- zorunlu Postmark DKIM ve Return-Path girdileri
+- SPF/DMARC/DKIM/Return-Path DNS
 - R2 bucket ve Restic check
 - Web/API/DNS/TLS sentetik kontrol
 
@@ -193,6 +200,7 @@ Issue içinde secret değeri göstermeden şu kanıtlar saklanır:
 - Render Blueprint sync ekranı
 - PostgreSQL paid/PITR durumu
 - Alembic head
+- deploy ID ve `live` terminal durumu
 - API readiness JSON
 - `api.alo186.com` TLS
 - Postmark domain verified
