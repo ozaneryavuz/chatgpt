@@ -52,7 +52,8 @@ assert.equal(questions.length,2);
 assert.ok(questions.every(item=>item.critical));
 const text=core.buildQuestionText('ev_cable','Type 2 ürün kartı',['phase_current','ip_temperature']);
 assert.match(text,/Marka Bağımsız Teknik Veri Soru Paketi/);
-assert.match(text,/Faz ve akım/);
+assert.match(text,/Kablo monofaze\/trifaze hangi akım ve güç sınıflarını destekler/);
+assert.match(text,/IP sınıfı ile çalışma\/saklama sıcaklıkları/);
 assert.match(text,/fiyat, stok, puan, garanti veya ürün uygunluk onayı değildir/i);
 assert.doesNotMatch(text,/amazon|asin|satıcı puanı|kampanya/i);
 
