@@ -70,7 +70,21 @@
     return `<a class="button ${secondary ? 'secondary' : 'primary'}" href="${url}" data-route="${dataRoute || url}">${label}</a>`;
   }
 
+  function outcomeUrl({ priority }, route) {
+    const params = new URLSearchParams({
+      kaynak: 'kesinti-atolyesi',
+      kategori: priority,
+      rota: route
+    });
+    return `/hesaplama/cozum-sonucu/?${params.toString()}`;
+  }
+
+  function outcomeAction(selection, route) {
+    return action(outcomeUrl(selection, route), 'Uyguladıktan sonra sonucu kaydet', true, 'solution_outcome');
+  }
+
   function renderPlan({ setting, priority, duration, existing }) {
+    const selection = { setting, priority, duration, existing };
     const plan = routes[priority];
     const resultTitle = byId('resultTitle');
     const resultText = byId('resultText');
@@ -84,14 +98,18 @@
 
     if (existing === 'works') {
       resultText.textContent = 'Mevcut çözümünüz ihtiyacı karşılıyorsa yeni ürün almayın. Bakım ve yeniden test planı oluşturun.';
-      actions.innerHTML = action('/hesaplama/ekipman-bakim-plani/', 'Mevcut ekipmanı koruma planı oluştur') + action(plan.calculate[0], plan.calculate[1], true);
+      actions.innerHTML = action('/hesaplama/ekipman-bakim-plani/', 'Mevcut ekipmanı koruma planı oluştur')
+        + action(plan.calculate[0], plan.calculate[1], true)
+        + outcomeAction(selection, 'buy_nothing');
       track('fast_revenue_plan_rendered', { setting, priority, duration, existing, route: 'buy_nothing' });
       return;
     }
 
     if (setting === 'hotel_site' || (setting === 'small_business' && (priority === 'cold_chain' || priority === 'long_outage')) || duration === 'long') {
       resultText.textContent = 'Bu senaryoda tek ürün seçimi yerine kritik yük, süre, transfer ve bakım planı birlikte değerlendirilmelidir. Ücretli profesyonel ön değerlendirme rotası açıldı.';
-      actions.innerHTML = action('/kurumsal-elektrik-surekliligi-on-degerlendirme', 'Ücretli kurumsal ön değerlendirmeyi incele', false, 'paid_b2b') + action(plan.calculate[0], plan.calculate[1], true, 'free_tool');
+      actions.innerHTML = action('/kurumsal-elektrik-surekliligi-on-degerlendirme', 'Ücretli kurumsal ön değerlendirmeyi incele', false, 'paid_b2b')
+        + action(plan.calculate[0], plan.calculate[1], true, 'free_tool')
+        + outcomeAction(selection, 'paid_b2b');
       track('fast_revenue_plan_rendered', { setting, priority, duration, existing, route: 'paid_b2b' });
       return;
     }
@@ -99,7 +117,9 @@
     resultText.textContent = existing === 'unknown'
       ? 'Mevcut ekipmanın yeterli olup olmadığını önce ücretsiz hesapla doğrulayın. Sonuç yetersizse ürün merkezine ilerleyin.'
       : 'Önce ücretsiz hesabı tamamlayın; yalnız gerçek kapasite veya güvenlik açığı varsa ürün sınıfını karşılaştırın.';
-    actions.innerHTML = action(plan.calculate[0], plan.calculate[1], false, 'free_tool') + action(plan.product[0], plan.product[1], true, 'affiliate_product_center');
+    actions.innerHTML = action(plan.calculate[0], plan.calculate[1], false, 'free_tool')
+      + action(plan.product[0], plan.product[1], true, 'affiliate_product_center')
+      + outcomeAction(selection, 'affiliate_product_center');
     disclosure.classList.remove('hidden');
     track('fast_revenue_plan_rendered', { setting, priority, duration, existing, route: 'affiliate_product_center' });
   }
