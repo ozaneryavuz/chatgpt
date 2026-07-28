@@ -42,9 +42,9 @@ jobs:
       - name: Mevcut ürün eşleştirme ve tekrar ziyaret regresyonları
         run: |
           node alo186/tests/test_product_matcher.js
-          node alo186/tests/test_safe_product_journey.js
-          node alo186/tests/test_trust_growth.js
-          node alo186/tests/test_product_shortlist.js
+          node alo186/urun-eslestirme/journey-retention.test.js
+          node alo186/urun-eslestirme/trust-growth-core.test.js
+          node alo186/urun-eslestirme/decision-shortlist.test.js
 
       - name: JavaScript sözdizimi
         run: |
