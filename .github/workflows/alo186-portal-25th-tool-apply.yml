@@ -1,0 +1,53 @@
+name: ALO186 portal 25. araç uygulaması
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'alo186/deployment/apply_portal_25th_tool.py'
+      - 'alo186/tests/test_portal_hardening.js'
+      - '.github/workflows/alo186-portal-hardening.yml'
+      - '.github/workflows/alo186-portal-25th-tool-apply.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.head_ref == 'feat/alo186-portal-25-arac-modem-mini-ups'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/alo186-portal-25-arac-modem-mini-ups
+          fetch-depth: 0
+      - name: Modem ve ONT mini UPS kartını uygula
+        run: python alo186/deployment/apply_portal_25th_tool.py
+      - name: Portal ve production bundle testleri
+        shell: bash
+        run: |
+          set -euo pipefail
+          node alo186/tests/test_portal_hardening.js
+          node alo186/tests/test_release_manifest.js
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-portal-25 \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-portal-25
+          grep -q '25 kişisel veri istemeyen araç' /tmp/alo186-portal-25/elektrik-portali/index.html
+          grep -q 'href="/hesaplama/modem-internet-yedekleme/"' /tmp/alo186-portal-25/elektrik-portali/index.html
+          test -f /tmp/alo186-portal-25/hesaplama/modem-internet-yedekleme/index.html
+      - name: Portal değişikliğini dala kaydet
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add alo186/index.html
+          if git diff --cached --quiet; then
+            echo 'Portal 25 araç değişikliği zaten uygulanmış.'
+          else
+            git commit -m 'feat(alo186): modem ve ONT mini UPS aracını portala ekle'
+            git push origin HEAD:feat/alo186-portal-25-arac-modem-mini-ups
+          fi
