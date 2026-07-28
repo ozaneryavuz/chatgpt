@@ -1,0 +1,45 @@
+name: ALO186 EV Cable Suitability CI
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/ev-sarj-kablosu-uygunluk/**'
+      - 'alo186/hesaplama/index.html'
+      - 'alo186/deployment/routing-manifest.json'
+      - 'alo186/sitemap.xml'
+      - '.github/workflows/alo186-ev-cable-suitability-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ev-cable-suitability:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript syntax
+        run: |
+          node --check alo186/hesaplama/ev-sarj-kablosu-uygunluk/core.js
+          node --check alo186/hesaplama/ev-sarj-kablosu-uygunluk/app.js
+          node --check alo186/hesaplama/ev-sarj-kablosu-uygunluk/test.js
+      - name: Safety, calculation and integration tests
+        run: node alo186/hesaplama/ev-sarj-kablosu-uygunluk/test.js
+      - name: JSON-LD and XML smoke test
+        run: |
+          python - <<'PY'
+          import json, pathlib, re, xml.etree.ElementTree as ET
+          html=pathlib.Path('alo186/hesaplama/ev-sarj-kablosu-uygunluk/index.html').read_text()
+          blocks=re.findall(r'<script type="application/ld\+json">(.*?)</script>',html,re.S)
+          assert blocks
+          for block in blocks: json.loads(block)
+          ET.parse('alo186/sitemap.xml')
+          manifest=json.loads(pathlib.Path('alo186/deployment/routing-manifest.json').read_text())
+          assert manifest['version'] >= 15
+          assert any(r['canonicalPath']=='/hesaplama/ev-sarj-kablosu-uygunluk/' for r in manifest['routes'])
+          print('JSON-LD, sitemap ve routing doğrulandı.')
+          PY
