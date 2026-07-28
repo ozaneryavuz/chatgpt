@@ -1,0 +1,61 @@
+prometheus.remote_write "grafana_cloud" {
+  external_labels = {
+    service     = "alo186-continuity-api",
+    environment = "production",
+    region      = "frankfurt",
+  }
+
+  endpoint {
+    url = sys.env("GRAFANA_CLOUD_PROMETHEUS_URL")
+
+    basic_auth {
+      username = sys.env("GRAFANA_CLOUD_PROMETHEUS_USERNAME")
+      password = sys.env("GRAFANA_CLOUD_API_KEY")
+    }
+
+    queue_config {
+      capacity             = 2500
+      max_samples_per_send = 1000
+      min_shards           = 1
+      max_shards           = 4
+      batch_send_deadline  = "5s"
+      retry_on_http_429    = true
+    }
+  }
+
+  wal {
+    truncate_frequency = "2h"
+    min_keepalive_time = "5m"
+    max_keepalive_time = "12h"
+  }
+}
+
+prometheus.scrape "alo186_api" {
+  targets = [
+    {
+      "__address__" = sys.env("ALO186_API_METRICS_TARGET"),
+      "__scheme__" = "https",
+      "__metrics_path__" = "/metrics",
+      "service" = "alo186-continuity-api",
+      "environment" = "production",
+    },
+  ]
+
+  scrape_interval = "30s"
+  scrape_timeout  = "10s"
+
+  authorization {
+    type        = "Bearer"
+    credentials = sys.env("ALO186_METRICS_TOKEN")
+  }
+
+  forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+}
+
+prometheus.exporter.self "alloy" {}
+
+prometheus.scrape "alloy" {
+  targets         = prometheus.exporter.self.alloy.targets
+  scrape_interval = "60s"
+  forward_to      = [prometheus.remote_write.grafana_cloud.receiver]
+}
