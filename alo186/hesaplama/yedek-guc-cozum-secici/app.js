@@ -2,11 +2,13 @@
   'use strict';
   const $=id=>document.getElementById(id);
   const core=window.Alo186BackupSelector;
+  const STORAGE_KEY='alo186_backup_selector_v2';
+  const MAX_AGE_MS=30*24*60*60*1000;
   const presets={
-    internet:{continuousW:20,peakW:25,hours:8,transition:'instant',scope:'dc-network',portable:'no',fuel:'no',outdoor:'no',solar:'no',phase:'single'},
-    office:{continuousW:250,peakW:500,hours:3,transition:'instant',scope:'plug',portable:'yes',fuel:'no',outdoor:'no',solar:'no',phase:'single'},
-    fridge:{continuousW:350,peakW:1200,hours:6,transition:'brief',scope:'motor',portable:'no',fuel:'no',outdoor:'no',solar:'no',phase:'single'},
-    business:{continuousW:800,peakW:1800,hours:4,transition:'instant',scope:'plug',portable:'no',fuel:'no',outdoor:'no',solar:'no',phase:'single'}
+    internet:{continuousW:20,peakW:25,hours:8,transition:'instant',scope:'dc-network',portable:'no',fuel:'no',outdoor:'no',solar:'no',phase:'single',medical:false},
+    office:{continuousW:250,peakW:500,hours:3,transition:'instant',scope:'plug',portable:'yes',fuel:'no',outdoor:'no',solar:'no',phase:'single',medical:false},
+    fridge:{continuousW:350,peakW:1200,hours:6,transition:'brief',scope:'motor',portable:'no',fuel:'no',outdoor:'no',solar:'no',phase:'single',medical:false},
+    business:{continuousW:800,peakW:1800,hours:4,transition:'instant',scope:'plug',portable:'no',fuel:'no',outdoor:'no',solar:'no',phase:'single',medical:false}
   };
 
   function emit(name,params={}){
@@ -20,9 +22,40 @@
       solar:$('solar').value,medical:$('medical').checked
     };
   }
+  function sanitize(data){
+    const allowed=['continuousW','peakW','hours','transition','scope','phase','portable','fuel','outdoor','solar'];
+    const clean={};
+    allowed.forEach(key=>{if(data&&Object.prototype.hasOwnProperty.call(data,key))clean[key]=String(data[key]);});
+    clean.medical=Boolean(data&&data.medical);
+    return clean;
+  }
   function setValues(data){
-    Object.entries(data).forEach(([key,value])=>{const el=$(key);if(el)el.value=String(value);});
-    $('medical').checked=false;
+    Object.entries(sanitize(data)).forEach(([key,value])=>{
+      const el=$(key);
+      if(!el)return;
+      if(key==='medical')el.checked=Boolean(value);
+      else el.value=String(value);
+    });
+  }
+  function save(data){
+    try{
+      localStorage.setItem(STORAGE_KEY,JSON.stringify({savedAt:Date.now(),input:sanitize(data)}));
+      $('restoreBtn').hidden=false;
+    }catch(_){ }
+  }
+  function load(){
+    try{
+      const stored=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');
+      if(!stored||!stored.savedAt||Date.now()-stored.savedAt>MAX_AGE_MS){
+        localStorage.removeItem(STORAGE_KEY);
+        return null;
+      }
+      return sanitize(stored.input||{});
+    }catch(_){return null;}
+  }
+  function clearStored(){
+    try{localStorage.removeItem(STORAGE_KEY);}catch(_){ }
+    $('restoreBtn').hidden=true;
   }
   function li(items){return items.map(item=>`<li>${escapeHtml(item)}</li>`).join('');}
   function escapeHtml(value){return String(value).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
@@ -48,8 +81,17 @@
     $('affiliateAck').checked=false;
     updateAffiliateLink();
     $('results').focus({preventScroll:true});
-    $('results').scrollIntoView({behavior:'smooth',block:'start'});
+    $('results').scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
     emit('backup_solution_selector_completed',{recommendation:result.recommendation,professional_required:result.professionalRequired,commercial_allowed:result.commercialAllowed,energy_band:result.energyWh<1000?'under_1kwh':result.energyWh<3000?'1_3kwh':'over_3kwh'});
+  }
+  function calculate(input,{restored=false}={}){
+    $('validation').textContent='';
+    try{
+      const result=core.analyze(input);
+      render(result);
+      save(input);
+      if(restored)emit('backup_solution_selector_restored',{recommendation:result.recommendation});
+    }catch(error){$('validation').textContent=error.message;$('validation').focus();}
   }
   function updateAffiliateLink(){
     const enabled=$('affiliateAck').checked;
@@ -65,12 +107,16 @@
   }));
   $('selectorForm').addEventListener('submit',event=>{
     event.preventDefault();
-    $('validation').textContent='';
-    try{render(core.analyze(values()));}
-    catch(error){$('validation').textContent=error.message;$('validation').focus();}
+    calculate(values());
+  });
+  $('restoreBtn').addEventListener('click',()=>{
+    const stored=load();
+    if(!stored){$('restoreBtn').hidden=true;return;}
+    setValues(stored);
+    calculate(stored,{restored:true});
   });
   $('resetBtn').addEventListener('click',()=>{
-    $('selectorForm').reset();setValues(presets.office);$('results').classList.add('hidden');$('validation').textContent='';
+    $('selectorForm').reset();setValues(presets.office);$('results').classList.add('hidden');$('validation').textContent='';clearStored();emit('backup_solution_selector_local_data_cleared');
   });
   $('affiliateAck').addEventListener('change',updateAffiliateLink);
   $('productCenterLink').addEventListener('click',event=>{
@@ -78,4 +124,5 @@
     emit('backup_solution_product_center_opened',{placement:'backup_solution_selector'});
   });
   $('nextStepLink').addEventListener('click',()=>emit('backup_solution_next_tool_opened',{url:$('nextStepLink').href}));
+  $('restoreBtn').hidden=!load();
 })();
