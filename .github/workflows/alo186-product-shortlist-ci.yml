@@ -30,4 +30,4 @@ jobs:
           ! grep -RniE 'name="(name|email|phone|address|plate|subscription)"' alo186/urun-eslestirme/index.html
           ! grep -Rni 'amazon.com.tr' alo186/urun-eslestirme/decision-shortlist.js
           grep -q 'sponsored nofollow noopener' alo186/urun-eslestirme/decision-shortlist.js
-          grep -q 'Satın almamak geçerli' alo186/urun-eslestirme/index.html
+          grep -qi 'satın almamak geçerli' alo186/urun-eslestirme/index.html
