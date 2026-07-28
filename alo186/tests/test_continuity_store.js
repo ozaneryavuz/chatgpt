@@ -2,8 +2,10 @@ const assert=require('assert');
 const store=require('../sureklilik-paneli/store.js');
 
 let state=store.createState();
-assert.strictEqual(state.schemaVersion,1);
+assert.strictEqual(state.schemaVersion,2);
 assert.strictEqual(store.metrics(state).locations,0);
+assert(Array.isArray(state.improvementActions));
+assert(Array.isArray(state.maturityImports));
 
 state=store.configureOrganization(state,{name:'Test Oteli',profile:'hotel'});
 assert.strictEqual(state.organization.name,'Test Oteli');
@@ -64,10 +66,12 @@ assert.strictEqual(result.incident.closedWithIncompleteP1,true,'Tamamlanmamış 
 const hydrated=store.hydrate(JSON.parse(JSON.stringify(state)));
 assert.strictEqual(hydrated.locations.length,1);
 assert.strictEqual(hydrated.incidents.length,1);
+assert(Array.isArray(hydrated.improvementActions));
 assert(hydrated.auditLog.length>=8,'Audit kayıtları oluşmalı.');
 
-const badHydrate=store.hydrate({locations:'bozuk',incidents:null});
+const badHydrate=store.hydrate({locations:'bozuk',incidents:null,improvementActions:'bozuk'});
 assert(Array.isArray(badHydrate.locations));
 assert(Array.isArray(badHydrate.incidents));
+assert(Array.isArray(badHydrate.improvementActions));
 
 console.log('İşletme sürekliliği store testleri başarılı.');
