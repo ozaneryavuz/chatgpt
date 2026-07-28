@@ -88,7 +88,15 @@
       byId('nextStep').textContent = assessment.next;
 
       const subject = `ALO186 tedarikçi/üretici iş birliği — ${readable.category}`;
-      const body = ['Merhaba,','',currentBrief,'','Kapsam, ücret, teslim, etiketleme ve gerekli belge listesinin yazılı olarak iletilmesini rica ederim.'].join('\n');
+      const body = [
+        'Merhaba,',
+        '',
+        currentBrief,
+        '',
+        'Sponsorlu ilişkinin açıkça etiketlenmesini, organik teknik sıralamanın ödeme ile değiştirilmemesini ve bütün teknik iddiaların resmî kaynaklarla doğrulanmasını kabul ediyorum.',
+        '',
+        'Kapsam, ücret, teslim, etiketleme ve gerekli belge listesinin yazılı olarak iletilmesini rica ederim.'
+      ].join('\n');
       link.href = `mailto:bilgi@alo186.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
       link.classList.remove('disabled');
       link.setAttribute('aria-disabled','false');
