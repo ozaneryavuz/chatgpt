@@ -69,6 +69,10 @@
     return [...new Set(Array.isArray(values) ? values.filter((item) => allowed.has(item)) : [])];
   }
 
+  function hasMixedNone(values) {
+    return values.includes("none") && values.length > 1;
+  }
+
   function validStatus(value) {
     return Object.prototype.hasOwnProperty.call(STATUS_SCORES, value) ? value : "missing";
   }
@@ -124,6 +128,8 @@
     const errors = [];
     if (!criticalLoads.length) errors.push("Kritik yük durumunu seçin.");
     if (!backupSources.length) errors.push("Yedek kaynak durumunu seçin.");
+    if (hasMixedNone(criticalLoads)) errors.push("“Kritik yük yok” seçeneğini diğer kritik yüklerle birlikte kullanmayın.");
+    if (hasMixedNone(backupSources)) errors.push("“Yedek kaynak yok” seçeneğini diğer yedek kaynaklarla birlikte kullanmayın.");
     if (data.confirmTabletop !== true) errors.push("Çalışmanın planlı masa başı veya yetkili ekip gözetimindeki kontrollü tatbikat olduğunu doğrulayın.");
     if (errors.length) return { valid: false, emergency: false, revenueAllowed: false, errors };
 
@@ -164,7 +170,7 @@
     }));
     const p0Count = gaps.filter((item) => item.priority === "P0").length;
     const p1Count = gaps.filter((item) => item.priority === "P1").length;
-    const passportSuggestions = {
+    const passportEvidenceSuggestions = {
       recovery_drill: p0Count === 0 ? "current" : "planned",
       emergency_contacts: data.rolesAssigned && data.offlineContacts ? "current" : "due",
       outage_log: data.recordTemplate ? "current" : "planned",
