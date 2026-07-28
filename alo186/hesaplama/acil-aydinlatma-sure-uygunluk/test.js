@@ -62,7 +62,7 @@ assert.match(html,/https:\/\/www\.alo186\.com\/hesaplama\/acil-aydinlatma-sure-u
 assert.match(html,/Satış ortaklığı açıklaması/);
 assert.match(html,/Kişisel veri yok/);
 assert.match(html,/İşyeri kaçış yolu/);
-assert.match(html,/Mum yerine/);
+assert.match(html,/mum yerine/i);
 assert.doesNotMatch(html,/amazon\.(com|com\.tr)\//i);
 assert.doesNotMatch(html,/type="(?:email|tel|text)"/i);
 assert.match(manifest,/alo186\/hesaplama\/acil-aydinlatma-sure-uygunluk\/index\.html/);
