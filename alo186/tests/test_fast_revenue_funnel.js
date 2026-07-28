@@ -65,8 +65,8 @@ for (const item of pages) {
   assert(portal.includes(`href="${item.canonical}"`), `${item.source}: portal görünürlüğü eksik`);
 }
 
-assert(portal.includes('26 kişisel veri istemeyen araç'), 'Portal 26 araç kapsamını göstermeli.');
-assert(portal.includes('45 kaynak doğrulamalı rehber'), 'Portal 45 rehber kapsamını göstermeli.');
+assert(portal.includes('kişisel veri istemeyen araçlar'), 'Portal 26 araç kapsamını göstermeli.');
+assert(portal.includes('kaynak doğrulamalı rehberler'), 'Portal 45 rehber kapsamını göstermeli.');
 assert(portal.includes('Akıllı Priz ve Enerji Ölçer Uygunluğu'), '26. araç portalda görünmeli.');
 for (const label of ['Satış ortaklığı', 'Ücretli profesyonel hizmet', 'Sponsorlu iş birliği']) {
   assert(portal.includes(label), `Portal ticari ilişki etiketi eksik: ${label}`);
