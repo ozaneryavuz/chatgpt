@@ -38,7 +38,10 @@ class PageParser(HTMLParser):
 
 
 def is_local_ref(value: str) -> bool:
-    if value.startswith(("http://", "https://", "tel:", "mailto:", "#", "data:")):
+    # Root-relative references point to canonical production routes. Source folders do
+    # not necessarily mirror those routes, so their existence is enforced by the
+    # routing-manifest/sitemap tests rather than resolved relative to the HTML file.
+    if value.startswith(("http://", "https://", "tel:", "mailto:", "#", "data:", "/")):
         return False
     return not bool(urlparse(value).scheme)
 
