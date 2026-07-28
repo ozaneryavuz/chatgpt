@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import argparse
+import html as html_module
 import json
+import re
 import socket
 import ssl
 import subprocess
 import time
+import unicodedata
 from datetime import datetime, timezone
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
@@ -28,6 +31,25 @@ REQUIRED_API_HEADERS = (
     "x-frame-options",
     "referrer-policy",
 )
+
+# EPDK'nın güncel tüketici açıklaması ve Hizmet Kalitesi Yönetmeliği madde 26
+# bağlamında cihaz/teçhizat hasarı talebi zararın ortaya çıktığı tarihten itibaren
+# 10 iş günü içinde ilgili dağıtım şirketine yapılabilir.
+EPDK_DEVICE_DAMAGE_SOURCE = (
+    "https://www.epdk.gov.tr/Detay/Icerik/12-3/"
+    "12-faturayi-zamaninda-odemezsem-gecikme-zammi-od"
+)
+DEVICE_DAMAGE_STRICT_PATHS = ("/", "/elektrik-portali")
+DEVICE_DAMAGE_CANDIDATE_PATHS = (
+    "/cihaz-hasari-gorevleri",
+    "/elektrik-gorevleri",
+    "/sektor-rehberi",
+    "/sektor-rehberi/elektrik-kesintisi-tazminati",
+    "/sektor-rehberi/elektrikli-cihaz-hasar-basvurusu",
+    "/sektor-rehberi/gerilim-dalgalanmasi-teknik-kalite",
+)
+DAMAGE_TERMS = ("cihaz", "techizat", "hasar", "zarar")
+CLAIM_TERMS = ("basvur", "tazmin", "talep", "dagitim", "edas")
 
 
 def resolve(hostname: str) -> dict[str, object]:
@@ -61,7 +83,7 @@ def fetch(
     started = time.perf_counter()
     request = Request(
         url,
-        headers={"User-Agent": "ALO186-Synthetic/2.1", "Accept": "application/json,text/html,*/*"},
+        headers={"User-Agent": "ALO186-Synthetic/2.2", "Accept": "application/json,text/html,*/*"},
     )
     try:
         with urlopen(request, timeout=timeout) as response:
@@ -120,6 +142,161 @@ def fetch(
             "error": str(exc),
             "durationMs": round((time.perf_counter() - started) * 1000, 1),
         }
+
+
+def _fold_content(value: str) -> str:
+    """HTML, görünür metin ve JSON-LD içeriğini arama için sadeleştirir."""
+
+    decoded = html_module.unescape(value)
+    without_tags = re.sub(r"<[^>]+>", " ", decoded)
+    normalized = unicodedata.normalize("NFKD", without_tags)
+    without_marks = "".join(ch for ch in normalized if not unicodedata.combining(ch))
+    return re.sub(r"\s+", " ", without_marks.casefold()).strip()
+
+
+def _context(value: str, start: int, end: int, radius: int = 360) -> str:
+    return value[max(0, start - radius) : min(len(value), end + radius)].strip()
+
+
+def _has_terms(value: str, terms: tuple[str, ...]) -> bool:
+    return any(term in value for term in terms)
+
+
+def analyze_device_damage_text(raw_html: str) -> dict[str, object]:
+    """Cihaz hasarı başvuru süresindeki hukuki açıdan kritik ifadeleri tarar.
+
+    Arama görünür HTML metnini ve JSON-LD script içeriğini birlikte kapsar. Böylece
+    sayfada doğru metin gösterilirken yapılandırılmış veride eski sürenin kalması da
+    yayın hatası sayılır.
+    """
+
+    text = _fold_content(raw_html)
+    bad_contexts: list[str] = []
+    good_contexts: list[str] = []
+
+    for match in re.finditer(r"\b30\s*(?:takvim\s*)?gun(?:luk|u|un|de|den)?\b", text):
+        nearby = _context(text, match.start(), match.end())
+        if _has_terms(nearby, DAMAGE_TERMS) and _has_terms(nearby, CLAIM_TERMS):
+            bad_contexts.append(nearby[:720])
+
+    for match in re.finditer(r"\b10\s*is\s*gun(?:u|luk|unde|unden)?\b", text):
+        nearby = _context(text, match.start(), match.end())
+        if _has_terms(nearby, DAMAGE_TERMS) and _has_terms(nearby, CLAIM_TERMS):
+            good_contexts.append(nearby[:720])
+
+    disclaimer_patterns = (
+        r"alo186.{0,320}(?:basvuru|ihbar|ariza|hasar|kayit).{0,180}(?:almaz|toplamaz|degildir|yapmaz)",
+        r"(?:basvuru|ihbar|ariza|hasar|kayit).{0,180}(?:almaz|toplamaz|degildir|yapmaz).{0,320}alo186",
+    )
+    has_disclaimer = any(re.search(pattern, text) for pattern in disclaimer_patterns)
+
+    return {
+        "has30DayDamageClaim": bool(bad_contexts),
+        "has10BusinessDayDamageClaim": bool(good_contexts),
+        "hasAlo186NoApplicationDisclaimer": has_disclaimer,
+        "badContexts": bad_contexts[:5],
+        "goodContexts": good_contexts[:3],
+    }
+
+
+def device_damage_deadline_check(
+    base_url: str,
+    path: str,
+    timeout: float,
+    *,
+    strict: bool,
+) -> dict[str, object]:
+    started = time.perf_counter()
+    url = f"{base_url.rstrip('/')}{path}"
+    request = Request(
+        url,
+        headers={
+            "User-Agent": "ALO186-Legal-Accuracy-Monitor/1.0",
+            "Accept": "text/html,application/xhtml+xml",
+        },
+    )
+    try:
+        with urlopen(request, timeout=timeout) as response:
+            body = response.read(512_000)
+            content_type = response.headers.get("content-type", "")
+            raw = body.decode("utf-8", errors="replace")
+            analysis = analyze_device_damage_text(raw)
+            ok = (
+                response.status == 200
+                and "text/html" in content_type.lower()
+                and not analysis["has30DayDamageClaim"]
+                and (
+                    not strict
+                    or (
+                        analysis["has10BusinessDayDamageClaim"]
+                        and analysis["hasAlo186NoApplicationDisclaimer"]
+                    )
+                )
+            )
+            result: dict[str, object] = {
+                "ok": ok,
+                "kind": "legal-content",
+                "rule": "device-damage-claim-deadline",
+                "path": path,
+                "requestedUrl": url,
+                "finalUrl": response.geturl(),
+                "status": response.status,
+                "contentType": content_type,
+                "strict": strict,
+                "sourceUrl": EPDK_DEVICE_DAMAGE_SOURCE,
+                "durationMs": round((time.perf_counter() - started) * 1000, 1),
+                **analysis,
+            }
+            if not ok:
+                reasons: list[str] = []
+                if response.status != 200:
+                    reasons.append(f"HTTP {response.status}")
+                if "text/html" not in content_type.lower():
+                    reasons.append("HTML yanıtı değil")
+                if analysis["has30DayDamageClaim"]:
+                    reasons.append("cihaz/teçhizat hasarı bağlamında 30 gün bulundu")
+                if strict and not analysis["has10BusinessDayDamageClaim"]:
+                    reasons.append("10 iş günü ifadesi bulunamadı")
+                if strict and not analysis["hasAlo186NoApplicationDisclaimer"]:
+                    reasons.append("ALO186'in başvuru/ihbar almadığı açıklanmıyor")
+                result["error"] = "; ".join(reasons)
+            return result
+    except (HTTPError, URLError, TimeoutError, OSError) as exc:
+        return {
+            "ok": False,
+            "kind": "legal-content",
+            "rule": "device-damage-claim-deadline",
+            "path": path,
+            "requestedUrl": url,
+            "strict": strict,
+            "sourceUrl": EPDK_DEVICE_DAMAGE_SOURCE,
+            "error": str(exc),
+            "durationMs": round((time.perf_counter() - started) * 1000, 1),
+        }
+
+
+def device_damage_deadline_checks(web_base: str, timeout: float) -> list[dict[str, object]]:
+    checks: list[dict[str, object]] = []
+    seen: set[str] = set()
+
+    # Hukuki açıdan en kritik ana sayfa ve portal hem apex hem www üzerinde ayrı
+    # doğrulanır; canonical/host geçişlerinde eski cache'in kalması böyle yakalanır.
+    for base in ("https://alo186.com", "https://www.alo186.com"):
+        for path in DEVICE_DAMAGE_STRICT_PATHS:
+            url = f"{base}{path}"
+            if url not in seen:
+                checks.append(device_damage_deadline_check(base, path, timeout, strict=True))
+                seen.add(url)
+
+    # Diğer aday sayfalar canonical web base üzerinde bağlam içinde taranır. Bu
+    # sayfalardaki başka bir sürece ait 30 günlük süre, hasar+başvuru bağlamı yoksa
+    # yanlışlıkla hata sayılmaz.
+    for path in DEVICE_DAMAGE_CANDIDATE_PATHS:
+        url = f"{web_base.rstrip('/')}{path}"
+        if url not in seen:
+            checks.append(device_damage_deadline_check(web_base, path, timeout, strict=False))
+            seen.add(url)
+    return checks
 
 
 def tls_expiry(hostname: str, port: int = 443, timeout: float = 10.0) -> dict[str, object]:
@@ -207,6 +384,8 @@ def run(
     kg_result.update({"kind": "knowledge-graph", "path": KG_HEALTH_PATH})
     checks.append(kg_result)
 
+    legal_content_checks = device_damage_deadline_checks(web_base, timeout)
+
     tls_checks = []
     for host in {web_host, api_host}:
         try:
@@ -215,7 +394,7 @@ def run(
             tls_checks.append({"ok": False, "hostname": host, "error": str(exc)})
 
     email_checks = email_dns(email_domain) if check_email_dns else []
-    all_checks = [*dns_checks, *checks, *tls_checks, *email_checks]
+    all_checks = [*dns_checks, *checks, *legal_content_checks, *tls_checks, *email_checks]
     failures = [item for item in all_checks if not item.get("ok")]
     return {
         "ok": not failures,
@@ -224,6 +403,7 @@ def run(
         "apiBase": api_base,
         "dns": dns_checks,
         "checks": checks,
+        "legalContent": legal_content_checks,
         "tls": tls_checks,
         "emailDns": email_checks,
         "failureCount": len(failures),
@@ -232,7 +412,10 @@ def run(
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="ALO186 web/API/Knowledge Graph/DNS/TLS sentetik kontrolü"
+        description=(
+            "ALO186 web/API/Knowledge Graph/DNS/TLS ve cihaz hasarı başvuru süresi "
+            "sentetik kontrolü"
+        )
     )
     parser.add_argument("--web-base", default="https://www.alo186.com")
     parser.add_argument("--api-base", default="https://api.alo186.com")
