@@ -24,7 +24,8 @@ assert(app.includes('seasonal_readiness_saved'),'Mevsimsel tekrar ziyaret olayı
 assert(!/localStorage\.setItem\([^\n]*(?:email|phone|address|serial|price|seller|asin)/i.test(app),'Büyüme runtimeı kişisel veya ticari veri saklamamalı.');
 
 for(const token of ['summer','winter','storm','spring','affiliateAllowed','professional','sharePayload','reviewRecord'])assert(core.includes(token),`Büyüme çekirdeği sözleşmesi eksik: ${token}`);
-assert(core.includes('Mevcut ekipman, bakım veya resmî kanal'),'Satın almama mantığı görünür değil.');
+assert(core.includes("status='no_buy'"),'Satın almama karar durumu eksik.');
+assert(core.includes("affiliateAllowed=false"),'Satın almama ve profesyonel sonuçlarda affiliate kapısı kapanmalı.');
 assert(core.includes('ALO186 EDAŞ veya kamu kurumu değildir'),'Resmî kurum sınırı paylaşım metninde eksik.');
 assert(!/amazon\.(?:com|com\.tr)|ASIN|seller|price|stock|warranty/i.test(core),'Büyüme çekirdeği haricî ürün veya doğrulanmamış ticari alan içermemeli.');
 
