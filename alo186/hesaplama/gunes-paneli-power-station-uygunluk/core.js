@@ -46,7 +46,9 @@
     if(input.panelImp>input.panelIsc)throw new Error('Panel Imp değeri Isc değerini aşmamalıdır.');
     if(input.mpptMinV>=input.mpptMaxV)throw new Error('MPPT alt sınırı üst çalışma sınırından küçük olmalıdır.');
     if(input.mpptMaxV>input.absoluteMaxVoc)throw new Error('MPPT çalışma üst sınırı mutlak azami Voc değerini aşamaz.');
-    if((input.currentSoc==null)!==(input.targetSoc==null))throw new Error('Şarj süresi için başlangıç ve hedef doluluk birlikte girilmelidir.');
+    const chargeInputs=[input.stationCapacity,input.currentSoc,input.targetSoc];
+    const chargeInputCount=chargeInputs.filter(value=>value!=null).length;
+    if(chargeInputCount!==0&&chargeInputCount!==3)throw new Error('Yaklaşık şarj süresi için kapasite, başlangıç ve hedef doluluk birlikte girilmelidir.');
     if(input.currentSoc!=null&&input.targetSoc<=input.currentSoc)throw new Error('Hedef doluluk başlangıç doluluğundan büyük olmalıdır.');
 
     const coldRise=1+(input.vocTempCoeff/100)*Math.max(0,25-input.minTemp);
@@ -78,7 +80,7 @@
     if(blockers.length)status='incompatible';
     else if(warnings.length)status='conditional';
 
-    const energyNeed=input.stationCapacity!=null&&input.currentSoc!=null?input.stationCapacity*(input.targetSoc-input.currentSoc)/100:null;
+    const energyNeed=input.stationCapacity!=null?input.stationCapacity*(input.targetSoc-input.currentSoc)/100:null;
     const idealHours=energyNeed!=null&&estimatedAcceptedPower>0?energyNeed/(estimatedAcceptedPower*input.derating):null;
     const professionalRequired=input.application!=='portable'||input.seriesCount>2||input.parallelCount>2||coldVoc>60||arrayPower>800||status==='incompatible';
     const commercialAllowed=status==='compatible'&&input.application==='portable'&&input.manualVerified&&input.connectorKnown&&input.factoryCable&&input.seriesCount<=2&&input.parallelCount<=2&&coldVoc<=60&&arrayPower<=800;
