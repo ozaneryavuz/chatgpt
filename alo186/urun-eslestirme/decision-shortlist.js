@@ -118,8 +118,8 @@
     emit('product_shortlist_recheck_opened',{category:categoryId});
   }
   function gateMarkup(product,href){
-    const unknowns=product?.limits?.length?`<li>${product.limits.map(escapeHtml).join('</li><li>')}</li>`:'<li>Ürün sayfasındaki teknik alanları yeniden doğrulayın.</li>';
-    return `<div class="affiliate-decision-gate" data-affiliate-gate><h4>Satın alma bağlantısından önce son kontrol</h4><p><strong>Reklam / satış ortaklığı:</strong> Bu bağlantıdan nitelikli satın alım yapılırsa ALO186 komisyon kazanabilir; kullanıcıya ek maliyet yansımaz.</p><label class="check-item"><input type="checkbox" data-gate-need><span><b>Mevcut ekipmanım ihtiyacımı karşılamıyor veya ek ürün ihtiyacını doğruladım.</b><br><small>Satın almamak geçerli bir sonuçtur.</small></span></label><label class="check-item"><input type="checkbox" data-gate-technical><span><b>Teknik sınırları ürün sayfasında yeniden kontrol edeceğim.</b><br><small>Özellikle: ${unknowns}</small></span></label><label class="check-item"><input type="checkbox" data-gate-affiliate><span><b>Bağlantının satış ortaklığı bağlantısı olduğunu anlıyorum.</b><br><small>Fiyat, stok, satıcı, teslimat ve garanti Amazon’da doğrulanır.</small></span></label><div class="actions"><a class="btn btn-primary disabled-link" data-gate-open href="${escapeHtml(href)}" target="_blank" rel="sponsored nofollow noopener" aria-disabled="true" tabindex="-1">Amazon ürün sayfasını aç</a><button type="button" class="btn btn-secondary" data-gate-no-purchase>Şimdilik satın alma</button></div><p class="gate-status" role="status"></p></div>`;
+    const limits=product?.limits?.length?product.limits:['Ürün sayfasındaki teknik alanları yeniden doğrulayın.'];
+    return `<div class="affiliate-decision-gate" data-affiliate-gate><h4>Satın alma bağlantısından önce son kontrol</h4><p><strong>Reklam / satış ortaklığı:</strong> Bu bağlantıdan nitelikli satın alım yapılırsa ALO186 komisyon kazanabilir; kullanıcıya ek maliyet yansımaz.</p><label class="check-item"><input type="checkbox" data-gate-need><span><b>Mevcut ekipmanım ihtiyacımı karşılamıyor veya ek ürün ihtiyacını doğruladım.</b><br><small>Satın almamak geçerli bir sonuçtur.</small></span></label><label class="check-item"><input type="checkbox" data-gate-technical><span><b>Teknik sınırları ürün sayfasında yeniden kontrol edeceğim.</b><small class="gate-limits"><span>Özellikle:</span><ul>${limits.map(item=>`<li>${escapeHtml(item)}</li>`).join('')}</ul></small></span></label><label class="check-item"><input type="checkbox" data-gate-affiliate><span><b>Bağlantının satış ortaklığı bağlantısı olduğunu anlıyorum.</b><br><small>Fiyat, stok, satıcı, teslimat ve garanti Amazon’da doğrulanır.</small></span></label><div class="actions"><a class="btn btn-primary disabled-link" data-gate-open href="${escapeHtml(href)}" target="_blank" rel="sponsored nofollow noopener" aria-disabled="true" tabindex="-1">Amazon ürün sayfasını aç</a><button type="button" class="btn btn-secondary" data-gate-no-purchase>Şimdilik satın alma</button></div><p class="gate-status" role="status"></p></div>`;
   }
   function openAffiliateGate(link){
     const card=link.closest('.product-card');
@@ -160,7 +160,11 @@
       const recheck=event.target.closest?.('[data-shortlist-recheck]');
       if(recheck){recheckCategory(recheck.dataset.shortlistRecheck);return;}
       const productLink=event.target.closest?.('#directResult [data-product]');
-      if(productLink){event.preventDefault();openAffiliateGate(productLink);}
+      if(productLink){
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        openAffiliateGate(productLink);
+      }
     },true);
     $('clearProductShortlistBtn')?.addEventListener('click',clearVault);
   }
