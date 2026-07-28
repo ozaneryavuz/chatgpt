@@ -1,5 +1,5 @@
 {
-  "version": 31,
+  "version": 32,
   "canonicalHost": "https://www.alo186.com",
   "generatedAt": "2026-07-28",
   "routes": [
@@ -109,7 +109,10 @@
     {"source":"alo186/haberler/jenerator-devreye-girince-kacak-akim-rolesi-neden-atar/index.html","canonicalPath":"/haberler/jenerator-devreye-girince-kacak-akim-rolesi-neden-atar","type":"article"},
     {"source":"alo186/haberler/elektrik-sayaci-degisti-eski-yeni-endeks-fatura-kontrolu/index.html","canonicalPath":"/haberler/elektrik-sayaci-degisti-eski-yeni-endeks-fatura-kontrolu","type":"article"},
     {"source":"alo186/haberler/notr-akimi-faz-akimindan-yuksek-neden-olur/index.html","canonicalPath":"/haberler/notr-akimi-faz-akimindan-yuksek-neden-olur","type":"article"},
-    {"source":"alo186/haberler/batarya-soc-soh-farki-kapasite-saglik-nasil-anlasilir/index.html","canonicalPath":"/haberler/batarya-soc-soh-farki-kapasite-saglik-nasil-anlasilir","type":"article"}
+    {"source":"alo186/haberler/batarya-soc-soh-farki-kapasite-saglik-nasil-anlasilir/index.html","canonicalPath":"/haberler/batarya-soc-soh-farki-kapasite-saglik-nasil-anlasilir","type":"article"},
+    {"source":"alo186/haberler/kacak-akim-rolesi-tip-s-selektivite-nedir/index.html","canonicalPath":"/haberler/kacak-akim-rolesi-tip-s-selektivite-nedir","type":"article"},
+    {"source":"alo186/haberler/jenerator-dusuk-yuk-wet-stacking-nedir/index.html","canonicalPath":"/haberler/jenerator-dusuk-yuk-wet-stacking-nedir","type":"article"},
+    {"source":"alo186/haberler/ups-aku-string-dengesizligi-zayif-aku-nasil-anlasilir/index.html","canonicalPath":"/haberler/ups-aku-string-dengesizligi-zayif-aku-nasil-anlasilir","type":"article"}
   ],
   "requiredIntegrations": [
     "canonical URL must resolve with HTTP 200",
