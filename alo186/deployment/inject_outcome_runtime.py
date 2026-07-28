@@ -121,8 +121,15 @@ def ensure_plan_route(site: Path, base_path: str) -> bool:
     return created
 
 
+def card_marker(card: str) -> str:
+    match = re.search(r'data-alo186-[a-z0-9-]+="true"', card, re.I)
+    if not match:
+        raise ValueError("ALO186 giriş kartı benzersiz marker içermeli")
+    return match.group(0)
+
+
 def insert_after_grid_open(text: str, cards: list[str]) -> tuple[str, int]:
-    missing = [card for card in cards if card.split(' ', 2)[1] not in text]
+    missing = [card for card in cards if card_marker(card) not in text]
     if not missing:
         return text, 0
     for match in re.finditer(r'<section\b[^>]*>', text, re.I):
@@ -193,7 +200,7 @@ def inject(site: Path, base_path: str) -> dict:
     plan_page = site / PLAN_RELATIVE
     trust_core = site / "akilli-urun-secimi" / "outcome-trust-circuit-core.js"
     trust_ui = site / "akilli-urun-secimi" / "outcome-trust-circuit.js"
-    for required, label in [(common,"Ortak hesaplama runtime"),(bridge,"Çözüm sonucu köprüsü"),(pending_context,"Bekleyen çözüm bağlamı tüketicisi"),(plan_page,"Elektrik Planım"),(trust_core,"Ürün güven devre kesicisi core"),(trust_ui,"Ürün güven devre kesicisi UI")]:
+    for required, label in [(common, "Ortak hesaplama runtime"), (bridge, "Çözüm sonucu köprüsü"), (pending_context, "Bekleyen çözüm bağlamı tüketicisi"), (plan_page, "Elektrik Planım"), (trust_core, "Ürün güven devre kesicisi core"), (trust_ui, "Ürün güven devre kesicisi UI")]:
         if not required.is_file():
             raise FileNotFoundError(f"{label} eksik: {required}")
 
