@@ -2,7 +2,7 @@ name: ALO186 hesaplayıcı kalite kontrolü
 
 on:
   push:
-    branches: [main, feat/alo186-kullanici-fayda-v1]
+    branches: [main, feat/alo186-kullanici-fayda-v1, 'feature/**']
     paths:
       - 'alo186/hesaplama/**'
       - 'alo186/tests/**'
