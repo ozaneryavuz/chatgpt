@@ -1,0 +1,115 @@
+name: ALO186 güvenli gelir dönüşümü kalite kontrolü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/urun-eslestirme/**'
+      - 'alo186/kurumsal-on-degerlendirme/**'
+      - 'alo186/tests/test_trust_revenue_conversion.js'
+      - '.github/workflows/alo186-trust-revenue-conversion.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/urun-eslestirme/**'
+      - 'alo186/kurumsal-on-degerlendirme/**'
+      - 'alo186/tests/test_trust_revenue_conversion.js'
+      - '.github/workflows/alo186-trust-revenue-conversion.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-trust-revenue-conversion-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Yeni gelir dönüşümü ve gizlilik sözleşmesi
+        run: node alo186/tests/test_trust_revenue_conversion.js
+
+      - name: Mevcut ürün eşleştirme ve tekrar ziyaret regresyonları
+        run: |
+          node alo186/tests/test_product_matcher.js
+          node alo186/tests/test_safe_product_journey.js
+          node alo186/tests/test_trust_growth.js
+          node alo186/tests/test_product_shortlist.js
+
+      - name: JavaScript sözdizimi
+        run: |
+          node --check alo186/urun-eslestirme/app.js
+          node --check alo186/urun-eslestirme/conversion-growth-core.js
+          node --check alo186/urun-eslestirme/conversion-growth.js
+          node --check alo186/urun-eslestirme/journey-retention-core.js
+          node --check alo186/urun-eslestirme/journey-retention.js
+          node --check alo186/kurumsal-on-degerlendirme/app.js
+
+      - name: Cihaz hasarı süre güvenlik kapısı
+        run: python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Canonical production bundle
+        run: |
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-trust-revenue \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-trust-revenue
+
+      - name: GitHub Pages custom-domain ve project-path testi
+        run: |
+          cp -a /tmp/alo186-trust-revenue /tmp/alo186-trust-revenue-custom
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-trust-revenue-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-trust-revenue-custom \
+            --base-path ''
+
+          cp -a /tmp/alo186-trust-revenue /tmp/alo186-trust-revenue-project
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-trust-revenue-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-trust-revenue-project \
+            --base-path '/chatgpt'
+
+      - name: Public artifact güven ve gelir sözleşmeleri
+        shell: bash
+        run: |
+          set -euo pipefail
+          root=/tmp/alo186-trust-revenue-custom
+          test -f "$root/akilli-urun-secimi/conversion-growth-core.js"
+          test -f "$root/akilli-urun-secimi/conversion-growth.js"
+          test -f "$root/akilli-urun-secimi/conversion-growth.css"
+          grep -q 'Şeffaf satış ortaklığı araması' "$root/akilli-urun-secimi/conversion-growth.js"
+          grep -q 'Şimdilik satın alma' "$root/akilli-urun-secimi/conversion-growth.js"
+          grep -q 'sponsored nofollow noopener' "$root/akilli-urun-secimi/conversion-growth.js"
+          grep -q 'Takvime ekle (.ics)' "$root/akilli-urun-secimi/journey-retention.js"
+          grep -q 'paid_assessment_source_prefilled' "$root/kurumsal-elektrik-surekliligi-on-degerlendirme/app.js"
+          ! grep -q 'data-filtered-search' "$root/akilli-urun-secimi/app.js"
+          ! grep -q 'data-guide-amazon' "$root/akilli-urun-secimi/app.js"
+          ! grep -Eqi 'priceCurrency|aggregateRating|availability' "$root/akilli-urun-secimi/conversion-growth.js"
+
+      - name: Doğrulanmış güvenli gelir artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-trust-revenue-conversion
+          path: /tmp/alo186-trust-revenue-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
