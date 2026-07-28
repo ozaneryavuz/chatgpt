@@ -1,5 +1,5 @@
 {
-  "version": 24,
+  "version": 25,
   "canonicalHost": "https://www.alo186.com",
   "generatedAt": "2026-07-28",
   "routes": [
@@ -91,7 +91,10 @@
     {"source":"alo186/haberler/parafudr-uc-up-in-imax-iimp-ne-demek/index.html","canonicalPath":"/haberler/parafudr-uc-up-in-imax-iimp-ne-demek","type":"article"},
     {"source":"alo186/haberler/ups-overload-asiri-yuk-alarmi-neden-verir/index.html","canonicalPath":"/haberler/ups-overload-asiri-yuk-alarmi-neden-verir","type":"article"},
     {"source":"alo186/haberler/jenerator-voltaj-frekans-dalgalanmasi-neden-olur/index.html","canonicalPath":"/haberler/jenerator-voltaj-frekans-dalgalanmasi-neden-olur","type":"article"},
-    {"source":"alo186/haberler/elektrikli-arac-sarj-olmuyor-wallbox-neden-baslamiyor/index.html","canonicalPath":"/haberler/elektrikli-arac-sarj-olmuyor-wallbox-neden-baslamiyor","type":"article"}
+    {"source":"alo186/haberler/elektrikli-arac-sarj-olmuyor-wallbox-neden-baslamiyor/index.html","canonicalPath":"/haberler/elektrikli-arac-sarj-olmuyor-wallbox-neden-baslamiyor","type":"article"},
+    {"source":"alo186/haberler/ups-surekli-otuyor-bip-sesi-ne-anlama-gelir/index.html","canonicalPath":"/haberler/ups-surekli-otuyor-bip-sesi-ne-anlama-gelir","type":"article"},
+    {"source":"alo186/haberler/jenerator-mars-basmiyor-calismiyor-ne-yapilmali/index.html","canonicalPath":"/haberler/jenerator-mars-basmiyor-calismiyor-ne-yapilmali","type":"article"},
+    {"source":"alo186/haberler/ev-sarj-kablosu-prizi-isiniyor-ne-yapilmali/index.html","canonicalPath":"/haberler/ev-sarj-kablosu-prizi-isiniyor-ne-yapilmali","type":"article"}
   ],
   "requiredIntegrations": [
     "canonical URL must resolve with HTTP 200",
