@@ -43,7 +43,7 @@
       ratedCurrentA:$('ratedCurrentA').value,
       ratedPowerW:$('ratedPowerW').value,
       joules:$('joules').value,
-      usbNeeded:$('usbNeeded').checked,
+      usbNeeded:$('usbNeeded').value==='true',
       usbPorts:$('usbPorts').value,
       groundStatus:$('groundStatus').value,
       labelVerified:$('labelVerified').checked,
