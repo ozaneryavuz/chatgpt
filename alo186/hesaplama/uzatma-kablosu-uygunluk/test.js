@@ -57,7 +57,8 @@ assert(html.includes('Amazon satış ortaklığı'));
 assert(html.includes('IEC 60884-2-7:2025'));
 assert(html.includes('IEC 61242'));
 assert(!/amazon\.(com|com\.tr)/i.test(html));
-assert(!/(name|email|telefon|adres|abonelik|tcKimlik)["']/i.test(html));
+const formFieldIds=[...html.matchAll(/<(?:input|select|textarea)\b[^>]*(?:id|name)="([^"]+)"/gi)].map(match=>match[1]);
+assert(!formFieldIds.some(field=>/(^|[-_])(name|email|phone|telefon|address|adres|abonelik|tc|identity)([-_]|$)/i.test(field)));
 assert(html.includes('aria-live="polite"'));
 assert(html.includes('type="application/ld+json"'));
 
