@@ -1,0 +1,385 @@
+name: ALO186 Live Quality Audit 0501
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install audit tools
+        run: |
+          npm install --no-save playwright@1.55.0 @axe-core/playwright@4.10.2 axe-core@4.10.2 cheerio@1.0.0 fast-xml-parser@5.0.8 lighthouse@12.8.2
+          npx playwright install --with-deps chromium
+
+      - name: Create audit scripts
+        shell: bash
+        run: |
+          mkdir -p artifacts/screenshots artifacts/lighthouse
+          cat > /tmp/live-audit.mjs <<'NODE'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          import { chromium } from 'playwright';
+          import AxeBuilder from '@axe-core/playwright';
+          import * as cheerio from 'cheerio';
+          import { XMLParser } from 'fast-xml-parser';
+
+          const ORIGIN = 'https://alo186.com';
+          const WWW = 'https://www.alo186.com';
+          const timeoutMs = 30000;
+          const parser = new XMLParser({ ignoreAttributes: false });
+          const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+          const absolute = (value, base) => {
+            try { return new URL(value, base).toString(); } catch { return null; }
+          };
+          const isInternal = (value) => {
+            try {
+              const host = new URL(value).hostname.toLowerCase();
+              return host === 'alo186.com' || host === 'www.alo186.com';
+            } catch { return false; }
+          };
+          async function fetchSafe(url, options = {}) {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+              const response = await fetch(url, {
+                redirect: options.redirect || 'follow',
+                headers: { 'user-agent': 'ALO186-Quality-Audit/2026-07-28' },
+                signal: controller.signal,
+              });
+              const body = options.body === false ? '' : await response.text();
+              return { ok: true, response, body };
+            } catch (error) {
+              return { ok: false, error: String(error), response: null, body: '' };
+            } finally { clearTimeout(timer); }
+          }
+          async function hostProbe(url) {
+            const first = await fetchSafe(url, { redirect: 'manual', body: false });
+            const followed = await fetchSafe(url, { redirect: 'follow', body: false });
+            return {
+              url,
+              firstStatus: first.response?.status ?? null,
+              location: first.response?.headers.get('location') ?? null,
+              finalStatus: followed.response?.status ?? null,
+              finalUrl: followed.response?.url ?? null,
+              error: first.error || followed.error || null,
+            };
+          }
+          async function loadSitemap(url, seen = new Set()) {
+            if (seen.has(url)) return [];
+            seen.add(url);
+            const got = await fetchSafe(url);
+            if (!got.ok || !got.response.ok) return [];
+            let xml;
+            try { xml = parser.parse(got.body); } catch { return []; }
+            const indexEntries = xml?.sitemapindex?.sitemap;
+            if (indexEntries) {
+              const entries = Array.isArray(indexEntries) ? indexEntries : [indexEntries];
+              const nested = [];
+              for (const item of entries) {
+                if (item.loc) nested.push(...await loadSitemap(item.loc, seen));
+              }
+              return nested;
+            }
+            const urlEntries = xml?.urlset?.url;
+            if (!urlEntries) return [];
+            return (Array.isArray(urlEntries) ? urlEntries : [urlEntries]).map((x) => x.loc).filter(Boolean);
+          }
+          async function mapLimit(items, limit, worker) {
+            const results = new Array(items.length);
+            let cursor = 0;
+            async function run() {
+              while (true) {
+                const index = cursor++;
+                if (index >= items.length) return;
+                results[index] = await worker(items[index], index);
+              }
+            }
+            await Promise.all(Array.from({ length: Math.min(limit, items.length) }, run));
+            return results;
+          }
+          function parseHtml(html, finalUrl) {
+            const $ = cheerio.load(html);
+            const canonicals = $('link[rel="canonical"]').map((_, el) => absolute($(el).attr('href'), finalUrl)).get().filter(Boolean);
+            const h1 = $('h1').map((_, el) => $(el).text().trim()).get();
+            const robots = $('meta[name="robots"]').attr('content') || '';
+            const jsonLd = [];
+            const jsonLdErrors = [];
+            $('script[type="application/ld+json"]').each((_, el) => {
+              const raw = $(el).text().trim();
+              if (!raw) return;
+              try { jsonLd.push(JSON.parse(raw)); } catch (error) { jsonLdErrors.push(String(error)); }
+            });
+            const images = $('img').map((_, el) => ({
+              src: absolute($(el).attr('src') || '', finalUrl),
+              alt: $(el).attr('alt'),
+              width: $(el).attr('width'),
+              height: $(el).attr('height'),
+              loading: $(el).attr('loading'),
+            })).get();
+            const links = $('a[href]').map((_, el) => absolute($(el).attr('href'), finalUrl)).get()
+              .filter(Boolean)
+              .filter((url) => !url.startsWith('mailto:') && !url.startsWith('tel:') && !url.startsWith('javascript:'))
+              .map((url) => url.split('#')[0]);
+            const ids = $('[id]').map((_, el) => $(el).attr('id')).get();
+            const duplicateIds = [...new Set(ids.filter((id, index) => ids.indexOf(id) !== index))];
+            const text = $('body').text().replace(/\s+/g, ' ').trim();
+            const suspiciousOfficial = /(resm[iî]\s+(başvuru|kayıt)\s+(oluştur|al)|alo186\s+(başvurunuzu|ihbarınızı)\s+alır)/i.test(text);
+            const piiInputs = $('input,textarea,select').map((_, el) => ({
+              name: $(el).attr('name') || '',
+              type: $(el).attr('type') || el.tagName,
+              placeholder: $(el).attr('placeholder') || '',
+              autocomplete: $(el).attr('autocomplete') || '',
+            })).get().filter((item) => /(tc|kimlik|adres|abon|telefon|phone|email|e-posta)/i.test(`${item.name} ${item.placeholder} ${item.autocomplete}`));
+            return {
+              canonicals, h1, robots, jsonLdCount: jsonLd.length, jsonLdErrors,
+              images, internalLinks: [...new Set(links.filter(isInternal))], duplicateIds,
+              suspiciousOfficial, piiInputs,
+              hasTenBusinessDays: /10\s*(iş|is)\s*gün/i.test(text),
+              hasThirtyDayDamageClaim: /(cihaz|teçhizat|hasar).{0,180}30\s*gün|30\s*gün.{0,180}(cihaz|teçhizat|hasar)/i.test(text),
+            };
+          }
+          async function auditUrl(url) {
+            const first = await fetchSafe(url, { redirect: 'manual', body: false });
+            const got = await fetchSafe(url);
+            if (!got.ok) return { url, error: got.error };
+            const response = got.response;
+            const contentType = response.headers.get('content-type') || '';
+            const headers = Object.fromEntries([
+              'strict-transport-security','x-content-type-options','content-security-policy',
+              'referrer-policy','permissions-policy','cache-control'
+            ].map((key) => [key, response.headers.get(key)]));
+            const parsed = contentType.includes('text/html') ? parseHtml(got.body, response.url) : null;
+            return {
+              url,
+              firstStatus: first.response?.status ?? null,
+              firstLocation: first.response?.headers.get('location') ?? null,
+              status: response.status,
+              finalUrl: response.url,
+              contentType,
+              headers,
+              bytes: Buffer.byteLength(got.body),
+              parsed,
+            };
+          }
+
+          const hostProbes = await Promise.all([
+            hostProbe(`${ORIGIN}/`), hostProbe(`${WWW}/`),
+            hostProbe(`http://alo186.com/`), hostProbe(`http://www.alo186.com/`),
+          ]);
+          const robotsProbe = await auditUrl(`${ORIGIN}/robots.txt`);
+          const sitemapProbe = await auditUrl(`${ORIGIN}/sitemap.xml`);
+          const sitemapUrls = [...new Set(await loadSitemap(`${ORIGIN}/sitemap.xml`))];
+          const pageAudits = await mapLimit(sitemapUrls, 10, auditUrl);
+          const internalLinks = [...new Set(pageAudits.flatMap((x) => x?.parsed?.internalLinks || []))];
+          const linkAudits = await mapLimit(internalLinks, 12, async (url) => {
+            const got = await fetchSafe(url, { redirect: 'manual', body: false });
+            return { url, status: got.response?.status ?? null, location: got.response?.headers.get('location') ?? null, error: got.error || null };
+          });
+          const imageUrls = [...new Set(pageAudits.flatMap((x) => x?.parsed?.images?.map((i) => i.src).filter(Boolean) || []))];
+          const imageAudits = await mapLimit(imageUrls, 12, async (url) => {
+            const got = await fetchSafe(url, { redirect: 'follow', body: false });
+            return { url, status: got.response?.status ?? null, contentType: got.response?.headers.get('content-type') ?? null, finalUrl: got.response?.url ?? null, error: got.error || null };
+          });
+
+          const browser = await chromium.launch({ headless: true });
+          const browserTargets = [
+            '/', '/elektrik-portali', '/elektrik-kesintisi', '/haberler', '/iletisim', '/acil-numaralar'
+          ];
+          const viewports = [
+            { name: 'mobile', width: 390, height: 844, isMobile: true, hasTouch: true },
+            { name: 'desktop', width: 1440, height: 1000, isMobile: false, hasTouch: false },
+          ];
+          const browserAudits = [];
+          for (const viewport of viewports) {
+            const context = await browser.newContext({ viewport: { width: viewport.width, height: viewport.height }, isMobile: viewport.isMobile, hasTouch: viewport.hasTouch });
+            for (const route of browserTargets) {
+              const page = await context.newPage();
+              const consoleErrors = [];
+              const pageErrors = [];
+              page.on('console', (msg) => { if (msg.type() === 'error') consoleErrors.push(msg.text()); });
+              page.on('pageerror', (err) => pageErrors.push(String(err)));
+              let navigation = null;
+              try {
+                navigation = await page.goto(`${ORIGIN}${route}`, { waitUntil: 'networkidle', timeout: 45000 });
+                await sleep(500);
+                const metrics = await page.evaluate(() => {
+                  const visible = (el) => {
+                    const s = getComputedStyle(el); const r = el.getBoundingClientRect();
+                    return s.display !== 'none' && s.visibility !== 'hidden' && Number(s.opacity) !== 0 && r.width > 0 && r.height > 0;
+                  };
+                  const interactive = [...document.querySelectorAll('a,button,input,select,textarea,[role="button"]')].filter(visible);
+                  const smallTargets = interactive.map((el) => {
+                    const r = el.getBoundingClientRect();
+                    return { tag: el.tagName, text: (el.innerText || el.getAttribute('aria-label') || el.getAttribute('name') || '').trim().slice(0, 100), width: Math.round(r.width), height: Math.round(r.height) };
+                  }).filter((x) => x.width < 44 || x.height < 44).slice(0, 100);
+                  const failedImages = [...document.images].filter((img) => img.complete && img.naturalWidth === 0).map((img) => img.currentSrc || img.src);
+                  const pendingImages = [...document.images].filter((img) => !img.complete).map((img) => img.currentSrc || img.src);
+                  const ids = [...document.querySelectorAll('[id]')].map((el) => el.id);
+                  const duplicateIds = [...new Set(ids.filter((id, idx) => ids.indexOf(id) !== idx))];
+                  const h1Count = document.querySelectorAll('h1').length;
+                  return {
+                    title: document.title,
+                    url: location.href,
+                    scrollWidth: document.documentElement.scrollWidth,
+                    clientWidth: document.documentElement.clientWidth,
+                    overflowPx: Math.max(0, document.documentElement.scrollWidth - document.documentElement.clientWidth),
+                    bodyHeight: document.body.scrollHeight,
+                    failedImages, pendingImages, duplicateIds, h1Count, smallTargets,
+                  };
+                });
+                let axe = { violations: [] };
+                try { axe = await new AxeBuilder({ page }).analyze(); } catch (error) { axe = { error: String(error), violations: [] }; }
+                const safeName = route === '/' ? 'home' : route.replace(/^\//, '').replace(/\//g, '-');
+                const screenshot = `artifacts/screenshots/${viewport.name}-${safeName}.png`;
+                await page.screenshot({ path: screenshot, fullPage: true });
+                browserAudits.push({ viewport: viewport.name, route, status: navigation?.status() ?? null, metrics, consoleErrors, pageErrors, axeViolations: axe.violations?.map((v) => ({ id: v.id, impact: v.impact, description: v.description, nodes: v.nodes.length, helpUrl: v.helpUrl })) || [], screenshot });
+              } catch (error) {
+                browserAudits.push({ viewport: viewport.name, route, status: navigation?.status() ?? null, error: String(error), consoleErrors, pageErrors });
+              } finally { await page.close(); }
+            }
+            await context.close();
+          }
+          await browser.close();
+
+          const output = {
+            generatedAt: new Date().toISOString(),
+            hostProbes, robotsProbe, sitemapProbe,
+            sitemapUrlCount: sitemapUrls.length,
+            pageAudits, internalLinkCount: internalLinks.length, linkAudits,
+            imageUrlCount: imageUrls.length, imageAudits,
+            browserAudits,
+          };
+          fs.writeFileSync('artifacts/live-audit.json', JSON.stringify(output, null, 2));
+          NODE
+
+          cat > /tmp/summarize.mjs <<'NODE'
+          import fs from 'node:fs';
+          const audit = JSON.parse(fs.readFileSync('artifacts/live-audit.json', 'utf8'));
+          const lhFiles = fs.readdirSync('artifacts/lighthouse').filter((x) => x.endsWith('.json')).sort();
+          const lighthouse = lhFiles.map((file) => {
+            const r = JSON.parse(fs.readFileSync(`artifacts/lighthouse/${file}`, 'utf8'));
+            const a = r.audits || {}, c = r.categories || {};
+            const n = (id) => a[id]?.numericValue ?? null;
+            return {
+              file, finalUrl: r.finalUrl, fetchTime: r.fetchTime,
+              scores: {
+                performance: Math.round((c.performance?.score ?? 0) * 100),
+                accessibility: Math.round((c.accessibility?.score ?? 0) * 100),
+                bestPractices: Math.round((c['best-practices']?.score ?? 0) * 100),
+                seo: Math.round((c.seo?.score ?? 0) * 100),
+              },
+              metrics: { fcpMs: n('first-contentful-paint'), lcpMs: n('largest-contentful-paint'), tbtMs: n('total-blocking-time'), cls: n('cumulative-layout-shift'), speedIndexMs: n('speed-index') },
+              consoleErrors: a['errors-in-console']?.details?.items || [],
+              failedAudits: Object.values(a).filter((x) => typeof x.score === 'number' && x.score < 1 && !['notApplicable','manual','informative'].includes(x.scoreDisplayMode)).map((x) => ({ id: x.id, title: x.title, score: x.score, displayValue: x.displayValue ?? null, savingsMs: x.details?.overallSavingsMs ?? null, savingsBytes: x.details?.overallSavingsBytes ?? null })).sort((x,y) => (x.score-y.score) || ((y.savingsMs||0)-(x.savingsMs||0))).slice(0,30),
+            };
+          });
+          audit.lighthouse = lighthouse;
+          fs.writeFileSync('artifacts/summary.json', JSON.stringify(audit, null, 2));
+
+          const pages = audit.pageAudits.filter(Boolean);
+          const badPages = pages.filter((x) => x.error || x.status >= 400);
+          const brokenLinks = audit.linkAudits.filter((x) => x.error || x.status >= 400);
+          const badImages = audit.imageAudits.filter((x) => x.error || x.status >= 400 || !(x.contentType || '').startsWith('image/'));
+          const missingCanonical = pages.filter((x) => x.parsed && x.parsed.canonicals.length !== 1);
+          const canonicalHostMismatch = pages.filter((x) => x.parsed?.canonicals?.some((c) => new URL(c).hostname !== new URL(x.finalUrl).hostname));
+          const noH1 = pages.filter((x) => x.parsed && x.parsed.h1.length !== 1);
+          const badJsonLd = pages.filter((x) => x.parsed?.jsonLdErrors?.length);
+          const missingHeaders = Object.fromEntries(['strict-transport-security','x-content-type-options','content-security-policy','referrer-policy','permissions-policy'].map((h) => [h, pages.filter((x) => !x.headers?.[h]).length]));
+          const damageDeadlineConflict = pages.filter((x) => x.parsed?.hasThirtyDayDamageClaim);
+          const suspiciousOfficial = pages.filter((x) => x.parsed?.suspiciousOfficial);
+          const piiPages = pages.filter((x) => x.parsed?.piiInputs?.length);
+          const overflow = audit.browserAudits.filter((x) => x.metrics?.overflowPx > 2);
+          const imageFailuresBrowser = audit.browserAudits.filter((x) => x.metrics?.failedImages?.length || x.metrics?.pendingImages?.length);
+          const axe = audit.browserAudits.flatMap((x) => (x.axeViolations || []).map((v) => ({ viewport: x.viewport, route: x.route, ...v })));
+          const smallTargets = audit.browserAudits.filter((x) => x.viewport === 'mobile').reduce((sum, x) => sum + (x.metrics?.smallTargets?.length || 0), 0);
+          const consoleErrors = audit.browserAudits.flatMap((x) => (x.consoleErrors || []).map((e) => ({ viewport: x.viewport, route: x.route, error: e })));
+
+          const lines = [];
+          lines.push('# ALO186 canlı teknik kalite özeti','');
+          lines.push(`Üretim zamanı: ${audit.generatedAt}`,'');
+          lines.push('## Kapsam','');
+          lines.push(`- Sitemap URL: ${audit.sitemapUrlCount}`);
+          lines.push(`- İç bağlantı: ${audit.internalLinkCount}`);
+          lines.push(`- Görsel URL: ${audit.imageUrlCount}`);
+          lines.push(`- Tarayıcı senaryosu: ${audit.browserAudits.length}`,'');
+          lines.push('## Statik sonuçlar','');
+          lines.push(`- Hatalı sayfa: ${badPages.length}`);
+          lines.push(`- Kırık iç bağlantı: ${brokenLinks.length}`);
+          lines.push(`- Hatalı görsel: ${badImages.length}`);
+          lines.push(`- Canonical sayısı != 1: ${missingCanonical.length}`);
+          lines.push(`- Canonical host uyuşmazlığı: ${canonicalHostMismatch.length}`);
+          lines.push(`- H1 sayısı != 1: ${noH1.length}`);
+          lines.push(`- JSON-LD parse hatası: ${badJsonLd.length}`);
+          lines.push(`- 30 gün cihaz hasarı ifadesi bulunan sayfa: ${damageDeadlineConflict.length}`);
+          lines.push(`- Resmî başvuru izlenimi riski: ${suspiciousOfficial.length}`);
+          lines.push(`- PII alanı olasılığı bulunan sayfa: ${piiPages.length}`);
+          for (const [h,n] of Object.entries(missingHeaders)) lines.push(`- ${h} eksik sayfa: ${n}`);
+          lines.push('','## Tarayıcı sonuçları','');
+          lines.push(`- Yatay taşma senaryosu: ${overflow.length}`);
+          lines.push(`- Görsel yükleme problemi senaryosu: ${imageFailuresBrowser.length}`);
+          lines.push(`- Konsol hata kaydı: ${consoleErrors.length}`);
+          lines.push(`- Axe ihlali kaydı: ${axe.length}`);
+          lines.push(`- Mobil küçük hedef kaydı (ilk 100/sayfa sınırı): ${smallTargets}`,'');
+          lines.push('## Lighthouse','');
+          lines.push('| Dosya | Perf. | Eriş. | En iyi uyg. | SEO | FCP | LCP | TBT | CLS |');
+          lines.push('|---|---:|---:|---:|---:|---:|---:|---:|---:|');
+          for (const r of lighthouse) lines.push(`| ${r.file} | ${r.scores.performance} | ${r.scores.accessibility} | ${r.scores.bestPractices} | ${r.scores.seo} | ${Math.round(r.metrics.fcpMs||0)} ms | ${Math.round(r.metrics.lcpMs||0)} ms | ${Math.round(r.metrics.tbtMs||0)} ms | ${r.metrics.cls ?? '—'} |`);
+          lines.push('','## Host ve yönlendirme','');
+          for (const p of audit.hostProbes) lines.push(`- ${p.url} → ilk ${p.firstStatus}${p.location ? ` (${p.location})` : ''}; son ${p.finalStatus} ${p.finalUrl || ''}`);
+          if (damageDeadlineConflict.length) { lines.push('','## Kritik içerik tutarsızlığı',''); for (const x of damageDeadlineConflict) lines.push(`- ${x.finalUrl}`); }
+          if (brokenLinks.length) { lines.push('','## Kırık bağlantılar',''); for (const x of brokenLinks.slice(0,50)) lines.push(`- ${x.status || 'ERR'} ${x.url}`); }
+          if (badImages.length) { lines.push('','## Hatalı görseller',''); for (const x of badImages.slice(0,50)) lines.push(`- ${x.status || 'ERR'} ${x.url}`); }
+          if (overflow.length) { lines.push('','## Yatay taşma',''); for (const x of overflow) lines.push(`- ${x.viewport} ${x.route}: ${x.metrics.overflowPx}px`); }
+          if (axe.length) { lines.push('','## Erişilebilirlik ihlalleri',''); for (const x of axe.slice(0,60)) lines.push(`- ${x.viewport} ${x.route}: ${x.id} (${x.impact}, ${x.nodes} düğüm)`); }
+          fs.writeFileSync('artifacts/summary.md', lines.join('\n') + '\n');
+          console.log(lines.join('\n'));
+          NODE
+
+      - name: Crawl, accessibility and responsive audit
+        run: node /tmp/live-audit.mjs
+
+      - name: Lighthouse mobile home run 1
+        run: npx lighthouse https://alo186.com/ --only-categories=performance,accessibility,best-practices,seo --output=json --output-path=artifacts/lighthouse/mobile-home-1.json --chrome-flags='--headless --no-sandbox --disable-dev-shm-usage' --throttling-method=simulate --quiet
+
+      - name: Lighthouse mobile home run 2
+        run: npx lighthouse https://alo186.com/ --only-categories=performance,accessibility,best-practices,seo --output=json --output-path=artifacts/lighthouse/mobile-home-2.json --chrome-flags='--headless --no-sandbox --disable-dev-shm-usage' --throttling-method=simulate --quiet
+
+      - name: Lighthouse mobile home run 3
+        run: npx lighthouse https://alo186.com/ --only-categories=performance,accessibility,best-practices,seo --output=json --output-path=artifacts/lighthouse/mobile-home-3.json --chrome-flags='--headless --no-sandbox --disable-dev-shm-usage' --throttling-method=simulate --quiet
+
+      - name: Lighthouse desktop home
+        run: npx lighthouse https://alo186.com/ --preset=desktop --only-categories=performance,accessibility,best-practices,seo --output=json --output-path=artifacts/lighthouse/desktop-home.json --chrome-flags='--headless --no-sandbox --disable-dev-shm-usage' --throttling-method=simulate --quiet
+
+      - name: Lighthouse mobile key routes
+        shell: bash
+        run: |
+          set -e
+          npx lighthouse https://alo186.com/elektrik-portali --only-categories=performance,accessibility,best-practices,seo --output=json --output-path=artifacts/lighthouse/mobile-elektrik-portali.json --chrome-flags='--headless --no-sandbox --disable-dev-shm-usage' --throttling-method=simulate --quiet
+          npx lighthouse https://alo186.com/elektrik-kesintisi --only-categories=performance,accessibility,best-practices,seo --output=json --output-path=artifacts/lighthouse/mobile-elektrik-kesintisi.json --chrome-flags='--headless --no-sandbox --disable-dev-shm-usage' --throttling-method=simulate --quiet
+          npx lighthouse https://alo186.com/haberler --only-categories=performance,accessibility,best-practices,seo --output=json --output-path=artifacts/lighthouse/mobile-haberler.json --chrome-flags='--headless --no-sandbox --disable-dev-shm-usage' --throttling-method=simulate --quiet
+
+      - name: Build summary
+        run: node /tmp/summarize.mjs
+
+      - name: Upload audit artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-live-quality-0501
+          path: artifacts/
+          if-no-files-found: error
+          retention-days: 7
