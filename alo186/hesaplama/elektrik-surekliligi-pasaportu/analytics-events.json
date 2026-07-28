@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "tool": "electric-continuity-passport",
+  "privacy": {
+    "personalDataAllowed": false,
+    "freeTextAllowed": false,
+    "lifeSupportValueAllowed": false,
+    "immediateDangerValueAllowed": false
+  },
+  "events": [
+    {
+      "name": "continuity_passport_started",
+      "when": "Araç JavaScript ile başarıyla başladığında bir kez",
+      "parameters": ["local_storage_default_enabled", "evidence_count"]
+    },
+    {
+      "name": "continuity_passport_completed",
+      "when": "Pasaport skoru oluşturulduğunda",
+      "parameters": ["facility_type", "score_band", "score_bucket", "p0_count", "p1_count", "p2_count", "maturity_reference_present", "life_support_runtime"]
+    },
+    {
+      "name": "continuity_passport_emergency_route_shown",
+      "when": "Acil tehlike seçimi skoru durdurup 112 rotasını gösterdiğinde",
+      "parameters": ["revenue_allowed"]
+    },
+    {
+      "name": "continuity_passport_maturity_imported",
+      "when": "Desteklenen olgunluk JSON/handoff içe aktarıldığında",
+      "parameters": ["source_type", "score_bucket", "contains_personal_data"]
+    },
+    {
+      "name": "continuity_passport_exported",
+      "when": "Kişisel veri içermeyen JSON pasaport indirildiğinde",
+      "parameters": ["score_band", "action_count", "contains_personal_data"]
+    },
+    {
+      "name": "continuity_passport_printed",
+      "when": "Yazdır/PDF işlemi başlatıldığında",
+      "parameters": ["score_band"]
+    },
+    {
+      "name": "continuity_passport_storage_opted_in",
+      "when": "Varsayılan kapalı yerel kayıt kullanıcı tarafından seçilip taslak kaydedildiğinde",
+      "parameters": ["ttl_days", "facility_type"]
+    },
+    {
+      "name": "continuity_passport_draft_restored",
+      "when": "30 günlük yerel taslak geri yüklendiğinde",
+      "parameters": ["facility_type"]
+    },
+    {
+      "name": "continuity_passport_handoff_created",
+      "when": "Panel handoff oluşturulduğunda",
+      "parameters": ["action_count", "ttl_days", "contains_personal_data"]
+    },
+    {
+      "name": "continuity_passport_panel_clicked",
+      "when": "Sonuçtan süreklilik paneline geçildiğinde",
+      "parameters": ["score_band", "handoff_ready"]
+    },
+    {
+      "name": "continuity_passport_reset",
+      "when": "Form ve yerel kayıt temizlendiğinde",
+      "parameters": []
+    }
+  ]
+}
