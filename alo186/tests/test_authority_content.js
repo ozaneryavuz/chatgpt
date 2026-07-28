@@ -33,7 +33,10 @@ const articles=[
   {slug:'paralel-ups-n-arti-1-yedeklilik-nedir',required:['N+1','paralel UPS','yük paylaşımı','ortak bypass','tek hata noktası'],cta:'/hesaplama/ups-suresi/',fresh:true},
   {slug:'parafudr-gostergesi-kirmizi-ne-demek',required:['durum göstergesi','kırmızı','koruma modülü','yetkili elektrikçi','parafudr risk testi'],cta:'/hesaplama/ekipman-bakim-plani/',fresh:true},
   {slug:'jenerator-saatte-kac-litre-yakar',required:['yük yüzdesi','litre/saat','üretici tüketim tablosu','standby','prime'],cta:'/hesaplama/jenerator-gucu-secimi/',fresh:true},
-  {slug:'ges-inverter-sebeke-gerilimi-yuksek-hatasi',required:['şebeke gerilimi','şebeke empedansı','on dakikalık ortalama','ülke ayarı','dağıtım şirketi'],cta:'/edas-bul',fresh:true}
+  {slug:'ges-inverter-sebeke-gerilimi-yuksek-hatasi',required:['şebeke gerilimi','şebeke empedansı','on dakikalık ortalama','ülke ayarı','dağıtım şirketi'],cta:'/edas-bul',fresh:true},
+  {slug:'elektrik-sayaci-arizali-mi-fatura-itirazi',required:['EPDK','1 yıl','%30','dağıtım şirketi','tedarik şirketi'],cta:'/fatura-analizi',fresh:true},
+  {slug:'v2l-v2h-v2g-farki-cift-yonlu-sarj',required:['V2L','V2H','V2G','ISO 15118-20','gelir garantisi'],cta:'/hesaplama/ev-sarj-uygunluk/',fresh:true},
+  {slug:'batarya-c-rate-dod-kullanilabilir-kapasite',required:['C-rate','DoD','SoC','kullanılabilir kWh','çevrim ömrü'],cta:'/hesaplama/inverter-uygunluk/',fresh:true}
 ];
 
 for(const article of articles){
