@@ -4,15 +4,21 @@ on:
   pull_request:
     paths:
       - 'alo186/hesaplama/elektrik-surekliligi-olgunluk-skoru/**'
+      - 'alo186/sureklilik-paneli/**'
       - 'alo186/hesaplama/index.html'
       - 'alo186/tests/test_continuity_maturity_score.js'
+      - 'alo186/tests/test_continuity_store.js'
+      - 'alo186/tests/test_maturity_panel_handoff.js'
       - '.github/workflows/alo186-continuity-maturity-ci.yml'
   push:
     branches: [main]
     paths:
       - 'alo186/hesaplama/elektrik-surekliligi-olgunluk-skoru/**'
+      - 'alo186/sureklilik-paneli/**'
       - 'alo186/hesaplama/index.html'
       - 'alo186/tests/test_continuity_maturity_score.js'
+      - 'alo186/tests/test_continuity_store.js'
+      - 'alo186/tests/test_maturity_panel_handoff.js'
       - '.github/workflows/alo186-continuity-maturity-ci.yml'
 
 permissions:
@@ -28,7 +34,23 @@ jobs:
           node-version: '22'
       - name: Puanlama, gizlilik, erişilebilirlik ve yayın sözleşmeleri
         run: node alo186/tests/test_continuity_maturity_score.js
+      - name: Mevcut Süreklilik Paneli veri motoru
+        run: node alo186/tests/test_continuity_store.js
+      - name: Olgunluk planı handoff, dedupe, expiry ve backlog
+        run: node alo186/tests/test_maturity_panel_handoff.js
       - name: JavaScript sözdizimi
         run: |
           node --check alo186/hesaplama/elektrik-surekliligi-olgunluk-skoru/core.js
           node --check alo186/hesaplama/elektrik-surekliligi-olgunluk-skoru/app.js
+          node --check alo186/sureklilik-paneli/store.js
+          node --check alo186/sureklilik-paneli/app.js
+      - name: Handoff gizlilik ve kullanıcı yolculuğu sözleşmesi
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'continuity_maturity_handoff_created' alo186/hesaplama/elektrik-surekliligi-olgunluk-skoru/app.js
+          grep -q 'continuity_maturity_handoff_imported' alo186/sureklilik-paneli/app.js
+          grep -q 'medicalOrLifeSupportFlagIncluded: false' alo186/hesaplama/elektrik-surekliligi-olgunluk-skoru/app.js
+          grep -q 'HANDOFF_TTL_MS = 7' alo186/hesaplama/elektrik-surekliligi-olgunluk-skoru/app.js
+          grep -q 'improvementActions' alo186/sureklilik-paneli/store.js
+          ! grep -Eqi 'type="(email|tel)"' alo186/hesaplama/elektrik-surekliligi-olgunluk-skoru/index.html
