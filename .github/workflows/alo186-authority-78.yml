@@ -1,4 +1,4 @@
-name: ALO186 içerik otoritesi 78 rehber
+name: ALO186 içerik otoritesi 78+ rehber tabanı
 
 on:
   pull_request:
@@ -45,7 +45,7 @@ jobs:
       - name: Mevcut 75 rehber regresyonu
         run: node alo186/tests/test_authority_content.js
 
-      - name: Üç yeni içerik ve etkili routing overlay
+      - name: 78 rehberlik authority tabanı
         run: node alo186/tests/test_authority_overlay_78.js
 
       - name: JSON XML ve Python sözdizimi
@@ -80,7 +80,7 @@ jobs:
           root=Path('/tmp/alo186-authority-78')
           release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
           assert release['routingVersion']>=35
-          assert release['articleCount']==78
+          assert release['articleCount']>=78
           assert release['routeCount']>=119
           assert 'content-authority-78.json' in release['routingOverlays']
           for slug in (
@@ -122,10 +122,10 @@ jobs:
             --site /tmp/alo186-authority-78-project \
             --base-path '/chatgpt'
 
-      - name: Doğrulanmış 78 rehber artifactı
+      - name: Doğrulanmış 78+ rehber taban artifactı
         uses: actions/upload-artifact@v4
         with:
-          name: alo186-authority-78-pages
+          name: alo186-authority-78-baseline-pages
           path: /tmp/alo186-authority-78-custom
           if-no-files-found: error
           include-hidden-files: true
