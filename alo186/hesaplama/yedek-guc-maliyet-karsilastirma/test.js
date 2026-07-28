@@ -33,6 +33,7 @@ function option(id, values = {}) {
 
 assert.strictEqual(core.replacementCount(5, 5), 0, "Analiz döneminin sonundaki yenileme gereksiz sayılmamalı");
 assert.strictEqual(core.replacementCount(6, 5), 1, "Dönem içindeki yenileme sayılmalı");
+assert.strictEqual(core.replacementCount(10, 2), 4, "Analiz sonundaki yenileme hariç dönem içindeki dört yenileme sayılmalı");
 
 const replacementAwarePayback = core.calculatePaybackYears({
   horizonYears: 2,
@@ -43,6 +44,16 @@ const replacementAwarePayback = core.calculatePaybackYears({
   replacementCost: 2000
 });
 assert(replacementAwarePayback > 1.3 && replacementAwarePayback < 1.5, "Geri ödeme, dönem içindeki yenileme harcamalarını içermeli");
+
+const impossiblePayback = core.calculatePaybackYears({
+  horizonYears: 5,
+  upfront: 10000,
+  annualAvoidedImpact: 1000,
+  annualRecurring: 1500,
+  replacementYears: 0,
+  replacementCost: 0
+});
+assert.strictEqual(impossiblePayback, null, "Yıllık net nakit akışı pozitif değilse geri ödeme gösterilmemeli");
 
 const ranked = core.compare(baseAssumptions, [
   option("ups", { purchase: 20000, coveragePercent: 90 }),
@@ -61,12 +72,34 @@ assert.strictEqual(noBuy.ok, true);
 assert.strictEqual(noBuy.noBuy, true, "Maliyet-fayda negatif olduğunda satın almama sonucu çıkmalı");
 assert.strictEqual(noBuy.affiliateEligible, false, "Satın almama sonucunda affiliate kapısı açılmamalı");
 
+const exactZero = core.compare({ ...baseAssumptions, impactPerHour: 125 }, [
+  option("ups", { purchase: 10000, coveragePercent: 80 }),
+  option("powerStation", { purchase: 20000, coveragePercent: 80 })
+]);
+assert.strictEqual(exactZero.best.netBenefit, 0, "Kontrol senaryosu sıfır net farka ayarlanmalı");
+assert.strictEqual(exactZero.noBuy, true, "Sıfır net fark satın alma gerekçesi sayılmamalı");
+assert.strictEqual(exactZero.affiliateEligible, false, "Sıfır net farkta affiliate kapısı açılmamalı");
+
 const fixed = core.compare({ ...baseAssumptions, scope: "fixed" }, [
   option("ups", { purchase: 20000 }),
   option("powerStation", { purchase: 25000 })
 ]);
 assert.strictEqual(fixed.professional, true);
 assert.strictEqual(fixed.affiliateEligible, false, "Sabit tesisat sonucunda affiliate kapısı kapalı olmalı");
+
+const threePhase = core.compare({ ...baseAssumptions, phase: "three" }, [
+  option("ups", { purchase: 20000 }),
+  option("powerStation", { purchase: 25000 })
+]);
+assert.strictEqual(threePhase.professional, true);
+assert.strictEqual(threePhase.affiliateEligible, false, "Trifaze sonuçta affiliate kapısı kapalı olmalı");
+
+const highPower = core.compare({ ...baseAssumptions, continuousW: 1201 }, [
+  option("ups", { purchase: 20000 }),
+  option("powerStation", { purchase: 25000 })
+]);
+assert.strictEqual(highPower.professional, true);
+assert.strictEqual(highPower.affiliateEligible, false, "1.200 W üzerindeki sonuçta ticari rota kapalı olmalı");
 
 const medical = core.compare({ ...baseAssumptions, medical: true }, [
   option("ups", { purchase: 20000 }),
@@ -90,8 +123,12 @@ const invalid = core.compare(baseAssumptions, [
 assert.strictEqual(invalid.ok, false, "Kullanıcı maliyet verisi olmadan sıfır maliyet sonucu üretilmemeli");
 assert(invalid.errors.some((message) => message.includes("kendi teklif")));
 
+const oneOption = core.compare(baseAssumptions, [option("ups"), { ...option("powerStation"), enabled: false }]);
+assert.strictEqual(oneOption.ok, false, "Karşılaştırma en az iki etkin çözüm gerektirmeli");
+
 const stored = core.sanitizeForStorage({ ...baseAssumptions, medical: true }, [option("ups")], "2026-07-28T04:00:00.000Z");
 assert.strictEqual(Object.prototype.hasOwnProperty.call(stored.assumptions, "medical"), false, "Tıbbi seçim kalıcı depolamaya yazılmamalı");
+assert.strictEqual(stored.assumptions.continuousW, 500, "Teknik güç girdisi yerel kayıtta korunmalı");
 
 const html = fs.readFileSync(path.join(__dirname, "index.html"), "utf8");
 const app = fs.readFileSync(path.join(__dirname, "app.js"), "utf8");
