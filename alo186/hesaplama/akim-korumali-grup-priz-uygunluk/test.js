@@ -5,54 +5,60 @@ const fs=require('node:fs');
 const path=require('node:path');
 const core=require('./core.js');
 
-const safe=core.evaluate({
+const safeInput={
   ownership:'candidate',loadType:'office',continuousW:650,peakW:900,hoursDaily:8,requiredOutlets:5,productOutlets:6,
   ratedCurrentA:16,ratedPowerW:3500,joules:900,usbNeeded:false,usbPorts:0,groundStatus:'verified',labelVerified:true,
   overloadProtection:true,protectionIndicator:true,damageFree:true,dryIndoor:true,directWall:true,uncovered:true
-});
+};
+
+const safe=core.evaluate(safeInput);
 assert.equal(safe.status,'suitable');
 assert.equal(safe.productRouteAllowed,true);
 assert.equal(safe.currentA,2.83);
 assert.equal(safe.screeningLimitW,2800);
 assert.equal(safe.recommendedCurrentA,6);
 
-const owned=core.evaluate({...safe,ownership:'owned'});
+const owned=core.evaluate({...safeInput,ownership:'owned'});
 assert.equal(owned.status,'no_purchase');
 assert.equal(owned.noPurchase,true);
 assert.equal(owned.productRouteAllowed,false);
 
-const heater=core.evaluate({...safe,loadType:'heater',continuousW:2000,peakW:2000,hoursDaily:4,ratedCurrentA:16,ratedPowerW:3500});
+const heater=core.evaluate({...safeInput,loadType:'heater',continuousW:2000,peakW:2000,hoursDaily:4,ratedCurrentA:16,ratedPowerW:3500});
 assert.equal(heater.status,'blocked');
 assert.equal(heater.productRouteAllowed,false);
 assert.ok(heater.blocks.some(item=>item.includes('Isıtıcı')));
 
-const daisy=core.evaluate({...safe,directWall:false});
+const daisy=core.evaluate({...safeInput,directWall:false});
 assert.equal(daisy.status,'blocked');
 assert.ok(daisy.blocks.some(item=>item.includes('başka bir grup prize')));
 
-const overloaded=core.evaluate({...safe,continuousW:2000,peakW:2200,ratedCurrentA:10,ratedPowerW:2300,hoursDaily:8});
+const overloaded=core.evaluate({...safeInput,continuousW:2000,peakW:2200,ratedCurrentA:10,ratedPowerW:2300,hoursDaily:8});
 assert.equal(overloaded.status,'insufficient');
 assert.equal(overloaded.screeningLimitW,1840);
 assert.ok(overloaded.failures.some(item=>item.includes('ön kontrol sınırı')));
 
-const unknownGround=core.evaluate({...safe,groundStatus:'unknown'});
+const unknownGround=core.evaluate({...safeInput,groundStatus:'unknown'});
 assert.equal(unknownGround.status,'conditional');
 assert.equal(unknownGround.productRouteAllowed,false);
 assert.ok(unknownGround.unknowns.some(item=>item.includes('koruma iletkeni')));
 
-const fewOutlets=core.evaluate({...safe,requiredOutlets:6,productOutlets:5});
+const fewOutlets=core.evaluate({...safeInput,requiredOutlets:6,productOutlets:5});
 assert.equal(fewOutlets.status,'insufficient');
 assert.ok(fewOutlets.failures.some(item=>item.includes('en az 6 priz')));
 
-const unverified=core.evaluate({...safe,labelVerified:false});
+const unverified=core.evaluate({...safeInput,labelVerified:false});
 assert.equal(unverified.status,'conditional');
 assert.equal(unverified.productRouteAllowed,false);
 
-const medical=core.evaluate({...safe,loadType:'medical'});
+const medical=core.evaluate({...safeInput,loadType:'medical'});
 assert.equal(medical.status,'blocked');
 assert.equal(medical.productRouteAllowed,false);
 
-assert.throws(()=>core.evaluate({...safe,peakW:300,continuousW:600}),/Tepe yük/);
+const usbMismatch=core.evaluate({...safeInput,usbNeeded:true,usbPorts:0});
+assert.equal(usbMismatch.status,'insufficient');
+assert.ok(usbMismatch.failures.some(item=>item.includes('USB')));
+
+assert.throws(()=>core.evaluate({...safeInput,peakW:300,continuousW:600}),/Tepe yük/);
 
 const repoRoot=path.resolve(__dirname,'../../..');
 const html=fs.readFileSync(path.join(__dirname,'index.html'),'utf8');
