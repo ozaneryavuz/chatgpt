@@ -1,0 +1,188 @@
+name: ALO186 Live Browser Audit Fixed
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  browser-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser audit tools
+        run: |
+          npm install --no-save playwright@1.55.0 @axe-core/playwright@4.10.2
+          npx playwright install --with-deps chromium
+      - name: Run mobile and desktop browser audit
+        shell: bash
+        run: |
+          mkdir -p artifacts/browser-fixed/screenshots
+          cat > browser-audit-fixed.mjs <<'NODE'
+          import fs from 'node:fs';
+          import { chromium } from 'playwright';
+          import AxeBuilder from '@axe-core/playwright';
+
+          const origin = 'https://alo186.com';
+          const routes = [
+            '/',
+            '/elektrik-portali',
+            '/elektrik-kesintisi',
+            '/haberler',
+            '/iletisim',
+            '/acil-numaralar',
+            '/sektor-rehberi/planli-elektrik-kesintisi-sorgulama',
+            '/sektor-rehberi/elektrikli-cihaz-hasar-basvurusu'
+          ];
+          const views = [
+            { name: 'mobile-360', width: 360, height: 800, isMobile: true, hasTouch: true },
+            { name: 'mobile-390', width: 390, height: 844, isMobile: true, hasTouch: true },
+            { name: 'desktop-1440', width: 1440, height: 1000, isMobile: false, hasTouch: false }
+          ];
+          const results = [];
+          const browser = await chromium.launch({ headless: true });
+
+          try {
+            for (const view of views) {
+              const context = await browser.newContext({
+                viewport: { width: view.width, height: view.height },
+                isMobile: view.isMobile,
+                hasTouch: view.hasTouch,
+                reducedMotion: 'reduce'
+              });
+
+              for (const route of routes) {
+                const page = await context.newPage();
+                const consoleErrors = [];
+                const pageErrors = [];
+                const requestFailures = [];
+                page.on('console', (message) => {
+                  if (message.type() === 'error') consoleErrors.push(message.text());
+                });
+                page.on('pageerror', (error) => pageErrors.push(String(error)));
+                page.on('requestfailed', (request) => requestFailures.push({
+                  url: request.url(),
+                  error: request.failure()?.errorText ?? 'unknown'
+                }));
+
+                const item = { viewport: view.name, route, consoleErrors, pageErrors, requestFailures };
+                try {
+                  const response = await page.goto(origin + route, {
+                    waitUntil: 'networkidle',
+                    timeout: 60000
+                  });
+                  await page.waitForTimeout(500);
+                  item.status = response?.status() ?? null;
+                  item.finalUrl = page.url();
+                  item.metrics = await page.evaluate(() => {
+                    const visible = (element) => {
+                      const rect = element.getBoundingClientRect();
+                      const style = getComputedStyle(element);
+                      return rect.width > 0 && rect.height > 0 && style.visibility !== 'hidden' && style.display !== 'none' && Number(style.opacity) !== 0;
+                    };
+                    const targetSelector = 'a,button,input,select,textarea,[role="button"]';
+                    const smallTargets = [...document.querySelectorAll(targetSelector)]
+                      .filter(visible)
+                      .map((element) => {
+                        const rect = element.getBoundingClientRect();
+                        return {
+                          tag: element.tagName,
+                          text: (element.innerText || element.getAttribute('aria-label') || element.getAttribute('name') || '').trim().slice(0, 120),
+                          width: Math.round(rect.width),
+                          height: Math.round(rect.height)
+                        };
+                      })
+                      .filter((target) => target.width < 44 || target.height < 44)
+                      .slice(0, 150);
+                    const clippedText = [...document.querySelectorAll('h1,h2,h3,p,a,button,label,li,td,th')]
+                      .filter(visible)
+                      .filter((element) => {
+                        const style = getComputedStyle(element);
+                        const clipped = element.scrollWidth > element.clientWidth + 2 || element.scrollHeight > element.clientHeight + 2;
+                        return clipped && ['hidden', 'clip'].includes(style.overflow) || clipped && ['hidden', 'clip'].includes(style.overflowX) || clipped && ['hidden', 'clip'].includes(style.overflowY);
+                      })
+                      .map((element) => ({
+                        tag: element.tagName,
+                        text: (element.innerText || element.textContent || '').trim().slice(0, 120),
+                        clientWidth: element.clientWidth,
+                        scrollWidth: element.scrollWidth,
+                        clientHeight: element.clientHeight,
+                        scrollHeight: element.scrollHeight
+                      }))
+                      .slice(0, 100);
+                    const ids = [...document.querySelectorAll('[id]')].map((element) => element.id);
+                    return {
+                      title: document.title,
+                      h1Count: document.querySelectorAll('h1').length,
+                      scrollWidth: document.documentElement.scrollWidth,
+                      clientWidth: document.documentElement.clientWidth,
+                      overflowPx: Math.max(0, document.documentElement.scrollWidth - document.documentElement.clientWidth),
+                      failedImages: [...document.images].filter((image) => image.complete && image.naturalWidth === 0).map((image) => image.currentSrc || image.src),
+                      pendingImages: [...document.images].filter((image) => !image.complete).map((image) => image.currentSrc || image.src),
+                      duplicateIds: [...new Set(ids.filter((id, index) => ids.indexOf(id) !== index))],
+                      smallTargets,
+                      clippedText
+                    };
+                  });
+                  const axe = await new AxeBuilder({ page }).analyze();
+                  item.axeViolations = axe.violations.map((violation) => ({
+                    id: violation.id,
+                    impact: violation.impact,
+                    help: violation.help,
+                    nodes: violation.nodes.length,
+                    selectors: violation.nodes.slice(0, 12).map((node) => node.target)
+                  }));
+                  const routeName = route === '/' ? 'home' : route.slice(1).replaceAll('/', '-');
+                  const screenshot = `artifacts/browser-fixed/screenshots/${view.name}-${routeName}.png`;
+                  await page.screenshot({ path: screenshot, fullPage: true });
+                  item.screenshot = screenshot;
+                } catch (error) {
+                  item.error = String(error);
+                } finally {
+                  results.push(item);
+                  await page.close();
+                }
+              }
+              await context.close();
+            }
+          } finally {
+            await browser.close();
+          }
+
+          fs.writeFileSync('artifacts/browser-fixed/browser-audit.json', JSON.stringify(results, null, 2));
+          const summary = {
+            generatedAt: new Date().toISOString(),
+            scenarioCount: results.length,
+            expectedScenarioCount: routes.length * views.length,
+            failedScenarios: results.filter((item) => item.error || !item.status || item.status >= 400).length,
+            overflowScenarios: results.filter((item) => (item.metrics?.overflowPx ?? 0) > 2).length,
+            failedImages: results.reduce((sum, item) => sum + (item.metrics?.failedImages?.length ?? 0), 0),
+            pendingImages: results.reduce((sum, item) => sum + (item.metrics?.pendingImages?.length ?? 0), 0),
+            consoleErrors: results.reduce((sum, item) => sum + (item.consoleErrors?.length ?? 0), 0),
+            pageErrors: results.reduce((sum, item) => sum + (item.pageErrors?.length ?? 0), 0),
+            requestFailures: results.reduce((sum, item) => sum + (item.requestFailures?.length ?? 0), 0),
+            axeViolations: results.reduce((sum, item) => sum + (item.axeViolations?.length ?? 0), 0),
+            seriousOrCriticalAxeNodes: results.reduce((sum, item) => sum + (item.axeViolations ?? []).filter((violation) => ['serious', 'critical'].includes(violation.impact)).reduce((nodeSum, violation) => nodeSum + violation.nodes, 0), 0),
+            mobileSmallTargets: results.filter((item) => item.viewport.startsWith('mobile')).reduce((sum, item) => sum + (item.metrics?.smallTargets?.length ?? 0), 0),
+            clippedTextRecords: results.reduce((sum, item) => sum + (item.metrics?.clippedText?.length ?? 0), 0)
+          };
+          fs.writeFileSync('artifacts/browser-fixed/summary.json', JSON.stringify(summary, null, 2));
+          console.log(JSON.stringify(summary, null, 2));
+          if (summary.scenarioCount !== summary.expectedScenarioCount || summary.failedScenarios > 0) process.exit(1);
+          NODE
+          node browser-audit-fixed.mjs | tee artifacts/browser-fixed/run.log
+      - name: Upload browser audit artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-live-browser-audit-fixed
+          path: artifacts/browser-fixed/
+          if-no-files-found: error
+          retention-days: 7
