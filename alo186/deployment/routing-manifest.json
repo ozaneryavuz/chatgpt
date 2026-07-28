@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 5,
   "canonicalHost": "https://www.alo186.com",
   "generatedAt": "2026-07-28",
   "routes": [
@@ -31,7 +31,10 @@
     {"source":"alo186/haberler/saf-sinus-modifiye-sinus-inverter-farki/index.html","canonicalPath":"/haberler/saf-sinus-modifiye-sinus-inverter-farki","type":"article"},
     {"source":"alo186/haberler/kacak-akim-rolesi-tip-a-tip-ac-farki/index.html","canonicalPath":"/haberler/kacak-akim-rolesi-tip-a-tip-ac-farki","type":"article"},
     {"source":"alo186/haberler/ev-tipi-enerji-depolama-kac-kwh-olmali/index.html","canonicalPath":"/haberler/ev-tipi-enerji-depolama-kac-kwh-olmali","type":"article"},
-    {"source":"alo186/haberler/harmonik-nedir-thd-cihazlari-nasil-etkiler/index.html","canonicalPath":"/haberler/harmonik-nedir-thd-cihazlari-nasil-etkiler","type":"article"}
+    {"source":"alo186/haberler/harmonik-nedir-thd-cihazlari-nasil-etkiler/index.html","canonicalPath":"/haberler/harmonik-nedir-thd-cihazlari-nasil-etkiler","type":"article"},
+    {"source":"alo186/haberler/ups-online-line-interactive-offline-farki/index.html","canonicalPath":"/haberler/ups-online-line-interactive-offline-farki","type":"article"},
+    {"source":"alo186/haberler/parafudr-gerilim-koruma-rolesi-farki/index.html","canonicalPath":"/haberler/parafudr-gerilim-koruma-rolesi-farki","type":"article"},
+    {"source":"alo186/haberler/vpp-sanal-guc-santrali-nedir/index.html","canonicalPath":"/haberler/vpp-sanal-guc-santrali-nedir","type":"article"}
   ],
   "requiredIntegrations": [
     "canonical URL must resolve with HTTP 200",
