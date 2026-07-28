@@ -1,0 +1,82 @@
+name: ALO186 web manifest kalite kontrolü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/manifest.webmanifest'
+      - 'alo186/deployment/apache-production.htaccess'
+      - 'alo186/deployment/build_static_site.py'
+      - 'alo186/deployment/smoke_static_site.py'
+      - '.github/workflows/alo186-webmanifest-quality.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/manifest.webmanifest'
+      - 'alo186/deployment/apache-production.htaccess'
+      - 'alo186/deployment/build_static_site.py'
+      - 'alo186/deployment/smoke_static_site.py'
+      - '.github/workflows/alo186-webmanifest-quality.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Manifest JSON ve güvenlik sözleşmesi
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('alo186/hesaplama/manifest.webmanifest')
+          data=json.loads(p.read_text(encoding='utf-8'))
+          assert data['id']=='/'
+          assert data['start_url']=='/'
+          assert data['scope']=='/'
+          assert data['lang']=='tr-TR'
+          assert data['name'].startswith('ALO186')
+          PY
+          grep -Fq 'RewriteRule ^manifest\.webmanifest$ hesaplama/manifest.webmanifest [T=application/manifest+json,L]' alo186/deployment/apache-production.htaccess
+          grep -Fq 'AddType application/manifest+json .webmanifest' alo186/deployment/apache-production.htaccess
+          grep -Fq 'Access-Control-Allow-Origin "https://www.alo186.com"' alo186/deployment/apache-production.htaccess
+          grep -Fq 'Cross-Origin-Resource-Policy "cross-origin"' alo186/deployment/apache-production.htaccess
+
+      - name: Canonical production bundle içinde manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-manifest-site \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-manifest-site
+          test -s /tmp/alo186-manifest-site/hesaplama/manifest.webmanifest
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          json.loads(Path('/tmp/alo186-manifest-site/hesaplama/manifest.webmanifest').read_text(encoding='utf-8'))
+          ht=Path('/tmp/alo186-manifest-site/.htaccess').read_text(encoding='utf-8')
+          assert 'application/manifest+json' in ht
+          assert 'Access-Control-Allow-Origin "https://www.alo186.com"' in ht
+          PY
+
+      - name: Doğrulanmış manifest artifactını sakla
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-webmanifest-production
+          path: |
+            /tmp/alo186-manifest-site/hesaplama/manifest.webmanifest
+            /tmp/alo186-manifest-site/.htaccess
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
