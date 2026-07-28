@@ -1,0 +1,2 @@
+ALO186 live quality audit rerun requested at 2026-07-28 06:29 Europe/Istanbul.
+Scope: mobile, desktop, crawl, accessibility, schema, canonical, robots, sitemap, Lighthouse, and device-damage deadline validation.
