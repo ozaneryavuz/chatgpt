@@ -5,18 +5,22 @@ on:
     branches: [main, feat/alo186-release-hub]
     paths:
       - 'alo186/index.html'
+      - 'alo186/haberler/**'
       - 'alo186/sitemap.xml'
       - 'alo186/robots.txt'
       - 'alo186/deployment/**'
       - 'alo186/tests/test_release_manifest.js'
+      - 'alo186/tests/test_authority_content.js'
       - '.github/workflows/alo186-release-ci.yml'
   pull_request:
     paths:
       - 'alo186/index.html'
+      - 'alo186/haberler/**'
       - 'alo186/sitemap.xml'
       - 'alo186/robots.txt'
       - 'alo186/deployment/**'
       - 'alo186/tests/test_release_manifest.js'
+      - 'alo186/tests/test_authority_content.js'
 
 permissions:
   contents: read
@@ -31,6 +35,8 @@ jobs:
           node-version: '22'
       - name: Yayın manifesti ve canonical testleri
         run: node alo186/tests/test_release_manifest.js
+      - name: İçerik otoritesi güvenlik ve SEO testleri
+        run: node alo186/tests/test_authority_content.js
       - name: XML ve robots temel kontrolü
         shell: bash
         run: |

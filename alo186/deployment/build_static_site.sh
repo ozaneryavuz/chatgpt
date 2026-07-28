@@ -43,6 +43,12 @@ copy_page "$ALO_DIR/fatura-analizi" "fatura-analizi"
 copy_page "$ALO_DIR/yedek-guc-hesaplayici" "hesaplama/yedek-guc"
 copy_page "$ALO_DIR/kesinti-maliyet-hesaplayici" "hesaplama/kesinti-maliyeti"
 
+mkdir -p "$DESTINATION/haberler"
+cp "$ALO_DIR/haberler/alo186-article.css" "$DESTINATION/haberler/alo186-article.css"
+copy_page "$ALO_DIR/haberler/ev-sarj-cihazi-icin-ev-tesisati-uygun-mu" "haberler/ev-sarj-cihazi-icin-ev-tesisati-uygun-mu"
+copy_page "$ALO_DIR/haberler/ges-elektrik-kesintisinde-calisir-mi" "haberler/ges-elektrik-kesintisinde-calisir-mi"
+copy_page "$ALO_DIR/haberler/jenerator-transfer-salteri-neden-gerekir" "haberler/jenerator-transfer-salteri-neden-gerekir"
+
 cp "$ALO_DIR/robots.txt" "$DESTINATION/robots.txt"
 cp "$ALO_DIR/sitemap.xml" "$DESTINATION/sitemap.xml"
 cp "$ALO_DIR/deployment/apache.htaccess" "$DESTINATION/.htaccess"
@@ -78,6 +84,10 @@ isletme-surekliligi/index.html
 fatura-analizi/index.html
 hesaplama/yedek-guc/index.html
 hesaplama/kesinti-maliyeti/index.html
+haberler/alo186-article.css
+haberler/ev-sarj-cihazi-icin-ev-tesisati-uygun-mu/index.html
+haberler/ges-elektrik-kesintisinde-calisir-mi/index.html
+haberler/jenerator-transfer-salteri-neden-gerekir/index.html
 robots.txt
 sitemap.xml
 .htaccess

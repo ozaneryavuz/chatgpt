@@ -12,6 +12,12 @@ LEGACY_ASSET_DIRECTORIES = (
     "yedek-guc-hesaplayici",
 )
 
+SHARED_STATIC_ASSETS = (
+    # Teknik makaleler canonical alt dizinlere taşınırken ortak responsive CSS
+    # /haberler kökünde tek kopya olarak yayınlanır.
+    ("alo186/haberler/alo186-article.css", "haberler/alo186-article.css"),
+)
+
 
 def copy_route(repo_root: Path, output: Path, route: dict) -> None:
     source = repo_root / route["source"]
@@ -51,6 +57,14 @@ def build(repo_root: Path, output: Path, commit_sha: str = "local") -> dict:
     for route in manifest["routes"]:
         copy_route(repo_root, output, route)
 
+    for source_name, target_name in SHARED_STATIC_ASSETS:
+        source = repo_root / source_name
+        if not source.is_file():
+            raise FileNotFoundError(f"Ortak yayın asset'i bulunamadı: {source}")
+        target = output / target_name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, target)
+
     # Canonical HTML üretmeyen ancak mevcut relatif CSS/JS bağımlılıklarını sağlayan
     # uyumluluk klasörleri. İçlerindeki index sayfaları kendi canonical URL'lerini taşır.
     for directory in LEGACY_ASSET_DIRECTORIES:
@@ -72,6 +86,7 @@ def build(repo_root: Path, output: Path, commit_sha: str = "local") -> dict:
         "canonicalHost": manifest["canonicalHost"],
         "routeCount": len(manifest["routes"]),
         "legacyAssetDirectories": list(LEGACY_ASSET_DIRECTORIES),
+        "sharedStaticAssets": [target for _, target in SHARED_STATIC_ASSETS],
         "routes": [
             {
                 "canonicalPath": item["canonicalPath"],
