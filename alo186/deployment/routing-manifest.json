@@ -1,5 +1,5 @@
 {
-  "version": 26,
+  "version": 27,
   "canonicalHost": "https://www.alo186.com",
   "generatedAt": "2026-07-28",
   "routes": [
@@ -95,7 +95,10 @@
     {"source":"alo186/haberler/elektrikli-arac-sarj-olmuyor-wallbox-neden-baslamiyor/index.html","canonicalPath":"/haberler/elektrikli-arac-sarj-olmuyor-wallbox-neden-baslamiyor","type":"article"},
     {"source":"alo186/haberler/ups-surekli-otuyor-bip-sesi-ne-anlama-gelir/index.html","canonicalPath":"/haberler/ups-surekli-otuyor-bip-sesi-ne-anlama-gelir","type":"article"},
     {"source":"alo186/haberler/jenerator-mars-basmiyor-calismiyor-ne-yapilmali/index.html","canonicalPath":"/haberler/jenerator-mars-basmiyor-calismiyor-ne-yapilmali","type":"article"},
-    {"source":"alo186/haberler/ev-sarj-kablosu-prizi-isiniyor-ne-yapilmali/index.html","canonicalPath":"/haberler/ev-sarj-kablosu-prizi-isiniyor-ne-yapilmali","type":"article"}
+    {"source":"alo186/haberler/ev-sarj-kablosu-prizi-isiniyor-ne-yapilmali/index.html","canonicalPath":"/haberler/ev-sarj-kablosu-prizi-isiniyor-ne-yapilmali","type":"article"},
+    {"source":"alo186/haberler/ev-sarj-gucu-neden-dusuk-yavas-sarj/index.html","canonicalPath":"/haberler/ev-sarj-gucu-neden-dusuk-yavas-sarj","type":"article"},
+    {"source":"alo186/haberler/ges-inverter-sicakta-guc-dusuruyor-temperature-derating/index.html","canonicalPath":"/haberler/ges-inverter-sicakta-guc-dusuruyor-temperature-derating","type":"article"},
+    {"source":"alo186/haberler/ups-akusu-sarj-olmuyor-batarya-dolmuyor/index.html","canonicalPath":"/haberler/ups-akusu-sarj-olmuyor-batarya-dolmuyor","type":"article"}
   ],
   "requiredIntegrations": [
     "canonical URL must resolve with HTTP 200",
