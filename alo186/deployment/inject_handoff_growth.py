@@ -3,10 +3,12 @@ import argparse,json
 from pathlib import Path
 from inject_handoff_growth_base import run as run_handoff_base
 from inject_proposal_scope_growth import run as run_proposal_scope
+from inject_lifecycle_cost_growth import run as run_lifecycle_cost
 
 def run(site:Path,base_path:str)->dict:
  result=run_handoff_base(site,base_path)
  result['proposalScope']=run_proposal_scope(site,base_path)
+ result['lifecycleCost']=run_lifecycle_cost(site,base_path)
  return result
 
 def main()->None:
