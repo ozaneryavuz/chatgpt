@@ -63,6 +63,24 @@ const fixedNow = new Date("2026-07-28T09:00:00.000Z");
 }
 
 {
+  const result = core.evaluate(base(), { now: fixedNow });
+  assert.strictEqual(result.passportEvidenceSuggestions.recovery_drill, "current");
+  assert.deepStrictEqual(result.handoff.passportEvidenceSuggestions, result.passportEvidenceSuggestions);
+}
+
+{
+  const result = core.evaluate(base({ criticalLoads: ["none", "communications"] }), { now: fixedNow });
+  assert.strictEqual(result.valid, false);
+  assert(result.errors.some((item) => item.includes("Kritik yük yok")));
+}
+
+{
+  const result = core.evaluate(base({ backupSources: ["none", "generator"] }), { now: fixedNow });
+  assert.strictEqual(result.valid, false);
+  assert(result.errors.some((item) => item.includes("Yedek kaynak yok")));
+}
+
+{
   const statuses = readyStatuses("grid-outage");
   statuses["hazard-check"] = "missing";
   const result = core.evaluate(base({ taskStatuses: statuses }), { now: fixedNow });
@@ -191,10 +209,17 @@ const fixedNow = new Date("2026-07-28T09:00:00.000Z");
 }
 
 {
+  const app = fs.readFileSync(path.join(__dirname, "../hesaplama/elektrik-kesintisi-tatbikati/app.js"), "utf8");
+  assert(app.includes("enforceExclusiveNone"));
+  assert(app.includes("invalidateResult"));
+  assert(app.includes('form.addEventListener("change"'));
+}
+
+{
   const schema = JSON.parse(fs.readFileSync(path.join(__dirname, "../hesaplama/elektrik-kesintisi-tatbikati/drill.schema.json"), "utf8"));
   assert.strictEqual(schema.$schema, "https://json-schema.org/draft/2020-12/schema");
   assert.strictEqual(schema.properties.schema.const, "alo186.electric-outage-drill.v1");
   assert(schema.required.includes("handoff"));
 }
 
-console.log("Elektrik kesintisi tatbikatı: 24 regresyon grubu başarılı.");
+console.log("Elektrik kesintisi tatbikatı: 28 regresyon grubu başarılı.");
