@@ -31,6 +31,7 @@ function option(id, values = {}) {
   };
 }
 
+assert.strictEqual(core.normalizedReplacementInterval(0.000001), 0.5, "Çok küçük yenileme aralığı güvenli alt sınıra çekilmeli");
 assert.strictEqual(core.replacementCount(5, 5), 0, "Analiz döneminin sonundaki yenileme gereksiz sayılmamalı");
 assert.strictEqual(core.replacementCount(6, 5), 1, "Dönem içindeki yenileme sayılmalı");
 assert.strictEqual(core.replacementCount(10, 2), 4, "Analiz sonundaki yenileme hariç dönem içindeki dört yenileme sayılmalı");
@@ -71,6 +72,20 @@ const noBuy = core.compare({ ...baseAssumptions, impactPerHour: 10 }, [
 assert.strictEqual(noBuy.ok, true);
 assert.strictEqual(noBuy.noBuy, true, "Maliyet-fayda negatif olduğunda satın almama sonucu çıkmalı");
 assert.strictEqual(noBuy.affiliateEligible, false, "Satın almama sonucunda affiliate kapısı açılmamalı");
+
+const explicitZeroImpact = core.compare({ ...baseAssumptions, impactPerHour: 0 }, [
+  option("ups", { purchase: 20000 }),
+  option("powerStation", { purchase: 25000 })
+]);
+assert.strictEqual(explicitZeroImpact.ok, true, "Kullanıcının açıkça girdiği sıfır etki kabul edilmeli");
+assert.strictEqual(explicitZeroImpact.noBuy, true);
+
+const missingImpact = core.compare({ ...baseAssumptions, impactPerHour: null }, [
+  option("ups", { purchase: 20000 }),
+  option("powerStation", { purchase: 25000 })
+]);
+assert.strictEqual(missingImpact.ok, false, "Boş bırakılan saatlik etki sıfır gibi yorumlanmamalı");
+assert(missingImpact.errors.some((message) => message.includes("saatlik tahmini etkisini")));
 
 const exactZero = core.compare({ ...baseAssumptions, impactPerHour: 125 }, [
   option("ups", { purchase: 10000, coveragePercent: 80 }),
@@ -121,7 +136,13 @@ const invalid = core.compare(baseAssumptions, [
   option("powerStation", { purchase: 0 })
 ]);
 assert.strictEqual(invalid.ok, false, "Kullanıcı maliyet verisi olmadan sıfır maliyet sonucu üretilmemeli");
-assert(invalid.errors.some((message) => message.includes("kendi teklif")));
+assert(invalid.errors.some((message) => message.includes("satın alma, kurulum")));
+
+const replacementOnly = core.compare(baseAssumptions, [
+  option("ups", { purchase: 0, installation: 0, annualMaintenance: 0, annualOperating: 0, replacementYears: 10, replacementCost: 50000 }),
+  option("powerStation", { purchase: 20000 })
+]);
+assert.strictEqual(replacementOnly.ok, false, "Analiz dönemi dışında kalan yenileme bedeli tek başına maliyet temeli sayılmamalı");
 
 const oneOption = core.compare(baseAssumptions, [option("ups"), { ...option("powerStation"), enabled: false }]);
 assert.strictEqual(oneOption.ok, false, "Karşılaştırma en az iki etkin çözüm gerektirmeli");
@@ -140,8 +161,9 @@ assert(html.includes("satın almamanın"));
 assert(html.includes("ALO186 örnek veya ortalama fiyat doldurmaz"));
 assert(!/amazon\.(com|com\.tr)/i.test(html), "Araçta doğrudan Amazon URL'si olmamalı");
 assert(!/<input[^>]+type="(?:text|email|tel)"/i.test(html), "Kişisel veri veya serbest metin alanı bulunmamalı");
-assert(!/id="(?:name|email|phone|address|company|contact|note)"/i.test(html), "Kimlik veya iletişim alanı bulunmamalı");
+assert(!/<input[^>]+(?:id|name)="(?:name|email|phone|address|company|contact|note)"/i.test(html), "Kimlik veya iletişim alanı bulunmamalı");
 assert(app.includes("STORAGE_TTL_MS = 30 * 24 * 60 * 60 * 1000"));
+assert(app.includes('return raw === "" ? null : Number(raw)'));
 assert(coreSource.includes("delete assumptions.medical"));
 assert(app.includes("backup_tco_no_buy_shown"));
 assert(app.includes("backup_tco_product_center_opened"));
