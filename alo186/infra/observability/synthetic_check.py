@@ -4,9 +4,11 @@ import argparse
 import json
 import socket
 import ssl
+import subprocess
 import time
 from datetime import datetime, timezone
 from urllib.error import HTTPError, URLError
+from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
 
@@ -18,38 +20,101 @@ STATIC_PATHS = (
     "/akilli-urun-secimi",
     "/isletme-surekliligi",
 )
-API_PATHS = ("/health/live", "/health/ready", "/api/v1/kg/public/health")
+API_HEALTH_PATHS = ("/health/live", "/health/ready")
+KG_HEALTH_PATH = "/api/v1/kg/public/health"
+REQUIRED_API_HEADERS = (
+    "x-request-id",
+    "x-content-type-options",
+    "x-frame-options",
+    "referrer-policy",
+)
 
 
-def fetch(url: str, timeout: float) -> dict[str, object]:
+def resolve(hostname: str) -> dict[str, object]:
     started = time.perf_counter()
-    request = Request(url, headers={"User-Agent": "ALO186-Synthetic/1.1", "Accept": "application/json,text/html,*/*"})
+    try:
+        addresses = sorted(
+            {item[4][0] for item in socket.getaddrinfo(hostname, 443, type=socket.SOCK_STREAM)}
+        )
+        return {
+            "ok": bool(addresses),
+            "hostname": hostname,
+            "addresses": addresses,
+            "durationMs": round((time.perf_counter() - started) * 1000, 1),
+        }
+    except OSError as exc:
+        return {
+            "ok": False,
+            "hostname": hostname,
+            "error": str(exc),
+            "durationMs": round((time.perf_counter() - started) * 1000, 1),
+        }
+
+
+def fetch(
+    url: str,
+    timeout: float,
+    *,
+    api_health: bool = False,
+    knowledge_graph_health: bool = False,
+) -> dict[str, object]:
+    started = time.perf_counter()
+    request = Request(
+        url,
+        headers={"User-Agent": "ALO186-Synthetic/2.1", "Accept": "application/json,text/html,*/*"},
+    )
     try:
         with urlopen(request, timeout=timeout) as response:
             body = response.read(64_000)
+            headers = {key.lower(): value for key, value in response.headers.items()}
             result: dict[str, object] = {
                 "ok": response.status == 200,
                 "status": response.status,
                 "finalUrl": response.geturl(),
-                "contentType": response.headers.get("content-type"),
+                "contentType": headers.get("content-type"),
                 "durationMs": round((time.perf_counter() - started) * 1000, 1),
                 "bytesRead": len(body),
             }
-            if url.endswith("/api/v1/kg/public/health") and response.status == 200:
+            if api_health or knowledge_graph_health:
                 try:
                     payload = json.loads(body.decode("utf-8"))
-                    score = float(payload.get("score", 0))
-                    result["knowledgeGraphScore"] = score
-                    result["knowledgeGraphEntities"] = int(payload.get("entities", 0))
-                    result["knowledgeGraphAssertions"] = int(payload.get("assertions", 0))
-                    result["ok"] = score >= 70 and int(payload.get("entities", 0)) > 0
+                except (UnicodeDecodeError, json.JSONDecodeError):
+                    payload = None
+                missing_headers = [name for name in REQUIRED_API_HEADERS if not headers.get(name)]
+                if api_health:
+                    status_value = payload.get("status") if isinstance(payload, dict) else None
+                    result.update(
+                        {
+                            "jsonStatus": status_value,
+                            "missingSecurityHeaders": missing_headers,
+                            "ok": response.status == 200
+                            and status_value in {"ok", "ready"}
+                            and not missing_headers,
+                        }
+                    )
+                else:
+                    score = float(payload.get("score", 0)) if isinstance(payload, dict) else 0.0
+                    entities = int(payload.get("entities", 0)) if isinstance(payload, dict) else 0
+                    assertions = int(payload.get("assertions", 0)) if isinstance(payload, dict) else 0
+                    result.update(
+                        {
+                            "knowledgeGraphScore": score,
+                            "knowledgeGraphEntities": entities,
+                            "knowledgeGraphAssertions": assertions,
+                            "missingSecurityHeaders": missing_headers,
+                            "ok": response.status == 200
+                            and score >= 70
+                            and entities > 0
+                            and assertions > 0
+                            and not missing_headers,
+                        }
+                    )
                     if not result["ok"]:
-                        result["error"] = "Knowledge Graph boş veya health skoru 70 altında."
-                except (ValueError, TypeError, json.JSONDecodeError) as exc:
-                    result["ok"] = False
-                    result["error"] = f"Knowledge Graph health cevabı okunamadı: {exc}"
+                        result["error"] = "Knowledge Graph boş, düşük skorlu veya güvenlik başlığı eksik."
+            else:
+                result["ok"] = response.status == 200 and len(body) >= 200
             return result
-    except (HTTPError, URLError, TimeoutError) as exc:
+    except (HTTPError, URLError, TimeoutError, OSError) as exc:
         return {
             "ok": False,
             "error": str(exc),
@@ -58,59 +123,131 @@ def fetch(url: str, timeout: float) -> dict[str, object]:
 
 
 def tls_expiry(hostname: str, port: int = 443, timeout: float = 10.0) -> dict[str, object]:
+    # create_default_context + server_hostname exact ve wildcard SAN eşleşmesini
+    # TLS handshake sırasında doğrular; tekrar exact string karşılaştırması yapılmaz.
     context = ssl.create_default_context()
     with socket.create_connection((hostname, port), timeout=timeout) as sock:
         with context.wrap_socket(sock, server_hostname=hostname) as tls_sock:
             certificate = tls_sock.getpeercert()
-    expires = datetime.strptime(certificate["notAfter"], "%b %d %H:%M:%S %Y %Z").replace(tzinfo=timezone.utc)
+    expires = datetime.strptime(certificate["notAfter"], "%b %d %H:%M:%S %Y %Z").replace(
+        tzinfo=timezone.utc
+    )
     remaining = expires - datetime.now(timezone.utc)
+    sans = [value for kind, value in certificate.get("subjectAltName", []) if kind == "DNS"]
     return {
         "ok": remaining.days >= 21,
         "hostname": hostname,
         "expiresAt": expires.isoformat(),
         "daysRemaining": remaining.days,
+        "hostnameVerifiedByTlsContext": True,
+        "subjectAltNames": sans,
         "issuer": dict(item[0] for item in certificate.get("issuer", [])),
     }
 
 
-def run(web_base: str, api_base: str, timeout: float) -> dict[str, object]:
+def dig_txt(name: str) -> list[str]:
+    try:
+        process = subprocess.run(
+            ["dig", "+short", "TXT", name],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=15,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return []
+    return [line.strip().replace('"', "") for line in process.stdout.splitlines() if line.strip()]
+
+
+def email_dns(domain: str) -> list[dict[str, object]]:
+    spf = [value for value in dig_txt(domain) if "v=spf1" in value.lower()]
+    dmarc = dig_txt(f"_dmarc.{domain}")
+    return [
+        {"ok": len(spf) == 1, "kind": "email-dns", "name": "spf", "recordCount": len(spf)},
+        {
+            "ok": any("V=DMARC1" in value.upper() for value in dmarc),
+            "kind": "email-dns",
+            "name": "dmarc",
+            "recordCount": len(dmarc),
+        },
+    ]
+
+
+def hostname(base_url: str) -> str:
+    parsed = urlparse(base_url)
+    if parsed.scheme != "https" or not parsed.hostname:
+        raise ValueError(f"HTTPS base URL bekleniyor: {base_url}")
+    return parsed.hostname
+
+
+def run(
+    web_base: str,
+    api_base: str,
+    timeout: float,
+    *,
+    check_email_dns: bool = False,
+    email_domain: str = "alo186.com",
+) -> dict[str, object]:
+    web_host, api_host = hostname(web_base), hostname(api_base)
+    dns_checks = [resolve(web_host), resolve(api_host)]
     checks: list[dict[str, object]] = []
     for path in STATIC_PATHS:
         result = fetch(f"{web_base.rstrip('/')}{path}", timeout)
         result.update({"kind": "web", "path": path})
         checks.append(result)
-    for path in API_PATHS:
-        result = fetch(f"{api_base.rstrip('/')}{path}", timeout)
+    for path in API_HEALTH_PATHS:
+        result = fetch(f"{api_base.rstrip('/')}{path}", timeout, api_health=True)
         result.update({"kind": "api", "path": path})
         checks.append(result)
+    kg_result = fetch(
+        f"{api_base.rstrip('/')}{KG_HEALTH_PATH}",
+        timeout,
+        knowledge_graph_health=True,
+    )
+    kg_result.update({"kind": "knowledge-graph", "path": KG_HEALTH_PATH})
+    checks.append(kg_result)
 
     tls_checks = []
-    for hostname in {web_base.split("//", 1)[-1].split("/", 1)[0], api_base.split("//", 1)[-1].split("/", 1)[0]}:
+    for host in {web_host, api_host}:
         try:
-            tls_checks.append(tls_expiry(hostname, timeout=timeout))
+            tls_checks.append(tls_expiry(host, timeout=timeout))
         except Exception as exc:  # noqa: BLE001
-            tls_checks.append({"ok": False, "hostname": hostname, "error": str(exc)})
+            tls_checks.append({"ok": False, "hostname": host, "error": str(exc)})
 
-    failures = [item for item in checks + tls_checks if not item.get("ok")]
+    email_checks = email_dns(email_domain) if check_email_dns else []
+    all_checks = [*dns_checks, *checks, *tls_checks, *email_checks]
+    failures = [item for item in all_checks if not item.get("ok")]
     return {
         "ok": not failures,
         "checkedAt": datetime.now(timezone.utc).isoformat(),
         "webBase": web_base,
         "apiBase": api_base,
+        "dns": dns_checks,
         "checks": checks,
         "tls": tls_checks,
+        "emailDns": email_checks,
         "failureCount": len(failures),
     }
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="ALO186 web/API/TLS/Knowledge Graph synthetic kontrolü")
+    parser = argparse.ArgumentParser(
+        description="ALO186 web/API/Knowledge Graph/DNS/TLS sentetik kontrolü"
+    )
     parser.add_argument("--web-base", default="https://www.alo186.com")
     parser.add_argument("--api-base", default="https://api.alo186.com")
     parser.add_argument("--timeout", type=float, default=15.0)
     parser.add_argument("--output", default="")
+    parser.add_argument("--check-email-dns", action="store_true")
+    parser.add_argument("--email-domain", default="alo186.com")
     args = parser.parse_args()
-    result = run(args.web_base, args.api_base, args.timeout)
+    result = run(
+        args.web_base,
+        args.api_base,
+        args.timeout,
+        check_email_dns=args.check_email_dns,
+        email_domain=args.email_domain,
+    )
     payload = json.dumps(result, ensure_ascii=False, indent=2)
     if args.output:
         with open(args.output, "w", encoding="utf-8") as handle:

@@ -1,6 +1,6 @@
 FROM postgres:16-alpine
 
-RUN apk add --no-cache bash ca-certificates restic tzdata
+RUN apk add --no-cache bash ca-certificates curl restic tzdata
 
 COPY ops/backup/backup_to_r2.sh /usr/local/bin/backup-to-r2
 COPY ops/backup/verify_restore.sh /usr/local/bin/verify-restore

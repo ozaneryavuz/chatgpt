@@ -1,0 +1,182 @@
+name: ALO186 Render manual deploy ve smoke test
+
+on:
+  workflow_dispatch:
+    inputs:
+      clear_cache:
+        description: Render build cache temizlensin
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: alo186-production
+    env:
+      RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+      RENDER_SERVICE_ID: ${{ vars.RENDER_SERVICE_ID }}
+    steps:
+      - name: Render API değerlerini doğrula
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$RENDER_API_KEY"
+          test -n "$RENDER_SERVICE_ID"
+      - name: Belirli commit için Render deploy oluştur
+        id: trigger
+        env:
+          CLEAR_CACHE: ${{ inputs.clear_cache }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          import urllib.error
+          import urllib.request
+
+          service_id = os.environ["RENDER_SERVICE_ID"]
+          api_key = os.environ["RENDER_API_KEY"]
+          clear_cache = "clear" if os.environ.get("CLEAR_CACHE", "false").lower() == "true" else "do_not_clear"
+          payload = json.dumps({
+              "clearCache": clear_cache,
+              "commitId": os.environ["GITHUB_SHA"],
+          }).encode("utf-8")
+          request = urllib.request.Request(
+              f"https://api.render.com/v1/services/{service_id}/deploys",
+              data=payload,
+              method="POST",
+              headers={
+                  "Authorization": f"Bearer {api_key}",
+                  "Content-Type": "application/json",
+                  "Accept": "application/json",
+                  "User-Agent": "ALO186-Render-Deploy/2.0",
+              },
+          )
+          try:
+              with urllib.request.urlopen(request, timeout=30) as response:
+                  status_code = response.status
+                  data = json.load(response)
+          except urllib.error.HTTPError as exc:
+              detail = exc.read().decode("utf-8", errors="replace")[:2000]
+              raise SystemExit(f"Render deploy oluşturulamadı: HTTP {exc.code}: {detail}") from exc
+
+          def deploy_id(value):
+              if isinstance(value, dict):
+                  candidate = value.get("id")
+                  if isinstance(candidate, str) and candidate.startswith("dep-"):
+                      return candidate
+                  for child in value.values():
+                      found = deploy_id(child)
+                      if found:
+                          return found
+              elif isinstance(value, list):
+                  for child in value:
+                      found = deploy_id(child)
+                      if found:
+                          return found
+              return None
+
+          identifier = deploy_id(data)
+          if status_code not in {201, 202}:
+              raise SystemExit(f"Beklenmeyen Render cevabı: HTTP {status_code}")
+          if not identifier:
+              raise SystemExit(
+                  "Render deploy ID döndürmedi. Başka bir deploy kuyruktaysa bu çalışma "
+                  "yeni sürümü doğrulayamaz; devam eden deploy bittikten sonra yeniden çalıştırın."
+              )
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write(f"deploy_id={identifier}\n")
+          print(f"Render deploy oluşturuldu: {identifier} (HTTP {status_code})")
+          PY
+      - name: Oluşturulan deploy canlı olana kadar bekle
+        env:
+          DEPLOY_ID: ${{ steps.trigger.outputs.deploy_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          import time
+          import urllib.error
+          import urllib.request
+
+          service_id = os.environ["RENDER_SERVICE_ID"]
+          deploy_id = os.environ["DEPLOY_ID"]
+          api_key = os.environ["RENDER_API_KEY"]
+          url = f"https://api.render.com/v1/services/{service_id}/deploys/{deploy_id}"
+          terminal_failures = {"canceled", "cancelled", "deactivated"}
+
+          def find_status(value):
+              if isinstance(value, dict):
+                  status = value.get("status")
+                  if isinstance(status, str):
+                      return status.lower()
+                  for child in value.values():
+                      found = find_status(child)
+                      if found:
+                          return found
+              elif isinstance(value, list):
+                  for child in value:
+                      found = find_status(child)
+                      if found:
+                          return found
+              return None
+
+          for attempt in range(1, 121):
+              request = urllib.request.Request(
+                  url,
+                  headers={
+                      "Authorization": f"Bearer {api_key}",
+                      "Accept": "application/json",
+                      "User-Agent": "ALO186-Render-Deploy/2.0",
+                  },
+              )
+              try:
+                  with urllib.request.urlopen(request, timeout=20) as response:
+                      data = json.load(response)
+              except urllib.error.HTTPError as exc:
+                  if exc.code in {429, 500, 503}:
+                      print(f"Render geçici HTTP {exc.code}; tekrar denenecek ({attempt}/120).")
+                      time.sleep(10)
+                      continue
+                  detail = exc.read().decode("utf-8", errors="replace")[:2000]
+                  raise SystemExit(f"Render deploy durumu alınamadı: HTTP {exc.code}: {detail}") from exc
+
+              status = find_status(data)
+              print(f"Deploy {deploy_id}: status={status!r} ({attempt}/120)")
+              if status == "live":
+                  print("Yeni Render deploy canlı duruma geçti.")
+                  break
+              if status and (status in terminal_failures or "failed" in status):
+                  raise SystemExit(f"Render deploy başarısız terminal durumda: {status}")
+              time.sleep(10)
+          else:
+              raise SystemExit("Render deploy 20 dakika içinde live durumuna geçmedi.")
+          PY
+      - name: Yeni canlı sürümde production smoke
+        run: |
+          python - <<'PY'
+          import json
+          import urllib.request
+
+          for path in ('/health/live', '/health/ready', '/api/v1/kg/public/health'):
+              request = urllib.request.Request(
+                  'https://api.alo186.com' + path,
+                  headers={'User-Agent': 'ALO186-Render-Deploy/2.0'},
+              )
+              with urllib.request.urlopen(request, timeout=20) as response:
+                  data = json.load(response)
+                  assert response.status == 200
+                  if path.startswith('/health/'):
+                      assert data['status'] in {'ok', 'ready'}
+                  else:
+                      assert data.get('entities', 0) > 0
+                  assert response.headers.get('X-Request-ID')
+          print('Yeni Render deployment smoke başarılı.')
+          PY

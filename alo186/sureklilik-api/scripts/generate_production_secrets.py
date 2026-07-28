@@ -26,7 +26,15 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="ALO186 production secret seti üretir.")
     parser.add_argument("--format", choices=("json", "shell"), default="json")
     parser.add_argument("--output", type=Path, help="Secret değerlerini 0600 izinli dosyaya yazar.")
+    parser.add_argument(
+        "--unsafe-stdout",
+        action="store_true",
+        help="Secret değerlerini terminale yazmaya açıkça izin verir; CI ve paylaşılan terminalde kullanmayın.",
+    )
     args = parser.parse_args()
+
+    if not args.output and not args.unsafe_stdout:
+        parser.error("Güvenlik için --output zorunludur; terminal çıktısı için --unsafe-stdout açıkça verilmelidir.")
 
     values = generate()
     payload = json.dumps(values, ensure_ascii=False, indent=2) + "\n" if args.format == "json" else shell_format(values)
@@ -40,7 +48,7 @@ def main() -> None:
         print(f"Secret dosyası oluşturuldu: {output} (izin 0600)")
         return
 
-    print("UYARI: Çıktı secret içerir; CI loguna veya issue yorumuna kopyalamayın.", file=os.sys.stderr)
+    print("UYARI: Secret değerleri açıkça stdout'a yazılıyor.", file=os.sys.stderr)
     print(payload, end="")
 
 

@@ -43,6 +43,21 @@ def _secret(name: str, default: str | None = None) -> str | None:
     return direct if direct is not None else default
 
 
+def normalize_database_url(value: str) -> str:
+    """Yönetilen PostgreSQL URL'lerini açıkça psycopg3 lehçesine çevirir.
+
+    Render ve benzeri sağlayıcılar çoğunlukla `postgresql://` veya tarihsel
+    `postgres://` bağlantı dizesi döndürür. SQLAlchemy'nin varsayılan sürücü
+    seçiminin psycopg2'ye düşmesini önlemek için psycopg3 lehçesi açık yazılır.
+    """
+
+    if value.startswith("postgres://"):
+        return "postgresql+psycopg://" + value[len("postgres://") :]
+    if value.startswith("postgresql://"):
+        return "postgresql+psycopg://" + value[len("postgresql://") :]
+    return value
+
+
 def _derived_fernet_key(secret: str) -> str:
     return base64.urlsafe_b64encode(hashlib.sha256(secret.encode("utf-8")).digest()).decode("ascii")
 
@@ -95,10 +110,13 @@ def load_settings() -> Settings:
     ) or ""
     explicit_encryption_key = _secret("ALO186_DATA_ENCRYPTION_KEY")
     data_encryption_key = explicit_encryption_key or _derived_fernet_key(token_secret)
+    database_url = normalize_database_url(
+        _secret("ALO186_DATABASE_URL", "sqlite:///./alo186_continuity.db") or ""
+    )
 
     settings = Settings(
         environment=environment,
-        database_url=_secret("ALO186_DATABASE_URL", "sqlite:///./alo186_continuity.db") or "",
+        database_url=database_url,
         token_secret=token_secret,
         data_encryption_key=data_encryption_key,
         token_ttl_seconds=_env_int("ALO186_TOKEN_TTL_SECONDS", 28_800),

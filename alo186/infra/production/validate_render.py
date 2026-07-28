@@ -13,10 +13,19 @@ REQUIRED_PRODUCTION_ENV = {
     "ALO186_AUTO_CREATE_SCHEMA": "false",
     "ALO186_EXPOSE_TEST_TOKENS": "false",
 }
+DATABASE_SERVICES = {
+    "alo186-continuity-api",
+    "alo186-email-worker",
+    "alo186-retention-cron",
+}
 
 
 def env_map(service: dict) -> dict[str, dict]:
-    return {item["key"]: item for item in service.get("envVars", []) if isinstance(item, dict) and item.get("key")}
+    return {
+        item["key"]: item
+        for item in service.get("envVars", [])
+        if isinstance(item, dict) and item.get("key")
+    }
 
 
 def validate(path: Path) -> dict[str, object]:
@@ -25,7 +34,11 @@ def validate(path: Path) -> dict[str, object]:
     warnings: list[str] = []
 
     if not isinstance(data, dict):
-        return {"ok": False, "failures": ["render.yaml kök nesnesi sözlük olmalıdır."], "warnings": []}
+        return {
+            "ok": False,
+            "failures": ["render.yaml kök nesnesi sözlük olmalıdır."],
+            "warnings": [],
+        }
 
     databases = data.get("databases") or []
     services = data.get("services") or []
@@ -44,12 +57,15 @@ def validate(path: Path) -> dict[str, object]:
     if "alo186-postgres" not in database_names:
         failures.append("alo186-postgres database tanımı eksik.")
 
-    service_by_name = {item.get("name"): item for item in services if isinstance(item, dict)}
+    service_by_name = {
+        item.get("name"): item for item in services if isinstance(item, dict)
+    }
     required_services = {
         "alo186-continuity-api": "web",
         "alo186-email-worker": "worker",
         "alo186-retention-cron": "cron",
         "alo186-r2-backup-cron": "cron",
+        "alo186-grafana-alloy": "worker",
     }
     for name, expected_type in required_services.items():
         service = service_by_name.get(name)
@@ -77,24 +93,41 @@ def validate(path: Path) -> dict[str, object]:
             failures.append(f"{name}: healthCheckPath eksik.")
 
         variables = env_map(service)
-        if name != "alo186-r2-backup-cron":
+        if name in DATABASE_SERVICES:
             for key, value in REQUIRED_PRODUCTION_ENV.items():
                 item = variables.get(key)
                 if not item or str(item.get("value", "")).lower() != value:
                     failures.append(f"{name}: {key}={value} olmalı.")
             db = variables.get("ALO186_DATABASE_URL")
             if not db or db.get("fromDatabase", {}).get("name") != "alo186-postgres":
-                failures.append(f"{name}: ALO186_DATABASE_URL alo186-postgres'ten gelmeli.")
+                failures.append(
+                    f"{name}: ALO186_DATABASE_URL alo186-postgres'ten gelmeli."
+                )
 
         for item in service.get("envVars", []):
             if not isinstance(item, dict) or not item.get("key"):
                 failures.append(f"{name}: geçersiz envVars satırı.")
                 continue
-            modes = sum(bool(item.get(field)) for field in ("value", "generateValue", "sync", "fromDatabase", "fromService"))
+            modes = sum(
+                bool(item.get(field))
+                for field in (
+                    "value",
+                    "generateValue",
+                    "sync",
+                    "fromDatabase",
+                    "fromService",
+                )
+            )
             if modes == 0:
                 warnings.append(f"{name}: {item['key']} için değer kaynağı görünmüyor.")
-            if item.get("key", "").endswith(("SECRET", "PASSWORD", "DSN")) and "value" in item and item["value"]:
-                warnings.append(f"{name}: {item['key']} sabit value içeriyor; secret store tercih edilmeli.")
+            if (
+                item.get("key", "").endswith(("SECRET", "PASSWORD", "DSN", "API_KEY"))
+                and "value" in item
+                and item["value"]
+            ):
+                warnings.append(
+                    f"{name}: {item['key']} sabit value içeriyor; secret store tercih edilmeli."
+                )
 
     api = service_by_name.get("alo186-continuity-api") or {}
     api_env = env_map(api)
@@ -108,7 +141,11 @@ def validate(path: Path) -> dict[str, object]:
         item = api_env.get(key)
         if not item:
             failures.append(f"API secret/env eksik: {key}")
-        elif not (item.get("generateValue") or item.get("sync") is False or item.get("fromService")):
+        elif not (
+            item.get("generateValue")
+            or item.get("sync") is False
+            or item.get("fromService")
+        ):
             failures.append(f"API secret güvenli kaynakta değil: {key}")
 
     for key, expected in {
@@ -118,14 +155,47 @@ def validate(path: Path) -> dict[str, object]:
     }.items():
         item = api_env.get(key)
         if not item or str(item.get("value", "")).lower() != expected:
-            failures.append(f"API Knowledge Graph ayarı eksik veya hatalı: {key}={expected}")
+            failures.append(
+                f"API Knowledge Graph ayarı eksik veya hatalı: {key}={expected}"
+            )
 
     backup = service_by_name.get("alo186-r2-backup-cron") or {}
     backup_env = env_map(backup)
-    for key in ("RESTIC_REPOSITORY", "RESTIC_PASSWORD", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY"):
+    for key in (
+        "RESTIC_REPOSITORY",
+        "RESTIC_PASSWORD",
+        "AWS_ACCESS_KEY_ID",
+        "AWS_SECRET_ACCESS_KEY",
+        "ALO186_BACKUP_HEARTBEAT_URL",
+    ):
         item = backup_env.get(key)
         if not item or item.get("sync") is not False:
-            failures.append(f"Backup secret kullanıcı tarafından sync:false olarak girilmeli: {key}")
+            failures.append(
+                f"Backup secret kullanıcı tarafından sync:false olarak girilmeli: {key}"
+            )
+    if (backup_env.get("ALO186_BACKUP_KEEP_YEARLY") or {}).get("value") != "3":
+        failures.append("Backup yıllık retention 3 olmalı.")
+    db = backup_env.get("ALO186_DATABASE_URL")
+    if not db or db.get("fromDatabase", {}).get("name") != "alo186-postgres":
+        failures.append("Backup ALO186_DATABASE_URL alo186-postgres'ten gelmeli.")
+
+    alloy = service_by_name.get("alo186-grafana-alloy") or {}
+    alloy_env = env_map(alloy)
+    for key in (
+        "GRAFANA_CLOUD_PROMETHEUS_URL",
+        "GRAFANA_CLOUD_PROMETHEUS_USERNAME",
+        "GRAFANA_CLOUD_API_KEY",
+    ):
+        item = alloy_env.get(key)
+        if not item or item.get("sync") is not False:
+            failures.append(f"Grafana Alloy secret/env sync:false olmalı: {key}")
+    metrics_item = alloy_env.get("ALO186_METRICS_TOKEN")
+    if (
+        not metrics_item
+        or metrics_item.get("fromService", {}).get("name")
+        != "alo186-continuity-api"
+    ):
+        failures.append("Grafana Alloy metrics token API servisinden gelmeli.")
 
     retention = service_by_name.get("alo186-retention-cron") or {}
     retention_command = str(retention.get("dockerCommand", ""))
