@@ -10,10 +10,16 @@ const hub = fs.readFileSync(path.join(root, 'alo186/hesaplama/index.html'), 'utf
 const manifest = JSON.parse(fs.readFileSync(path.join(root, 'alo186/deployment/routing-manifest.json'), 'utf8'));
 
 const staleInventory = /\b\d+\s+(?:kişisel veri istemeyen (?:araç|hesaplama ve karar aracı)|kaynak doğrulamalı (?:teknik )?rehber)\b/giu;
+const head = (portal.match(/<head>[\s\S]*?<\/head>/i) || [''])[0];
 assert.equal(
   [...portal.matchAll(staleInventory)].length,
   0,
   'Elektrik Portalı hızlı değişen araç/rehber envanterini sabit sayıyla yayımlamamalı.'
+);
+assert.equal(
+  [...head.matchAll(staleInventory)].length,
+  0,
+  'Meta açıklaması ve JSON-LD hızlı değişen envanteri sabit sayıyla yayımlamamalı.'
 );
 
 assert(portal.includes('kişisel veri istemeyen araçlar'), 'Portal kişisel veri istemeyen araç ailesini görünür anlatmalı.');
