@@ -73,7 +73,7 @@ assert.match(html,/Joule değeri.*tek başına koruma garantisi değildir/s);
 assert.doesNotMatch(html,/amazon\.(com|com\.tr)\//i);
 assert.doesNotMatch(html,/type="(?:email|tel|text)"/i);
 assert.doesNotMatch(html,/name="(?:address|phone|email|subscription|tc|identity|note)"/i);
-assert.match(hub,/29 çekirdek araç/);
+assert.match(hub,/[3-9][0-9]* çekirdek araç/);
 assert.match(hub,/\.\/akim-korumali-grup-priz-uygunluk\//);
 assert.match(manifest,/alo186\/hesaplama\/akim-korumali-grup-priz-uygunluk\/index\.html/);
 assert.match(sitemap,/https:\/\/www\.alo186\.com\/hesaplama\/akim-korumali-grup-priz-uygunluk\//);

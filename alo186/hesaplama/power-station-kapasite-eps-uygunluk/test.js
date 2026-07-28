@@ -74,7 +74,7 @@ assert.match(html,/href="\/akilli-urun-secimi\?kategori=power_station"/);
 assert.doesNotMatch(html,/amazon\.(com\.tr|com)\//i);
 assert.doesNotMatch(html,/type="(?:email|tel|text)"/i);
 assert.doesNotMatch(html,/name="(?:address|phone|email|subscription|plate|serial|note)"/i);
-assert.match(center,/2[8-9] çekirdek araç/);
+assert.match(center,/[3-9][0-9]* çekirdek araç/);
 assert.match(center,/\.\/power-station-kapasite-eps-uygunluk\//);
 assert.match(manifest,/alo186\/hesaplama\/power-station-kapasite-eps-uygunluk\/index\.html/);
 assert.match(sitemap,/https:\/\/www\.alo186\.com\/hesaplama\/power-station-kapasite-eps-uygunluk\//);

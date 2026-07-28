@@ -1,5 +1,5 @@
 {
-  "version": 27,
+  "version": 28,
   "canonicalHost": "https://www.alo186.com",
   "generatedAt": "2026-07-28",
   "routes": [
@@ -19,6 +19,7 @@
     {"source":"alo186/hesaplama/modem-internet-yedekleme/index.html","canonicalPath":"/hesaplama/modem-internet-yedekleme/","type":"calculator"},
     {"source":"alo186/hesaplama/jenerator-gucu-secimi/index.html","canonicalPath":"/hesaplama/jenerator-gucu-secimi/","type":"calculator"},
     {"source":"alo186/hesaplama/kesinti-gunlugu/index.html","canonicalPath":"/hesaplama/kesinti-gunlugu/","type":"tool"},
+    {"source":"alo186/hesaplama/cozum-sonucu/index.html","canonicalPath":"/hesaplama/cozum-sonucu/","type":"tool"},
     {"source":"alo186/hesaplama/inverter-uygunluk/index.html","canonicalPath":"/hesaplama/inverter-uygunluk/","type":"tool"},
     {"source":"alo186/hesaplama/gunes-paneli-power-station-uygunluk/index.html","canonicalPath":"/hesaplama/gunes-paneli-power-station-uygunluk/","type":"tool"},
     {"source":"alo186/hesaplama/ev-sarj-suresi/index.html","canonicalPath":"/hesaplama/ev-sarj-suresi/","type":"calculator"},
