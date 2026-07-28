@@ -1,0 +1,59 @@
+name: ALO186 elektrik kesintisi tatbikatı kalite kontrolü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/elektrik-kesintisi-tatbikati/**'
+      - 'alo186/hesaplama/index.html'
+      - 'alo186/deployment/routing-manifest.json'
+      - 'alo186/sitemap.xml'
+      - 'alo186/tests/test_outage_drill.js'
+      - '.github/workflows/alo186-outage-drill.yml'
+  push:
+    branches: [main, feature/alo186-elektrik-kesintisi-tatbikati-20260728]
+    paths:
+      - 'alo186/hesaplama/elektrik-kesintisi-tatbikati/**'
+      - 'alo186/hesaplama/index.html'
+      - 'alo186/deployment/routing-manifest.json'
+      - 'alo186/sitemap.xml'
+      - 'alo186/tests/test_outage_drill.js'
+      - '.github/workflows/alo186-outage-drill.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-outage-drill-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Tatbikat motoru ve entegrasyon testleri
+        run: |
+          node alo186/tests/test_outage_drill.js
+          node alo186/tests/test_release_manifest.js
+      - name: JSON ve Python sözdizimi
+        run: |
+          python -m json.tool alo186/hesaplama/elektrik-kesintisi-tatbikati/drill.schema.json >/dev/null
+          python -m json.tool alo186/deployment/routing-manifest.json >/dev/null
+      - name: Production bundle ve smoke test
+        run: |
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-outage-drill-site --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-outage-drill-site
+          test -f /tmp/alo186-outage-drill-site/hesaplama/elektrik-kesintisi-tatbikati/index.html
+          test -f /tmp/alo186-outage-drill-site/hesaplama/elektrik-kesintisi-tatbikati/core.js
+          test -f /tmp/alo186-outage-drill-site/hesaplama/elektrik-kesintisi-tatbikati/drill.schema.json
+      - name: Güven ve kişisel veri kapıları
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -R -n -E '<input[^>]+type=["'"'](text|email|tel)["'"']|<textarea' alo186/hesaplama/elektrik-kesintisi-tatbikati
+          ! grep -R -n -E 'amazon\.|amzn\.|price|stok|puan|garanti' alo186/hesaplama/elektrik-kesintisi-tatbikati/index.html
+          grep -q '112’yi ara' alo186/hesaplama/elektrik-kesintisi-tatbikati/index.html
+          grep -q 'alo186.continuity-drill-handoff.v1' alo186/hesaplama/elektrik-kesintisi-tatbikati/core.js
