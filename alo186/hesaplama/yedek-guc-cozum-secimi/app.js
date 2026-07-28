@@ -5,6 +5,7 @@
 
   const STORAGE_KEY = 'alo186_backup_solution_v1';
   const MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
+  const PRODUCT_FALLBACK = '/akilli-urun-secimi?source=backup-solution';
   const $ = function (id) { return document.getElementById(id); };
   const form = $('solutionForm');
   const results = $('results');
@@ -67,6 +68,21 @@
     return items.map(function (item) { return '<li>' + escapeHtml(item) + '</li>'; }).join('');
   }
 
+  function disableProductLink(link) {
+    link.href = PRODUCT_FALLBACK;
+    link.setAttribute('aria-disabled', 'true');
+    link.setAttribute('tabindex', '-1');
+    link.classList.add('disabled');
+  }
+
+  function enableProductLink(link) {
+    if (!link.dataset.href) return;
+    link.href = link.dataset.href;
+    link.removeAttribute('aria-disabled');
+    link.removeAttribute('tabindex');
+    link.classList.remove('disabled');
+  }
+
   function render(result, input) {
     lastResult = result;
     $('validation').textContent = '';
@@ -100,9 +116,7 @@
     const productLink = $('productLink');
     const productAck = $('productAck');
     productAck.checked = false;
-    productLink.setAttribute('aria-disabled', 'true');
-    productLink.classList.add('disabled');
-    productLink.removeAttribute('href');
+    disableProductLink(productLink);
     if (result.showCommercial) {
       commercial.hidden = false;
       productLink.dataset.href = result.productUrl;
@@ -176,19 +190,12 @@
 
   $('productAck').addEventListener('change', function (event) {
     const link = $('productLink');
-    if (event.target.checked && link.dataset.href) {
-      link.href = link.dataset.href;
-      link.removeAttribute('aria-disabled');
-      link.classList.remove('disabled');
-    } else {
-      link.removeAttribute('href');
-      link.setAttribute('aria-disabled', 'true');
-      link.classList.add('disabled');
-    }
+    if (event.target.checked && link.dataset.href) enableProductLink(link);
+    else disableProductLink(link);
   });
 
   $('productLink').addEventListener('click', function (event) {
-    if (!event.currentTarget.getAttribute('href')) {
+    if (event.currentTarget.getAttribute('aria-disabled') === 'true') {
       event.preventDefault();
       return;
     }
