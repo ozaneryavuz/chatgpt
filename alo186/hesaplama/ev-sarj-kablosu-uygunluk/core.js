@@ -41,7 +41,7 @@
     if(!input.storageOk)warnings.push('Koruyucu kapak, kuru/temiz saklama ve konnektör koruması doğrulanmadı.');
     if(input.cableLength>10)warnings.push('10 m üzerindeki kablo daha ağır ve zor yönetilir; üreticinin uzunluk, sinyal ve saklama talimatını ayrıca kontrol edin.');
     const overSpecified=Boolean(recommendedCurrent&&input.cableRatedCurrent>recommendedCurrent&&input.cablePhases!=='unknown');
-    if(overSpecified)warnings.push(`Hedef için yaklaşık ${recommendedCurrent} A kablo yeterli olabilir; daha yüksek akım etiketi aracın veya istasyonun sınırını aşarak şarjı hızlandırmaz.`);
+    if(overSpecified)warnings.push(`Hedef için yaklaşık ${recommendedCurrent} A kablo yeterli olabilir; daha yüksek akım etiketi aracın veya istasyonun sınırını aşarak şarjı hızlandırmaz. Gereksiz yüksek sınıf için ürün yönlendirmesi açılmaz.`);
     let limitingComponent='Belirlenemedi';
     if(targetPhase&&cablePowerKw!=null){const vehicle=input.vehicleMaxKw,station=powerFor(targetPhase,input.stationMaxCurrent),cable=powerFor(effective||targetPhase,input.cableRatedCurrent),min=Math.min(vehicle,station,cable);limitingComponent=min===vehicle?'Araç üstü AC şarj cihazı':min===station?'Şarj noktası':'Şarj kablosu';}
     const safetyCodes=['damage','interposed_equipment','locking','connector','connector_unknown','cable_connector'];
@@ -52,7 +52,7 @@
     let status='compatible';if(blockers.length)status='incompatible';else if(warnings.length)status='conditional';
     const targetMet=targetPowerKw!=null&&cablePowerKw!=null&&cablePowerKw+0.05>=targetPowerKw&&!capabilityGap;
     const noPurchaseNeeded=input.ownership==='owned'&&targetMet&&!safetyBlocker&&allVerified;
-    const commercialAllowed=Boolean(allVerified&&lowRiskBand&&!noPurchaseNeeded&&((input.ownership==='candidate'&&!safetyBlocker)||(input.ownership==='owned'&&capabilityGap&&!safetyBlocker)));
+    const commercialAllowed=Boolean(allVerified&&lowRiskBand&&!noPurchaseNeeded&&!overSpecified&&((input.ownership==='candidate'&&!safetyBlocker)||(input.ownership==='owned'&&capabilityGap&&!safetyBlocker)));
     const professionalRequired=safetyBlocker||!targetPhase||recommendedCurrent==null||input.vehicleInlet!=='type2';
     if(recommendedCurrent&&targetPhase)checks.push(`Hedefi kabloyla sınırlamamak için teknik minimum: ${targetPhase==='three'?'trifaze':'monofaze'} ${recommendedCurrent} A Type 2–Type 2 Mode 3.`);
     checks.push('Gerçek şarj gücü; araç, istasyon ve kablonun desteklediği en düşük güçle sınırlanır.','Kablo etiketinde Type 2, Mode 3, faz sayısı, akım ve üretici/model bilgilerini doğrulayın.','Konnektör, dış kılıf, kilit ve koruyucu kapakta çatlak, ezilme, aşınma veya aşırı kir bulunmamalıdır.','Şarj kaynağı ile araç arasına uzatma, çoklayıcı, adaptör veya haricî zamanlayıcı eklemeyin.','Hasarlı kabloyu onarmaya çalışmayın; üretici veya yetkili servis sürecini izleyin.');
