@@ -82,15 +82,42 @@
     return {eligible:true,score:Math.round(clamp(score,0,100)),reasons,unknowns,failures,confidence:unknowns.length>1?'Düşük–orta':unknowns.length?'Orta':'Yüksek'};
   }
 
-  function match(categoryId,requirements={}){
+  function guideResult(category){
+    const professionalSelectionRequired=['compatibility','safety','measurement'].includes(category.risk);
+    return {
+      category,
+      mode:'guide',
+      matches:[],
+      searchUrl:catalog.searchUrl(category.id),
+      professionalSelectionRequired,
+      affiliatePolicy:category.affiliatePolicy||'after_checklist',
+      nextStep:category.nextStepUrl?{url:category.nextStepUrl,label:category.nextStepLabel||'Ücretsiz ön kontrolü aç'}:null
+    };
+  }
+
+  function match(categoryId,requirements={},options={}){
     const category=catalog.getCategory(categoryId);
     if(!category)throw new Error('Ürün kategorisi bulunamadı.');
-    if(category.mode!=='direct')return {category,mode:'guide',matches:[],searchUrl:catalog.searchUrl(categoryId),professionalSelectionRequired:['compatibility','safety','measurement'].includes(category.risk)};
+    if(category.mode!=='direct')return guideResult(category);
 
+    const now=options.now||new Date();
+    const allProducts=catalog.productsFor(categoryId,{now,freshOnly:false});
+    const freshProducts=catalog.productsFor(categoryId,{now,freshOnly:true});
+    const staleProductCount=Math.max(0,allProducts.length-freshProducts.length);
     const scorer=categoryId==='powerbank'?scorePowerbank:scoreSurge;
-    const scored=catalog.productsFor(categoryId).map(product=>({product,...scorer(product,requirements)})).filter(x=>x.eligible).sort((a,b)=>b.score-a.score);
+    const scored=freshProducts.map(product=>({product,...scorer(product,requirements),freshness:catalog.verificationStatus(product,now)})).filter(x=>x.eligible).sort((a,b)=>b.score-a.score);
     scored.forEach((item,index)=>item.label=rankLabel(index,scored.length));
-    return {category,mode:'direct',matches:scored.slice(0,3),searchUrl:catalog.searchUrl(categoryId),professionalSelectionRequired:false};
+    return {
+      category,
+      mode:'direct',
+      matches:scored.slice(0,3),
+      searchUrl:catalog.searchUrl(categoryId),
+      professionalSelectionRequired:false,
+      affiliatePolicy:category.affiliatePolicy||'verified_direct',
+      staleProductCount,
+      freshProductCount:freshProducts.length,
+      catalogFresh:staleProductCount===0
+    };
   }
 
   function requirementsSummary(categoryId,requirements={}){
@@ -100,5 +127,5 @@
     return category?category.description:'';
   }
 
-  return {match,scorePowerbank,scoreSurge,requirementsSummary,knownRatio};
+  return {match,scorePowerbank,scoreSurge,requirementsSummary,knownRatio,guideResult};
 });

@@ -5,6 +5,7 @@
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
   const affiliateTag='alo186hazirlik-21';
   const verifiedAt='2026-07-27';
+  const verificationMaxAgeDays=45;
 
   function amazonProductUrl(asin){
     const base=`https://www.amazon.com.tr/dp/${encodeURIComponent(asin)}`;
@@ -16,13 +17,13 @@
   }
 
   const categories=[
-    {id:'powerbank',name:'Telefon ve mobil cihaz için powerbank',mode:'direct',risk:'consumer',description:'Kapasite, USB-C çıkış gücü ve kablosuz şarj ihtiyacına göre ürün sayfası teknik verilerini karşılaştırır.',searchQuery:'USB C PD powerbank 20000 mAh dijital ekran'},
-    {id:'surge_strip',name:'Akım korumalı grup priz',mode:'direct',risk:'consumer',description:'Priz sayısı, joule ve USB ihtiyacına göre tak-çalıştır grup prizleri karşılaştırır. Pano tipi SPD ve topraklamanın yerine geçmez.',searchQuery:'akım korumalı grup priz joule'},
-    {id:'mini_ups',name:'Modem ve fiber ONT için mini UPS',mode:'guide',risk:'compatibility',description:'Voltaj, polarite, jak ölçüsü, toplam watt ve geçiş davranışı doğrulanmadan ürün seçilmemelidir.',searchQuery:'modem mini UPS 12V 9V 5V'},
-    {id:'emergency_light',name:'Şarjlı acil aydınlatma',mode:'guide',risk:'consumer',description:'Düşük mod çalışma süresi, fiziksel düğme, pil göstergesi ve asma/taşıma biçimini kontrol edin.',searchQuery:'şarjlı acil durum lambası kamp lambası'},
-    {id:'smoke_alarm',name:'Fotoelektrik duman alarmı',mode:'guide',risk:'safety',description:'EN 14604 işareti, test düğmesi, düşük pil uyarısı, ses seviyesi ve son kullanım bilgisini doğrulayın.',searchQuery:'EN 14604 fotoelektrik duman dedektörü'},
-    {id:'power_station',name:'Taşınabilir güç istasyonu',mode:'guide',risk:'compatibility',description:'Wh kapasitesi, sürekli/tepe güç, dalga biçimi, batarya kimyası ve şarj girişleri yük hesabıyla birlikte seçilmelidir.',searchQuery:'LiFePO4 taşınabilir güç istasyonu power station'},
-    {id:'outlet_tester',name:'Priz ve RCD test cihazı',mode:'guide',risk:'measurement',description:'Gösterge yalnız temel bağlantı hatalarını ön kontrol eder; izolasyon, topraklama direnci ve koruma açma testi yerine geçmez.',searchQuery:'priz test cihazı RCD tester'}
+    {id:'powerbank',name:'Telefon ve mobil cihaz için powerbank',mode:'direct',risk:'consumer',affiliatePolicy:'verified_direct',description:'Kapasite, USB-C çıkış gücü ve kablosuz şarj ihtiyacına göre ürün sayfası teknik verilerini karşılaştırır.',searchQuery:'USB C PD powerbank 20000 mAh dijital ekran'},
+    {id:'surge_strip',name:'Akım korumalı grup priz',mode:'direct',risk:'consumer',affiliatePolicy:'verified_direct',description:'Priz sayısı, joule ve USB ihtiyacına göre tak-çalıştır grup prizleri karşılaştırır. Pano tipi SPD ve topraklamanın yerine geçmez.',searchQuery:'akım korumalı grup priz joule'},
+    {id:'mini_ups',name:'Modem ve fiber ONT için mini UPS',mode:'guide',risk:'compatibility',affiliatePolicy:'after_tool',nextStepUrl:'https://www.alo186.com/hesaplama/modem-internet-yedekleme/',nextStepLabel:'Önce modem ve ONT hesabını yap',description:'Voltaj, polarite, jak ölçüsü, toplam watt ve geçiş davranışı doğrulanmadan ürün seçilmemelidir.',searchQuery:'modem mini UPS 12V 9V 5V'},
+    {id:'emergency_light',name:'Şarjlı acil aydınlatma',mode:'guide',risk:'consumer',affiliatePolicy:'after_checklist',description:'Düşük mod çalışma süresi, fiziksel düğme, pil göstergesi ve asma/taşıma biçimini kontrol edin.',searchQuery:'şarjlı acil durum lambası kamp lambası'},
+    {id:'smoke_alarm',name:'Fotoelektrik duman alarmı',mode:'guide',risk:'safety',affiliatePolicy:'after_checklist',description:'EN 14604 işareti, test düğmesi, düşük pil uyarısı, ses seviyesi ve son kullanım bilgisini doğrulayın.',searchQuery:'EN 14604 fotoelektrik duman dedektörü'},
+    {id:'power_station',name:'Taşınabilir güç istasyonu',mode:'guide',risk:'compatibility',affiliatePolicy:'after_tool',nextStepUrl:'https://www.alo186.com/hesaplama/ups-suresi/',nextStepLabel:'Önce yük ve çalışma süresini hesapla',description:'Wh kapasitesi, sürekli/tepe güç, dalga biçimi, batarya kimyası ve şarj girişleri yük hesabıyla birlikte seçilmelidir.',searchQuery:'LiFePO4 taşınabilir güç istasyonu power station'},
+    {id:'outlet_tester',name:'Priz ve RCD test cihazı',mode:'guide',risk:'measurement',affiliatePolicy:'professional_only',nextStepUrl:'https://www.alo186.com/karar-motoru/',nextStepLabel:'Önce güvenli yönlendirmeyi aç',description:'Gösterge yalnız temel bağlantı hatalarını ön kontrol eder; izolasyon, topraklama direnci ve koruma açma testi yerine geçmez.',searchQuery:'priz test cihazı RCD tester'}
   ];
 
   const products=[
@@ -70,9 +71,24 @@
     }
   ];
 
+  function dateOnly(value){
+    const date=value instanceof Date?value:new Date(value);
+    return Number.isNaN(date.getTime())?null:new Date(Date.UTC(date.getUTCFullYear(),date.getUTCMonth(),date.getUTCDate()));
+  }
+  function verificationStatus(item,now=new Date()){
+    const checked=dateOnly(item&&item.verifiedAt);
+    const today=dateOnly(now);
+    if(!checked||!today)return {fresh:false,ageDays:null,verifiedAt:item&&item.verifiedAt||null,maxAgeDays:verificationMaxAgeDays};
+    const ageDays=Math.max(0,Math.floor((today.getTime()-checked.getTime())/86400000));
+    return {fresh:ageDays<=verificationMaxAgeDays,ageDays,verifiedAt:item.verifiedAt,maxAgeDays:verificationMaxAgeDays};
+  }
   function getCategory(id){return categories.find(c=>c.id===id)||null;}
-  function productsFor(category){return products.filter(p=>p.category===category&&p.status==='verified_listing');}
+  function productsFor(category,options={}){
+    const now=options.now||new Date();
+    const freshOnly=Boolean(options.freshOnly);
+    return products.filter(product=>product.category===category&&product.status==='verified_listing'&&(!freshOnly||verificationStatus(product,now).fresh));
+  }
   function searchUrl(category){const c=getCategory(category);return c?amazonSearchUrl(c.searchQuery):'https://www.amazon.com.tr';}
 
-  return {affiliateTag,verifiedAt,categories,products,getCategory,productsFor,amazonProductUrl,amazonSearchUrl,searchUrl};
+  return {affiliateTag,verifiedAt,verificationMaxAgeDays,categories,products,getCategory,productsFor,verificationStatus,amazonProductUrl,amazonSearchUrl,searchUrl};
 });
