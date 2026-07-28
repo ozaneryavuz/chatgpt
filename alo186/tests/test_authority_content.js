@@ -1,0 +1,56 @@
+const assert=require('assert');
+const fs=require('fs');
+const path=require('path');
+
+const repoRoot=path.resolve(__dirname,'../..');
+const articles=[
+  {
+    slug:'ev-sarj-cihazi-icin-ev-tesisati-uygun-mu',
+    required:['EPDK','IEC 60364-7-722','RDC-DD','yetkili'],
+    cta:'/hesaplama/ev-sarj-suresi/'
+  },
+  {
+    slug:'ges-elektrik-kesintisinde-calisir-mi',
+    required:['anti-islanding','ada modu','batarya','yetkili'],
+    cta:'/urun-rehberleri/ges-malzemeleri'
+  },
+  {
+    slug:'jenerator-transfer-salteri-neden-gerekir',
+    required:['geri besleme','transfer','erkek–erkek','yetkili'],
+    cta:'/isletme-surekliligi'
+  }
+];
+
+for(const article of articles){
+  const file=path.join(repoRoot,'alo186/haberler',article.slug,'index.html');
+  assert(fs.existsSync(file),`Makale bulunamadı: ${article.slug}`);
+  const html=fs.readFileSync(file,'utf8');
+  const canonical=`https://www.alo186.com/haberler/${article.slug}`;
+  assert(html.toLowerCase().includes('<!doctype html>'));
+  assert(html.includes(`rel="canonical" href="${canonical}"`),`Canonical eksik: ${article.slug}`);
+  assert(html.includes('meta name="description"'),`Description eksik: ${article.slug}`);
+  assert(html.includes('application/ld+json'),`JSON-LD eksik: ${article.slug}`);
+  const jsonLd=[...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
+  assert(jsonLd.length>0,`JSON-LD bulunamadı: ${article.slug}`);
+  for(const match of jsonLd) JSON.parse(match[1]);
+  assert(html.includes('../alo186-article.css'),`Ortak CSS eksik: ${article.slug}`);
+  assert(html.includes(article.cta),`İç CTA eksik: ${article.slug}`);
+  assert(html.includes('Bağımsız bilgi'),`Bağımsızlık ifadesi eksik: ${article.slug}`);
+  assert(!/<form\b/i.test(html),`Makale kişisel veri/form istememeli: ${article.slug}`);
+  assert(!/amazon\.com\.tr/i.test(html),`Teknik makalede doğrudan Amazon URL'si olmamalı: ${article.slug}`);
+  assert(!/fiyatı\s+\d|stokta|puanı\s+\d/i.test(html),`Doğrulanmamış ticari bilgi riski: ${article.slug}`);
+  for(const text of article.required){
+    assert(html.toLocaleLowerCase('tr').includes(text.toLocaleLowerCase('tr')),`Zorunlu güvenlik/teknik ifade eksik (${text}): ${article.slug}`);
+  }
+  const h1=(html.match(/<h1\b/g)||[]).length;
+  assert.strictEqual(h1,1,`Tek H1 olmalı: ${article.slug}`);
+}
+
+const css=path.join(repoRoot,'alo186/haberler/alo186-article.css');
+assert(fs.existsSync(css),'Makale CSS dosyası eksik.');
+const cssText=fs.readFileSync(css,'utf8');
+assert(cssText.includes('@media(max-width:820px)'), 'Mobil breakpoint eksik.');
+assert(cssText.includes(':focus-visible'), 'Klavye odak stili eksik.');
+assert(cssText.includes('prefers-reduced-motion'), 'Azaltılmış hareket desteği eksik.');
+
+console.log('ALO186 içerik otoritesi makaleleri SEO, erişilebilirlik ve güvenlik testlerini geçti.');
