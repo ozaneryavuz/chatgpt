@@ -38,6 +38,7 @@ jobs:
           set -euo pipefail
           node alo186/hesaplama/parafudr-risk-testi/test.js
           node alo186/hesaplama/jenerator-gucu-secimi/test.js
+          node alo186/hesaplama/ev-sarj-uygunluk/test.js
       - name: HTML temel kontrolleri
         shell: bash
         run: |
