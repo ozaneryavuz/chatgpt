@@ -1,0 +1,40 @@
+name: ALO186 Affiliate Trust Smoke
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/urun-eslestirme/**'
+      - '.github/workflows/alo186-affiliate-trust-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  trust-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript syntax
+        run: |
+          node --check alo186/urun-eslestirme/catalog.js
+          node --check alo186/urun-eslestirme/matcher-core.js
+          node --check alo186/urun-eslestirme/app.js
+          node --check alo186/urun-eslestirme/growth-trust-test.js
+      - name: Trust and conversion tests
+        run: node alo186/urun-eslestirme/growth-trust-test.js
+      - name: Static disclosure and route checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'rel="sponsored nofollow noopener"' alo186/urun-eslestirme/app.js
+          grep -q 'EDAŞ veya kamu kurumu değildir' alo186/urun-eslestirme/index.html
+          grep -q 'Fiyat, stok, satıcı' alo186/urun-eslestirme/index.html
+          grep -q 'modem-internet-yedekleme' alo186/urun-eslestirme/catalog.js
+          grep -q 'hesaplama/ups-suresi' alo186/urun-eslestirme/catalog.js
+          grep -q 'karar-motoru' alo186/urun-eslestirme/catalog.js
+          ! grep -Eiq '<input[^>]+(name|id)="(name|email|phone|address|tc|abonelik)' alo186/urun-eslestirme/index.html
