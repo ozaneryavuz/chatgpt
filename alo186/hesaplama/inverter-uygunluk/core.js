@@ -106,7 +106,10 @@
     }, 0);
 
     const extraSurges = loads.map(function (load) {
-      return Math.max(0, load.surgeW - load.runningW) * load.quantity;
+      const singleUnitExtra = Math.max(0, load.surgeW - load.runningW);
+      return startPolicy === 'simultaneous'
+        ? singleUnitExtra * load.quantity
+        : singleUnitExtra;
     });
     const extraSurgeW = startPolicy === 'simultaneous'
       ? extraSurges.reduce(function (sum, value) { return sum + value; }, 0)
