@@ -51,6 +51,24 @@ const articles=[
     required:['THDv','THDi','nötr','PCC','aktif harmonik filtre'],
     cta:'/isletme-surekliligi',
     fresh:true
+  },
+  {
+    slug:'ups-online-line-interactive-offline-farki',
+    required:['line-interactive','online çift dönüşüm','transfer süresi','AVR','bypass'],
+    cta:'/hesaplama/ups-suresi/',
+    fresh:true
+  },
+  {
+    slug:'parafudr-gerilim-koruma-rolesi-farki',
+    required:['SPD','gerilim izleme rölesi','sürekli aşırı gerilim','kontaktör','Tip 1'],
+    cta:'/hesaplama/parafudr-risk-testi/',
+    fresh:true
+  },
+  {
+    slug:'vpp-sanal-guc-santrali-nedir',
+    required:['VPP','Toplayıcılık Lisansı','Talep Tarafı Katılımı','telemetri','gelir garantisi'],
+    cta:'/isletme-surekliligi',
+    fresh:true
   }
 ];
 
