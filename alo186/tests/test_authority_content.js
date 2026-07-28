@@ -42,9 +42,12 @@ const articles=[
   {slug:'batarya-c-rate-dod-kullanilabilir-kapasite',required:['C-rate','DoD','SoC','kullanılabilir kWh','çevrim ömrü'],cta:'/hesaplama/inverter-uygunluk/',fresh:true},
   {slug:'elektrik-arizasinda-edas-mi-tedarikci-mi-aranir',required:['dağıtım şirketi','görevli tedarik şirketi','186','15 iş günü','ALO186 resmî kayıt almaz'],cta:'/edas-bul',fresh:true},
   {slug:'elektrik-kesintisinde-buzdolabi-dondurucu-kac-saat-dayanir',required:['4 saat','48 saat','24 saat','4°C','Şüpheli gıdayı tatmayın'],cta:'/hesaplama/kesinti-hazirlik-plani/',fresh:true},
-  {slug:'ges-inverter-izolasyon-direnci-dusuk-hatasi',required:['Low insulation resistance','PV string','yağmur','DC konnektör','yetkili kişi'],cta:'/hesaplama/ekipman-bakim-plani/',fresh:true}
+  {slug:'ges-inverter-izolasyon-direnci-dusuk-hatasi',required:['Low insulation resistance','PV string','yağmur','DC konnektör','yetkili kişi'],cta:'/hesaplama/ekipman-bakim-plani/',fresh:true},
+  {slug:'inverter-dusuk-voltaj-alarmi-neden-verir',required:['low battery voltage','DC gerilim düşümü','kablo kesiti','BMS','yetkili kişi'],cta:'/hesaplama/inverter-uygunluk/',fresh:true},
+  {slug:'ups-va-watt-farki-nasil-hesaplanir',required:['VA','Watt','güç faktörü','W = VA × PF','runtime'],cta:'/hesaplama/ups-suresi/',fresh:true},
+  {slug:'jenerator-balkonda-garajda-calistirilir-mi',required:['20 feet','yaklaşık 6 metre','karbonmonoksit','112','CO alarmı'],cta:'/hesaplama/kesinti-hazirlik-plani/',fresh:true}
 ];
-assert.strictEqual(articles.length,39,'İçerik kalite testi 39 teknik makaleyi kapsamalı.');
+assert.strictEqual(articles.length,42,'İçerik kalite testi 42 teknik makaleyi kapsamalı.');
 
 for(const article of articles){
   const file=path.join(repoRoot,'alo186/haberler',article.slug,'index.html');
@@ -86,8 +89,8 @@ assert(cssText.includes('prefers-reduced-motion'),'Azaltılmış hareket desteğ
 const sitemap=fs.readFileSync(path.join(repoRoot,'alo186/sitemap.xml'),'utf8');
 const routing=JSON.parse(fs.readFileSync(path.join(repoRoot,'alo186/deployment/routing-manifest.json'),'utf8'));
 const portal=fs.readFileSync(path.join(repoRoot,'alo186/index.html'),'utf8');
-assert.strictEqual(routing.routes.filter(route=>route.type==='article').length,39,'Routing manifest 39 teknik makale içermeli.');
-assert(portal.includes('39 kaynak doğrulamalı teknik rehber'),'Portal görünür makale sayısı 39 olmalı.');
+assert.strictEqual(routing.routes.filter(route=>route.type==='article').length,42,'Routing manifest 42 teknik makale içermeli.');
+assert(portal.includes('42 kaynak doğrulamalı teknik rehber'),'Portal görünür makale sayısı 42 olmalı.');
 for(const article of articles){
   const canonicalPath=`/haberler/${article.slug}`;
   assert(sitemap.includes(`https://www.alo186.com${canonicalPath}`),`Sitemap eksik: ${article.slug}`);
