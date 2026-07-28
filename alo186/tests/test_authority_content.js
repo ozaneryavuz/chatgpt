@@ -105,6 +105,24 @@ const articles=[
     required:['öz tüketim','mahsuplaşma','ihtiyaç fazlası','YEKDEM','gelir garantisi'],
     cta:'/fatura-analizi',
     fresh:true
+  },
+  {
+    slug:'ups-akusu-ne-zaman-degisir',
+    required:['self-test','3–5 yıl','20–25°C','runtime','eski ve yeni batarya'],
+    cta:'/hesaplama/ekipman-bakim-plani/',
+    fresh:true
+  },
+  {
+    slug:'jenerator-ups-birlikte-calisir-mi',
+    required:['jeneratör','UPS','online çift dönüşüm','frekans','harmonik','transfer'],
+    cta:'/hesaplama/jenerator-gucu-secimi/',
+    fresh:true
+  },
+  {
+    slug:'gunes-paneli-inverter-clipping-dc-ac-orani',
+    required:['DC/AC oranı','clipping','PVWatts','MPPT','yıllık enerji'],
+    cta:'/fatura-analizi',
+    fresh:true
   }
 ];
 
