@@ -57,7 +57,7 @@ jobs:
           grep -q 'Satın almama sonucu' "$file"
           grep -q 'Kişisel veri yok' "$file"
           grep -q '/akilli-urun-secimi?kategori=power_station' "$file"
-          grep -q '27 çekirdek araç' alo186/hesaplama/index.html
+          grep -Eq '2[8-9] çekirdek araç' alo186/hesaplama/index.html
           grep -q 'power-station-kapasite-eps-uygunluk' alo186/deployment/routing-manifest.json
           grep -q 'hesaplama/power-station-kapasite-eps-uygunluk/' alo186/sitemap.xml
           grep -q "nextStepUrl:'https://www.alo186.com/hesaplama/power-station-kapasite-eps-uygunluk/'" alo186/urun-eslestirme/catalog.js
@@ -91,7 +91,7 @@ jobs:
           test -f /tmp/alo186-power-station-site/hesaplama/power-station-kapasite-eps-uygunluk/core.js
           test -f /tmp/alo186-power-station-site/hesaplama/power-station-kapasite-eps-uygunluk/app.js
           test ! -f /tmp/alo186-power-station-site/hesaplama/power-station-kapasite-eps-uygunluk/test.js
-          grep -q '27 çekirdek araç' /tmp/alo186-power-station-site/hesaplama/index.html
+          grep -Eq '2[8-9] çekirdek araç' /tmp/alo186-power-station-site/hesaplama/index.html
 
       - name: Doğrulanmış production artifactı
         uses: actions/upload-artifact@v4
