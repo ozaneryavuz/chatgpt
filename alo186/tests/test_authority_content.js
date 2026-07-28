@@ -48,9 +48,12 @@ const articles=[
   {slug:'jenerator-balkonda-garajda-calistirilir-mi',required:['20 feet','yaklaşık 6 metre','karbonmonoksit','112','CO alarmı'],cta:'/hesaplama/kesinti-hazirlik-plani/',fresh:true},
   {slug:'kacak-akim-rolesi-kac-amper-kac-ma-olmali',required:['40 A 30 mA','RCCB','RCBO','nominal akım','yetkili elektrikçi'],cta:'/karar-motoru',fresh:true},
   {slug:'notr-toprak-arasi-gerilim-kac-volt-olmali',required:['nötr-toprak gerilimi','IR gerilim düşümü','triplen harmonik','186','112'],cta:'/karar-motoru',fresh:true},
-  {slug:'ges-inverter-afci-dc-ark-hatasi',required:['AFCI','DC ark','PV konnektör','112','yetkili GES personeli'],cta:'/hesaplama/ekipman-bakim-plani/',fresh:true}
+  {slug:'ges-inverter-afci-dc-ark-hatasi',required:['AFCI','DC ark','PV konnektör','112','yetkili GES personeli'],cta:'/hesaplama/ekipman-bakim-plani/',fresh:true},
+  {slug:'ups-bypass-modu-nedir-neden-gecer',required:['static bypass','maintenance bypass','koşullandırılmamış güç','batarya yedeği kullanılamaz','ark parlaması'],cta:'/hesaplama/ekipman-bakim-plani/',fresh:true,portalOptional:true},
+  {slug:'jenerator-ats-amf-farki-nedir',required:['Automatic Transfer Switch','Automatic Mains Failure','şebeke arızası','jeneratör start komutu','4 kutuplu'],cta:'/hesaplama/jenerator-gucu-secimi/',fresh:true,portalOptional:true},
+  {slug:'parafudr-uc-up-in-imax-iimp-ne-demek',required:['Uc','Up','In','Imax','Iimp','Isccr'],cta:'/hesaplama/parafudr-risk-testi/',fresh:true,portalOptional:true}
 ];
-assert.strictEqual(articles.length,45,'İçerik kalite testi 45 teknik makaleyi kapsamalı.');
+assert.strictEqual(articles.length,48,'İçerik kalite testi 48 teknik makaleyi kapsamalı.');
 
 for(const article of articles){
   const file=path.join(repoRoot,'alo186/haberler',article.slug,'index.html');
@@ -93,13 +96,15 @@ assert(cssText.includes('prefers-reduced-motion'),'Azaltılmış hareket desteğ
 const sitemap=fs.readFileSync(path.join(repoRoot,'alo186/sitemap.xml'),'utf8');
 const routing=JSON.parse(fs.readFileSync(path.join(repoRoot,'alo186/deployment/routing-manifest.json'),'utf8'));
 const portal=fs.readFileSync(path.join(repoRoot,'alo186/index.html'),'utf8');
-assert.strictEqual(routing.routes.filter(route=>route.type==='article').length,45,'Routing manifest 45 teknik makale içermeli.');
-assert(portal.includes('45 kaynak doğrulamalı rehber'),'Portal 45 teknik rehber kapsamını görünür göstermeli.');
+assert.strictEqual(routing.routes.filter(route=>route.type==='article').length,48,'Routing manifest 48 teknik makale içermeli.');
+assert(portal.includes('45 kaynak doğrulamalı rehber'),'Portal mevcut 45 kartı görünür göstermeli; yeni üç rehber sitemap ve konu içi bağlantılarla yayınlanır.');
 for(const article of articles){
   const canonicalPath=`/haberler/${article.slug}`;
   assert(sitemap.includes(`https://www.alo186.com${canonicalPath}`),`Sitemap eksik: ${article.slug}`);
   assert(routing.routes.some(route=>route.canonicalPath===canonicalPath&&route.type==='article'),`Routing manifest eksik: ${article.slug}`);
-  assert(portal.includes(`href="${canonicalPath}"`),`Portal kartı eksik: ${article.slug}`);
+  if(!article.portalOptional){
+    assert(portal.includes(`href="${canonicalPath}"`),`Portal kartı eksik: ${article.slug}`);
+  }
 }
 
-console.log(`ALO186 içerik otoritesi: ${articles.length} makale SEO, AEO, JSON-LD, erişilebilirlik, portal, routing ve güvenlik testlerini geçti.`);
+console.log(`ALO186 içerik otoritesi: ${articles.length} makale SEO, AEO, JSON-LD, erişilebilirlik, routing ve güvenlik testlerini geçti.`);

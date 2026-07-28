@@ -1,5 +1,5 @@
 {
-  "version": 22,
+  "version": 23,
   "canonicalHost": "https://www.alo186.com",
   "generatedAt": "2026-07-28",
   "routes": [
@@ -82,7 +82,10 @@
     {"source":"alo186/haberler/jenerator-balkonda-garajda-calistirilir-mi/index.html","canonicalPath":"/haberler/jenerator-balkonda-garajda-calistirilir-mi","type":"article"},
     {"source":"alo186/haberler/kacak-akim-rolesi-kac-amper-kac-ma-olmali/index.html","canonicalPath":"/haberler/kacak-akim-rolesi-kac-amper-kac-ma-olmali","type":"article"},
     {"source":"alo186/haberler/notr-toprak-arasi-gerilim-kac-volt-olmali/index.html","canonicalPath":"/haberler/notr-toprak-arasi-gerilim-kac-volt-olmali","type":"article"},
-    {"source":"alo186/haberler/ges-inverter-afci-dc-ark-hatasi/index.html","canonicalPath":"/haberler/ges-inverter-afci-dc-ark-hatasi","type":"article"}
+    {"source":"alo186/haberler/ges-inverter-afci-dc-ark-hatasi/index.html","canonicalPath":"/haberler/ges-inverter-afci-dc-ark-hatasi","type":"article"},
+    {"source":"alo186/haberler/ups-bypass-modu-nedir-neden-gecer/index.html","canonicalPath":"/haberler/ups-bypass-modu-nedir-neden-gecer","type":"article"},
+    {"source":"alo186/haberler/jenerator-ats-amf-farki-nedir/index.html","canonicalPath":"/haberler/jenerator-ats-amf-farki-nedir","type":"article"},
+    {"source":"alo186/haberler/parafudr-uc-up-in-imax-iimp-ne-demek/index.html","canonicalPath":"/haberler/parafudr-uc-up-in-imax-iimp-ne-demek","type":"article"}
   ],
   "requiredIntegrations": [
     "canonical URL must resolve with HTTP 200",
