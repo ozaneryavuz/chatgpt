@@ -1,0 +1,96 @@
+name: ALO186 güvenli büyüme ve gelir kalite kontrolü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/katalog-guven-durumu/**'
+      - 'alo186/kurumsal-on-degerlendirme/**'
+      - 'alo186/tedarikci-isbirligi/**'
+      - 'alo186/deployment/routing-manifest.json'
+      - 'alo186/sitemap.xml'
+      - 'alo186/tests/test_trust_revenue_run7.js'
+      - '.github/workflows/alo186-trust-revenue-run7.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/katalog-guven-durumu/**'
+      - 'alo186/kurumsal-on-degerlendirme/**'
+      - 'alo186/tedarikci-isbirligi/**'
+      - 'alo186/deployment/routing-manifest.json'
+      - 'alo186/sitemap.xml'
+      - 'alo186/tests/test_trust_revenue_run7.js'
+      - '.github/workflows/alo186-trust-revenue-run7.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-trust-revenue-run7-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Güvenli büyüme ve gelir senaryoları
+        run: node alo186/tests/test_trust_revenue_run7.js
+
+      - name: Mevcut gelir ve yayın regresyonları
+        run: |
+          node alo186/tests/test_fast_revenue_funnel.js
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_authority_content.js
+
+      - name: JavaScript sözdizimi
+        run: |
+          node --check alo186/katalog-guven-durumu/app.js
+          node --check alo186/kurumsal-on-degerlendirme/core.js
+          node --check alo186/kurumsal-on-degerlendirme/app.js
+          node --check alo186/tedarikci-isbirligi/core.js
+          node --check alo186/tedarikci-isbirligi/app.js
+
+      - name: Cihaz hasarı süre güvenlik kapısı
+        run: python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Production bundle oluştur ve smoke testini çalıştır
+        run: |
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-trust-revenue-site \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-trust-revenue-site
+
+      - name: Production artifact güven ve gelir sözleşmeleri
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f /tmp/alo186-trust-revenue-site/katalog-guven-durumu/index.html
+          test -f /tmp/alo186-trust-revenue-site/katalog-guven-durumu/app.js
+          test -f /tmp/alo186-trust-revenue-site/kurumsal-elektrik-surekliligi-on-degerlendirme/core.js
+          test -f /tmp/alo186-trust-revenue-site/tedarikci-ve-uretici-isbirligi/core.js
+          grep -q 'Reklam / satış ortaklığı açıklaması' /tmp/alo186-trust-revenue-site/katalog-guven-durumu/index.html
+          grep -q 'Hazırlık skorunu ve talep özetini oluştur' /tmp/alo186-trust-revenue-site/kurumsal-elektrik-surekliligi-on-degerlendirme/index.html
+          grep -q 'Teknik hazırlık skorunu ve talebi oluştur' /tmp/alo186-trust-revenue-site/tedarikci-ve-uretici-isbirligi/index.html
+          grep -q 'https://www.alo186.com/katalog-guven-durumu' /tmp/alo186-trust-revenue-site/sitemap.xml
+          ! grep -Eqi 'amazon\.(com|com\.tr)/' /tmp/alo186-trust-revenue-site/katalog-guven-durumu/index.html
+          ! grep -Eqi 'type="(email|tel|text|file)"' /tmp/alo186-trust-revenue-site/kurumsal-elektrik-surekliligi-on-degerlendirme/index.html
+          ! grep -Eqi 'type="(email|tel|text|file)"' /tmp/alo186-trust-revenue-site/tedarikci-ve-uretici-isbirligi/index.html
+
+      - name: Doğrulanmış güvenli gelir artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-trust-revenue-production
+          path: /tmp/alo186-trust-revenue-site
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
