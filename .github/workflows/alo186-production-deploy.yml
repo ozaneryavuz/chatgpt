@@ -42,6 +42,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
+      - name: Test bağımlılıkları
+        run: python -m pip install -q pytest
       - name: ALO186 statik ürün testleri
         shell: bash
         run: |
@@ -54,10 +56,12 @@ jobs:
           node alo186/tests/test_release_manifest.js
           python alo186/tests/device_damage_deadline_guard.py
           python alo186/tests/test_active_production_contract.py
+          python -m pytest -q alo186/tests/test_live_release_verifier.py
           python -m py_compile \
             alo186/deployment/build_static_site.py \
             alo186/deployment/smoke_static_site.py \
-            alo186/deployment/smoke_live_routes.py
+            alo186/deployment/smoke_live_routes.py \
+            alo186/deployment/verify_live_release.py
       - name: Üretim bundle oluştur
         run: |
           python alo186/deployment/build_static_site.py \
@@ -165,28 +169,44 @@ jobs:
         run: |
           echo "ALO186_DEPLOY_METHOD yalnız ssh veya ftps olabilir." >&2
           exit 1
-      - name: CDN yayılımını bekle ve canlı smoke testi
+      - name: CDN yayılımını bekle, canlı smoke ve release drift testi
         shell: bash
         run: |
           set -euo pipefail
           success=0
           for attempt in 1 2 3 4 5 6; do
-            echo "Canlı smoke denemesi: $attempt"
-            if python alo186/deployment/smoke_live_routes.py --base-url https://www.alo186.com > live-smoke.json 2>&1; then
-              success=1
-              cat live-smoke.json
-              break
+            echo "Canlı doğrulama denemesi: $attempt"
+            smoke_ok=0
+            drift_ok=0
+            if python alo186/deployment/smoke_live_routes.py \
+              --base-url https://www.alo186.com > live-smoke.json 2>&1; then
+              smoke_ok=1
+            fi
+            if python alo186/deployment/verify_live_release.py \
+              --base-url https://www.alo186.com \
+              --bundle release/_production_site \
+              --expected-commit "${GITHUB_SHA}" \
+              --report live-release-drift.json > live-release-drift.stdout 2>&1; then
+              drift_ok=1
             fi
             cat live-smoke.json || true
+            cat live-release-drift.stdout || true
+            if [[ "$smoke_ok" -eq 1 && "$drift_ok" -eq 1 ]]; then
+              success=1
+              break
+            fi
             sleep 20
           done
           test "$success" -eq 1
-      - name: Canlı smoke raporunu sakla
+      - name: Canlı doğrulama raporlarını sakla
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: alo186-live-smoke
-          path: live-smoke.json
+          name: alo186-live-verification
+          path: |
+            live-smoke.json
+            live-release-drift.json
+            live-release-drift.stdout
           if-no-files-found: warn
           retention-days: 30
 
