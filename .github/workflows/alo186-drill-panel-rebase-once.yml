@@ -1,0 +1,44 @@
+name: ALO186 drill panel current main merge once
+
+on:
+  push:
+    branches: [fix/alo186-drill-panel-handoff-20260728]
+    paths:
+      - '.github/alo186-drill-panel-rebase.trigger'
+
+permissions:
+  contents: write
+
+jobs:
+  merge-main:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/alo186-drill-panel-handoff-20260728
+          fetch-depth: 0
+      - name: Main dalını kontrollü birleştir
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git fetch origin main
+          if ! git merge --no-commit --no-ff origin/main; then
+            conflicts=$(git diff --name-only --diff-filter=U)
+            allowed=$'.github/workflows/alo186-outage-drill.yml\nalo186/hesaplama/elektrik-kesintisi-tatbikati/app.js'
+            while IFS= read -r file; do
+              [[ -z "$file" ]] && continue
+              if ! grep -Fxq "$file" <<<"$allowed"; then
+                echo "Beklenmeyen merge conflict: $file" >&2
+                exit 1
+              fi
+              git checkout --ours -- "$file"
+              git add "$file"
+            done <<<"$conflicts"
+          fi
+          test -z "$(git diff --name-only --diff-filter=U)"
+          git add -A
+          git rm .github/workflows/alo186-drill-panel-rebase-once.yml .github/alo186-drill-panel-rebase.trigger
+          git commit -m 'chore(alo186): tatbikat panel düzeltmesini güncel main ile birleştir'
+          git push origin HEAD:fix/alo186-drill-panel-handoff-20260728
