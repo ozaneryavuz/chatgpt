@@ -42,9 +42,16 @@ const base={panelPower:200,panelVoc:24.3,panelVmp:20.5,panelIsc:10.3,panelImp:9.
   assert(r.estimatedAcceptedPower<=100);
   assert.equal(r.commercialAllowed,false);
 }
+{
+  const r=core.analyze({...base,stationCapacity:'',currentSoc:'',targetSoc:''});
+  assert.equal(r.energyNeed,null);
+  assert.equal(r.idealHours,null);
+}
 assert.throws(()=>core.analyze({...base,panelVmp:25}),/Vmp değeri Voc/);
 assert.throws(()=>core.analyze({...base,targetSoc:10}),/Hedef doluluk/);
-assert.throws(()=>core.analyze({...base,currentSoc:'',targetSoc:80}),/birlikte girilmelidir/);
+assert.throws(()=>core.analyze({...base,stationCapacity:'',currentSoc:20,targetSoc:80}),/birlikte girilmelidir/);
+assert.throws(()=>core.analyze({...base,stationCapacity:768,currentSoc:'',targetSoc:''}),/birlikte girilmelidir/);
+assert.throws(()=>core.analyze({...base,stationCapacity:768,currentSoc:20,targetSoc:''}),/birlikte girilmelidir/);
 
 const html=fs.readFileSync(path.join(__dirname,'index.html'),'utf8');
 assert(html.includes('rel="canonical" href="https://www.alo186.com/hesaplama/gunes-paneli-power-station-uygunluk/"'));
