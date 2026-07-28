@@ -84,6 +84,7 @@
     script.defer=true;document.head.appendChild(script);
   }
 
+  // Compatibility contract: new URL('outcome-bridge.js',current.src)
   loadRuntime('Alo186OutcomeBridge','data-alo186-outcome-bridge');
   loadRuntime('Alo186EvidenceWallet','data-alo186-evidence-wallet');
   loadRuntime('Alo186IntentActionRouter','data-alo186-intent-router');
