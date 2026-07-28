@@ -77,7 +77,7 @@ jobs:
             echo 'Ekipman bakım planında kişisel veri, seri/model veya serbest metin alanı bulundu.' >&2
             exit 1
           fi
-          if grep -Eqi 'href=["'"']https?://(www\.)?amazon\.' "$file"; then
+          if grep -Eqi 'amazon\.(com\.tr|com)/' "$file"; then
             echo 'Ekipman bakım planında doğrudan Amazon bağlantısı bulundu.' >&2
             exit 1
           fi
