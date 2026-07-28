@@ -27,12 +27,23 @@ def main() -> None:
     assert "apache-production.htaccess" in builder
     assert "build_static_site.sh" not in workflow
 
-    # A controlled hotfix merge or explicit manual dispatch can run deploy even if the
-    # repository-wide deploy variable is intentionally disabled.
+    # A controlled hotfix merge or explicit manual dispatch can request deploy even if
+    # the repository-wide deploy variable is intentionally disabled. A request must not
+    # run a transfer with an undefined method: it becomes an explicit blocked state and
+    # updates the P0 hosting issue instead of producing an opaque scheduled-task error.
     assert "[deploy alo186]" in workflow
     assert "force_deploy" in workflow
     assert "environment:" in workflow and "alo186-production" in workflow
     assert "mirror --reverse --overwrite" in workflow
+    assert "deploy-config-blocked:" in workflow
+    assert "Deploy yapılandırması eksik — yayın yapılmadı" in workflow
+    assert "vars.ALO186_DEPLOY_METHOD == 'ssh'" in workflow
+    assert "vars.ALO186_DEPLOY_METHOD == 'ftps'" in workflow
+    assert "alo186-production-deploy-blocked" in workflow
+    assert "alo186-production-deploy-failure" in workflow
+    assert "issues: write" in workflow
+    assert "Manuel zorunlu deploy isteğini başarısız say" in workflow
+    assert "Deploy yöntemi doğrulaması" not in workflow
 
     # The build must fail closed on the legal deadline, active production contract,
     # Python syntax and canonical bundle.
@@ -101,7 +112,7 @@ def main() -> None:
 
     print(
         "PASS: active ALO186 production builder, public artifact hygiene, Apache config, "
-        "deploy gate and smoke tests are aligned."
+        "deploy request/block/failure gates and smoke tests are aligned."
     )
 
 
