@@ -1,7 +1,7 @@
 {
-  "version": 1,
+  "version": 2,
   "canonicalHost": "https://www.alo186.com",
-  "generatedAt": "2026-07-27",
+  "generatedAt": "2026-07-28",
   "routes": [
     {
       "source": "alo186/index.html",
@@ -67,6 +67,21 @@
       "source": "alo186/kesinti-maliyet-hesaplayici/index.html",
       "canonicalPath": "/hesaplama/kesinti-maliyeti",
       "type": "calculator"
+    },
+    {
+      "source": "alo186/haberler/ev-sarj-cihazi-icin-ev-tesisati-uygun-mu/index.html",
+      "canonicalPath": "/haberler/ev-sarj-cihazi-icin-ev-tesisati-uygun-mu",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ges-elektrik-kesintisinde-calisir-mi/index.html",
+      "canonicalPath": "/haberler/ges-elektrik-kesintisinde-calisir-mi",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/jenerator-transfer-salteri-neden-gerekir/index.html",
+      "canonicalPath": "/haberler/jenerator-transfer-salteri-neden-gerekir",
+      "type": "article"
     }
   ],
   "requiredIntegrations": [
