@@ -1,0 +1,166 @@
+name: ALO186 kesinti kiti güvenli büyüme kalite kontrolü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/elektrik-kesintisi-kiti/**'
+      - 'alo186/hesaplama/pwa-install.js'
+      - 'alo186/hesaplama/elektrik-planim/**'
+      - 'alo186/deployment/inject_outcome_runtime.py'
+      - 'alo186/deployment/prepare_github_pages.py'
+      - 'alo186/deployment/smoke_github_pages.py'
+      - 'alo186/tests/test_outage_kit_growth.js'
+      - '.github/workflows/alo186-outage-kit-growth.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/elektrik-kesintisi-kiti/**'
+      - 'alo186/hesaplama/pwa-install.js'
+      - 'alo186/hesaplama/elektrik-planim/**'
+      - 'alo186/deployment/inject_outcome_runtime.py'
+      - 'alo186/tests/test_outage_kit_growth.js'
+      - '.github/workflows/alo186-outage-kit-growth.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-outage-kit-growth-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Kesinti kiti karar senaryoları
+        run: node alo186/hesaplama/elektrik-kesintisi-kiti/test.js
+
+      - name: Birleşik plan, PWA ve affiliate entegrasyonu
+        run: |
+          node alo186/tests/test_outage_kit_growth.js
+          node alo186/hesaplama/elektrik-planim/test.js
+          node alo186/hesaplama/elektrik-planim/growth-test.js
+
+      - name: JavaScript ve Python sözdizimi
+        run: |
+          node --check alo186/hesaplama/elektrik-kesintisi-kiti/core.js
+          node --check alo186/hesaplama/elektrik-kesintisi-kiti/app.js
+          node --check alo186/hesaplama/pwa-install.js
+          node --check alo186/hesaplama/elektrik-planim/core.js
+          node --check alo186/hesaplama/elektrik-planim/app.js
+          node --check alo186/hesaplama/elektrik-planim/growth.js
+          python -m py_compile alo186/deployment/inject_outcome_runtime.py
+
+      - name: Canonical, portal ve cihaz hasarı güvenlik kapıları
+        run: |
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Canonical production bundle
+        run: |
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-outage-kit-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-outage-kit-canonical
+
+      - name: Custom-domain Pages paketi
+        run: |
+          cp -a /tmp/alo186-outage-kit-canonical /tmp/alo186-outage-kit-custom
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-outage-kit-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-outage-kit-custom \
+            --base-path ''
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-outage-kit-custom \
+            --base-path ''
+
+      - name: Project-path Pages paketi
+        run: |
+          cp -a /tmp/alo186-outage-kit-canonical /tmp/alo186-outage-kit-project
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-outage-kit-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-outage-kit-project \
+            --base-path '/chatgpt'
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-outage-kit-project \
+            --base-path '/chatgpt'
+
+      - name: Artifact güven, gelir ve tekrar ziyaret sözleşmeleri
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          modes=[
+              (Path('/tmp/alo186-outage-kit-custom'), ''),
+              (Path('/tmp/alo186-outage-kit-project'), '/chatgpt'),
+          ]
+          for root,base in modes:
+              kit=root/'hesaplama/elektrik-kesintisi-kiti/index.html'
+              plan=root/'hesaplama/elektrik-planim/index.html'
+              hub=root/'hesaplama/index.html'
+              portal=root/'elektrik-portali/index.html'
+              gateway=root/'index.html'
+              assert kit.is_file()
+              assert plan.is_file()
+              kit_text=kit.read_text(encoding='utf-8')
+              plan_text=plan.read_text(encoding='utf-8')
+              hub_text=hub.read_text(encoding='utf-8')
+              assert 'Elektrik Kesintisi Kiti Eksik Analizi' in kit_text
+              assert 'Reklam / satış ortaklığı açıklaması' in kit_text
+              assert 'data-alo186-kit-hub-card="true"' in hub_text
+              assert '33 çekirdek araç' in hub_text
+              assert 'data-alo186-kit-card="true"' in portal.read_text(encoding='utf-8')
+              assert 'data-alo186-kit-card="true"' in gateway.read_text(encoding='utf-8')
+              assert f'{base}/hesaplama/elektrik-kesintisi-kiti/' in plan_text
+              release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
+              assert any(r['canonicalPath']=='/hesaplama/elektrik-kesintisi-kiti/' for r in release['routes'])
+              pages=json.loads((root/'pages-release.json').read_text(encoding='utf-8'))
+              runtime=pages['outcomeRuntime']
+              assert runtime['version']==3
+              assert runtime['pwaInstallHelper'] is True
+              assert runtime['offlineOutageKitRoute']==f'{base}/hesaplama/elektrik-kesintisi-kiti/'
+              manifest=json.loads((root/'manifest.webmanifest').read_text(encoding='utf-8'))
+              shortcuts={item['url'] for item in manifest.get('shortcuts',[])}
+              assert f'{base}/hesaplama/elektrik-kesintisi-kiti/' in shortcuts
+              assert f'{base}/hesaplama/elektrik-planim/' in shortcuts
+              sw=(root/'sw.js').read_text(encoding='utf-8')
+              assert f'{base}/hesaplama/elektrik-kesintisi-kiti/' in sw
+              sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
+              assert '<loc>https://www.alo186.com/hesaplama/elektrik-kesintisi-kiti/</loc>' in sitemap
+          PY
+
+          ! grep -Eqi 'type="(email|tel|text)"|<textarea' /tmp/alo186-outage-kit-custom/hesaplama/elektrik-kesintisi-kiti/index.html
+          ! grep -Eqi 'amazon\.(com|com\.tr)/' /tmp/alo186-outage-kit-custom/hesaplama/elektrik-kesintisi-kiti/index.html
+          ! grep -Eqi 'fiyat[^<]{0,20}[0-9]+|stok[^<]{0,20}[0-9]+|puan[^<]{0,20}[0-9]+|garanti[^<]{0,20}[0-9]+' /tmp/alo186-outage-kit-custom/hesaplama/elektrik-kesintisi-kiti/index.html
+
+      - name: Doğrulanmış kesinti kiti büyüme artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-outage-kit-growth-pages
+          path: /tmp/alo186-outage-kit-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
