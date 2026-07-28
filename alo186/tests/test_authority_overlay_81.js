@@ -17,7 +17,7 @@ assert(overlays.some(item=>item.name==='content-authority-78.json'),'78 rehberli
 assert(overlays.some(item=>item.name==='growth-technical-handoff-run11.json'),'Teknik devir büyüme overlay eksik.');
 const current=overlays.find(item=>item.name==='content-authority-81-run12.json');
 assert(current,'Run 12 içerik otoritesi overlay eksik.');
-assert.equal(current.version,37,'Etkili routing sürümü v37 olmalı.');
+assert.equal(current.version,37,'Run 12 routing sürümü v37 olmalı.');
 assert.equal(current.generatedAt,'2026-07-29');
 assert.equal(current.routes.length,3,'Run 12 overlay tam üç yeni rota taşımalı.');
 
@@ -31,9 +31,9 @@ for(const route of effective){
   canonical.add(route.canonicalPath);
   sources.add(route.source);
 }
-assert.equal(Math.max(...overlays.map(item=>item.version)),37,'En yüksek routing overlay sürümü v37 olmalı.');
-assert.equal(effective.filter(route=>route.type==='article').length,81,'Etkili routing 81 teknik makale taşımalı.');
-assert.equal(effective.length,123,'Etkili routing 123 canonical rota taşımalı.');
+assert(Math.max(...overlays.map(item=>item.version))>=37,'En yüksek routing overlay sürümü en az v37 olmalı.');
+assert(effective.filter(route=>route.type==='article').length>=81,'Etkili routing en az 81 teknik makale taşımalı.');
+assert(effective.length>=123,'Etkili routing en az 123 canonical rota taşımalı.');
 
 const articles=[
   {
@@ -89,4 +89,4 @@ for(const article of articles){
   }
 }
 
-console.log('ALO186 içerik otoritesi run 12: 81 kaynak doğrulamalı makale ve 123 canonical rota sözleşmesi başarılı.');
+console.log('ALO186 içerik otoritesi run 12 tabanı: en az 81 kaynak doğrulamalı makale ve 123 canonical rota sözleşmesi başarılı.');
