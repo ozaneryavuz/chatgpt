@@ -1,0 +1,152 @@
+name: ALO186 birleşik plan ve güven devre kesicisi
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/elektrik-planim/**'
+      - 'alo186/hesaplama/common.js'
+      - 'alo186/urun-eslestirme/outcome-trust-circuit*'
+      - 'alo186/deployment/inject_outcome_runtime.py'
+      - 'alo186/tests/test_unified_plan_growth.js'
+      - '.github/workflows/alo186-unified-plan-growth.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/elektrik-planim/**'
+      - 'alo186/hesaplama/common.js'
+      - 'alo186/urun-eslestirme/outcome-trust-circuit*'
+      - 'alo186/deployment/inject_outcome_runtime.py'
+      - 'alo186/tests/test_unified_plan_growth.js'
+      - '.github/workflows/alo186-unified-plan-growth.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-unified-plan-growth-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Elektrik Planım karar senaryoları
+        run: node alo186/hesaplama/elektrik-planim/test.js
+
+      - name: Outcome-aware affiliate güven devre kesicisi
+        run: node alo186/urun-eslestirme/outcome-trust-circuit.test.js
+
+      - name: Site ve yayın entegrasyon sözleşmeleri
+        run: node alo186/tests/test_unified_plan_growth.js
+
+      - name: JavaScript ve Python sözdizimi
+        run: |
+          node --check alo186/hesaplama/elektrik-planim/core.js
+          node --check alo186/hesaplama/elektrik-planim/app.js
+          node --check alo186/urun-eslestirme/outcome-trust-circuit-core.js
+          node --check alo186/urun-eslestirme/outcome-trust-circuit.js
+          node --check alo186/hesaplama/common.js
+          python -m py_compile alo186/deployment/inject_outcome_runtime.py
+
+      - name: Mevcut güven ve canonical regresyonları
+        run: |
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          node alo186/tests/test_solution_outcome_loop.js
+          node alo186/tests/test_smart_outcome_bridge.js
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Canonical production bundle
+        run: |
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-plan-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-plan-canonical
+
+      - name: Custom-domain Pages plan ve güven entegrasyonu
+        run: |
+          cp -a /tmp/alo186-plan-canonical /tmp/alo186-plan-custom
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-plan-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-plan-custom \
+            --base-path ''
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-plan-custom \
+            --base-path ''
+
+      - name: Project-path Pages plan ve güven entegrasyonu
+        run: |
+          cp -a /tmp/alo186-plan-canonical /tmp/alo186-plan-project
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-plan-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-plan-project \
+            --base-path '/chatgpt'
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-plan-project \
+            --base-path '/chatgpt'
+
+      - name: Artifact büyüme ve gizlilik sözleşmeleri
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          for root, prefix in [
+              (Path('/tmp/alo186-plan-custom'), ''),
+              (Path('/tmp/alo186-plan-project'), '/chatgpt'),
+          ]:
+              plan=root/'hesaplama/elektrik-planim/index.html'
+              assert plan.is_file(), plan
+              text=plan.read_text(encoding='utf-8')
+              assert 'Elektrik Planım' in text
+              assert 'data-alo186-common-runtime="true"' in text
+              if prefix:
+                  assert 'content="noindex,follow"' in text
+                  assert f'href="{prefix}/hesaplama/"' in text
+                  for script in ['core.js','app.js']:
+                      content=(root/'hesaplama/elektrik-planim'/script).read_text(encoding='utf-8')
+                      assert "'/hesaplama/" not in content and '"/hesaplama/' not in content, script
+              hub=(root/'hesaplama/index.html').read_text(encoding='utf-8')
+              assert '32 çekirdek araç' in hub
+              assert 'data-alo186-plan-hub-card="true"' in hub
+              common=(root/'hesaplama/common.js').read_text(encoding='utf-8')
+              assert 'data-alo186-plan-runtime-card' in common
+              assert 'data-alo186-outcome-runtime-card' in common
+              assert '<loc>https://www.alo186.com/hesaplama/elektrik-planim/</loc>' in (root/'sitemap.xml').read_text(encoding='utf-8')
+              release=json.loads((root/'pages-release.json').read_text(encoding='utf-8'))
+              assert release['outcomeRuntime']['version']==2
+              assert release['outcomeRuntime']['productTrustCircuit'] is True
+              assert release['outcomeRuntime']['offlinePlanRoute'] in (root/'sw.js').read_text(encoding='utf-8')
+              assert (root/'akilli-urun-secimi/outcome-trust-circuit-core.js').is_file()
+              assert (root/'akilli-urun-secimi/outcome-trust-circuit.js').is_file()
+          PY
+          ! grep -Eqi 'type="(email|tel|text)"|<textarea|amazon\.(com|com\.tr)/' /tmp/alo186-plan-custom/hesaplama/elektrik-planim/index.html
+
+      - name: Doğrulanmış birleşik plan artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-unified-plan-growth-pages
+          path: /tmp/alo186-plan-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
