@@ -1,5 +1,5 @@
 {
-  "version": 14,
+  "version": 15,
   "canonicalHost": "https://www.alo186.com",
   "generatedAt": "2026-07-28",
   "routes": [
@@ -18,6 +18,7 @@
     {"source":"alo186/hesaplama/gunes-paneli-power-station-uygunluk/index.html","canonicalPath":"/hesaplama/gunes-paneli-power-station-uygunluk/","type":"tool"},
     {"source":"alo186/hesaplama/ev-sarj-suresi/index.html","canonicalPath":"/hesaplama/ev-sarj-suresi/","type":"calculator"},
     {"source":"alo186/hesaplama/ev-sarj-uygunluk/index.html","canonicalPath":"/hesaplama/ev-sarj-uygunluk/","type":"tool"},
+    {"source":"alo186/hesaplama/ev-sarj-kablosu-uygunluk/index.html","canonicalPath":"/hesaplama/ev-sarj-kablosu-uygunluk/","type":"tool"},
     {"source":"alo186/hesaplama/kablo-gerilim-dusumu/index.html","canonicalPath":"/hesaplama/kablo-gerilim-dusumu/","type":"calculator"},
     {"source":"alo186/hesaplama/uzatma-kablosu-uygunluk/index.html","canonicalPath":"/hesaplama/uzatma-kablosu-uygunluk/","type":"tool"},
     {"source":"alo186/hesaplama/powerbank-usb-c-uygunluk/index.html","canonicalPath":"/hesaplama/powerbank-usb-c-uygunluk/","type":"tool"},
