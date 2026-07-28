@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Elektrik Sürekliliği Pasaportu ve Kanıt Dosyası | ALO186</title>
+  <meta name="description" content="Otel, site ve işletmeniz için kritik yük, yedek kaynak, test ve teknik kanıtları standartlaştırın; P0/P1/P2 eksikleri, 0–100 pasaport skoru, JSON ve PDF yönetici özeti oluşturun.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta name="theme-color" content="#0b1633">
+  <link rel="canonical" href="https://www.alo186.com/hesaplama/elektrik-surekliligi-pasaportu/">
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","@id":"https://www.alo186.com/hesaplama/elektrik-surekliligi-pasaportu/#app","name":"Elektrik Sürekliliği Pasaportu","url":"https://www.alo186.com/hesaplama/elektrik-surekliligi-pasaportu/","applicationCategory":"BusinessApplication","operatingSystem":"Web","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"TRY"},"description":"Otel, site ve işletmelerin kritik yük, yedek kaynak, test ve teknik kanıtlarını kişisel veri istemeden standart bir elektrik sürekliliği pasaportuna dönüştüren ücretsiz araç."},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Elektrik Sürekliliği Pasaportu resmî belge midir?","acceptedAnswer":{"@type":"Answer","text":"Hayır. ALO186 pasaportu ücretsiz ve kişisel veri istemeyen bir ön değerlendirme ve veri standardıdır; elektrik projesi, sertifika, sigorta ekspertizi veya resmî uygunluk raporu değildir."}},{"@type":"Question","name":"Pasaportta kişisel veri tutulur mu?","acceptedAnswer":{"@type":"Answer","text":"Araç ad, şirket adı, telefon, e-posta, adres, abonelik bilgisi veya serbest metin istemez. Yaşam destek ve acil tehlike seçimleri kayda ve dışa aktarıma yazılmaz."}},{"@type":"Question","name":"Pasaport ne işe yarar?","acceptedAnswer":{"@type":"Answer","text":"Kritik yük, yedek güç, test, topraklama, koruma, kesinti kaydı ve tatbikat kanıtlarını tek formatta gösterir; P0/P1/P2 eksikleri ve sonraki gözden geçirme tarihini üretir."}}]}]}</script>
+</head>
+<body>
+  <a class="skip-link" href="#passportForm">Pasaport değerlendirmesine geç</a>
+  <header class="site-header"><div class="header-inner"><a class="brand" href="https://www.alo186.com" aria-label="ALO186 ana sayfa"><span class="brand-mark" aria-hidden="true">186</span><span><strong>ALO186</strong><small>Bağımsız elektrik bilgi ağı</small></span></a><nav aria-label="Üst menü"><a href="https://www.alo186.com/elektrik-portali">Portal</a><a href="https://www.alo186.com/hesaplama/">Hesaplayıcılar</a><a href="https://www.alo186.com/isletme-surekliligi">Süreklilik paneli</a></nav></div></header>
+  <main>
+    <section class="trust-banner"><strong>Kanıt dosyasıdır, sertifika değildir.</strong> Pasaport; elektrik projesi, periyodik kontrol raporu, sigorta ekspertizi, ISO sertifikası veya resmî denetim yerine geçmez. Sabit tesisat, jeneratör, UPS, transfer, koruma ve topraklama yetkili uzman tarafından sahada doğrulanmalıdır.</section>
+
+    <section class="hero">
+      <div class="hero-copy"><span class="eyebrow">Otel · site · işletme · teknik yönetim</span><h1>Elektrik sürekliliğini <em>kanıt dosyasına</em> dönüştürün.</h1><p>Kritik yük, yedek kaynak, test, tek hat, koruma, topraklama, kesinti günlüğü ve tatbikat kayıtlarını tek standarda bağlayın. Sonuçta 0–100 pasaport skoru, P0/P1/P2 eksikler, gözden geçirme tarihi ve kişisel veri içermeyen JSON/PDF özeti oluşur.</p><div class="chip-row"><span class="chip">Kişisel veri yok</span><span class="chip">Makine okunur JSON</span><span class="chip">Varsayılan kayıt yok</span><span class="chip">SaaS onboarding köprüsü</span></div></div>
+      <aside class="hero-card"><span>Ücretsiz B2B kanıt standardı</span><strong>10 kanıt alanı</strong><small>Olgunluk skoru JSON’unuzu içe aktarabilir, dosyayı yönetici veya teknik ekip için yazdırabilirsiniz.</small><a href="#passportForm">Pasaportu oluştur ↓</a></aside>
+    </section>
+
+    <section id="emergencyNotice" class="danger emergency" role="alert" tabindex="-1" hidden><strong>Değerlendirmeyi bırakın.</strong> Yangın, duman, elektrik çarpması, kıvılcım veya yere düşmüş iletken varsa yaklaşmayın; güvenli mesafeye geçin ve 112’yi arayın.<br><a class="btn btn-danger" href="tel:112">112’yi ara</a></section>
+
+    <form id="passportForm" novalidate>
+      <section class="layout">
+        <div>
+          <section class="panel">
+            <div class="section-title"><div><span class="step">1</span><h2>Değerlendirme sınırı</h2></div></div>
+            <div class="form-grid">
+              <label class="field"><span>Tesis türü</span><select id="facilityType"><option value="hotel">Otel / konaklama</option><option value="site">Site / apartman yönetimi</option><option value="business" selected>Küçük veya orta işletme</option><option value="other">Diğer teknik tesis</option></select></label>
+              <label class="field import-field"><span>Olgunluk skoru JSON’u (isteğe bağlı)</span><input id="maturityFile" type="file" accept="application/json,.json"><small id="importStatus" class="help">Dosya yalnız tarayıcıda okunur; sunucuya gönderilmez.</small></label>
+              <label class="check-item field full"><input id="immediateDanger" type="checkbox"><span><strong>Şu anda yangın, duman, kıvılcım, elektrik çarpması veya düşmüş iletken var</strong><br><small>Bu durumda pasaport hesaplanmaz ve ticari yönlendirme gösterilmez. Seçim kaydedilmez.</small></span></label>
+              <label class="check-item field full"><input id="medical" type="checkbox"><span><strong>Tıbbi veya yaşam destek yükü bulunuyor</strong><br><small>Pasaport gösterilebilir; ancak üretici onaylı ve test edilmiş profesyonel süreklilik planı zorunludur. Bu seçim kayda veya JSON’a yazılmaz.</small></span></label>
+            </div>
+          </section>
+
+          <section class="panel section-block">
+            <div class="section-title"><div><span class="step">2</span><h2>Kritik yük kategorileri</h2></div></div>
+            <p class="section-intro">Kesintide hizmet, güvenlik, stok veya operasyon kaybı yaratacak yükleri seçin. Marka, model ve güç bilgisi bu ön değerlendirmede istenmez.</p>
+            <div class="choice-grid" id="criticalLoads">
+              <label class="choice"><input type="checkbox" value="communications"><span><strong>İletişim ve BT</strong><small>Modem, ağ, sunucu, telefon</small></span></label>
+              <label class="choice"><input type="checkbox" value="refrigeration"><span><strong>Soğutma</strong><small>Soğuk oda, dolap, gıda/ilaç</small></span></label>
+              <label class="choice"><input type="checkbox" value="safety-lighting"><span><strong>Güvenlik ve acil aydınlatma</strong><small>Yangın, kaçış, alarm, kamera</small></span></label>
+              <label class="choice"><input type="checkbox" value="access-security"><span><strong>Erişim ve güvenlik</strong><small>Kartlı geçiş, kapı, bariyer</small></span></label>
+              <label class="choice"><input type="checkbox" value="pumps"><span><strong>Pompa ve altyapı</strong><small>Yangın, hidrofor, drenaj</small></span></label>
+              <label class="choice"><input type="checkbox" value="production"><span><strong>Üretim veya hizmet yükü</strong><small>Operasyonu durduran ekipman</small></span></label>
+            </div>
+          </section>
+
+          <section class="panel section-block">
+            <div class="section-title"><div><span class="step">3</span><h2>Mevcut yedek kaynak sınıfları</h2></div></div>
+            <p class="section-intro">Yalnız kurulu veya gerçekten kullanılabilir kaynakları seçin. Seçim kapasite uygunluğunu kanıtlamaz.</p>
+            <div class="choice-grid" id="backupSystems">
+              <label class="choice"><input type="checkbox" value="generator"><span><strong>Jeneratör</strong><small>Otomatik veya manuel transfer</small></span></label>
+              <label class="choice"><input type="checkbox" value="ups"><span><strong>UPS</strong><small>Online, line-interactive veya diğer</small></span></label>
+              <label class="choice"><input type="checkbox" value="battery-inverter"><span><strong>Batarya ve inverter</strong><small>Sabit enerji depolama</small></span></label>
+              <label class="choice"><input type="checkbox" value="power-station"><span><strong>Taşınabilir güç istasyonu</strong><small>Sınırlı taşınabilir yükler</small></span></label>
+            </div>
+          </section>
+
+          <section class="panel section-block">
+            <div class="section-title"><div><span class="step">4</span><h2>Kanıt güncelliği</h2></div><span id="evidenceProgress" class="status warn">0 / 10</span></div>
+            <p class="section-intro">“Güncel” seçeneğini yalnız tarihli ve erişilebilir kayıt varsa kullanın. “Yenileme zamanı” mevcut ancak süresi veya güveni azalmış kayıt içindir.</p>
+            <div id="evidenceList" class="evidence-list"></div>
+          </section>
+
+          <div id="validation" class="validation" role="alert" tabindex="-1" hidden></div>
+          <div class="actions"><button class="btn btn-primary" type="submit">Pasaport skorunu ve kanıt planını oluştur</button><button id="restoreBtn" class="btn btn-secondary" type="button" hidden>30 günlük yerel kaydı yükle</button><button id="resetBtn" class="btn btn-secondary" type="button">Sıfırla</button></div>
+        </div>
+
+        <aside class="side">
+          <section class="panel"><span class="eyebrow">Veri sınırı</span><h2>Kayıt sizin kontrolünüzde</h2><p>Ad, şirket adı, telefon, e-posta, adres, abonelik, marka/model ve serbest metin alınmaz.</p><label class="check-item save-option"><input id="saveLocal" type="checkbox"><span><strong>Teknik seçimleri 30 gün bu cihazda sakla</strong><br><small>Varsayılan kapalıdır. Hassas yük ve acil tehlike seçimi hiçbir zaman saklanmaz.</small></span></label><div class="info"><strong>Önerilen akış</strong><br>Önce olgunluk skorunu oluşturun, ardından bu pasaportta kanıt durumunu ekleyin ve sonuçları süreklilik panelinde takip edin.</div><a class="btn btn-secondary full-button" href="./elektrik-surekliligi-olgunluk-skoru/">Olgunluk skorunu aç</a></section>
+        </aside>
+      </section>
+    </form>
+
+    <section id="results" class="results" tabindex="-1" aria-live="polite" hidden>
+      <div class="metric-grid passport-metrics"><article class="metric accent"><span>Pasaport skoru</span><strong id="passportScore">0/100</strong><small id="passportBand">—</small></article><article class="metric"><span>Kanıt puanı</span><strong id="evidenceScore">0/100</strong><small>Belge ve test güncelliği</small></article><article class="metric"><span>P0 kritik açık</span><strong id="p0Count">0</strong><small>Önce kapatılması gerekenler</small></article><article class="metric"><span>Sonraki gözden geçirme</span><strong id="reviewDate">—</strong><small id="maturitySummary">Olgunluk skoru aktarılmadı</small></article></div>
+
+      <section class="result-grid"><article class="result-card"><span class="eyebrow">Yönetici özeti</span><h2 id="resultTitle">Pasaport sonucu</h2><p id="resultSummary"></p><div id="professionalNotice" class="danger" hidden></div></article><article class="result-card"><span class="eyebrow">Kanıt durumu</span><h2>Güncel / yenilenecek / eksik</h2><div id="evidenceSummary" class="summary-bars"></div></article></section>
+
+      <section class="content-section"><span class="eyebrow">Öncelik sırası</span><h2>P0 / P1 / P2 kanıt kapatma planı</h2><div class="priority-grid"><article class="priority-card p0"><span>P0</span><h3>Kritik boşluklar</h3><ul id="p0List"></ul></article><article class="priority-card p1"><span>P1</span><h3>İlk plan dönemi</h3><ul id="p1List"></ul></article><article class="priority-card p2"><span>P2</span><h3>Güncellik ve iyileştirme</h3><ul id="p2List"></ul></article></div></section>
+
+      <div class="results-actions"><button id="exportBtn" class="btn btn-secondary" type="button">Pasaport JSON’unu indir</button><button id="printBtn" class="btn btn-secondary" type="button">Yazdır / PDF</button><button id="clearStorageBtn" class="btn btn-secondary" type="button">Yerel kaydı sil</button></div>
+
+      <section id="businessCta" class="business-cta"><div><h3>Kanıt dosyasını yaşayan sisteme taşıyın.</h3><p>Kritik yük, jeneratör/UPS testi, olay, görev, maliyet ve audit kayıtlarını Elektrik Sürekliliği Paneli’nde takip edin. Pasaport dosyası onboarding standardı olarak kullanılabilir.</p></div><a class="btn btn-primary" href="https://www.alo186.com/isletme-surekliligi?passport=1">Süreklilik panelini aç</a></section>
+      <p class="no-affiliate"><strong>Ticari sınır:</strong> Pasaport sonucunda ürün veya affiliate bağlantısı gösterilmez. Düşük skor tek başına ekipman satın alma gerekçesi değildir; önce kritik yük, mevcut kapasite, test ve saha koşulu doğrulanmalıdır.</p>
+    </section>
+
+    <section class="content-section"><div class="panel"><span class="eyebrow">Açık veri standardı</span><h2>Pasaport dosyası neden JSON üretir?</h2><p>JSON dosyası; ücretsiz değerlendirme, saha kontrolü ve Elektrik Sürekliliği SaaS arasında tekrar veri girişini azaltmak için sürümlü bir değişim formatıdır. Dosya kişisel veri veya serbest metin içermez; şeması yayınlanmıştır.</p><div class="actions"><a class="btn btn-secondary" href="https://www.alo186.com/schemas/electrical-continuity-passport-v1.schema.json">JSON Schema v1’i aç</a><a class="btn btn-secondary" href="https://www.alo186.com/yayin-ilkeleri">Yayın ilkelerini incele</a></div></div></section>
+
+    <section class="content-section faq"><details><summary>Bu pasaport ISO 22301 veya elektrik uygunluk belgesi midir?</summary><p>Hayır. ALO186 pasaportu ücretsiz ön değerlendirme ve veri değişim formatıdır. Sertifika, proje, periyodik kontrol veya sigorta raporu değildir.</p></details><details><summary>Yaşam destek yükü neden dosyaya yazılmıyor?</summary><p>Hassas sağlık verisi oluşturmamak için bu seçim yalnız ekranda profesyonel plan uyarısını tetikler; local storage, JSON ve analitik olaya eklenmez.</p></details><details><summary>JSON dosyası nereye gönderilir?</summary><p>İndirme tamamen tarayıcıda oluşur. Araç dosyayı ALO186 sunucusuna yüklemez. Daha sonra panel import özelliği etkinleştiğinde kullanıcı kendi dosyasını açıkça seçebilir.</p></details><details><summary>Skor neden düşük olabilir?</summary><p>Eksik kritik yük haritası, yedek kaynak bulunmaması, test kayıtları veya koruma/transfer kanıtlarının güncel olmaması skoru düşürür.</p></details></section>
+  </main>
+  <footer><div class="footer-inner"><div><strong>ALO186</strong><p>Bağımsız bilgilendirme platformudur; EDAŞ, kamu kurumu veya sertifikasyon kuruluşu değildir.</p></div><div class="footer-links"><a href="https://www.alo186.com/elektrik-portali">Portal</a><a href="https://www.alo186.com/hesaplama/">Hesaplayıcılar</a><a href="https://www.alo186.com/gizlilik">Gizlilik</a></div></div></footer>
+  <noscript><div class="noscript">Bu araç JavaScript gerektirir.</div></noscript>
+  <script src="./core.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
