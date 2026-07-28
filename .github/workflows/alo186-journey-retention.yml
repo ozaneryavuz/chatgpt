@@ -1,0 +1,53 @@
+name: ALO186 güvenli kullanıcı yolculuğu ve tekrar ziyaret
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/urun-eslestirme/**'
+      - 'alo186/deployment/**'
+      - '.github/workflows/alo186-journey-retention.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/urun-eslestirme/**'
+      - 'alo186/deployment/**'
+      - '.github/workflows/alo186-journey-retention.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  journey-retention:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: JavaScript syntax
+        run: |
+          node --check alo186/urun-eslestirme/journey-retention-core.js
+          node --check alo186/urun-eslestirme/journey-retention.js
+      - name: Journey and retention regression
+        run: node alo186/urun-eslestirme/journey-retention.test.js
+      - name: Existing trust growth regressions
+        run: |
+          test ! -f alo186/urun-eslestirme/trust-growth.test.js || node alo186/urun-eslestirme/trust-growth.test.js
+          test ! -f alo186/urun-eslestirme/decision-shortlist.test.js || node alo186/urun-eslestirme/decision-shortlist.test.js
+          test ! -f alo186/urun-eslestirme/test.js || node alo186/urun-eslestirme/test.js
+      - name: Production bundle
+        run: python alo186/deployment/build_static_site.py --output _production_site --commit "${GITHUB_SHA}"
+      - name: Production integration contract
+        run: |
+          test -f _production_site/akilli-urun-secimi/index.html
+          test -f _production_site/akilli-urun-secimi/journey-retention-core.js
+          test -f _production_site/akilli-urun-secimi/journey-retention.js
+          test -f _production_site/akilli-urun-secimi/journey-retention.css
+          grep -q 'Güvenli kullanıcı yolculuğu ve tekrar ziyaret' _production_site/akilli-urun-secimi/index.html
+          grep -q 'Öğren → hesapla → karşılaştır' _production_site/akilli-urun-secimi/index.html
+          grep -q 'Ad, telefon, e-posta, adres, abonelik, seri numarası, fiyat veya satıcı kaydedilmez' _production_site/akilli-urun-secimi/index.html
+          ! grep -Rqi 'amazon.com.tr/dp/' _production_site/akilli-urun-secimi/index.html
+          ! find _production_site -type f \( -name '*.test.js' -o -name '*.md' \) | grep -q .
