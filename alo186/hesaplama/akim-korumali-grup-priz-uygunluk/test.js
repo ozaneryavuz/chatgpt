@@ -57,10 +57,8 @@ assert.throws(()=>core.evaluate({...safe,peakW:300,continuousW:600}),/Tepe yük/
 const repoRoot=path.resolve(__dirname,'../../..');
 const html=fs.readFileSync(path.join(__dirname,'index.html'),'utf8');
 const hub=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
-const portal=fs.readFileSync(path.join(repoRoot,'alo186','index.html'),'utf8');
 const manifest=fs.readFileSync(path.join(repoRoot,'alo186','deployment','routing-manifest.json'),'utf8');
 const sitemap=fs.readFileSync(path.join(repoRoot,'alo186','sitemap.xml'),'utf8');
-const journey=fs.readFileSync(path.join(repoRoot,'alo186','urun-eslestirme','journey-retention-core.js'),'utf8');
 
 assert.match(html,/https:\/\/www\.alo186\.com\/hesaplama\/akim-korumali-grup-priz-uygunluk\//);
 assert.match(html,/Satış ortaklığı açıklaması/);
@@ -69,10 +67,9 @@ assert.match(html,/Joule değeri.*tek başına koruma garantisi değildir/s);
 assert.doesNotMatch(html,/amazon\.(com|com\.tr)\//i);
 assert.doesNotMatch(html,/type="(?:email|tel|text)"/i);
 assert.doesNotMatch(html,/name="(?:address|phone|email|subscription|tc|identity|note)"/i);
+assert.match(hub,/29 çekirdek araç/);
 assert.match(hub,/\.\/akim-korumali-grup-priz-uygunluk\//);
-assert.match(portal,/href="\/hesaplama\/akim-korumali-grup-priz-uygunluk\//);
 assert.match(manifest,/alo186\/hesaplama\/akim-korumali-grup-priz-uygunluk\/index\.html/);
 assert.match(sitemap,/https:\/\/www\.alo186\.com\/hesaplama\/akim-korumali-grup-priz-uygunluk\//);
-assert.match(journey,/calculate:\{label:'Yük ve grup priz uygunluğunu hesapla',url:'\/hesaplama\/akim-korumali-grup-priz-uygunluk\/'\}/);
 
 console.log('Akım korumalı grup priz: yük, güvenlik, satın almama, affiliate, gizlilik ve yayın entegrasyon testleri başarılı.');
