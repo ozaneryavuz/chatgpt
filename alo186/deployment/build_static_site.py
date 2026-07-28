@@ -102,6 +102,11 @@ def normalize_canonical_host(output: Path) -> None:
 def find_wrong_damage_deadlines(output: Path) -> list[str]:
     violations: list[str] = []
     for path in iter_text_files(output):
+        # .htaccess intentionally contains the legacy phrases as fixed-string
+        # mod_substitute search patterns. It is an output-safety rule, not user-facing
+        # legal content, so it must not be classified as a deadline violation.
+        if path.name == ".htaccess":
+            continue
         try:
             text = re.sub(r"\s+", " ", path.read_text(encoding="utf-8"))
         except UnicodeDecodeError:
