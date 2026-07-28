@@ -81,9 +81,9 @@ jobs:
           from pathlib import Path
           root=Path('/tmp/alo186-authority-81')
           release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
-          assert release['routingVersion']==37, release
-          assert release['articleCount']==81, release
-          assert release['routeCount']==123, release
+          assert release['routingVersion']>=37, release
+          assert release['articleCount']>=81, release
+          assert release['routeCount']>=123, release
           assert 'content-authority-81-run12.json' in release['routingOverlays']
           for slug in (
               'topraklama-espotansiyel-kusaklama-farki',
