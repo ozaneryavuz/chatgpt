@@ -1,5 +1,5 @@
 {
-  "version": 10,
+  "version": 11,
   "canonicalHost": "https://www.alo186.com",
   "generatedAt": "2026-07-28",
   "routes": [
@@ -46,7 +46,10 @@
     {"source":"alo186/haberler/planli-elektrik-kesintisi-ne-kadar-once-bildirilir/index.html","canonicalPath":"/haberler/planli-elektrik-kesintisi-ne-kadar-once-bildirilir","type":"article"},
     {"source":"alo186/haberler/topraklama-direnci-kac-ohm-olmali/index.html","canonicalPath":"/haberler/topraklama-direnci-kac-ohm-olmali","type":"article"},
     {"source":"alo186/haberler/notr-kopmasi-nasil-anlasilir/index.html","canonicalPath":"/haberler/notr-kopmasi-nasil-anlasilir","type":"article"},
-    {"source":"alo186/haberler/lisanssiz-ges-mahsuplasma-ihtiyac-fazlasi/index.html","canonicalPath":"/haberler/lisanssiz-ges-mahsuplasma-ihtiyac-fazlasi","type":"article"}
+    {"source":"alo186/haberler/lisanssiz-ges-mahsuplasma-ihtiyac-fazlasi/index.html","canonicalPath":"/haberler/lisanssiz-ges-mahsuplasma-ihtiyac-fazlasi","type":"article"},
+    {"source":"alo186/haberler/ups-akusu-ne-zaman-degisir/index.html","canonicalPath":"/haberler/ups-akusu-ne-zaman-degisir","type":"article"},
+    {"source":"alo186/haberler/jenerator-ups-birlikte-calisir-mi/index.html","canonicalPath":"/haberler/jenerator-ups-birlikte-calisir-mi","type":"article"},
+    {"source":"alo186/haberler/gunes-paneli-inverter-clipping-dc-ac-orani/index.html","canonicalPath":"/haberler/gunes-paneli-inverter-clipping-dc-ac-orani","type":"article"}
   ],
   "requiredIntegrations": [
     "canonical URL must resolve with HTTP 200",
