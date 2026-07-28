@@ -44,8 +44,10 @@ assert.equal(emergencyLight.professionalSelectionRequired,false);
 assert.match(emergencyLight.nextStep.url,/acil-aydinlatma-sure-uygunluk/);
 
 const smokeAlarm=matcher.match('smoke_alarm',{}, {now:freshNow});
-assert.equal(smokeAlarm.affiliatePolicy,'after_checklist');
+assert.equal(smokeAlarm.affiliatePolicy,'after_tool');
 assert.equal(smokeAlarm.professionalSelectionRequired,true);
+assert.match(smokeAlarm.nextStep.url,/duman-alarmi-yerlesim-bakim-uygunluk/);
+assert.equal(smokeAlarm.matches.length,0,'Doğrulanmamış duman alarmı kartı doğrudan gösterilmemeli.');
 
 const app=fs.readFileSync(path.join(__dirname,'app.js'),'utf8');
 const html=fs.readFileSync(path.join(__dirname,'index.html'),'utf8');
@@ -62,4 +64,4 @@ assert.match(html,/satış ortaklığı/,'Affiliate açıklaması görünür olm
 assert.match(html,/EDAŞ veya kamu kurumu değildir/,'Resmî kurum izlenimi reddedilmeli.');
 assert.match(styles,/\.disabled-link\{pointer-events:none/,'Onay verilmeden affiliate bağlantısı etkinleşmemeli.');
 
-console.log('ALO186 affiliate trust ve repeat-visit testleri başarılı.');
+console.log('ALO186 affiliate trust, smoke-alarm teknik kapısı ve repeat-visit testleri başarılı.');
