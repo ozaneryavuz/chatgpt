@@ -22,24 +22,22 @@
       solar:$('solar').value,medical:$('medical').checked
     };
   }
-  function sanitize(data){
+  function sanitizeTechnical(data){
     const allowed=['continuousW','peakW','hours','transition','scope','phase','portable','fuel','outdoor','solar'];
     const clean={};
     allowed.forEach(key=>{if(data&&Object.prototype.hasOwnProperty.call(data,key))clean[key]=String(data[key]);});
-    clean.medical=Boolean(data&&data.medical);
     return clean;
   }
   function setValues(data){
-    Object.entries(sanitize(data)).forEach(([key,value])=>{
+    Object.entries(sanitizeTechnical(data)).forEach(([key,value])=>{
       const el=$(key);
-      if(!el)return;
-      if(key==='medical')el.checked=Boolean(value);
-      else el.value=String(value);
+      if(el)el.value=String(value);
     });
+    $('medical').checked=Boolean(data&&data.medical);
   }
   function save(data){
     try{
-      localStorage.setItem(STORAGE_KEY,JSON.stringify({savedAt:Date.now(),input:sanitize(data)}));
+      localStorage.setItem(STORAGE_KEY,JSON.stringify({savedAt:Date.now(),input:sanitizeTechnical(data)}));
       $('restoreBtn').hidden=false;
     }catch(_){ }
   }
@@ -50,7 +48,7 @@
         localStorage.removeItem(STORAGE_KEY);
         return null;
       }
-      return sanitize(stored.input||{});
+      return sanitizeTechnical(stored.input||{});
     }catch(_){return null;}
   }
   function clearStored(){
