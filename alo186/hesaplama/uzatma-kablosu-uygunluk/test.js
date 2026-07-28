@@ -68,7 +68,8 @@ assert(routing.routes.some(route=>route.canonicalPath==='/hesaplama/uzatma-kablo
 const sitemap=fs.readFileSync(path.join(root,'sitemap.xml'),'utf8');
 assert(sitemap.includes('/hesaplama/uzatma-kablosu-uygunluk/'));
 const center=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
-assert(center.includes('20 çekirdek araç'));
+const toolCount=Number((center.match(/(\d+) çekirdek araç/)||[])[1]);
+assert(toolCount>=21);
 assert(center.includes('./uzatma-kablosu-uygunluk/'));
 
 console.log('Uzatma kablosu uygunluk testleri başarılı.');
