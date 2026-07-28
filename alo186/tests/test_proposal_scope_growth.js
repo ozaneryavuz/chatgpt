@@ -1,1 +1,34 @@
-'use strict';const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');const root=path.resolve(__dirname,'../..'),read=p=>fs.readFileSync(path.join(root,p),'utf8');const html=read('alo186/hesaplama/teknik-teklif-kapsam-karsilastirma/index.html'),core=read('alo186/hesaplama/teknik-teklif-kapsam-karsilastirma/core.js'),inject=read('alo186/deployment/inject_proposal_scope_growth.py'),chain=read('alo186/deployment/inject_handoff_growth.py'),overlay=JSON.parse(read('alo186/deployment/routing-overlays/growth-proposal-scope-run12.json'));assert.equal(overlay.version,37);assert(overlay.routes.some(r=>r.canonicalPath==='/hesaplama/teknik-teklif-kapsam-karsilastirma/'&&r.type==='business-tool'));assert.match(html,/https:\/\/www\.alo186\.com\/hesaplama\/teknik-teklif-kapsam-karsilastirma\//);assert.match(html,/WebApplication/);assert.match(html,/FAQPage/);assert.match(html,/Marka ve fiyat yok/);assert.match(html,/ALO186 EDAŞ, kamu kurumu, yüklenici, satıcı veya kabul kuruluşu değildir/);assert.doesNotMatch(html,/type="(?:email|tel|text)"|<textarea/i);assert.doesNotMatch(html,/amazon\.(?:com|com\.tr)/i);assert.match(core,/commercialAllowed=false/);assert.match(core,/existingSufficient==='yes'/);assert.match(core,/status='no_buy'/);assert.match(core,/status='ready_affiliate'/);assert.match(core,/status='ready_review'/);assert.match(core,/status='professional'/);assert.match(core,/status='safety'/);assert.match(inject,/36 çekirdek araç/);assert.match(inject,/data-alo186-proposal-hub/);assert.match(inject,/data-alo186-proposal-card/);assert.match(inject,/teknik-devir-kabul-paketi/);assert.match(inject,/kurumsal-elektrik-surekliligi-on-degerlendirme/);assert.match(inject,/offlineCriticalRouteCount/);assert.match(inject,/checksums\.sha256/);assert.match(chain,/run_proposal_scope/);console.log('ALO186 teknik teklif kapsamı: route v37, no-buy, affiliate/professional ayrımı, artifact kartları ve gizlilik sözleşmeleri başarılı.');
+'use strict';
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const root=path.resolve(__dirname,'../..');
+const read=p=>fs.readFileSync(path.join(root,p),'utf8');
+const exists=p=>fs.existsSync(path.join(root,p));
+
+const route='/hesaplama/teknik-teklif-kapsam-karsilastirma/';
+const overlay=JSON.parse(read('alo186/deployment/routing-overlays/growth-proposal-scope-run12.json'));
+assert.equal(overlay.version,37);
+assert.deepEqual(overlay.routes,[{source:'alo186/hesaplama/teknik-teklif-kapsam-karsilastirma/index.html',canonicalPath:route,type:'business-tool'}]);
+
+for(const file of ['core.js','app.js','index.html','styles.css','test.js'])assert(exists(`alo186/hesaplama/teknik-teklif-kapsam-karsilastirma/${file}`),`${file} eksik`);
+const html=read('alo186/hesaplama/teknik-teklif-kapsam-karsilastirma/index.html');
+assert(html.includes(`rel="canonical" href="https://www.alo186.com${route}"`));
+assert(html.includes('WebApplication'));
+assert(html.includes('FAQPage'));
+assert(html.includes('Mevcut çözüm yeterli mi?'));
+assert(html.includes('satış ortaklığı açıklamasını anladım'));
+assert(html.includes('ALO186 EDAŞ, kamu kurumu, yüklenici, satıcı veya kabul kuruluşu değildir'));
+assert(!/<textarea\b|type="(?:email|tel|text)"/i.test(html));
+assert(!/amazon\.(?:com|com\.tr)/i.test(html));
+
+const inject=read('alo186/deployment/inject_proposal_scope_growth.py');
+for(const token of ['36 çekirdek araç','data-alo186-proposal-hub','data-alo186-proposal-card','data-alo186-proposal-section','manifest.webmanifest','offlineCriticalRouteCount','checksums.sha256'])assert(inject.includes(token),`Enjektör sözleşmesi eksik: ${token}`);
+assert(inject.includes('teknik-devir-kabul-paketi'));
+assert(inject.includes('kurumsal-elektrik-surekliligi-on-degerlendirme'));
+
+const chain=read('alo186/deployment/inject_handoff_growth.py');
+assert(chain.includes('from inject_proposal_scope_growth import run as run_proposal_scope'));
+assert(chain.includes("result['proposalScope']=run_proposal_scope(site,base_path)"));
+
+console.log('ALO186 teknik teklif kapsamı: v37 rota, görünür güven sınırı, artifact entegrasyonu ve gizlilik sözleşmeleri başarılı.');
