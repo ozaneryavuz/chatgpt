@@ -49,6 +49,7 @@ assert.match(corporateApp, /paid_assessment_readiness_scored/);
 assert.match(corporateApp, /paid_assessment_brief_copied/);
 assert.match(corporateApp, /paid_assessment_brief_printed/);
 assert.doesNotMatch(corporateHtml, /type="(?:email|tel|text|file)"/i);
+assert.doesNotMatch(corporateHtml, /name="(?:name|email|phone|address|subscription|identity|plate|serial|company|note|message)"/i);
 assert.doesNotMatch(corporateHtml, /amazon\.(com|com\.tr)\//i);
 
 // 3. Supplier technical-data readiness and transparent sponsorship.
@@ -66,11 +67,11 @@ assert.match(supplierApp, /supplier_data_readiness_scored/);
 assert.match(supplierApp, /supplier_partnership_brief_copied/);
 assert.match(supplierApp, /supplier_partnership_brief_printed/);
 assert.doesNotMatch(supplierHtml, /type="(?:email|tel|text|file)"/i);
+assert.doesNotMatch(supplierHtml, /name="(?:name|email|phone|address|subscription|identity|plate|serial|company|note|message)"/i);
 assert.doesNotMatch(supplierHtml, /amazon\.(com|com\.tr)\//i);
 
-// PII and fast-changing commercial claims are not introduced.
+// Privacy disclosures may name data that is explicitly not collected; only actual fields are forbidden.
 for (const [name, text] of [['catalog', catalogHtml], ['corporate', corporateHtml], ['supplier', supplierHtml]]) {
-  assert.doesNotMatch(text, /T\.C\. kimlik|açık adres|abone numarası|telefon numarası/i, `${name}: PII request found`);
   assert.doesNotMatch(text, /stokta|kargo|teslimat süresi|satıcı puanı|garanti süresi\s*:\s*\d/i, `${name}: unverified commercial claim found`);
   assert.match(text, /Bağımsız|bağımsız/i, `${name}: independence wording missing`);
 }
