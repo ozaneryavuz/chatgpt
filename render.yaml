@@ -267,9 +267,39 @@ services:
         sync: false
       - key: AWS_DEFAULT_REGION
         value: auto
+      - key: ALO186_BACKUP_HEARTBEAT_URL
+        sync: false
       - key: ALO186_BACKUP_KEEP_DAILY
         value: "14"
       - key: ALO186_BACKUP_KEEP_WEEKLY
         value: "8"
       - key: ALO186_BACKUP_KEEP_MONTHLY
         value: "12"
+      - key: ALO186_BACKUP_KEEP_YEARLY
+        value: "3"
+
+  - type: worker
+    name: alo186-grafana-alloy
+    runtime: docker
+    plan: starter
+    region: frankfurt
+    branch: main
+    rootDir: alo186/infra/observability
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    dockerCommand: run /etc/alloy/config.alloy --storage.path=/tmp/alloy
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: ALO186_API_METRICS_TARGET
+        value: alo186-continuity-api.onrender.com
+      - key: ALO186_METRICS_TOKEN
+        fromService:
+          type: web
+          name: alo186-continuity-api
+          envVarKey: ALO186_METRICS_TOKEN
+      - key: GRAFANA_CLOUD_PROMETHEUS_URL
+        sync: false
+      - key: GRAFANA_CLOUD_PROMETHEUS_USERNAME
+        sync: false
+      - key: GRAFANA_CLOUD_API_KEY
+        sync: false
