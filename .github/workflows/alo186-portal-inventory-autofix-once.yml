@@ -6,12 +6,20 @@ on:
     paths:
       - '.github/alo186-portal-inventory-autofix.trigger'
       - '.github/workflows/alo186-portal-inventory-autofix-once.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'alo186/index.html'
+      - 'alo186/tests/test_portal_inventory_claims.js'
+      - '.github/alo186-portal-inventory-autofix.trigger'
+      - '.github/workflows/alo186-portal-inventory-autofix-once.yml'
 
 permissions:
   contents: write
 
 jobs:
   patch:
+    if: github.head_ref == 'fix/alo186-portal-inventory-drift' || github.ref_name == 'fix/alo186-portal-inventory-drift'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -29,9 +37,9 @@ jobs:
           path = Path('alo186/index.html')
           text = path.read_text(encoding='utf-8')
           replacements = {
-              '26 kişisel veri istemeyen araç': 'kişisel veri istemeyen araçlar',
               '26 kişisel veri istemeyen hesaplama ve karar aracı': 'kişisel veri istemeyen hesaplama ve karar araçları',
               '45 kaynak doğrulamalı teknik rehber': 'kaynak doğrulamalı teknik rehberler',
+              '26 kişisel veri istemeyen araç': 'kişisel veri istemeyen araçlar',
               '45 kaynak doğrulamalı rehber': 'kaynak doğrulamalı rehberler',
           }
           changed = False
