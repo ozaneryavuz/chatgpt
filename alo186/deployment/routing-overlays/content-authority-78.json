@@ -1,0 +1,21 @@
+{
+  "version": 35,
+  "generatedAt": "2026-07-29",
+  "routes": [
+    {
+      "source": "alo186/haberler/ups-eco-modu-acik-olmali-mi/index.html",
+      "canonicalPath": "/haberler/ups-eco-modu-acik-olmali-mi",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ges-inverter-mppt-giris-akimi-isc-nasil-kontrol-edilir/index.html",
+      "canonicalPath": "/haberler/ges-inverter-mppt-giris-akimi-isc-nasil-kontrol-edilir",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/jenerator-start-akusu-neden-bosalir-sarj-olmaz/index.html",
+      "canonicalPath": "/haberler/jenerator-start-akusu-neden-bosalir-sarj-olmaz",
+      "type": "article"
+    }
+  ]
+}
