@@ -47,6 +47,7 @@ cp "$ALO_DIR/robots.txt" "$DESTINATION/robots.txt"
 cp "$ALO_DIR/sitemap.xml" "$DESTINATION/sitemap.xml"
 cp "$ALO_DIR/deployment/apache.htaccess" "$DESTINATION/.htaccess"
 cp "$ALO_DIR/deployment/404.html" "$DESTINATION/404.html"
+cp "$ALO_DIR/deployment/tailwindcss" "$DESTINATION/tailwindcss"
 touch "$DESTINATION/.nojekyll"
 
 if [ "$MODE" = "preview" ]; then
@@ -81,6 +82,7 @@ robots.txt
 sitemap.xml
 .htaccess
 404.html
+tailwindcss
 "
 
 printf '%s\n' "$required_files" | while IFS= read -r file; do
