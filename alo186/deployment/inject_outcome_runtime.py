@@ -41,6 +41,21 @@ def prefix_plan_links(text: str, base_path: str) -> str:
     )
 
 
+def prefix_plan_script_paths(text: str, base_path: str) -> str:
+    if not base_path:
+        return text
+    base_segment = base_path.lstrip("/")
+    pattern = re.compile(r'(?P<quote>["\'`])/(?P<path>(?!/)[a-zA-Z0-9_\-/.?=&%]*)')
+
+    def replace(match: re.Match[str]) -> str:
+        path = match.group("path")
+        if path == base_segment or path.startswith(base_segment + "/"):
+            return match.group(0)
+        return f'{match.group("quote")}{base_path}/{path}'
+
+    return pattern.sub(replace, text)
+
+
 def inject_pages_meta(text: str, base_path: str) -> str:
     if base_path:
         if re.search(r'<meta\s+name="robots"', text, re.I):
@@ -71,10 +86,12 @@ def ensure_plan_route(site: Path, base_path: str) -> bool:
         shutil.copy2(src, target / name)
 
     plan_html = target / "index.html"
-    text = plan_html.read_text(encoding="utf-8")
-    text = prefix_plan_links(text, base_path)
+    text = prefix_plan_links(plan_html.read_text(encoding="utf-8"), base_path)
     text = inject_pages_meta(text, base_path)
     plan_html.write_text(text, encoding="utf-8")
+    for name in ("core.js", "app.js"):
+        path = target / name
+        path.write_text(prefix_plan_script_paths(path.read_text(encoding="utf-8"), base_path), encoding="utf-8")
 
     sitemap = site / "sitemap.xml"
     if sitemap.is_file():
@@ -89,8 +106,8 @@ def ensure_plan_route(site: Path, base_path: str) -> bool:
         routes = release.setdefault("routes", [])
         if not any(item.get("canonicalPath") == "/hesaplama/elektrik-planim/" for item in routes):
             routes.append({"canonicalPath": "/hesaplama/elektrik-planim/", "source": "alo186/hesaplama/elektrik-planim/index.html", "type": "tool"})
-            release["routeCount"] = len(routes)
-            release_path.write_text(json.dumps(release, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        release["routeCount"] = len(routes)
+        release_path.write_text(json.dumps(release, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     hub = site / "hesaplama" / "index.html"
     if hub.is_file():
@@ -110,9 +127,8 @@ def insert_after_grid_open(text: str, cards: list[str]) -> tuple[str, int]:
         return text, 0
     for match in re.finditer(r'<section\b[^>]*>', text, re.I):
         class_match = re.search(r'class=["\']([^"\']*)["\']', match.group(0), re.I)
-        if not class_match or "grid" not in class_match.group(1).split():
-            continue
-        return text[: match.end()] + "\n" + "\n".join(missing) + text[match.end() :], len(missing)
+        if class_match and "grid" in class_match.group(1).split():
+            return text[: match.end()] + "\n" + "\n".join(missing) + text[match.end() :], len(missing)
     return text, 0
 
 
@@ -140,14 +156,10 @@ def add_offline_routes(site: Path, base_path: str) -> list[str]:
     if not match:
         raise RuntimeError("Service worker CRITICAL rota dizisi bulunamadı")
     critical = json.loads(match.group(1))
-    added = []
-    for route in routes:
-        if route not in critical:
-            critical.append(route)
-            added.append(route)
+    added = [route for route in routes if route not in critical]
     if added:
-        updated = text[: match.start(1)] + json.dumps(critical, ensure_ascii=False) + text[match.end(1) :]
-        sw_path.write_text(updated, encoding="utf-8")
+        critical.extend(added)
+        sw_path.write_text(text[: match.start(1)] + json.dumps(critical, ensure_ascii=False) + text[match.end(1) :], encoding="utf-8")
     return added
 
 
@@ -189,7 +201,6 @@ def inject(site: Path, base_path: str) -> dict:
     pending_url = public_url(base_path, "/hesaplama/cozum-sonucu/pending-context.js")
     injected = already_present = pending_injected = cards_injected = 0
     missing_body = []
-
     for html_path in sorted(site.rglob("*.html")):
         relative = html_path.relative_to(site)
         text = html_path.read_text(encoding="utf-8", errors="ignore")
@@ -214,7 +225,6 @@ def inject(site: Path, base_path: str) -> dict:
                 continue
             text = text.replace("</body>", "\n".join(tags) + "\n</body>", 1)
         html_path.write_text(text, encoding="utf-8")
-
     if missing_body:
         raise RuntimeError("Ortak runtime için </body> bulunamayan HTML: " + ", ".join(missing_body[:20]))
     offline_added = add_offline_routes(site, base_path)
