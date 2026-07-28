@@ -66,9 +66,12 @@ const articles=[
   {slug:'jenerator-calisiyor-elektrik-uretmiyor-ne-yapilmali',required:['main line circuit breaker','GFCI','bilinen sağlam','yetkili servis','erkek–erkek'],cta:'/hesaplama/ekipman-bakim-plani/',fresh:true,portalOptional:true},
   {slug:'lifepo4-batarya-sogukta-sarj-edilir-mi',required:['5°C','Allowed-To-Charge','low temperature cut-off','BMS','kalıcı hasar'],cta:'/hesaplama/inverter-uygunluk/',fresh:true,portalOptional:true},
   {slug:'parafudr-baglanti-kablosu-neden-kisa-olmali',required:['50 cm','let-through voltage','indüktans','gereksiz kıvrım','yetkili elektrikçi'],cta:'/hesaplama/parafudr-risk-testi/',fresh:true,portalOptional:true},
-  {slug:'jenerator-devreye-girince-kacak-akim-rolesi-neden-atar',required:['solid neutral','switched neutral','4 kutuplu ATS','ayrı türetilmiş sistem','yetkili elektrikçi'],cta:'/hesaplama/jenerator-gucu-secimi/',fresh:true,portalOptional:true}
+  {slug:'jenerator-devreye-girince-kacak-akim-rolesi-neden-atar',required:['solid neutral','switched neutral','4 kutuplu ATS','ayrı türetilmiş sistem','yetkili elektrikçi'],cta:'/hesaplama/jenerator-gucu-secimi/',fresh:true,portalOptional:true},
+  {slug:'elektrik-sayaci-degisti-eski-yeni-endeks-fatura-kontrolu',required:['sayaç seri numarası','ilk ve son endeks','okuma tarihleri','değiştirilen sayaç','görevli tedarik şirketi'],cta:'/fatura-analizi',fresh:true,portalOptional:true},
+  {slug:'notr-akimi-faz-akimindan-yuksek-neden-olur',required:['3. harmonik','triplen harmonik','58,5 A','THDi','yetkili elektrik mühendisi'],cta:'/isletme-surekliligi',fresh:true,portalOptional:true},
+  {slug:'batarya-soc-soh-farki-kapasite-saglik-nasil-anlasilir',required:['State of Charge','State of Health','kullanılabilir kapasite','iç direnç','yüzde 80'],cta:'/hesaplama/inverter-uygunluk/',fresh:true,portalOptional:true}
 ];
-assert.strictEqual(articles.length,63,'İçerik kalite testi 63 teknik makaleyi kapsamalı.');
+assert.strictEqual(articles.length,66,'İçerik kalite testi 66 teknik makaleyi kapsamalı.');
 
 for(const article of articles){
   const file=path.join(repoRoot,'alo186/haberler',article.slug,'index.html');
@@ -111,7 +114,7 @@ assert(cssText.includes('prefers-reduced-motion'),'Azaltılmış hareket desteğ
 const sitemap=fs.readFileSync(path.join(repoRoot,'alo186/sitemap.xml'),'utf8');
 const routing=JSON.parse(fs.readFileSync(path.join(repoRoot,'alo186/deployment/routing-manifest.json'),'utf8'));
 const portal=fs.readFileSync(path.join(repoRoot,'alo186/index.html'),'utf8');
-assert.strictEqual(routing.routes.filter(route=>route.type==='article').length,63,'Routing manifest 63 teknik makale içermeli.');
+assert.strictEqual(routing.routes.filter(route=>route.type==='article').length,66,'Routing manifest 66 teknik makale içermeli.');
 assert(portal.includes('kaynak doğrulamalı rehberler'),'Portal kaynak doğrulamalı rehber ailesini görünür göstermeli; routing ve sitemap tam makale envanterini doğrular.');
 for(const article of articles){
   const canonicalPath=`/haberler/${article.slug}`;
