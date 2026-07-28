@@ -1,0 +1,103 @@
+name: ALO186 duman alarmı yerleşim ve bakım uygunluğu
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/duman-alarmi-yerlesim-bakim-uygunluk/**'
+      - 'alo186/hesaplama/index.html'
+      - 'alo186/urun-eslestirme/catalog.js'
+      - 'alo186/urun-eslestirme/journey-retention-core.js'
+      - 'alo186/urun-eslestirme/journey-retention.test.js'
+      - 'alo186/tests/test_product_matcher.js'
+      - 'alo186/tests/test_solution_outcome_loop.js'
+      - 'alo186/deployment/routing-manifest.json'
+      - 'alo186/sitemap.xml'
+      - '.github/workflows/alo186-smoke-alarm-suitability.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/duman-alarmi-yerlesim-bakim-uygunluk/**'
+      - 'alo186/hesaplama/index.html'
+      - 'alo186/urun-eslestirme/catalog.js'
+      - 'alo186/urun-eslestirme/journey-retention-core.js'
+      - 'alo186/tests/test_product_matcher.js'
+      - 'alo186/deployment/routing-manifest.json'
+      - 'alo186/sitemap.xml'
+      - '.github/workflows/alo186-smoke-alarm-suitability.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-smoke-alarm-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Duman alarmı senaryo ve güvenlik testleri
+        run: node alo186/hesaplama/duman-alarmi-yerlesim-bakim-uygunluk/test.js
+
+      - name: Ürün kapısı ve tekrar ziyaret regresyonları
+        run: |
+          node alo186/tests/test_product_matcher.js
+          node alo186/urun-eslestirme/journey-retention.test.js
+          node alo186/tests/test_solution_outcome_loop.js
+
+      - name: JavaScript sözdizimi
+        run: |
+          node --check alo186/hesaplama/duman-alarmi-yerlesim-bakim-uygunluk/core.js
+          node --check alo186/hesaplama/duman-alarmi-yerlesim-bakim-uygunluk/app.js
+          node --check alo186/urun-eslestirme/catalog.js
+          node --check alo186/urun-eslestirme/journey-retention-core.js
+
+      - name: Canonical ve cihaz hasarı güvenlik kapıları
+        run: |
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Canonical production ve GitHub Pages paketleri
+        run: |
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-smoke-site --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-smoke-site
+          cp -a /tmp/alo186-smoke-site /tmp/alo186-smoke-pages
+          python alo186/deployment/prepare_github_pages.py --site /tmp/alo186-smoke-pages --base-path '' --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_github_pages.py --site /tmp/alo186-smoke-pages --base-path ''
+
+      - name: Production artifact sözleşmeleri
+        shell: bash
+        run: |
+          set -euo pipefail
+          route='hesaplama/duman-alarmi-yerlesim-bakim-uygunluk'
+          test -f "/tmp/alo186-smoke-pages/$route/index.html"
+          test -f "/tmp/alo186-smoke-pages/$route/core.js"
+          test -f "/tmp/alo186-smoke-pages/$route/app.js"
+          grep -q 'Duman Alarmı Yerleşim ve Bakım Uygunluk Testi' "/tmp/alo186-smoke-pages/$route/index.html"
+          grep -q 'Satış ortaklığı açıklaması' "/tmp/alo186-smoke-pages/$route/index.html"
+          grep -q '31 çekirdek araç' /tmp/alo186-smoke-pages/hesaplama/index.html
+          grep -q 'duman-alarmi-yerlesim-bakim-uygunluk' /tmp/alo186-smoke-pages/sitemap.xml
+          grep -q 'duman-alarmi-yerlesim-bakim-uygunluk' /tmp/alo186-smoke-pages/akilli-urun-secimi/catalog.js
+          grep -q 'duman-alarmi-yerlesim-bakim-uygunluk' /tmp/alo186-smoke-pages/akilli-urun-secimi/journey-retention-core.js
+          ! grep -Eqi 'amazon\.(com|com\.tr)/' "/tmp/alo186-smoke-pages/$route/index.html"
+          ! grep -Eqi 'type="(email|tel|text|file)"|<textarea' "/tmp/alo186-smoke-pages/$route/index.html"
+
+      - name: Doğrulanmış modül artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-smoke-alarm-suitability-production
+          path: /tmp/alo186-smoke-pages
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
