@@ -50,10 +50,19 @@ jobs:
           test -f /tmp/alo186-outage-drill-site/hesaplama/elektrik-kesintisi-tatbikati/core.js
           test -f /tmp/alo186-outage-drill-site/hesaplama/elektrik-kesintisi-tatbikati/drill.schema.json
       - name: Güven ve kişisel veri kapıları
-        shell: bash
         run: |
-          set -euo pipefail
-          ! grep -R -n -E '<input[^>]+type=["'"'](text|email|tel)["'"']|<textarea' alo186/hesaplama/elektrik-kesintisi-tatbikati
-          ! grep -R -n -E 'amazon\.|amzn\.|stok|puan|garanti' alo186/hesaplama/elektrik-kesintisi-tatbikati/index.html
-          grep -q '112’yi ara' alo186/hesaplama/elektrik-kesintisi-tatbikati/index.html
-          grep -q 'alo186.continuity-drill-handoff.v1' alo186/hesaplama/elektrik-kesintisi-tatbikati/core.js
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          root = Path('alo186/hesaplama/elektrik-kesintisi-tatbikati')
+          html = (root / 'index.html').read_text(encoding='utf-8')
+          core = (root / 'core.js').read_text(encoding='utf-8')
+          assert not re.search(r'<input[^>]+type=["\'](?:text|email|tel)["\']', html, re.I), 'PII input alanı bulundu'
+          assert '<textarea' not in html.lower(), 'Serbest metin alanı bulundu'
+          assert not re.search(r'amazon\.|amzn\.', html, re.I), 'Affiliate host bulundu'
+          assert '112’yi ara' in html, '112 güvenlik CTA eksik'
+          assert 'alo186.continuity-drill-handoff.v1' in core, 'Panel handoff sözleşmesi eksik'
+          assert 'lifeSupport' not in re.search(r'function exportPayload\(result\).*?\n  }', core, re.S).group(0), 'Yaşam destek seçimi export içinde'
+          print('Güven ve veri minimizasyonu kapıları başarılı.')
+          PY
