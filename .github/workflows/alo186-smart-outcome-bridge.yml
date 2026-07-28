@@ -1,0 +1,166 @@
+name: ALO186 akıllı çözüm sonucu köprüsü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/outcome-bridge.js'
+      - 'alo186/hesaplama/outcome-bridge.test.js'
+      - 'alo186/hesaplama/common.js'
+      - 'alo186/hesaplama/cozum-sonucu/**'
+      - 'alo186/deployment/inject_outcome_runtime.py'
+      - 'alo186/deployment/prepare_github_pages.py'
+      - 'alo186/deployment/smoke_github_pages.py'
+      - 'alo186/deployment/build_static_site.py'
+      - 'alo186/deployment/routing-manifest.json'
+      - 'alo186/sitemap.xml'
+      - 'alo186/tests/test_solution_outcome_loop.js'
+      - 'alo186/tests/test_smart_outcome_bridge.js'
+      - '.github/workflows/alo186-github-pages.yml'
+      - '.github/workflows/alo186-smart-outcome-bridge.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/outcome-bridge.js'
+      - 'alo186/hesaplama/outcome-bridge.test.js'
+      - 'alo186/hesaplama/common.js'
+      - 'alo186/hesaplama/cozum-sonucu/**'
+      - 'alo186/deployment/inject_outcome_runtime.py'
+      - 'alo186/deployment/prepare_github_pages.py'
+      - 'alo186/deployment/smoke_github_pages.py'
+      - 'alo186/deployment/build_static_site.py'
+      - 'alo186/deployment/routing-manifest.json'
+      - 'alo186/sitemap.xml'
+      - 'alo186/tests/test_solution_outcome_loop.js'
+      - 'alo186/tests/test_smart_outcome_bridge.js'
+      - '.github/workflows/alo186-github-pages.yml'
+      - '.github/workflows/alo186-smart-outcome-bridge.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-smart-outcome-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Bekleyen çözüm bridge senaryoları
+        run: node alo186/hesaplama/outcome-bridge.test.js
+
+      - name: Çözüm sonucu karar motoru senaryoları
+        run: node alo186/hesaplama/cozum-sonucu/test.js
+
+      - name: Site entegrasyon sözleşmeleri
+        run: |
+          node alo186/tests/test_solution_outcome_loop.js
+          node alo186/tests/test_smart_outcome_bridge.js
+
+      - name: JavaScript ve Python sözdizimi
+        run: |
+          node --check alo186/hesaplama/common.js
+          node --check alo186/hesaplama/outcome-bridge.js
+          node --check alo186/hesaplama/cozum-sonucu/pending-context.js
+          python -m py_compile alo186/deployment/inject_outcome_runtime.py
+
+      - name: Canonical ve cihaz hasarı güvenlik regresyonları
+        run: |
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Canonical production bundle
+        run: |
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-smart-outcome-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-smart-outcome-canonical
+
+      - name: Custom-domain Pages runtime enjeksiyonu
+        run: |
+          cp -a /tmp/alo186-smart-outcome-canonical /tmp/alo186-smart-outcome-custom
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-smart-outcome-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-smart-outcome-custom \
+            --base-path ''
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-smart-outcome-custom \
+            --base-path ''
+
+      - name: Project-path Pages runtime enjeksiyonu
+        run: |
+          cp -a /tmp/alo186-smart-outcome-canonical /tmp/alo186-smart-outcome-project
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-smart-outcome-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-smart-outcome-project \
+            --base-path '/chatgpt'
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-smart-outcome-project \
+            --base-path '/chatgpt'
+
+      - name: Artifact runtime ve gizlilik sözleşmeleri
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          for root, prefix in [
+              (Path('/tmp/alo186-smart-outcome-custom'), '/hesaplama/common.js'),
+              (Path('/tmp/alo186-smart-outcome-project'), '/chatgpt/hesaplama/common.js'),
+          ]:
+              pages=list(root.rglob('*.html'))
+              assert pages, root
+              for page in pages:
+                  text=page.read_text(encoding='utf-8', errors='ignore')
+                  assert 'data-alo186-common-runtime="true"' in text, page
+                  assert f'src="{prefix}"' in text, page
+              outcome=root/'hesaplama/cozum-sonucu/index.html'
+              text=outcome.read_text(encoding='utf-8')
+              expected='/hesaplama/cozum-sonucu/pending-context.js' if root.name.endswith('custom') else '/chatgpt/hesaplama/cozum-sonucu/pending-context.js'
+              assert 'data-alo186-pending-context="true"' in text
+              assert f'src="{expected}"' in text
+              release=json.loads((root/'pages-release.json').read_text(encoding='utf-8'))
+              assert release['outcomeRuntime']['version']==1
+              assert release['outcomeRuntime']['pendingRecordLimit']==6
+              assert release['outcomeRuntime']['pendingTtlDays']==45
+              sw=(root/'sw.js').read_text(encoding='utf-8')
+              assert release['outcomeRuntime']['offlineOutcomeRoute'] in sw
+              bridge=(root/'hesaplama/outcome-bridge.js').read_text(encoding='utf-8')
+              assert 'pending-solutions:v1' in bridge
+              assert 'Bu çözüm işe yaradı mı?' in bridge
+              assert 'amazon.com.tr/dp' not in bridge
+          PY
+
+          ! grep -Eqi 'type="(email|tel|text)"|<textarea' /tmp/alo186-smart-outcome-custom/hesaplama/cozum-sonucu/index.html
+          ! grep -Eqi 'amazon\.(com|com\.tr)/' /tmp/alo186-smart-outcome-custom/hesaplama/cozum-sonucu/index.html
+
+      - name: Doğrulanmış akıllı outcome artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-smart-outcome-pages
+          path: /tmp/alo186-smart-outcome-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
