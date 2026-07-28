@@ -12,6 +12,8 @@ on:
       - 'alo186/sitemap.xml'
       - 'alo186/tests/test_fast_revenue_funnel.js'
       - 'alo186/tests/test_portal_hardening.js'
+      - 'alo186/tests/test_release_manifest.js'
+      - 'alo186/tests/test_authority_content.js'
       - '.github/workflows/alo186-fast-revenue-funnel.yml'
   push:
     branches: [main]
@@ -25,6 +27,8 @@ on:
       - 'alo186/sitemap.xml'
       - 'alo186/tests/test_fast_revenue_funnel.js'
       - 'alo186/tests/test_portal_hardening.js'
+      - 'alo186/tests/test_release_manifest.js'
+      - 'alo186/tests/test_authority_content.js'
       - '.github/workflows/alo186-fast-revenue-funnel.yml'
   workflow_dispatch:
 
@@ -48,12 +52,17 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Gelir akışı, portal ve yayın sözleşmeleri
-        run: |
-          node alo186/tests/test_fast_revenue_funnel.js
-          node alo186/tests/test_portal_hardening.js
-          node alo186/tests/test_release_manifest.js
-          node alo186/tests/test_authority_content.js
+      - name: Hızlı gelir sayfaları ve gizlilik sözleşmesi
+        run: node alo186/tests/test_fast_revenue_funnel.js
+
+      - name: Portal kapsamı ve erişilebilirlik sözleşmesi
+        run: node alo186/tests/test_portal_hardening.js
+
+      - name: Canonical routing manifest sözleşmesi
+        run: node alo186/tests/test_release_manifest.js
+
+      - name: Teknik içerik otoritesi sözleşmesi
+        run: node alo186/tests/test_authority_content.js
 
       - name: JavaScript sözdizimi
         run: |
@@ -64,11 +73,14 @@ jobs:
       - name: Cihaz hasarı süre güvenlik kapısı
         run: python alo186/tests/device_damage_deadline_guard.py
 
-      - name: Production bundle oluştur ve smoke testini çalıştır
+      - name: Production bundle oluştur
         run: |
           python alo186/deployment/build_static_site.py \
             --output /tmp/alo186-fast-revenue-site \
             --commit "$GITHUB_SHA"
+
+      - name: Production bundle smoke testi
+        run: |
           python alo186/deployment/smoke_static_site.py \
             --bundle /tmp/alo186-fast-revenue-site
 
