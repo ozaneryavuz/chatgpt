@@ -6,6 +6,8 @@ import json
 import re
 from pathlib import Path
 
+from inject_handoff_growth import run as run_handoff_growth
+
 CANONICAL = "https://www.alo186.com/hesaplama/teknik-urun-karsilastirma/"
 CANONICAL_PATH = "/hesaplama/teknik-urun-karsilastirma/"
 SOURCE = "alo186/hesaplama/teknik-urun-karsilastirma/index.html"
@@ -177,7 +179,8 @@ def run(site: Path, base_path: str) -> dict:
     update_manifest(site, base_path)
     update_pages_release(site, base_path, offline_added, cards)
     recompute(site)
-    return {"ok": True, "basePath": base_path, "cardsInjected": cards, "offlineAdded": offline_added, "route": public_url(base_path, CANONICAL_PATH)}
+    handoff = run_handoff_growth(site, base_path)
+    return {"ok": True, "basePath": base_path, "cardsInjected": cards, "offlineAdded": offline_added, "route": public_url(base_path, CANONICAL_PATH), "technicalHandoff": handoff}
 
 
 def main() -> None:
