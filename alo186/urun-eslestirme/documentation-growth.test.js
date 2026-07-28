@@ -53,7 +53,8 @@ assert.ok(questions.every(item=>item.critical));
 const text=core.buildQuestionText('ev_cable','Type 2 ürün kartı',['phase_current','ip_temperature']);
 assert.match(text,/Marka Bağımsız Teknik Veri Soru Paketi/);
 assert.match(text,/Faz ve akım/);
-assert.doesNotMatch(text,/fiyat|stok|puan|garanti önerisi/i);
+assert.match(text,/fiyat, stok, puan, garanti veya ürün uygunluk onayı değildir/i);
+assert.doesNotMatch(text,/amazon|asin|satıcı puanı|kampanya/i);
 
 const route=core.supplierRoute('surge_strip',['joules','max_current_a','invalid','asin']);
 assert.match(route,/^\/tedarikci-ve-uretici-isbirligi\?/);
@@ -83,6 +84,8 @@ assert.doesNotMatch(ics,/ATTENDEE|ORGANIZER|LOCATION|EMAIL|PHONE/i);
 const exported=core.exportPayload([review],now);
 assert.equal(exported.schema,'alo186-documentation-reviews-v1');
 assert.equal(exported.records.length,1);
-assert.doesNotMatch(JSON.stringify(exported),/asin|price|stock|seller|warranty|email|phone|address/i);
+assert.equal(core.hasForbiddenData(exported.records[0]),false);
+assert.doesNotMatch(JSON.stringify(exported.records),/asin|price|stock|seller|warranty|email|phone|address/i);
+assert.match(exported.privacy,/ASIN/);
 
 console.log('ALO186 belge öncelikli ürün güveni: kapsam skoru, kritik alan, soru paketi, tedarikçi rotası ve 14 günlük tekrar kontrol testleri başarılı.');
