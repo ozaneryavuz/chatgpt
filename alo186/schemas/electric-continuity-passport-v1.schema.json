@@ -1,0 +1,160 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://www.alo186.com/schemas/electric-continuity-passport-v1.schema.json",
+  "title": "ALO186 Elektrik Sürekliliği Pasaportu v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schemaVersion",
+    "passportId",
+    "generatedAt",
+    "nextReviewDate",
+    "facilityType",
+    "criticalLoadCategories",
+    "backupSourceClasses",
+    "evidence",
+    "score",
+    "maturityBand",
+    "maturityBandLabel",
+    "gaps",
+    "handoff",
+    "privacy",
+    "disclaimer"
+  ],
+  "properties": {
+    "$schema": { "const": "https://www.alo186.com/schemas/electric-continuity-passport-v1.schema.json" },
+    "schemaVersion": { "const": "1.0.0" },
+    "passportId": { "type": "string", "pattern": "^alo186-passport-[0-9]{8,14}-[0-9]{1,3}$", "maxLength": 80 },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "nextReviewDate": { "type": "string", "format": "date" },
+    "facilityType": { "enum": ["hotel", "site", "business", "other"] },
+    "criticalLoadCategories": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": ["safety", "communications", "refrigeration", "water-pumps", "access", "operations", "elevator", "other-critical"]
+      }
+    },
+    "backupSourceClasses": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": ["generator", "ups", "battery-inverter", "power-station", "solar-storage", "temporary"]
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "status", "weight", "priority", "nextReviewDate"],
+        "properties": {
+          "id": {
+            "enum": [
+              "critical-load-inventory",
+              "single-line-diagram",
+              "emergency-contacts",
+              "capacity-record",
+              "generator-ups-test",
+              "transfer-test",
+              "protection-test",
+              "grounding-measurement",
+              "outage-log",
+              "recovery-drill"
+            ]
+          },
+          "status": { "enum": ["current", "due", "planned", "missing"] },
+          "weight": { "type": "number", "minimum": 1, "maximum": 20 },
+          "priority": { "enum": ["P0", "P1", "P2"] },
+          "nextReviewDate": { "type": "string", "format": "date" }
+        }
+      }
+    },
+    "score": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "maturityBand": { "enum": ["insufficient", "developing", "controlled", "strong", "complete"] },
+    "maturityBandLabel": { "type": "string", "minLength": 2, "maxLength": 80 },
+    "gaps": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["P0", "P1", "P2"],
+      "properties": {
+        "P0": { "$ref": "#/$defs/gapList" },
+        "P1": { "$ref": "#/$defs/gapList" },
+        "P2": { "$ref": "#/$defs/gapList" }
+      }
+    },
+    "maturityReference": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["score", "band", "generatedAt", "sourceSchemaVersion"],
+          "properties": {
+            "score": { "type": "integer", "minimum": 0, "maximum": 100 },
+            "band": { "type": "string", "maxLength": 80 },
+            "generatedAt": { "type": ["string", "null"], "maxLength": 40 },
+            "sourceSchemaVersion": { "type": "string", "maxLength": 30 }
+          }
+        }
+      ]
+    },
+    "handoff": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "target", "recommended", "actions"],
+      "properties": {
+        "version": { "const": 1 },
+        "target": { "const": "alo186-continuity-panel" },
+        "recommended": { "type": "boolean" },
+        "actions": {
+          "type": "array",
+          "maxItems": 20,
+          "items": { "$ref": "#/$defs/action" }
+        }
+      }
+    },
+    "privacy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "containsPersonalData",
+        "freeTextCollected",
+        "includesLifeSupportFlag",
+        "includesImmediateDangerFlag",
+        "localStorageDefaultEnabled"
+      ],
+      "properties": {
+        "containsPersonalData": { "const": false },
+        "freeTextCollected": { "const": false },
+        "includesLifeSupportFlag": { "const": false },
+        "includesImmediateDangerFlag": { "const": false },
+        "localStorageDefaultEnabled": { "const": false }
+      }
+    },
+    "disclaimer": { "type": "string", "minLength": 40, "maxLength": 500 }
+  },
+  "$defs": {
+    "gapList": {
+      "type": "array",
+      "maxItems": 20,
+      "items": { "$ref": "#/$defs/action" }
+    },
+    "action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label", "status", "targetDate", "action"],
+      "properties": {
+        "id": { "type": "string", "minLength": 2, "maxLength": 100 },
+        "priority": { "enum": ["P0", "P1", "P2"] },
+        "label": { "type": "string", "minLength": 2, "maxLength": 180 },
+        "status": { "enum": ["due", "planned", "missing"] },
+        "targetDate": { "type": "string", "format": "date" },
+        "action": { "type": "string", "minLength": 10, "maxLength": 500 }
+      }
+    }
+  }
+}
