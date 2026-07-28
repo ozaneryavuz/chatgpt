@@ -178,6 +178,7 @@
     $('generatorForm').addEventListener('submit', calculate);
     $('resetBtn').addEventListener('click', resetAll);
     const productLink = $('productGuideLink');
+    productLink.href = productLink.href + '&hesaplandi=1';
     productLink.addEventListener('click', function () {
       emit('generator_product_route_opened', { category: 'generator', placement: 'generator_sizing_result' });
     });
