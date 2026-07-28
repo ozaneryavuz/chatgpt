@@ -9,6 +9,12 @@ const settings = {
   priorities: { internet: true, lighting: true, cold: false, pump: false, medical: false }
 };
 
+const exactTwelveHourSummary = core.summarize([
+  { date: '2026-07-19', durationMinutes: 720, kind: 'unplanned', scope: 'street', officialRecord: true }
+], { year: 2026, settings });
+assert.equal(exactTwelveHourSummary.longDurationEntries.length, 0);
+assert.equal(exactTwelveHourSummary.hasCompensationReviewSignal, false);
+
 const longSummary = core.summarize([
   { date: '2026-07-20', durationMinutes: 721, kind: 'unplanned', scope: 'street', officialRecord: true }
 ], { year: 2026, settings });
