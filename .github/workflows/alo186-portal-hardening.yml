@@ -1,0 +1,93 @@
+name: ALO186 portal hardening kalite kontrolü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/index.html'
+      - 'alo186/styles.css'
+      - 'alo186/deployment/apache-production.htaccess'
+      - 'alo186/deployment/build_static_site.py'
+      - 'alo186/deployment/routing-manifest.json'
+      - 'alo186/sitemap.xml'
+      - 'alo186/tests/test_portal_hardening.js'
+      - 'alo186/tests/test_release_manifest.js'
+      - 'alo186/tests/device_damage_deadline_guard.py'
+      - '.github/workflows/alo186-portal-hardening.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/index.html'
+      - 'alo186/styles.css'
+      - 'alo186/deployment/apache-production.htaccess'
+      - 'alo186/deployment/build_static_site.py'
+      - 'alo186/deployment/routing-manifest.json'
+      - 'alo186/sitemap.xml'
+      - 'alo186/tests/test_portal_hardening.js'
+      - 'alo186/tests/test_release_manifest.js'
+      - 'alo186/tests/device_damage_deadline_guard.py'
+      - '.github/workflows/alo186-portal-hardening.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-portal-hardening-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Portal kaynak ve canonical sözleşmeleri
+        run: |
+          node alo186/tests/test_portal_hardening.js
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_authority_content.js
+
+      - name: Cihaz hasarı başvuru süresi güvenlik kapısı
+        run: python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Canonical production bundle oluştur ve doğrula
+        run: |
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-portal-site \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-portal-site
+
+      - name: Üretim artifact sözleşmeleri
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f /tmp/alo186-portal-site/elektrik-portali/index.html
+          test -f /tmp/alo186-portal-site/elektrik-portali/styles.css
+          test -f /tmp/alo186-portal-site/.htaccess
+          test -f /tmp/alo186-portal-site/alo186-release.json
+          grep -q 'Cihaz hasarında başvuru süresi 10 iş günüdür' /tmp/alo186-portal-site/elektrik-portali/index.html
+          grep -q '24 kişisel veri istemeyen araç' /tmp/alo186-portal-site/elektrik-portali/index.html
+          grep -q '42 kaynak doğrulamalı teknik rehber' /tmp/alo186-portal-site/elektrik-portali/index.html
+          grep -q 'href="/edas-bul"' /tmp/alo186-portal-site/elektrik-portali/index.html
+          grep -q 'href="/hesaplama/elektrik-kesintisi-tatbikati/"' /tmp/alo186-portal-site/elektrik-portali/index.html
+          grep -q 'Strict-Transport-Security' /tmp/alo186-portal-site/.htaccess
+          grep -q 'AddOutputFilterByType SUBSTITUTE text/html application/xhtml+xml' /tmp/alo186-portal-site/.htaccess
+          ! grep -q 'href="./turkiye-arama/"' /tmp/alo186-portal-site/elektrik-portali/index.html
+          ! grep -q '19 kişisel veri istemeyen araç' /tmp/alo186-portal-site/elektrik-portali/index.html
+
+      - name: Doğrulanmış portal artifactını sakla
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-portal-hardened-production
+          path: /tmp/alo186-portal-site
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
