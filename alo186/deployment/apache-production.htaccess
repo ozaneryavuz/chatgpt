@@ -1,11 +1,18 @@
 Options -Indexes
 DirectoryIndex index.html
+ErrorDocument 404 /404.html
 
 <IfModule mod_rewrite.c>
 RewriteEngine On
 
-# Tek canonical host: kök alan adındaki aynı path tek yönlendirmeyle www'ye gider.
+# Tek canonical host: kök alan adındaki aynı path ve query tek yönlendirmeyle www'ye gider.
 RewriteCond %{HTTP_HOST} !^www\.alo186\.com$ [NC]
+RewriteRule ^ https://www.alo186.com%{REQUEST_URI} [R=301,L,NE]
+
+# www host üzerindeki doğrudan HTTP isteğini HTTPS'e taşı. CDN/proxy
+# X-Forwarded-Proto gönderiyorsa HTTPS isteğinde yönlendirme döngüsü oluşmaz.
+RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTP:X-Forwarded-Proto} !https [NC]
 RewriteRule ^ https://www.alo186.com%{REQUEST_URI} [R=301,L,NE]
 
 # Extensionless canonical araç rotaları directory redirect oluşturmadan index dosyasını sunar.
@@ -21,10 +28,50 @@ RewriteRule ^hesaplama/kesinti-maliyeti/?$ hesaplama/kesinti-maliyeti/index.html
 </IfModule>
 
 <IfModule mod_headers.c>
+Header always set Strict-Transport-Security "max-age=31536000"
 Header always set X-Content-Type-Options "nosniff"
-Header always set X-Frame-Options "SAMEORIGIN"
+Header always set X-Frame-Options "DENY"
 Header always set Referrer-Policy "strict-origin-when-cross-origin"
-Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+Header always set Cross-Origin-Opener-Policy "same-origin"
+Header always set Content-Security-Policy "default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' https: data:; font-src 'self' https: data:; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self' https:; upgrade-insecure-requests"
+
+<FilesMatch "\.(html?)$">
+Header set Cache-Control "public, max-age=300, must-revalidate"
+Header set CDN-Cache-Control "public, max-age=300, must-revalidate"
+</FilesMatch>
+<FilesMatch "\.(css|js)$">
+Header set Cache-Control "public, max-age=86400, must-revalidate"
+</FilesMatch>
+<Files "tailwindcss">
+Header set Cache-Control "public, max-age=604800, immutable"
+</Files>
+</IfModule>
+
+<IfModule mod_mime.c>
+AddType text/css .css
+AddType application/javascript .js
+AddType application/json .json
+AddType application/xml .xml
+</IfModule>
+
+# Canlı ana sayfadaki çözümlenemeyen @import "tailwindcss" isteği kaynak
+# şablondan kaldırılana kadar görünümü değiştirmeyen boş CSS yanıtı ver.
+<Files "tailwindcss">
+ForceType text/css
+</Files>
+
+# P0 geçici hukukî içerik koruması: canlı ana sayfa/portalın haricî veya eski
+# şablonu tamamen yenilenene kadar kullanıcı hakkını yanlış gösteren iki metni
+# HTML ve gömülü JSON-LD içinde düzeltir. Kalıcı kaynak düzeltmesi sonrasında da
+# zararsız bir savunma katmanı olarak bırakılabilir.
+<IfModule mod_filter.c>
+<IfModule mod_substitute.c>
+AddOutputFilterByType SUBSTITUTE text/html application/xhtml+xml
+Substitute "s|zararın ortaya çıktığı tarihten itibaren 30 gün içinde|zararın ortaya çıktığı tarihten itibaren 10 iş günü içinde|n"
+Substitute "s|30 gün içinde EDAŞ kaydı açın|10 iş günü içinde ilgili dağıtım şirketinin resmî kanalına başvurun|n"
+Substitute "s|ilgili dağıtım şirketine kayıtlı başvuru yapmalı|ilgili dağıtım şirketinin resmî kanalına başvurmalı|n"
+</IfModule>
 </IfModule>
 
 <IfModule mod_expires.c>
@@ -33,4 +80,9 @@ ExpiresByType text/css "access plus 7 days"
 ExpiresByType application/javascript "access plus 7 days"
 ExpiresByType image/svg+xml "access plus 30 days"
 ExpiresByType image/webp "access plus 30 days"
+ExpiresByType image/avif "access plus 30 days"
+</IfModule>
+
+<IfModule mod_deflate.c>
+AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript application/json application/xml image/svg+xml
 </IfModule>
