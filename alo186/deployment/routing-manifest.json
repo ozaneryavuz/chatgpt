@@ -1,5 +1,5 @@
 {
-  "version": 16,
+  "version": 17,
   "canonicalHost": "https://www.alo186.com",
   "generatedAt": "2026-07-28",
   "routes": [
@@ -12,6 +12,7 @@
     {"source":"alo186/hesaplama/yedek-guc-maliyet-karsilastirma/index.html","canonicalPath":"/hesaplama/yedek-guc-maliyet-karsilastirma/","type":"calculator"},
     {"source":"alo186/hesaplama/elektrik-surekliligi-olgunluk-skoru/index.html","canonicalPath":"/hesaplama/elektrik-surekliligi-olgunluk-skoru/","type":"business-tool"},
     {"source":"alo186/hesaplama/elektrik-surekliligi-pasaportu/index.html","canonicalPath":"/hesaplama/elektrik-surekliligi-pasaportu/","type":"business-tool"},
+    {"source":"alo186/hesaplama/elektrik-kesintisi-tatbikati/index.html","canonicalPath":"/hesaplama/elektrik-kesintisi-tatbikati/","type":"business-tool"},
     {"source":"alo186/hesaplama/modem-internet-yedekleme/index.html","canonicalPath":"/hesaplama/modem-internet-yedekleme/","type":"calculator"},
     {"source":"alo186/hesaplama/jenerator-gucu-secimi/index.html","canonicalPath":"/hesaplama/jenerator-gucu-secimi/","type":"calculator"},
     {"source":"alo186/hesaplama/kesinti-gunlugu/index.html","canonicalPath":"/hesaplama/kesinti-gunlugu/","type":"tool"},
