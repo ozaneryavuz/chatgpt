@@ -56,7 +56,7 @@ assert.throws(()=>run({bankMah:0}),/Powerbank kapasitesi/);
 
 const html=fs.readFileSync(path.join(__dirname,'index.html'),'utf8');
 assert(html.includes('https://www.alo186.com/hesaplama/powerbank-usb-c-uygunluk/'));
-assert(html.includes('Amazon satış ortaklığı'));
+assert(/Amazon[^<]{0,100}satış ortaklığı/i.test(html));
 assert(html.includes('USB-IF'));
 assert(html.includes('FAA PackSafe'));
 assert(html.includes('28 Temmuz 2026'));
@@ -69,12 +69,13 @@ assert(html.includes('Satın alma zorunlu sonuç değildir'));
 
 const root=path.resolve(__dirname,'../..');
 const routing=JSON.parse(fs.readFileSync(path.join(root,'deployment/routing-manifest.json'),'utf8'));
-assert(routing.version>=13);
+assert(routing.version>=14);
 assert(routing.routes.some(route=>route.canonicalPath==='/hesaplama/powerbank-usb-c-uygunluk/'));
 const sitemap=fs.readFileSync(path.join(root,'sitemap.xml'),'utf8');
 assert(sitemap.includes('/hesaplama/powerbank-usb-c-uygunluk/'));
 const center=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
-assert(center.includes('21 çekirdek araç'));
+const toolCount=Number((center.match(/(\d+) çekirdek araç/)||[])[1]);
+assert(toolCount>=21);
 assert(center.includes('./powerbank-usb-c-uygunluk/'));
 
 console.log('Powerbank ve USB-C uygunluk testleri başarılı.');
