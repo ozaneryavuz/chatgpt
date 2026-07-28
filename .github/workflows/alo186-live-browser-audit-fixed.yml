@@ -11,7 +11,7 @@ permissions:
 jobs:
   browser-audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -75,10 +75,10 @@ jobs:
                 const item = { viewport: view.name, route, consoleErrors, pageErrors, requestFailures };
                 try {
                   const response = await page.goto(origin + route, {
-                    waitUntil: 'networkidle',
-                    timeout: 60000
+                    waitUntil: 'domcontentloaded',
+                    timeout: 45000
                   });
-                  await page.waitForTimeout(500);
+                  await page.waitForTimeout(2000);
                   item.status = response?.status() ?? null;
                   item.finalUrl = page.url();
                   item.metrics = await page.evaluate(() => {
@@ -106,7 +106,11 @@ jobs:
                       .filter((element) => {
                         const style = getComputedStyle(element);
                         const clipped = element.scrollWidth > element.clientWidth + 2 || element.scrollHeight > element.clientHeight + 2;
-                        return clipped && ['hidden', 'clip'].includes(style.overflow) || clipped && ['hidden', 'clip'].includes(style.overflowX) || clipped && ['hidden', 'clip'].includes(style.overflowY);
+                        return clipped && (
+                          ['hidden', 'clip'].includes(style.overflow) ||
+                          ['hidden', 'clip'].includes(style.overflowX) ||
+                          ['hidden', 'clip'].includes(style.overflowY)
+                        );
                       })
                       .map((element) => ({
                         tag: element.tagName,
