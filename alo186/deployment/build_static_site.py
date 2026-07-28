@@ -16,6 +16,9 @@ SHARED_STATIC_ASSETS = (
     # Teknik makaleler canonical alt dizinlere taşınırken ortak responsive CSS
     # /haberler kökünde tek kopya olarak yayınlanır.
     ("alo186/haberler/alo186-article.css", "haberler/alo186-article.css"),
+    # Elektrik Sürekliliği Pasaportu JSON değişim şeması canonical /schemas
+    # rotasında HTML dışı ortak asset olarak yayımlanır.
+    ("alo186/schemas/electrical-continuity-passport-v1.schema.json", "schemas/electrical-continuity-passport-v1.schema.json"),
 )
 
 
