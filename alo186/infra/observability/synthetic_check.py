@@ -50,6 +50,7 @@ DEVICE_DAMAGE_CANDIDATE_PATHS = (
 )
 DAMAGE_TERMS = ("cihaz", "techizat", "hasar", "zarar")
 CLAIM_TERMS = ("basvur", "tazmin", "talep", "dagitim", "edas")
+STATEMENT_BOUNDARIES = "|.!?;"
 
 
 def resolve(hostname: str) -> dict[str, object]:
@@ -145,21 +146,70 @@ def fetch(
 
 
 def _fold_content(value: str) -> str:
-    """HTML, görünür metin ve JSON-LD içeriğini arama için sadeleştirir."""
+    """HTML, görünür metin ve JSON-LD içeriğini arama için sadeleştirir.
+
+    Etiketler `|` sınırına çevrilir. Böylece birbirinden bağımsız kart veya paragraf
+    metinleri geniş bir karakter penceresinde yanlışlıkla aynı hukuki bağlama girmez.
+    Script içindeki JSON-LD metni korunur.
+    """
 
     decoded = html_module.unescape(value)
-    without_tags = re.sub(r"<[^>]+>", " ", decoded)
-    normalized = unicodedata.normalize("NFKD", without_tags)
+    with_boundaries = re.sub(r"<[^>]+>", " | ", decoded)
+    normalized = unicodedata.normalize("NFKD", with_boundaries)
     without_marks = "".join(ch for ch in normalized if not unicodedata.combining(ch))
     return re.sub(r"\s+", " ", without_marks.casefold()).strip()
 
 
-def _context(value: str, start: int, end: int, radius: int = 360) -> str:
-    return value[max(0, start - radius) : min(len(value), end + radius)].strip()
-
-
 def _has_terms(value: str, terms: tuple[str, ...]) -> bool:
     return any(term in value for term in terms)
+
+
+def _left_boundary(value: str, position: int, floor: int) -> int:
+    found = max(value.rfind(char, floor, position) for char in STATEMENT_BOUNDARIES)
+    return found + 1 if found >= floor else floor
+
+
+def _right_boundary(value: str, position: int, ceiling: int) -> int:
+    candidates = [value.find(char, position, ceiling) for char in STATEMENT_BOUNDARIES]
+    found = [item for item in candidates if item >= 0]
+    return min(found) if found else ceiling
+
+
+def _statement_context(value: str, start: int, end: int, radius: int = 420) -> str:
+    floor = max(0, start - radius)
+    ceiling = min(len(value), end + radius)
+    left = _left_boundary(value, start, floor)
+    right = _right_boundary(value, end, ceiling)
+    return value[left:right].strip(" |")
+
+
+def _previous_statement(value: str, start: int, radius: int = 260) -> str:
+    floor = max(0, start - radius)
+    current_left = _left_boundary(value, start, floor)
+    if current_left <= floor:
+        return ""
+    previous_end = max(floor, current_left - 1)
+    previous_left = _left_boundary(value, previous_end, floor)
+    return value[previous_left:previous_end].strip(" |")
+
+
+def _claim_context(value: str, start: int, end: int) -> str:
+    """Süre ifadesinin ait olduğu cümle/kart bağlamını döndürür.
+
+    Sürenin bulunduğu ifade başvuru terimi taşıyor fakat cihaz/hasar başlığı bir
+    önceki HTML öğesindeyse yalnız önceki ifadeyi ekler. Sonraki ifadeyi eklemez;
+    bu, başka bir sürece ait `30 gün` cümlesinin ardından gelen doğru cihaz hasarı
+    cümlesi nedeniyle yanlış pozitif oluşmasını engeller.
+    """
+
+    current = _statement_context(value, start, end)
+    if _has_terms(current, DAMAGE_TERMS):
+        return current
+    if _has_terms(current, CLAIM_TERMS):
+        previous = _previous_statement(value, start)
+        if _has_terms(previous, DAMAGE_TERMS):
+            return f"{previous} | {current}".strip()
+    return current
 
 
 def analyze_device_damage_text(raw_html: str) -> dict[str, object]:
@@ -175,12 +225,12 @@ def analyze_device_damage_text(raw_html: str) -> dict[str, object]:
     good_contexts: list[str] = []
 
     for match in re.finditer(r"\b30\s*(?:takvim\s*)?gun(?:luk|u|un|de|den)?\b", text):
-        nearby = _context(text, match.start(), match.end())
+        nearby = _claim_context(text, match.start(), match.end())
         if _has_terms(nearby, DAMAGE_TERMS) and _has_terms(nearby, CLAIM_TERMS):
             bad_contexts.append(nearby[:720])
 
     for match in re.finditer(r"\b10\s*is\s*gun(?:u|luk|unde|unden)?\b", text):
-        nearby = _context(text, match.start(), match.end())
+        nearby = _claim_context(text, match.start(), match.end())
         if _has_terms(nearby, DAMAGE_TERMS) and _has_terms(nearby, CLAIM_TERMS):
             good_contexts.append(nearby[:720])
 
