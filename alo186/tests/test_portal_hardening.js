@@ -18,10 +18,11 @@ assert(!new RegExp(`zararın ortaya çıktığı tarihten itibaren\\s*${oldDurat
 assert(portal.includes('rel="canonical" href="https://www.alo186.com/elektrik-portali"'), 'Portal www canonical kullanmalı.');
 assert(portal.includes('class="skip-link" href="#main-content"'), 'Skip link eksik.');
 assert(portal.includes('<main id="main-content"'), 'Skip link ana hedefi eksik.');
-assert(portal.includes('45 kaynak doğrulamalı rehber'), 'Portal güncel 45 rehber kapsamını göstermeli.');
-assert(portal.includes('26 kişisel veri istemeyen araç'), 'Portal güncel 26 araç kapsamını göstermeli.');
-assert(portal.includes('Akıllı Priz ve Enerji Ölçer Uygunluğu'), '26. araç olan akıllı priz/enerji ölçer portalda bulunmalı.');
-assert(portal.includes('Kaçak akım rölesi kaç amper ve kaç mA?'), '45. içerik kümesindeki RCD etiketi rehberi portalda bulunmalı.');
+assert(portal.includes('kaynak doğrulamalı rehberler'), 'Portal kaynak doğrulamalı rehber ailesini göstermeli.');
+assert(portal.includes('kişisel veri istemeyen araçlar'), 'Portal kişisel veri istemeyen araç ailesini göstermeli.');
+assert(!/\b\d+\s+(?:kişisel veri istemeyen (?:araç|hesaplama ve karar aracı)|kaynak doğrulamalı (?:teknik )?rehber)\b/iu.test(portal), 'Hızla değişen araç/rehber envanteri sabit sayıyla pazarlanmamalı.');
+assert(portal.includes('Akıllı Priz ve Enerji Ölçer Uygunluğu'), 'Akıllı priz/enerji ölçer aracı portalda bulunmalı.');
+assert(portal.includes('Kaçak akım rölesi kaç amper ve kaç mA?'), 'RCD etiketi rehberi portalda bulunmalı.');
 assert(portal.includes('Nötr ile toprak arası kaç volt olmalı?'), 'Nötr-toprak rehberi portalda bulunmalı.');
 assert(portal.includes('GES inverter AFCI alarmı nedir?'), 'AFCI/DC ark rehberi portalda bulunmalı.');
 
@@ -96,4 +97,4 @@ assert(htaccess.includes('AddOutputFilterByType SUBSTITUTE text/html application
 assert(htaccess.includes(oldLivePhrase), 'Bilinen yanlış canlı cümle fail-safe eşleşmesinde bulunmalı.');
 assert(htaccess.includes('10 iş günü içinde ilgili dağıtım şirketinin resmî kanalına başvurun'), 'Fail-safe doğru 10 iş günü metnini üretmeli.');
 
-console.log('ALO186 portal hardening: 45 rehber, 26 araç, üç şeffaf gelir kanalı, canonical rotalar, 10 iş günü ve erişilebilirlik sözleşmeleri geçti.');
+console.log('ALO186 portal hardening: sayısal envanter drift koruması, şeffaf gelir kanalları, canonical rotalar, 10 iş günü ve erişilebilirlik sözleşmeleri geçti.');
