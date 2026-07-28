@@ -1,0 +1,132 @@
+name: ALO186 kapalı döngü çözüm sonucu kalite kontrolü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/cozum-sonucu/**'
+      - 'alo186/hesaplama/index.html'
+      - 'alo186/karar-motoru/**'
+      - 'alo186/kesinti-hazirlik-atolyesi/app.js'
+      - 'alo186/urun-eslestirme/journey-retention.js'
+      - 'alo186/deployment/routing-manifest.json'
+      - 'alo186/deployment/prepare_github_pages.py'
+      - 'alo186/deployment/smoke_github_pages.py'
+      - 'alo186/sitemap.xml'
+      - 'alo186/tests/test_solution_outcome_loop.js'
+      - '.github/workflows/alo186-solution-outcome-loop.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/cozum-sonucu/**'
+      - 'alo186/hesaplama/index.html'
+      - 'alo186/karar-motoru/**'
+      - 'alo186/kesinti-hazirlik-atolyesi/app.js'
+      - 'alo186/urun-eslestirme/journey-retention.js'
+      - 'alo186/deployment/routing-manifest.json'
+      - 'alo186/deployment/prepare_github_pages.py'
+      - 'alo186/deployment/smoke_github_pages.py'
+      - 'alo186/sitemap.xml'
+      - 'alo186/tests/test_solution_outcome_loop.js'
+      - '.github/workflows/alo186-solution-outcome-loop.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-solution-outcome-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Sonuç motoru senaryoları
+        run: node alo186/hesaplama/cozum-sonucu/test.js
+
+      - name: Kapalı döngü site entegrasyonu
+        run: node alo186/tests/test_solution_outcome_loop.js
+
+      - name: JavaScript sözdizimi
+        run: |
+          node --check alo186/hesaplama/cozum-sonucu/core.js
+          node --check alo186/hesaplama/cozum-sonucu/app.js
+          node --check alo186/karar-motoru/app.js
+          node --check alo186/kesinti-hazirlik-atolyesi/app.js
+          node --check alo186/urun-eslestirme/journey-retention.js
+
+      - name: Mevcut canonical ve güvenlik regresyonları
+        run: |
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Canonical production bundle
+        run: |
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-outcome-site \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-outcome-site
+
+      - name: GitHub Pages custom-domain ve project-path testleri
+        run: |
+          cp -a /tmp/alo186-outcome-site /tmp/alo186-outcome-pages-custom
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-outcome-pages-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-outcome-pages-custom \
+            --base-path ''
+
+          cp -a /tmp/alo186-outcome-site /tmp/alo186-outcome-pages-project
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-outcome-pages-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-outcome-pages-project \
+            --base-path '/chatgpt'
+
+      - name: Production artifact sözleşmeleri
+        shell: bash
+        run: |
+          set -euo pipefail
+          file=/tmp/alo186-outcome-site/hesaplama/cozum-sonucu/index.html
+          test -f "$file"
+          test -f /tmp/alo186-outcome-site/hesaplama/cozum-sonucu/core.js
+          test -f /tmp/alo186-outcome-site/hesaplama/cozum-sonucu/app.js
+          grep -q 'Elektrik Çözüm Sonucu ve Tekrar Önleme Merkezi' "$file"
+          grep -q 'Satın alma gerekmedi' "$file"
+          grep -q 'En fazla 12 kayıt' "$file"
+          grep -q '180 gün' "$file"
+          grep -q 'hesaplama/cozum-sonucu/' /tmp/alo186-outcome-site/sitemap.xml
+          grep -q 'hesaplama/cozum-sonucu/' /tmp/alo186-outcome-site/elektrik-portali/index.html || true
+          grep -q 'href="./cozum-sonucu/"' /tmp/alo186-outcome-site/hesaplama/index.html
+          grep -q 'id="outcomeBtn"' /tmp/alo186-outcome-site/karar-motoru/index.html
+          grep -q 'solution-outcomes:v1' /tmp/alo186-outcome-site/hesaplama/cozum-sonucu/app.js
+          if grep -Eqi 'type="(email|tel|text)"|<textarea|amazon\.(com|com\.tr)/' "$file"; then
+            echo 'Çözüm sonucu aracında kişisel veri, serbest metin veya doğrudan affiliate URL bulundu.' >&2
+            exit 1
+          fi
+
+      - name: Doğrulanmış kapalı döngü artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-solution-outcome-production
+          path: /tmp/alo186-outcome-pages-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30

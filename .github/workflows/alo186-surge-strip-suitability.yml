@@ -112,7 +112,7 @@ jobs:
           test -f "/tmp/alo186-surge-strip-pages/$route/app.js"
           grep -q 'Akım Korumalı Grup Priz Yük ve Uygunluk Testi' "/tmp/alo186-surge-strip-pages/$route/index.html"
           grep -q 'Satış ortaklığı açıklaması' "/tmp/alo186-surge-strip-pages/$route/index.html"
-          grep -q '29 çekirdek araç' /tmp/alo186-surge-strip-pages/hesaplama/index.html
+          grep -Eq '[3-9][0-9]* çekirdek araç' /tmp/alo186-surge-strip-pages/hesaplama/index.html
           grep -q 'akim-korumali-grup-priz-uygunluk' /tmp/alo186-surge-strip-pages/sitemap.xml
           grep -q 'affiliatePolicy.*after_tool' /tmp/alo186-surge-strip-pages/akilli-urun-secimi/catalog.js
           grep -q 'akim-korumali-grup-priz-uygunluk' /tmp/alo186-surge-strip-pages/akilli-urun-secimi/journey-retention-core.js

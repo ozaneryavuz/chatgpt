@@ -158,6 +158,32 @@
     return { ...base, ...map[type], problemId: `danger-${type}` };
   }
 
+  function outcomeCategory() {
+    if (state.category === 'panel') return 'indoor_fault';
+    if (['outage', 'external', 'meter'].includes(state.category)) return 'outage_official';
+    return 'outage_official';
+  }
+
+  function outcomeAction(result) {
+    if (result.level === 'danger') return 'official_channel';
+    if (['official', 'admin'].includes(result.level)) return 'official_channel';
+    if (['electrician', 'building', 'mixed'].includes(result.level)) return 'electrician';
+    return 'free_tool';
+  }
+
+  function updateOutcomeLink(result) {
+    const params = new URLSearchParams({
+      kaynak: 'karar-motoru',
+      kategori: outcomeCategory(),
+      eylem: outcomeAction(result)
+    });
+    if (result.level === 'danger' || (state.danger && state.danger !== 'none')) {
+      params.set('guvenlik', 'true');
+      params.set('sonuc', 'safety');
+    }
+    $('outcomeBtn').href = `/hesaplama/cozum-sonucu/?${params.toString()}`;
+  }
+
   function showResult(result) {
     lastResult = result;
     $('engine').classList.add('hidden');
@@ -177,6 +203,7 @@
     const warning = Boolean(result.warningText);
     $('warningCard').classList.toggle('hidden', !warning);
     if (warning) { $('warningTitle').textContent = result.warningTitle || 'Güvenlik uyarısı'; $('warningText').textContent = result.warningText; }
+    updateOutcomeLink(result);
     $('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
     emit('electrical_decision_completed', { route: result.level, problem: result.problemId, danger: state.danger, scope: state.scope || 'not_asked', revenue_allowed: result.revenueAllowed });
   }
@@ -208,5 +235,6 @@
     renderQuestion();
     $('restartBtn').addEventListener('click', restart);
     $('copyBtn').addEventListener('click', copyResult);
+    $('outcomeBtn').addEventListener('click', () => emit('electrical_decision_outcome_handoff', { problem: lastResult ? lastResult.problemId : 'unknown', route: lastResult ? lastResult.level : 'unknown' }));
   });
 })();
