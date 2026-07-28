@@ -38,17 +38,16 @@ jobs:
           test -f _site/hesaplama/elektrik-kesintisi-tatbikati/index.html
           grep -q 'Cihaz hasarında başvuru süresi 10 iş günüdür' _site/elektrik-portali/index.html
           grep -q 'mod_substitute.c' _overlay/.htaccess
-      - name: Geçici yardımcıları kaldır ve sonucu dala kaydet
+      - name: Portal değişikliklerini dala kaydet
         shell: bash
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git rm -f \
-            .github/alo186-portal-hardening.trigger \
-            .github/workflows/alo186-portal-hardening-autofix-once.yml \
-            .github/workflows/alo186-portal-hardening-pr-apply.yml \
-            alo186/deployment/apply_portal_hardening.py
           git add .github/workflows/alo186-fatura-pages.yml alo186/deployment/apache.htaccess alo186/index.html alo186/styles.css alo186/tests/test_portal_hardening.js alo186/tests/test_release_manifest.js
-          git commit -m 'fix(alo186): portal hardening paketini güncel main ile birleştir'
-          git push origin HEAD:fix/alo186-portal-hardening-main-20260728
+          if git diff --cached --quiet; then
+            echo 'Portal değişiklikleri zaten uygulanmış.'
+          else
+            git commit -m 'fix(alo186): portal hardening paketini güncel main ile birleştir'
+            git push origin HEAD:fix/alo186-portal-hardening-main-20260728
+          fi
