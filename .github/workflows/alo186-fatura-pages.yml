@@ -39,6 +39,7 @@ jobs:
           node alo186/tests/test_continuity_store.js
           node alo186/tests/test_continuity_passport.js
           node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
 
       - name: Preview ve üretim overlay paketlerini hazırla
         shell: bash
@@ -65,6 +66,8 @@ jobs:
           grep -q 'Strict-Transport-Security' _overlay/.htaccess
           grep -q 'X-Content-Type-Options' _overlay/.htaccess
           grep -q 'Content-Security-Policy' _overlay/.htaccess
+          grep -q 'mod_substitute.c' _overlay/.htaccess
+          grep -q '10 iş günü içinde ilgili dağıtım şirketinin resmî kanalına başvurun' _overlay/.htaccess
           grep -q 'ForceType text/css' _overlay/.htaccess
           grep -q 'tailwindcss' _overlay/SHA256SUMS
           test ! -e _site/sureklilik-api
