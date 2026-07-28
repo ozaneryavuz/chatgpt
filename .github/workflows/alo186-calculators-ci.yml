@@ -38,6 +38,27 @@ jobs:
           set -euo pipefail
           node alo186/hesaplama/parafudr-risk-testi/test.js
           node alo186/hesaplama/jenerator-gucu-secimi/test.js
+          node alo186/hesaplama/kesinti-gunlugu/test.js
+      - name: Kesinti günlüğü güven ve veri minimizasyonu sözleşmesi
+        shell: bash
+        run: |
+          set -euo pipefail
+          file='alo186/hesaplama/kesinti-gunlugu/index.html'
+          grep -q 'Resmî kayıt değildir' "$file"
+          grep -q 'Reklam / satış ortaklığı açıklaması' "$file"
+          grep -q 'Ticari ürün yönlendirmesi kapatıldı' "$file"
+          grep -q 'https://www.epdk.gov.tr/' "$file"
+          grep -q 'https://www.alo186.com/edas-bul' "$file"
+          grep -q 'kesinti-gunlugu' alo186/deployment/routing-manifest.json
+          grep -q 'hesaplama/kesinti-gunlugu/' alo186/sitemap.xml
+          if grep -Eqi 'type="(email|tel|text)"|name="(address|phone|email|subscription|tc)' "$file"; then
+            echo 'Kesinti günlüğünde kişisel veri veya serbest metin alanı bulundu.' >&2
+            exit 1
+          fi
+          if grep -Eqi 'amazon\.(com\.tr|com)/' "$file"; then
+            echo 'Kesinti günlüğünde doğrudan Amazon bağlantısı bulundu.' >&2
+            exit 1
+          fi
       - name: HTML temel kontrolleri
         shell: bash
         run: |
