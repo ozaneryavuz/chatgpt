@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "canonicalHost": "https://www.alo186.com",
   "generatedAt": "2026-07-28",
   "routes": [
@@ -19,6 +19,7 @@
     {"source":"alo186/hesaplama/kesinti-hazirlik-plani/index.html","canonicalPath":"/hesaplama/kesinti-hazirlik-plani/","type":"tool"},
     {"source":"alo186/hesaplama/ekipman-bakim-plani/index.html","canonicalPath":"/hesaplama/ekipman-bakim-plani/","type":"tool"},
     {"source":"alo186/hesaplama/parafudr-risk-testi/index.html","canonicalPath":"/hesaplama/parafudr-risk-testi/","type":"tool"},
+    {"source":"alo186/hesaplama/gerilim-koruma-cozum-secici/index.html","canonicalPath":"/hesaplama/gerilim-koruma-cozum-secici/","type":"tool"},
     {"source":"alo186/fatura-analizi/index.html","canonicalPath":"/fatura-analizi","type":"calculator"},
     {"source":"alo186/urun-eslestirme/index.html","canonicalPath":"/akilli-urun-secimi","type":"tool"},
     {"source":"alo186/sureklilik-paneli/index.html","canonicalPath":"/isletme-surekliligi","type":"business-tool"},
