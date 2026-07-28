@@ -1,5 +1,5 @@
 {
-  "version": 23,
+  "version": 24,
   "canonicalHost": "https://www.alo186.com",
   "generatedAt": "2026-07-28",
   "routes": [
@@ -33,6 +33,7 @@
     {"source":"alo186/hesaplama/gerilim-koruma-cozum-secici/index.html","canonicalPath":"/hesaplama/gerilim-koruma-cozum-secici/","type":"tool"},
     {"source":"alo186/fatura-analizi/index.html","canonicalPath":"/fatura-analizi","type":"calculator"},
     {"source":"alo186/urun-eslestirme/index.html","canonicalPath":"/akilli-urun-secimi","type":"tool"},
+    {"source":"alo186/katalog-guven-durumu/index.html","canonicalPath":"/katalog-guven-durumu","type":"collection"},
     {"source":"alo186/sureklilik-paneli/index.html","canonicalPath":"/isletme-surekliligi","type":"business-tool"},
     {"source":"alo186/yedek-guc-hesaplayici/index.html","canonicalPath":"/hesaplama/yedek-guc","type":"calculator"},
     {"source":"alo186/kesinti-maliyet-hesaplayici/index.html","canonicalPath":"/hesaplama/kesinti-maliyeti","type":"calculator"},
