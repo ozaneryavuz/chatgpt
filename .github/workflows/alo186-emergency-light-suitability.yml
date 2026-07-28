@@ -79,7 +79,7 @@ jobs:
           grep -q 'Acil Aydınlatma Süre ve Uygunluk Testi' "$route/index.html"
           grep -q 'Satış ortaklığı açıklaması' "$route/index.html"
           grep -q 'İşyeri kaçış yolu' "$route/index.html"
-          grep -q 'Mum yerine' "$route/index.html"
+          grep -qi 'mum yerine' "$route/index.html"
           grep -q '28 çekirdek araç' /tmp/alo186-emergency-light-site/hesaplama/index.html
           grep -q 'acil-aydinlatma-sure-uygunluk' /tmp/alo186-emergency-light-site/sitemap.xml
           ! grep -Eqi 'amazon\.(com|com\.tr)/' "$route/index.html"
