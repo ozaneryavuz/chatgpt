@@ -62,7 +62,8 @@
     if(window[name]||document.querySelector(`script[${dataKey}]`))return;
     const script=document.createElement('script');
     script.src=new URL(`${name==='Alo186EvidenceWallet'?'evidence-wallet.js':name==='Alo186IntentActionRouter'?'intent-action-router.js':'outcome-bridge.js'}`,commonUrl).href;
-    script.setAttribute(dataKey,'true');
+    if(name==='Alo186OutcomeBridge')script.dataset.alo186OutcomeBridge='true';
+    else script.setAttribute(dataKey,'true');
     script.defer=true;
     document.head.appendChild(script);
   }
