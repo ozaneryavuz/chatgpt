@@ -6,7 +6,7 @@ assert.strictEqual(catalog.affiliateTag,'alo186hazirlik-21');
 assert.strictEqual(catalog.categories.length,12,'On iki ihtiyaç kategorisi bulunmalı.');
 assert(catalog.productsFor('powerbank').length>=3,'Powerbank kataloğunda en az üç ürün olmalı.');
 assert(catalog.productsFor('surge_strip').length>=3,'Grup priz kataloğunda en az üç doğrulanmış ürün korunmalı.');
-for(const category of ['generator','inverter','smart_plug','ev_cable','ups_battery'])assert.strictEqual(catalog.productsFor(category).length,0,`${category} doğrulanmamış ürün kartı taşımamalı.`);
+for(const category of ['generator','inverter','smart_plug','ev_cable','ups_battery','smoke_alarm'])assert.strictEqual(catalog.productsFor(category).length,0,`${category} doğrulanmamış ürün kartı taşımamalı.`);
 
 const asins=catalog.products.map(p=>p.asin);
 assert.strictEqual(new Set(asins).size,asins.length,'ASIN değerleri benzersiz olmalı.');
@@ -37,6 +37,7 @@ assert.strictEqual(matcher.scoreSurge(lowJoule,{minOutlets:5,minJoules:900,usb:f
 const gated={
   surge_strip:'https://www.alo186.com/hesaplama/akim-korumali-grup-priz-uygunluk/',
   mini_ups:'https://www.alo186.com/hesaplama/modem-internet-yedekleme/',
+  smoke_alarm:'https://www.alo186.com/hesaplama/duman-alarmi-yerlesim-bakim-uygunluk/',
   generator:'https://www.alo186.com/hesaplama/jenerator-gucu-secimi/',
   inverter:'https://www.alo186.com/hesaplama/inverter-uygunluk/',
   smart_plug:'https://www.alo186.com/hesaplama/akilli-priz-enerji-olcer-uygunluk/',
@@ -53,4 +54,4 @@ for(const[category,url]of Object.entries(gated)){
 result=matcher.match('emergency_light',{});
 assert.strictEqual(result.professionalSelectionRequired,false);
 assert.throws(()=>matcher.match('olmayan-kategori',{}),/Ürün kategorisi bulunamadı/);
-console.log('Ürün kataloğu ve eşleştirme testleri: 12 kategori, surge-strip teknik kapısı ve doğrulanmış ürün envanteri başarılı.');
+console.log('Ürün kataloğu ve eşleştirme testleri: 12 kategori, smoke-alarm ve surge-strip teknik kapıları başarılı.');
