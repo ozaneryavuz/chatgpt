@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import ssl
 import time
 from html.parser import HTMLParser
@@ -10,7 +11,25 @@ from urllib.parse import urljoin
 from urllib.request import Request, build_opener, HTTPRedirectHandler
 
 
+CANONICAL_HOST = "https://www.alo186.com"
+REQUIRED_SECURITY_HEADERS = (
+    "strict-transport-security",
+    "x-content-type-options",
+    "content-security-policy",
+    "referrer-policy",
+    "permissions-policy",
+)
+LEGAL_PATHS = {"/", "/elektrik-portali"}
+DAMAGE_TERMS = re.compile(r"\b(cihaz|teçhizat|techizat|hasar|zarar)\w*\b", re.IGNORECASE)
+APPLICATION_TERMS = re.compile(
+    r"\b(başvur|basvur|talep|tazmin|dağıtım şirket|dagitim sirket|edaş|edas)\w*",
+    re.IGNORECASE,
+)
+WRONG_DEADLINE = re.compile(r"\b30\s*gün\b", re.IGNORECASE)
+CORRECT_DEADLINE = re.compile(r"\b10\s*iş\s*gün(?:ü|de|den|i|içinde|içerisinde)?\b", re.IGNORECASE)
+
 ROUTES = [
+    ("/", "Elektrik kesintisi", "https://www.alo186.com/"),
     ("/elektrik-portali", "ALO186", "https://www.alo186.com/elektrik-portali"),
     ("/edas-bul", "EDAŞ", "https://www.alo186.com/edas-bul"),
     ("/karar-motoru", "186 mı", "https://www.alo186.com/karar-motoru"),
@@ -56,7 +75,14 @@ class PageParser(HTMLParser):
 
 
 def fetch(url: str, timeout: int = 20) -> tuple[int, str, bytes, dict[str, str], float]:
-    request = Request(url, headers={"User-Agent": "ALO186-Production-Smoke/1.0", "Accept": "text/html,*/*"})
+    request = Request(
+        url,
+        headers={
+            "User-Agent": "ALO186-Production-Smoke/2.0",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Encoding": "identity",
+        },
+    )
     started = time.perf_counter()
     with build_opener(HTTPRedirectHandler()).open(request, timeout=timeout) as response:
         body = response.read()
@@ -69,10 +95,55 @@ def normalize_url(value: str) -> str:
     return value.rstrip("/")
 
 
+def wrong_deadline_contexts(text: str) -> list[str]:
+    normalized = re.sub(r"\s+", " ", text)
+    contexts: list[str] = []
+    for match in WRONG_DEADLINE.finditer(normalized):
+        start = max(0, match.start() - 260)
+        end = min(len(normalized), match.end() + 260)
+        context = normalized[start:end]
+        if DAMAGE_TERMS.search(context) and APPLICATION_TERMS.search(context):
+            contexts.append(context[:520])
+    return contexts
+
+
+def has_independent_platform_notice(text: str) -> bool:
+    lowered = text.lower()
+    return any(
+        phrase in lowered
+        for phrase in (
+            "başvuru almaz",
+            "başvuru veya hasar kaydı almaz",
+            "arıza ihbarı almaz",
+            "edaş veya kamu kurumu değildir",
+            "bağımsız bilgilendirme platformudur",
+        )
+    )
+
+
 def run(base_url: str, check_assets: bool = True) -> dict:
     base_url = base_url.rstrip("/")
     results: list[dict] = []
     failures: list[str] = []
+
+    # Apex URL'nin aynı path ile tek canonical www hostuna ulaşmasını doğrula.
+    apex_url = base_url.replace("://www.", "://", 1) + "/"
+    try:
+        status, final_url, _body, _headers, duration = fetch(apex_url)
+        results.append(
+            {
+                "path": "apex-redirect",
+                "status": status,
+                "requestedUrl": apex_url,
+                "finalUrl": final_url,
+                "durationMs": round(duration * 1000, 1),
+            }
+        )
+        if status != 200 or normalize_url(final_url) != normalize_url(f"{CANONICAL_HOST}/"):
+            failures.append(f"Apex canonical yönlendirme yanlış: {apex_url} → {final_url} (HTTP {status})")
+    except (HTTPError, URLError, TimeoutError, ssl.SSLError) as exc:
+        failures.append(f"Apex canonical yönlendirme erişim hatası: {exc}")
+
     for path, marker, canonical in ROUTES:
         url = f"{base_url}{path}"
         try:
@@ -88,56 +159,100 @@ def run(base_url: str, check_assets: bool = True) -> dict:
                 "title": parser.title,
                 "canonical": parser.canonical,
                 "contentType": headers.get("content-type"),
+                "securityHeaders": {name: headers.get(name) for name in REQUIRED_SECURITY_HEADERS},
             }
             if status != 200:
                 failures.append(f"{path}: HTTP {status}")
-            if marker.lower() not in (parser.title + " " + text[:20000]).lower():
+            if marker.lower() not in (parser.title + " " + text[:30000]).lower():
                 failures.append(f"{path}: beklenen içerik işareti yok: {marker}")
             if not parser.canonical or normalize_url(parser.canonical) != normalize_url(canonical):
                 failures.append(f"{path}: canonical yanlış: {parser.canonical!r}")
             if normalize_url(final_url).startswith("https://alo186.com"):
                 failures.append(f"{path}: www olmayan final URL: {final_url}")
+            for header_name in REQUIRED_SECURITY_HEADERS:
+                if not headers.get(header_name):
+                    failures.append(f"{path}: güvenlik başlığı eksik: {header_name}")
+
+            if path in LEGAL_PATHS:
+                contexts = wrong_deadline_contexts(text)
+                for context in contexts:
+                    failures.append(f"{path}: cihaz hasarı bağlamında yanlış 30 gün ifadesi → {context}")
+                if not CORRECT_DEADLINE.search(text):
+                    failures.append(f"{path}: cihaz hasarı için görünür 10 iş günü ifadesi yok")
+                if not has_independent_platform_notice(text):
+                    failures.append(f"{path}: ALO186 bağımsızlık/başvuru almama açıklaması yok")
+                row["deviceDamageDeadline"] = "10 iş günü" if CORRECT_DEADLINE.search(text) else None
+                row["wrongDeviceDamageDeadlineContexts"] = contexts
+
             if check_assets:
                 asset_rows = []
-                for reference in parser.assets[:12]:
+                for reference in parser.assets[:16]:
                     asset_url = urljoin(final_url, reference)
-                    asset_status, asset_final, _asset_body, asset_headers, asset_duration = fetch(asset_url)
-                    asset_rows.append({
-                        "url": asset_final,
-                        "status": asset_status,
-                        "contentType": asset_headers.get("content-type"),
-                        "durationMs": round(asset_duration * 1000, 1),
-                    })
-                    if asset_status != 200:
-                        failures.append(f"{path}: asset HTTP {asset_status}: {reference}")
-                    if reference.endswith(".js") and "javascript" not in (asset_headers.get("content-type") or ""):
-                        failures.append(f"{path}: JS MIME yanlış: {reference}")
-                    if reference.endswith(".css") and "css" not in (asset_headers.get("content-type") or ""):
-                        failures.append(f"{path}: CSS MIME yanlış: {reference}")
+                    try:
+                        asset_status, asset_final, _asset_body, asset_headers, asset_duration = fetch(asset_url)
+                        asset_rows.append(
+                            {
+                                "url": asset_final,
+                                "status": asset_status,
+                                "contentType": asset_headers.get("content-type"),
+                                "durationMs": round(asset_duration * 1000, 1),
+                            }
+                        )
+                        if asset_status != 200:
+                            failures.append(f"{path}: asset HTTP {asset_status}: {reference}")
+                        if reference.endswith(".js") and "javascript" not in (asset_headers.get("content-type") or ""):
+                            failures.append(f"{path}: JS MIME yanlış: {reference}")
+                        if reference.endswith(".css") and "css" not in (asset_headers.get("content-type") or ""):
+                            failures.append(f"{path}: CSS MIME yanlış: {reference}")
+                    except (HTTPError, URLError, TimeoutError, ssl.SSLError) as exc:
+                        asset_rows.append({"url": asset_url, "error": str(exc)})
+                        failures.append(f"{path}: asset erişim hatası: {reference} → {exc}")
                 row["assets"] = asset_rows
             results.append(row)
         except (HTTPError, URLError, TimeoutError, ssl.SSLError) as exc:
             failures.append(f"{path}: erişim hatası: {exc}")
             results.append({"path": path, "error": str(exc)})
 
-    for root_path in ("/robots.txt", "/sitemap.xml"):
+    for root_path in ("/robots.txt", "/sitemap.xml", "/tailwindcss", "/404.html"):
         try:
-            status, final_url, _body, headers, duration = fetch(f"{base_url}{root_path}")
-            results.append({"path": root_path, "status": status, "finalUrl": final_url, "contentType": headers.get("content-type"), "durationMs": round(duration * 1000, 1)})
+            status, final_url, body, headers, duration = fetch(f"{base_url}{root_path}")
+            content_type = headers.get("content-type") or ""
+            results.append(
+                {
+                    "path": root_path,
+                    "status": status,
+                    "finalUrl": final_url,
+                    "contentType": content_type,
+                    "durationMs": round(duration * 1000, 1),
+                }
+            )
             if status != 200:
                 failures.append(f"{root_path}: HTTP {status}")
+            if root_path == "/tailwindcss" and "css" not in content_type:
+                failures.append(f"{root_path}: CSS MIME yanlış: {content_type!r}")
+            if root_path == "/robots.txt" and f"Sitemap: {CANONICAL_HOST}/sitemap.xml" not in body.decode("utf-8", errors="replace"):
+                failures.append("/robots.txt: canonical sitemap adresi yanlış")
+            if root_path == "/sitemap.xml" and "https://alo186.com" in body.decode("utf-8", errors="replace"):
+                failures.append("/sitemap.xml: eski apex origin içeriyor")
         except Exception as exc:  # noqa: BLE001
             failures.append(f"{root_path}: erişim hatası: {exc}")
 
-    output = {"ok": not failures, "baseUrl": base_url, "results": results, "failures": failures}
+    output = {
+        "ok": not failures,
+        "baseUrl": base_url,
+        "canonicalHost": CANONICAL_HOST,
+        "requiredSecurityHeaders": list(REQUIRED_SECURITY_HEADERS),
+        "results": results,
+        "failures": failures,
+    }
     if failures:
         raise SystemExit(json.dumps(output, ensure_ascii=False, indent=2))
     return output
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="ALO186 canlı canonical rota smoke testi.")
-    parser.add_argument("--base-url", default="https://www.alo186.com")
+    parser = argparse.ArgumentParser(description="ALO186 canlı canonical, güvenlik ve hukukî içerik smoke testi.")
+    parser.add_argument("--base-url", default=CANONICAL_HOST)
     parser.add_argument("--skip-assets", action="store_true")
     args = parser.parse_args()
     print(json.dumps(run(args.base_url, check_assets=not args.skip_assets), ensure_ascii=False, indent=2))
