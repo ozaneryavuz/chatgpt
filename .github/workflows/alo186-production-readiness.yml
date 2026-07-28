@@ -53,6 +53,14 @@ jobs:
             args+=(--send)
           fi
           python alo186/infra/production/smtp_probe.py "${args[@]}"
+      - name: Postmark DNS girdilerini zorunlu doğrula
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$POSTMARK_DKIM_HOST"
+          test -n "$POSTMARK_RETURN_PATH_HOST"
+          [[ "$POSTMARK_DKIM_HOST" == *._domainkey.alo186.com || "$POSTMARK_DKIM_HOST" == *._domainkey.alo186.com. ]]
+          [[ "$POSTMARK_RETURN_PATH_HOST" == *.alo186.com || "$POSTMARK_RETURN_PATH_HOST" == *.alo186.com. ]]
       - name: SPF, DMARC, DKIM ve Return-Path
         run: bash alo186/infra/production/check_email_dns.sh alo186.com
       - name: R2 bucket ve Restic repository
@@ -85,7 +93,8 @@ jobs:
 
           - Cloudflare DNS dry-run: başarılı
           - SMTP TLS/auth: başarılı
-          - E-posta DNS: başarılı
+          - Postmark DKIM ve Return-Path girdileri: tanımlı ve doğrulandı
+          - SPF/DMARC/DKIM/Return-Path DNS: başarılı
           - R2 Restic erişimi ve repository check: başarılı
           - Web/API/TLS sentetik kontrolleri: başarılı
           EOF
