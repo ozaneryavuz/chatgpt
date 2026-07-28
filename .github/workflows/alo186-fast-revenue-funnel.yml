@@ -62,7 +62,7 @@ jobs:
 
       - name: JavaScript sözdizimi
         run: |
-          node --check alo186/kesintiye-hazirlik-atolyesi/app.js
+          node --check alo186/kesinti-hazirlik-atolyesi/app.js
           node --check alo186/kurumsal-on-degerlendirme/app.js
           node --check alo186/tedarikci-isbirligi/app.js
 
