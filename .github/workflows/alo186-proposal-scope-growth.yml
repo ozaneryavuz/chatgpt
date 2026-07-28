@@ -47,11 +47,14 @@ jobs:
       - name: Teklif kapsamı karar senaryoları
         run: node alo186/hesaplama/teknik-teklif-kapsam-karsilastirma/test.js
 
-      - name: Routing ve site entegrasyon sözleşmeleri
-        run: |
-          node alo186/tests/test_proposal_scope_growth.js
-          node alo186/hesaplama/teknik-devir-kabul-paketi/test.js
-          node alo186/hesaplama/teknik-urun-karsilastirma/test.js
+      - name: Teklif kapsamı routing ve site sözleşmeleri
+        run: node alo186/tests/test_proposal_scope_growth.js
+
+      - name: Teknik devir regresyonu
+        run: node alo186/hesaplama/teknik-devir-kabul-paketi/test.js
+
+      - name: Teknik kısa liste regresyonu
+        run: node alo186/hesaplama/teknik-urun-karsilastirma/test.js
 
       - name: Sözdizimi
         run: |
