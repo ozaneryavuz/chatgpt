@@ -1,0 +1,140 @@
+name: ALO186 arama niyeti ve teknik kanıt büyüme kalite kontrolü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/evidence-wallet.js'
+      - 'alo186/hesaplama/intent-action-router.js'
+      - 'alo186/hesaplama/common.js'
+      - 'alo186/hesaplama/elektrik-planim/**'
+      - 'alo186/urun-eslestirme/conversion-growth.js'
+      - 'alo186/tests/test_intent_evidence_growth.js'
+      - 'alo186/deployment/**'
+      - '.github/workflows/alo186-intent-evidence-growth.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/evidence-wallet.js'
+      - 'alo186/hesaplama/intent-action-router.js'
+      - 'alo186/hesaplama/common.js'
+      - 'alo186/hesaplama/elektrik-planim/**'
+      - 'alo186/urun-eslestirme/conversion-growth.js'
+      - 'alo186/tests/test_intent_evidence_growth.js'
+      - 'alo186/deployment/**'
+      - '.github/workflows/alo186-intent-evidence-growth.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-intent-evidence-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Arama niyeti, teknik kanıt ve tekrar ziyaret senaryoları
+        run: node alo186/tests/test_intent_evidence_growth.js
+
+      - name: JavaScript sözdizimi
+        run: |
+          node --check alo186/hesaplama/evidence-wallet.js
+          node --check alo186/hesaplama/intent-action-router.js
+          node --check alo186/hesaplama/common.js
+          node --check alo186/urun-eslestirme/conversion-growth.js
+          node --check alo186/hesaplama/elektrik-planim/growth.js
+
+      - name: Ürün eşleştirme regresyonu
+        run: node alo186/tests/test_product_matcher.js
+
+      - name: Çözüm sonucu regresyonu
+        run: node alo186/tests/test_solution_outcome_loop.js
+
+      - name: Birleşik Elektrik Planım regresyonu
+        run: node alo186/tests/test_unified_plan_growth.js
+
+      - name: Kesinti kiti regresyonu
+        run: node alo186/tests/test_outage_kit_growth.js
+
+      - name: Canonical routing regresyonu
+        run: node alo186/tests/test_release_manifest.js
+
+      - name: Cihaz hasarı 10 iş günü güvenlik kapısı
+        run: python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Canonical production bundle
+        run: |
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-intent-evidence-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-intent-evidence-canonical
+
+      - name: GitHub Pages custom-domain artifactı
+        run: |
+          cp -a /tmp/alo186-intent-evidence-canonical /tmp/alo186-intent-evidence-custom
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-intent-evidence-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-intent-evidence-custom \
+            --base-path ''
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-intent-evidence-custom \
+            --base-path ''
+
+      - name: GitHub Pages project-path artifactı
+        run: |
+          cp -a /tmp/alo186-intent-evidence-canonical /tmp/alo186-intent-evidence-project
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-intent-evidence-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-intent-evidence-project \
+            --base-path '/chatgpt'
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-intent-evidence-project \
+            --base-path '/chatgpt'
+
+      - name: Production artifact güven ve dönüşüm sözleşmeleri
+        shell: bash
+        run: |
+          set -euo pipefail
+          for root in /tmp/alo186-intent-evidence-custom /tmp/alo186-intent-evidence-project; do
+            test -f "$root/hesaplama/evidence-wallet.js"
+            test -f "$root/hesaplama/intent-action-router.js"
+            test -f "$root/hesaplama/elektrik-planim/growth.js"
+            grep -q 'technical-evidence:v1' "$root/hesaplama/evidence-wallet.js"
+            grep -q 'Arama niyetinden güvenli sonraki adıma' "$root/hesaplama/intent-action-router.js"
+            grep -q 'Teknik Doğrulama Cüzdanı' "$root/hesaplama/elektrik-planim/index.html"
+            grep -q 'qualifiedEvidenceStatus' "$root/akilli-urun-secimi/conversion-growth.js"
+            grep -q 'evidence-wallet.js' "$root/hesaplama/common.js"
+            grep -q 'intent-action-router.js' "$root/hesaplama/common.js"
+            ! grep -Eqi 'type="(email|tel|text)"|<textarea' "$root/hesaplama/elektrik-planim/index.html"
+          done
+          ! grep -Eqi 'amazon\.(com|com\.tr)/dp|ASIN|price|stock|seller|warranty' /tmp/alo186-intent-evidence-custom/hesaplama/evidence-wallet.js
+          ! grep -Eqi 'amazon\.(com|com\.tr)/' /tmp/alo186-intent-evidence-custom/hesaplama/intent-action-router.js
+
+      - name: Doğrulanmış intent ve evidence artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-intent-evidence-growth-pages
+          path: /tmp/alo186-intent-evidence-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
