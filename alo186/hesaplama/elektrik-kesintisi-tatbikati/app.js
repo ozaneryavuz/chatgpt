@@ -65,6 +65,18 @@
     return [...form.querySelectorAll(`input[name="${name}"]:checked`)].map((item) => item.value);
   }
 
+  function enforceNoneExclusivity(event) {
+    const target = event.target;
+    if (!target.matches('input[type="checkbox"]') || !target.checked) return;
+    const group = target.closest('.choice-grid');
+    if (!group) return;
+    const boxes = [...group.querySelectorAll('input[type="checkbox"]')];
+    if (target.value === "none") boxes.forEach((box) => { if (box !== target) box.checked = false; });
+    else boxes.forEach((box) => { if (box.value === "none") box.checked = false; });
+    results.hidden = true;
+    latestResult = null;
+  }
+
   function collect() {
     const statuses = {};
     core.activeTasks(scenarioSelect.value).forEach((task) => {
@@ -156,10 +168,15 @@
   }
 
   function saveHandoff() {
+    if (panelBtn.dataset.handoffReady === "true") {
+      window.location.href = "https://www.alo186.com/isletme-surekliligi";
+      return;
+    }
     if (!latestResult) return;
     try {
       localStorage.setItem("alo186.continuity-drill-handoff.v1", JSON.stringify(latestResult.handoff));
-      panelBtn.textContent = "Panel aktarımı 7 günlüğüne hazır";
+      panelBtn.dataset.handoffReady = "true";
+      panelBtn.textContent = "Panele git ve bulguları içe aktar";
       emit("continuity_drill_handoff_saved", { score_band: latestResult.classification.id, p0_count: latestResult.p0Count });
     } catch (_error) {
       panelBtn.textContent = "Tarayıcı aktarımı kaydedemedi";
@@ -203,10 +220,13 @@
     results.hidden = true;
     latestResult = null;
     panelBtn.textContent = "7 günlük panel aktarımını hazırla";
+    delete panelBtn.dataset.handoffReady;
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
 
   renderChoices(criticalLoads, core.CRITICAL_LOADS, "criticalLoad");
   renderChoices(backupSources, core.BACKUP_SOURCES, "backupSource");
+  criticalLoads.addEventListener("change", enforceNoneExclusivity);
+  backupSources.addEventListener("change", enforceNoneExclusivity);
   renderTasks();
 })();
