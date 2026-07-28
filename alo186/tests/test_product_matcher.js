@@ -5,7 +5,7 @@ const matcher=require('../urun-eslestirme/matcher-core.js');
 assert.strictEqual(catalog.affiliateTag,'alo186hazirlik-21');
 assert.strictEqual(catalog.categories.length,12,'On iki ihtiyaç kategorisi bulunmalı.');
 assert(catalog.productsFor('powerbank').length>=3,'Powerbank kataloğunda en az üç ürün olmalı.');
-assert(catalog.productsFor('surge_strip').length>=3,'Grup priz kataloğunda en az üç ürün olmalı.');
+assert(catalog.productsFor('surge_strip').length>=3,'Grup priz kataloğunda en az üç doğrulanmış ürün korunmalı.');
 for(const category of ['generator','inverter','smart_plug','ev_cable','ups_battery'])assert.strictEqual(catalog.productsFor(category).length,0,`${category} doğrulanmamış ürün kartı taşımamalı.`);
 
 const asins=catalog.products.map(p=>p.asin);
@@ -26,14 +26,16 @@ assert.strictEqual(result.matches[0].product.asin,'B0BYNZXFM2');
 result=matcher.match('powerbank',{minCapacityMah:10000,minOutputW:10,wireless:true});
 assert(result.matches.length>=2);
 assert(result.matches.every(x=>x.product.attributes.wireless));
-result=matcher.match('surge_strip',{minOutlets:5,minJoules:900,usb:false});
-assert.strictEqual(result.matches.length,1);
-assert.strictEqual(result.matches[0].product.asin,'B07CST4766');
-result=matcher.match('surge_strip',{minOutlets:5,minJoules:250,usb:true});
-assert.strictEqual(result.matches.length,1);
-assert(result.matches[0].unknowns.length>0);
+
+const tuncmatik=catalog.products.find(product=>product.asin==='B07CST4766');
+const surgeScore=matcher.scoreSurge(tuncmatik,{minOutlets:5,minJoules:900,usb:false});
+assert.strictEqual(surgeScore.eligible,true);
+assert(surgeScore.score>0);
+const lowJoule=catalog.products.find(product=>product.asin==='B08L9KVRP1');
+assert.strictEqual(matcher.scoreSurge(lowJoule,{minOutlets:5,minJoules:900,usb:false}).eligible,false);
 
 const gated={
+  surge_strip:'https://www.alo186.com/hesaplama/akim-korumali-grup-priz-uygunluk/',
   mini_ups:'https://www.alo186.com/hesaplama/modem-internet-yedekleme/',
   generator:'https://www.alo186.com/hesaplama/jenerator-gucu-secimi/',
   inverter:'https://www.alo186.com/hesaplama/inverter-uygunluk/',
@@ -51,4 +53,4 @@ for(const[category,url]of Object.entries(gated)){
 result=matcher.match('emergency_light',{});
 assert.strictEqual(result.professionalSelectionRequired,false);
 assert.throws(()=>matcher.match('olmayan-kategori',{}),/Ürün kategorisi bulunamadı/);
-console.log('Ürün kataloğu ve eşleştirme testleri: 12 kategori, yeni akıllı priz, EV kablosu ve UPS aküsü kapıları başarılı.');
+console.log('Ürün kataloğu ve eşleştirme testleri: 12 kategori, surge-strip teknik kapısı ve doğrulanmış ürün envanteri başarılı.');
