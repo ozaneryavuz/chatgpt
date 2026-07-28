@@ -19,7 +19,9 @@ assert(portal.includes('rel="canonical" href="https://www.alo186.com/elektrik-po
 assert(portal.includes('class="skip-link" href="#main-content"'), 'Skip link eksik.');
 assert(portal.includes('<main id="main-content"'), 'Skip link ana hedefi eksik.');
 assert(portal.includes('42 kaynak doğrulamalı teknik rehber'), 'Portal güncel 42 rehber kapsamını göstermeli.');
-assert(portal.includes('24 kişisel veri istemeyen araç'), 'Portal güncel 24 araç kapsamını göstermeli.');
+assert(portal.includes('25 kişisel veri istemeyen araç'), 'Portal güncel 25 araç kapsamını göstermeli.');
+assert(portal.includes('Modem ve ONT Mini UPS Hesabı'), 'Yüksek niyetli modem/ONT mini UPS kartı portalda bulunmalı.');
+assert(portal.includes('12 V modem, ONT ve ağ cihazları'), 'Mini UPS kartı kullanıcı ihtiyacını açıkça anlatmalı.');
 
 const staleRoutes = [
   'href="./turkiye-arama/"',
@@ -45,6 +47,7 @@ const requiredRoutes = [
   '/hesaplama/kesinti-maliyeti',
   '/hesaplama/elektrik-surekliligi-pasaportu/',
   '/hesaplama/elektrik-kesintisi-tatbikati/',
+  '/hesaplama/modem-internet-yedekleme/',
   '/hesaplama/powerbank-usb-c-uygunluk/',
   '/hesaplama/gunes-paneli-power-station-uygunluk/',
   '/hesaplama/ev-sarj-kablosu-uygunluk/'
@@ -80,4 +83,4 @@ assert(htaccess.includes('AddOutputFilterByType SUBSTITUTE text/html application
 assert(htaccess.includes(oldLivePhrase), 'Bilinen yanlış canlı cümle fail-safe eşleşmesinde bulunmalı.');
 assert(htaccess.includes('10 iş günü içinde ilgili dağıtım şirketinin resmî kanalına başvurun'), 'Fail-safe doğru 10 iş günü metnini üretmeli.');
 
-console.log('ALO186 portal hardening: 42 rehber, 24 araç, canonical rotalar, 10 iş günü, erişilebilirlik ve aktif production korumaları geçti.');
+console.log('ALO186 portal hardening: 42 rehber, 25 araç, modem mini UPS, canonical rotalar, 10 iş günü, erişilebilirlik ve aktif production korumaları geçti.');

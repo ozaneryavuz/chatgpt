@@ -74,10 +74,11 @@ jobs:
           test -f /tmp/alo186-portal-site/.htaccess
           test -f /tmp/alo186-portal-site/alo186-release.json
           grep -q 'Cihaz hasarında başvuru süresi 10 iş günüdür' /tmp/alo186-portal-site/elektrik-portali/index.html
-          grep -q '24 kişisel veri istemeyen araç' /tmp/alo186-portal-site/elektrik-portali/index.html
+          grep -q '25 kişisel veri istemeyen araç' /tmp/alo186-portal-site/elektrik-portali/index.html
           grep -q '42 kaynak doğrulamalı teknik rehber' /tmp/alo186-portal-site/elektrik-portali/index.html
           grep -q 'href="/edas-bul"' /tmp/alo186-portal-site/elektrik-portali/index.html
           grep -q 'href="/hesaplama/elektrik-kesintisi-tatbikati/"' /tmp/alo186-portal-site/elektrik-portali/index.html
+          grep -q 'href="/hesaplama/modem-internet-yedekleme/"' /tmp/alo186-portal-site/elektrik-portali/index.html
           grep -q 'Strict-Transport-Security' /tmp/alo186-portal-site/.htaccess
           grep -q 'AddOutputFilterByType SUBSTITUTE text/html application/xhtml+xml' /tmp/alo186-portal-site/.htaccess
           ! grep -q 'href="./turkiye-arama/"' /tmp/alo186-portal-site/elektrik-portali/index.html
