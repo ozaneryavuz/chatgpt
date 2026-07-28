@@ -6,11 +6,13 @@ import hashlib
 import json
 import re
 import shutil
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 
 CANONICAL_HOST = "https://www.alo186.com"
 LEGACY_HOST = "https://alo186.com"
+ROUTING_OVERLAY_DIRECTORY = "alo186/deployment/routing-overlays"
 
 LEGACY_ASSET_DIRECTORIES = (
     # Karar motoru CSS tabanı bu klasöre relatif @import kullanıyor.
@@ -118,6 +120,71 @@ def is_forbidden_public_path(path: Path, output: Path) -> bool:
     return is_forbidden_public_name(path.name)
 
 
+def validate_route(route: dict, source_label: str) -> dict:
+    required = {"source", "canonicalPath", "type"}
+    missing = sorted(required - set(route))
+    if missing:
+        raise ValueError(f"Routing kaydı eksik alan taşıyor ({source_label}): {', '.join(missing)}")
+    source = str(route["source"]).strip()
+    canonical_path = "/" + str(route["canonicalPath"]).strip().strip("/")
+    if str(route["canonicalPath"]).strip().endswith("/") and canonical_path != "/":
+        canonical_path += "/"
+    route_type = str(route["type"]).strip()
+    if not source.startswith("alo186/") or not source.endswith("index.html"):
+        raise ValueError(f"Routing source geçersiz ({source_label}): {source}")
+    if not canonical_path.startswith("/") or "//" in canonical_path:
+        raise ValueError(f"Canonical path geçersiz ({source_label}): {canonical_path}")
+    if not route_type:
+        raise ValueError(f"Routing type boş ({source_label}): {canonical_path}")
+    return {"source": source, "canonicalPath": canonical_path, "type": route_type}
+
+
+def load_effective_manifest(repo_root: Path) -> dict:
+    manifest_path = repo_root / "alo186/deployment/routing-manifest.json"
+    base = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if base.get("canonicalHost") != CANONICAL_HOST:
+        raise ValueError(f"Base routing canonicalHost yanlış: {base.get('canonicalHost')!r}")
+
+    routes: list[dict] = []
+    canonical_paths: set[str] = set()
+    sources: set[str] = set()
+
+    def append_route(raw_route: dict, source_label: str) -> None:
+        route = validate_route(raw_route, source_label)
+        if route["canonicalPath"] in canonical_paths:
+            raise ValueError(f"Yinelenen canonical rota ({source_label}): {route['canonicalPath']}")
+        if route["source"] in sources:
+            raise ValueError(f"Yinelenen routing source ({source_label}): {route['source']}")
+        canonical_paths.add(route["canonicalPath"])
+        sources.add(route["source"])
+        routes.append(route)
+
+    for route in base.get("routes", []):
+        append_route(route, "routing-manifest.json")
+
+    overlay_directory = repo_root / ROUTING_OVERLAY_DIRECTORY
+    overlay_names: list[str] = []
+    effective_version = int(base.get("version", 0))
+    generated_at = str(base.get("generatedAt", ""))
+    if overlay_directory.is_dir():
+        for overlay_path in sorted(overlay_directory.glob("*.json")):
+            overlay = json.loads(overlay_path.read_text(encoding="utf-8"))
+            overlay_names.append(overlay_path.name)
+            effective_version = max(effective_version, int(overlay.get("version", 0)))
+            generated_at = max(generated_at, str(overlay.get("generatedAt", "")))
+            for route in overlay.get("routes", []):
+                append_route(route, overlay_path.name)
+
+    return {
+        "version": effective_version,
+        "canonicalHost": CANONICAL_HOST,
+        "generatedAt": generated_at,
+        "routes": routes,
+        "routingOverlays": overlay_names,
+        "requiredIntegrations": list(base.get("requiredIntegrations", [])),
+    }
+
+
 def copy_route(repo_root: Path, output: Path, route: dict) -> None:
     source = repo_root / route["source"]
     if not source.is_file():
@@ -150,6 +217,19 @@ def copy_file(repo_root: Path, output: Path, source_name: str, target_name: str)
     target = output / target_name
     target.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(source, target)
+
+
+def write_effective_sitemap(output: Path, manifest: dict) -> None:
+    namespace = "http://www.sitemaps.org/schemas/sitemap/0.9"
+    ET.register_namespace("", namespace)
+    urlset = ET.Element(f"{{{namespace}}}urlset")
+    for route in manifest["routes"]:
+        url = ET.SubElement(urlset, f"{{{namespace}}}url")
+        loc = ET.SubElement(url, f"{{{namespace}}}loc")
+        loc.text = f"{CANONICAL_HOST}{route['canonicalPath']}"
+    tree = ET.ElementTree(urlset)
+    ET.indent(tree, space="  ")
+    tree.write(output / "sitemap.xml", encoding="utf-8", xml_declaration=True)
 
 
 def iter_text_files(output: Path):
@@ -260,6 +340,12 @@ def validate_bundle(output: Path, manifest: dict) -> None:
             failures.append("sitemap.xml www canonical origin taşımıyor")
         if LEGACY_HOST in sitemap_text:
             failures.append("sitemap.xml eski apex origin taşıyor")
+        for route in manifest["routes"]:
+            canonical = f"{CANONICAL_HOST}{route['canonicalPath']}"
+            if canonical not in sitemap_text:
+                failures.append(f"sitemap.xml canonical rotayı taşımıyor: {route['canonicalPath']}")
+    else:
+        failures.append("sitemap.xml artifact'ta yok")
 
     if failures:
         raise RuntimeError("ALO186 production bundle doğrulaması başarısız:\n- " + "\n- ".join(failures))
@@ -274,8 +360,7 @@ def sha256(path: Path) -> str:
 
 
 def build(repo_root: Path, output: Path, commit_sha: str = "local") -> dict:
-    manifest_path = repo_root / "alo186/deployment/routing-manifest.json"
-    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest = load_effective_manifest(repo_root)
     if output.exists():
         shutil.rmtree(output)
     output.mkdir(parents=True)
@@ -301,15 +386,20 @@ def build(repo_root: Path, output: Path, commit_sha: str = "local") -> dict:
     for source_name, target_name in ROOT_STATIC_FILES:
         copy_file(repo_root, output, source_name, target_name)
 
+    write_effective_sitemap(output, manifest)
     (output / ".nojekyll").touch()
     normalize_canonical_host(output)
     validate_bundle(output, manifest)
 
     release = {
-        "schemaVersion": 3,
+        "schemaVersion": 4,
         "commit": commit_sha,
         "canonicalHost": manifest["canonicalHost"],
+        "routingVersion": manifest["version"],
+        "routingGeneratedAt": manifest["generatedAt"],
+        "routingOverlays": manifest["routingOverlays"],
         "routeCount": len(manifest["routes"]),
+        "articleCount": sum(1 for item in manifest["routes"] if item["type"] == "article"),
         "legacyAssetDirectories": list(LEGACY_ASSET_DIRECTORIES),
         "sharedStaticAssets": [target for _, target in SHARED_STATIC_ASSETS],
         "rootStaticFiles": [target for _, target in ROOT_STATIC_FILES],
