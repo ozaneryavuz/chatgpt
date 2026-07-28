@@ -40,6 +40,8 @@ CANONICAL_METADATA_FILES = {
     "checksums.sha256",
     "robots.txt",
     "sitemap.xml",
+    "manifest.webmanifest",
+    "sw.js",
 }
 
 
