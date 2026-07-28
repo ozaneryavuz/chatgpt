@@ -55,15 +55,26 @@ jobs:
           node --check alo186/urun-eslestirme/conversion-growth.js
           node --check alo186/hesaplama/elektrik-planim/growth.js
 
-      - name: Mevcut güven ve gelir regresyonları
-        run: |
-          node alo186/tests/test_product_matcher.js
-          node alo186/tests/test_safe_user_journey.js
-          node alo186/tests/test_solution_outcome_loop.js
-          node alo186/tests/test_unified_plan_growth.js
-          node alo186/tests/test_outage_kit_growth.js
-          node alo186/tests/test_release_manifest.js
-          python alo186/tests/device_damage_deadline_guard.py
+      - name: Ürün eşleştirme regresyonu
+        run: node alo186/tests/test_product_matcher.js
+
+      - name: Güvenli kullanıcı yolculuğu regresyonu
+        run: node alo186/tests/test_safe_user_journey.js
+
+      - name: Çözüm sonucu regresyonu
+        run: node alo186/tests/test_solution_outcome_loop.js
+
+      - name: Birleşik Elektrik Planım regresyonu
+        run: node alo186/tests/test_unified_plan_growth.js
+
+      - name: Kesinti kiti regresyonu
+        run: node alo186/tests/test_outage_kit_growth.js
+
+      - name: Canonical routing regresyonu
+        run: node alo186/tests/test_release_manifest.js
+
+      - name: Cihaz hasarı 10 iş günü güvenlik kapısı
+        run: python alo186/tests/device_damage_deadline_guard.py
 
       - name: Canonical production bundle
         run: |
