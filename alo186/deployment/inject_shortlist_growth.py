@@ -1,0 +1,192 @@
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import re
+from pathlib import Path
+
+CANONICAL = "https://www.alo186.com/hesaplama/teknik-urun-karsilastirma/"
+CANONICAL_PATH = "/hesaplama/teknik-urun-karsilastirma/"
+SOURCE = "alo186/hesaplama/teknik-urun-karsilastirma/index.html"
+HUB = Path("hesaplama/index.html")
+PORTAL = Path("elektrik-portali/index.html")
+GATEWAY = Path("index.html")
+PRODUCT = Path("akilli-urun-secimi/index.html")
+HUB_MARKER = 'data-alo186-shortlist-hub-card="true"'
+PORTAL_MARKER = 'data-alo186-shortlist-entry-card="true"'
+PRODUCT_MARKER = 'data-alo186-shortlist-product-card="true"'
+
+
+def normalize_base_path(value: str) -> str:
+    cleaned = (value or "").strip()
+    if not cleaned or cleaned == "/":
+        return ""
+    return "/" + cleaned.strip("/")
+
+
+def public_url(base_path: str, route: str) -> str:
+    return f"{base_path}/{route.lstrip('/')}" if base_path else "/" + route.lstrip("/")
+
+
+def append_sitemap(site: Path) -> None:
+    path = site / "sitemap.xml"
+    text = path.read_text(encoding="utf-8")
+    if f"<loc>{CANONICAL}</loc>" not in text:
+        entry = f"<url><loc>{CANONICAL}</loc></url>"
+        text = text.replace("</urlset>", entry + "</urlset>", 1)
+        path.write_text(text, encoding="utf-8")
+
+
+def append_release(site: Path) -> None:
+    path = site / "alo186-release.json"
+    release = json.loads(path.read_text(encoding="utf-8"))
+    routes = release.setdefault("routes", [])
+    if not any(item.get("canonicalPath") == CANONICAL_PATH for item in routes):
+        routes.append({"canonicalPath": CANONICAL_PATH, "source": SOURCE, "type": "tool"})
+    release["routeCount"] = len(routes)
+    release["technicalShortlist"] = {
+        "version": 1,
+        "candidateLimit": 3,
+        "receiptLimit": 6,
+        "receiptTtlDays": 45,
+        "reviewDays": 14,
+        "commercialFieldsExcluded": ["price", "stock", "rating", "seller", "warranty", "asin"],
+    }
+    path.write_text(json.dumps(release, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def add_offline(site: Path, base_path: str) -> bool:
+    path = site / "sw.js"
+    text = path.read_text(encoding="utf-8")
+    match = re.search(r"const CRITICAL=(\[.*?\]);", text, re.S)
+    if not match:
+        raise RuntimeError("Service worker CRITICAL rota dizisi bulunamadı")
+    routes = json.loads(match.group(1))
+    url = public_url(base_path, CANONICAL_PATH)
+    if url in routes:
+        return False
+    routes.append(url)
+    path.write_text(text[: match.start(1)] + json.dumps(routes, ensure_ascii=False) + text[match.end(1) :], encoding="utf-8")
+    return True
+
+
+def update_pages_release(site: Path, base_path: str, offline_added: bool, cards: int) -> None:
+    path = site / "pages-release.json"
+    release = json.loads(path.read_text(encoding="utf-8"))
+    core = json.loads((site / "alo186-release.json").read_text(encoding="utf-8"))
+    release["routeCount"] = core.get("routeCount")
+    release["technicalShortlist"] = {
+        "version": 1,
+        "basePath": base_path,
+        "route": public_url(base_path, CANONICAL_PATH),
+        "entryCardsInjected": cards,
+        "offline": True,
+        "candidateLimit": 3,
+        "reviewDays": 14,
+    }
+    if offline_added:
+        release["offlineCriticalRouteCount"] = int(release.get("offlineCriticalRouteCount") or 0) + 1
+    path.write_text(json.dumps(release, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def update_manifest(site: Path, base_path: str) -> None:
+    path = site / "manifest.webmanifest"
+    if not path.is_file():
+        return
+    manifest = json.loads(path.read_text(encoding="utf-8"))
+    shortcuts = manifest.setdefault("shortcuts", [])
+    url = public_url(base_path, CANONICAL_PATH)
+    if not any(item.get("url") == url for item in shortcuts if isinstance(item, dict)):
+        shortcuts.append({"name": "Teknik Ürün Karşılaştırma", "short_name": "Teknik Kısa Liste", "url": url})
+    path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def raise_count(text: str) -> str:
+    return re.sub(r"\d+ çekirdek araç", "34 çekirdek araç", text, count=1)
+
+
+def insert_hub(site: Path, base_path: str) -> int:
+    path = site / HUB
+    text = raise_count(path.read_text(encoding="utf-8"))
+    if HUB_MARKER in text:
+        path.write_text(text, encoding="utf-8")
+        return 0
+    href = public_url(base_path, CANONICAL_PATH)
+    card = f'<a class="tool-card" {HUB_MARKER} href="{href}"><span class="eyebrow">Üç aday · mevcut ürün · karar makbuzu</span><h2>Teknik Ürün Karşılaştırma</h2><p>Marka, fiyat ve puan kullanmadan üç adayın kritik teknik belgelerini karşılaştırın; mevcut ürün yeterliyse satın almama sonucu alın.</p><b>Teknik kısa listeyi oluştur →</b></a>'
+    text = text.replace('<section id="araclar" class="tool-grid">', '<section id="araclar" class="tool-grid">' + card, 1)
+    path.write_text(text, encoding="utf-8")
+    return 1
+
+
+def insert_grid_card(site: Path, relative: Path, base_path: str, gateway: bool) -> int:
+    path = site / relative
+    text = path.read_text(encoding="utf-8")
+    if PORTAL_MARKER in text:
+        return 0
+    href = public_url(base_path, CANONICAL_PATH)
+    if gateway:
+        card = f'<a class="card" {PORTAL_MARKER} href="{href}"><strong>Üç ürün adayını teknik olarak karşılaştırın</strong><p>Marka ve fiyat kullanmadan belge kapsamını görün; mevcut ürün yeterliyse satın almayın.</p><span>Teknik kısa listeyi aç →</span></a>'
+    else:
+        card = f'<a class="card" {PORTAL_MARKER} href="{href}"><span class="tag">Üç aday · teknik belge · satın almama</span><h2>Teknik Ürün Karşılaştırma</h2><p>Power station, mini UPS, powerbank, EV kablosu ve güvenli tüketici ürünlerini belge kapsamıyla karşılaştırın.</p><b>Kısa listeyi oluştur →</b></a>'
+    for match in re.finditer(r'<section\b[^>]*>', text, re.I):
+        classes = re.search(r'class=["\']([^"\']*)["\']', match.group(0), re.I)
+        if classes and "grid" in classes.group(1).split():
+            text = text[: match.end()] + card + text[match.end() :]
+            path.write_text(text, encoding="utf-8")
+            return 1
+    return 0
+
+
+def insert_product(site: Path, base_path: str) -> int:
+    path = site / PRODUCT
+    text = path.read_text(encoding="utf-8")
+    if PRODUCT_MARKER in text:
+        return 0
+    href = public_url(base_path, CANONICAL_PATH)
+    section = f'<section class="content-section" {PRODUCT_MARKER}><div class="panel"><span class="eyebrow">Karşılaştırma öncesi güven kapısı</span><h2>Üç adayı marka ve fiyat kullanmadan karşılaştırın</h2><p>Mevcut ürünü dördüncü seçenek olarak koruyun. Kritik teknik belge eksikse ürün rotasını açmayın; 14 günlük karar makbuzu oluşturun.</p><div class="actions"><a class="btn btn-secondary" href="{href}">Teknik kısa listeyi aç</a></div><small>Doğrudan mağaza, fiyat, stok, puan veya garanti bilgisi gösterilmez.</small></div></section>'
+    marker = '<section id="matcher"'
+    if marker in text:
+        text = text.replace(marker, section + marker, 1)
+    else:
+        text = text.replace('</main>', section + '</main>', 1)
+    path.write_text(text, encoding="utf-8")
+    return 1
+
+
+def recompute(site: Path) -> None:
+    path = site / "checksums.sha256"
+    if path.exists():
+        path.unlink()
+    lines = [f"{hashlib.sha256(item.read_bytes()).hexdigest()}  {item.relative_to(site).as_posix()}" for item in sorted(x for x in site.rglob('*') if x.is_file())]
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def run(site: Path, base_path: str) -> dict:
+    base_path = normalize_base_path(base_path)
+    required = site / "hesaplama" / "teknik-urun-karsilastirma" / "index.html"
+    if not required.is_file():
+        raise FileNotFoundError(f"Teknik kısa liste rotası artifactta eksik: {required}")
+    append_sitemap(site)
+    append_release(site)
+    cards = insert_hub(site, base_path)
+    cards += insert_grid_card(site, PORTAL, base_path, False)
+    cards += insert_grid_card(site, GATEWAY, base_path, True)
+    cards += insert_product(site, base_path)
+    offline_added = add_offline(site, base_path)
+    update_manifest(site, base_path)
+    update_pages_release(site, base_path, offline_added, cards)
+    recompute(site)
+    return {"ok": True, "basePath": base_path, "cardsInjected": cards, "offlineAdded": offline_added, "route": public_url(base_path, CANONICAL_PATH)}
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--site", type=Path, required=True)
+    parser.add_argument("--base-path", default="")
+    args = parser.parse_args()
+    print(json.dumps(run(args.site.resolve(), args.base_path), ensure_ascii=False, indent=2))
+
+
+if __name__ == "__main__":
+    main()
