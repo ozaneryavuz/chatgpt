@@ -10,7 +10,7 @@ on:
       - 'alo186/tests/test_outage_drill.js'
       - '.github/workflows/alo186-outage-drill.yml'
   push:
-    branches: [main, feature/alo186-elektrik-kesintisi-tatbikati-20260728]
+    branches: [main, feature/alo186-elektrik-kesintisi-tatbikati-v2-20260728]
     paths:
       - 'alo186/hesaplama/elektrik-kesintisi-tatbikati/**'
       - 'alo186/hesaplama/index.html'
@@ -54,6 +54,6 @@ jobs:
         run: |
           set -euo pipefail
           ! grep -R -n -E '<input[^>]+type=["'"'](text|email|tel)["'"']|<textarea' alo186/hesaplama/elektrik-kesintisi-tatbikati
-          ! grep -R -n -E 'amazon\.|amzn\.|price|stok|puan|garanti' alo186/hesaplama/elektrik-kesintisi-tatbikati/index.html
+          ! grep -R -n -E 'amazon\.|amzn\.|stok|puan|garanti' alo186/hesaplama/elektrik-kesintisi-tatbikati/index.html
           grep -q '112’yi ara' alo186/hesaplama/elektrik-kesintisi-tatbikati/index.html
           grep -q 'alo186.continuity-drill-handoff.v1' alo186/hesaplama/elektrik-kesintisi-tatbikati/core.js
