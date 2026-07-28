@@ -1,0 +1,66 @@
+name: ALO186 Pages dual-mode smoke fix once
+
+on:
+  push:
+    branches: [infra/alo186-github-pages-primary-20260728]
+    paths:
+      - '.github/alo186-pages-dual-mode-fix.trigger'
+      - '.github/workflows/alo186-pages-dual-mode-fix-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: infra/alo186-github-pages-primary-20260728
+          fetch-depth: 0
+      - name: Prepare ve smoke sözleşmelerini düzelt
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          prepare = Path('alo186/deployment/prepare_github_pages.py')
+          text = prepare.read_text(encoding='utf-8')
+          old = '            text = inject_meta_and_service_worker(text, base_path, noindex)\n        text = prefix_root_references(text, base_path, known_top_levels)\n        path.write_text(text, encoding="utf-8")\n'
+          new = '''            text = inject_meta_and_service_worker(\n                text,\n                base_path,\n                noindex or path.name == "404.html",\n            )\n        text = prefix_root_references(text, base_path, known_top_levels)\n        if path.suffix.lower() == ".webmanifest" and base_path:\n            try:\n                manifest = json.loads(text)\n            except json.JSONDecodeError as exc:\n                raise RuntimeError(f"Geçersiz webmanifest: {path.relative_to(site)}") from exc\n            for key in ("id", "start_url", "scope"):\n                value = manifest.get(key)\n                if isinstance(value, str) and value.startswith("/"):\n                    manifest[key] = public_url(base_path, value)\n            for icon in manifest.get("icons", []):\n                if isinstance(icon, dict):\n                    value = icon.get("src")\n                    if isinstance(value, str) and value.startswith("/"):\n                        icon["src"] = public_url(base_path, value)\n            text = json.dumps(manifest, ensure_ascii=False, indent=2) + "\\n"\n        path.write_text(text, encoding="utf-8")\n'''
+          if old not in text:
+              raise SystemExit('prepare patch marker bulunamadı')
+          prepare.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          smoke = Path('alo186/deployment/smoke_github_pages.py')
+          text = smoke.read_text(encoding='utf-8')
+          old = '''        if not base_path and html_path.relative_to(site).as_posix() != "durum/index.html":\n            if "İçerik yeni adresine taşındı" not in text and parser.canonical is None:\n                failures.append(f"Custom-domain sayfasında canonical eksik: {html_path.relative_to(site)}")\n'''
+          new = '''        relative_html = html_path.relative_to(site).as_posix()\n        if relative_html == "404.html":\n            if "noindex" not in (parser.robots or "").lower():\n                failures.append("404 sayfasında noindex eksik")\n        elif not base_path and relative_html != "durum/index.html":\n            if "İçerik yeni adresine taşındı" not in text and parser.canonical is None:\n                failures.append(f"Custom-domain sayfasında canonical eksik: {relative_html}")\n'''
+          if old not in text:
+              raise SystemExit('canonical patch marker bulunamadı')
+          text = text.replace(old, new, 1)
+
+          old = '''    manifest_json = json.loads((site / "manifest.webmanifest").read_text(encoding="utf-8"))\n    expected_start = (base_path + "/") if base_path else "/"\n    if manifest_json.get("start_url") != expected_start or manifest_json.get("scope") != expected_start:\n        failures.append("Web manifest start_url/scope base path ile uyumlu değil")\n'''
+          new = '''    expected_start = (base_path + "/") if base_path else "/"\n    for manifest_path in sorted(site.rglob("*.webmanifest")):\n        manifest_json = json.loads(manifest_path.read_text(encoding="utf-8"))\n        for key in ("id", "start_url", "scope"):\n            value = manifest_json.get(key)\n            if isinstance(value, str) and value.startswith("/"):\n                if base_path and not (value == base_path or value.startswith(base_path + "/")):\n                    failures.append(\n                        f"Web manifest {key} base path ile uyumlu değil: {manifest_path.relative_to(site)} → {value}"\n                    )\n        if manifest_path == site / "manifest.webmanifest":\n            if manifest_json.get("start_url") != expected_start or manifest_json.get("scope") != expected_start:\n                failures.append("Web manifest start_url/scope base path ile uyumlu değil")\n'''
+          if old not in text:
+              raise SystemExit('manifest patch marker bulunamadı')
+          text = text.replace(old, new, 1)
+
+          old = '''            if not path.is_file() or path.suffix.lower() not in {".html", ".js", ".css", ".json", ".webmanifest"}:\n                continue\n            if path.name in {"robots.txt", "sitemap.xml"}:\n                continue\n'''
+          new = '''            if not path.is_file() or path.suffix.lower() not in {".html", ".js", ".css", ".webmanifest"}:\n                continue\n            if path.name in {"robots.txt", "sitemap.xml", "sw.js"}:\n                continue\n'''
+          if old not in text:
+              raise SystemExit('unresolved scan patch marker bulunamadı')
+          smoke.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
+          python -m py_compile alo186/deployment/prepare_github_pages.py alo186/deployment/smoke_github_pages.py
+      - name: Helper dosyalarını kaldır ve branch'e kaydet
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/alo186-pages-dual-mode-fix-once.yml .github/alo186-pages-dual-mode-fix.trigger
+          git add alo186/deployment/prepare_github_pages.py alo186/deployment/smoke_github_pages.py
+          git commit -m 'fix(alo186): GitHub Pages dual-mode smoke hatalarını kapat'
+          git push origin HEAD:infra/alo186-github-pages-primary-20260728
