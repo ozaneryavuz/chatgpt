@@ -69,27 +69,34 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test -f /tmp/alo186-portal-site/elektrik-portali/index.html
+          portal=/tmp/alo186-portal-site/elektrik-portali/index.html
+          test -f "$portal"
           test -f /tmp/alo186-portal-site/elektrik-portali/styles.css
           test -f /tmp/alo186-portal-site/.htaccess
           test -f /tmp/alo186-portal-site/alo186-release.json
           test -f /tmp/alo186-portal-site/kesintiye-hazirlik-atolyesi/index.html
           test -f /tmp/alo186-portal-site/kurumsal-elektrik-surekliligi-on-degerlendirme/index.html
           test -f /tmp/alo186-portal-site/tedarikci-ve-uretici-isbirligi/index.html
-          grep -q 'Cihaz hasarında başvuru süresi 10 iş günüdür' /tmp/alo186-portal-site/elektrik-portali/index.html
-          grep -q '26 kişisel veri istemeyen araç' /tmp/alo186-portal-site/elektrik-portali/index.html
-          grep -q '45 kaynak doğrulamalı rehber' /tmp/alo186-portal-site/elektrik-portali/index.html
-          grep -q 'href="/edas-bul"' /tmp/alo186-portal-site/elektrik-portali/index.html
-          grep -q 'href="/hesaplama/elektrik-kesintisi-tatbikati/"' /tmp/alo186-portal-site/elektrik-portali/index.html
-          grep -q 'href="/hesaplama/modem-internet-yedekleme/"' /tmp/alo186-portal-site/elektrik-portali/index.html
-          grep -q 'href="/hesaplama/akilli-priz-enerji-olcer-uygunluk/"' /tmp/alo186-portal-site/elektrik-portali/index.html
-          grep -q 'href="/kesintiye-hazirlik-atolyesi"' /tmp/alo186-portal-site/elektrik-portali/index.html
-          grep -q 'href="/kurumsal-elektrik-surekliligi-on-degerlendirme"' /tmp/alo186-portal-site/elektrik-portali/index.html
-          grep -q 'href="/tedarikci-ve-uretici-isbirligi"' /tmp/alo186-portal-site/elektrik-portali/index.html
+
+          # Portal kapsamı büyüdüğünde eski sabit araç/rehber sayıları CI'ı yanlış
+          # biçimde kırmamalı. Üretim portalı kaynak portalın birebir kopyasıdır;
+          # kapsam ve kart sözleşmesini kaynak testleri doğrular.
+          cmp --silent alo186/index.html "$portal"
+
+          grep -q 'Cihaz hasarında başvuru süresi 10 iş günüdür' "$portal"
+          grep -Eq '[0-9]+ kişisel veri istemeyen araç' "$portal"
+          grep -Eq '[0-9]+ kaynak doğrulamalı( teknik)? rehber' "$portal"
+          grep -q 'href="/edas-bul"' "$portal"
+          grep -q 'href="/hesaplama/elektrik-kesintisi-tatbikati/"' "$portal"
+          grep -q 'href="/hesaplama/modem-internet-yedekleme/"' "$portal"
+          grep -q 'href="/hesaplama/akilli-priz-enerji-olcer-uygunluk/"' "$portal"
+          grep -q 'href="/kesintiye-hazirlik-atolyesi"' "$portal"
+          grep -q 'href="/kurumsal-elektrik-surekliligi-on-degerlendirme"' "$portal"
+          grep -q 'href="/tedarikci-ve-uretici-isbirligi"' "$portal"
           grep -q 'Strict-Transport-Security' /tmp/alo186-portal-site/.htaccess
           grep -q 'AddOutputFilterByType SUBSTITUTE text/html application/xhtml+xml' /tmp/alo186-portal-site/.htaccess
-          ! grep -q 'href="./turkiye-arama/"' /tmp/alo186-portal-site/elektrik-portali/index.html
-          ! grep -q '19 kişisel veri istemeyen araç' /tmp/alo186-portal-site/elektrik-portali/index.html
+          ! grep -q 'href="./turkiye-arama/"' "$portal"
+          ! grep -q '19 kişisel veri istemeyen araç' "$portal"
 
       - name: Doğrulanmış portal artifactını sakla
         uses: actions/upload-artifact@v4
