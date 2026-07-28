@@ -54,9 +54,12 @@ const articles=[
   {slug:'parafudr-uc-up-in-imax-iimp-ne-demek',required:['Uc','Up','In','Imax','Iimp','Isccr'],cta:'/hesaplama/parafudr-risk-testi/',fresh:true,portalOptional:true},
   {slug:'ups-overload-asiri-yuk-alarmi-neden-verir',required:['UPS overload','VA veya Watt','kalkış gücü','yüksüz durumda','bataryaya geçiş'],cta:'/hesaplama/ups-suresi/',fresh:true,portalOptional:true},
   {slug:'jenerator-voltaj-frekans-dalgalanmasi-neden-olur',required:['motor devri','governor','AVR','yük adımı','V/Hz'],cta:'/hesaplama/jenerator-gucu-secimi/',fresh:true,portalOptional:true},
-  {slug:'elektrikli-arac-sarj-olmuyor-wallbox-neden-baslamiyor',required:['zamanlanmış şarj','control pilot','port kilidi','RCD','112'],cta:'/hesaplama/ev-sarj-uygunluk/',fresh:true,portalOptional:true}
+  {slug:'elektrikli-arac-sarj-olmuyor-wallbox-neden-baslamiyor',required:['zamanlanmış şarj','control pilot','port kilidi','RCD','112'],cta:'/hesaplama/ev-sarj-uygunluk/',fresh:true,portalOptional:true},
+  {slug:'ups-surekli-otuyor-bip-sesi-ne-anlama-gelir',required:['On Battery','Low Battery','Replace Battery','Disconnected Battery','overload'],cta:'/hesaplama/ups-suresi/',fresh:true,portalOptional:true},
+  {slug:'jenerator-mars-basmiyor-calismiyor-ne-yapilmali',required:['electric start battery','fuel shut-off valve','low oil shutdown','choke','112'],cta:'/hesaplama/ekipman-bakim-plani/',fresh:true,portalOptional:true},
+  {slug:'ev-sarj-kablosu-prizi-isiniyor-ne-yapilmali',required:['thermal derating','Wall plug temperature high','Charge handle temperature high','Wall Connector wiring','112'],cta:'/hesaplama/ev-sarj-kablosu-uygunluk/',fresh:true,portalOptional:true}
 ];
-assert.strictEqual(articles.length,51,'İçerik kalite testi 51 teknik makaleyi kapsamalı.');
+assert.strictEqual(articles.length,54,'İçerik kalite testi 54 teknik makaleyi kapsamalı.');
 
 for(const article of articles){
   const file=path.join(repoRoot,'alo186/haberler',article.slug,'index.html');
@@ -99,8 +102,8 @@ assert(cssText.includes('prefers-reduced-motion'),'Azaltılmış hareket desteğ
 const sitemap=fs.readFileSync(path.join(repoRoot,'alo186/sitemap.xml'),'utf8');
 const routing=JSON.parse(fs.readFileSync(path.join(repoRoot,'alo186/deployment/routing-manifest.json'),'utf8'));
 const portal=fs.readFileSync(path.join(repoRoot,'alo186/index.html'),'utf8');
-assert.strictEqual(routing.routes.filter(route=>route.type==='article').length,51,'Routing manifest 51 teknik makale içermeli.');
-assert(portal.includes('45 kaynak doğrulamalı rehber'),'Portal mevcut 45 kartı görünür göstermeli; yeni altı rehber sitemap ve konu içi bağlantılarla yayınlanır.');
+assert.strictEqual(routing.routes.filter(route=>route.type==='article').length,54,'Routing manifest 54 teknik makale içermeli.');
+assert(portal.includes('45 kaynak doğrulamalı rehber'),'Portal mevcut 45 kartı görünür göstermeli; yeni dokuz rehber sitemap ve konu içi bağlantılarla yayınlanır.');
 for(const article of articles){
   const canonicalPath=`/haberler/${article.slug}`;
   assert(sitemap.includes(`https://www.alo186.com${canonicalPath}`),`Sitemap eksik: ${article.slug}`);
