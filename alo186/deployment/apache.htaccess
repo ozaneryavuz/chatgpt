@@ -5,15 +5,17 @@ ErrorDocument 404 /404.html
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
-  # Önce canonical hostu tekilleştir.
-  RewriteCond %{HTTP_HOST} !^www\.alo186\.com$ [NC]
-  RewriteRule ^ https://www.alo186.com%{REQUEST_URI} [R=301,L,NE]
+  # Canlı canonical, robots ve sitemap politikası apex hostu kullanır.
+  # Yanlış hostu doğrudan HTTPS apex sürümüne taşıyarak www + HTTP isteğini
+  # tek dış yönlendirmede canonical URL'ye ulaştır.
+  RewriteCond %{HTTP_HOST} !^alo186\.com$ [NC]
+  RewriteRule ^ https://alo186.com%{REQUEST_URI} [R=301,L,NE]
 
-  # Ardından doğrudan HTTP isteklerini HTTPS'e taşı. CDN/proxy X-Forwarded-Proto
-  # gönderiyorsa HTTPS isteğinde yönlendirme döngüsü oluşmasını önler.
+  # Apex host üzerindeki doğrudan HTTP isteklerini HTTPS'e taşı. CDN/proxy
+  # X-Forwarded-Proto gönderiyorsa HTTPS isteğinde döngü oluşmasını önler.
   RewriteCond %{HTTPS} !=on
   RewriteCond %{HTTP:X-Forwarded-Proto} !https [NC]
-  RewriteRule ^ https://www.alo186.com%{REQUEST_URI} [R=301,L,NE]
+  RewriteRule ^ https://alo186.com%{REQUEST_URI} [R=301,L,NE]
 
   # Uzantısız canonical URL'leri klasör indexlerine çözer.
   RewriteCond %{REQUEST_FILENAME} !-f
