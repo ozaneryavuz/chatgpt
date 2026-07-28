@@ -1,0 +1,57 @@
+name: ALO186 güneş paneli power station uygunluk kalite kontrolü
+
+on:
+  push:
+    branches: [main, 'feature/**']
+    paths:
+      - 'alo186/hesaplama/gunes-paneli-power-station-uygunluk/**'
+      - 'alo186/hesaplama/index.html'
+      - 'alo186/deployment/routing-manifest.json'
+      - 'alo186/sitemap.xml'
+      - '.github/workflows/alo186-solar-input-ci.yml'
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/gunes-paneli-power-station-uygunluk/**'
+      - 'alo186/hesaplama/index.html'
+      - 'alo186/deployment/routing-manifest.json'
+      - 'alo186/sitemap.xml'
+      - '.github/workflows/alo186-solar-input-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Senaryo ve hesap motoru testleri
+        run: node alo186/hesaplama/gunes-paneli-power-station-uygunluk/test.js
+      - name: JavaScript sözdizimi
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check alo186/hesaplama/gunes-paneli-power-station-uygunluk/core.js
+          node --check alo186/hesaplama/gunes-paneli-power-station-uygunluk/app.js
+      - name: Yayın, gizlilik ve affiliate sözleşmesi
+        shell: bash
+        run: |
+          set -euo pipefail
+          file='alo186/hesaplama/gunes-paneli-power-station-uygunluk/index.html'
+          grep -q 'Elektriksel ön kontroldür; kurulum onayı değildir' "$file"
+          grep -q 'Reklam / satış ortaklığı açıklaması' "$file"
+          grep -q 'Kişisel veri yok' "$file"
+          grep -q 'gunes-paneli-power-station-uygunluk' alo186/deployment/routing-manifest.json
+          grep -q 'hesaplama/gunes-paneli-power-station-uygunluk/' alo186/sitemap.xml
+          grep -q 'Güneş Paneli ve Power Station Uyumu' alo186/hesaplama/index.html
+          if grep -Eqi 'amazon\.(com\.tr|com)/' "$file"; then
+            echo 'Doğrudan Amazon bağlantısı bulundu.' >&2
+            exit 1
+          fi
+          if grep -Eqi 'type="(email|tel|text)"|name="(address|phone|email|subscription|tc|identity|note)' "$file"; then
+            echo 'Kişisel veri veya serbest metin alanı bulundu.' >&2
+            exit 1
+          fi
