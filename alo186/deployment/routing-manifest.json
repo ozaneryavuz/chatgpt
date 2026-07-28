@@ -1,5 +1,5 @@
 {
-  "version": 16,
+  "version": 17,
   "canonicalHost": "https://www.alo186.com",
   "generatedAt": "2026-07-28",
   "routes": [
@@ -67,7 +67,10 @@
     {"source":"alo186/haberler/kacak-akim-rolesi-test-dugmesi-ne-siklikla/index.html","canonicalPath":"/haberler/kacak-akim-rolesi-test-dugmesi-ne-siklikla","type":"article"},
     {"source":"alo186/haberler/elektrik-sayaci-arizali-mi-fatura-itirazi/index.html","canonicalPath":"/haberler/elektrik-sayaci-arizali-mi-fatura-itirazi","type":"article"},
     {"source":"alo186/haberler/v2l-v2h-v2g-farki-cift-yonlu-sarj/index.html","canonicalPath":"/haberler/v2l-v2h-v2g-farki-cift-yonlu-sarj","type":"article"},
-    {"source":"alo186/haberler/batarya-c-rate-dod-kullanilabilir-kapasite/index.html","canonicalPath":"/haberler/batarya-c-rate-dod-kullanilabilir-kapasite","type":"article"}
+    {"source":"alo186/haberler/batarya-c-rate-dod-kullanilabilir-kapasite/index.html","canonicalPath":"/haberler/batarya-c-rate-dod-kullanilabilir-kapasite","type":"article"},
+    {"source":"alo186/haberler/elektrik-arizasinda-edas-mi-tedarikci-mi-aranir/index.html","canonicalPath":"/haberler/elektrik-arizasinda-edas-mi-tedarikci-mi-aranir","type":"article"},
+    {"source":"alo186/haberler/elektrik-kesintisinde-buzdolabi-dondurucu-kac-saat-dayanir/index.html","canonicalPath":"/haberler/elektrik-kesintisinde-buzdolabi-dondurucu-kac-saat-dayanir","type":"article"},
+    {"source":"alo186/haberler/ges-inverter-izolasyon-direnci-dusuk-hatasi/index.html","canonicalPath":"/haberler/ges-inverter-izolasyon-direnci-dusuk-hatasi","type":"article"}
   ],
   "requiredIntegrations": [
     "canonical URL must resolve with HTTP 200",

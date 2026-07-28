@@ -39,9 +39,12 @@ const articles=[
   {slug:'kacak-akim-rolesi-test-dugmesi-ne-siklikla',required:['TEST düğmesi','altı aylık','aylık','IΔn','köprülemek'],cta:'/hesaplama/ekipman-bakim-plani/',fresh:true},
   {slug:'elektrik-sayaci-arizali-mi-fatura-itirazi',required:['EPDK','1 yıl','%30','dağıtım şirketi','tedarik şirketi'],cta:'/fatura-analizi',fresh:true},
   {slug:'v2l-v2h-v2g-farki-cift-yonlu-sarj',required:['V2L','V2H','V2G','ISO 15118-20','gelir garantisi'],cta:'/hesaplama/ev-sarj-uygunluk/',fresh:true},
-  {slug:'batarya-c-rate-dod-kullanilabilir-kapasite',required:['C-rate','DoD','SoC','kullanılabilir kWh','çevrim ömrü'],cta:'/hesaplama/inverter-uygunluk/',fresh:true}
+  {slug:'batarya-c-rate-dod-kullanilabilir-kapasite',required:['C-rate','DoD','SoC','kullanılabilir kWh','çevrim ömrü'],cta:'/hesaplama/inverter-uygunluk/',fresh:true},
+  {slug:'elektrik-arizasinda-edas-mi-tedarikci-mi-aranir',required:['dağıtım şirketi','görevli tedarik şirketi','186','15 iş günü','ALO186 resmî kayıt almaz'],cta:'/edas-bul',fresh:true},
+  {slug:'elektrik-kesintisinde-buzdolabi-dondurucu-kac-saat-dayanir',required:['4 saat','48 saat','24 saat','4°C','Şüpheli gıdayı tatmayın'],cta:'/hesaplama/kesinti-hazirlik-plani/',fresh:true},
+  {slug:'ges-inverter-izolasyon-direnci-dusuk-hatasi',required:['Low insulation resistance','PV string','yağmur','DC konnektör','yetkili kişi'],cta:'/hesaplama/ekipman-bakim-plani/',fresh:true}
 ];
-assert.strictEqual(articles.length,36,'İçerik kalite testi 36 teknik makaleyi kapsamalı.');
+assert.strictEqual(articles.length,39,'İçerik kalite testi 39 teknik makaleyi kapsamalı.');
 
 for(const article of articles){
   const file=path.join(repoRoot,'alo186/haberler',article.slug,'index.html');
@@ -83,8 +86,8 @@ assert(cssText.includes('prefers-reduced-motion'),'Azaltılmış hareket desteğ
 const sitemap=fs.readFileSync(path.join(repoRoot,'alo186/sitemap.xml'),'utf8');
 const routing=JSON.parse(fs.readFileSync(path.join(repoRoot,'alo186/deployment/routing-manifest.json'),'utf8'));
 const portal=fs.readFileSync(path.join(repoRoot,'alo186/index.html'),'utf8');
-assert.strictEqual(routing.routes.filter(route=>route.type==='article').length,36,'Routing manifest 36 teknik makale içermeli.');
-assert(portal.includes('36 kaynak doğrulamalı teknik rehber'),'Portal görünür makale sayısı 36 olmalı.');
+assert.strictEqual(routing.routes.filter(route=>route.type==='article').length,39,'Routing manifest 39 teknik makale içermeli.');
+assert(portal.includes('39 kaynak doğrulamalı teknik rehber'),'Portal görünür makale sayısı 39 olmalı.');
 for(const article of articles){
   const canonicalPath=`/haberler/${article.slug}`;
   assert(sitemap.includes(`https://www.alo186.com${canonicalPath}`),`Sitemap eksik: ${article.slug}`);
