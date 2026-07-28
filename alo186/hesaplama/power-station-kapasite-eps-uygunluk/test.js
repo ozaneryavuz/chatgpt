@@ -44,7 +44,7 @@ const fridgeCompatible=run({loadType:'fridge',continuousPowerW:150,surgePowerW:9
 assert.equal(fridgeCompatible.status,'compatible');
 assert.equal(fridgeCompatible.commercialAllowed,true);
 
-assert.ok(run({continuousPowerW:1300}).blockerCodes.includes('continuous_power'));
+assert.ok(run({continuousPowerW:1300,surgePowerW:1400}).blockerCodes.includes('continuous_power'));
 assert.ok(run({surgePowerW:2000}).blockerCodes.includes('surge_power'));
 assert.ok(run({pureSine:false}).blockerCodes.includes('waveform'));
 assert.ok(run({loadType:'medical'}).blockerCodes.includes('medical'));
