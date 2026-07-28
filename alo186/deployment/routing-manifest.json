@@ -1,5 +1,5 @@
 {
-  "version": 16,
+  "version": 17,
   "canonicalHost": "https://www.alo186.com",
   "generatedAt": "2026-07-28",
   "routes": [
@@ -46,6 +46,11 @@
     {
       "source": "alo186/hesaplama/elektrik-surekliligi-pasaportu/index.html",
       "canonicalPath": "/hesaplama/elektrik-surekliligi-pasaportu/",
+      "type": "business-tool"
+    },
+    {
+      "source": "alo186/hesaplama/elektrik-kesintisi-tatbikati/index.html",
+      "canonicalPath": "/hesaplama/elektrik-kesintisi-tatbikati/",
       "type": "business-tool"
     },
     {
