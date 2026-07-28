@@ -8,7 +8,8 @@ from pathlib import Path
 
 MARKER = 'data-alo186-common-runtime="true"'
 PENDING_MARKER = 'data-alo186-pending-context="true"'
-CARD_MARKER = 'data-alo186-outcome-card="true"'
+OUTCOME_CARD_MARKER = 'data-alo186-outcome-card="true"'
+PLAN_CARD_MARKER = 'data-alo186-plan-card="true"'
 OUTCOME_RELATIVE = Path("hesaplama/cozum-sonucu/index.html")
 PORTAL_RELATIVE = Path("elektrik-portali/index.html")
 GATEWAY_RELATIVE = Path("index.html")
@@ -26,49 +27,63 @@ def public_url(base_path: str, route: str) -> str:
     return f"{base_path}{route}" if base_path else route
 
 
-def insert_after_grid_open(text: str, card: str) -> tuple[str, bool]:
-    if CARD_MARKER in text:
-        return text, False
+def insert_after_grid_open(text: str, cards: list[str]) -> tuple[str, int]:
+    missing = [card for card in cards if card.split(' ', 2)[1] not in text]
+    if not missing:
+        return text, 0
     for match in re.finditer(r'<section\b[^>]*>', text, re.I):
         class_match = re.search(r'class=["\']([^"\']*)["\']', match.group(0), re.I)
         if not class_match or "grid" not in class_match.group(1).split():
             continue
-        return text[: match.end()] + "\n" + card + text[match.end() :], True
-    return text, False
+        return text[: match.end()] + "\n" + "\n".join(missing) + text[match.end() :], len(missing)
+    return text, 0
 
 
 def outcome_card(base_path: str, gateway: bool = False) -> str:
     href = public_url(base_path, "/hesaplama/cozum-sonucu/")
     if gateway:
-        return f'<a class="card" {CARD_MARKER} href="{href}"><strong>Çözüm gerçekten işe yaradı mı?</strong><p>Öneri, ürün, bakım veya resmî kanal sonucunu kişisel veri vermeden kaydedin; tekrar eden problemi doğru rotaya taşıyın.</p><span>Sonucu kaydet ve izle →</span></a>'
-    return f'<a class="card" {CARD_MARKER} href="{href}"><span class="tag">Kapalı döngü · satın almama · tekrar önleme</span><h2>Çözüm Sonucu Merkezi</h2><p>Karar, hesap, ürün, bakım veya resmî kanalın gerçekten işe yarayıp yaramadığını izleyin; çözüldüyse yeni ürün önerilmez.</p><b>Sonucu kaydet ve tekrar riskini izle →</b></a>'
+        return f'<a class="card" {OUTCOME_CARD_MARKER} href="{href}"><strong>Çözüm gerçekten işe yaradı mı?</strong><p>Öneri, ürün, bakım veya resmî kanal sonucunu kişisel veri vermeden kaydedin; tekrar eden problemi doğru rotaya taşıyın.</p><span>Sonucu kaydet ve izle →</span></a>'
+    return f'<a class="card" {OUTCOME_CARD_MARKER} href="{href}"><span class="tag">Kapalı döngü · satın almama · tekrar önleme</span><h2>Çözüm Sonucu Merkezi</h2><p>Karar, hesap, ürün, bakım veya resmî kanalın gerçekten işe yarayıp yaramadığını izleyin; çözüldüyse yeni ürün önerilmez.</p><b>Sonucu kaydet ve tekrar riskini izle →</b></a>'
 
 
-def add_offline_route(site: Path, base_path: str) -> bool:
+def plan_card(base_path: str, gateway: bool = False) -> str:
+    href = public_url(base_path, "/hesaplama/elektrik-planim/")
+    if gateway:
+        return f'<a class="card" {PLAN_CARD_MARKER} href="{href}"><strong>Elektrik Planım</strong><p>Kesinti, bakım, ürün yeniden kontrolü ve çözülmemiş işleri tek kişisel verisiz öncelik planında görün.</p><span>Bugünkü planı aç →</span></a>'
+    return f'<a class="card" {PLAN_CARD_MARKER} href="{href}"><span class="tag">Tek plan · tekrar ziyaret · profesyonel hazırlık</span><h2>Elektrik Planım</h2><p>Yerel kesinti, bakım, ürün ve çözüm kayıtlarını tek öncelik listesinde birleştirin; tekrar eden yüksek riskli sonuçları profesyonel pakete dönüştürün.</p><b>Bugünkü planı aç →</b></a>'
+
+
+def add_offline_routes(site: Path, base_path: str) -> list[str]:
     sw_path = site / "sw.js"
     if not sw_path.is_file():
         raise FileNotFoundError(f"GitHub Pages service worker eksik: {sw_path}")
-    outcome_url = public_url(base_path, "/hesaplama/cozum-sonucu/")
+    routes = [
+        public_url(base_path, "/hesaplama/cozum-sonucu/"),
+        public_url(base_path, "/hesaplama/elektrik-planim/"),
+    ]
     text = sw_path.read_text(encoding="utf-8")
     match = re.search(r"const CRITICAL=(\[.*?\]);", text, re.S)
     if not match:
         raise RuntimeError("Service worker CRITICAL rota dizisi bulunamadı")
     critical = json.loads(match.group(1))
-    if outcome_url in critical:
-        return False
-    critical.append(outcome_url)
-    updated = text[: match.start(1)] + json.dumps(critical, ensure_ascii=False) + text[match.end(1) :]
-    sw_path.write_text(updated, encoding="utf-8")
-    return True
+    added = []
+    for route in routes:
+        if route not in critical:
+            critical.append(route)
+            added.append(route)
+    if added:
+        updated = text[: match.start(1)] + json.dumps(critical, ensure_ascii=False) + text[match.end(1) :]
+        sw_path.write_text(updated, encoding="utf-8")
+    return added
 
 
-def update_pages_release(site: Path, base_path: str, injected: int, pending_injected: int, cards_injected: int, offline_added: bool) -> None:
+def update_pages_release(site: Path, base_path: str, injected: int, pending_injected: int, cards_injected: int, offline_added: list[str]) -> None:
     release_path = site / "pages-release.json"
     if not release_path.is_file():
         return
     release = json.loads(release_path.read_text(encoding="utf-8"))
     release["outcomeRuntime"] = {
-        "version": 1,
+        "version": 2,
         "basePath": base_path,
         "injectedPages": injected,
         "pendingContextInjected": pending_injected,
@@ -76,9 +91,11 @@ def update_pages_release(site: Path, base_path: str, injected: int, pending_inje
         "pendingRecordLimit": 6,
         "pendingTtlDays": 45,
         "offlineOutcomeRoute": public_url(base_path, "/hesaplama/cozum-sonucu/"),
+        "offlinePlanRoute": public_url(base_path, "/hesaplama/elektrik-planim/"),
+        "productTrustCircuit": True,
     }
     if offline_added:
-        release["offlineCriticalRouteCount"] = int(release.get("offlineCriticalRouteCount") or 0) + 1
+        release["offlineCriticalRouteCount"] = int(release.get("offlineCriticalRouteCount") or 0) + len(offline_added)
     release_path.write_text(json.dumps(release, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
@@ -98,19 +115,16 @@ def inject(site: Path, base_path: str) -> dict:
     common = site / "hesaplama" / "common.js"
     bridge = site / "hesaplama" / "outcome-bridge.js"
     pending_context = site / "hesaplama" / "cozum-sonucu" / "pending-context.js"
-    if not common.is_file():
-        raise FileNotFoundError(f"Ortak hesaplama runtime eksik: {common}")
-    if not bridge.is_file():
-        raise FileNotFoundError(f"Çözüm sonucu köprüsü eksik: {bridge}")
-    if not pending_context.is_file():
-        raise FileNotFoundError(f"Bekleyen çözüm bağlamı tüketicisi eksik: {pending_context}")
+    plan_page = site / "hesaplama" / "elektrik-planim" / "index.html"
+    trust_core = site / "akilli-urun-secimi" / "outcome-trust-circuit-core.js"
+    trust_ui = site / "akilli-urun-secimi" / "outcome-trust-circuit.js"
+    for required, label in [(common,"Ortak hesaplama runtime"),(bridge,"Çözüm sonucu köprüsü"),(pending_context,"Bekleyen çözüm bağlamı tüketicisi"),(plan_page,"Elektrik Planım"),(trust_core,"Ürün güven devre kesicisi core"),(trust_ui,"Ürün güven devre kesicisi UI")]:
+        if not required.is_file():
+            raise FileNotFoundError(f"{label} eksik: {required}")
 
     common_url = public_url(base_path, "/hesaplama/common.js")
     pending_url = public_url(base_path, "/hesaplama/cozum-sonucu/pending-context.js")
-    injected = 0
-    already_present = 0
-    pending_injected = 0
-    cards_injected = 0
+    injected = already_present = pending_injected = cards_injected = 0
     missing_body = []
 
     for html_path in sorted(site.rglob("*.html")):
@@ -118,11 +132,11 @@ def inject(site: Path, base_path: str) -> dict:
         text = html_path.read_text(encoding="utf-8", errors="ignore")
 
         if relative == PORTAL_RELATIVE:
-            text, added = insert_after_grid_open(text, outcome_card(base_path))
-            cards_injected += int(added)
+            text, added = insert_after_grid_open(text, [outcome_card(base_path), plan_card(base_path)])
+            cards_injected += added
         elif relative == GATEWAY_RELATIVE:
-            text, added = insert_after_grid_open(text, outcome_card(base_path, gateway=True))
-            cards_injected += int(added)
+            text, added = insert_after_grid_open(text, [outcome_card(base_path, True), plan_card(base_path, True)])
+            cards_injected += added
 
         tags = []
         if MARKER not in text:
@@ -140,17 +154,16 @@ def inject(site: Path, base_path: str) -> dict:
                 missing_body.append(relative.as_posix())
                 continue
             text = text.replace("</body>", "\n".join(tags) + "\n</body>", 1)
-
         html_path.write_text(text, encoding="utf-8")
 
     if missing_body:
         raise RuntimeError("Outcome runtime için </body> bulunamayan HTML: " + ", ".join(missing_body[:20]))
 
-    offline_added = add_offline_route(site, base_path)
+    offline_added = add_offline_routes(site, base_path)
     update_pages_release(site, base_path, injected, pending_injected, cards_injected, offline_added)
     recompute_checksums(site)
 
-    result = {
+    return {
         "ok": True,
         "basePath": base_path,
         "commonUrl": common_url,
@@ -159,14 +172,14 @@ def inject(site: Path, base_path: str) -> dict:
         "alreadyPresent": already_present,
         "pendingContextInjected": pending_injected,
         "entryCardsInjected": cards_injected,
-        "offlineOutcomeRouteAdded": offline_added,
+        "offlineRoutesAdded": offline_added,
+        "productTrustCircuit": True,
         "totalPages": injected + already_present,
     }
-    return result
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="ALO186 ortak çözüm sonucu runtime'ını bütün GitHub Pages HTML rotalarına ekler.")
+    parser = argparse.ArgumentParser(description="ALO186 ortak sonuç, plan ve güven runtime'ını bütün GitHub Pages HTML rotalarına ekler.")
     parser.add_argument("--site", type=Path, required=True)
     parser.add_argument("--base-path", default="")
     args = parser.parse_args()
