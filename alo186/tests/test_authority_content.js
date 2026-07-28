@@ -36,9 +36,12 @@ const articles=[
   {slug:'ges-inverter-sebeke-gerilimi-yuksek-hatasi',required:['şebeke gerilimi','şebeke empedansı','on dakikalık ortalama','ülke ayarı','dağıtım şirketi'],cta:'/edas-bul',fresh:true},
   {slug:'power-station-gunes-paneli-nasil-secilir',required:['Voc','Vmp','Isc','Imp','MPPT','polarite'],cta:'/hesaplama/gunes-paneli-power-station-uygunluk/',fresh:true},
   {slug:'tip-2-ev-sarj-kablosu-nasil-secilir',required:['Type 2','Mode 3','16 A','32 A','uzatma kablosu'],cta:'/hesaplama/ev-sarj-uygunluk/',fresh:true},
-  {slug:'kacak-akim-rolesi-test-dugmesi-ne-siklikla',required:['TEST düğmesi','altı aylık','aylık','IΔn','köprülemek'],cta:'/hesaplama/ekipman-bakim-plani/',fresh:true}
+  {slug:'kacak-akim-rolesi-test-dugmesi-ne-siklikla',required:['TEST düğmesi','altı aylık','aylık','IΔn','köprülemek'],cta:'/hesaplama/ekipman-bakim-plani/',fresh:true},
+  {slug:'elektrik-arizasinda-edas-mi-tedarikci-mi-aranir',required:['dağıtım şirketi','görevli tedarik şirketi','186','15 iş günü','ALO186 resmî kayıt almaz'],cta:'/edas-bul',fresh:true},
+  {slug:'elektrik-kesintisinde-buzdolabi-dondurucu-kac-saat-dayanir',required:['4 saat','48 saat','24 saat','4°C','Şüpheli gıdayı tatmayın'],cta:'/hesaplama/kesinti-hazirlik-plani/',fresh:true},
+  {slug:'ges-inverter-izolasyon-direnci-dusuk-hatasi',required:['Low insulation resistance','PV string','yağmur','DC konnektör','yetkili kişi'],cta:'/hesaplama/ekipman-bakim-plani/',fresh:true}
 ];
-assert.strictEqual(articles.length,33,'İçerik kalite testi 33 teknik makaleyi kapsamalı.');
+assert.strictEqual(articles.length,36,'İçerik kalite testi 36 teknik makaleyi kapsamalı.');
 
 for(const article of articles){
   const file=path.join(repoRoot,'alo186/haberler',article.slug,'index.html');
@@ -80,12 +83,13 @@ assert(cssText.includes('prefers-reduced-motion'),'Azaltılmış hareket desteğ
 const sitemap=fs.readFileSync(path.join(repoRoot,'alo186/sitemap.xml'),'utf8');
 const routing=JSON.parse(fs.readFileSync(path.join(repoRoot,'alo186/deployment/routing-manifest.json'),'utf8'));
 const portal=fs.readFileSync(path.join(repoRoot,'alo186/index.html'),'utf8');
-assert.strictEqual(routing.routes.filter(route=>route.type==='article').length,33,'Routing manifest 33 teknik makale içermeli.');
-assert(portal.includes('33 kaynak doğrulamalı teknik rehber'),'Portal görünür makale sayısı 33 olmalı.');
+assert.strictEqual(routing.routes.filter(route=>route.type==='article').length,36,'Routing manifest 36 teknik makale içermeli.');
+assert(portal.includes('36 kaynak doğrulamalı teknik rehber'),'Portal görünür makale sayısı 36 olmalı.');
 for(const article of articles){
   const canonicalPath=`/haberler/${article.slug}`;
   assert(sitemap.includes(`https://www.alo186.com${canonicalPath}`),`Sitemap eksik: ${article.slug}`);
   assert(routing.routes.some(route=>route.canonicalPath===canonicalPath&&route.type==='article'),`Routing manifest eksik: ${article.slug}`);
   assert(portal.includes(`href="${canonicalPath}"`),`Portal kartı eksik: ${article.slug}`);
 }
+
 console.log(`ALO186 içerik otoritesi: ${articles.length} makale SEO, AEO, JSON-LD, erişilebilirlik, routing ve güvenlik testlerini geçti.`);
