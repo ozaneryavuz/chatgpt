@@ -123,6 +123,42 @@ const articles=[
     required:['DC/AC oranı','clipping','PVWatts','MPPT','yıllık enerji'],
     cta:'/fatura-analizi',
     fresh:true
+  },
+  {
+    slug:'elektrik-panosunda-termal-kamera-kontrolu',
+    required:['emisivite','gevşek bağlantı','ark parlaması','yetkili personel','sürekli termal izleme'],
+    cta:'/hesaplama/ekipman-bakim-plani/',
+    fresh:true
+  },
+  {
+    slug:'faz-dengesizligi-faz-kaybi-motoru-nasil-etkiler',
+    required:['faz sırası','faz kaybı','gerilim dengesizliği','akım dengesizliği','motor koruma rölesi'],
+    cta:'/karar-motoru',
+    fresh:true
+  },
+  {
+    slug:'kompanzasyon-panosu-reaktif-guc-neden-bozulur',
+    required:['akım trafosu','kondansatör kademesi','detuned','rezonans','deşarj süresi'],
+    cta:'/isletme-surekliligi',
+    fresh:true
+  },
+  {
+    slug:'ges-fazlasi-ile-elektrikli-arac-sarji',
+    required:['PV fazlası','tek faz–üç faz geçişi','Eco Mode','fail-safe','öz tüketim'],
+    cta:'/hesaplama/ev-sarj-uygunluk/',
+    fresh:true
+  },
+  {
+    slug:'lifepo4-ev-bataryasi-guvenligi-bms-termal-kacak',
+    required:['LiFePO4','BMS','termal kaçak','UL 9540A','DC sigorta'],
+    cta:'/hesaplama/ekipman-bakim-plani/',
+    fresh:true
+  },
+  {
+    slug:'paralel-ups-n-arti-1-yedeklilik-nedir',
+    required:['N+1','paralel UPS','yük paylaşımı','ortak bypass','tek hata noktası'],
+    cta:'/hesaplama/ups-suresi/',
+    fresh:true
   }
 ];
 
@@ -178,4 +214,4 @@ for(const article of articles){
   assert(portal.includes(`href="${canonicalPath}"`),`Portal kartı eksik: ${article.slug}`);
 }
 
-console.log('ALO186 içerik otoritesi makaleleri SEO, AEO, JSON-LD, erişilebilirlik, routing ve güvenlik testlerini geçti.');
+console.log(`ALO186 içerik otoritesi: ${articles.length} makale SEO, AEO, JSON-LD, erişilebilirlik, routing ve güvenlik testlerini geçti.`);
