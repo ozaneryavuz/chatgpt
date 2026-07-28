@@ -44,6 +44,16 @@
     `).join("");
   }
 
+  function enforceExclusiveNone(target, name) {
+    target.addEventListener("change", (event) => {
+      const changed = event.target;
+      if (!(changed instanceof HTMLInputElement) || changed.name !== name || !changed.checked) return;
+      const options = [...target.querySelectorAll(`input[name="${name}"]`)];
+      if (changed.value === "none") options.forEach((item) => { if (item !== changed) item.checked = false; });
+      else options.forEach((item) => { if (item.value === "none") item.checked = false; });
+    });
+  }
+
   function renderTasks() {
     const tasks = core.activeTasks(scenarioSelect.value);
     taskList.innerHTML = ["5", "15", "60"].map((windowValue) => {
@@ -63,18 +73,6 @@
 
   function selected(name) {
     return [...form.querySelectorAll(`input[name="${name}"]:checked`)].map((item) => item.value);
-  }
-
-  function enforceNoneExclusivity(event) {
-    const target = event.target;
-    if (!target.matches('input[type="checkbox"]') || !target.checked) return;
-    const group = target.closest('.choice-grid');
-    if (!group) return;
-    const boxes = [...group.querySelectorAll('input[type="checkbox"]')];
-    if (target.value === "none") boxes.forEach((box) => { if (box !== target) box.checked = false; });
-    else boxes.forEach((box) => { if (box.value === "none") box.checked = false; });
-    results.hidden = true;
-    latestResult = null;
   }
 
   function collect() {
@@ -107,6 +105,14 @@
   function hideValidation() {
     validation.hidden = true;
     validation.innerHTML = "";
+  }
+
+  function invalidateResult() {
+    if (!latestResult && results.hidden) return;
+    results.hidden = true;
+    latestResult = null;
+    panelBtn.textContent = "7 günlük panel aktarımını hazırla";
+    delete panelBtn.dataset.handoffReady;
   }
 
   function formatDate(date) {
@@ -189,6 +195,7 @@
     const result = core.evaluate(collect());
     if (result.emergency) {
       results.hidden = true;
+      latestResult = null;
       emergency.hidden = false;
       emergency.focus();
       emit("continuity_drill_emergency_stopped", { route: "112" });
@@ -197,16 +204,16 @@
     emergency.hidden = true;
     if (!result.valid) {
       results.hidden = true;
+      latestResult = null;
       showValidation(result.errors);
       return;
     }
     renderResult(result);
   });
 
-  scenarioSelect.addEventListener("change", () => {
-    renderTasks();
-    results.hidden = true;
-    latestResult = null;
+  form.addEventListener("change", (event) => {
+    if (event.target === scenarioSelect) renderTasks();
+    invalidateResult();
   });
 
   exportBtn.addEventListener("click", downloadJson);
@@ -226,7 +233,7 @@
 
   renderChoices(criticalLoads, core.CRITICAL_LOADS, "criticalLoad");
   renderChoices(backupSources, core.BACKUP_SOURCES, "backupSource");
-  criticalLoads.addEventListener("change", enforceNoneExclusivity);
-  backupSources.addEventListener("change", enforceNoneExclusivity);
+  enforceExclusiveNone(criticalLoads, "criticalLoad");
+  enforceExclusiveNone(backupSources, "backupSource");
   renderTasks();
 })();
