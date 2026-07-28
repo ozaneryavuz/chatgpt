@@ -80,9 +80,13 @@ const drillApp=fs.readFileSync(path.join(root,'hesaplama/elektrik-kesintisi-tatb
 assert(panelIndex.includes('./drill-handoff-bridge.js'));
 assert(bridge.includes('store.validateDrillHandoff'));
 assert(bridge.includes('store.importDrillHandoff'));
+assert(bridge.includes('const sourcePayload=parse(MATURITY_KEY)'),'Importer normalize edilmiş paket yerine ham handoff kaynağını korumalı.');
+assert(bridge.includes('if(small.textContent!==desired)small.textContent=desired'),'Observer kendi mutation döngüsünü üretmemeli.');
 assert(bridge.includes('continuity_drill_handoff_detected'));
 assert(drillApp.includes('enforceExclusiveNone'));
 assert(drillApp.includes('Panele git ve bulguları içe aktar'));
+assert(drillApp.includes('continuity_drill_handoff_refreshed'));
+assert(drillApp.indexOf('localStorage.setItem("alo186.continuity-drill-handoff.v1"')<drillApp.indexOf('window.location.href = "https://www.alo186.com/isletme-surekliligi"'),'Yönlendirmeden önce güncel handoff tekrar yazılmalı.');
 assert(drillApp.includes('https://www.alo186.com/isletme-surekliligi'));
 
 console.log('Tatbikat → Süreklilik Paneli handoff testleri başarılı.');
