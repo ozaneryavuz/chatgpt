@@ -24,9 +24,13 @@ jobs:
           node --check alo186/urun-eslestirme/catalog.js
           node --check alo186/urun-eslestirme/matcher-core.js
           node --check alo186/urun-eslestirme/app.js
+          node --check alo186/urun-eslestirme/growth-intent-brief.js
           node --check alo186/urun-eslestirme/growth-trust-test.js
+          node --check alo186/urun-eslestirme/growth-intent-brief-test.js
       - name: Trust and conversion tests
-        run: node alo186/urun-eslestirme/growth-trust-test.js
+        run: |
+          node alo186/urun-eslestirme/growth-trust-test.js
+          node alo186/urun-eslestirme/growth-intent-brief-test.js
       - name: Static disclosure and route checks
         shell: bash
         run: |
@@ -37,4 +41,6 @@ jobs:
           grep -q 'modem-internet-yedekleme' alo186/urun-eslestirme/catalog.js
           grep -q 'hesaplama/ups-suresi' alo186/urun-eslestirme/catalog.js
           grep -q 'karar-motoru' alo186/urun-eslestirme/catalog.js
+          grep -q 'no_verified_match_requires_ack' alo186/urun-eslestirme/growth-intent-brief.js
+          grep -q 'alo186_product_briefs_v1' alo186/urun-eslestirme/growth-intent-brief.js
           ! grep -Eiq '<input[^>]+(name|id)="(name|email|phone|address|tc|abonelik)' alo186/urun-eslestirme/index.html
