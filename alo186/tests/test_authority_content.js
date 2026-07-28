@@ -33,8 +33,12 @@ const articles=[
   {slug:'paralel-ups-n-arti-1-yedeklilik-nedir',required:['N+1','paralel UPS','yük paylaşımı','ortak bypass','tek hata noktası'],cta:'/hesaplama/ups-suresi/',fresh:true},
   {slug:'parafudr-gostergesi-kirmizi-ne-demek',required:['durum göstergesi','kırmızı','koruma modülü','yetkili elektrikçi','parafudr risk testi'],cta:'/hesaplama/ekipman-bakim-plani/',fresh:true},
   {slug:'jenerator-saatte-kac-litre-yakar',required:['yük yüzdesi','litre/saat','üretici tüketim tablosu','standby','prime'],cta:'/hesaplama/jenerator-gucu-secimi/',fresh:true},
-  {slug:'ges-inverter-sebeke-gerilimi-yuksek-hatasi',required:['şebeke gerilimi','şebeke empedansı','on dakikalık ortalama','ülke ayarı','dağıtım şirketi'],cta:'/edas-bul',fresh:true}
+  {slug:'ges-inverter-sebeke-gerilimi-yuksek-hatasi',required:['şebeke gerilimi','şebeke empedansı','on dakikalık ortalama','ülke ayarı','dağıtım şirketi'],cta:'/edas-bul',fresh:true},
+  {slug:'power-station-gunes-paneli-nasil-secilir',required:['Voc','Vmp','Isc','Imp','MPPT','polarite'],cta:'/hesaplama/gunes-paneli-power-station-uygunluk/',fresh:true},
+  {slug:'tip-2-ev-sarj-kablosu-nasil-secilir',required:['Type 2','Mode 3','16 A','32 A','uzatma kablosu'],cta:'/hesaplama/ev-sarj-uygunluk/',fresh:true},
+  {slug:'kacak-akim-rolesi-test-dugmesi-ne-siklikla',required:['TEST düğmesi','altı aylık','aylık','IΔn','köprülemek'],cta:'/hesaplama/ekipman-bakim-plani/',fresh:true}
 ];
+assert.strictEqual(articles.length,33,'İçerik kalite testi 33 teknik makaleyi kapsamalı.');
 
 for(const article of articles){
   const file=path.join(repoRoot,'alo186/haberler',article.slug,'index.html');
@@ -44,12 +48,10 @@ for(const article of articles){
   assert(html.toLowerCase().includes('<!doctype html>'));
   assert(html.includes(`rel="canonical" href="${canonical}"`),`Canonical eksik: ${article.slug}`);
   assert(html.includes('meta name="description"'),`Description eksik: ${article.slug}`);
-  assert(html.includes('application/ld+json'),`JSON-LD eksik: ${article.slug}`);
   const jsonLd=[...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
   assert(jsonLd.length>0,`JSON-LD bulunamadı: ${article.slug}`);
   for(const match of jsonLd){
-    const parsed=JSON.parse(match[1]);
-    const graph=parsed['@graph']||[parsed];
+    const graph=JSON.parse(match[1])['@graph']||[JSON.parse(match[1])];
     assert(graph.some(item=>item['@type']==='Article'),`Article schema eksik: ${article.slug}`);
     assert(graph.some(item=>item['@type']==='FAQPage'),`FAQPage schema eksik: ${article.slug}`);
   }
@@ -65,27 +67,25 @@ for(const article of articles){
   assert(!/fiyatı\s+\d|stokta|puanı\s+\d/i.test(html),`Doğrulanmamış ticari bilgi riski: ${article.slug}`);
   assert(!/kesinlikle güvenlidir|her durumda güvenlidir|sonucu garanti eder/i.test(html),`Aşırı kesin güvenlik iddiası riski: ${article.slug}`);
   for(const text of article.required){
-    assert(html.toLocaleLowerCase('tr').includes(text.toLocaleLowerCase('tr')),`Zorunlu güvenlik/teknik ifade eksik (${text}): ${article.slug}`);
+    assert(html.toLocaleLowerCase('tr').includes(text.toLocaleLowerCase('tr')),`Zorunlu ifade eksik (${text}): ${article.slug}`);
   }
-  const h1=(html.match(/<h1\b/g)||[]).length;
-  assert.strictEqual(h1,1,`Tek H1 olmalı: ${article.slug}`);
+  assert.strictEqual((html.match(/<h1\b/g)||[]).length,1,`Tek H1 olmalı: ${article.slug}`);
 }
 
-const css=path.join(repoRoot,'alo186/haberler/alo186-article.css');
-assert(fs.existsSync(css),'Makale CSS dosyası eksik.');
-const cssText=fs.readFileSync(css,'utf8');
-assert(cssText.includes('@media(max-width:820px)'), 'Mobil breakpoint eksik.');
-assert(cssText.includes(':focus-visible'), 'Klavye odak stili eksik.');
-assert(cssText.includes('prefers-reduced-motion'), 'Azaltılmış hareket desteği eksik.');
+const cssText=fs.readFileSync(path.join(repoRoot,'alo186/haberler/alo186-article.css'),'utf8');
+assert(cssText.includes('@media(max-width:820px)'),'Mobil breakpoint eksik.');
+assert(cssText.includes(':focus-visible'),'Klavye odak stili eksik.');
+assert(cssText.includes('prefers-reduced-motion'),'Azaltılmış hareket desteği eksik.');
 
 const sitemap=fs.readFileSync(path.join(repoRoot,'alo186/sitemap.xml'),'utf8');
 const routing=JSON.parse(fs.readFileSync(path.join(repoRoot,'alo186/deployment/routing-manifest.json'),'utf8'));
 const portal=fs.readFileSync(path.join(repoRoot,'alo186/index.html'),'utf8');
+assert.strictEqual(routing.routes.filter(route=>route.type==='article').length,33,'Routing manifest 33 teknik makale içermeli.');
+assert(portal.includes('33 kaynak doğrulamalı teknik rehber'),'Portal görünür makale sayısı 33 olmalı.');
 for(const article of articles){
   const canonicalPath=`/haberler/${article.slug}`;
   assert(sitemap.includes(`https://www.alo186.com${canonicalPath}`),`Sitemap eksik: ${article.slug}`);
   assert(routing.routes.some(route=>route.canonicalPath===canonicalPath&&route.type==='article'),`Routing manifest eksik: ${article.slug}`);
   assert(portal.includes(`href="${canonicalPath}"`),`Portal kartı eksik: ${article.slug}`);
 }
-
 console.log(`ALO186 içerik otoritesi: ${articles.length} makale SEO, AEO, JSON-LD, erişilebilirlik, routing ve güvenlik testlerini geçti.`);
