@@ -54,6 +54,19 @@ function base(overrides) {
   assert.equal(simultaneous.totals.peakW, 2400);
 })();
 
+(function testSingleStartPolicyCountsOneUnitOnly() {
+  const loads = [
+    { name: 'Buzdolabı', runningW: 150, surgeW: 800, quantity: 3, loadType: 'motor' }
+  ];
+  const largest = core.calculate(base({ loads, startPolicy: 'largest', dcVoltage: 48, batteryAh: 200 }));
+  const simultaneous = core.calculate(base({ loads, startPolicy: 'simultaneous', dcVoltage: 48, batteryAh: 200 }));
+  assert.equal(largest.totals.runningW, 450);
+  assert.equal(largest.totals.extraSurgeW, 650);
+  assert.equal(largest.totals.peakW, 1100);
+  assert.equal(simultaneous.totals.extraSurgeW, 1950);
+  assert.equal(simultaneous.totals.peakW, 2400);
+})();
+
 (function testHighDcCurrentBlocksAffiliate() {
   const result = core.calculate(base({
     loads: [{ name: 'Isıtıcı', runningW: 1500, surgeW: 1500, quantity: 1, loadType: 'resistive' }],
@@ -117,6 +130,8 @@ function base(overrides) {
   const inverterCategory = catalog.getCategory('inverter');
 
   assert(html.includes('https://www.alo186.com/hesaplama/inverter-uygunluk/'));
+  assert(html.includes('https://www.alo186.com/akilli-urun-secimi?kategori=inverter&kaynak=inverter-uygunluk'));
+  assert(!html.includes('https://www.alo186.com/urun-eslestirme/?kategori=inverter&kaynak=inverter-uygunluk'));
   assert(html.includes('"@type":"WebApplication"'));
   assert(html.includes('Kişisel veri yok'));
   assert(html.includes('Reklam / satış ortaklığı açıklaması'));
