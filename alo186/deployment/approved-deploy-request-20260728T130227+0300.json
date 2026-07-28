@@ -1,0 +1,24 @@
+{
+  "requestedAt": "2026-07-28T13:02:27+03:00",
+  "reason": "Canlı teknik kalite denetiminde kaynak ve üretim paketiyle çelişen eski yayın tespit edildi.",
+  "canonicalHost": "https://www.alo186.com",
+  "expectedLiveAssertions": [
+    "https://alo186.com üzerindeki tüm yollar aynı www yoluna tek atlamalı kalıcı yönlendirme yapar",
+    "cihaz hasarı başvuru metni 30 gün değil 10 iş günü kullanır",
+    "ALO186 başvuru veya hasar kaydı almadığını görünür biçimde belirtir",
+    "Strict-Transport-Security, X-Content-Type-Options, Content-Security-Policy, Referrer-Policy ve Permissions-Policy başlıkları gönderilir",
+    "robots.txt ve sitemap.xml canonical www hostunu kullanır",
+    "production artifact test veya iç doküman yayımlamaz"
+  ],
+  "liveEvidenceBeforeDeploy": {
+    "homepage": "www ana sayfada cihaz hasarı için 30 gün ifadesi görünür",
+    "portal": "elektrik portalında cihaz hasarı için 30 gün ifadesi görünür",
+    "hostSplit": "apex ve www HTTPS yüzeyleri ayrı içerik sunuyor"
+  },
+  "safety": {
+    "personalDataAdded": false,
+    "officialInstitutionImpersonationAdded": false,
+    "affiliateBehaviorChanged": false,
+    "userFacingFeatureChanged": false
+  }
+}
