@@ -27,7 +27,8 @@
   }
 
   function numericValue(id) {
-    return Number(document.getElementById(id).value || 0);
+    const raw = document.getElementById(id).value.trim();
+    return raw === "" ? null : Number(raw);
   }
 
   function collectAssumptions() {

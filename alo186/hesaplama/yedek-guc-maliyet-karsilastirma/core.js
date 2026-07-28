@@ -13,6 +13,7 @@
   });
 
   function finiteNumber(value, fallback) {
+    if (value === null || value === undefined || value === "") return fallback;
     const parsed = Number(value);
     return Number.isFinite(parsed) ? parsed : fallback;
   }
@@ -21,9 +22,14 @@
     return Math.min(max, Math.max(min, value));
   }
 
+  function normalizedReplacementInterval(value) {
+    const interval = finiteNumber(value, 0);
+    return interval > 0 ? clamp(interval, 0.5, 50) : 0;
+  }
+
   function replacementCount(years, intervalYears) {
     const horizon = Math.max(0, finiteNumber(years, 0));
-    const interval = finiteNumber(intervalYears, 0);
+    const interval = normalizedReplacementInterval(intervalYears);
     if (interval <= 0 || horizon <= interval) return 0;
     return Math.floor((horizon - 0.000001) / interval);
   }
@@ -39,7 +45,7 @@
     const horizon = Math.max(0, finiteNumber(horizonYears, 0));
     const initialCost = Math.max(0, finiteNumber(upfront, 0));
     const annualNetCashFlow = finiteNumber(annualAvoidedImpact, 0) - finiteNumber(annualRecurring, 0);
-    const interval = Math.max(0, finiteNumber(replacementYears, 0));
+    const interval = normalizedReplacementInterval(replacementYears);
     const replacementOutlay = Math.max(0, finiteNumber(replacementCost, 0));
 
     if (horizon <= 0 || annualNetCashFlow <= 0) return null;
@@ -65,11 +71,12 @@
   }
 
   function normalizeAssumptions(input) {
+    const hasImpact = input.impactPerHour !== null && input.impactPerHour !== undefined && input.impactPerHour !== "";
     return {
       years: clamp(finiteNumber(input.years, 0), 1, 20),
       outagesPerYear: clamp(finiteNumber(input.outagesPerYear, 0), 0, 1000),
       hoursPerOutage: clamp(finiteNumber(input.hoursPerOutage, 0), 0, 720),
-      impactPerHour: clamp(finiteNumber(input.impactPerHour, 0), 0, 100000000),
+      impactPerHour: hasImpact ? clamp(finiteNumber(input.impactPerHour, 0), 0, 100000000) : null,
       continuousW: clamp(finiteNumber(input.continuousW, 0), 0, 1000000),
       scope: input.scope === "fixed" ? "fixed" : "plug",
       phase: ["single", "three", "unknown"].includes(input.phase) ? input.phase : "unknown",
@@ -85,7 +92,7 @@
       installation: clamp(finiteNumber(solution.installation, 0), 0, 1000000000),
       annualMaintenance: clamp(finiteNumber(solution.annualMaintenance, 0), 0, 1000000000),
       annualOperating: clamp(finiteNumber(solution.annualOperating, 0), 0, 1000000000),
-      replacementYears: clamp(finiteNumber(solution.replacementYears, 0), 0, 50),
+      replacementYears: normalizedReplacementInterval(solution.replacementYears),
       replacementCost: clamp(finiteNumber(solution.replacementCost, 0), 0, 1000000000),
       coveragePercent: clamp(finiteNumber(solution.coveragePercent, 0), 0, 100)
     };
@@ -146,10 +153,11 @@
     if (assumptions.years < 1) errors.push("Analiz süresi en az bir yıl olmalıdır.");
     if (assumptions.continuousW <= 0) errors.push("Sürekli yük gücünü girin.");
     if (assumptions.outagesPerYear <= 0 || assumptions.hoursPerOutage <= 0) errors.push("Kesinti sıklığı ve süresi sıfırdan büyük olmalıdır.");
+    if (assumptions.impactPerHour === null) errors.push("Kesintinin saatlik tahmini etkisini girin; etkiniz yoksa 0 yazın.");
 
     enabledSolutions.forEach((solution) => {
-      const hasCostBasis = solution.purchase + solution.installation + solution.annualMaintenance + solution.annualOperating + solution.replacementCost > 0;
-      if (!hasCostBasis) errors.push(`${SOLUTION_LABELS[solution.id] || solution.id} için kendi teklif veya maliyet verinizi girin.`);
+      const hasCurrentCostBasis = solution.purchase + solution.installation + solution.annualMaintenance + solution.annualOperating > 0;
+      if (!hasCurrentCostBasis) errors.push(`${SOLUTION_LABELS[solution.id] || solution.id} için satın alma, kurulum veya dönem içi işletme maliyetinizden en az birini girin.`);
       if (solution.coveragePercent <= 0) errors.push(`${SOLUTION_LABELS[solution.id] || solution.id} için karşılama oranını girin.`);
       if (solution.replacementCost > 0 && solution.replacementYears <= 0) errors.push(`${SOLUTION_LABELS[solution.id] || solution.id} yenileme bedeli girildiyse yenileme aralığını da girin.`);
     });
@@ -191,6 +199,7 @@
 
   return {
     SOLUTION_LABELS,
+    normalizedReplacementInterval,
     replacementCount,
     calculatePaybackYears,
     normalizeAssumptions,
