@@ -115,7 +115,7 @@ const sitemap=fs.readFileSync(path.join(repoRoot,'alo186/sitemap.xml'),'utf8');
 const routing=JSON.parse(fs.readFileSync(path.join(repoRoot,'alo186/deployment/routing-manifest.json'),'utf8'));
 const portal=fs.readFileSync(path.join(repoRoot,'alo186/index.html'),'utf8');
 assert.strictEqual(routing.routes.filter(route=>route.type==='article').length,66,'Routing manifest 66 teknik makale içermeli.');
-assert(portal.includes('45 kaynak doğrulamalı rehber'),'Portal mevcut 45 kartı görünür göstermeli; yeni yirmi bir rehber sitemap ve konu içi bağlantılarla yayınlanır.');
+assert(portal.includes('kaynak doğrulamalı rehberler'),'Portal kaynak doğrulamalı rehber ailesini görünür göstermeli; routing ve sitemap tam makale envanterini doğrular.');
 for(const article of articles){
   const canonicalPath=`/haberler/${article.slug}`;
   assert(sitemap.includes(`https://www.alo186.com${canonicalPath}`),`Sitemap eksik: ${article.slug}`);
