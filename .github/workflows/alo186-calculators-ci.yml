@@ -2,7 +2,7 @@ name: ALO186 hesaplayıcı kalite kontrolü
 
 on:
   push:
-    branches: [main, feat/alo186-kullanici-fayda-v1, 'feature/**']
+    branches: [main, feat/alo186-kullanici-fayda-v1, 'feature/**', 'growth/**']
     paths:
       - 'alo186/hesaplama/**'
       - 'alo186/tests/**'
@@ -41,6 +41,7 @@ jobs:
           node alo186/hesaplama/ev-sarj-uygunluk/test.js
           node alo186/hesaplama/kesinti-gunlugu/test.js
           node alo186/hesaplama/inverter-uygunluk/test.js
+          node alo186/hesaplama/ekipman-bakim-plani/test.js
       - name: Kesinti günlüğü güven ve veri minimizasyonu sözleşmesi
         shell: bash
         run: |
@@ -59,6 +60,25 @@ jobs:
           fi
           if grep -Eqi 'amazon\.(com\.tr|com)/' "$file"; then
             echo 'Kesinti günlüğünde doğrudan Amazon bağlantısı bulundu.' >&2
+            exit 1
+          fi
+      - name: Ekipman bakım planı güven ve affiliate sözleşmesi
+        shell: bash
+        run: |
+          set -euo pipefail
+          file='alo186/hesaplama/ekipman-bakim-plani/index.html'
+          grep -q 'Hatırlatma aracıdır; bakım talimatı değildir' "$file"
+          grep -q 'Normal sonuçta satış yok' "$file"
+          grep -q 'Reklam / satış ortaklığı açıklaması' "$file"
+          grep -q 'ALO186 herhangi bir markanın temsilcisi değildir' "$file"
+          grep -q 'ekipman-bakim-plani' alo186/deployment/routing-manifest.json
+          grep -q 'hesaplama/ekipman-bakim-plani/' alo186/sitemap.xml
+          if grep -Eqi 'type="(email|tel|text)"|name="(address|phone|email|subscription|serial|model|note)' "$file"; then
+            echo 'Ekipman bakım planında kişisel veri, seri/model veya serbest metin alanı bulundu.' >&2
+            exit 1
+          fi
+          if grep -Eqi 'amazon\.(com\.tr|com)/' "$file"; then
+            echo 'Ekipman bakım planında doğrudan Amazon bağlantısı bulundu.' >&2
             exit 1
           fi
       - name: HTML temel kontrolleri
