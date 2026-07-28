@@ -33,6 +33,21 @@ const articles=[
     slug:'saf-sinus-modifiye-sinus-inverter-farki',
     required:['aktif PFC','kalkış gücü','saf sinüs','tıbbi cihaz'],
     cta:'/hesaplama/ups-suresi/'
+  },
+  {
+    slug:'kacak-akim-rolesi-tip-a-tip-ac-farki',
+    required:['Tip AC','Tip A','RDC-DD','30 mA','yetkili elektrikçi'],
+    cta:'/hesaplama/ev-sarj-uygunluk/'
+  },
+  {
+    slug:'ev-tipi-enerji-depolama-kac-kwh-olmali',
+    required:['kritik yük','kWh','kW','kullanılabilir kapasite','BMS'],
+    cta:'/hesaplama/inverter-uygunluk/'
+  },
+  {
+    slug:'harmonik-nedir-thd-cihazlari-nasil-etkiler',
+    required:['THDv','THDi','nötr','PCC','aktif harmonik filtre'],
+    cta:'/isletme-surekliligi'
   }
 ];
 
@@ -47,13 +62,21 @@ for(const article of articles){
   assert(html.includes('application/ld+json'),`JSON-LD eksik: ${article.slug}`);
   const jsonLd=[...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
   assert(jsonLd.length>0,`JSON-LD bulunamadı: ${article.slug}`);
-  for(const match of jsonLd) JSON.parse(match[1]);
+  for(const match of jsonLd){
+    const parsed=JSON.parse(match[1]);
+    const graph=parsed['@graph']||[parsed];
+    assert(graph.some(item=>item['@type']==='Article'),`Article schema eksik: ${article.slug}`);
+    assert(graph.some(item=>item['@type']==='FAQPage'),`FAQPage schema eksik: ${article.slug}`);
+  }
   assert(html.includes('../alo186-article.css'),`Ortak CSS eksik: ${article.slug}`);
   assert(html.includes(article.cta),`İç CTA eksik: ${article.slug}`);
   assert(html.includes('Bağımsız bilgi'),`Bağımsızlık ifadesi eksik: ${article.slug}`);
+  assert(html.includes('Son doğrulama: 28 Temmuz 2026'),`Doğrulama tarihi eksik: ${article.slug}`);
+  assert(html.includes('Kaynaklar ve doğrulama'),`Görünür kaynak bölümü eksik: ${article.slug}`);
   assert(!/<form\b/i.test(html),`Makale kişisel veri/form istememeli: ${article.slug}`);
   assert(!/amazon\.com\.tr/i.test(html),`Teknik makalede doğrudan Amazon URL'si olmamalı: ${article.slug}`);
   assert(!/fiyatı\s+\d|stokta|puanı\s+\d/i.test(html),`Doğrulanmamış ticari bilgi riski: ${article.slug}`);
+  assert(!/kesinlikle güvenli|garanti eder|kesin çözer/i.test(html),`Aşırı kesin güvenlik iddiası riski: ${article.slug}`);
   for(const text of article.required){
     assert(html.toLocaleLowerCase('tr').includes(text.toLocaleLowerCase('tr')),`Zorunlu güvenlik/teknik ifade eksik (${text}): ${article.slug}`);
   }
@@ -78,4 +101,4 @@ for(const article of articles){
   assert(portal.includes(`href="${canonicalPath}"`),`Portal kartı eksik: ${article.slug}`);
 }
 
-console.log('ALO186 içerik otoritesi makaleleri SEO, erişilebilirlik, routing ve güvenlik testlerini geçti.');
+console.log('ALO186 içerik otoritesi makaleleri SEO, AEO, JSON-LD, erişilebilirlik, routing ve güvenlik testlerini geçti.');
