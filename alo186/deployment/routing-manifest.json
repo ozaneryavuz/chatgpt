@@ -1,5 +1,5 @@
 {
-  "version": 19,
+  "version": 20,
   "canonicalHost": "https://www.alo186.com",
   "generatedAt": "2026-07-28",
   "routes": [
@@ -75,7 +75,10 @@
     {"source":"alo186/haberler/ges-inverter-izolasyon-direnci-dusuk-hatasi/index.html","canonicalPath":"/haberler/ges-inverter-izolasyon-direnci-dusuk-hatasi","type":"article"},
     {"source":"alo186/haberler/inverter-dusuk-voltaj-alarmi-neden-verir/index.html","canonicalPath":"/haberler/inverter-dusuk-voltaj-alarmi-neden-verir","type":"article"},
     {"source":"alo186/haberler/ups-va-watt-farki-nasil-hesaplanir/index.html","canonicalPath":"/haberler/ups-va-watt-farki-nasil-hesaplanir","type":"article"},
-    {"source":"alo186/haberler/jenerator-balkonda-garajda-calistirilir-mi/index.html","canonicalPath":"/haberler/jenerator-balkonda-garajda-calistirilir-mi","type":"article"}
+    {"source":"alo186/haberler/jenerator-balkonda-garajda-calistirilir-mi/index.html","canonicalPath":"/haberler/jenerator-balkonda-garajda-calistirilir-mi","type":"article"},
+    {"source":"alo186/haberler/kacak-akim-rolesi-kac-amper-kac-ma-olmali/index.html","canonicalPath":"/haberler/kacak-akim-rolesi-kac-amper-kac-ma-olmali","type":"article"},
+    {"source":"alo186/haberler/notr-toprak-arasi-gerilim-kac-volt-olmali/index.html","canonicalPath":"/haberler/notr-toprak-arasi-gerilim-kac-volt-olmali","type":"article"},
+    {"source":"alo186/haberler/ges-inverter-afci-dc-ark-hatasi/index.html","canonicalPath":"/haberler/ges-inverter-afci-dc-ark-hatasi","type":"article"}
   ],
   "requiredIntegrations": [
     "canonical URL must resolve with HTTP 200",
