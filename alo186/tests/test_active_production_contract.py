@@ -65,13 +65,33 @@ def main() -> None:
     assert "wrong_deadline_contexts" in live_smoke
     assert "10 iş günü" in live_smoke
 
-    # The active builder must include the root operational files that the old shell
-    # builder already carried, otherwise 404 and the Tailwind compatibility response
-    # silently disappear from the real artifact.
+    # The active builder must include root operational files. Otherwise 404 and the
+    # Tailwind compatibility response silently disappear from the real artifact.
     for token in ("404.html", "tailwindcss", "ROOT_STATIC_FILES", "normalize_canonical_host"):
         assert token in builder, f"Builder production asset/normalization missing: {token}"
     for token in ("404.html", "tailwindcss", "REQUIRED_ROOT_FILES"):
         assert token in static_smoke, f"Static smoke root-file check missing: {token}"
+
+    # Public web root must not expose test files, README/internal notes, source maps,
+    # package metadata, Python/shell scripts or deployment/infra trees.
+    for token in (
+        "FORBIDDEN_PUBLIC_DIRECTORIES",
+        "FORBIDDEN_PUBLIC_FILE_PATTERNS",
+        "public_copy_ignore",
+        "find_forbidden_public_files",
+        "publicArtifactPolicy",
+    ):
+        assert token in builder, f"Builder public-artifact hygiene missing: {token}"
+    for token in (
+        "FORBIDDEN_PUBLIC_DIRECTORIES",
+        "FORBIDDEN_PUBLIC_FILE_PATTERNS",
+        "is_forbidden_public_file",
+        "forbiddenPublicFileCount",
+        "sourceDocsExcluded",
+        "testsExcluded",
+        "packageMetadataExcluded",
+    ):
+        assert token in static_smoke, f"Static smoke public-artifact hygiene missing: {token}"
 
     # Canonical host policy is www everywhere and live smoke verifies apex redirect.
     assert "https://www.alo186.com" in apache
@@ -79,7 +99,10 @@ def main() -> None:
     assert "apex-redirect" in live_smoke
     assert "https://alo186.com" in builder
 
-    print("PASS: active ALO186 production builder, Apache config, deploy gate and smoke tests are aligned.")
+    print(
+        "PASS: active ALO186 production builder, public artifact hygiene, Apache config, "
+        "deploy gate and smoke tests are aligned."
+    )
 
 
 if __name__ == "__main__":
