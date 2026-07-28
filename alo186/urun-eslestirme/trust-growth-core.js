@@ -12,6 +12,7 @@
   const forbiddenEventKeys=['name','fullName','email','phone','address','subscription','identity','plate','serialNumber','freeText','requirements','existing','raw','value'];
 
   function num(value){
+    if(value===null||value===undefined||value==='')return null;
     const parsed=Number(value);
     return Number.isFinite(parsed)?parsed:null;
   }
