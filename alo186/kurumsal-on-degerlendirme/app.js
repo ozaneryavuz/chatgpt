@@ -10,10 +10,17 @@
     urgency: {urgent:'0–30 gün içinde karar gerekli',soon:'30–90 gün içinde değerlendirme',planning:'Yıllık plan / bütçe hazırlığı'},
     evidence: {none:'Belge ve yük listesi henüz yok',partial:'Bazı fatura, etiket veya kayıtlar var',ready:'Tek hat, yük listesi ve kayıtlar hazır'}
   };
+  const sourceProfiles = {
+    generator:{label:'Jeneratör',problem:'backup',backup:'generator',scope:'comparison'},
+    inverter:{label:'İnverter ve batarya sistemi',problem:'backup',backup:'solar_storage',scope:'comparison'},
+    outlet_tester:{label:'Priz / RCD ve tesisat ölçümü',problem:'audit',backup:'none',scope:'site'},
+    ups_battery:{label:'UPS aküsü ve kartuşu',problem:'backup',backup:'ups',scope:'remote'}
+  };
 
   const byId = (id) => document.getElementById(id);
   let currentBrief = '';
   let currentSelection = null;
+  let sourceCategory = '';
 
   function safeChoice(group, id) {
     const value = String(byId(id).value || '');
@@ -26,11 +33,27 @@
 
   function track(name, data = {}) {
     const allowed = {};
-    for (const key of ['facility','problem','backup','scope','urgency','evidence','readiness_band']) {
+    for (const key of ['facility','problem','backup','scope','urgency','evidence','readiness_band','source_category']) {
       if (typeof data[key] === 'string' && data[key].length < 60) allowed[key] = data[key];
     }
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({ event: name, ...allowed });
+  }
+
+  function prefillFromProductCenter() {
+    const params = new URLSearchParams(location.search);
+    if (params.get('source') !== 'product_center') return;
+    const category = String(params.get('category') || '');
+    const profile = sourceProfiles[category];
+    if (!profile) return;
+    sourceCategory = category;
+    byId('problem').value = profile.problem;
+    byId('backup').value = profile.backup;
+    byId('scope').value = profile.scope;
+    byId('resultTitle').textContent = `${profile.label} seçiminiz için teknik kapsamı hazırlayın.`;
+    byId('resultText').textContent = 'Ürün merkezinden gelen yüksek riskli seçim, doğrudan satın alma yerine belge hazırlık skoru ve yazılı kapsam teyidine yönlendirildi.';
+    byId('actionStatus').textContent = 'Bu ön doldurma ürün önerisi değildir. Tesis türü, karar zamanı ve belge hazırlığını seçerek ücretsiz kapsam özetini oluşturun.';
+    track('paid_assessment_source_prefilled',{problem:profile.problem,backup:profile.backup,scope:profile.scope,source_category:category});
   }
 
   async function copyText(text) {
@@ -51,6 +74,7 @@
     const link = byId('mailLink');
     const copyButton = byId('copyBriefBtn');
     const printButton = byId('printBriefBtn');
+    prefillFromProductCenter();
 
     form.addEventListener('submit', (event) => {
       event.preventDefault();
@@ -64,7 +88,7 @@
       };
       const readable = Object.fromEntries(Object.keys(selection).map((key) => [key, labels[key][selection[key]]]));
       const assessment = core.assess(selection);
-      currentSelection = { ...selection, readiness_band: assessment.band };
+      currentSelection = { ...selection, readiness_band: assessment.band, source_category: sourceCategory };
       currentBrief = core.brief(readable, assessment);
 
       byId('resultTitle').textContent = `${readable.facility} için nitelikli ön değerlendirme özeti hazır.`;
@@ -80,8 +104,9 @@
       byId('documentList').innerHTML = assessment.docs.map((item) => `<li>${escapeHtml(item)}</li>`).join('');
       byId('nextStep').textContent = assessment.next;
 
+      const sourceNote = sourceCategory && sourceProfiles[sourceCategory] ? `\nÜrün merkezi başlangıç kategorisi: ${sourceProfiles[sourceCategory].label}\n` : '';
       const subject = `ALO186 ücretli teknik ön değerlendirme talebi — ${readable.facility}`;
-      const body = ['Merhaba,','',currentBrief,'','Çalışmaya başlamadan önce kapsam, ücret, teslim biçimi ve gerekiyorsa saha koşullarının yazılı olarak teyit edilmesini rica ederim.'].join('\n');
+      const body = ['Merhaba,','',currentBrief,sourceNote,'Çalışmaya başlamadan önce kapsam, ücret, teslim biçimi ve gerekiyorsa saha koşullarının yazılı olarak teyit edilmesini rica ederim.'].join('\n');
       link.href = `mailto:bilgi@alo186.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
       link.classList.remove('disabled');
       link.setAttribute('aria-disabled','false');
