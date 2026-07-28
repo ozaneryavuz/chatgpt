@@ -3,6 +3,7 @@
 
   const core=window.Alo186DecisionShortlistCore;
   const catalog=window.Alo186ProductCatalog;
+  const trustCore=window.Alo186TrustGrowthCore;
   if(!core||!catalog)return;
 
   const storageKey='alo186_product_shortlist_v1';
@@ -121,9 +122,43 @@
     const limits=product?.limits?.length?product.limits:['Ürün sayfasındaki teknik alanları yeniden doğrulayın.'];
     return `<div class="affiliate-decision-gate" data-affiliate-gate><h4>Satın alma bağlantısından önce son kontrol</h4><p><strong>Reklam / satış ortaklığı:</strong> Bu bağlantıdan nitelikli satın alım yapılırsa ALO186 komisyon kazanabilir; kullanıcıya ek maliyet yansımaz.</p><label class="check-item"><input type="checkbox" data-gate-need><span><b>Mevcut ekipmanım ihtiyacımı karşılamıyor veya ek ürün ihtiyacını doğruladım.</b><br><small>Satın almamak geçerli bir sonuçtur.</small></span></label><label class="check-item"><input type="checkbox" data-gate-technical><span><b>Teknik sınırları ürün sayfasında yeniden kontrol edeceğim.</b><small class="gate-limits"><span>Özellikle:</span><ul>${limits.map(item=>`<li>${escapeHtml(item)}</li>`).join('')}</ul></small></span></label><label class="check-item"><input type="checkbox" data-gate-affiliate><span><b>Bağlantının satış ortaklığı bağlantısı olduğunu anlıyorum.</b><br><small>Fiyat, stok, satıcı, teslimat ve garanti Amazon’da doğrulanır.</small></span></label><div class="actions"><a class="btn btn-primary disabled-link" data-gate-open href="${escapeHtml(href)}" target="_blank" rel="sponsored nofollow noopener" aria-disabled="true" tabindex="-1">Amazon ürün sayfasını aç</a><button type="button" class="btn btn-secondary" data-gate-no-purchase>Şimdilik satın alma</button></div><p class="gate-status" role="status"></p></div>`;
   }
+  function blockedMarkup(result,productId){
+    return `<div class="affiliate-decision-gate affiliate-confidence-block" data-affiliate-confidence-block><h4>Doğrudan ürün bağlantısı açılmadı</h4><p>${escapeHtml(result.message||'Teknik karar tamamlanmadan ürün bağlantısı gösterilmez.')}</p><div class="actions"><button type="button" class="btn btn-primary" data-confidence-save>Teknik ihtiyacı cihazımda sakla</button><button type="button" class="btn btn-secondary" data-confidence-recheck>Teknik minimumlara dön</button></div><small>Ürün kısa listede tutulabilir; ancak eksik teknik veri veya yeterli mevcut ekipman varken ticari bağlantı açılmaz.</small><p class="gate-status" role="status">Engel nedeni: ${escapeHtml(result.reason||'trust_gate')}.</p><input type="hidden" value="${escapeHtml(productId)}" data-confidence-product></div>`;
+  }
+  function trustAssessment(card){
+    const viaUi=window.Alo186TrustGrowth?.evaluateCard?.(card);
+    if(viaUi)return viaUi;
+    if(!trustCore)return {allowed:true,reason:'legacy_gate',message:''};
+    const snapshot=snapshotFromCard(card);
+    return trustCore.affiliateEligibility({
+      existingStatus:window.Alo186TrustGrowth?.getState?.().existingStatus||'none',
+      confidence:snapshot?.confidence,
+      unknowns:snapshot?.unknowns,
+      score:snapshot?.score,
+      verifiedAt:snapshot?.verifiedAt
+    });
+  }
+  function renderConfidenceBlock(card,result,productId){
+    let block=card.querySelector('[data-affiliate-confidence-block]');
+    if(!block){
+      card.querySelector('.product-actions')?.insertAdjacentHTML('beforeend',blockedMarkup(result,productId));
+      block=card.querySelector('[data-affiliate-confidence-block]');
+      block.querySelector('[data-confidence-save]')?.addEventListener('click',()=>{
+        const save=$('saveBriefBtn');
+        if(save){save.click();$('decisionBrief')?.scrollIntoView({behavior:'smooth',block:'nearest'});}
+        else $('decisionBrief')?.scrollIntoView({behavior:'smooth',block:'nearest'});
+      });
+      block.querySelector('[data-confidence-recheck]')?.addEventListener('click',()=>$('requirements')?.scrollIntoView({behavior:'smooth',block:'start'}));
+      emit('affiliate_confidence_blocked',{category:activeCategory(),product_id:productId,reason:result.reason||'trust_gate'});
+    }
+    block.scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
   function openAffiliateGate(link){
     const card=link.closest('.product-card');
     if(!card)return;
+    const trust=trustAssessment(card);
+    if(trust&&!trust.allowed){renderConfidenceBlock(card,trust,link.dataset.product);return;}
+    card.querySelector('[data-affiliate-confidence-block]')?.remove();
     let gate=card.querySelector('[data-affiliate-gate]');
     if(!gate){
       const product=productById(link.dataset.product);
@@ -141,7 +176,7 @@
       checks.forEach(check=>check.addEventListener('change',sync));
       open.addEventListener('click',event=>{
         if(open.getAttribute('aria-disabled')==='true'){event.preventDefault();return;}
-        emit('affiliate_verified_product_opened',{category:activeCategory(),product_id:link.dataset.product,gate:'need_technical_disclosure'});
+        emit('affiliate_verified_product_opened',{category:activeCategory(),product_id:link.dataset.product,gate:'existing_need_confidence_technical_disclosure'});
       });
       gate.querySelector('[data-gate-no-purchase]').addEventListener('click',()=>{
         gate.remove();
@@ -171,7 +206,7 @@
   function bindObserver(){
     const result=document.getElementById('directResult');
     if(!result)return;
-    const observer=new MutationObserver(()=>{augmentCards();renderVault();});
+    const observer=new MutationObserver(()=>{augmentCards();renderVault();window.Alo186TrustGrowth?.refresh?.();});
     observer.observe(result,{subtree:true,childList:true});
   }
 

@@ -1,0 +1,43 @@
+name: ALO186 Trust Growth Quality
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/urun-eslestirme/**'
+      - '.github/workflows/alo186-trust-growth-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/urun-eslestirme/**'
+      - '.github/workflows/alo186-trust-growth-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  trust-growth-quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript syntax
+        run: |
+          node --check alo186/urun-eslestirme/trust-growth-core.js
+          node --check alo186/urun-eslestirme/trust-growth.js
+          node --check alo186/urun-eslestirme/decision-shortlist.js
+      - name: Trust-first growth regression
+        run: node alo186/urun-eslestirme/trust-growth-core.test.js
+      - name: Existing shortlist regression
+        run: node alo186/urun-eslestirme/decision-shortlist.test.js
+      - name: Privacy and affiliate contract
+        run: |
+          ! grep -RniE 'name="(name|email|phone|address|plate|subscription|identity)"' alo186/urun-eslestirme/index.html
+          ! grep -Rni 'amazon.com.tr' alo186/urun-eslestirme/trust-growth.js
+          grep -q 'affiliate_confidence_blocked' alo186/urun-eslestirme/decision-shortlist.js
+          grep -q 'sponsored nofollow noopener' alo186/urun-eslestirme/decision-shortlist.js
+          grep -qi 'Mevcut ürün yeterliyse satın alma yok' alo186/urun-eslestirme/index.html
+          grep -qi 'Eksik teknik veri linki durdurur' alo186/urun-eslestirme/index.html
