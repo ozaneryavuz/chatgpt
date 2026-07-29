@@ -3,8 +3,8 @@ name: ALO186 içerik otoritesi 162 kaynak rehber kalite kontrolü
 on:
   pull_request:
     paths:
-      - 'alo186/haberler/kacak-akim-rolesi-tip-s-secicilik-30ma-300ma/**'
-      - 'alo186/haberler/parafudr-ne-zaman-degisir-gosterge-uzak-sinyal/**'
+      - 'alo186/haberler/ups-statik-transfer-salteri-sts-ats-bakim-bypass-farki/**'
+      - 'alo186/haberler/enerji-depolama-yardimci-tuketim-hvac-net-rte/**'
       - 'alo186/haberler/topraklama-olcumu-yagmur-yaz-kis-mevsim-farki/**'
       - 'alo186/deployment/routing-overlays/content-authority-162-run41.json'
       - 'alo186/tests/test_authority_content_run41.py'
@@ -12,8 +12,8 @@ on:
   push:
     branches: [main]
     paths:
-      - 'alo186/haberler/kacak-akim-rolesi-tip-s-secicilik-30ma-300ma/**'
-      - 'alo186/haberler/parafudr-ne-zaman-degisir-gosterge-uzak-sinyal/**'
+      - 'alo186/haberler/ups-statik-transfer-salteri-sts-ats-bakim-bypass-farki/**'
+      - 'alo186/haberler/enerji-depolama-yardimci-tuketim-hvac-net-rte/**'
       - 'alo186/haberler/topraklama-olcumu-yagmur-yaz-kis-mevsim-farki/**'
       - 'alo186/deployment/routing-overlays/content-authority-162-run41.json'
       - 'alo186/tests/test_authority_content_run41.py'
@@ -65,20 +65,22 @@ jobs:
           from pathlib import Path
           root=Path('/tmp/alo186-authority-162-custom')
           routes=[
-            '/haberler/kacak-akim-rolesi-tip-s-secicilik-30ma-300ma',
-            '/haberler/parafudr-ne-zaman-degisir-gosterge-uzak-sinyal',
+            '/haberler/ups-statik-transfer-salteri-sts-ats-bakim-bypass-farki',
+            '/haberler/enerji-depolama-yardimci-tuketim-hvac-net-rte',
             '/haberler/topraklama-olcumu-yagmur-yaz-kis-mevsim-farki',
           ]
           sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
           search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
           release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
           active={item['canonicalPath'] for item in search['entries']}
-          assert release['routingVersion'] >= 72
-          assert release['articleCount'] >= 162
+          assert release['routingVersion'] >= 72, release['routingVersion']
+          assert release['articleCount'] >= 162, release['articleCount']
           for route in routes:
-              assert (root/route.strip('/')/'index.html').is_file()
-              assert f'https://www.alo186.com{route}' in sitemap
-              assert route in active
+              target=root/route.strip('/')/'index.html'
+              assert target.is_file(), target
+              assert f'https://www.alo186.com{route}' in sitemap, ('sitemap', route)
+              assert route in active, ('search-index', route)
+          print(json.dumps({'routingVersion':release['routingVersion'],'articleCount':release['articleCount'],'routes':routes},ensure_ascii=False))
           PY
       - name: Doğrulanmış içerik artifactı
         uses: actions/upload-artifact@v4
