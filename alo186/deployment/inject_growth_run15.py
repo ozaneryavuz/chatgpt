@@ -7,6 +7,7 @@ import re
 from pathlib import Path
 
 from inject_affiliate_product_graph import run as run_affiliate_product_graph
+from inject_growth_run17 import run as run_growth_run17
 
 ROUTES = {
     "ev": "/hesaplama/ev-sarj-kablosu-saglik-gunlugu/",
@@ -126,6 +127,8 @@ def update_release(site: Path, base_path: str, injected: int) -> None:
 
 def add_offline(site: Path, base_path: str) -> int:
     path = site / "sw.js"
+    if not path.is_file():
+        return 0
     text = path.read_text(encoding="utf-8")
     match = re.search(r"const CRITICAL=(\[.*?\]);", text, re.S)
     if not match:
@@ -138,7 +141,7 @@ def add_offline(site: Path, base_path: str) -> int:
             current.append(url)
             added += 1
     if added:
-        path.write_text(text[:match.start(1)] + json.dumps(current, ensure_ascii=False) + text[match.end(1):], encoding="utf-8")
+        path.write_text(text[: match.start(1)] + json.dumps(current, ensure_ascii=False) + text[match.end(1) :], encoding="utf-8")
     return added
 
 
@@ -150,7 +153,7 @@ def update_manifest(site: Path, base_path: str) -> None:
     shortcuts = manifest.setdefault("shortcuts", [])
     for name, route in [("EV Kablo Sağlığı", ROUTES["ev"]), ("GES Temizlik Kararı", ROUTES["pv"]), ("Topraklama Trendi", ROUTES["ground"])]:
         url = public_url(base_path, route)
-        if not any(item.get("url") == url for item in shortcuts if isinstance(item, dict)):
+        if not any(isinstance(item, dict) and item.get("url") == url for item in shortcuts):
             shortcuts.append({"name": name, "short_name": name, "url": url})
     path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
@@ -168,8 +171,7 @@ def run(site: Path, base_path: str = "") -> dict:
     base_path = normalize_base_path(base_path)
     for route in ROUTES.values():
         target = site / route.strip("/") / "index.html"
-        app = target.with_name("app.js")
-        if not target.is_file() or not app.is_file():
+        if not target.is_file() or not target.with_name("app.js").is_file():
             raise FileNotFoundError(f"Growth run15 rota veya app eksik: {target}")
     injected = inject_entries(site, base_path)
     append_sitemap(site)
@@ -178,6 +180,7 @@ def run(site: Path, base_path: str = "") -> dict:
     offline_added = add_offline(site, base_path)
     update_manifest(site, base_path)
     recompute(site)
+    growth_run17 = run_growth_run17(site, base_path)
     product_graph = run_affiliate_product_graph(site, base_path)
     return {
         "ok": True,
@@ -188,6 +191,7 @@ def run(site: Path, base_path: str = "") -> dict:
         "directAffiliateLinksAdded": 0,
         "rawPersonalDataCollected": False,
         "emergencyCommerceClosed": True,
+        "growthRun17": growth_run17,
         "affiliateProductKnowledgeGraph": product_graph,
     }
 
