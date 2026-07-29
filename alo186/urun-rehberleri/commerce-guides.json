@@ -241,7 +241,7 @@
       ],
       "related": [
         {"label": "Kesinti hazırlık planı", "path": "/hesaplama/kesinti-hazirlik-plani/"},
-        {"label": "Elektrik kesintisi kiti", "path": "/hesaplama/elektrik-kesintisi-kiti/"}
+        {"label": "Kişisel elektrik planı", "path": "/hesaplama/elektrik-planim/"}
       ],
       "terms": ["lümen", "çalışma süresi", "otomatik yanma", "pil göstergesi"]
     },
