@@ -71,7 +71,10 @@ def test_vpp_contract() -> None:
     ]:
         assert token in html, token
     assert "toplayıcı sıralamaz" in html.lower()
-    assert "/hizmetler/ges-batarya-ev-fizibilitesi/" in html
+    assert "/hizmetler/ges-batarya-ev-sarj-fizibilitesi/" in html
+    assert "/hizmetler/ges-batarya-ev-fizibilitesi/" not in html
+    assert "if(assets.length&&score>=9)" in html
+    assert "else if(assets.length&&score>=5)" in html
 
 
 def test_ev_contract() -> None:
@@ -88,6 +91,11 @@ def test_ev_contract() -> None:
         assert token in html, token
     assert "doğrudan affiliate/mağaza yönlendirmesi yapılmaz" in html.lower()
     assert "/hesaplama/teknik-sartname-talep-paketi/" in html
+    assert "/hizmetler/ges-batarya-ev-sarj-fizibilitesi/" in html
+    assert "/hizmetler/ges-batarya-ev-fizibilitesi/" not in html
+    assert "const maxScore=11" in html
+    assert "maxScore:11" in html
+    assert "${score}/${maxScore}" in html
 
 
 def test_runtime_contract() -> None:
@@ -102,10 +110,20 @@ def test_runtime_contract() -> None:
         "Affiliate ve yeni ürün yönlendirmesi bu sonuçta kapalıdır",
         "/amazon-elektrik-urunleri/modem-mini-ups-secimi",
         "/amazon-elektrik-urunleri/tasinabilir-guc-istasyonu-secimi",
+        "repeatedDrop",
+        "x.date<latest.date",
+        "Date.parse(x.expiresAt)>now",
+        "expiresAt:new Date(now.getTime()+TTL).toISOString()",
+        "sayfayı ziyaret etmek süreyi uzatmaz",
+        "Affiliate yolu kapalıdır",
     ]:
         assert token in html, token
     assert "Reklam / satış ortaklığı açıklaması" in html
     assert "fiyat, stok, puan, satıcı" in html.lower()
+    assert "showCommercial=latest.system!=='desktop'" in html
+    render_match = re.search(r"function render\(focus\)(.*?)\n\$\('date'\)", html, re.S)
+    assert render_match
+    assert "save()" not in render_match.group(1), "render must not renew retention on view"
 
 
 def test_overlay_and_pipeline() -> None:
