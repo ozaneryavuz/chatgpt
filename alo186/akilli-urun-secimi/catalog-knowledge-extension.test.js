@@ -7,7 +7,7 @@ const catalog=require('./catalog-knowledge-extension.js');
 assert.equal(catalog.products.length,14);
 assert.equal(catalog.needs.length,14);
 assert.equal(catalog.categories.length,14);
-assert.deepEqual(catalog.knowledgeGraphSummary(),{version:'2026-07-29-run34b',generatedAt:'2026-07-29',needCount:14,categoryCount:14,productCount:14,exactListingCount:10,manufacturerSearchCount:4,affiliatePolicies:['verified_direct','after_tool','professional_only']});
+assert.deepEqual(catalog.knowledgeGraphSummary(),{version:'2026-07-29-run34b',generatedAt:'2026-07-29',needCount:14,categoryCount:14,productCount:14,exactListingCount:10,manufacturerSearchCount:4,publicProductCount:3,gatedCandidateCount:11,affiliatePolicies:['verified_direct','after_tool','professional_only']});
 const exact=catalog.products.filter(product=>product.status==='verified_listing');
 const models=catalog.products.filter(product=>product.status==='manufacturer_verified_search');
 assert.equal(exact.length,10);assert.equal(models.length,4);
@@ -22,12 +22,31 @@ for(const[id,checks]of Object.entries(expected)){const product=catalog.getProduc
 assert.equal(catalog.productsFor('smart_plug').length,0,'Mevcut matcher davranışı üretici arama düğümlerini doğrudan eşleştirmemeli.');
 assert.equal(catalog.allProductsFor('smart_plug').length,2);
 assert.equal(catalog.graphForCategory('power_station').products.length,1);
-const payload=catalog.knowledgeGraph({now:new Date('2026-07-29T12:00:00Z')});
+const now=new Date('2026-07-29T12:00:00Z');
+const publicProducts=catalog.products.filter(product=>catalog.publicAffiliateEligible(product,{now}));
+const gatedProducts=catalog.products.filter(product=>catalog.isCatalogProduct(product)&&!catalog.publicAffiliateEligible(product,{now,freshOnly:false}));
+assert.equal(publicProducts.length,3);
+assert.deepEqual(new Set(publicProducts.map(product=>product.category)),new Set(['powerbank']));
+assert.equal(gatedProducts.length,11);
+const payload=catalog.knowledgeGraph({now});
 const graph=payload['@graph'];
 const productNodes=graph.filter(node=>node['@type']==='Product');
-assert.equal(productNodes.length,14);
-assert.equal(graph.filter(node=>node['@type']==='DefinedTerm').length,28);
+const termNodes=graph.filter(node=>node['@type']==='DefinedTerm');
+const candidateNodes=termNodes.filter(node=>node.inDefinedTermSet&&node.inDefinedTermSet['@id'].endsWith('/gated-product-candidates#termset'));
+assert.equal(productNodes.length,3);
+assert.equal(termNodes.length,39);
+assert.equal(candidateNodes.length,11);
 assert.equal(graph.filter(node=>node['@type']==='Offer').length,0);
-for(const node of productNodes){assert(!('offers'in node));assert(!('aggregateRating'in node));assert(Array.isArray(node.identifier)&&node.identifier.length);assert(Array.isArray(node.isRelatedTo)&&node.isRelatedTo.length);}
-for(const id of Object.keys(expected)){const node=productNodes.find(item=>item['@id'].endsWith(`/${id}#product`));assert(node&&node.sameAs);assert(node.identifier.some(item=>item.propertyID==='Model'));}
-console.log(JSON.stringify({ok:true,affiliateTag:catalog.affiliateTag,needs:14,categories:14,products:14,exactAsins:10,manufacturerModels:4},null,2));
+for(const node of productNodes){assert(!('offers'in node));assert(!('aggregateRating'in node));assert(Array.isArray(node.identifier)&&node.identifier.some(item=>item.propertyID==='ASIN'));assert(Array.isArray(node.isRelatedTo)&&node.isRelatedTo.length);const product=catalog.getProduct(node.sku);assert(catalog.publicAffiliateEligible(product,{now}));}
+for(const product of gatedProducts){assert(!productNodes.some(node=>node.sku===product.id),`Kapılı ürün Product schema'ya sızdı: ${product.id}`);assert(candidateNodes.some(node=>node.termCode===product.id),`Kapılı aday DefinedTerm olarak eksik: ${product.id}`);}
+for(const id of Object.keys(expected)){const node=candidateNodes.find(item=>item.termCode===id);assert(node&&node.sameAs);assert(node.additionalProperty.some(item=>item.name==='Model'));}
+const itemList=graph.find(node=>node['@type']==='ItemList');
+assert.equal(itemList.numberOfItems,3);
+assert.equal(itemList.itemListElement.length,3);
+const stale=catalog.knowledgeGraph({now:new Date('2027-01-01T12:00:00Z')})['@graph'];
+assert.equal(stale.filter(node=>node['@type']==='Product').length,0);
+assert.equal(stale.filter(node=>node['@type']==='DefinedTerm'&&node.inDefinedTermSet&&node.inDefinedTermSet['@id'].endsWith('/gated-product-candidates#termset')).length,0);
+const audit=catalog.knowledgeGraph({now:new Date('2027-01-01T12:00:00Z'),freshOnly:false})['@graph'];
+assert.equal(audit.filter(node=>node['@type']==='Product').length,3);
+assert.equal(audit.filter(node=>node['@type']==='DefinedTerm'&&node.inDefinedTermSet&&node.inDefinedTermSet['@id'].endsWith('/gated-product-candidates#termset')).length,11);
+console.log(JSON.stringify({ok:true,affiliateTag:catalog.affiliateTag,needs:14,categories:14,totalProducts:14,publicProducts:3,gatedCandidates:11,exactAsins:10,manufacturerModels:4},null,2));
