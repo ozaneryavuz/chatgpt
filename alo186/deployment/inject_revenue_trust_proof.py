@@ -42,11 +42,13 @@ def route_file(site: Path, route: str) -> Path:
 def insert_before_end(html: str, block: str) -> tuple[str, bool]:
     if MARKER in html:
         return html, False
-    for marker in ("</footer>", "</body>"):
-        index = html.lower().rfind(marker)
-        if index >= 0:
-            return html[:index] + block + html[index:], True
-    raise RuntimeError("HTML kapanış etiketi bulunamadı")
+    footer_index = html.lower().rfind("<footer")
+    if footer_index >= 0:
+        return html[:footer_index] + block + html[footer_index:], True
+    body_index = html.lower().rfind("</body>")
+    if body_index >= 0:
+        return html[:body_index] + block + html[body_index:], True
+    raise RuntimeError("HTML footer/body kapanış etiketi bulunamadı")
 
 
 def trust_block(base_path: str, route_type: str, affiliate: bool) -> str:
