@@ -1,0 +1,50 @@
+{
+  "version": 63,
+  "name": "ALO186 Mode 2 EV outlet, mini UPS runtime and plug voltage monitor trust revenue run16",
+  "routes": [
+    {
+      "canonicalPath": "/hesaplama/tasinabilir-ev-sarj-cihazi-priz-uygunluk/",
+      "source": "alo186/hesaplama/tasinabilir-ev-sarj-cihazi-priz-uygunluk/index.html",
+      "type": "calculator",
+      "intent": "Mode 2 portable EV charger IC-CPD socket circuit earth temperature and occasional use qualification",
+      "affiliatePolicy": "after_full_socket_document_temperature_and_no_hazard_gate_daily_charging_professional_only"
+    },
+    {
+      "canonicalPath": "/hesaplama/modem-ont-mini-ups-sure-saglik-gunlugu/",
+      "source": "alo186/hesaplama/modem-ont-mini-ups-sure-saglik-gunlugu/index.html",
+      "type": "calculator",
+      "intent": "mini UPS actual modem ONT runtime battery health full charge and failed retest evidence",
+      "affiliatePolicy": "after_confirmed_failed_retest_and_exact_output_compatibility"
+    },
+    {
+      "canonicalPath": "/hesaplama/priz-tipi-gerilim-monitoru-uygunluk/",
+      "source": "alo186/hesaplama/priz-tipi-gerilim-monitoru-uygunluk/index.html",
+      "type": "calculator",
+      "intent": "plug voltage monitor min max timestamp seven day evidence versus official power quality measurement",
+      "affiliatePolicy": "low_risk_single_circuit_observation_only_building_three_phase_harmonics_and_official_measurement_closed"
+    }
+  ],
+  "trust": {
+    "rawPersonalDataCollected": false,
+    "directAffiliateLinksAdded": 0,
+    "unverifiedCommercialFieldsUsed": [],
+    "noBuyOutcomePreserved": true,
+    "affiliateDisclosureRequired": true,
+    "officialApprovalClaimed": false,
+    "emergencyCommerceClosed": true,
+    "buildingWideCommerceClosed": true,
+    "mode2JournalTtlDays": 540,
+    "miniUpsJournalTtlDays": 730,
+    "voltageMonitorJournalTtlDays": 365,
+    "qualifiedAffiliateFlows": [
+      "mode2_ev_charger_after_full_socket_and_document_gate",
+      "mini_ups_after_failed_confirmed_runtime_retest",
+      "plug_voltage_monitor_for_low_risk_single_circuit_observation"
+    ],
+    "professionalServiceFlows": [
+      "ev_outlet_and_dedicated_circuit_acceptance",
+      "network_backup_runtime_verification",
+      "distribution_voltage_quality_and_power_quality_logging"
+    ]
+  }
+}
