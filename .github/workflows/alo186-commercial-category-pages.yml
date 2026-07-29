@@ -125,7 +125,8 @@ jobs:
               sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
               entries={item['canonicalPath']: item for item in search['entries']}
               assert release['routingVersion'] >= 41
-              assert release['routeCount'] >= 145
+              assert release['routeCount'] == len(release['routes'])
+              assert release['routeCount'] >= len(routes)
               assert pages['routeCount'] == release['routeCount']
               for route in routes:
                   file=root/route.strip('/')/'index.html'
