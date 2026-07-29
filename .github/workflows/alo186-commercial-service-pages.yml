@@ -118,7 +118,11 @@ jobs:
               sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
               release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
               search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
-              route_map={item['canonicalPath']: item for item in release['routes']}
+              def canonical_route(value):
+                  if prefix and value.startswith(prefix + '/'):
+                      return value[len(prefix):]
+                  return value
+              route_map={canonical_route(item['canonicalPath']): item for item in release['routes']}
               search_map={item['canonicalPath']: item for item in search['entries']}
               for route in routes:
                   directory=root/route.strip('/')
