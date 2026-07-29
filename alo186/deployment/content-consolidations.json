@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "generatedAt": "2026-07-29",
+  "version": 2,
+  "generatedAt": "2026-07-30",
   "consolidations": [
     {
       "intentKey": "lifepo4-low-temperature-charging",
@@ -15,6 +15,20 @@
       "canonicalPath": "/haberler/dusuk-yuksek-voltaj-edas-teknik-kalite-olcumu",
       "label": "Düşük/yüksek voltaj EDAŞ teknik kalite ölçümü",
       "reason": "Aynı EDAŞ ölçüm talebi, bir haftalık teknik kalite kaydı ve EPDK aşamasını hedefleyen iki rehber tek canonical kaynakta birleştirildi."
+    },
+    {
+      "intentKey": "ups-battery-string-imbalance",
+      "aliasPath": "/haberler/ups-aku-string-blok-dengesizligi-ic-direnc",
+      "canonicalPath": "/haberler/ups-aku-string-dengesizligi-zayif-aku-nasil-anlasilir",
+      "label": "UPS akü string dengesizliği ve zayıf blok",
+      "reason": "Tek zayıf blok, iç direnç, sıcaklık ve yük altı gerilim davranışını hedefleyen iki rehber mevcut köklü canonical kaynakta birleştirildi."
+    },
+    {
+      "intentKey": "pv-string-fuse-reverse-current",
+      "aliasPath": "/haberler/ges-string-sigortasi-gpv-ne-zaman-gerekir",
+      "canonicalPath": "/haberler/ges-pv-string-sigortasi-ters-akim-nasil-secilir",
+      "label": "PV string sigortası, ters akım ve gPV seçimi",
+      "reason": "Isc, ters akım, maksimum seri sigorta değeri, inverter topolojisi ve gPV kararını hedefleyen iki rehber mevcut köklü canonical kaynakta birleştirildi."
     }
   ]
 }
