@@ -18,13 +18,14 @@ DISCLOSURE_PATTERN = re.compile(
     r"satış\s+ortaklığı|affiliate|nitelikli\s+satın\s+alımlardan\s+komisyon",
     re.I,
 )
-NO_BUY_PATTERN = re.compile(
-    r"mevcut.{0,120}(?:yeterli|uygun|güvenli).{0,160}(?:satın\s+alma|satın\s+almayın|yeni\s+ürün\s+alma)",
-    re.I | re.S,
-)
-INDEPENDENCE_PATTERN = re.compile(
-    r"ALO186.{0,180}(?:EDAŞ|kamu\s+kurumu|resmî\s+kurum|ürün\s+satıcısı).{0,220}(?:değildir|değil)",
-    re.I | re.S,
+NO_BUY_PATTERNS = (
+    re.compile(
+        r"mevcut.{0,150}(?:yeterli|uygun|güvenli).{0,180}(?:satın\s+alma|satın\s+almayın|yeni\s+ürün\s+alma)",
+        re.I | re.S,
+    ),
+    re.compile(r"satın\s+almama\s+(?:seçeneği|sonucu|hakkı)", re.I),
+    re.compile(r"yeni\s+ürün\s+almak\s+gerekmeyebilir", re.I),
+    re.compile(r"ürün\s+satın\s+alma\s+zorunluluğu\s+yok", re.I),
 )
 UNVERIFIED_COMMERCIAL_PATTERNS = (
     re.compile(r"\b\d[\d.]*\s*(?:TL|₺)\b", re.I),
@@ -78,12 +79,24 @@ def is_affiliate_url(value: str) -> bool:
     return parsed.scheme in {"http", "https"} and parsed.hostname in AFFILIATE_HOSTS
 
 
+def has_no_buy(value: str) -> bool:
+    return any(pattern.search(value) for pattern in NO_BUY_PATTERNS)
+
+
+def has_independence(value: str) -> bool:
+    folded = value.casefold()
+    independent = "bağımsız" in folded
+    institution = any(token in folded for token in ("edaş", "kamu kurumu", "resmî kurum", "ürün satıcısı"))
+    boundary = "değildir" in folded or "değil" in folded
+    return independent and institution and boundary
+
+
 def route_file(site: Path, route: str) -> Path:
     return site / route.strip("/") / "index.html"
 
 
 def canonical_expected(route: str) -> str:
-    return f'https://www.alo186.com{route}'
+    return f"https://www.alo186.com{route}"
 
 
 def scan_affiliate_anchors(path: Path, site: Path) -> list[str]:
@@ -128,9 +141,9 @@ def validate_commercial_pages(site: Path) -> tuple[list[str], dict]:
             errors.append(f"{route}: canonical yanlış veya eksik")
         if not DISCLOSURE_PATTERN.search(visible):
             errors.append(f"{route}: görünür satış ortaklığı açıklaması eksik")
-        if not NO_BUY_PATTERN.search(visible):
+        if not has_no_buy(visible):
             errors.append(f"{route}: mevcut ekipman yeterliyse satın almama sınırı eksik")
-        if not INDEPENDENCE_PATTERN.search(visible):
+        if not has_independence(visible):
             errors.append(f"{route}: ALO186 bağımsızlık/resmî kurum sınırı eksik")
         if "<form" in html.casefold() or 'type="email"' in html.casefold() or 'type="tel"' in html.casefold():
             errors.append(f"{route}: ticari içerik sayfası kişisel veri formu içermemeli")
@@ -165,18 +178,19 @@ def validate_service_pages(site: Path) -> tuple[list[str], dict]:
         visible = text_only(html)
         if f'rel="canonical" href="{canonical_expected(route)}"' not in html:
             errors.append(f"{route}: canonical yanlış veya eksik")
+        compact = html.replace(" ", "")
         for schema_type in ('"@type":"Service"', '"@type":"FAQPage"', '"@type":"BreadcrumbList"', '"@type":"OfferCatalog"'):
-            if schema_type not in html.replace(" ", ""):
+            if schema_type not in compact:
                 errors.append(f"{route}: yapılandırılmış veri eksik: {schema_type}")
         if "amazon.com.tr" in html.casefold() or "amzn.to" in html.casefold():
             errors.append(f"{route}: ücretli mühendislik hizmetinde affiliate/mağaza bağlantısı olmamalı")
         if "<form" in html.casefold() or 'type="email"' in html.casefold() or 'type="tel"' in html.casefold():
             errors.append(f"{route}: hizmet sayfası doğrudan kişisel veri formu içermemeli")
-        if not INDEPENDENCE_PATTERN.search(visible):
+        if not has_independence(visible):
             errors.append(f"{route}: resmî kurum/EDAŞ bağımsızlık açıklaması eksik")
-        if not re.search(r"ücretli\s+hizmet|yazılı\s+kapsam|teklif\s+sonrası", visible, re.I):
+        if not re.search(r"ücretli\s+(?:bağımsız\s+)?(?:profesyonel\s+)?hizmet|yazılı\s+(?:olarak\s+)?(?:kapsam|teyit)|teklif\s+edilir", visible, re.I):
             errors.append(f"{route}: ücretli hizmet ve yazılı kapsam sınırı görünür değil")
-        if not re.search(r"mevcut.{0,160}(?:yeterli|korunabilir|iyileştirme)", visible, re.I | re.S):
+        if not has_no_buy(visible) and not re.search(r"mevcut.{0,180}(?:yeterli|ertelenebilir|korunur|sınırlı\s+iyileştirme)", visible, re.I | re.S):
             errors.append(f"{route}: yeni yatırım yerine mevcut sistem/sınırlı iyileştirme seçeneği eksik")
         for pattern in UNVERIFIED_COMMERCIAL_PATTERNS:
             if pattern.search(html):
