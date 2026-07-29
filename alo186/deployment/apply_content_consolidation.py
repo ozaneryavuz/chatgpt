@@ -190,7 +190,9 @@ def update_htaccess(site: Path, items: list[dict]) -> bool:
     block_pattern = re.compile(re.escape(MARKER_START) + r".*?" + re.escape(MARKER_END), re.S)
     rules = [MARKER_START, "<IfModule mod_rewrite.c>", "  RewriteEngine On"]
     for item in items:
-        source = re.escape(item["aliasPath"].lstrip("/"))
+        # normalize_path already constrains aliases to lowercase letters, digits, slashes and hyphens;
+        # no additional regex escaping is needed and readable rules are easier to audit.
+        source = item["aliasPath"].lstrip("/")
         destination = f"{CANONICAL_HOST}{item['canonicalPath']}"
         rules.append(f"  RewriteRule ^{source}/?$ {destination} [R=301,L,NE]")
     rules.extend(["</IfModule>", MARKER_END])
