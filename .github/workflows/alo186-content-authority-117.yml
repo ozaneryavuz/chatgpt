@@ -1,0 +1,151 @@
+name: ALO186 içerik otoritesi 117 kaynak rehber kalite kontrolü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/haberler/harmonik-thd-tdd-pcc-olcum-farki/**'
+      - 'alo186/haberler/ges-pid-potansiyel-kaynakli-degradasyon-nasil-anlasilir/**'
+      - 'alo186/haberler/kacak-akim-rolesi-acma-suresi-rampa-testi-nasil-olculur/**'
+      - 'alo186/deployment/routing-overlays/content-authority-117-run25.json'
+      - 'alo186/tests/test_authority_content_run25.py'
+      - '.github/workflows/alo186-content-authority-117.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/harmonik-thd-tdd-pcc-olcum-farki/**'
+      - 'alo186/haberler/ges-pid-potansiyel-kaynakli-degradasyon-nasil-anlasilir/**'
+      - 'alo186/haberler/kacak-akim-rolesi-acma-suresi-rampa-testi-nasil-olculur/**'
+      - 'alo186/deployment/routing-overlays/content-authority-117-run25.json'
+      - 'alo186/tests/test_authority_content_run25.py'
+      - '.github/workflows/alo186-content-authority-117.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-authority-117-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Yeni rehberlerin AEO SEO kaynak ve güven sözleşmeleri
+        run: python alo186/tests/test_authority_content_run25.py
+
+      - name: İçerik niyeti ve kanibalizasyon kontrolü
+        run: python alo186/tests/test_content_intent_consolidation.py
+
+      - name: Mevcut güven, ticari sınır ve yayın regresyonları
+        run: |
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+          node alo186/arama/test.js
+          python alo186/tests/test_private_technical_search.py
+
+      - name: Canonical üretim paketini oluştur
+        run: |
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-authority-117-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-authority-117-canonical
+
+      - name: Custom-domain Pages artifactını oluştur
+        run: |
+          cp -a /tmp/alo186-authority-117-canonical /tmp/alo186-authority-117-custom
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-authority-117-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-authority-117-custom \
+            --base-path ''
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-authority-117-custom \
+            --base-path '' \
+            > /tmp/alo186-authority-117-custom.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-authority-117-custom \
+            --base-path ''
+
+      - name: Project-path Pages artifactını oluştur
+        run: |
+          cp -a /tmp/alo186-authority-117-canonical /tmp/alo186-authority-117-project
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-authority-117-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-authority-117-project \
+            --base-path '/chatgpt'
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-authority-117-project \
+            --base-path '/chatgpt' \
+            > /tmp/alo186-authority-117-project.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-authority-117-project \
+            --base-path '/chatgpt'
+
+      - name: Canonical, sitemap, arama indeksi ve base-path kabulü
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          routes = [
+              '/haberler/harmonik-thd-tdd-pcc-olcum-farki',
+              '/haberler/ges-pid-potansiyel-kaynakli-degradasyon-nasil-anlasilir',
+              '/haberler/kacak-akim-rolesi-acma-suresi-rampa-testi-nasil-olculur',
+          ]
+          for root, prefix in [
+              (Path('/tmp/alo186-authority-117-custom'), ''),
+              (Path('/tmp/alo186-authority-117-project'), '/chatgpt'),
+          ]:
+              sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
+              release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
+              pages=json.loads((root/'pages-release.json').read_text(encoding='utf-8'))
+              search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
+              active={entry['canonicalPath'] for entry in search['entries']}
+              assert release['routingVersion'] >= 52
+              assert release['articleCount'] >= 115, release['articleCount']
+              assert release['contentConsolidation']['aliasCount'] == 2
+              assert search['entryCount'] >= 159, search['entryCount']
+              assert pages['siteSearch']['entryCount'] == search['entryCount']
+              for route in routes:
+                  file=root/route.strip('/')/'index.html'
+                  assert file.is_file(), file
+                  html=file.read_text(encoding='utf-8')
+                  assert f'rel="canonical" href="https://www.alo186.com{route}"' in html
+                  assert 'Son doğrulama: 29 Temmuz 2026' in html
+                  assert f'https://www.alo186.com{route}' in sitemap
+                  assert route in active
+                  entry=next(item for item in search['entries'] if item['canonicalPath']==route)
+                  assert entry['url'] == (prefix + route if prefix else route)
+                  assert entry['bucket'] == 'article'
+                  assert 'price' not in entry and 'stock' not in entry and 'rating' not in entry
+          PY
+
+      - name: Doğrulanmış içerik otoritesi artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-authority-117-pages
+          path: /tmp/alo186-authority-117-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
