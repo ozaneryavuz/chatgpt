@@ -1,0 +1,120 @@
+name: ALO186 güven ve gelir büyümesi run16
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/tasinabilir-ev-sarj-cihazi-priz-uygunluk/**'
+      - 'alo186/hesaplama/modem-ont-mini-ups-sure-saglik-gunlugu/**'
+      - 'alo186/hesaplama/priz-tipi-gerilim-monitoru-uygunluk/**'
+      - 'alo186/deployment/inject_growth_run16.py'
+      - 'alo186/deployment/inject_growth_run15.py'
+      - 'alo186/deployment/routing-overlays/growth-trust-revenue-run16.json'
+      - 'alo186/tests/test_growth_run16.py'
+      - '.github/workflows/alo186-growth-run16.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/tasinabilir-ev-sarj-cihazi-priz-uygunluk/**'
+      - 'alo186/hesaplama/modem-ont-mini-ups-sure-saglik-gunlugu/**'
+      - 'alo186/hesaplama/priz-tipi-gerilim-monitoru-uygunluk/**'
+      - 'alo186/deployment/inject_growth_run16.py'
+      - 'alo186/deployment/inject_growth_run15.py'
+      - 'alo186/deployment/routing-overlays/growth-trust-revenue-run16.json'
+      - 'alo186/tests/test_growth_run16.py'
+      - '.github/workflows/alo186-growth-run16.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-growth-run16-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Güven, no-buy, affiliate ve resmî ölçüm kapıları
+        run: python alo186/tests/test_growth_run16.py
+      - name: Python ve tarayıcı betiği sözdizimi
+        run: |
+          python -m py_compile alo186/deployment/inject_growth_run15.py alo186/deployment/inject_growth_run16.py
+          node --check alo186/hesaplama/tasinabilir-ev-sarj-cihazi-priz-uygunluk/app.js
+          node --check alo186/hesaplama/modem-ont-mini-ups-sure-saglik-gunlugu/app.js
+          node --check alo186/hesaplama/priz-tipi-gerilim-monitoru-uygunluk/app.js
+      - name: Mevcut içerik ve güven regresyonları
+        run: |
+          python alo186/tests/test_growth_run15.py
+          python alo186/tests/test_content_intent_consolidation.py
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+      - name: Canonical üretim paketi
+        run: |
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-growth16-canonical --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-growth16-canonical
+      - name: Custom-domain artifactı
+        run: |
+          cp -a /tmp/alo186-growth16-canonical /tmp/alo186-growth16-custom
+          python alo186/deployment/prepare_github_pages.py --site /tmp/alo186-growth16-custom --base-path '' --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py --site /tmp/alo186-growth16-custom --base-path ''
+          python alo186/deployment/inject_shortlist_growth.py --site /tmp/alo186-growth16-custom --base-path '' > /tmp/growth16-custom.json
+          python alo186/deployment/smoke_github_pages.py --site /tmp/alo186-growth16-custom --base-path ''
+      - name: Project-path artifactı
+        run: |
+          cp -a /tmp/alo186-growth16-canonical /tmp/alo186-growth16-project
+          python alo186/deployment/prepare_github_pages.py --site /tmp/alo186-growth16-project --base-path '/chatgpt' --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py --site /tmp/alo186-growth16-project --base-path '/chatgpt'
+          python alo186/deployment/inject_shortlist_growth.py --site /tmp/alo186-growth16-project --base-path '/chatgpt' > /tmp/growth16-project.json
+          python alo186/deployment/smoke_github_pages.py --site /tmp/alo186-growth16-project --base-path '/chatgpt'
+      - name: Artifact, arama, PWA, katalog ve giriş noktaları
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          routes=['/hesaplama/tasinabilir-ev-sarj-cihazi-priz-uygunluk/','/hesaplama/modem-ont-mini-ups-sure-saglik-gunlugu/','/hesaplama/priz-tipi-gerilim-monitoru-uygunluk/']
+          for root,prefix in [(Path('/tmp/alo186-growth16-custom'),''),(Path('/tmp/alo186-growth16-project'),'/chatgpt')]:
+              release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
+              pages=json.loads((root/'pages-release.json').read_text(encoding='utf-8'))
+              search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
+              index={x['canonicalPath']:x for x in search['entries']}
+              c=release['growthRun16']
+              assert release['routingVersion'] >= 63
+              assert c['rawPersonalDataCollected'] is False and c['directAffiliateLinksAdded']==0
+              assert c['unverifiedCommercialFieldsUsed']==[] and c['noBuyOutcomePreserved'] is True
+              assert c['officialApprovalClaimed'] is False and c['buildingWideCommerceClosed'] is True
+              assert c['mode2JournalTtlDays']==540 and c['miniUpsJournalTtlDays']==730 and c['voltageMonitorJournalTtlDays']==365
+              assert pages['growthRun16']['directAffiliateLinksAdded']==0
+              sitemap=(root/'sitemap.xml').read_text(encoding='utf-8'); sw=(root/'sw.js').read_text(encoding='utf-8')
+              for route in routes:
+                  d=root/route.strip('/'); assert (d/'index.html').is_file() and (d/'app.js').is_file()
+                  html=(d/'index.html').read_text(encoding='utf-8'); assert 'application/ld+json' in html
+                  assert 'amazon.com.tr' not in html.lower() and f'https://www.alo186.com{route}' in sitemap
+                  assert route in index and index[route]['bucket']=='calculator'
+                  assert index[route]['url']==(prefix+route if prefix else route)
+                  assert (prefix+route if prefix else route) in sw
+              assert 'data-alo186-growth-run16-tools="true"' in (root/'hesaplama/index.html').read_text(encoding='utf-8')
+              assert 'data-alo186-growth-run16-evidence="true"' in (root/'elektrik-portali/index.html').read_text(encoding='utf-8')
+              assert 'data-alo186-growth-run16-affiliate="true"' in (root/'akilli-urun-secimi/index.html').read_text(encoding='utf-8')
+              catalog=(root/'akilli-urun-secimi/catalog.js').read_text(encoding='utf-8')
+              assert "id:'ev_mobile_charger'" in catalog and "id:'voltage_monitor'" in catalog
+          PY
+      - name: Doğrulanmış büyüme artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-trust-revenue-growth-run16
+          path: /tmp/alo186-growth16-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
