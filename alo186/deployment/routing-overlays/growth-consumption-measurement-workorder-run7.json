@@ -1,0 +1,16 @@
+{
+  "version": 48,
+  "generatedAt": "2026-07-29",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/7-gunluk-cihaz-tuketim-deneyi/index.html",
+      "canonicalPath": "/hesaplama/7-gunluk-cihaz-tuketim-deneyi/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/elektrikci-is-emri-ozeti/index.html",
+      "canonicalPath": "/hesaplama/elektrikci-is-emri-ozeti/",
+      "type": "business-tool"
+    }
+  ]
+}

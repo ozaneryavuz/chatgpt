@@ -1,0 +1,166 @@
+name: ALO186 tüketim, ölçüm ve iş emri büyümesi
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/7-gunluk-cihaz-tuketim-deneyi/**'
+      - 'alo186/hesaplama/elektrikci-is-emri-ozeti/**'
+      - 'alo186/deployment/inject_growth_run7.py'
+      - 'alo186/deployment/inject_shortlist_growth.py'
+      - 'alo186/deployment/routing-overlays/growth-consumption-measurement-workorder-run7.json'
+      - 'alo186/tests/test_growth_run7.py'
+      - '.github/workflows/alo186-growth-run7.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/7-gunluk-cihaz-tuketim-deneyi/**'
+      - 'alo186/hesaplama/elektrikci-is-emri-ozeti/**'
+      - 'alo186/deployment/inject_growth_run7.py'
+      - 'alo186/deployment/inject_shortlist_growth.py'
+      - 'alo186/deployment/routing-overlays/growth-consumption-measurement-workorder-run7.json'
+      - 'alo186/tests/test_growth_run7.py'
+      - '.github/workflows/alo186-growth-run7.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-growth-run7-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Kaynak, gizlilik, no-buy ve yönlendirme sözleşmeleri
+        run: python alo186/tests/test_growth_run7.py
+
+      - name: Python sözdizimi
+        run: |
+          python -m py_compile alo186/deployment/inject_growth_run7.py
+          python -m py_compile alo186/deployment/inject_shortlist_growth.py
+
+      - name: Mevcut içerik, ticaret ve cihaz hasarı regresyonları
+        run: |
+          python alo186/tests/test_content_intent_consolidation.py
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Canonical üretim paketini oluştur
+        run: |
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-growth7-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-growth7-canonical
+
+      - name: Custom-domain artifactı
+        run: |
+          cp -a /tmp/alo186-growth7-canonical /tmp/alo186-growth7-custom
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-growth7-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py --site /tmp/alo186-growth7-custom --base-path ''
+          python alo186/deployment/inject_shortlist_growth.py --site /tmp/alo186-growth7-custom --base-path '' > /tmp/growth7-custom.json
+          python alo186/deployment/smoke_github_pages.py --site /tmp/alo186-growth7-custom --base-path ''
+
+      - name: Project-path artifactı
+        run: |
+          cp -a /tmp/alo186-growth7-canonical /tmp/alo186-growth7-project
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-growth7-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py --site /tmp/alo186-growth7-project --base-path '/chatgpt'
+          python alo186/deployment/inject_shortlist_growth.py --site /tmp/alo186-growth7-project --base-path '/chatgpt' > /tmp/growth7-project.json
+          python alo186/deployment/smoke_github_pages.py --site /tmp/alo186-growth7-project --base-path '/chatgpt'
+
+      - name: Artifact, arama, PWA ve giriş noktaları
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          routes = [
+              '/hesaplama/7-gunluk-cihaz-tuketim-deneyi/',
+              '/hesaplama/elektrikci-is-emri-ozeti/',
+          ]
+          expected_buckets = {
+              routes[0]: 'calculator',
+              routes[1]: 'business',
+          }
+          for root, prefix in [
+              (Path('/tmp/alo186-growth7-custom'), ''),
+              (Path('/tmp/alo186-growth7-project'), '/chatgpt'),
+          ]:
+              release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
+              pages=json.loads((root/'pages-release.json').read_text(encoding='utf-8'))
+              search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
+              index={item['canonicalPath']:item for item in search['entries']}
+              contract=release['growthRun7']
+              assert contract['rawPersonalDataCollected'] is False
+              assert contract['billAmountCollected'] is False
+              assert contract['monthlyKwhLocalOnly'] is True
+              assert contract['monthlyJournalTtlDays']==400
+              assert contract['directAffiliateLinksAdded']==0
+              assert contract['unverifiedCommercialFieldsUsed']==[]
+              assert contract['noBuyOutcomePreserved'] is True
+              assert contract['providerRanking'] is False
+              assert contract['paidReferralDisclosureRequired'] is True
+              assert pages['growthRun7']['rawPersonalDataCollected'] is False
+              sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
+              sw=(root/'sw.js').read_text(encoding='utf-8')
+              for route in routes:
+                  page=root/route.strip('/')/'index.html'
+                  assert page.is_file(), page
+                  html=page.read_text(encoding='utf-8')
+                  assert 'application/ld+json' in html
+                  assert 'amazon.com' not in html.lower() and 'amzn.' not in html.lower()
+                  assert f'https://www.alo186.com{route}' in sitemap
+                  assert route in index
+                  assert index[route]['bucket']==expected_buckets[route]
+                  assert index[route]['url']==(prefix+route if prefix else route)
+                  assert not any(field in index[route] for field in ['price','stock','rating','seller','warranty','asin'])
+                  assert (prefix+route if prefix else route) in sw
+              bill=(root/'fatura-analizi/index.html').read_text(encoding='utf-8')
+              assert 'data-alo186-growth-run7-journal="true"' in bill
+              assert 'alo186.monthlyKwhJournal.v1' in bill
+              assert '400*86400000' in bill
+              expected_experiment=(prefix+routes[0] if prefix else routes[0])
+              assert expected_experiment in bill
+              hub=(root/'hesaplama/index.html').read_text(encoding='utf-8')
+              portal=(root/'elektrik-portali/index.html').read_text(encoding='utf-8')
+              product=(root/'amazon-elektrik-urunleri/index.html').read_text(encoding='utf-8')
+              assert 'data-alo186-growth-run7-tools="true"' in hub
+              assert 'data-alo186-growth-run7-journey="true"' in portal
+              assert 'data-alo186-growth-run7-measurement="true"' in product
+              manifest=json.loads((root/'manifest.webmanifest').read_text(encoding='utf-8'))
+              urls={item.get('url') for item in manifest.get('shortcuts',[]) if isinstance(item,dict)}
+              assert (prefix+'/fatura-analizi#aylik-tuketim-gunlugu' if prefix else '/fatura-analizi#aylik-tuketim-gunlugu') in urls
+              assert (prefix+routes[1] if prefix else routes[1]) in urls
+          PY
+
+      - name: Doğrulanmış büyüme artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-consumption-measurement-workorder-growth
+          path: /tmp/alo186-growth7-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
