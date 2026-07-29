@@ -1,0 +1,20 @@
+{
+  "version": 74,
+  "generatedAt": "2026-07-30",
+  "routes": [
+    {
+      "canonicalPath": "/elektrik-durum-merkezi",
+      "source": "alo186/elektrik-durum-merkezi/index.html",
+      "type": "tool",
+      "title": "Elektrik Durum Merkezi: 112, 186, EDAŞ veya Elektrikçi",
+      "intent": [
+        "elektrik arızasında kimi aramalıyım",
+        "112 mi 186 mı",
+        "elektrik kesintisi edaş mı elektrikçi mi",
+        "sayaç arızası nereye bildirilir",
+        "cihaz hasarı elektrik kesintisi",
+        "ups jeneratör çalışmadı ne yapmalıyım"
+      ]
+    }
+  ]
+}
