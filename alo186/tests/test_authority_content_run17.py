@@ -115,6 +115,7 @@ def main() -> None:
             "yetkili" in lower
             or "kullanıcı müdahalesine uygun değildir" in lower
             or "kullanıcı müdahalesi yok" in lower
+            or "lisanslı toplayıcı" in lower
         )
         assert professional_boundary, f"Profesyonel müdahale sınırı eksik: {slug}"
         assert "WebApplication" not in html
