@@ -1,0 +1,41 @@
+{
+  "version": 57,
+  "name": "ALO186 device damage, smart plug energy and surge strip lifecycle run13",
+  "routes": [
+    {
+      "canonicalPath": "/hesaplama/elektrik-cihaz-hasari-edas-basvuru-paketi/",
+      "source": "alo186/hesaplama/elektrik-cihaz-hasari-edas-basvuru-paketi/index.html",
+      "type": "business-tool",
+      "intent": "distribution-company device damage application deadline, evidence and official escalation preparation",
+      "affiliatePolicy": "none_official_and_professional_handoff_only"
+    },
+    {
+      "canonicalPath": "/hesaplama/akilli-priz-enerji-anomali-gunlugu/",
+      "source": "alo186/hesaplama/akilli-priz-enerji-anomali-gunlugu/index.html",
+      "type": "calculator",
+      "intent": "monthly smart plug energy measurement normalization and repeated anomaly confirmation",
+      "affiliatePolicy": "qualified_low_power_measurement_need_after_safety_gate"
+    },
+    {
+      "canonicalPath": "/hesaplama/akim-korumali-grup-priz-saglik-gunlugu/",
+      "source": "alo186/hesaplama/akim-korumali-grup-priz-saglik-gunlugu/index.html",
+      "type": "calculator",
+      "intent": "surge protected power strip indicator, grounding warning and physical health lifecycle check",
+      "affiliatePolicy": "verified_replacement_need_after_wiring_and_hazard_gate"
+    }
+  ],
+  "trust": {
+    "rawPersonalDataCollected": false,
+    "directAffiliateLinksAdded": 0,
+    "unverifiedCommercialFieldsUsed": [],
+    "noBuyOutcomePreserved": true,
+    "affiliateDisclosureRequired": true,
+    "officialApprovalClaimed": false,
+    "emergencyCommerceClosed": true,
+    "deviceDamageDeadlineBusinessDays": 10,
+    "smartPlugJournalTtlDays": 730,
+    "surgeStripJournalTtlDays": 540,
+    "qualifiedAffiliateFlows": ["energy_monitoring_smart_plug", "surge_protected_power_strip"],
+    "professionalAndOfficialFlows": ["distribution_company_damage_application", "electrical_wiring_check"]
+  }
+}
