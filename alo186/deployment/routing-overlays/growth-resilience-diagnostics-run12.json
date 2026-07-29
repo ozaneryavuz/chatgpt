@@ -1,0 +1,39 @@
+{
+  "version": 55,
+  "name": "ALO186 outage resilience, RCD diagnostics and PV monthly health run12",
+  "routes": [
+    {
+      "canonicalPath": "/hesaplama/elektrik-kesintisi-dayaniklilik-plani/",
+      "source": "alo186/hesaplama/elektrik-kesintisi-dayaniklilik-plani/index.html",
+      "type": "calculator",
+      "intent": "power outage resilience planning from critical needs and existing backup resources",
+      "affiliatePolicy": "verified_gap_after_tool_and_explicit_disclosure"
+    },
+    {
+      "canonicalPath": "/hesaplama/kacak-akim-rolesi-olay-gunlugu/",
+      "source": "alo186/hesaplama/kacak-akim-rolesi-olay-gunlugu/index.html",
+      "type": "calculator",
+      "intent": "RCD trip event chronology, circuit pattern and safe electrician handoff",
+      "affiliatePolicy": "professional_service_only"
+    },
+    {
+      "canonicalPath": "/hesaplama/ges-aylik-uretim-saglik-gunlugu/",
+      "source": "alo186/hesaplama/ges-aylik-uretim-saglik-gunlugu/index.html",
+      "type": "business-tool",
+      "intent": "monthly PV specific yield and comparable reference performance tracking",
+      "affiliatePolicy": "professional_service_only"
+    }
+  ],
+  "trust": {
+    "rawPersonalDataCollected": false,
+    "directAffiliateLinksAdded": 0,
+    "unverifiedCommercialFieldsUsed": [],
+    "noBuyOutcomePreserved": true,
+    "affiliateDisclosureRequired": true,
+    "officialApprovalClaimed": false,
+    "emergencyCommerceClosed": true,
+    "localOnlyJournals": ["rcd", "pv"],
+    "rcdJournalTtlDays": 365,
+    "pvJournalTtlDays": 730
+  }
+}
