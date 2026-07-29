@@ -104,7 +104,10 @@ class CommercialCategoryExpansionTests(unittest.TestCase):
             self.assertIn("Reklam / satış ortaklığı" if "ges-malzemeleri" not in route else "Ticari şeffaflık", html)
             self.assertIn("ürün satıc", lower)
             self.assertIn("fiyat", lower)
-            self.assertIn("stok", lower)
+            if "ges-malzemeleri" not in route:
+                self.assertIn("stok", lower)
+            else:
+                self.assertIn("mağaza bağlantısı göstermez", lower)
             self.assertNotRegex(lower, r"\b\d+[.,]?\d*\s*(?:tl|₺|try)\b")
             self.assertNotIn("en ucuz", lower)
             self.assertNotIn("en iyi ürün", lower)
@@ -127,15 +130,18 @@ class CommercialCategoryExpansionTests(unittest.TestCase):
         power = ROUTES["/amazon-elektrik-urunleri/tasinabilir-guc-istasyonu-secimi"].read_text(encoding="utf-8")
         smart = ROUTES["/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi"].read_text(encoding="utf-8")
         ges = ROUTES["/amazon-elektrik-urunleri/ges-malzemeleri-secimi"].read_text(encoding="utf-8")
+        runtime = (SOURCE_ROOT / "commercial.js").read_text(encoding="utf-8")
         self.assertIn('data-category="power_station"', power)
         self.assertIn('data-category="smart_plug"', smart)
         self.assertIn("data-product-center", power)
         self.assertIn("data-product-center", smart)
-        self.assertIn("Doğrulanmış ürün kartı yoksa doğrudan Amazon bağlantısı gösterilmez", power)
-        self.assertIn("Doğrulanmış ürün kartı yoksa doğrudan Amazon bağlantısı gösterilmez", smart)
+        for html in (power, smart):
+            self.assertIn("doğrudan Amazon bağlantısı gösterilmez", html)
+            self.assertTrue("doğrulanmış ürün" in html.casefold() or "doğrulanmış ürün kartı" in html.casefold())
         self.assertIn('data-commercial-scope="professional-only"', ges)
         self.assertIn("doğrudan Amazon veya başka mağaza bağlantısı göstermez", ges)
         self.assertNotIn("data-product-center", ges)
+        self.assertIn("if (professionalOnly) return;", runtime)
 
     def test_catalog_keeps_new_consumer_categories_tool_first(self) -> None:
         catalog = (ROOT / "alo186/urun-eslestirme/catalog.js").read_text(encoding="utf-8")
@@ -181,6 +187,7 @@ class CommercialCategoryExpansionTests(unittest.TestCase):
             for route in ROUTES:
                 self.assertIn(route, entries)
                 self.assertEqual(entries[route]["priority"], 45)
+                self.assertEqual(entries[route]["bucket"], "collection")
                 self.assertFalse(entries[route]["featured"])
                 for forbidden in ("price", "stock", "rating", "seller", "warranty", "affiliateCommission"):
                     self.assertNotIn(forbidden, entries[route])
