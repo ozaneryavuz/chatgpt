@@ -1,0 +1,21 @@
+{
+  "version": 68,
+  "generatedAt": "2026-07-29",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-sayaci-isiniyor-yanik-kokusu-cizirti-edas-elektrikci/index.html",
+      "canonicalPath": "/haberler/elektrik-sayaci-isiniyor-yanik-kokusu-cizirti-edas-elektrikci",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/harmonik-thdi-tdd-pcc-ieee-519-farki/index.html",
+      "canonicalPath": "/haberler/harmonik-thdi-tdd-pcc-ieee-519-farki",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ups-notr-toprak-bypass-4-kutup-ats-npe/index.html",
+      "canonicalPath": "/haberler/ups-notr-toprak-bypass-4-kutup-ats-npe",
+      "type": "article"
+    }
+  ]
+}
