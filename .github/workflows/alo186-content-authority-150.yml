@@ -1,0 +1,146 @@
+name: ALO186 içerik otoritesi 150 kaynak rehber kalite kontrolü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/haberler/ups-eco-modu-double-conversion-econversion-farki/**'
+      - 'alo186/haberler/harmonik-k-factor-trafo-derating-notr-isinmasi/**'
+      - 'alo186/haberler/ges-pid-lid-letid-guc-kaybi-teshisi/**'
+      - 'alo186/deployment/routing-overlays/content-authority-150-run37.json'
+      - 'alo186/tests/test_authority_content_run37.py'
+      - '.github/workflows/alo186-content-authority-150.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/ups-eco-modu-double-conversion-econversion-farki/**'
+      - 'alo186/haberler/harmonik-k-factor-trafo-derating-notr-isinmasi/**'
+      - 'alo186/haberler/ges-pid-lid-letid-guc-kaybi-teshisi/**'
+      - 'alo186/deployment/routing-overlays/content-authority-150-run37.json'
+      - 'alo186/tests/test_authority_content_run37.py'
+      - '.github/workflows/alo186-content-authority-150.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-authority-150-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Yeni rehberlerin AEO SEO kaynak ve güven sözleşmeleri
+        run: python alo186/tests/test_authority_content_run37.py
+
+      - name: İçerik niyeti ve kanibalizasyon kontrolü
+        run: python alo186/tests/test_content_intent_consolidation.py
+
+      - name: Mevcut güven ticari sınır ve yayın regresyonları
+        run: |
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+          node alo186/arama/test.js
+          python alo186/tests/test_private_technical_search.py
+
+      - name: Canonical üretim paketini oluştur
+        run: |
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-authority-150-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-authority-150-canonical
+
+      - name: Custom-domain Pages artifactını oluştur
+        run: |
+          cp -a /tmp/alo186-authority-150-canonical /tmp/alo186-authority-150-custom
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-authority-150-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-authority-150-custom \
+            --base-path ''
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-authority-150-custom \
+            --base-path '' \
+            > /tmp/alo186-authority-150-custom.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-authority-150-custom \
+            --base-path ''
+
+      - name: Project-path Pages artifactını oluştur
+        run: |
+          cp -a /tmp/alo186-authority-150-canonical /tmp/alo186-authority-150-project
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-authority-150-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-authority-150-project \
+            --base-path '/chatgpt'
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-authority-150-project \
+            --base-path '/chatgpt' \
+            > /tmp/alo186-authority-150-project.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-authority-150-project \
+            --base-path '/chatgpt'
+
+      - name: Canonical sitemap arama ve base-path kabulü
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          routes = [
+              '/haberler/ups-eco-modu-double-conversion-econversion-farki',
+              '/haberler/harmonik-k-factor-trafo-derating-notr-isinmasi',
+              '/haberler/ges-pid-lid-letid-guc-kaybi-teshisi',
+          ]
+          for root, prefix in [
+              (Path('/tmp/alo186-authority-150-custom'), ''),
+              (Path('/tmp/alo186-authority-150-project'), '/chatgpt'),
+          ]:
+              sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
+              release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
+              search = json.loads((root / 'arama/search-index.json').read_text(encoding='utf-8'))
+              active = {entry['canonicalPath']: entry for entry in search['entries']}
+              assert release['routingVersion'] >= 67
+              assert release['articleCount'] >= 148
+              for route in routes:
+                  file = root / route.strip('/') / 'index.html'
+                  assert file.is_file(), file
+                  html = file.read_text(encoding='utf-8')
+                  assert f'rel="canonical" href="https://www.alo186.com{route}"' in html
+                  assert 'Son doğrulama: 29 Temmuz 2026' in html
+                  assert f'https://www.alo186.com{route}' in sitemap
+                  assert route in active
+                  assert active[route]['url'] == (prefix + route if prefix else route)
+                  assert active[route]['bucket'] == 'article'
+                  assert not any(field in active[route] for field in ['price','stock','rating','seller','warranty','asin'])
+          PY
+
+      - name: Doğrulanmış içerik otoritesi artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-authority-150-pages
+          path: /tmp/alo186-authority-150-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
