@@ -10,7 +10,11 @@ const catalog = require(path.join(productRoot, 'catalog.js'));
 const conversion = require(path.join(productRoot, 'conversion-growth-core.js'));
 const retention = require(path.join(productRoot, 'journey-retention-core.js'));
 
-assert.equal(catalog.categories.length, 12, 'Ürün merkezi 12 kullanıcı niyetini korumalı.');
+assert.equal(catalog.categories.length, 13, 'Ürün merkezi 13 kullanıcı niyetini korumalı.');
+const coCategory = catalog.getCategory('co_alarm');
+assert(coCategory, 'CO alarmı güvenlik niyeti katalogda bulunmalı.');
+assert.equal(coCategory.affiliatePolicy, 'after_tool');
+assert.equal(catalog.productsFor('co_alarm').length, 0, 'CO alarmında doğrulanmış ürün olmadan doğrudan kart açılamaz.');
 
 const evQuery = conversion.buildQuery('ev_cable', { current: '32', phase: 'three', length: '7_5' });
 assert.match(evQuery, /Type 2/i);
@@ -40,6 +44,7 @@ assert.deepEqual(
 );
 assert.equal(conversion.gateStatus('generator', {}).reason, 'professional_only');
 assert.equal(conversion.getProfile('outlet_tester'), null);
+assert.equal(conversion.getProfile('co_alarm'), null, 'CO alarmı yalnız özel güvenlik aracı sonrasında değerlendirilmelidir.');
 
 const professionalRoute = conversion.professionalRoute('generator');
 assert.match(professionalRoute, /^\/kurumsal-elektrik-surekliligi-on-degerlendirme\?/);
@@ -74,9 +79,10 @@ assert.doesNotMatch(app, /data-filtered-search/);
 assert.doesNotMatch(app, /data-guide-amazon/);
 assert.doesNotMatch(app, /\/iletisim\?konu=urun-teknik-secim/);
 assert.match(app, /Ücretli teknik ön değerlendirme/);
+assert.match(app, /co_alarm/);
 assert.match(conversionUi, /qualifiedAffiliateAccepted/);
 assert.match(conversionUi, /qualifiedExistingInsufficient/);
-assert.match(conversionUi, /rel=\"sponsored nofollow noopener\"/);
+assert.match(conversionUi, /rel="sponsored nofollow noopener"/);
 assert.match(conversionUi, /Şimdilik satın alma/);
 assert.match(conversionUi, /ALO186 resmî kurum, EDAŞ veya ürün satıcısı değildir/);
 assert.match(conversionCore, /after_tool/);
@@ -91,7 +97,7 @@ assert.match(styles, /min-height:48px/);
 assert.match(styles, /@media\(max-width:760px\)/);
 
 for (const text of [conversionUi, conversionCore, retentionUi]) {
-  assert.doesNotMatch(text, /type=\"(?:email|tel|text)\"/i);
+  assert.doesNotMatch(text, /type="(?:email|tel|text)"/i);
   assert.doesNotMatch(text, /priceCurrency|availability|aggregateRating/i);
 }
 
@@ -105,4 +111,4 @@ assert.deepEqual(cleanEvent, { category: 'ev_cable', status: 'opened', placement
 assert.equal(conversion.hasForbiddenEventData({ category: 'ev_cable', email: 'blocked@example.com' }), true);
 assert.equal(conversion.hasForbiddenEventData({ category: 'ev_cable', status: 'opened' }), false);
 
-console.log('ALO186 güvenli gelir dönüşümü: teknik arama, satın almama, profesyonel rota, ICS tekrar ziyaret ve PII korumaları başarılı.');
+console.log('ALO186 güvenli gelir dönüşümü: 13 niyet, CO güvenlik kapısı, teknik arama, satın almama, profesyonel rota, ICS ve PII korumaları başarılı.');
