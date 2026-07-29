@@ -1,0 +1,18 @@
+{
+  "version": 73,
+  "routes": [
+    {
+      "canonicalPath": "/hesaplama/aydinlatma-ihtiyac-ve-ampul-uygunluk/",
+      "source": "alo186/hesaplama/aydinlatma-ihtiyac-ve-ampul-uygunluk/index.html",
+      "type": "tool",
+      "title": "Aydınlatma İhtiyacı ve Mevcut Ampul Uygunluk Merkezi",
+      "intent": [
+        "kaç lümen ampul almalıyım",
+        "salon için kaç kelvin",
+        "e27 led ampul seçimi",
+        "sensörlü ampul mü armatür mü",
+        "led ampul dimmer uyumu"
+      ]
+    }
+  ]
+}

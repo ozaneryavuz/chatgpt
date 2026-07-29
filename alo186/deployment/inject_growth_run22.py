@@ -5,18 +5,16 @@ import json
 import re
 from pathlib import Path
 
-from inject_growth_run22 import run as run_growth_run22
-
-ROUTE = "/hesaplama/kesinti-hazirlik-envanteri/"
+ROUTE = "/hesaplama/aydinlatma-ihtiyac-ve-ampul-uygunluk/"
 CANONICAL = "https://www.alo186.com" + ROUTE
-SOURCE = "alo186/hesaplama/kesinti-hazirlik-envanteri/index.html"
-ENTRY_MARKER = 'data-alo186-growth-run21-entry="true"'
-GUARD_MARKER = 'data-alo186-risk-gate-run21="true"'
+SOURCE = "alo186/hesaplama/aydinlatma-ihtiyac-ve-ampul-uygunluk/index.html"
+ENTRY_MARKER = 'data-alo186-growth-run22-entry="true"'
+DEEP_LINK_MARKER = 'data-alo186-lighting-deeplink-run22="true"'
 TARGETS = {
-    Path("hesaplama/index.html"): ("Kesinti hazırlık envanterinizi çıkarın", "Mevcut ürünleri kaydedin; çalışan ekipmanı yeniden satın almayın ve yalnız gerçek eksikleri görün."),
-    Path("elektrik-portali/index.html"): ("Mevcut ekipmanı önce değerlendirin", "Telefon, internet, aydınlatma ve erken uyarı hazırlığını kişisel veri paylaşmadan kaydedin."),
-    Path("akilli-urun-secimi/index.html"): ("Satın almadan önce elinizdekileri sayın", "Test edilmiş ürün yeterliyse satın almama sonucu; yalnız doğrulanmış eksikte kategori rehberi."),
-    Path("amazon-elektrik-urunleri/index.html"): ("Hazır paket yerine gerçek eksik", "Kesinti hazırlık envanteriyle yalnız eksik işlevleri belirleyin; test edilmemiş ürünü değiştirmeyin."),
+    Path("hesaplama/index.html"): ("Aydınlatma ihtiyacını ürün almadan sınıflandırın", "Mevcut ampul yeterliyse kullanmaya devam edin; yalnız gerçek eksikte lümen, Kelvin, CRI, duy ve ortam koşullarına göre kategori açın."),
+    Path("elektrik-portali/index.html"): ("Ampul wattına değil görevine bakın", "Salon, çalışma, koridor ve dış alan ihtiyacını mevcut ürünle karşılaştırın; güvenli ürün için satın almama sonucu alın."),
+    Path("akilli-urun-secimi/index.html"): ("Aydınlatma kategorisini teknik kanıtla açın", "Lümen, Kelvin, dimmer, duy ve ortam etiketi bilinmeden ürün bağlantısı açılmaz."),
+    Path("amazon-elektrik-urunleri/index.html"): ("Aydınlatma ürünlerini doğru karta daraltın", "Yedi aydınlatma ürün yolundan yalnız ihtiyacınıza uyan kartı açın; mevcut ürün yeterliyse satın almayın."),
 }
 
 
@@ -45,10 +43,18 @@ def append_search(site: Path, base_path: str) -> None:
         entries.append({
             "canonicalPath": ROUTE,
             "url": public_url(base_path, ROUTE),
-            "title": "Kesinti Hazırlık Envanteri ve Ürün İhtiyaç Kontrolü",
-            "description": "Mevcut ekipmanı kaydedin, çalışan ürünü yeniden satın almayın, gerçek eksikleri ve 90 günlük test planını belirleyin.",
+            "title": "Aydınlatma İhtiyacı ve Mevcut Ampul Uygunluk Merkezi",
+            "description": "Mevcut ampul veya armatürün yeterliliğini lümen, Kelvin, CRI, duy, dimmer ve ortam koşullarıyla değerlendirin; yalnız gerçek eksikte kategoriye ilerleyin.",
             "bucket": "calculator",
-            "keywords": ["elektrik kesintisi hazırlık listesi", "evde kesinti için gerekli ürünler", "powerbank mini UPS acil aydınlatma", "mevcut ürün yeterli mi", "kesinti ekipmanı test takvimi"],
+            "keywords": [
+                "kaç lümen ampul almalıyım",
+                "salon için kaç kelvin",
+                "e27 led ampul seçimi",
+                "sensörlü ampul mü armatür mü",
+                "led ampul dimmer uyumu",
+                "dış mekan projektör ip sınıfı",
+                "led ampul titriyor ısınıyor",
+            ],
         })
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
@@ -76,7 +82,7 @@ def update_manifest(site: Path, base_path: str) -> None:
     shortcuts = payload.setdefault("shortcuts", [])
     url = public_url(base_path, ROUTE)
     if not any(item.get("url") == url for item in shortcuts if isinstance(item, dict)):
-        shortcuts.append({"name": "Kesinti Hazırlık Envanteri", "short_name": "Hazırlık Envanteri", "url": url})
+        shortcuts.append({"name": "Aydınlatma Uygunluk Merkezi", "short_name": "Aydınlatma Seçimi", "url": url})
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
@@ -90,50 +96,48 @@ def insert_entries(site: Path, base_path: str) -> int:
         text = path.read_text(encoding="utf-8")
         if ENTRY_MARKER in text:
             continue
-        card = f'<section class="content-section" {ENTRY_MARKER}><div class="panel"><span class="eyebrow">Mevcut ekipman · satın almama · 90 günlük test</span><h2>{title}</h2><p>{description}</p><div class="actions"><a class="btn btn-secondary" href="{href}">Kesinti hazırlık envanterini aç</a></div><small>Doğrudan mağaza bağlantısı yoktur; gerçek eksik doğrulanırsa kategori rehberine geçilir.</small></div></section>'
+        card = f'<section class="content-section" {ENTRY_MARKER}><div class="panel"><span class="eyebrow">Lümen · Kelvin · CRI · mevcut ürün</span><h2>{title}</h2><p>{description}</p><div class="actions"><a class="btn btn-secondary" href="{href}">Aydınlatma uygunluk merkezini aç</a></div><small>Doğrudan mağaza bağlantısı yoktur; kategori yalnız güvenli ve doğrulanmış eksikte açılır.</small></div></section>'
         text = text.replace("</main>", card + "</main>", 1) if "</main>" in text else text + card
         path.write_text(text, encoding="utf-8")
         count += 1
     return count
 
 
-def inject_risk_gate(site: Path, base_path: str) -> bool:
+def inject_lighting_deeplink(site: Path) -> bool:
     path = site / "amazon-elektrik-urunleri/index.html"
     if not path.is_file():
         return False
     text = path.read_text(encoding="utf-8")
-    if GUARD_MARKER in text:
+    if DEEP_LINK_MARKER in text:
         return False
-    fallback = public_url(base_path, "/akilli-urun-secimi")
-    banner = f'<div class="affiliate-disclosure" {GUARD_MARKER}><strong>Risk bazlı ticari kapı:</strong> Pano, sabit tesisat, yüksek güçlü enerji, GES, jeneratör, EV şarj ve ölçüm gerektiren ürünlerde doğrudan mağaza bağlantısı kapatılır; önce teknik rehber veya uzmanlık sınırı açılır.</div>'
-    script = rf'''<script {GUARD_MARKER}>(function(){{'use strict';const patterns=[/pano/i,/rccb/i,/rcbo/i,/otomatik sigorta/i,/kaçak akım/i,/\bspd\b/i,/gerilim rölesi/i,/jeneratör/i,/inverter/i,/mppt/i,/solar dc/i,/ges/i,/elektrikli araç/i,/ev şarj/i,/transfer şalteri/i,/kontaktör/i,/akım trafosu/i,/kablo makarası/i,/dış ortam kauçuk/i];let gated=0;for(const link of document.querySelectorAll('a[href*="amazon.com.tr"]')){{const box=link.closest('article,.card,li,section')||link.parentElement;const text=(box?box.textContent:link.textContent)||'';if(!patterns.some(pattern=>pattern.test(text)))continue;const internal=box&&[...box.querySelectorAll('a[href]')].find(item=>item!==link&&!/amazon\.com\.tr/i.test(item.href)&&item.getAttribute('href')&&!item.getAttribute('href').startsWith('#'));link.href=internal?internal.getAttribute('href'):'{fallback}';link.removeAttribute('target');link.removeAttribute('rel');link.dataset.alo186RiskGated='true';link.textContent='Önce teknik uygunluğu doğrula';gated++;}}document.documentElement.dataset.alo186RiskGatedCount=String(gated);}})();</script>'''
-    if '<div class="affiliate-disclosure"' in text:
-        text = text.replace('<div class="affiliate-disclosure"', banner + '<div class="affiliate-disclosure"', 1)
-    else:
-        text = text.replace("<main", banner + "<main", 1)
+    script = r'''<script data-alo186-lighting-deeplink-run22="true">(function(){'use strict';const map={
+'e27-led-ampul':'E27 LED ampul','sensorlu-led-ampul':'Sensörlü LED ampul','sensorlu-tavan-armaturu':'Sensörlü tavan armatürü','dis-mekan-led-projektor':'Dış mekân LED projektör','solar-dis-mekan-lambasi':'Solar dış mekân lambası','ayarlanabilir-calisma-lambasi':'Ayarlanabilir çalışma lambası','24v-led-serit-seti':'24 V LED şerit seti'};
+const params=new URLSearchParams(location.search),slug=params.get('kategori');if(!slug||!map[slug])return;const wanted=map[slug].toLocaleLowerCase('tr-TR');const nodes=[...document.querySelectorAll('article,section,li,.card')];const target=nodes.find(node=>(node.textContent||'').toLocaleLowerCase('tr-TR').includes(wanted));if(!target)return;target.dataset.alo186LightingTarget='true';target.setAttribute('tabindex','-1');target.scrollIntoView({behavior:'smooth',block:'center'});target.focus({preventScroll:true});const note=document.createElement('div');note.className='affiliate-disclosure';note.dataset.alo186LightingQualification='true';note.innerHTML='<strong>Nitelikli aydınlatma yönlendirmesi:</strong> Bu karta lümen, Kelvin, CRI, bağlantı ve mevcut ürün kontrolünden sonra ulaştınız. Mevcut ürün yeterliyse satın alma gerekli değildir. Aşağıdaki mağaza bağlantıları Amazon satış ortaklığı bağlantılarıdır.';target.insertBefore(note,target.firstChild);})();</script>'''
     text = text.replace("</body>", script + "</body>", 1)
     path.write_text(text, encoding="utf-8")
     return True
 
 
-def update_release(site: Path, base_path: str, entries: int, risk_gate: bool, offline: bool) -> None:
+def update_release(site: Path, base_path: str, entries: int, deeplink: bool, offline: bool) -> None:
     path = site / "alo186-release.json"
     release = json.loads(path.read_text(encoding="utf-8"))
     routes = release.setdefault("routes", [])
     if not any(item.get("canonicalPath") == ROUTE for item in routes if isinstance(item, dict)):
         routes.append({"canonicalPath": ROUTE, "source": SOURCE, "type": "tool"})
     release["routeCount"] = len(routes)
-    release["outagePreparednessInventory"] = {
+    release["lightingSuitabilityCenter"] = {
         "version": 1,
         "basePath": base_path,
         "route": public_url(base_path, ROUTE),
         "entryCardsInjected": entries,
-        "riskBasedAffiliateGate": risk_gate,
+        "qualifiedCategoryDeepLink": deeplink,
         "offline": True,
-        "recordLimit": 12,
+        "recordLimit": 8,
         "recordTtlDays": 365,
-        "reviewDays": 90,
+        "reviewDays": 180,
         "directAffiliateLinksAdded": 0,
+        "noBuyOutcomePreserved": True,
+        "hazardCommerceClosed": True,
         "commercialFieldsExcluded": ["price", "stock", "rating", "seller", "warranty"],
         "officialAffiliationClaimed": False,
     }
@@ -142,7 +146,7 @@ def update_release(site: Path, base_path: str, entries: int, risk_gate: bool, of
     if pages.is_file():
         payload = json.loads(pages.read_text(encoding="utf-8"))
         payload["routeCount"] = release["routeCount"]
-        payload["outagePreparednessInventory"] = release["outagePreparednessInventory"]
+        payload["lightingSuitabilityCenter"] = release["lightingSuitabilityCenter"]
         if offline:
             payload["offlineCriticalRouteCount"] = int(payload.get("offlineCriticalRouteCount") or 0) + 1
         pages.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -158,16 +162,15 @@ def recompute(site: Path) -> None:
 
 def run(site: Path, base_path: str) -> dict:
     base_path = normalize_base_path(base_path)
-    required = site / "hesaplama/kesinti-hazirlik-envanteri/index.html"
+    required = site / "hesaplama/aydinlatma-ihtiyac-ve-ampul-uygunluk/index.html"
     if not required.is_file():
-        raise FileNotFoundError(f"Kesinti hazırlık envanteri artifactta eksik: {required}")
+        raise FileNotFoundError(f"Aydınlatma uygunluk rotası artifactta eksik: {required}")
     append_sitemap(site)
     append_search(site, base_path)
     entries = insert_entries(site, base_path)
-    risk_gate = inject_risk_gate(site, base_path)
+    deeplink = inject_lighting_deeplink(site)
     offline = add_offline(site, base_path)
     update_manifest(site, base_path)
-    update_release(site, base_path, entries, risk_gate, offline)
+    update_release(site, base_path, entries, deeplink, offline)
     recompute(site)
-    lighting = run_growth_run22(site, base_path)
-    return {"ok": True, "route": public_url(base_path, ROUTE), "entries": entries, "riskGate": risk_gate, "offline": True, "lightingSuitability": lighting}
+    return {"ok": True, "route": public_url(base_path, ROUTE), "entries": entries, "qualifiedDeepLink": deeplink, "offline": True}
