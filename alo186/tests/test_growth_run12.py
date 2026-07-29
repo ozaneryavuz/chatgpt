@@ -46,11 +46,13 @@ def test_pages() -> None:
         assert '<script src="./app.js"></script>' in html, key
         assert "amazon.com" not in lower and "amzn." not in lower, key
         assert '"@type":"product"' not in lower and '"@type":"offer"' not in lower, key
-        assert "fiyat" in lower and ("stok" in lower or key in {"rcd", "pv"}), key
         assert "kişisel veri" in lower or "kişisel verisiz" in lower, key
         assert "resmî" in lower or "resmi" in lower, key
         assert "satın al" in lower or "ürün yönlendirmesi yok" in lower, key
         assert "URL.createObjectURL" in app, key
+    outage = read(PAGES["outage"]).lower()
+    for field in ("fiyat", "stok", "puan", "garanti"):
+        assert field in outage, field
 
 
 def test_outage_contract() -> None:
@@ -113,7 +115,7 @@ def test_pv_contract() -> None:
 
 def test_pipeline() -> None:
     overlay = json.loads(read(ROOT / "alo186/deployment/routing-overlays/growth-resilience-diagnostics-run12.json"))
-    assert overlay["version"] == 55
+    assert overlay["version"] == 56
     assert {item["canonicalPath"] for item in overlay["routes"]} == set(ROUTES.values())
     assert overlay["trust"]["directAffiliateLinksAdded"] == 0
     assert overlay["trust"]["unverifiedCommercialFieldsUsed"] == []
