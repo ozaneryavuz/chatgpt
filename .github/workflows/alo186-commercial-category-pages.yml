@@ -43,7 +43,7 @@ jobs:
         run: |
           node --check alo186/amazon-elektrik-urunleri/commercial.js
           node --check alo186/urun-eslestirme/catalog.js
-          node --check alo186/urun-eslestirme/matcher.js
+          node --check alo186/urun-eslestirme/matcher-core.js
           node --check alo186/urun-eslestirme/app.js
 
       - name: Mevcut yayın, hukuk ve içerik güveni
