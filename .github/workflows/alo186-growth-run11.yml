@@ -1,0 +1,149 @@
+name: ALO186 güvenli tekrar ziyaret ve gelir run11
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/power-station-gunes-paneli-uygunluk/**'
+      - 'alo186/hesaplama/duman-co-alarmi-bakim-gunlugu/**'
+      - 'alo186/hesaplama/jenerator-ats-test-gunlugu/**'
+      - 'alo186/deployment/inject_growth_run11.py'
+      - 'alo186/deployment/inject_shortlist_growth.py'
+      - 'alo186/deployment/routing-overlays/growth-trust-retention-run11.json'
+      - 'alo186/tests/test_growth_run11.py'
+      - '.github/workflows/alo186-growth-run11.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/power-station-gunes-paneli-uygunluk/**'
+      - 'alo186/hesaplama/duman-co-alarmi-bakim-gunlugu/**'
+      - 'alo186/hesaplama/jenerator-ats-test-gunlugu/**'
+      - 'alo186/deployment/inject_growth_run11.py'
+      - 'alo186/deployment/inject_shortlist_growth.py'
+      - 'alo186/deployment/routing-overlays/growth-trust-retention-run11.json'
+      - 'alo186/tests/test_growth_run11.py'
+      - '.github/workflows/alo186-growth-run11.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-growth-run11-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Güven, retention, no-buy ve dönüşüm sözleşmeleri
+        run: python alo186/tests/test_growth_run11.py
+
+      - name: Python ve tarayıcı betiği sözdizimi
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile alo186/deployment/inject_growth_run11.py alo186/deployment/inject_shortlist_growth.py
+          node --check alo186/hesaplama/power-station-gunes-paneli-uygunluk/app.js
+          node --check alo186/hesaplama/duman-co-alarmi-bakim-gunlugu/app.js
+          node --check alo186/hesaplama/jenerator-ats-test-gunlugu/app.js
+
+      - name: Mevcut içerik, ticaret ve cihaz hasarı regresyonları
+        run: |
+          python alo186/tests/test_content_intent_consolidation.py
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Canonical üretim paketini oluştur
+        run: |
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-growth11-canonical --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-growth11-canonical
+
+      - name: Custom-domain artifactı
+        run: |
+          cp -a /tmp/alo186-growth11-canonical /tmp/alo186-growth11-custom
+          python alo186/deployment/prepare_github_pages.py --site /tmp/alo186-growth11-custom --base-path '' --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py --site /tmp/alo186-growth11-custom --base-path ''
+          python alo186/deployment/inject_shortlist_growth.py --site /tmp/alo186-growth11-custom --base-path '' > /tmp/growth11-custom.json
+          python alo186/deployment/smoke_github_pages.py --site /tmp/alo186-growth11-custom --base-path ''
+
+      - name: Project-path artifactı
+        run: |
+          cp -a /tmp/alo186-growth11-canonical /tmp/alo186-growth11-project
+          python alo186/deployment/prepare_github_pages.py --site /tmp/alo186-growth11-project --base-path '/chatgpt' --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py --site /tmp/alo186-growth11-project --base-path '/chatgpt'
+          python alo186/deployment/inject_shortlist_growth.py --site /tmp/alo186-growth11-project --base-path '/chatgpt' > /tmp/growth11-project.json
+          python alo186/deployment/smoke_github_pages.py --site /tmp/alo186-growth11-project --base-path '/chatgpt'
+
+      - name: Artifact, arama, PWA ve giriş noktaları
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          routes = {
+              '/hesaplama/power-station-gunes-paneli-uygunluk/': 'calculator',
+              '/hesaplama/duman-co-alarmi-bakim-gunlugu/': 'calculator',
+              '/hesaplama/jenerator-ats-test-gunlugu/': 'business',
+          }
+          for root, prefix in [(Path('/tmp/alo186-growth11-custom'), ''), (Path('/tmp/alo186-growth11-project'), '/chatgpt')]:
+              release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
+              pages=json.loads((root/'pages-release.json').read_text(encoding='utf-8'))
+              search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
+              index={item['canonicalPath']:item for item in search['entries']}
+              contract=release['growthRun11']
+              assert contract['rawPersonalDataCollected'] is False
+              assert contract['directAffiliateLinksAdded']==0
+              assert contract['unverifiedCommercialFieldsUsed']==[]
+              assert contract['noBuyOutcomePreserved'] is True
+              assert contract['officialApprovalClaimed'] is False
+              assert contract['emergencyCommerceClosed'] is True
+              assert contract['alarmJournalTtlDays']==400
+              assert contract['generatorAtsJournalTtlDays']==540
+              assert pages['growthRun11']['directAffiliateLinksAdded']==0
+              sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
+              sw=(root/'sw.js').read_text(encoding='utf-8')
+              for route,bucket in routes.items():
+                  directory=root/route.strip('/')
+                  assert (directory/'index.html').is_file(), directory
+                  assert (directory/'app.js').is_file(), directory
+                  html=(directory/'index.html').read_text(encoding='utf-8')
+                  assert 'application/ld+json' in html
+                  assert 'amazon.com' not in html.lower() and 'amzn.' not in html.lower()
+                  assert f'https://www.alo186.com{route}' in sitemap
+                  assert route in index and index[route]['bucket']==bucket
+                  assert index[route]['url']==(prefix+route if prefix else route)
+                  assert not any(field in index[route] for field in ['price','stock','rating','seller','warranty','asin'])
+                  assert (prefix+route if prefix else route) in sw
+              hub=(root/'hesaplama/index.html').read_text(encoding='utf-8')
+              portal=(root/'elektrik-portali/index.html').read_text(encoding='utf-8')
+              product=(root/'akilli-urun-secimi/index.html').read_text(encoding='utf-8')
+              corporate=(root/'kurumsal-elektrik-surekliligi-on-degerlendirme/index.html').read_text(encoding='utf-8')
+              assert 'data-alo186-growth-run11-tools="true"' in hub
+              assert 'data-alo186-growth-run11-journey="true"' in portal
+              assert 'data-alo186-growth-run11-product-gates="true"' in product
+              assert 'data-alo186-growth-run11-service="true"' in corporate
+              shortcuts={item.get('url') for item in json.loads((root/'manifest.webmanifest').read_text(encoding='utf-8')).get('shortcuts',[]) if isinstance(item,dict)}
+              assert (prefix+'/hesaplama/duman-co-alarmi-bakim-gunlugu/' if prefix else '/hesaplama/duman-co-alarmi-bakim-gunlugu/') in shortcuts
+              assert (prefix+'/hesaplama/jenerator-ats-test-gunlugu/' if prefix else '/hesaplama/jenerator-ats-test-gunlugu/') in shortcuts
+          PY
+
+      - name: Doğrulanmış büyüme artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-trust-retention-growth-run11
+          path: /tmp/alo186-growth11-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30

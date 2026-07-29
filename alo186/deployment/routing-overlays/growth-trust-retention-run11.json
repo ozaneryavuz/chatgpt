@@ -1,0 +1,39 @@
+{
+  "version": 54,
+  "name": "ALO186 trusted retention and qualified conversion run11",
+  "routes": [
+    {
+      "canonicalPath": "/hesaplama/power-station-gunes-paneli-uygunluk/",
+      "source": "alo186/hesaplama/power-station-gunes-paneli-uygunluk/index.html",
+      "type": "calculator",
+      "intent": "power station solar panel electrical compatibility before connection or purchase",
+      "affiliatePolicy": "after_tool_complete_and_explicit_disclosure"
+    },
+    {
+      "canonicalPath": "/hesaplama/duman-co-alarmi-bakim-gunlugu/",
+      "source": "alo186/hesaplama/duman-co-alarmi-bakim-gunlugu/index.html",
+      "type": "calculator",
+      "intent": "monthly smoke and carbon monoxide alarm test and lifecycle tracking",
+      "affiliatePolicy": "confirmed_failure_or_service_life_only"
+    },
+    {
+      "canonicalPath": "/hesaplama/jenerator-ats-test-gunlugu/",
+      "source": "alo186/hesaplama/jenerator-ats-test-gunlugu/index.html",
+      "type": "business-tool",
+      "intent": "generator exercise versus loaded ATS transfer evidence and repeat testing",
+      "affiliatePolicy": "professional_service_only"
+    }
+  ],
+  "trust": {
+    "rawPersonalDataCollected": false,
+    "directAffiliateLinksAdded": 0,
+    "unverifiedCommercialFieldsUsed": [],
+    "noBuyOutcomePreserved": true,
+    "affiliateDisclosureRequired": true,
+    "officialApprovalClaimed": false,
+    "emergencyCommerceClosed": true,
+    "localOnlyJournals": ["alarm", "generator_ats"],
+    "alarmJournalTtlDays": 400,
+    "generatorAtsJournalTtlDays": 540
+  }
+}
