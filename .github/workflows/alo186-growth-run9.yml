@@ -1,0 +1,180 @@
+name: ALO186 hasar, ev ve CO güven büyümesi
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/cihaz-hasari-basvuru-takibi/**'
+      - 'alo186/hesaplama/ev-elektrik-guvenligi-kontrolu/**'
+      - 'alo186/hesaplama/karbonmonoksit-alarmi-jenerator-guvenligi/**'
+      - 'alo186/urun-eslestirme/catalog.js'
+      - 'alo186/urun-eslestirme/app.js'
+      - 'alo186/deployment/inject_growth_run9.py'
+      - 'alo186/deployment/inject_shortlist_growth.py'
+      - 'alo186/deployment/routing-overlays/growth-damage-home-co-run9.json'
+      - 'alo186/tests/test_growth_run9.py'
+      - '.github/workflows/alo186-growth-run9.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/cihaz-hasari-basvuru-takibi/**'
+      - 'alo186/hesaplama/ev-elektrik-guvenligi-kontrolu/**'
+      - 'alo186/hesaplama/karbonmonoksit-alarmi-jenerator-guvenligi/**'
+      - 'alo186/urun-eslestirme/catalog.js'
+      - 'alo186/urun-eslestirme/app.js'
+      - 'alo186/deployment/inject_growth_run9.py'
+      - 'alo186/deployment/inject_shortlist_growth.py'
+      - 'alo186/deployment/routing-overlays/growth-damage-home-co-run9.json'
+      - 'alo186/tests/test_growth_run9.py'
+      - '.github/workflows/alo186-growth-run9.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-growth-run9-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Güven, gizlilik, no-buy ve affiliate kapısı sözleşmeleri
+        run: python alo186/tests/test_growth_run9.py
+
+      - name: Python ve tarayıcı betiği sözdizimi
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile alo186/deployment/inject_growth_run9.py
+          python -m py_compile alo186/deployment/inject_shortlist_growth.py
+          for file in \
+            alo186/hesaplama/cihaz-hasari-basvuru-takibi/app.js \
+            alo186/hesaplama/ev-elektrik-guvenligi-kontrolu/app.js \
+            alo186/hesaplama/karbonmonoksit-alarmi-jenerator-guvenligi/app.js \
+            alo186/urun-eslestirme/catalog.js \
+            alo186/urun-eslestirme/app.js; do
+            node --check "$file"
+          done
+
+      - name: Mevcut içerik, ticaret ve cihaz hasarı regresyonları
+        run: |
+          python alo186/tests/device_damage_deadline_guard.py
+          python alo186/tests/test_content_intent_consolidation.py
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+
+      - name: Canonical üretim paketini oluştur
+        run: |
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-growth9-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-growth9-canonical
+
+      - name: Custom-domain artifactı
+        run: |
+          cp -a /tmp/alo186-growth9-canonical /tmp/alo186-growth9-custom
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-growth9-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py --site /tmp/alo186-growth9-custom --base-path ''
+          python alo186/deployment/inject_shortlist_growth.py --site /tmp/alo186-growth9-custom --base-path '' > /tmp/growth9-custom.json
+          python alo186/deployment/smoke_github_pages.py --site /tmp/alo186-growth9-custom --base-path ''
+
+      - name: Project-path artifactı
+        run: |
+          cp -a /tmp/alo186-growth9-canonical /tmp/alo186-growth9-project
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-growth9-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py --site /tmp/alo186-growth9-project --base-path '/chatgpt'
+          python alo186/deployment/inject_shortlist_growth.py --site /tmp/alo186-growth9-project --base-path '/chatgpt' > /tmp/growth9-project.json
+          python alo186/deployment/smoke_github_pages.py --site /tmp/alo186-growth9-project --base-path '/chatgpt'
+
+      - name: Artifact, Teknik Arama, PWA ve ticari sınırlar
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          routes = [
+              '/hesaplama/cihaz-hasari-basvuru-takibi/',
+              '/hesaplama/ev-elektrik-guvenligi-kontrolu/',
+              '/hesaplama/karbonmonoksit-alarmi-jenerator-guvenligi/',
+          ]
+          for root, prefix in [
+              (Path('/tmp/alo186-growth9-custom'), ''),
+              (Path('/tmp/alo186-growth9-project'), '/chatgpt'),
+          ]:
+              release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
+              pages=json.loads((root/'pages-release.json').read_text(encoding='utf-8'))
+              search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
+              index={item['canonicalPath']:item for item in search['entries']}
+              contract=release['growthRun9']
+              assert contract['rawPersonalDataCollected'] is False
+              assert contract['directAffiliateLinksAdded']==0
+              assert contract['unverifiedCommercialFieldsUsed']==[]
+              assert contract['noBuyOutcomePreserved'] is True
+              assert contract['officialApplicationClaimed'] is False
+              assert contract['legalAdviceClaimed'] is False
+              assert contract['deviceDamageWindowBusinessDays']==10
+              assert contract['deviceDamageReminderApproximate'] is True
+              assert contract['homeSafetyReviewDays']==180
+              assert contract['coAlarmAffiliateGate'] is True
+              assert contract['indoorGeneratorAffiliateBlocked'] is True
+              assert pages['growthRun9']['rawPersonalDataCollected'] is False
+              assert pages['growthRun9']['directAffiliateLinksAdded']==0
+              sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
+              sw=(root/'sw.js').read_text(encoding='utf-8')
+              for route in routes:
+                  directory=root/route.strip('/')
+                  html=(directory/'index.html').read_text(encoding='utf-8')
+                  assert (directory/'app.js').is_file()
+                  assert 'application/ld+json' in html
+                  assert 'amazon.com' not in html.lower() and 'amzn.' not in html.lower()
+                  assert f'https://www.alo186.com{route}' in sitemap
+                  assert route in index
+                  assert index[route]['url']==(prefix+route if prefix else route)
+                  assert not any(field in index[route] for field in ['price','stock','rating','seller','warranty','asin'])
+                  assert (prefix+route if prefix else route) in sw
+              hub=(root/'hesaplama/index.html').read_text(encoding='utf-8')
+              portal=(root/'elektrik-portali/index.html').read_text(encoding='utf-8')
+              product=(root/'amazon-elektrik-urunleri/index.html').read_text(encoding='utf-8')
+              business=(root/'kurumsal-elektrik-surekliligi-on-degerlendirme/index.html').read_text(encoding='utf-8')
+              assert 'data-alo186-growth-run9-tools="true"' in hub
+              assert 'data-alo186-growth-run9-journey="true"' in portal
+              assert 'data-alo186-growth-run9-affiliate="true"' in product
+              assert 'data-alo186-growth-run9-business="true"' in business
+              catalog=(root/'akilli-urun-secimi/catalog.js').read_text(encoding='utf-8')
+              assert "id:'co_alarm'" in catalog
+              assert "category:'co_alarm'" not in catalog
+              manifest=json.loads((root/'manifest.webmanifest').read_text(encoding='utf-8'))
+              urls={item.get('url') for item in manifest.get('shortcuts',[]) if isinstance(item,dict)}
+              for route in routes:
+                  assert (prefix+route if prefix else route) in urls
+          PY
+
+      - name: Doğrulanmış büyüme artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-damage-home-co-growth
+          path: /tmp/alo186-growth9-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30

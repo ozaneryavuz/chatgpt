@@ -1,0 +1,21 @@
+{
+  "version": 52,
+  "generatedAt": "2026-07-29",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/cihaz-hasari-basvuru-takibi/index.html",
+      "canonicalPath": "/hesaplama/cihaz-hasari-basvuru-takibi/",
+      "type": "tool"
+    },
+    {
+      "source": "alo186/hesaplama/ev-elektrik-guvenligi-kontrolu/index.html",
+      "canonicalPath": "/hesaplama/ev-elektrik-guvenligi-kontrolu/",
+      "type": "tool"
+    },
+    {
+      "source": "alo186/hesaplama/karbonmonoksit-alarmi-jenerator-guvenligi/index.html",
+      "canonicalPath": "/hesaplama/karbonmonoksit-alarmi-jenerator-guvenligi/",
+      "type": "tool"
+    }
+  ]
+}
