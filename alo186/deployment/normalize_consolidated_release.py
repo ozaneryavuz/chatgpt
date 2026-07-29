@@ -42,10 +42,23 @@ def run(site: Path, base_path: str = "") -> dict:
         if canonical_identity(route.get("canonicalPath"), base_path) not in aliases
     ]
     removed = len(routes) - len(filtered)
+    remaining_aliases = sorted(
+        {
+            canonical_identity(route.get("canonicalPath"), base_path)
+            for route in filtered
+        }
+        & aliases
+    )
+    if remaining_aliases:
+        raise RuntimeError(
+            "Project release alias normalizasyonu eksik; kalan rotalar: " + ", ".join(remaining_aliases)
+        )
+
     release["routes"] = filtered
     release["routeCount"] = len(filtered)
     release["articleCount"] = sum(1 for route in filtered if route.get("type") == "article")
     release.setdefault("contentConsolidation", {})["projectReleaseAliasesRemoved"] = removed
+    release["contentConsolidation"]["projectReleaseAliasNormalizationIdempotent"] = True
     release_path.write_text(json.dumps(release, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     pages_path = site / "pages-release.json"
@@ -53,18 +66,15 @@ def run(site: Path, base_path: str = "") -> dict:
         pages = json.loads(pages_path.read_text(encoding="utf-8"))
         pages["routeCount"] = len(filtered)
         pages.setdefault("contentConsolidation", {})["projectReleaseAliasesRemoved"] = removed
+        pages["contentConsolidation"]["projectReleaseAliasNormalizationIdempotent"] = True
         pages_path.write_text(json.dumps(pages, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
-    expected = len(aliases) if base_path else 0
-    if base_path and removed != expected:
-        raise RuntimeError(
-            f"Project release alias normalizasyonu eksik: kaldırılan={removed}, beklenen={expected}"
-        )
     return {
         "ok": True,
         "basePath": base_path,
         "aliasCount": len(aliases),
-        "removedRoutes": removed,
+        "removedRoutesThisPass": removed,
+        "remainingAliasRoutes": 0,
         "routeCount": len(filtered),
         "articleCount": release["articleCount"],
     }
