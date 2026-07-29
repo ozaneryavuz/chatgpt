@@ -1,0 +1,151 @@
+name: ALO186 bakım, hizmet uygunluğu ve ürün sonrası güven
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/elektrik-bakim-takvimi/**'
+      - 'alo186/hizmet-secici/**'
+      - 'alo186/hesaplama/urun-sonrasi-guvenlik-kontrolu/**'
+      - 'alo186/deployment/inject_retention_growth.py'
+      - 'alo186/deployment/inject_shortlist_growth.py'
+      - 'alo186/deployment/routing-overlays/growth-retention-run5.json'
+      - 'alo186/tests/test_retention_growth.py'
+      - '.github/workflows/alo186-retention-growth.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/elektrik-bakim-takvimi/**'
+      - 'alo186/hizmet-secici/**'
+      - 'alo186/hesaplama/urun-sonrasi-guvenlik-kontrolu/**'
+      - 'alo186/deployment/inject_retention_growth.py'
+      - 'alo186/deployment/inject_shortlist_growth.py'
+      - 'alo186/deployment/routing-overlays/growth-retention-run5.json'
+      - 'alo186/tests/test_retention_growth.py'
+      - '.github/workflows/alo186-retention-growth.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-retention-growth-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Kaynak, gizlilik, no-buy ve routing sözleşmeleri
+        run: python alo186/tests/test_retention_growth.py
+
+      - name: Python sözdizimi
+        run: |
+          python -m py_compile alo186/deployment/inject_retention_growth.py
+          python -m py_compile alo186/deployment/inject_shortlist_growth.py
+
+      - name: Mevcut içerik, ticaret ve cihaz hasarı regresyonları
+        run: |
+          python alo186/tests/test_content_intent_consolidation.py
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Canonical üretim paketini oluştur
+        run: |
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-retention-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-retention-canonical
+
+      - name: Custom-domain artifactı
+        run: |
+          cp -a /tmp/alo186-retention-canonical /tmp/alo186-retention-custom
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-retention-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py --site /tmp/alo186-retention-custom --base-path ''
+          python alo186/deployment/inject_shortlist_growth.py --site /tmp/alo186-retention-custom --base-path '' > /tmp/retention-custom.json
+          python alo186/deployment/smoke_github_pages.py --site /tmp/alo186-retention-custom --base-path ''
+
+      - name: Project-path artifactı
+        run: |
+          cp -a /tmp/alo186-retention-canonical /tmp/alo186-retention-project
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-retention-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py --site /tmp/alo186-retention-project --base-path '/chatgpt'
+          python alo186/deployment/inject_shortlist_growth.py --site /tmp/alo186-retention-project --base-path '/chatgpt' > /tmp/retention-project.json
+          python alo186/deployment/smoke_github_pages.py --site /tmp/alo186-retention-project --base-path '/chatgpt'
+
+      - name: Artifact, arama, PWA ve giriş noktaları
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          routes = [
+              '/hesaplama/elektrik-bakim-takvimi/',
+              '/hizmet-secici/',
+              '/hesaplama/urun-sonrasi-guvenlik-kontrolu/',
+          ]
+          for root, prefix in [
+              (Path('/tmp/alo186-retention-custom'), ''),
+              (Path('/tmp/alo186-retention-project'), '/chatgpt'),
+          ]:
+              release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
+              pages=json.loads((root/'pages-release.json').read_text(encoding='utf-8'))
+              search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
+              index={item['canonicalPath']:item for item in search['entries']}
+              assert release['retentionGrowth']['rawPersonalDataCollected'] is False
+              assert release['retentionGrowth']['directAffiliateLinksAdded']==0
+              assert release['retentionGrowth']['noPaidServiceResultSupported'] is True
+              assert pages['retentionGrowth']['rawPersonalDataCollected'] is False
+              for route in routes:
+                  assert (root/route.strip('/')/'index.html').is_file()
+                  assert f'https://www.alo186.com{route}' in (root/'sitemap.xml').read_text(encoding='utf-8')
+                  assert route in index
+                  assert index[route]['url']==(prefix+route if prefix else route)
+                  assert not any(field in index[route] for field in ['price','stock','rating','seller','warranty','asin'])
+              hub=(root/'hesaplama/index.html').read_text(encoding='utf-8')
+              portal=(root/'elektrik-portali/index.html').read_text(encoding='utf-8')
+              product=(root/'amazon-elektrik-urunleri/index.html').read_text(encoding='utf-8')
+              corporate=(root/'kurumsal-elektrik-surekliligi-on-degerlendirme/index.html').read_text(encoding='utf-8')
+              assert 'data-alo186-retention-tools="true"' in hub
+              assert 'data-alo186-retention-growth="true"' in portal
+              assert 'data-alo186-aftercare-entry="true"' in product
+              assert 'data-alo186-service-fit-entry="true"' in corporate
+              for route in routes:
+                  expected=prefix+route if prefix else route
+                  assert expected in hub or expected in portal or expected in product or expected in corporate
+              sw=(root/'sw.js').read_text(encoding='utf-8')
+              for route in routes:
+                  assert (prefix+route if prefix else route) in sw
+              manifest=json.loads((root/'manifest.webmanifest').read_text(encoding='utf-8'))
+              assert any(item.get('url')==(prefix+routes[0] if prefix else routes[0]) for item in manifest.get('shortcuts',[]))
+              assert any(item.get('url')==(prefix+routes[1] if prefix else routes[1]) for item in manifest.get('shortcuts',[]))
+          PY
+
+      - name: Doğrulanmış büyüme artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-retention-growth-pages
+          path: /tmp/alo186-retention-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
