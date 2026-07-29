@@ -142,9 +142,8 @@ jobs:
                   assert 'stock' not in entries[route]
                   assert 'rating' not in entries[route]
               power=(root/'amazon-elektrik-urunleri/powerbank-usb-c-secimi/index.html').read_text(encoding='utf-8')
-              styles=(prefix+'/amazon-elektrik-urunleri/styles.css') if prefix else '/amazon-elektrik-urunleri/styles.css'
               catalog=(prefix+'/akilli-urun-secimi/catalog.js') if prefix else '/akilli-urun-secimi/catalog.js'
-              assert styles in power
+              assert 'href="../styles.css"' in power
               assert catalog in power
               runtime=(root/'amazon-elektrik-urunleri/commercial.js').read_text(encoding='utf-8')
               assert 'freshOnly: true' in runtime
