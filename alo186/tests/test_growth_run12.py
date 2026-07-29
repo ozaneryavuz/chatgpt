@@ -15,6 +15,11 @@ ROUTES = {
     "rcd": "/hesaplama/kacak-akim-rolesi-olay-gunlugu/",
     "pv": "/hesaplama/ges-aylik-uretim-saglik-gunlugu/",
 }
+NO_BUY_TOKENS = {
+    "outage": ("satın almama", "mevcut yedek"),
+    "rcd": ("ürün yönlendirmesi yok", "tek olay"),
+    "pv": ("değişimi önermez", "tek ay"),
+}
 
 
 def read(path: Path) -> str:
@@ -54,7 +59,8 @@ def test_pages() -> None:
             or "kabul kuruluşu değildir" in lower
         )
         assert independence, key
-        assert "satın al" in lower or "ürün yönlendirmesi yok" in lower, key
+        for token in NO_BUY_TOKENS[key]:
+            assert token in lower, (key, token)
         assert "URL.createObjectURL" in app, key
     outage = read(PAGES["outage"]).lower()
     for field in ("fiyat", "stok", "puan", "garanti"):
