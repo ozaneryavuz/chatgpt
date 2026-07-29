@@ -84,7 +84,7 @@ def test_ground_contract() -> None:
         "IEC 60364-6:2016", "IEC 61557-5:2019", "Fluke kazıksız çevrim yöntemi",
         "TTL=1095*86400000", "MAX=30", "retentionMode:'per-record'", "officialReport:false",
         "method==='stakeless'&&!r.bonded", "Evrensel tek ohm sınırı kullanılmadı",
-        "kazıksız sonuç çevrim direncidir", "affiliateLinks:0",
+        "Kazıksız sonuç çevrim direncidir", "affiliateLinks:0",
     ]:
         assert token in combined, token
     assert "2026 sayfası 17 Temmuz 2026 itibarıyla ön yayımdır" in read(PAGES["ground"])
