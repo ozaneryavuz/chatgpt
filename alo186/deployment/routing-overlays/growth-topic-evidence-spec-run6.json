@@ -1,0 +1,21 @@
+{
+  "version": 46,
+  "generatedAt": "2026-07-29",
+  "routes": [
+    {
+      "source": "alo186/konu-takip-merkezi/index.html",
+      "canonicalPath": "/konu-takip-merkezi/",
+      "type": "tool"
+    },
+    {
+      "source": "alo186/hesaplama/elektrik-kanit-envanteri/index.html",
+      "canonicalPath": "/hesaplama/elektrik-kanit-envanteri/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/teknik-sartname-talep-paketi/index.html",
+      "canonicalPath": "/hesaplama/teknik-sartname-talep-paketi/",
+      "type": "business-tool"
+    }
+  ]
+}
