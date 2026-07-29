@@ -1,0 +1,16 @@
+{
+  "version": 49,
+  "generatedAt": "2026-07-29",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/kesinti-sonrasi-takip-dosyasi/index.html",
+      "canonicalPath": "/hesaplama/kesinti-sonrasi-takip-dosyasi/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/karar-makbuzlari/index.html",
+      "canonicalPath": "/karar-makbuzlari/",
+      "type": "retention-tool"
+    }
+  ]
+}
