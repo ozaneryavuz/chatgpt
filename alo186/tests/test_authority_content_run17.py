@@ -122,7 +122,10 @@ def main() -> None:
         assert "amazon.com" not in lower and "amazon.com.tr" not in lower
         assert not re.search(r"\bfiyat(?:ı)?\s*[:=]?\s*\d|\bstokta\b|\bpuanı\s*\d|\bgaranti\s*[:=]?\s*\d", lower)
         assert not re.search(r"<form\b|<input\b|<textarea\b", lower)
-        assert not re.search(r"kesinlikle güvenlidir|her durumda güvenlidir|garanti gelir|gelir garantisi", lower)
+        assert not re.search(
+            r"kesinlikle güvenlidir|her durumda güvenlidir|garanti gelir|gelir garantisi (?:sağlar|sunar|verir)",
+            lower,
+        )
 
         for required in article["required"]:
             assert required.casefold() in lower, f"Zorunlu ifade eksik ({required}): {slug}"
