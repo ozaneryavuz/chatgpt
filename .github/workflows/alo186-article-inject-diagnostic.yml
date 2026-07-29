@@ -1,0 +1,53 @@
+name: ALO186 makale project-path tanı
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/deployment/inject_article_growth.py'
+      - 'alo186/deployment/inject_shortlist_growth.py'
+      - 'alo186/deployment/normalize_article_followup_paths.py'
+      - 'alo186/deployment/assets/article-growth.*'
+      - '.github/workflows/alo186-article-inject-diagnostic.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Project artifactını hazırla
+        run: |
+          python alo186/deployment/build_static_site.py --output /tmp/canonical --commit "$GITHUB_SHA"
+          cp -a /tmp/canonical /tmp/project
+          python alo186/deployment/prepare_github_pages.py --site /tmp/project --base-path '/chatgpt' --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py --site /tmp/project --base-path '/chatgpt'
+      - name: Enjeksiyon stdout ve stderr kaydı
+        shell: bash
+        run: |
+          set +e
+          python alo186/deployment/inject_shortlist_growth.py --site /tmp/project --base-path '/chatgpt' > /tmp/inject.stdout 2> /tmp/inject.stderr
+          echo "$?" > /tmp/inject.status
+          cp /tmp/project/haberler/power-station-gunes-paneli-nasil-secilir/index.html /tmp/sample.html || true
+          cp /tmp/project/checksums.sha256 /tmp/checksums.sha256 || true
+          exit 0
+      - name: Tanı dosyalarını yükle
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-article-inject-diagnostic
+          path: |
+            /tmp/inject.stdout
+            /tmp/inject.stderr
+            /tmp/inject.status
+            /tmp/sample.html
+            /tmp/checksums.sha256
+          if-no-files-found: error
+          retention-days: 3
+      - name: Enjeksiyon sonucunu zorunlu kıl
+        run: test "$(cat /tmp/inject.status)" = "0"
