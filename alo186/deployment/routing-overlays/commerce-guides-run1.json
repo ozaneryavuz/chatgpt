@@ -1,0 +1,51 @@
+{
+  "version": 41,
+  "generatedAt": "2026-07-29",
+  "routes": [
+    {
+      "source": "alo186/urun-rehberleri/index.html",
+      "canonicalPath": "/urun-rehberleri/",
+      "type": "commerce-collection"
+    },
+    {
+      "source": "alo186/urun-rehberleri/powerbank-usb-c-pd/index.html",
+      "canonicalPath": "/urun-rehberleri/powerbank-usb-c-pd",
+      "type": "commerce-guide"
+    },
+    {
+      "source": "alo186/urun-rehberleri/akim-korumali-grup-priz/index.html",
+      "canonicalPath": "/urun-rehberleri/akim-korumali-grup-priz",
+      "type": "commerce-guide"
+    },
+    {
+      "source": "alo186/urun-rehberleri/modem-ont-mini-ups/index.html",
+      "canonicalPath": "/urun-rehberleri/modem-ont-mini-ups",
+      "type": "commerce-guide"
+    },
+    {
+      "source": "alo186/urun-rehberleri/tasinabilir-guc-istasyonu/index.html",
+      "canonicalPath": "/urun-rehberleri/tasinabilir-guc-istasyonu",
+      "type": "commerce-guide"
+    },
+    {
+      "source": "alo186/urun-rehberleri/sarjli-acil-aydinlatma/index.html",
+      "canonicalPath": "/urun-rehberleri/sarjli-acil-aydinlatma",
+      "type": "commerce-guide"
+    },
+    {
+      "source": "alo186/urun-rehberleri/fotoelektrik-duman-alarmi/index.html",
+      "canonicalPath": "/urun-rehberleri/fotoelektrik-duman-alarmi",
+      "type": "commerce-guide"
+    },
+    {
+      "source": "alo186/urun-rehberleri/akilli-priz-enerji-olcer/index.html",
+      "canonicalPath": "/urun-rehberleri/akilli-priz-enerji-olcer",
+      "type": "commerce-guide"
+    },
+    {
+      "source": "alo186/urun-rehberleri/ges-malzemeleri/index.html",
+      "canonicalPath": "/urun-rehberleri/ges-malzemeleri",
+      "type": "commerce-guide"
+    }
+  ]
+}
