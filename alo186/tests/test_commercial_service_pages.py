@@ -95,6 +95,9 @@ def main() -> None:
         path = REPO_ROOT / config["source"]
         html = path.read_text(encoding="utf-8")
         lower = html.casefold()
+        style_path = path.parent / "styles.css"
+        assert style_path.is_file() and style_path.stat().st_size > 5000, style_path
+        assert '<link rel="stylesheet" href="./styles.css">' in html
         title = one_tag(html, "title")
         h1 = one_tag(html, "h1")
         description = meta_content(html, "description")
@@ -149,6 +152,9 @@ def main() -> None:
 
     shared_style = REPO_ROOT / "alo186/hizmetler/shared/styles.css"
     assert shared_style.is_file() and shared_style.stat().st_size > 5000
+    shared_bytes = shared_style.read_bytes()
+    for config in SERVICES.values():
+        assert (REPO_ROOT / config["source"]).parent.joinpath("styles.css").read_bytes() == shared_bytes
 
     print(json.dumps({
         "ok": True,
@@ -156,6 +162,7 @@ def main() -> None:
         "commercialServicePageCountAdded": len(SERVICES),
         "routes": sorted(SERVICES),
         "sharedScopeBuilder": True,
+        "routeLocalAssets": True,
         "directStoreLinks": 0,
         "personalDataFields": 0,
     }, ensure_ascii=False, indent=2))
