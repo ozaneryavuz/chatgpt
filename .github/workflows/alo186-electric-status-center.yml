@@ -39,6 +39,10 @@ jobs:
         run: |
           python alo186/deployment/build_static_site.py --output /tmp/alo186-status-center --commit "$GITHUB_SHA"
           python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-status-center
+      - name: Custom-domain yayın katmanını hazırla
+        run: |
+          python alo186/deployment/prepare_github_pages.py --site /tmp/alo186-status-center --base-path '' --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_github_pages.py --site /tmp/alo186-status-center --base-path ''
       - name: Rota ve arama kabulü
         run: |
           python - <<'PY'
