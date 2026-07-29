@@ -1,0 +1,21 @@
+{
+  "version": 62,
+  "generatedAt": "2026-07-29",
+  "routes": [
+    {
+      "source": "alo186/haberler/enerji-depolama-bms-soc-kalibrasyon-sapma-drift/index.html",
+      "canonicalPath": "/haberler/enerji-depolama-bms-soc-kalibrasyon-sapma-drift",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ev-sarj-kablosu-soketi-isiniyor-termal-derating/index.html",
+      "canonicalPath": "/haberler/ev-sarj-kablosu-soketi-isiniyor-termal-derating",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/parafudr-baglanti-kablosu-uzunlugu-v-baglanti-up-etkin-koruma/index.html",
+      "canonicalPath": "/haberler/parafudr-baglanti-kablosu-uzunlugu-v-baglanti-up-etkin-koruma",
+      "type": "article"
+    }
+  ]
+}
