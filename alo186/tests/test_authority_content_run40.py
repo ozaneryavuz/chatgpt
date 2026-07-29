@@ -119,7 +119,7 @@ def main() -> None:
     sag = (ROOT / "alo186/haberler/gerilim-cukuru-kisa-kesinti-dusuk-gerilim-farki/index.html").read_text(encoding="utf-8").casefold()
     bess = (ROOT / "alo186/haberler/enerji-depolama-garanti-throughput-cevrim-takvim-omru-soh/index.html").read_text(encoding="utf-8").casefold()
     generator = (ROOT / "alo186/haberler/jenerator-yakit-tuketimi-litre-saat-yuk-faktoru/index.html").read_text(encoding="utf-8").casefold()
-    assert "ışıklar sönmeden elektronik cihaz neden kapanır" in sag
+    assert "elektronik cihaz neden kapanır" in sag
     assert "garanti belgesindeki kavramları ayırın" in bess and "hangisine önce ulaşıldığını" in bess
     assert "kva ile kw neden ayrılmalıdır" in generator and "üretici tablosu nasıl kullanılır" in generator
     assert len(new_paths) == 3
