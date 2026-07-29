@@ -156,6 +156,7 @@ def main() -> None:
     assert "yalnız üst röleyi daha yüksek ma" in rcd and "si ile s aynı değildir" in rcd
     assert "yalnız “1000 v dc” etiketine göre" in pv and "yalnız daha yüksek ucpv" in pv
     assert "negatif kw her zaman mekanik arıza değildir" in generator and "yüzde 5 / 10 saniye" in generator
+    assert len(new_paths) == 3, new_paths
 
     print(json.dumps({
         "ok": True,
