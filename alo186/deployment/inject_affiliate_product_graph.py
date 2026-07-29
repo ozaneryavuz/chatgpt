@@ -61,16 +61,37 @@ const products=catalog.products.filter(catalog.isCatalogProduct).map(product=>({
  linkMode:product.linkMode||'asin_detail',officialSource:product.technicalSource||undefined,needIds:product.needIds||catalog.categoryNeeds[product.category]||[],
  technicalProperties:product.attributes||{{}},relatedTools:product.relatedTools||[],relatedGuides:product.relatedGuides||[],requiredEvidence:product.requiredEvidence||[]
 }}));
-process.stdout.write(JSON.stringify({{graph:{{version:'2026-07-29-run34b',generatedAt:'2026-07-29',canonicalUrl:'https://www.alo186.com/urun-bilgi-grafigi/',commercialPolicy:{{affiliateDisclosureRequired:true,commercialRankingFieldsExcluded:['price','stock','rating','seller','delivery','warranty','affiliateCommission'],verificationMaxAgeDays:45,noBuyOutcomePreserved:true,professionalOnlyCategoriesNeverExposeAffiliateLinks:true,manufacturerVerifiedSearchRequiresExactModelRecheck:true}},needs:catalog.needs,categories,products}},schema:catalog.knowledgeGraph({{now:new Date('2026-07-29T12:00:00Z')}}),summary:catalog.knowledgeGraphSummary()}}));
+process.stdout.write(JSON.stringify({{graph:{{version:'2026-07-29-dynamic',generatedAt:'2026-07-29',canonicalUrl:'https://www.alo186.com/urun-bilgi-grafigi/',commercialPolicy:{{affiliateDisclosureRequired:true,commercialRankingFieldsExcluded:['price','stock','rating','seller','delivery','warranty','affiliateCommission'],verificationMaxAgeDays:45,noBuyOutcomePreserved:true,professionalOnlyCategoriesNeverExposeAffiliateLinks:true,manufacturerVerifiedSearchRequiresExactModelRecheck:true}},needs:catalog.needs,categories,products}},schema:catalog.knowledgeGraph({{now:new Date('2026-07-29T12:00:00Z')}}),summary:catalog.knowledgeGraphSummary()}}));
 """
     completed = subprocess.run(["node", "-e", script], check=True, capture_output=True, text=True)
     payload = json.loads(completed.stdout)
     graph = payload["graph"]
     summary = payload["summary"]
-    if (len(graph["needs"]), len(graph["categories"]), len(graph["products"])) != (14, 14, 14):
-        raise ValueError("Affiliate Product Knowledge Graph düğüm sayıları 14/14/14 değil")
-    if summary.get("exactListingCount") != 10 or summary.get("manufacturerSearchCount") != 4:
-        raise ValueError("ASIN/model doğrulama dağılımı 10/4 değil")
+
+    for key in ("needs", "categories", "products"):
+        if not isinstance(graph.get(key), list) or not graph[key]:
+            raise ValueError(f"Affiliate Product Knowledge Graph {key} düğümleri boş")
+        ids = [item.get("id") for item in graph[key] if isinstance(item, dict)]
+        if len(ids) != len(set(ids)) or any(not item for item in ids):
+            raise ValueError(f"Affiliate Product Knowledge Graph {key} kimlikleri tekil değil")
+
+    category_ids = {item["id"] for item in graph["categories"]}
+    if any(product.get("categoryId") not in category_ids for product in graph["products"]):
+        raise ValueError("Ürün düğümünde katalogda bulunmayan kategori var")
+
+    exact_count = sum(product.get("identifier", {}).get("type") == "ASIN" for product in graph["products"])
+    manufacturer_count = sum(product.get("identifier", {}).get("type") == "Model" for product in graph["products"])
+    expected = {
+        "needCount": len(graph["needs"]),
+        "categoryCount": len(graph["categories"]),
+        "productCount": len(graph["products"]),
+        "exactListingCount": exact_count,
+        "manufacturerSearchCount": manufacturer_count,
+    }
+    for key, value in expected.items():
+        if summary.get(key) != value:
+            raise ValueError(f"Affiliate Product Knowledge Graph özeti uyuşmuyor: {key}={summary.get(key)} beklenen={value}")
+
     keys: set[str] = set()
     collect_keys(graph["products"], keys)
     forbidden = FORBIDDEN.intersection(keys)
@@ -80,8 +101,7 @@ process.stdout.write(JSON.stringify({{graph:{{version:'2026-07-29-run34b',genera
 
 
 def write_graph_and_schema(site: Path, payload: dict) -> None:
-    graph_path = site / GRAPH
-    graph_path.write_text(json.dumps(payload["graph"], ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    (site / GRAPH).write_text(json.dumps(payload["graph"], ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     page_path = site / PAGE
     text = page_path.read_text(encoding="utf-8")
     pattern = re.compile(rf'(<script\s+id=["\']{SCHEMA_ID}["\']\s+type=["\']application/ld\+json["\']>)(.*?)(</script>)', re.I | re.S)
@@ -100,10 +120,9 @@ def inject_extension_scripts(site: Path, base_path: str) -> int:
         if "akilli-urun-secimi/catalog.js" not in text or EXTENSION_MARKER in text:
             continue
         match = re.search(r'<script[^>]+src=["\'][^"\']*akilli-urun-secimi/catalog\.js["\'][^>]*></script>', text, re.I)
-        if not match:
-            continue
-        path.write_text(text[: match.end()] + tag + text[match.end() :], encoding="utf-8")
-        injected += 1
+        if match:
+            path.write_text(text[: match.end()] + tag + text[match.end() :], encoding="utf-8")
+            injected += 1
     return injected
 
 
@@ -114,8 +133,8 @@ def entry_block(href: str, title: str, body: str) -> str:
 def inject_entries(site: Path, base_path: str) -> int:
     href = public_url(base_path, ROUTE)
     copy = {
-        "amazon-elektrik-urunleri/index.html": ("Ürünleri yalnız kategori olarak değil, ihtiyaç ve kanıt ilişkileriyle görün.", "ASIN, üretici modeli, ücretsiz araç, risk sınırı ve affiliate politikasını tek grafikte inceleyin."),
-        "akilli-urun-secimi/index.html": ("Teknik eşleştirmenin arkasındaki ürün ilişkilerini inceleyin.", "Mevcut on ASIN korunurken dört üretici kaynaklı model düğümü tam model aramasıyla eklendi."),
+        "amazon-elektrik-urunleri/index.html": ("Ürünleri yalnız kategori olarak değil, ihtiyaç ve kanıt ilişkileriyle görün.", "Doğrulanmış ASIN, üretici modeli, ücretsiz araç, risk sınırı ve affiliate politikasını tek grafikte inceleyin."),
+        "akilli-urun-secimi/index.html": ("Teknik eşleştirmenin arkasındaki ürün ilişkilerini inceleyin.", "Güncel katalogdaki doğrulanmış ürün ve üretici model düğümleri kaynak türüyle ayrı gösterilir."),
         "katalog-guven-durumu/index.html": ("Doğrulanmış ASIN ile üretici model doğrulamasını ayırın.", "Katalog tazeliği, kaynak türü ve mağaza bağlantısı biçimi ayrı düğümler olarak yayımlanır."),
         "elektrik-portali/index.html": ("Affiliate ürün Knowledge Graph", "İhtiyaçtan kategoriye, ücretsiz araca ve kaynak doğrulamalı ürün düğümüne ilerleyin."),
         "index.html": ("Affiliate ürün ilişkilerini görün.", "Ürün, ihtiyaç, teknik kanıt ve kaynak düğümlerini tek görünümde inceleyin."),
@@ -126,9 +145,7 @@ def inject_entries(site: Path, base_path: str) -> int:
         if not path.is_file():
             continue
         text = path.read_text(encoding="utf-8")
-        if MARKER in text:
-            continue
-        if "</main>" not in text:
+        if MARKER in text or "</main>" not in text:
             continue
         title, body = copy[relative.as_posix()]
         path.write_text(text.replace("</main>", entry_block(href, title, body) + "</main>", 1), encoding="utf-8")
@@ -146,12 +163,9 @@ def add_offline(site: Path, base_path: str) -> list[str]:
         return []
     routes = json.loads(match.group(1))
     candidates = [public_url(base_path, ROUTE), public_url(base_path, "/urun-bilgi-grafigi/product-graph.json")]
-    added = []
-    for route in candidates:
-        if route not in routes:
-            routes.append(route)
-            added.append(route)
+    added = [route for route in candidates if route not in routes]
     if added:
+        routes.extend(added)
         path.write_text(text[: match.start(1)] + json.dumps(routes, ensure_ascii=False) + text[match.end(1) :], encoding="utf-8")
     return added
 
@@ -168,9 +182,29 @@ def update_manifest(site: Path, base_path: str) -> None:
     path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
-def update_release(site: Path, base_path: str, payload: dict, cards: int, scripts: int, offline: list[str]) -> None:
+def graph_metadata(base_path: str, payload: dict, cards: int, scripts: int, offline: list[str]) -> dict:
+    graph = payload["graph"]
     summary = payload["summary"]
-    metadata = {"version": summary["version"], "route": public_url(base_path, ROUTE), "graph": public_url(base_path, "/urun-bilgi-grafigi/product-graph.json"), "needCount": 14, "categoryCount": 14, "productCount": 14, "exactAsinCount": 10, "manufacturerVerifiedSearchCount": 4, "entryCardsInjected": cards, "extensionScriptsInjected": scripts, "offlineAssetsAdded": offline, "commercialRankingFieldsUsed": [], "noBuyOutcomePreserved": True, "directStoreLinksOnGraphJson": 0}
+    return {
+        "version": summary["version"],
+        "route": public_url(base_path, ROUTE),
+        "graph": public_url(base_path, "/urun-bilgi-grafigi/product-graph.json"),
+        "needCount": len(graph["needs"]),
+        "categoryCount": len(graph["categories"]),
+        "productCount": len(graph["products"]),
+        "exactAsinCount": summary["exactListingCount"],
+        "manufacturerVerifiedSearchCount": summary["manufacturerSearchCount"],
+        "entryCardsInjected": cards,
+        "extensionScriptsInjected": scripts,
+        "offlineAssetsAdded": offline,
+        "commercialRankingFieldsUsed": [],
+        "noBuyOutcomePreserved": True,
+        "directStoreLinksOnGraphJson": 0,
+    }
+
+
+def update_release(site: Path, base_path: str, payload: dict, cards: int, scripts: int, offline: list[str]) -> None:
+    metadata = graph_metadata(base_path, payload, cards, scripts, offline)
     core_path = site / "alo186-release.json"
     core = json.loads(core_path.read_text(encoding="utf-8"))
     core["affiliateProductKnowledgeGraph"] = metadata
@@ -202,7 +236,7 @@ def run(site: Path, base_path: str = "") -> dict:
     update_manifest(site, base_path)
     update_release(site, base_path, payload, cards, scripts, offline)
     recompute(site)
-    return {"ok": True, "basePath": base_path, "route": public_url(base_path, ROUTE), "needCount": 14, "categoryCount": 14, "productCount": 14, "exactAsinCount": 10, "manufacturerVerifiedSearchCount": 4, "entryCardsInjected": cards, "extensionScriptsInjected": scripts, "offlineAssetsAdded": offline}
+    return {"ok": True, "basePath": base_path, **graph_metadata(base_path, payload, cards, scripts, offline)}
 
 
 def main() -> None:
