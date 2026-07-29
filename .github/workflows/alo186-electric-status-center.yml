@@ -41,6 +41,16 @@ jobs:
           python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-status-center
       - name: Rota ve arama kabulü
         run: |
-          test -f /tmp/alo186-status-center/elektrik-durum-merkezi/index.html
-          grep -q 'https://www.alo186.com/elektrik-durum-merkezi' /tmp/alo186-status-center/sitemap.xml
-          grep -q 'Elektrik Durum Merkezi' /tmp/alo186-status-center/arama/search-index.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('/tmp/alo186-status-center')
+          route='/elektrik-durum-merkezi'
+          assert (root/route.strip('/')/'index.html').is_file()
+          sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
+          assert f'https://www.alo186.com{route}' in sitemap
+          search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
+          active={item.get('canonicalPath','').rstrip('/') for item in search['entries']}
+          assert route in active, (route, sorted(x for x in active if 'durum' in x))
+          print({'route':route,'searchEntries':len(active)})
+          PY
