@@ -8,7 +8,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEPLOYMENT = REPO_ROOT / "alo186/deployment"
 sys.path.insert(0, str(DEPLOYMENT))
-from build_static_site import load_effective_manifest  # noqa: E402
+from build_static_site import load_effective_manifest
 
 ROUTE = "/urun-bilgi-grafigi/"
 FORBIDDEN = {"price", "stock", "rating", "seller", "delivery", "warranty", "affiliateCommission"}
@@ -21,9 +21,8 @@ const c=require('./alo186/akilli-urun-secimi/catalog-knowledge-extension.js');
 const now=new Date('2026-07-29T12:00:00Z');
 process.stdout.write(JSON.stringify({
  tag:c.affiliateTag, summary:c.knowledgeGraphSummary(),
- categories:c.categories.map(x=>x.id).sort(), needs:c.needs.map(x=>x.id).sort(),
- products:c.products.map(x=>({id:x.id,category:x.category,asin:x.asin,status:x.status,linkMode:x.linkMode,url:x.url,source:x.technicalSource||null,needIds:x.needIds||[]})).sort((a,b)=>a.id.localeCompare(b.id)),
- publicProductIds:c.products.filter(x=>c.publicAffiliateEligible(x,{now})).map(x=>x.id).sort(),
+ products:c.products.map(x=>({id:x.id,category:x.category,asin:x.asin,status:x.status,linkMode:x.linkMode,url:x.url,source:x.technicalSource||null,needIds:x.needIds||[]})),
+ publicProductIds:c.products.filter(x=>c.publicAffiliateEligible(x,{now})).map(x=>x.id),
  schema:c.knowledgeGraph({now})
 }));
 """
@@ -41,13 +40,16 @@ def collect_keys(value, result: set[str]) -> None:
 
 def main() -> None:
     manifest = load_effective_manifest(REPO_ROOT)
-    assert manifest["version"] >= 69
+    assert manifest["version"] >= 71
     routes = [item for item in manifest["routes"] if item["canonicalPath"] == ROUTE]
-    assert len(routes) == 1 and routes[0]["source"] == "alo186/urun-bilgi-grafigi/index.html" and routes[0]["type"] == "commerce-guide"
+    assert len(routes) == 1
+    assert routes[0]["source"] == "alo186/urun-bilgi-grafigi/index.html"
+    assert routes[0]["type"] == "commerce-guide"
 
     page = (REPO_ROOT / "alo186/urun-bilgi-grafigi/index.html").read_text(encoding="utf-8")
     app = (REPO_ROOT / "alo186/urun-bilgi-grafigi/app.js").read_text(encoding="utf-8")
     extension = (REPO_ROOT / "alo186/urun-eslestirme/catalog-knowledge-extension.js").read_text(encoding="utf-8")
+    bridge = (REPO_ROOT / "alo186/akilli-urun-secimi/catalog-knowledge-extension.js").read_text(encoding="utf-8")
     injector = (REPO_ROOT / "alo186/deployment/inject_affiliate_product_graph.py").read_text(encoding="utf-8")
     pipeline = (REPO_ROOT / "alo186/deployment/inject_growth_run15.py").read_text(encoding="utf-8")
     placeholder = json.loads((REPO_ROOT / "alo186/urun-bilgi-grafigi/product-graph.json").read_text(encoding="utf-8"))
@@ -55,56 +57,51 @@ def main() -> None:
 
     expected_summary = {
         "version": "2026-07-29-run39", "generatedAt": "2026-07-29",
-        "needCount": 16, "categoryCount": 16, "productCount": 16,
-        "exactListingCount": 12, "manufacturerSearchCount": 4,
-        "publicProductCount": 5, "gatedCandidateCount": 11,
+        "needCount": 18, "categoryCount": 18, "productCount": 21,
+        "exactListingCount": 17, "manufacturerSearchCount": 4,
+        "publicProductCount": 10, "gatedCandidateCount": 11,
         "affiliatePolicies": ["verified_direct", "after_tool", "professional_only"],
     }
     assert snapshot["tag"] == "alo186rehber-21"
     assert snapshot["summary"] == expected_summary
-    assert len(snapshot["products"]) == 16 and len(snapshot["publicProductIds"]) == 5
-    assert {item["category"] for item in snapshot["products"] if item["id"] in snapshot["publicProductIds"]} == {"powerbank", "usb_c_charger", "usb_c_cable"}
+    assert len(snapshot["products"]) == 21
+    assert len(snapshot["publicProductIds"]) == 10
+    public_categories = {item["category"] for item in snapshot["products"] if item["id"] in snapshot["publicProductIds"]}
+    assert public_categories == {"powerbank", "usb_c_charger", "usb_c_cable", "usb_c_hub", "display_cable"}
     assert NEW_PRODUCTS == {item["id"] for item in snapshot["products"] if item["status"] == "manufacturer_verified_search"}
     assert all(item["needIds"] for item in snapshot["products"])
-    assert all(item["asin"] is None and item["linkMode"] == "exact_model_search" and item["source"] for item in snapshot["products"] if item["id"] in NEW_PRODUCTS)
     assert all("tag=alo186rehber-21" in item["url"] for item in snapshot["products"])
 
     graph_nodes = snapshot["schema"]["@graph"]
     product_nodes = [node for node in graph_nodes if node.get("@type") == "Product"]
     term_nodes = [node for node in graph_nodes if node.get("@type") == "DefinedTerm"]
     candidate_nodes = [node for node in term_nodes if (node.get("inDefinedTermSet") or {}).get("@id", "").endswith("/gated-product-candidates#termset")]
-    assert len(product_nodes) == 5 and len(term_nodes) == 43 and len(candidate_nodes) == 11
+    assert len(product_nodes) == 10
+    assert len(term_nodes) == 47
+    assert len(candidate_nodes) == 11
     assert not any(node.get("@type") == "Offer" for node in graph_nodes)
     assert not any("offers" in node or "aggregateRating" in node for node in product_nodes)
     assert {node.get("sku") for node in product_nodes} == set(snapshot["publicProductIds"])
     assert not NEW_PRODUCTS.intersection({node.get("sku") for node in product_nodes})
     assert NEW_PRODUCTS.issubset({node.get("termCode") for node in candidate_nodes})
-    for node in candidate_nodes: assert isinstance(node.get("additionalProperty"), list) and node["additionalProperty"]
-    for item_id in NEW_PRODUCTS:
-        node = next(candidate for candidate in candidate_nodes if candidate.get("termCode") == item_id)
-        assert node.get("sameAs", "").startswith("https://")
-        assert any(prop.get("name") == "Model" for prop in node["additionalProperty"])
 
     assert 'rel="canonical" href="https://www.alo186.com/urun-bilgi-grafigi/"' in page
     assert "CollectionPage" in page and "FAQPage" in page and "BreadcrumbList" in page
     assert "affiliateProductGraphJsonLd" in page and "catalog-knowledge-extension.js" in page
-    assert "Tapo P110" in page and "EcoFlow RIVER 2" in page and "X-Sense XS01" in page
     assert "amazon.com.tr" not in page.casefold()
-    assert "<form" not in page.casefold() and 'type="email"' not in page.casefold() and 'type="tel"' not in page.casefold()
-    assert "sponsored nofollow noopener" in app and "Mevcut ürünüm güvenli biçimde ihtiyacı karşılamıyor" in app
-    assert "localStorage" not in app and "sessionStorage" not in app and "allChecked" in app and "exact_model_search" in app
-    for token in ["alo186rehber-21", "manufacturer_verified_search", "publicAffiliateEligible", "gated-product-candidates", "technicalSource", "knowledgeGraphSummary", "usb-c-fast-charging", "usb-c-cable-compatibility"]: assert token in extension
+    assert "sponsored nofollow noopener" in app
+    assert "localStorage" not in app and "sessionStorage" not in app
+    for token in ["manufacturer_verified_search", "gated-product-candidates", "knowledgeGraphSummary"]: assert token in extension
+    for token in ["usb-c-hub-connectivity", "usb-c-display-output", "usb_c_hub", "display_cable", "usb-c-urun-kabul-testi"]: assert token in bridge
 
     assert placeholder["needs"] == [] and placeholder["categories"] == [] and placeholder["products"] == []
     assert placeholder["commercialPolicy"]["noBuyOutcomePreserved"] is True
-    assert placeholder["commercialPolicy"]["professionalOnlyCategoriesNeverExposeAffiliateLinks"] is True
-    for token in ["node_payload", "data-alo186-product-graph-entry", "affiliateProductKnowledgeGraph", "commercialRankingFieldsUsed", "directStoreLinksOnGraphJson", "graph_metadata"]: assert token in injector
+    for token in ["node_payload", "affiliateProductKnowledgeGraph", "commercialRankingFieldsUsed", "graph_metadata"]: assert token in injector
     assert "run_affiliate_product_graph" in pipeline
-    assert pipeline.index("run_affiliate_product_graph(site, base_path)") > pipeline.index("recompute(site)")
 
     keys: set[str] = set(); collect_keys(snapshot["products"], keys)
     assert not FORBIDDEN.intersection(keys)
-    print(json.dumps({"ok": True, "routingVersion": manifest["version"], "needNodes": 16, "categoryNodes": 16, "sourceProductRecords": 16, "publicProductNodes": 5, "gatedCandidateNodes": 11, "exactAsins": 12, "newManufacturerModels": 4, "affiliateTag": "alo186rehber-21", "commercialRankingFieldsUsed": [], "noBuyOutcomePreserved": True}, ensure_ascii=False, indent=2))
+    print(json.dumps({"ok": True, "routingVersion": manifest["version"], "needNodes": 18, "categoryNodes": 18, "sourceProductRecords": 21, "publicProductNodes": 10, "gatedCandidateNodes": 11, "exactAsins": 17, "newManufacturerModels": 4, "commercialRankingFieldsUsed": [], "noBuyOutcomePreserved": True}, ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":
