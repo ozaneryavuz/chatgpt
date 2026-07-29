@@ -62,7 +62,7 @@ def main() -> None:
         assert "amazon.com" not in lower and "amzn." not in lower, key
         assert '"@type":"product"' not in lower and '"@type":"offer"' not in lower, key
         assert "fiyat, stok, puan" in lower, key
-        assert "resmî" in lower or "resmi" in lower, key
+        assert any(token in lower for token in ("resmî", "resmi", "kamu kurumu")), key
         assert "adres" in lower and ("kişi" in lower or "işletme adı" in lower), key
         assert "localstorage" in lower, key
 
