@@ -8,6 +8,7 @@ from pathlib import Path
 
 from apply_content_consolidation import apply as apply_content_consolidation
 from inject_handoff_growth import run as run_handoff_growth
+from inject_private_search import run as run_private_search
 
 CANONICAL = "https://www.alo186.com/hesaplama/teknik-urun-karsilastirma/"
 CANONICAL_PATH = "/hesaplama/teknik-urun-karsilastirma/"
@@ -186,6 +187,7 @@ def run(site: Path, base_path: str) -> dict:
     recompute(site)
     handoff = run_handoff_growth(site, base_path)
     consolidation = apply_content_consolidation(site, base_path)
+    site_search = run_private_search(site, base_path)
     return {
         "ok": True,
         "basePath": base_path,
@@ -194,6 +196,7 @@ def run(site: Path, base_path: str) -> dict:
         "route": public_url(base_path, CANONICAL_PATH),
         "technicalHandoff": handoff,
         "contentConsolidation": consolidation,
+        "siteSearch": site_search,
     }
 
 

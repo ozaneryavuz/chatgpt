@@ -42,6 +42,17 @@ CANONICAL_METADATA_FILES = {
     "sitemap.xml",
     "manifest.webmanifest",
     "sw.js",
+    "search-index.json",
+}
+SEARCH_INDEX_PATH = Path("arama/search-index.json")
+SEARCH_FORBIDDEN_FIELDS = {
+    "price",
+    "stock",
+    "rating",
+    "seller",
+    "warranty",
+    "asin",
+    "affiliateCommission",
 }
 
 
@@ -92,6 +103,22 @@ def strip_base_path(path: str, base_path: str) -> str | None:
     return None
 
 
+def normalize_canonical_path(value: str, base_path: str) -> str:
+    path = urlsplit(str(value or "")).path or "/"
+    stripped = strip_base_path(path, base_path)
+    return stripped if stripped is not None else path
+
+
+def public_url(base_path: str, route: str) -> str:
+    if not route.startswith("/"):
+        route = "/" + route
+    if not base_path:
+        return route
+    if route == "/":
+        return base_path + "/"
+    return base_path + route
+
+
 def route_exists(site: Path, route: str) -> bool:
     clean = urlsplit(route).path or "/"
     if clean == "/":
@@ -102,6 +129,91 @@ def route_exists(site: Path, route: str) -> bool:
 
 def file_sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def validate_search_index(
+    site: Path,
+    base_path: str,
+    core_release: dict,
+    pages_release: dict,
+    failures: list[str],
+) -> int:
+    index_path = site / SEARCH_INDEX_PATH
+    if not index_path.is_file():
+        if core_release.get("siteSearch") or pages_release.get("siteSearch"):
+            failures.append("Release metadata teknik arama bildiriyor fakat search-index.json eksik")
+        return 0
+
+    try:
+        payload = json.loads(index_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        failures.append(f"Teknik arama indeksi geçersiz JSON: {exc}")
+        return 0
+
+    entries = payload.get("entries")
+    if not isinstance(entries, list):
+        failures.append("Teknik arama indeksi entries alanı liste değil")
+        return 0
+    if payload.get("entryCount") != len(entries):
+        failures.append("Teknik arama indeksi entryCount gerçek kayıt sayısıyla eşleşmiyor")
+
+    declared_exclusions = payload.get("commercialRankingExcluded")
+    expected_exclusions = ["price", "stock", "rating", "seller", "warranty", "affiliateCommission"]
+    if declared_exclusions != expected_exclusions:
+        failures.append("Teknik arama ticari sıralama dışlama sözleşmesi değişmiş")
+
+    aliases: set[str] = set()
+    consolidation = core_release.get("contentConsolidation") or {}
+    for item in consolidation.get("aliases") or []:
+        if isinstance(item, dict) and item.get("aliasPath"):
+            aliases.add(normalize_canonical_path(item["aliasPath"], base_path))
+
+    canonical_paths: set[str] = set()
+    for index, entry in enumerate(entries):
+        if not isinstance(entry, dict):
+            failures.append(f"Teknik arama kaydı nesne değil: sıra={index}")
+            continue
+        canonical = normalize_canonical_path(entry.get("canonicalPath"), base_path)
+        if not canonical.startswith("/") or canonical == "/arama/":
+            failures.append(f"Teknik arama canonicalPath geçersiz: {entry.get('canonicalPath')!r}")
+            continue
+        if canonical in canonical_paths:
+            failures.append(f"Teknik arama indeksinde yinelenen canonicalPath: {canonical}")
+        canonical_paths.add(canonical)
+        if canonical in aliases:
+            failures.append(f"Canonical alias teknik arama indeksine sızmış: {canonical}")
+
+        expected_url = public_url(base_path, canonical)
+        if entry.get("url") != expected_url:
+            failures.append(
+                f"Teknik arama base-path URL eşleşmiyor: {canonical} → {entry.get('url')!r}, beklenen={expected_url!r}"
+            )
+        if not route_exists(site, canonical):
+            failures.append(f"Teknik arama kaydının fiziksel rotası eksik: {canonical}")
+        forbidden = SEARCH_FORBIDDEN_FIELDS.intersection(entry.keys())
+        if forbidden:
+            failures.append(f"Teknik arama kaydında ticari alan bulundu: {canonical} → {sorted(forbidden)}")
+
+    core_search = core_release.get("siteSearch") or {}
+    pages_search = pages_release.get("siteSearch") or {}
+    if core_search:
+        if core_search.get("entryCount") != len(entries):
+            failures.append("alo186-release siteSearch entryCount eşleşmiyor")
+        if core_search.get("rawQueryStored") is not False:
+            failures.append("alo186-release teknik arama ham sorgu saklamamalı")
+        if core_search.get("commercialRankingUsed") is not False:
+            failures.append("alo186-release teknik arama ticari sıralama kullanmamalı")
+    if pages_search:
+        if pages_search.get("entryCount") != len(entries):
+            failures.append("pages-release siteSearch entryCount eşleşmiyor")
+        if pages_search.get("route") != public_url(base_path, "/arama/"):
+            failures.append("pages-release teknik arama rotası base-path ile uyumsuz")
+        if pages_search.get("index") != public_url(base_path, "/arama/search-index.json"):
+            failures.append("pages-release teknik arama indeks rotası base-path ile uyumsuz")
+        if pages_search.get("rawQueryStored") is not False:
+            failures.append("pages-release teknik arama ham sorgu saklamamalı")
+
+    return len(entries)
 
 
 def smoke(site: Path, manifest_path: Path, base_path: str) -> dict:
@@ -202,6 +314,8 @@ def smoke(site: Path, manifest_path: Path, base_path: str) -> dict:
         if not route_exists(site, bridge["target"]):
             failures.append(f"Route bridge hedefi eksik: {bridge['target']}")
 
+    search_index_entries = validate_search_index(site, base_path, core_release, pages_release, failures)
+
     checksum_path = site / "checksums.sha256"
     if checksum_path.is_file():
         for line in checksum_path.read_text(encoding="utf-8").splitlines():
@@ -226,7 +340,16 @@ def smoke(site: Path, manifest_path: Path, base_path: str) -> dict:
                     failures.append(f"Project base path sonrası kök referans kaldı: {path.relative_to(site)} → /{rest}")
                     break
 
-    result = {"ok": not failures, "basePath": base_path, "routeCount": len(manifest["routes"]), "routeBridgeCount": bridge_manifest.get("count", 0), "checkedPages": checked_pages, "checkedReferences": checked_references, "failures": failures}
+    result = {
+        "ok": not failures,
+        "basePath": base_path,
+        "routeCount": len(manifest["routes"]),
+        "routeBridgeCount": bridge_manifest.get("count", 0),
+        "searchIndexEntryCount": search_index_entries,
+        "checkedPages": checked_pages,
+        "checkedReferences": checked_references,
+        "failures": failures,
+    }
     if failures:
         raise SystemExit(json.dumps(result, ensure_ascii=False, indent=2))
     return result

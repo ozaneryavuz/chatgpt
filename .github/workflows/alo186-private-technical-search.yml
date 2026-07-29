@@ -1,0 +1,188 @@
+name: ALO186 kişisel verisiz teknik arama kalite kontrolü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/arama/**'
+      - 'alo186/deployment/inject_private_search.py'
+      - 'alo186/deployment/inject_shortlist_growth.py'
+      - 'alo186/deployment/apply_content_consolidation.py'
+      - 'alo186/deployment/content-consolidations.json'
+      - 'alo186/deployment/smoke_github_pages.py'
+      - 'alo186/deployment/routing-manifest.json'
+      - 'alo186/deployment/routing-overlays/**'
+      - 'alo186/tests/test_private_technical_search.py'
+      - '.github/workflows/alo186-private-technical-search.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/arama/**'
+      - 'alo186/deployment/inject_private_search.py'
+      - 'alo186/deployment/inject_shortlist_growth.py'
+      - 'alo186/deployment/apply_content_consolidation.py'
+      - 'alo186/deployment/content-consolidations.json'
+      - 'alo186/deployment/smoke_github_pages.py'
+      - 'alo186/deployment/routing-manifest.json'
+      - 'alo186/deployment/routing-overlays/**'
+      - 'alo186/tests/test_private_technical_search.py'
+      - '.github/workflows/alo186-private-technical-search.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-private-search-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Türkçe arama ve güvenli niyet sıralama senaryoları
+        run: node alo186/arama/test.js
+
+      - name: Kaynak, gizlilik, routing ve indeks üretici sözleşmeleri
+        run: python alo186/tests/test_private_technical_search.py
+
+      - name: JavaScript ve Python sözdizimi
+        run: |
+          node --check alo186/arama/core.js
+          node --check alo186/arama/app.js
+          python -m py_compile alo186/deployment/inject_private_search.py
+          python -m py_compile alo186/deployment/smoke_github_pages.py
+
+      - name: Canonical, içerik niyeti ve cihaz hasarı regresyonları
+        run: |
+          python alo186/tests/test_content_intent_consolidation.py
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Canonical üretim paketini oluştur
+        run: |
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-search-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-search-canonical
+
+      - name: Custom-domain teknik arama artifactı
+        run: |
+          cp -a /tmp/alo186-search-canonical /tmp/alo186-search-custom
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-search-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-search-custom \
+            --base-path ''
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-search-custom \
+            --base-path '' \
+            > /tmp/alo186-search-custom.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-search-custom \
+            --base-path ''
+
+      - name: Project-path teknik arama artifactı
+        run: |
+          cp -a /tmp/alo186-search-canonical /tmp/alo186-search-project
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-search-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-search-project \
+            --base-path '/chatgpt'
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-search-project \
+            --base-path '/chatgpt' \
+            > /tmp/alo186-search-project.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-search-project \
+            --base-path '/chatgpt'
+
+      - name: Arama indeksi, base-path, güvenlik ve yayın sözleşmeleri
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          aliases = {
+              '/haberler/lifepo4-batarya-sogukta-sarj-edilir-mi',
+              '/haberler/elektrik-gerilimi-dusuk-yuksek-edas-olcum-talebi',
+          }
+          for root, prefix in [
+              (Path('/tmp/alo186-search-custom'), ''),
+              (Path('/tmp/alo186-search-project'), '/chatgpt'),
+          ]:
+              search_dir=root/'arama'
+              for relative in ['index.html','styles.css','core.js','app.js','search-index.json']:
+                  assert (search_dir/relative).is_file(), (root, relative)
+              assert not (search_dir/'test.js').exists()
+
+              index=json.loads((search_dir/'search-index.json').read_text(encoding='utf-8'))
+              assert index['entryCount'] >= 80, index['entryCount']
+              assert index['entryCount'] == len(index['entries'])
+              assert index['commercialRankingExcluded'] == ['price','stock','rating','seller','warranty','affiliateCommission']
+              assert not aliases.intersection({entry['canonicalPath'] for entry in index['entries']})
+              assert not any(entry['canonicalPath']=='/arama/' for entry in index['entries'])
+              for entry in index['entries']:
+                  expected = prefix + entry['canonicalPath'] if prefix else entry['canonicalPath']
+                  assert entry['url'] == expected, (entry['url'], expected)
+                  assert 'price' not in entry and 'stock' not in entry and 'rating' not in entry
+
+              release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
+              pages=json.loads((root/'pages-release.json').read_text(encoding='utf-8'))
+              assert release['siteSearch']['rawQueryStored'] is False
+              assert release['siteSearch']['commercialRankingUsed'] is False
+              assert release['siteSearch']['entryCount'] == index['entryCount']
+              assert pages['siteSearch']['rawQueryStored'] is False
+              assert pages['siteSearch']['entryCount'] == index['entryCount']
+              assert pages['siteSearch']['route'] == (prefix + '/arama/' if prefix else '/arama/')
+              assert pages['siteSearch']['index'] == (prefix + '/arama/search-index.json' if prefix else '/arama/search-index.json')
+
+              portal=(root/'elektrik-portali/index.html').read_text(encoding='utf-8')
+              gateway=(root/'index.html').read_text(encoding='utf-8')
+              assert 'data-alo186-search-card="true"' in portal
+              assert 'data-alo186-search-card="true"' in gateway
+              assert (prefix + '/arama/' if prefix else '/arama/') in portal
+              assert (prefix + '/arama/' if prefix else '/arama/') in gateway
+
+              sw=(root/'sw.js').read_text(encoding='utf-8')
+              assert (prefix + '/arama/' if prefix else '/arama/') in sw
+              assert (prefix + '/arama/search-index.json' if prefix else '/arama/search-index.json') in sw
+              manifest=json.loads((root/'manifest.webmanifest').read_text(encoding='utf-8'))
+              assert any(item.get('url') == (prefix + '/arama/' if prefix else '/arama/') for item in manifest.get('shortcuts', []))
+
+              html=(search_dir/'index.html').read_text(encoding='utf-8')
+              app=(search_dir/'app.js').read_text(encoding='utf-8')
+              assert 'ham sorgu gönderilmez' in html
+              assert 'href="tel:112"' in html
+              assert 'query_length' in app and 'token_count' in app
+              assert 'localStorage' not in app and 'sessionStorage' not in app
+              assert 'amazon.com' not in html.lower()
+          PY
+
+      - name: Doğrulanmış kişisel verisiz arama artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-private-technical-search-pages
+          path: /tmp/alo186-search-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
