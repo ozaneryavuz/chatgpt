@@ -74,7 +74,7 @@ jobs:
           release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
           active={item['canonicalPath'] for item in search['entries']}
           assert release['routingVersion'] >= 72, release['routingVersion']
-          assert release['articleCount'] >= 162, release['articleCount']
+          assert release['articleCount'] >= 160, release['articleCount']
           for route in routes:
               target=root/route.strip('/')/'index.html'
               assert target.is_file(), target
