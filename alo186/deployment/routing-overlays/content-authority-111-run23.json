@@ -1,0 +1,21 @@
+{
+  "version": 49,
+  "generatedAt": "2026-07-29",
+  "routes": [
+    {
+      "source": "alo186/haberler/parafudr-tip-1-tip-2-tip-3-farki-kaskad-koordinasyon/index.html",
+      "canonicalPath": "/haberler/parafudr-tip-1-tip-2-tip-3-farki-kaskad-koordinasyon",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ev-sarj-74-11-22-kw-tek-faz-uc-faz-onboard-charger/index.html",
+      "canonicalPath": "/haberler/ev-sarj-74-11-22-kw-tek-faz-uc-faz-onboard-charger",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/elektrik-kesintisi-tazminati-edas-otomatik-odeme-nasil-kontrol-edilir/index.html",
+      "canonicalPath": "/haberler/elektrik-kesintisi-tazminati-edas-otomatik-odeme-nasil-kontrol-edilir",
+      "type": "article"
+    }
+  ]
+}
