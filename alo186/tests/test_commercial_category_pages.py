@@ -21,6 +21,11 @@ DIRECT_COMMERCIAL_ROUTES = {
     "/amazon-elektrik-urunleri",
     "/amazon-elektrik-urunleri/powerbank-usb-c-secimi",
 }
+EXPANSION_ROUTES = {
+    "/amazon-elektrik-urunleri/tasinabilir-guc-istasyonu-secimi",
+    "/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi",
+    "/amazon-elektrik-urunleri/ges-malzemeleri-secimi",
+}
 
 
 def text_of(html: str, tag: str) -> str:
@@ -74,9 +79,9 @@ class CommercialCategoryPagesTests(unittest.TestCase):
 
     def test_hub_links_to_every_dedicated_page(self) -> None:
         html = ROUTES["/amazon-elektrik-urunleri"].read_text(encoding="utf-8")
-        for route in set(ROUTES) - {"/amazon-elektrik-urunleri"}:
+        for route in (set(ROUTES) - {"/amazon-elektrik-urunleri"}) | EXPANSION_ROUTES:
             self.assertIn(f'href="{route}"', html)
-        self.assertIn("4 özel rehber", html)
+        self.assertIn("7 özel rehber", html)
         self.assertIn("Mevcut ürün yeterliyse satın alma yok", html)
         self.assertIn("Sabit tesisatta mağaza linki yok", html)
 

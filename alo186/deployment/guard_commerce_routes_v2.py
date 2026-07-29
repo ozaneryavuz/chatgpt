@@ -18,14 +18,19 @@ DISCLOSURE_PATTERN = re.compile(
     r"satış\s+ortaklığı|affiliate|nitelikli\s+satın\s+alımlardan\s+komisyon",
     re.I,
 )
+PROFESSIONAL_ONLY_PATTERN = re.compile(
+    r"professional[- ]only|doğrudan\s+(?:amazon\s+veya\s+başka\s+)?mağaza\s+bağlantısı\s+(?:yok|kapalı|gösterilmez)|profesyonel\s+doğrulama",
+    re.I,
+)
 NO_BUY_PATTERNS = (
     re.compile(
         r"mevcut.{0,150}(?:yeterli|uygun|güvenli).{0,180}(?:satın\s+alma|satın\s+almayın|yeni\s+ürün\s+alma)",
         re.I | re.S,
     ),
-    re.compile(r"satın\s+almama\s+(?:seçeneği|sonucu|hakkı)", re.I),
+    re.compile(r"satın\s+almama\s+(?:seçeneği|sonucu|hakkı|koruması)", re.I),
     re.compile(r"yeni\s+ürün\s+almak\s+gerekmeyebilir", re.I),
     re.compile(r"ürün\s+satın\s+alma\s+zorunluluğu\s+yok", re.I),
+    re.compile(r"(?:sipariş|satın\s+alma).{0,80}(?:vermeyin|durdurun)", re.I | re.S),
 )
 UNVERIFIED_COMMERCIAL_PATTERNS = (
     re.compile(r"\b\d[\d.]*\s*(?:TL|₺)\b", re.I),
@@ -49,11 +54,14 @@ ATTR_PATTERN = re.compile(
 )
 
 COMMERCIAL_ROUTES = {
-    "/amazon-elektrik-urunleri": {"direct": False},
-    "/amazon-elektrik-urunleri/powerbank-usb-c-secimi": {"direct": True},
-    "/amazon-elektrik-urunleri/akim-korumali-grup-priz-secimi": {"direct": False},
-    "/amazon-elektrik-urunleri/modem-mini-ups-secimi": {"direct": False},
-    "/amazon-elektrik-urunleri/acil-aydinlatma-duman-alarmi": {"direct": False},
+    "/amazon-elektrik-urunleri": {"direct": False, "affiliate": True, "professional_only": False},
+    "/amazon-elektrik-urunleri/powerbank-usb-c-secimi": {"direct": True, "affiliate": True, "professional_only": False},
+    "/amazon-elektrik-urunleri/akim-korumali-grup-priz-secimi": {"direct": False, "affiliate": True, "professional_only": False},
+    "/amazon-elektrik-urunleri/modem-mini-ups-secimi": {"direct": False, "affiliate": True, "professional_only": False},
+    "/amazon-elektrik-urunleri/acil-aydinlatma-duman-alarmi": {"direct": False, "affiliate": True, "professional_only": False},
+    "/amazon-elektrik-urunleri/tasinabilir-guc-istasyonu-secimi": {"direct": False, "affiliate": True, "professional_only": False},
+    "/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi": {"direct": False, "affiliate": True, "professional_only": False},
+    "/amazon-elektrik-urunleri/ges-malzemeleri-secimi": {"direct": False, "affiliate": False, "professional_only": True},
 }
 SERVICE_ROUTES = {
     "/hizmetler/otel-elektrik-surekliligi-denetimi/",
@@ -129,6 +137,8 @@ def scan_affiliate_anchors(path: Path, site: Path) -> list[str]:
 def validate_commercial_pages(site: Path) -> tuple[list[str], dict]:
     errors: list[str] = []
     direct_pages = 0
+    affiliate_pages = 0
+    professional_only_pages = 0
     for route, policy in COMMERCIAL_ROUTES.items():
         path = route_file(site, route)
         if not path.is_file():
@@ -139,8 +149,16 @@ def validate_commercial_pages(site: Path) -> tuple[list[str], dict]:
         canonical = canonical_expected(route)
         if f'rel="canonical" href="{canonical}"' not in html:
             errors.append(f"{route}: canonical yanlış veya eksik")
-        if not DISCLOSURE_PATTERN.search(visible):
-            errors.append(f"{route}: görünür satış ortaklığı açıklaması eksik")
+        if policy["affiliate"]:
+            affiliate_pages += 1
+            if not DISCLOSURE_PATTERN.search(visible):
+                errors.append(f"{route}: görünür satış ortaklığı açıklaması eksik")
+        else:
+            professional_only_pages += 1
+            if not PROFESSIONAL_ONLY_PATTERN.search(visible):
+                errors.append(f"{route}: professional-only mağaza sınırı görünür değil")
+            if 'data-commercial-scope="professional-only"' not in html:
+                errors.append(f"{route}: professional-only makine tarafından okunabilir işareti eksik")
         if not has_no_buy(visible):
             errors.append(f"{route}: mevcut ekipman yeterliyse satın almama sınırı eksik")
         if not has_independence(visible):
@@ -157,14 +175,22 @@ def validate_commercial_pages(site: Path) -> tuple[list[str], dict]:
         if static_affiliate:
             errors.append(f"{route}: kaynak HTML statik affiliate bağlantısı içermemeli; runtime tazelik kapısı kullanılmalı")
         has_product_container = "data-fresh-products" in html
+        has_product_center = "data-product-center" in html
         if policy["direct"]:
             direct_pages += 1
             if not has_product_container:
                 errors.append(f"{route}: doğrudan kategori için taze katalog konteyneri eksik")
         elif has_product_container:
             errors.append(f"{route}: guide kategoride doğrudan ürün konteyneri bulunmamalı")
+        if policy["professional_only"] and has_product_center:
+            errors.append(f"{route}: professional-only sayfada ürün merkezine ticari CTA bulunmamalı")
 
-    return errors, {"commercialPageCount": len(COMMERCIAL_ROUTES), "directCommercialPageCount": direct_pages}
+    return errors, {
+        "commercialPageCount": len(COMMERCIAL_ROUTES),
+        "directCommercialPageCount": direct_pages,
+        "affiliateCommercialPageCount": affiliate_pages,
+        "professionalOnlyPageCount": professional_only_pages,
+    }
 
 
 def validate_service_pages(site: Path) -> tuple[list[str], dict]:
@@ -219,6 +245,7 @@ def validate_runtime(site: Path) -> tuple[list[str], dict]:
         "sponsored nofollow noopener",
         "category.mode === 'direct'",
         "Fiyat, stok, satıcı, teslimat, puan ve garanti",
+        "if (professionalOnly) return;",
     ):
         if token not in runtime:
             errors.append(f"commercial.js: güven/tazelik sözleşmesi eksik: {token}")
@@ -268,6 +295,7 @@ def validate_site(site: Path) -> dict:
             "directCategory": DIRECT_CATEGORY_ID,
             "freshnessDays": 45,
             "highRiskDirectAffiliate": False,
+            "professionalOnlyDirectAffiliate": False,
             "officialInstitutionImpression": False,
         },
         "errorCount": len(errors),
