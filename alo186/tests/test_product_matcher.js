@@ -2,7 +2,7 @@ const assert=require('assert');
 const catalog=require('../urun-eslestirme/catalog.js');
 const matcher=require('../urun-eslestirme/matcher-core.js');
 
-assert.strictEqual(catalog.affiliateTag,'alo186hazirlik-21');
+assert.strictEqual(catalog.affiliateTag,'alo186rehber-21');
 assert.strictEqual(catalog.categories.length,14,'On dört ihtiyaç kategorisi bulunmalı.');
 assert(catalog.productsFor('powerbank').length>=3,'Powerbank kataloğunda en az üç ürün olmalı.');
 assert(catalog.productsFor('surge_strip').length>=3,'Grup priz kataloğunda en az üç doğrulanmış ürün korunmalı.');
@@ -13,7 +13,7 @@ assert.strictEqual(new Set(asins).size,asins.length,'ASIN değerleri benzersiz o
 for(const product of catalog.products){
   assert(/^B[A-Z0-9]{9}$/.test(product.asin),`${product.id} ASIN biçimi geçersiz.`);
   assert(product.url.includes(`/dp/${product.asin}`),`${product.id} doğrudan ürün URL'si içermeli.`);
-  assert(product.url.includes('tag=alo186hazirlik-21'),`${product.id} affiliate etiketi içermeli.`);
+  assert(product.url.includes('tag=alo186rehber-21'),`${product.id} affiliate etiketi içermeli.`);
   assert(product.verifiedAt&&product.sourceNote,`${product.id} doğrulama kaydı içermeli.`);
   assert(!Object.prototype.hasOwnProperty.call(product,'price'),`${product.id} statik fiyat taşımamalı.`);
   assert(!Object.prototype.hasOwnProperty.call(product,'stock'),`${product.id} statik stok taşımamalı.`);
@@ -51,7 +51,7 @@ for(const[category,url]of Object.entries(gated)){
   assert.strictEqual(result.mode,'guide');
   assert.strictEqual(result.affiliatePolicy,'after_tool');
   assert.strictEqual(result.nextStep.url,url);
-  assert(result.searchUrl.includes('tag=alo186hazirlik-21'));
+  assert(result.searchUrl.includes('tag=alo186rehber-21'));
 }
 result=matcher.match('emergency_light',{});
 assert.strictEqual(result.professionalSelectionRequired,false);

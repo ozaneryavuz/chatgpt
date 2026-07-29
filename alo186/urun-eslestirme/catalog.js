@@ -2,10 +2,22 @@
   const api=factory();
   if(typeof module==='object'&&module.exports){module.exports=api;}
   root.Alo186ProductCatalog=api;
+  if(root.document&&typeof api.knowledgeGraph==='function'){
+    const id='alo186-affiliate-knowledge-graph';
+    const current=root.document.getElementById(id);
+    if(current)current.remove();
+    const script=root.document.createElement('script');
+    script.id=id;
+    script.type='application/ld+json';
+    script.dataset.generated='alo186-affiliate-knowledge-graph';
+    script.textContent=JSON.stringify(api.knowledgeGraph());
+    root.document.head.appendChild(script);
+  }
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
-  const affiliateTag='alo186hazirlik-21';
-  const verifiedAt='2026-07-27';
+  const affiliateTag='alo186rehber-21';
+  const verifiedAt='2026-07-29';
   const verificationMaxAgeDays=45;
+  const siteOrigin='https://www.alo186.com';
 
   function amazonProductUrl(asin){
     const base=`https://www.amazon.com.tr/dp/${encodeURIComponent(asin)}`;
@@ -40,7 +52,10 @@
     {id:'tuncmatik-tsk6136',category:'surge_strip',asin:'B07CST4766',name:'Tunçmatik TSK6136 PowerSurge 5 Priz 1050 J',brand:'Tunçmatik',status:'verified_listing',verifiedAt,attributes:{outlets:5,joules:1050,maxCurrentA:10,maxPowerW:null,usbPorts:0,cableM:1.5},strengths:['1050 joule','5 çocuk emniyetli priz','1,5 m kablo'],limits:['10 A nominal akım','Pano tipi SPD ve uygun topraklamanın yerine geçmez'],sourceNote:'ASIN, 1050 J, 8000 A tepe, 10 A nominal ve 5 priz bilgileri ürün sayfasından kontrol edildi.',url:amazonProductUrl('B07CST4766')},
     {id:'viko-multilet-6',category:'surge_strip',asin:'B08L9KVRP1',name:'Viko Multilet Şok Korumalı 6’lı Grup Priz',brand:'Viko',status:'verified_listing',verifiedAt,attributes:{outlets:6,joules:282,maxCurrentA:16,maxPowerW:3500,usbPorts:0,cableM:1.5},strengths:['6 priz','16 A / 3500 W etiket bilgisi','Çocuk koruma'],limits:['282 joule seviyesi','Pano tipi koruma yerine kullanılamaz'],sourceNote:'ASIN, 6 priz, 16 A, 3500 W, 282 J ve 1,7 kV koruma seviyesi ürün açıklamasından kontrol edildi.',url:amazonProductUrl('B08L9KVRP1')},
     {id:'tuncmatik-tsk5015',category:'surge_strip',asin:'B08KW6X13Y',name:'Tunçmatik PowerSurge 5 Priz + USB TSK5015',brand:'Tunçmatik',status:'verified_listing',verifiedAt,attributes:{outlets:5,joules:null,maxCurrentA:null,maxPowerW:null,usbPorts:2,cableM:null},strengths:['5 priz','USB çıkışları','Elektronik cihaz kullanım senaryosu'],limits:['Joule ve nominal akım satın alma öncesi ürün etiketinden doğrulanmalı'],sourceNote:'ASIN, model, 5 priz ve USB özellikleri ürün sayfasından kontrol edildi; bilinmeyen alanlar puanda cezalandırılır.',url:amazonProductUrl('B08KW6X13Y')},
-    {id:'cata-ct9186',category:'surge_strip',asin:'B09YTYTZ4J',name:'Cata CT-9186 Tekli Akım Korumalı Priz 918 J',brand:'Cata',status:'verified_listing',verifiedAt,attributes:{outlets:1,joules:918,maxCurrentA:null,maxPowerW:4000,usbPorts:0,cableM:0},strengths:['918 joule','Tek cihaz için kompakt kullanım','LED gösterge'],limits:['Tek priz','4000 W ifadesi ürün sayfasında tekrar doğrulanmalı','Pano tipi koruma yerine geçmez'],sourceNote:'ASIN, 918 J ve 4000 W ürün başlığı/açıklamasından kontrol edildi.',url:amazonProductUrl('B09YTYTZ4J')}
+    {id:'cata-ct9186',category:'surge_strip',asin:'B09YTYTZ4J',name:'Cata CT-9186 Tekli Akım Korumalı Priz 918 J',brand:'Cata',status:'verified_listing',verifiedAt,attributes:{outlets:1,joules:918,maxCurrentA:null,maxPowerW:4000,usbPorts:0,cableM:0},strengths:['918 joule','Tek cihaz için kompakt kullanım','LED gösterge'],limits:['Tek priz','4000 W ifadesi ürün sayfasında tekrar doğrulanmalı','Pano tipi koruma yerine geçmez'],sourceNote:'ASIN, 918 J ve 4000 W ürün başlığı/açıklamasından kontrol edildi.',url:amazonProductUrl('B09YTYTZ4J')},
+    {id:'philips-spn7040wa-62',category:'surge_strip',asin:'B09Y5VH14K',mpn:'SPN7040WA/62',name:'Philips SPN7040WA/62 4’lü Akım Korumalı Grup Priz 600 J',brand:'Philips',status:'verified_listing',verifiedAt,attributes:{outlets:4,joules:600,maxCurrentA:16,maxPowerW:3680,usbPorts:0,cableM:2,doublePoleSwitch:true},strengths:['4 topraklı priz','600 joule','2 m kablo','16 A / 3680 W'],limits:['Pano tipi SPD ve uygun topraklamanın yerine geçmez','600 J sınıfı daha yüksek darbe enerjisi ihtiyacında ayrıca değerlendirilmelidir'],sourceNote:'ASIN, model, 4 priz, 600 J, 2 m, 16 A ve 3680 W alanları ürün sayfasından doğrulandı; fiyat ve stok gösterilmez.',url:amazonProductUrl('B09Y5VH14K')},
+    {id:'tuncmatik-tsk6134',category:'surge_strip',asin:'B08L9LF2WC',mpn:'TSK6134',name:'Tunçmatik TSK6134 PowerSurge 5 Priz 1050 J',brand:'Tunçmatik',status:'verified_listing',verifiedAt,attributes:{outlets:5,joules:1050,maxCurrentA:null,maxPowerW:null,usbPorts:0,cableM:1.5},strengths:['5 priz','1050 joule','1,5 m kablo'],limits:['Nominal akım ve maksimum güç ürün etiketinden satın alma öncesi yeniden doğrulanmalı','Pano tipi SPD yerine geçmez'],sourceNote:'ASIN, model, 5 priz, 1050 J ve 1,5 m alanları ürün listelemesinden doğrulandı; bilinmeyen alanlar null tutuldu.',url:amazonProductUrl('B08L9LF2WC')},
+    {id:'brennenstuhl-eco-line-6',category:'surge_strip',asin:'B07RWYSQKV',name:'Brennenstuhl Eco-Line 6’lı Akım Korumalı Grup Priz',brand:'Brennenstuhl',status:'verified_listing',verifiedAt,attributes:{outlets:6,joules:null,maxCurrentA:null,maxPowerW:null,usbPorts:0,cableM:null,surgeCurrentA:13500},strengths:['6 priz','13.500 A darbe akımı listeleme bilgisi','Çocuk koruma sınıfı'],limits:['Joule, kablo uzunluğu, nominal akım ve güç Amazon sayfasında yeniden doğrulanmalı','Darbe akımı değeri joule değeriyle aynı değildir'],sourceNote:'ASIN, 6 priz ve 13.500 A listeleme alanları doğrulandı; fiyat, stok ve eksik teknik alanlar yayımlanmaz.',url:amazonProductUrl('B07RWYSQKV')}
   ];
 
   function dateOnly(value){const date=value instanceof Date?value:new Date(value);return Number.isNaN(date.getTime())?null:new Date(Date.UTC(date.getUTCFullYear(),date.getUTCMonth(),date.getUTCDate()));}
@@ -48,5 +63,36 @@
   function getCategory(id){return categories.find(c=>c.id===id)||null;}
   function productsFor(category,options={}){const now=options.now||new Date();const freshOnly=Boolean(options.freshOnly);return products.filter(product=>product.category===category&&product.status==='verified_listing'&&(!freshOnly||verificationStatus(product,now).fresh));}
   function searchUrl(category){const c=getCategory(category);return c?amazonSearchUrl(c.searchQuery):'https://www.amazon.com.tr';}
-  return {affiliateTag,verifiedAt,verificationMaxAgeDays,categories,products,getCategory,productsFor,verificationStatus,amazonProductUrl,amazonSearchUrl,searchUrl};
+  function slug(value){return String(value||'').toLocaleLowerCase('tr-TR').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/ı/g,'i').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');}
+  function productId(product){return `${siteOrigin}/akilli-urun-secimi/urun/${encodeURIComponent(product.id)}#product`;}
+  function productPageUrl(product){return `${siteOrigin}/akilli-urun-secimi?urun=${encodeURIComponent(product.id)}`;}
+  function brandId(brand){return `${siteOrigin}/knowledge-graph/brand/${slug(brand)}#brand`;}
+  function categoryId(category){return `${siteOrigin}/knowledge-graph/category/${encodeURIComponent(category)}#category`;}
+  function additionalProperties(product){return Object.entries(product.attributes||{}).filter(([,value])=>value!==null&&value!==undefined).map(([name,value])=>({'@type':'PropertyValue',name,value}));}
+  function productNode(product){
+    const identifiers=[{'@type':'PropertyValue',propertyID:'ASIN',value:product.asin}];
+    if(product.mpn)identifiers.push({'@type':'PropertyValue',propertyID:'MPN',value:product.mpn});
+    return {
+      '@type':'Product','@id':productId(product),name:product.name,url:productPageUrl(product),sku:product.id,identifier:identifiers,
+      ...(product.mpn?{mpn:product.mpn}:{}),brand:{'@id':brandId(product.brand)},category:{'@id':categoryId(product.category)},
+      description:product.sourceNote,additionalProperty:additionalProperties(product),
+      subjectOf:{'@id':`${productPageUrl(product)}#webpage`},mainEntityOfPage:{'@id':`${productPageUrl(product)}#webpage`}
+    };
+  }
+  function knowledgeGraph(options={}){
+    const active=products.filter(product=>product.status==='verified_listing'&&verificationStatus(product,options.now||new Date()).fresh);
+    const uniqueBrands=[...new Set(active.map(product=>product.brand))].sort((a,b)=>a.localeCompare(b,'tr'));
+    const brands=uniqueBrands.map(name=>({'@type':'Brand','@id':brandId(name),name}));
+    const categoryNodes=categories.map(category=>({'@type':'DefinedTerm','@id':categoryId(category.id),termCode:category.id,name:category.name,description:category.description,inDefinedTermSet:{'@id':`${siteOrigin}/knowledge-graph/electrical-product-categories#termset`}}));
+    const itemList={'@type':'ItemList','@id':`${siteOrigin}/akilli-urun-secimi#verified-products`,name:'ALO186 doğrulanmış affiliate ürünleri',numberOfItems:active.length,itemListElement:active.map((product,index)=>({'@type':'ListItem',position:index+1,item:{'@id':productId(product)}}))};
+    const graph=[
+      {'@type':'Organization','@id':`${siteOrigin}/#organization`,name:'ALO186',url:`${siteOrigin}/`,description:'Bağımsız elektrik bilgi ve ürün uygunluk platformu.'},
+      {'@type':'WebSite','@id':`${siteOrigin}/#website`,url:`${siteOrigin}/`,name:'ALO186',publisher:{'@id':`${siteOrigin}/#organization`}},
+      {'@type':'DefinedTermSet','@id':`${siteOrigin}/knowledge-graph/electrical-product-categories#termset`,name:'ALO186 elektrik ürün kategorileri',hasDefinedTerm:categoryNodes.map(node=>({'@id':node['@id']}))},
+      itemList,...categoryNodes,...brands,...active.map(productNode)
+    ];
+    return {'@context':'https://schema.org','@graph':graph};
+  }
+
+  return {affiliateTag,verifiedAt,verificationMaxAgeDays,categories,products,getCategory,productsFor,verificationStatus,amazonProductUrl,amazonSearchUrl,searchUrl,productId,productNode,knowledgeGraph};
 });
