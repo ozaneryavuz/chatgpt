@@ -3,6 +3,11 @@
   "generatedAt": "2026-07-29",
   "routes": [
     {
+      "source": "alo186/hesaplama/elektrik-planim/index.html",
+      "canonicalPath": "/hesaplama/elektrik-planim/",
+      "type": "calculator"
+    },
+    {
       "source": "alo186/urun-rehberleri/index.html",
       "canonicalPath": "/urun-rehberleri/",
       "type": "commerce-collection"
