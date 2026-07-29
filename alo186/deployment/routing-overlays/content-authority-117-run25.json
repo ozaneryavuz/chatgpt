@@ -1,0 +1,21 @@
+{
+  "version": 52,
+  "generatedAt": "2026-07-29",
+  "routes": [
+    {
+      "source": "alo186/haberler/harmonik-thd-tdd-pcc-olcum-farki/index.html",
+      "canonicalPath": "/haberler/harmonik-thd-tdd-pcc-olcum-farki",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ges-pid-potansiyel-kaynakli-degradasyon-nasil-anlasilir/index.html",
+      "canonicalPath": "/haberler/ges-pid-potansiyel-kaynakli-degradasyon-nasil-anlasilir",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/kacak-akim-rolesi-acma-suresi-rampa-testi-nasil-olculur/index.html",
+      "canonicalPath": "/haberler/kacak-akim-rolesi-acma-suresi-rampa-testi-nasil-olculur",
+      "type": "article"
+    }
+  ]
+}
