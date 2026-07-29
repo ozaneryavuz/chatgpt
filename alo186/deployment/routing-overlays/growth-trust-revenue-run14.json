@@ -1,0 +1,40 @@
+{
+  "version": 59,
+  "name": "ALO186 extension cord, emergency lighting lifecycle and voltage quality evidence run14",
+  "routes": [
+    {
+      "canonicalPath": "/hesaplama/uzatma-kablosu-kablo-makarasi-uygunluk/",
+      "source": "alo186/hesaplama/uzatma-kablosu-kablo-makarasi-uygunluk/index.html",
+      "type": "calculator",
+      "intent": "extension cord and cable reel load, voltage drop, label, earthing and environment qualification",
+      "affiliatePolicy": "qualified_extension_cord_category_after_full_safety_gate"
+    },
+    {
+      "canonicalPath": "/hesaplama/acil-aydinlatma-test-bakim-gunlugu/",
+      "source": "alo186/hesaplama/acil-aydinlatma-test-bakim-gunlugu/index.html",
+      "type": "calculator",
+      "intent": "emergency lighting function, duration, maintenance and confirmed replacement lifecycle journal",
+      "affiliatePolicy": "portable_only_after_failed_retest_fixed_system_professional_only"
+    },
+    {
+      "canonicalPath": "/hesaplama/gerilim-olayi-edas-olcum-talebi/",
+      "source": "alo186/hesaplama/gerilim-olayi-edas-olcum-talebi/index.html",
+      "type": "business-tool",
+      "intent": "voltage quality event evidence, distribution company measurement request and local source separation",
+      "affiliatePolicy": "none_official_and_professional_handoff_only"
+    }
+  ],
+  "trust": {
+    "rawPersonalDataCollected": false,
+    "directAffiliateLinksAdded": 0,
+    "unverifiedCommercialFieldsUsed": [],
+    "noBuyOutcomePreserved": true,
+    "affiliateDisclosureRequired": true,
+    "officialApprovalClaimed": false,
+    "emergencyCommerceClosed": true,
+    "emergencyLightingJournalTtlDays": 540,
+    "voltageEventJournalTtlDays": 365,
+    "qualifiedAffiliateFlows": ["extension_cord_after_tool", "portable_emergency_light_after_failed_retest"],
+    "professionalAndOfficialFlows": ["fixed_emergency_lighting_acceptance", "distribution_company_voltage_quality_measurement", "power_quality_logging"]
+  }
+}
