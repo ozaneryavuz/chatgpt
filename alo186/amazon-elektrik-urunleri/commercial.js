@@ -4,6 +4,7 @@
   const catalog = window.Alo186ProductCatalog;
   const body = document.body;
   const categoryId = body ? body.dataset.category : '';
+  const professionalOnly = Boolean(body && body.dataset.commercialScope === 'professional-only');
   const escapeHtml = (value) => String(value ?? '').replace(/[&<>"]/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char]));
   const escapeAttr = (value) => escapeHtml(value).replace(/'/g, '&#39;');
   const disclosureSuffix = ' Nitelikli satın alımlardan komisyon kazanılabilir; kullanıcıya ek maliyet yansımaz. Fiyat, stok, satıcı, teslimat, puan ve garanti yalnız Amazon’un güncel sayfasında doğrulanır.';
@@ -13,6 +14,7 @@
   }
 
   function normalizeDisclosures() {
+    if (professionalOnly) return;
     document.querySelectorAll('.affiliate-disclosure').forEach((element) => {
       const current = element.textContent.toLocaleLowerCase('tr-TR');
       const missingCost = !current.includes('kullanıcıya ek maliyet yansımaz');
