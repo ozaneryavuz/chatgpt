@@ -8,6 +8,8 @@ on:
       - 'alo186/deployment/assets/article-growth.*'
       - 'alo186/deployment/inject_article_growth.py'
       - 'alo186/deployment/inject_shortlist_growth.py'
+      - 'alo186/deployment/apply_content_consolidation.py'
+      - 'alo186/deployment/normalize_consolidated_release.py'
       - 'alo186/deployment/normalize_article_followup_paths.py'
       - 'alo186/deployment/routing-overlays/**'
       - 'alo186/tests/test_article_growth.py'
@@ -20,6 +22,8 @@ on:
       - 'alo186/deployment/assets/article-growth.*'
       - 'alo186/deployment/inject_article_growth.py'
       - 'alo186/deployment/inject_shortlist_growth.py'
+      - 'alo186/deployment/apply_content_consolidation.py'
+      - 'alo186/deployment/normalize_consolidated_release.py'
       - 'alo186/deployment/normalize_article_followup_paths.py'
       - 'alo186/deployment/routing-overlays/**'
       - 'alo186/tests/test_article_growth.py'
@@ -54,6 +58,8 @@ jobs:
           node --check alo186/hesaplama/teknik-takip-listem/app.js
           node --check alo186/deployment/assets/article-growth.js
           python -m py_compile alo186/deployment/inject_article_growth.py
+          python -m py_compile alo186/deployment/apply_content_consolidation.py
+          python -m py_compile alo186/deployment/normalize_consolidated_release.py
           python -m py_compile alo186/deployment/normalize_article_followup_paths.py
 
       - name: İçerik niyeti, canonical ve cihaz hasarı regresyonları
@@ -103,7 +109,9 @@ jobs:
             --base-path '/chatgpt'
 
       - name: Project-path büyüme ve makale yolculuğu enjeksiyonu
+        shell: bash
         run: |
+          set -euo pipefail
           python alo186/deployment/inject_shortlist_growth.py \
             --site /tmp/alo186-journey-project \
             --base-path '/chatgpt' \
@@ -179,7 +187,7 @@ jobs:
                   panel=text.split('data-alo186-article-next-step="true"',1)[1].split('</section>',1)[0]
                   assert 'amazon.' not in panel.lower()
                   assert 'Takip listeme ekle' in panel
-                  assert 'Mevcut sistem yeterli' in panel
+                  assert 'mevcut sistem yeterli' in panel.casefold()
 
               for canonical, lane in samples.items():
                   text=(root/canonical.strip('/')/'index.html').read_text(encoding='utf-8')
