@@ -1,0 +1,21 @@
+{
+  "version": 71,
+  "generatedAt": "2026-07-29",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/usb-c-sarj-zinciri-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/usb-c-sarj-zinciri-uygunluk/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/usb-c-urun-kabul-testi/index.html",
+      "canonicalPath": "/hesaplama/usb-c-urun-kabul-testi/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/urun-bilgi-grafigi/usb-c-ekosistemi/index.html",
+      "canonicalPath": "/urun-bilgi-grafigi/usb-c-ekosistemi/",
+      "type": "commerce-guide"
+    }
+  ]
+}

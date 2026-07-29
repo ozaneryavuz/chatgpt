@@ -1,0 +1,145 @@
+name: ALO186 USB-C güvenli büyüme ve gelir döngüsü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/usb-c-sarj-zinciri-uygunluk/**'
+      - 'alo186/hesaplama/usb-c-urun-kabul-testi/**'
+      - 'alo186/urun-bilgi-grafigi/usb-c-ekosistemi/**'
+      - 'alo186/deployment/inject_growth_run20.py'
+      - 'alo186/deployment/routing-overlays/growth-trust-revenue-run20.json'
+      - 'alo186/tests/test_growth_run20.py'
+      - '.github/workflows/alo186-growth-run20.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/usb-c-sarj-zinciri-uygunluk/**'
+      - 'alo186/hesaplama/usb-c-urun-kabul-testi/**'
+      - 'alo186/urun-bilgi-grafigi/usb-c-ekosistemi/**'
+      - 'alo186/deployment/inject_growth_run20.py'
+      - 'alo186/deployment/routing-overlays/growth-trust-revenue-run20.json'
+      - 'alo186/tests/test_growth_run20.py'
+      - '.github/workflows/alo186-growth-run20.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-growth-run20-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Routing, gizlilik, affiliate ve satın almama sözleşmeleri
+        run: python alo186/tests/test_growth_run20.py
+
+      - name: Inline JavaScript ve Python sözdizimi
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import re
+          from pathlib import Path
+          paths=[
+            Path('alo186/hesaplama/usb-c-sarj-zinciri-uygunluk/index.html'),
+            Path('alo186/hesaplama/usb-c-urun-kabul-testi/index.html'),
+          ]
+          for index,path in enumerate(paths):
+              text=path.read_text(encoding='utf-8')
+              scripts=re.findall(r'<script(?![^>]+type=["\']application/ld\+json["\'])[^>]*>(.*?)</script>',text,re.I|re.S)
+              assert len(scripts)==1,(path,len(scripts))
+              Path(f'/tmp/run20-{index}.js').write_text(scripts[0],encoding='utf-8')
+          PY
+          node --check /tmp/run20-0.js
+          node --check /tmp/run20-1.js
+          python -m py_compile alo186/deployment/inject_growth_run20.py
+
+      - name: Affiliate Knowledge Graph ve mevcut güven regresyonları
+        run: |
+          node alo186/tests/test_affiliate_knowledge_graph.js
+          node alo186/tests/test_product_matcher.js
+          node alo186/tests/test_trust_revenue_conversion.js
+          python alo186/tests/test_content_intent_consolidation.py
+          python alo186/tests/device_damage_deadline_guard.py
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+
+      - name: Canonical üretim paketini oluştur
+        run: |
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-run20-canonical --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-run20-canonical
+
+      - name: Custom-domain ve project-path artifactlarını hazırla
+        shell: bash
+        run: |
+          set -euo pipefail
+          for spec in 'custom|' 'project|/chatgpt'; do
+            name="${spec%%|*}"
+            base="${spec#*|}"
+            target="/tmp/alo186-run20-${name}"
+            cp -a /tmp/alo186-run20-canonical "$target"
+            python alo186/deployment/prepare_github_pages.py --site "$target" --base-path "$base" --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
+            python alo186/deployment/inject_outcome_runtime.py --site "$target" --base-path "$base"
+            python alo186/deployment/inject_shortlist_growth.py --site "$target" --base-path "$base" > "/tmp/run20-${name}-base.json"
+            python alo186/deployment/inject_growth_run20.py --site "$target" --base-path "$base" > "/tmp/run20-${name}.json"
+            python alo186/deployment/smoke_github_pages.py --site "$target" --base-path "$base"
+          done
+
+      - name: Artifact keşif, base-path ve ticari güven kabulü
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          routes=[
+            '/hesaplama/usb-c-sarj-zinciri-uygunluk/',
+            '/hesaplama/usb-c-urun-kabul-testi/',
+            '/urun-bilgi-grafigi/usb-c-ekosistemi/',
+          ]
+          targets=['hesaplama/index.html','elektrik-portali/index.html','akilli-urun-secimi/index.html','amazon-elektrik-urunleri/index.html','urun-bilgi-grafigi/index.html','index.html']
+          for root,prefix in [(Path('/tmp/alo186-run20-custom'),''),(Path('/tmp/alo186-run20-project'),'/chatgpt')]:
+              sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
+              search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
+              entries={item['canonicalPath']:item for item in search['entries']}
+              sw=(root/'sw.js').read_text(encoding='utf-8')
+              for route in routes:
+                  expected=prefix+route if prefix else route
+                  assert (root/route.strip('/')/'index.html').is_file(),route
+                  assert f'https://www.alo186.com{route}' in sitemap
+                  assert route in entries and entries[route]['url']==expected
+                  assert expected in sw
+              for relative in targets:
+                  text=(root/relative).read_text(encoding='utf-8')
+                  assert 'data-alo186-growth-run20-entry="true"' in text,relative
+              release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))['growthRun20']
+              assert release['directAffiliateLinksAdded']==0
+              assert release['hazardCommerceClosed'] is True
+              assert release['firstFailureCommerceClosed'] is True
+              assert release['existingEquipmentNoBuyPreserved'] is True
+              assert release['unverifiedCommercialFieldsUsed']==[]
+              manifest=json.loads((root/'manifest.webmanifest').read_text(encoding='utf-8'))
+              urls={item.get('url') for item in manifest.get('shortcuts',[]) if isinstance(item,dict)}
+              for route in routes: assert (prefix+route if prefix else route) in urls
+          PY
+
+      - name: Doğrulanmış USB-C büyüme artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-usbc-decision-loop-pages
+          path: /tmp/alo186-run20-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
