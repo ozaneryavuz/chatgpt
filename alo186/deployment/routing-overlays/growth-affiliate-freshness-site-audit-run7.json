@@ -1,0 +1,21 @@
+{
+  "version": 47,
+  "generatedAt": "2026-07-29",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/satin-alma-oncesi-teknik-uygunluk-makbuzu/index.html",
+      "canonicalPath": "/hesaplama/satin-alma-oncesi-teknik-uygunluk-makbuzu/",
+      "type": "tool"
+    },
+    {
+      "source": "alo186/icerik-guncellik-merkezi/index.html",
+      "canonicalPath": "/icerik-guncellik-merkezi/",
+      "type": "collection"
+    },
+    {
+      "source": "alo186/hizmetler/site-villa-elektrik-guvenligi-ev-altyapi-denetimi/index.html",
+      "canonicalPath": "/hizmetler/site-villa-elektrik-guvenligi-ev-altyapi-denetimi/",
+      "type": "service"
+    }
+  ]
+}
