@@ -10,7 +10,7 @@ const catalog = require(path.join(productRoot, 'catalog.js'));
 const conversion = require(path.join(productRoot, 'conversion-growth-core.js'));
 const retention = require(path.join(productRoot, 'journey-retention-core.js'));
 
-assert.equal(catalog.categories.length, 16, 'Ürün merkezi 16 kullanıcı niyetini korumalı.');
+assert.equal(catalog.categories.length, 18, 'Ürün merkezi 18 kullanıcı niyetini korumalı.');
 const coCategory = catalog.getCategory('co_alarm');
 assert(coCategory, 'CO alarmı güvenlik niyeti katalogda bulunmalı.');
 assert.equal(coCategory.affiliatePolicy, 'after_tool');
@@ -22,9 +22,10 @@ assert.match(extensionCategory.nextStepUrl, /uzatma-kablosu-kablo-makarasi-uygun
 assert.equal(catalog.productsFor('extension_cord').length, 0, 'Uzatma kablosunda doğrulanmış ürün olmadan doğrudan kart açılamaz.');
 const chargerCategory = catalog.getCategory('usb_c_charger');
 const cableCategory = catalog.getCategory('usb_c_cable');
-assert(chargerCategory&&cableCategory, 'USB-C şarj cihazı ve kablo niyetleri katalogda bulunmalı.');
-assert.equal(chargerCategory.affiliatePolicy, 'verified_direct');
-assert.equal(cableCategory.affiliatePolicy, 'verified_direct');
+const hubCategory = catalog.getCategory('usb_c_hub');
+const displayCategory = catalog.getCategory('display_cable');
+assert(chargerCategory&&cableCategory&&hubCategory&&displayCategory, 'USB-C şarj, kablo, hub ve görüntü niyetleri katalogda bulunmalı.');
+for(const category of [chargerCategory,cableCategory,hubCategory,displayCategory])assert.equal(category.affiliatePolicy, 'verified_direct');
 
 const evQuery = conversion.buildQuery('ev_cable', { current: '32', phase: 'three', length: '7_5' });
 assert.match(evQuery, /Type 2/i);
@@ -36,22 +37,10 @@ const evUrl = conversion.buildAffiliateUrl('ev_cable', { current: '32', phase: '
 assert.match(evUrl, /^https:\/\/www\.amazon\.com\.tr\/s\?k=/);
 assert.equal(new URL(evUrl).searchParams.get('tag'), catalog.affiliateTag);
 
-assert.deepEqual(
-  conversion.gateStatus('ev_cable', { toolConfirmed: false, existingInsufficient: true, affiliateAccepted: true }),
-  { allowed: false, reason: 'tool_not_confirmed' }
-);
-assert.deepEqual(
-  conversion.gateStatus('ev_cable', { toolConfirmed: true, existingInsufficient: false, affiliateAccepted: true }),
-  { allowed: false, reason: 'existing_may_be_sufficient' }
-);
-assert.deepEqual(
-  conversion.gateStatus('ev_cable', { toolConfirmed: true, existingInsufficient: true, affiliateAccepted: false }),
-  { allowed: false, reason: 'affiliate_not_accepted' }
-);
-assert.deepEqual(
-  conversion.gateStatus('ev_cable', { toolConfirmed: true, existingInsufficient: true, affiliateAccepted: true }),
-  { allowed: true, reason: 'qualified_search' }
-);
+assert.deepEqual(conversion.gateStatus('ev_cable', { toolConfirmed: false, existingInsufficient: true, affiliateAccepted: true }),{ allowed: false, reason: 'tool_not_confirmed' });
+assert.deepEqual(conversion.gateStatus('ev_cable', { toolConfirmed: true, existingInsufficient: false, affiliateAccepted: true }),{ allowed: false, reason: 'existing_may_be_sufficient' });
+assert.deepEqual(conversion.gateStatus('ev_cable', { toolConfirmed: true, existingInsufficient: true, affiliateAccepted: false }),{ allowed: false, reason: 'affiliate_not_accepted' });
+assert.deepEqual(conversion.gateStatus('ev_cable', { toolConfirmed: true, existingInsufficient: true, affiliateAccepted: true }),{ allowed: true, reason: 'qualified_search' });
 assert.equal(conversion.gateStatus('generator', {}).reason, 'professional_only');
 assert.equal(conversion.getProfile('outlet_tester'), null);
 assert.equal(conversion.getProfile('co_alarm'), null, 'CO alarmı yalnız özel güvenlik aracı sonrasında değerlendirilmelidir.');
@@ -65,10 +54,7 @@ assert.match(professionalRoute, /problem=backup/);
 assert.match(professionalRoute, /backup=generator/);
 assert.match(professionalRoute, /scope=comparison/);
 
-const review = retention.normalizeReview(
-  { category: 'surge_strip', reason: 'catalog_refresh', reviewDays: 30, createdAt: '2026-07-28' },
-  new Date('2026-07-28T12:00:00Z')
-);
+const review = retention.normalizeReview({ category: 'surge_strip', reason: 'catalog_refresh', reviewDays: 30, createdAt: '2026-07-28' },new Date('2026-07-28T12:00:00Z'));
 assert.equal(review.reviewDate, '2026-08-27');
 const ics = retention.buildReviewIcs(review, { origin: 'https://www.alo186.com' });
 assert.match(ics, /BEGIN:VCALENDAR/);
@@ -112,14 +98,9 @@ for (const text of [conversionUi, conversionCore, retentionUi]) {
   assert.doesNotMatch(text, /priceCurrency|availability|aggregateRating/i);
 }
 
-const cleanEvent = conversion.sanitizeEvent({
-  category: 'ev_cable',
-  status: 'opened',
-  placement: 'qualified_search',
-  email: 'blocked@example.com'
-});
+const cleanEvent = conversion.sanitizeEvent({category: 'ev_cable',status: 'opened',placement: 'qualified_search',email: 'blocked@example.com'});
 assert.deepEqual(cleanEvent, { category: 'ev_cable', status: 'opened', placement: 'qualified_search' });
 assert.equal(conversion.hasForbiddenEventData({ category: 'ev_cable', email: 'blocked@example.com' }), true);
 assert.equal(conversion.hasForbiddenEventData({ category: 'ev_cable', status: 'opened' }), false);
 
-console.log('ALO186 güvenli gelir dönüşümü: 16 niyet, USB-C doğrudan ürünleri, uzatma kablosu/CO güvenlik kapıları, teknik arama, satın almama, profesyonel rota, ICS ve PII korumaları başarılı.');
+console.log('ALO186 güvenli gelir dönüşümü: 18 niyet, USB-C hub/görüntü doğrudan ürünleri, uzatma kablosu/CO güvenlik kapıları, teknik arama, satın almama, profesyonel rota, ICS ve PII korumaları başarılı.');
