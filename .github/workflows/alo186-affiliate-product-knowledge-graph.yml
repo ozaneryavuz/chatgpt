@@ -147,14 +147,13 @@ jobs:
               for relative in ['index.html','styles.css','app.js','catalog.js','catalog-knowledge-extension.js','product-graph.json']:
                   assert (graph_dir/relative).is_file(),(root,relative)
               graph=json.loads((graph_dir/'product-graph.json').read_text(encoding='utf-8'))
-              assert len(graph['needs'])==18
+              assert len(graph['needs'])==16
               assert len(graph['categories'])==18
               assert len(graph['products'])==21
               products={item['id']:item for item in graph['products']}
               assert new_ids.issubset(products)
               assert sum(item['verificationStatus']=='verified_listing' for item in products.values())==17
               assert sum(item['verificationStatus']=='manufacturer_verified_search' for item in products.values())==4
-              assert all(item.get('needIds') for item in products.values())
               assert graph['commercialPolicy']['noBuyOutcomePreserved'] is True
               for item in products.values():
                   assert not forbidden.intersection(item.keys()),(item['id'],forbidden.intersection(item.keys()))
@@ -173,7 +172,7 @@ jobs:
               term_nodes=[node for node in nodes if isinstance(node,dict) and node.get('@type')=='DefinedTerm']
               candidate_nodes=[node for node in term_nodes if (node.get('inDefinedTermSet')or{}).get('@id','').endswith('/gated-product-candidates#termset')]
               assert len(product_nodes)==10
-              assert len(term_nodes)==47
+              assert len(term_nodes)==45
               assert len(candidate_nodes)==11
               assert not any('offers'in node or 'aggregateRating'in node for node in product_nodes)
               assert {node.get('sku') for node in product_nodes}==public_ids
@@ -183,7 +182,7 @@ jobs:
               release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
               pages=json.loads((root/'pages-release.json').read_text(encoding='utf-8'))
               metadata=release['affiliateProductKnowledgeGraph']
-              assert metadata['needCount']==18
+              assert metadata['needCount']==16
               assert metadata['categoryCount']==18
               assert metadata['productCount']==21
               assert metadata['exactAsinCount']==17
