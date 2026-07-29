@@ -73,7 +73,8 @@ def main() -> None:
 
     assert "DefinedTermSet" in graph
     assert "usb_c_charger" in graph and "usb_c_cable" in graph and "powerbank" in graph
-    assert "Cihaz, protokol, adaptör, kablo ve powerbank" in graph
+    for visible_node in ["1. Cihaz", "2. Protokol", "3. Adaptör", "4. Kablo", "5. Powerbank"]:
+        assert visible_node in graph, visible_node
     assert "Mevcut zinciri test edin" in graph
     assert "amazon.com.tr" not in graph.casefold()
 
