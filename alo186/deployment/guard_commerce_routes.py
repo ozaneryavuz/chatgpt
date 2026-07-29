@@ -16,6 +16,16 @@ AFFILIATE_HOSTS = {
 REQUIRED_REL = {"sponsored", "nofollow", "noopener"}
 DISCLOSURE_PATTERN = re.compile(r"satış\s+ortaklığı|affiliate|nitelikli\s+satın\s+alımlardan\s+komisyon", re.I)
 QUALIFIED_GATE_MARKER = 'data-alo186-affiliate-gate="qualified"'
+DYNAMIC_GATE_PANEL_PATTERN = re.compile(
+    r"<(?:section|div)\b(?=[^>]*\bid=(?:['\"])affiliatePanel\1)"
+    r"(?=[^>]*\bclass=(?:['\"])[^'\"]*\bhidden\b[^'\"]*(?:['\"]))[^>]*>",
+    re.I,
+)
+DYNAMIC_GATE_ACK_PATTERN = re.compile(
+    r"<input\b(?=[^>]*\bid=(?:['\"])affiliateAck\1)"
+    r"(?=[^>]*\btype=(?:['\"])checkbox\2)[^>]*>",
+    re.I,
+)
 HIGH_RISK_PATTERN = re.compile(
     r"\b(?:rccb|rcbo|mcb|kaçak\s+akım\s+rölesi|parafudr|\bspd\b|gerilim\s+koruma\s+rölesi|"
     r"kontaktör|sigorta|dağıtım\s+panosu|wallbox|jeneratör|transfer\s+şalteri|inverter\s+batarya|"
@@ -39,12 +49,22 @@ def text_only(value: str) -> str:
     return re.sub(r"\s+", " ", unescape(re.sub(r"<[^>]+>", " ", value))).strip()
 
 
+def has_runtime_qualified_gate(html: str, affiliate_attrs: dict[str, str]) -> bool:
+    """Statik marker yoksa gerçek kapalı/izinli runtime kapısının bütün parçalarını doğrula."""
+
+    return (
+        affiliate_attrs.get("aria-disabled", "").casefold() == "true"
+        and affiliate_attrs.get("tabindex") == "-1"
+        and bool(DYNAMIC_GATE_PANEL_PATTERN.search(html))
+        and bool(DYNAMIC_GATE_ACK_PATTERN.search(html))
+    )
+
+
 def scan_html(path: Path, site: Path) -> list[str]:
     html = path.read_text(encoding="utf-8", errors="ignore")
     relative = path.relative_to(site).as_posix()
     errors: list[str] = []
     has_disclosure = bool(DISCLOSURE_PATTERN.search(text_only(html)))
-    has_qualified_gate = QUALIFIED_GATE_MARKER in html
 
     for match in ANCHOR_PATTERN.finditer(html):
         attrs = attributes(match.group("attrs"))
@@ -58,8 +78,12 @@ def scan_html(path: Path, site: Path) -> list[str]:
             errors.append(f"{relative}: affiliate bağlantısında eksik rel tokenları: {', '.join(sorted(missing_rel))}")
         if not has_disclosure:
             errors.append(f"{relative}: affiliate bağlantısı var fakat görünür satış ortaklığı açıklaması yok")
+
+        has_qualified_gate = QUALIFIED_GATE_MARKER in html or has_runtime_qualified_gate(html, attrs)
         if not has_qualified_gate:
-            errors.append(f"{relative}: statik mağaza bağlantısı nitelikli affiliate kapısı işareti olmadan yayımlanamaz")
+            errors.append(
+                f"{relative}: statik mağaza bağlantısı nitelikli affiliate kapısı veya kapalı runtime izin akışı olmadan yayımlanamaz"
+            )
 
         start = max(0, match.start() - 900)
         end = min(len(html), match.end() + 900)
@@ -107,7 +131,10 @@ def validate_site(site: Path) -> dict:
         "ok": not errors,
         "htmlFileCount": len(list(site.rglob("*.html"))),
         "legacyAlias": "/amazon-elektrik-urunleri -> /akilli-urun-secimi",
-        "staticAffiliatePolicy": "qualified-gate + visible-disclosure + sponsored-nofollow-noopener; high-risk direct links forbidden",
+        "staticAffiliatePolicy": (
+            "qualified marker or disabled runtime consent gate + visible disclosure + "
+            "sponsored-nofollow-noopener; high-risk direct links forbidden"
+        ),
         "errorCount": len(errors),
         "errors": errors,
     }
