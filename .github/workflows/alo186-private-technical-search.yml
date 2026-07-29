@@ -8,6 +8,7 @@ on:
       - 'alo186/deployment/inject_shortlist_growth.py'
       - 'alo186/deployment/apply_content_consolidation.py'
       - 'alo186/deployment/content-consolidations.json'
+      - 'alo186/deployment/smoke_github_pages.py'
       - 'alo186/deployment/routing-manifest.json'
       - 'alo186/deployment/routing-overlays/**'
       - 'alo186/tests/test_private_technical_search.py'
@@ -20,6 +21,7 @@ on:
       - 'alo186/deployment/inject_shortlist_growth.py'
       - 'alo186/deployment/apply_content_consolidation.py'
       - 'alo186/deployment/content-consolidations.json'
+      - 'alo186/deployment/smoke_github_pages.py'
       - 'alo186/deployment/routing-manifest.json'
       - 'alo186/deployment/routing-overlays/**'
       - 'alo186/tests/test_private_technical_search.py'
@@ -57,6 +59,7 @@ jobs:
           node --check alo186/arama/core.js
           node --check alo186/arama/app.js
           python -m py_compile alo186/deployment/inject_private_search.py
+          python -m py_compile alo186/deployment/smoke_github_pages.py
 
       - name: Canonical, içerik niyeti ve cihaz hasarı regresyonları
         run: |
