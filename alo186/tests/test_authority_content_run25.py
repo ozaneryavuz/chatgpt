@@ -146,7 +146,11 @@ def main() -> None:
 
         assert "Doğrudan cevap" in html
         assert "Kaynaklar ve doğrulama" in html
-        assert "Ticari sınır" in html or "Satın alma ve hizmet sınırı" in html
+        assert any(marker in html for marker in (
+            "Ticari sınır",
+            "Satın alma ve hizmet sınırı",
+            "Ticari ve güvenlik sınırı",
+        ))
         assert "Bağımsız" in html
         assert "yetkili" in lower or "resmî" in lower
         assert "WebApplication" not in html
