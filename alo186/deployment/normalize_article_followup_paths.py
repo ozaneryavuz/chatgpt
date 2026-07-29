@@ -10,6 +10,8 @@ MARKER = 'data-alo186-article-next-step="true"'
 ARTICLE_ROOT = "/haberler/"
 DATA_PATH_PATTERN = re.compile(r'data-path=(["\'])(?:/chatgpt)?(/haberler/[^"\']+)\1', re.I)
 ROOT_REFERENCE_PATTERN = re.compile(r'(["\'])/haberler/[^"\'\s<>]*', re.I)
+NO_BUY_SOURCE = "tamamlayın; mevcut sistem yeterli"
+NO_BUY_TARGET = "tamamlayın. Mevcut sistem yeterli"
 
 
 def normalize_base_path(value: str) -> str:
@@ -53,6 +55,7 @@ def run(site: Path, base_path: str = "") -> dict:
             continue
         checked += 1
         original = text
+        text = text.replace(NO_BUY_SOURCE, NO_BUY_TARGET)
         text = normalize_data_paths(text, base_path)
         if text != original:
             path.write_text(text, encoding="utf-8")
@@ -75,6 +78,7 @@ def run(site: Path, base_path: str = "") -> dict:
         "updatedPages": updated,
         "remainingRootReferences": 0,
         "checksumsRecomputed": True,
+        "noBuySentenceNormalized": True,
     }
 
 
