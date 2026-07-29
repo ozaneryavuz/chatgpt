@@ -43,14 +43,18 @@ def public_url(base_path: str, route: str) -> str:
 
 
 def canonical_route_path(value: str, base_path: str) -> str:
-    raw = "/" + str(value or "").strip().strip("/")
+    text = str(value or "").strip()
+    trailing_slash = text.endswith("/") and text != "/"
+    raw = "/" + text.strip("/")
     if raw == "/":
         return raw
     if base_path:
         if raw == base_path:
             return "/"
         if raw.startswith(base_path + "/"):
-            return raw[len(base_path) :]
+            raw = raw[len(base_path) :]
+    if trailing_slash and raw != "/" and not raw.endswith("/"):
+        raw += "/"
     return raw
 
 
