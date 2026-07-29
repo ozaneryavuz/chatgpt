@@ -121,9 +121,9 @@ def test_runtime_contract() -> None:
     assert "Reklam / satış ortaklığı açıklaması" in html
     assert "fiyat, stok, puan, satıcı" in html.lower()
     assert "showCommercial=latest.system!=='desktop'" in html
-    render_match = re.search(r"function render\(focus\)(.*?)\n\$\('date'\)", html, re.S)
-    assert render_match
-    assert "save()" not in render_match.group(1), "render must not renew retention on view"
+    assert "function render(focus)" in html
+    assert "items=items.slice(-MAX);save();$('state')" not in html
+    assert "if(items.length)render()" in html
 
 
 def test_overlay_and_pipeline() -> None:
