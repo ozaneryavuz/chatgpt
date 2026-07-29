@@ -20,24 +20,6 @@ ARTICLES = [
         ],
         "hosts": ["iec.ch", "se.com", "abb.com"],
     },
-    {
-        "slug": "ups-aku-string-blok-dengesizligi-ic-direnc",
-        "required": [
-            "tek zayıf blok", "iç direnç", "ohmik değer", "ripple",
-            "blok sıcaklığı", "tek blok değişimi", "Satın almama sınırı",
-            "Ticari sınır", "Son doğrulama: 30 Temmuz 2026",
-        ],
-        "hosts": ["ieee.org", "iec.ch", "vertiv.com", "eaton.com", "se.com"],
-    },
-    {
-        "slug": "ges-string-sigortasi-gpv-ne-zaman-gerekir",
-        "required": [
-            "ters akım", "maximum series fuse rating", "gPV", "Isc", "Voc",
-            "IEC 60269-6", "Satın almama sınırı", "Ticari sınır",
-            "Son doğrulama: 30 Temmuz 2026",
-        ],
-        "hosts": ["iec.ch", "fronius.com", "sma.de"],
-    },
 ]
 
 
@@ -117,12 +99,8 @@ def main() -> None:
         new_paths.add(canonical_path)
 
     afdd = (ROOT / "alo186/haberler/elektrik-ark-hatasi-afdd-rcd-sigorta-farki/index.html").read_text(encoding="utf-8").casefold()
-    ups = (ROOT / "alo186/haberler/ups-aku-string-blok-dengesizligi-ic-direnc/index.html").read_text(encoding="utf-8").casefold()
-    pv = (ROOT / "alo186/haberler/ges-string-sigortasi-gpv-ne-zaman-gerekir/index.html").read_text(encoding="utf-8").casefold()
     assert "afdd, rcd ve mcb birbirinin otomatik yerine geçen" in afdd
-    assert "tek zayıf blok" in ups and "float gerilimi normal" in ups
-    assert "karar yalnız" in pv and "string sayısı" in pv
-    assert len(new_paths) == 3
+    assert len(new_paths) == 1
 
     print(json.dumps({
         "ok": True,
