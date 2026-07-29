@@ -28,6 +28,26 @@ def html_text(html: str, tag: str) -> str:
     return unescape(re.sub(r"<[^>]+>", " ", match.group(1)))
 
 
+def meta_description(html: str) -> str:
+    match = re.search(
+        r'<meta\b(?=[^>]*\bname=["\']description["\'])(?=[^>]*\bcontent=["\']([^"\']*)["\'])[^>]*>',
+        html,
+        re.I,
+    )
+    return unescape(match.group(1)) if match else ""
+
+
+def class_text(html: str, class_name: str) -> str:
+    match = re.search(
+        fr'<[^>]+\bclass=["\'][^"\']*\b{re.escape(class_name)}\b[^"\']*["\'][^>]*>(.*?)</[^>]+>',
+        html,
+        re.I | re.S,
+    )
+    if not match:
+        return ""
+    return unescape(re.sub(r"<[^>]+>", " ", match.group(1)))
+
+
 def normalized_tokens(value: str) -> set[str]:
     normalized = unicodedata.normalize("NFKD", value.casefold())
     normalized = "".join(char for char in normalized if not unicodedata.combining(char))
@@ -47,12 +67,23 @@ def article_signature(source: str) -> dict:
     html = path.read_text(encoding="utf-8")
     title = html_text(html, "title")
     h1 = html_text(html, "h1")
+    summary = " ".join(
+        value for value in (
+            title,
+            h1,
+            meta_description(html),
+            class_text(html, "lead"),
+            class_text(html, "answer"),
+        )
+        if value
+    )
     return {
         "source": source,
         "title": title,
         "h1": h1,
         "titleTokens": normalized_tokens(title),
         "h1Tokens": normalized_tokens(h1),
+        "summaryTokens": normalized_tokens(summary),
     }
 
 
@@ -62,6 +93,19 @@ def pair_score(left: dict, right: dict) -> tuple[float, int, str]:
     if h1_score >= title_score:
         return h1_score, h1_common, "h1"
     return title_score, title_common, "title"
+
+
+def declared_pair_matches(left: dict, right: dict) -> tuple[bool, str]:
+    headline_score, headline_common, field = pair_score(left, right)
+    if headline_score >= 0.50 and headline_common >= 3:
+        return True, f"{field}={headline_score:.2f}, ortak={headline_common}"
+
+    summary_score, summary_common = similarity(left["summaryTokens"], right["summaryTokens"])
+    matches = summary_score >= 0.22 and summary_common >= 8
+    return matches, (
+        f"{field}={headline_score:.2f}, ortak={headline_common}; "
+        f"özet={summary_score:.2f}, ortak={summary_common}"
+    )
 
 
 def main() -> None:
@@ -79,10 +123,10 @@ def main() -> None:
         assert alias_route["type"] == "article" and target_route["type"] == "article"
         alias_signature = article_signature(alias_route["source"])
         target_signature = article_signature(target_route["source"])
-        score, common, field = pair_score(alias_signature, target_signature)
-        assert score >= 0.50 and common >= 3, (
+        matches, evidence = declared_pair_matches(alias_signature, target_signature)
+        assert matches, (
             f"İlan edilen içerik birleştirmesi aynı arama niyetini doğrulamıyor: "
-            f"{item['aliasPath']} → {item['canonicalPath']} ({field}={score:.2f}, ortak={common})"
+            f"{item['aliasPath']} → {item['canonicalPath']} ({evidence})"
         )
 
     active_articles = [
