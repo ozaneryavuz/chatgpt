@@ -1,0 +1,21 @@
+{
+  "version": 41,
+  "generatedAt": "2026-07-29",
+  "routes": [
+    {
+      "source": "alo186/hizmetler/otel-elektrik-surekliligi-denetimi/index.html",
+      "canonicalPath": "/hizmetler/otel-elektrik-surekliligi-denetimi/",
+      "type": "service"
+    },
+    {
+      "source": "alo186/hizmetler/elektrik-teklif-teknik-inceleme/index.html",
+      "canonicalPath": "/hizmetler/elektrik-teklif-teknik-inceleme/",
+      "type": "service"
+    },
+    {
+      "source": "alo186/hizmetler/ges-batarya-ev-sarj-fizibilitesi/index.html",
+      "canonicalPath": "/hizmetler/ges-batarya-ev-sarj-fizibilitesi/",
+      "type": "service"
+    }
+  ]
+}
