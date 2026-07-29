@@ -1,0 +1,21 @@
+{
+  "version": 42,
+  "generatedAt": "2026-07-29",
+  "routes": [
+    {
+      "source": "alo186/haberler/ges-mc4-konnektor-farkli-marka-birlikte-kullanilir-mi/index.html",
+      "canonicalPath": "/haberler/ges-mc4-konnektor-farkli-marka-birlikte-kullanilir-mi",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ups-aku-ic-direnc-empedans-kapasite-testi-farki/index.html",
+      "canonicalPath": "/haberler/ups-aku-ic-direnc-empedans-kapasite-testi-farki",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/vpp-toplayicilik-sayac-telemetri-uzaktan-kontrol/index.html",
+      "canonicalPath": "/haberler/vpp-toplayicilik-sayac-telemetri-uzaktan-kontrol",
+      "type": "article"
+    }
+  ]
+}
