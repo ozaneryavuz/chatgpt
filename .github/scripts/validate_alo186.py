@@ -65,6 +65,23 @@ def referenced_ids(js_text: str) -> set[str]:
     return result
 
 
+def dynamically_declared_ids(js_text: str) -> set[str]:
+    """Return literal IDs created by page JavaScript before they are referenced.
+
+    Static pages may insert accessibility/status panels at runtime. Treat only literal
+    assignments and literal id attributes as declarations; computed values remain
+    fail-closed and must still exist in source HTML or be made explicit.
+    """
+    patterns = [
+        r"\.id\s*=\s*['\"]([^'\"]+)['\"]",
+        r"\bid\s*=\s*['\"]([^'\"]+)['\"]",
+    ]
+    result: set[str] = set()
+    for pattern in patterns:
+        result.update(re.findall(pattern, js_text))
+    return result
+
+
 def main() -> int:
     errors: list[str] = []
     pages = sorted(ROOT.rglob("index.html"))
@@ -93,7 +110,9 @@ def main() -> int:
 
         app = page.parent / "app.js"
         if app.exists():
-            missing = sorted(referenced_ids(app.read_text(encoding="utf-8")) - parser.ids)
+            js_text = app.read_text(encoding="utf-8")
+            available_ids = parser.ids | dynamically_declared_ids(js_text)
+            missing = sorted(referenced_ids(js_text) - available_ids)
             if missing:
                 errors.append(f"{relative}: app.js tarafından kullanılan id'ler HTML'de yok: {missing}")
 
