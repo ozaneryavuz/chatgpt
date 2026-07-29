@@ -11,11 +11,24 @@ PAGES = {
     "ev": ROOT / "alo186/hesaplama/apartman-site-ev-sarj-karar-paketi/index.html",
     "runtime": ROOT / "alo186/hesaplama/yedek-guc-runtime-saglik-gunlugu/index.html",
 }
+CORES = {
+    key: path.with_name("core.js") for key, path in PAGES.items()
+}
+APPS = {
+    key: path.with_name("app.js") for key, path in PAGES.items()
+}
 ROUTES = {
     "vpp": "/hesaplama/vpp-esnek-yuk-hazirlik/",
     "ev": "/hesaplama/apartman-site-ev-sarj-karar-paketi/",
     "runtime": "/hesaplama/yedek-guc-runtime-saglik-gunlugu/",
 }
+PRIVACY_TOKENS = {
+    "vpp": ("tesis adı", "adres", "sayaç numarası"),
+    "ev": ("adres", "malik/kullanıcı adı", "sayaç/abone numarası"),
+    "runtime": ("adres", "iletişim", "seri numarası"),
+}
+CANONICAL_FEASIBILITY = "/hizmetler/ges-batarya-ev-sarj-fizibilitesi/"
+LEGACY_FEASIBILITY = "/hizmetler/ges-batarya-ev-fizibilitesi/"
 
 
 def read(path: Path) -> str:
@@ -51,8 +64,12 @@ def test_pages() -> None:
         assert {"WebApplication", "FAQPage", "BreadcrumbList"} <= types(jsonld(html)), key
         assert "amazon.com" not in lower and "amzn." not in lower, key
         assert '"@type":"product"' not in lower and '"@type":"offer"' not in lower, key
-        assert "adres" in lower, key
+        for token in PRIVACY_TOKENS[key]:
+            assert token in lower, (key, token)
         assert "kişisel veri" in lower or "kişisel verisiz" in lower, key
+        assert '<script src="./core.js"></script>' in html, key
+        assert '<script src="./app.js"></script>' in html, key
+        assert CORES[key].is_file() and APPS[key].is_file(), key
     for key in ("vpp", "ev"):
         lower = read(PAGES[key]).lower()
         assert "resmî" in lower or "resmi" in lower, key
@@ -60,6 +77,8 @@ def test_pages() -> None:
 
 def test_vpp_contract() -> None:
     html = read(PAGES["vpp"])
+    core = read(CORES["vpp"])
+    combined = html + core + read(APPS["vpp"])
     for token in [
         "incomeEstimate:false",
         "aggregatorRanking:false",
@@ -68,14 +87,20 @@ def test_vpp_contract() -> None:
         "gelir garantisi",
         "teias.gov.tr",
         "30 günlük",
+        "assetRequired",
+        "Math.min(rawScore,8)",
     ]:
-        assert token in html, token
+        assert token in combined, token
     assert "toplayıcı sıralamaz" in html.lower()
-    assert "/hizmetler/ges-batarya-ev-fizibilitesi/" in html
+    assert CANONICAL_FEASIBILITY in html
+    assert LEGACY_FEASIBILITY not in html
 
 
 def test_ev_contract() -> None:
     html = read(PAGES["ev"])
+    core = read(CORES["ev"])
+    app = read(APPS["ev"])
+    combined = html + core + app
     for token in [
         "officialApproval:false",
         "managementDecision:false",
@@ -84,28 +109,42 @@ def test_ev_contract() -> None:
         "ayrı abonelik",
         "dinamik yük yönetimi",
         "45 günlük",
+        "MAX_SCORE=11",
+        "maxScore:MAX_SCORE",
     ]:
-        assert token in html, token
+        assert token in combined, token
     assert "doğrudan affiliate/mağaza yönlendirmesi yapılmaz" in html.lower()
     assert "/hesaplama/teknik-sartname-talep-paketi/" in html
+    assert CANONICAL_FEASIBILITY in html
+    assert LEGACY_FEASIBILITY not in html
 
 
 def test_runtime_contract() -> None:
     html = read(PAGES["runtime"])
+    core = read(CORES["runtime"])
+    app = read(APPS["runtime"])
+    combined = html + core + app
     for token in [
         "alo186.backupRuntimeJournal.v1",
-        "540*86400000",
-        "MAX=12",
+        "TTL_MS=540*86400000",
+        "MAX_RECORDS=12",
         "localStorage",
         "Mevcut ürünle devam",
         "satın almayın",
         "Affiliate ve yeni ürün yönlendirmesi bu sonuçta kapalıdır",
         "/amazon-elektrik-urunleri/modem-mini-ups-secimi",
         "/amazon-elektrik-urunleri/tasinabilir-guc-istasyonu-secimi",
+        "retentionMode:'per-record'",
+        "compareOrder(item,focus)<0",
+        "repeatedSignificantDrop",
+        "state:'confirmation_needed'",
+        "state:'repeated_drop'",
     ]:
-        assert token in html, token
+        assert token in combined, token
     assert "Reklam / satış ortaklığı açıklaması" in html
     assert "fiyat, stok, puan, satıcı" in html.lower()
+    assert "function render" in app and "persist();render(entry)" in app
+    assert "expiresAt:new Date(now+TTL_MS).toISOString()" in core
 
 
 def test_overlay_and_pipeline() -> None:
