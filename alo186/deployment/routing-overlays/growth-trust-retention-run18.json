@@ -1,0 +1,21 @@
+{
+  "version": 66,
+  "generatedAt": "2026-07-29",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/urun-guvenlik-duyurusu-kontrolu/index.html",
+      "canonicalPath": "/hesaplama/urun-guvenlik-duyurusu-kontrolu/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/urun-teknik-belge-pasaportu/index.html",
+      "canonicalPath": "/hesaplama/urun-teknik-belge-pasaportu/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/kesinti-kiti-donemsel-kontrolu/index.html",
+      "canonicalPath": "/hesaplama/kesinti-kiti-donemsel-kontrolu/",
+      "type": "calculator"
+    }
+  ]
+}
