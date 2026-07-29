@@ -6,9 +6,19 @@
   const categoryId = body ? body.dataset.category : '';
   const escapeHtml = (value) => String(value ?? '').replace(/[&<>"]/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char]));
   const escapeAttr = (value) => escapeHtml(value).replace(/'/g, '&#39;');
+  const disclosureSuffix = ' Nitelikli satın alımlardan komisyon kazanılabilir; kullanıcıya ek maliyet yansımaz. Fiyat, stok, satıcı, teslimat, puan ve garanti yalnız Amazon’un güncel sayfasında doğrulanır.';
 
   function track(name, params = {}) {
     if (typeof window.Alo186Track === 'function') window.Alo186Track(name, params);
+  }
+
+  function normalizeDisclosures() {
+    document.querySelectorAll('.affiliate-disclosure').forEach((element) => {
+      const current = element.textContent.toLocaleLowerCase('tr-TR');
+      const missingCost = !current.includes('kullanıcıya ek maliyet yansımaz');
+      const missingFreshness = !current.includes('fiyat') || !current.includes('stok');
+      if (missingCost || missingFreshness) element.append(document.createTextNode(disclosureSuffix));
+    });
   }
 
   function renderFreshProducts(container, category) {
@@ -65,6 +75,7 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
+    normalizeDisclosures();
     renderCategoryState();
     document.querySelectorAll('[data-commercial-route]').forEach((link) => link.addEventListener('click', () => {
       track('commercial_route_opened', {
