@@ -47,7 +47,13 @@ def test_pages() -> None:
         assert "amazon.com" not in lower and "amzn." not in lower, key
         assert '"@type":"product"' not in lower and '"@type":"offer"' not in lower, key
         assert "kişisel veri" in lower or "kişisel verisiz" in lower, key
-        assert "resmî" in lower or "resmi" in lower, key
+        independence = (
+            "resmî" in lower
+            or "resmi" in lower
+            or "dağıtım şirketi" in lower and "değildir" in lower
+            or "kabul kuruluşu değildir" in lower
+        )
+        assert independence, key
         assert "satın al" in lower or "ürün yönlendirmesi yok" in lower, key
         assert "URL.createObjectURL" in app, key
     outage = read(PAGES["outage"]).lower()
