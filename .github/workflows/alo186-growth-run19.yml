@@ -1,0 +1,164 @@
+name: ALO186 taşınma, yeniden başlatma ve baz yük kalite kontrolü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/yeni-ev-elektrik-guvenligi-devir-kontrolu/**'
+      - 'alo186/hesaplama/kesinti-sonrasi-guvenli-yeniden-baslatma-plani/**'
+      - 'alo186/hesaplama/gece-baz-yuk-standby-tuketim-deneyi/**'
+      - 'alo186/deployment/inject_growth_run19.py'
+      - 'alo186/deployment/inject_shortlist_growth.py'
+      - 'alo186/deployment/routing-overlays/growth-trust-revenue-run19.json'
+      - 'alo186/tests/test_growth_run19.py'
+      - '.github/workflows/alo186-growth-run19.yml'
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-growth-run19-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Routing, güven, affiliate ve retention sözleşmeleri
+        run: python alo186/tests/test_growth_run19.py
+
+      - name: Inline JavaScript ve Python sözdizimi
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import re
+          from pathlib import Path
+          paths=[
+            Path('alo186/hesaplama/yeni-ev-elektrik-guvenligi-devir-kontrolu/index.html'),
+            Path('alo186/hesaplama/kesinti-sonrasi-guvenli-yeniden-baslatma-plani/index.html'),
+            Path('alo186/hesaplama/gece-baz-yuk-standby-tuketim-deneyi/index.html'),
+          ]
+          for index,path in enumerate(paths):
+            text=path.read_text(encoding='utf-8')
+            scripts=re.findall(r'<script(?![^>]+type=["\']application/ld\+json["\'])[^>]*>(.*?)</script>',text,re.I|re.S)
+            assert len(scripts)==1,(path,len(scripts))
+            Path(f'/tmp/run19-{index}.js').write_text(scripts[0],encoding='utf-8')
+          PY
+          node --check /tmp/run19-0.js
+          node --check /tmp/run19-1.js
+          node --check /tmp/run19-2.js
+          python -m py_compile alo186/deployment/inject_growth_run19.py
+          python -m py_compile alo186/deployment/inject_shortlist_growth.py
+
+      - name: Affiliate, içerik ve cihaz hasarı regresyonları
+        run: |
+          node alo186/tests/test_affiliate_knowledge_graph.js
+          node alo186/tests/test_product_matcher.js
+          python alo186/tests/test_content_intent_consolidation.py
+          python alo186/tests/device_damage_deadline_guard.py
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+
+      - name: Canonical üretim paketini oluştur
+        run: |
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-run19-canonical --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-run19-canonical
+
+      - name: Custom-domain ve project-path artifactlarını hazırla
+        shell: bash
+        run: |
+          set -euo pipefail
+          for spec in 'custom|' 'project|/chatgpt'; do
+            name="${spec%%|*}"
+            base="${spec#*|}"
+            target="/tmp/alo186-run19-${name}"
+            cp -a /tmp/alo186-run19-canonical "$target"
+            python alo186/deployment/prepare_github_pages.py --site "$target" --base-path "$base" --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
+            python alo186/deployment/inject_outcome_runtime.py --site "$target" --base-path "$base"
+            python alo186/deployment/inject_shortlist_growth.py --site "$target" --base-path "$base" > "/tmp/alo186-run19-${name}-result.json"
+            python alo186/deployment/smoke_github_pages.py --site "$target" --base-path "$base"
+          done
+
+      - name: Artifact keşif, base-path, güven ve retention kabulü
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          routes=[
+            '/hesaplama/yeni-ev-elektrik-guvenligi-devir-kontrolu/',
+            '/hesaplama/kesinti-sonrasi-guvenli-yeniden-baslatma-plani/',
+            '/hesaplama/gece-baz-yuk-standby-tuketim-deneyi/',
+          ]
+          entry_targets=[
+            'hesaplama/index.html','elektrik-portali/index.html','akilli-urun-secimi/index.html',
+            'amazon-elektrik-urunleri/index.html','kesintiye-hazirlik-atolyesi/index.html','fatura-analizi/index.html',
+          ]
+          for root,prefix in [(Path('/tmp/alo186-run19-custom'),''),(Path('/tmp/alo186-run19-project'),'/chatgpt')]:
+            for route in routes: assert (root/route.strip('/')/'index.html').is_file(),route
+            release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
+            pages=json.loads((root/'pages-release.json').read_text(encoding='utf-8'))
+            meta=release['growthRun19']
+            assert meta['rawPersonalDataCollected'] is False
+            assert meta['directAffiliateLinksAdded']==0
+            assert meta['hazardCommerceClosed'] is True
+            assert meta['fixedWiringCommerceClosed'] is True
+            assert meta['singleEventCommerceClosed'] is True
+            assert meta['singleHighMeasurementCommerceClosed'] is True
+            assert meta['noBuyOutcomePreserved'] is True
+            assert meta['unverifiedCommercialFieldsUsed']==[]
+            assert meta['moveInReceiptTtlDays']==365
+            assert meta['restartPlanTtlDays']==365
+            assert meta['nightBaseloadRecordTtlDays']==540
+            assert meta['nightBaseloadRecordLimit']==12
+            assert meta['restartDrillDays']==90
+            assert meta['baseloadReviewDays']==30
+            assert pages['growthRun19']['routes']==meta['routes']
+            expected=[prefix+route if prefix else route for route in routes]
+            assert meta['routes']==expected
+            for relative in entry_targets:
+              text=(root/relative).read_text(encoding='utf-8')
+              assert 'data-alo186-growth-run19-entry="true"' in text,relative
+              for route in expected: assert route in text,(relative,route)
+            search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
+            entries={item['canonicalPath']:item for item in search['entries']}
+            for route,url in zip(routes,expected): assert entries[route]['url']==url
+            sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
+            for route in routes: assert f'<loc>https://www.alo186.com{route}</loc>' in sitemap
+            sw=(root/'sw.js').read_text(encoding='utf-8')
+            for url in expected: assert url in sw
+            manifest=json.loads((root/'manifest.webmanifest').read_text(encoding='utf-8'))
+            shortcuts={item.get('url') for item in manifest.get('shortcuts',[]) if isinstance(item,dict)}
+            assert set(expected).issubset(shortcuts)
+            movein=(root/routes[0].strip('/')/'index.html').read_text(encoding='utf-8')
+            restart=(root/routes[1].strip('/')/'index.html').read_text(encoding='utf-8')
+            baseload=(root/routes[2].strip('/')/'index.html').read_text(encoding='utf-8')
+            assert "commercial= !hazard&&!fixedIssue&&!fixedUnknown" in movein
+            assert "commercial=!hazard&&repeated&&$('existing').value==='gap'" in restart
+            assert "previous.length>=2" in baseload
+            assert "recent.avgW>=baseline.avgW*1.2" in baseload
+            assert "Date.parse(x.expiresAt)>now" in baseload
+            assert all('amazon.com' not in text.casefold() for text in [movein,restart,baseload])
+          PY
+
+      - name: Doğrulanmış run19 artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-trust-revenue-run19-pages
+          path: /tmp/alo186-run19-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30

@@ -1,0 +1,21 @@
+{
+  "version": 67,
+  "generatedAt": "2026-07-29",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/yeni-ev-elektrik-guvenligi-devir-kontrolu/index.html",
+      "canonicalPath": "/hesaplama/yeni-ev-elektrik-guvenligi-devir-kontrolu/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/kesinti-sonrasi-guvenli-yeniden-baslatma-plani/index.html",
+      "canonicalPath": "/hesaplama/kesinti-sonrasi-guvenli-yeniden-baslatma-plani/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/gece-baz-yuk-standby-tuketim-deneyi/index.html",
+      "canonicalPath": "/hesaplama/gece-baz-yuk-standby-tuketim-deneyi/",
+      "type": "calculator"
+    }
+  ]
+}
