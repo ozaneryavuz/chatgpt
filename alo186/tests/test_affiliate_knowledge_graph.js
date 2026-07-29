@@ -4,7 +4,7 @@ const catalog=require('../urun-eslestirme/catalog.js');
 
 assert.equal(catalog.affiliateTag,'alo186rehber-21');
 assert.equal(catalog.verifiedAt,'2026-07-29');
-assert.ok(catalog.products.length>=10);
+assert.ok(catalog.products.length>=12);
 
 const ids=new Set();
 const asins=new Set();
@@ -17,12 +17,12 @@ for(const product of catalog.products){
   assert.equal(product.status,'verified_listing');
   for(const forbidden of ['price','stock','rating','aggregateRating','review','warranty','seller'])assert.ok(!(forbidden in product),`Yasak ürün alanı: ${forbidden}`);
 }
-for(const id of ['philips-spn7040wa-62','tuncmatik-tsk6134','brennenstuhl-eco-line-6'])assert.ok(ids.has(id),`Yeni ürün eksik: ${id}`);
+for(const id of ['philips-spn7040wa-62','tuncmatik-tsk6134','brennenstuhl-eco-line-6','anker-313-a2677','baseus-cafule-catklf-gg1'])assert.ok(ids.has(id),`Yeni ürün eksik: ${id}`);
 
 const now=new Date('2026-07-29T12:00:00Z');
 const publicProducts=catalog.products.filter(product=>catalog.publicAffiliateEligible(product,{now}));
 const gatedProducts=catalog.products.filter(product=>!catalog.publicAffiliateEligible(product,{now,freshOnly:false}));
-assert.deepEqual([...new Set(publicProducts.map(product=>product.category))],['powerbank']);
+assert.deepEqual([...new Set(publicProducts.map(product=>product.category))],['powerbank','usb_c_charger','usb_c_cable']);
 assert.ok(gatedProducts.some(product=>product.category==='surge_strip'));
 
 const payload=catalog.knowledgeGraph({now});
@@ -52,6 +52,11 @@ for(const node of productNodes){
   assert.ok(node.identifier.some(item=>item.propertyID==='ASIN'));
   assert.ok(node.additionalProperty.some(item=>item.name==='Teknik doğrulama tarihi'));
   assert.ok(node.additionalProperty.some(item=>item.name==='Ticari ilişki'));
+}
+for(const id of ['anker-313-a2677','baseus-cafule-catklf-gg1']){
+  const node=productNodes.find(item=>item.sku===id);
+  assert.ok(node,`Yeni USB-C Product düğümü eksik: ${id}`);
+  assert.ok(node.identifier.some(item=>item.propertyID==='MPN'));
 }
 for(const product of gatedProducts)assert.ok(!productNodes.some(node=>node.sku===product.id),`Guide ürün public Product düğümüne sızdı: ${product.id}`);
 const itemList=graph.find(node=>node['@type']==='ItemList');
