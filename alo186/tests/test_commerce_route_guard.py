@@ -25,6 +25,18 @@ def write_base(root: Path) -> None:
     )
 
 
+def assert_accepted(html: str) -> None:
+    with tempfile.TemporaryDirectory() as temp:
+        root = Path(temp)
+        write_base(root)
+        page = root / "safe" / "index.html"
+        page.parent.mkdir(parents=True, exist_ok=True)
+        page.write_text(html, encoding="utf-8")
+        result = validate_site(root)
+        assert result["ok"] is True
+        assert result["errorCount"] == 0
+
+
 def assert_rejected(html: str, expected: str) -> None:
     with tempfile.TemporaryDirectory() as temp:
         root = Path(temp)
@@ -42,22 +54,22 @@ def assert_rejected(html: str, expected: str) -> None:
 
 
 def main() -> None:
-    with tempfile.TemporaryDirectory() as temp:
-        root = Path(temp)
-        write_base(root)
-        page = root / "safe" / "index.html"
-        page.parent.mkdir(parents=True, exist_ok=True)
-        page.write_text(
-            '<html><body data-alo186-affiliate-gate="qualified">'
-            '<p><strong>Reklam / satış ortaklığı:</strong> Nitelikli satın alımlardan komisyon kazanılabilir.</p>'
-            '<p>USB-C powerbank teknik eşleşmesi.</p>'
-            '<a href="https://www.amazon.com.tr/s?k=usb-c-powerbank" rel="sponsored nofollow noopener">'
-            'Şeffaf satış ortaklığı aramasını aç</a></body></html>',
-            encoding="utf-8",
-        )
-        result = validate_site(root)
-        assert result["ok"] is True
-        assert result["errorCount"] == 0
+    assert_accepted(
+        '<html><body data-alo186-affiliate-gate="qualified">'
+        '<p><strong>Reklam / satış ortaklığı:</strong> Nitelikli satın alımlardan komisyon kazanılabilir.</p>'
+        '<p>USB-C powerbank teknik eşleşmesi.</p>'
+        '<a href="https://www.amazon.com.tr/s?k=usb-c-powerbank" rel="sponsored nofollow noopener">'
+        'Şeffaf satış ortaklığı aramasını aç</a></body></html>'
+    )
+
+    assert_accepted(
+        '<html><body><section id="affiliatePanel" class="affiliate-panel hidden">'
+        '<p><strong>Şeffaf satış ortaklığı:</strong> uygun alışverişten komisyon alınabilir.</p>'
+        '<label><input id="affiliateAck" type="checkbox">Teknik değerleri yeniden doğrulayacağım.</label>'
+        '<a id="affiliateLink" aria-disabled="true" tabindex="-1" '
+        'href="https://www.amazon.com.tr/s?k=usb-c-powerbank" rel="sponsored nofollow noopener">'
+        'İzin sonrası aramayı aç</a></section></body></html>'
+    )
 
     assert_rejected(
         '<html><body data-alo186-affiliate-gate="qualified"><p>Satış ortaklığı bağlantısıdır.</p>'
@@ -70,13 +82,20 @@ def main() -> None:
         "nitelikli affiliate kapısı",
     )
     assert_rejected(
+        '<html><body><section id="affiliatePanel" class="affiliate-panel hidden">'
+        '<p>Satış ortaklığı bağlantısıdır.</p>'
+        '<a aria-disabled="true" tabindex="-1" href="https://www.amazon.com.tr/s?k=powerbank" '
+        'rel="sponsored nofollow noopener">Ürün</a></section></body></html>',
+        "kapalı runtime izin akışı",
+    )
+    assert_rejected(
         '<html><body data-alo186-affiliate-gate="qualified"><p>Satış ortaklığı bağlantısıdır.</p>'
         '<p>RCCB ve RCBO pano seçimi</p>'
         '<a href="https://www.amazon.com.tr/s?k=rccb" rel="sponsored nofollow noopener">Ürün</a></body></html>',
         "yüksek riskli/sabit tesisat",
     )
 
-    print(json.dumps({"ok": True, "safeFixture": 1, "blockedFixtures": 3}, ensure_ascii=False))
+    print(json.dumps({"ok": True, "safeFixtures": 2, "blockedFixtures": 4}, ensure_ascii=False))
 
 
 if __name__ == "__main__":
