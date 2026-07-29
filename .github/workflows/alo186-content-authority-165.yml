@@ -7,6 +7,7 @@ on:
       - 'alo186/haberler/ups-aku-string-blok-dengesizligi-ic-direnc/**'
       - 'alo186/haberler/ges-string-sigortasi-gpv-ne-zaman-gerekir/**'
       - 'alo186/deployment/routing-overlays/content-authority-165-run42.json'
+      - 'alo186/deployment/content-consolidations.json'
       - 'alo186/tests/test_authority_content_run42.py'
       - '.github/workflows/alo186-content-authority-165.yml'
   push:
@@ -16,6 +17,7 @@ on:
       - 'alo186/haberler/ups-aku-string-blok-dengesizligi-ic-direnc/**'
       - 'alo186/haberler/ges-string-sigortasi-gpv-ne-zaman-gerekir/**'
       - 'alo186/deployment/routing-overlays/content-authority-165-run42.json'
+      - 'alo186/deployment/content-consolidations.json'
       - 'alo186/tests/test_authority_content_run42.py'
       - '.github/workflows/alo186-content-authority-165.yml'
   workflow_dispatch:
@@ -58,31 +60,60 @@ jobs:
           python alo186/deployment/inject_outcome_runtime.py --site /tmp/alo186-authority-165-custom --base-path ''
           python alo186/deployment/inject_shortlist_growth.py --site /tmp/alo186-authority-165-custom --base-path '' > /tmp/authority165.json
           python alo186/deployment/smoke_github_pages.py --site /tmp/alo186-authority-165-custom --base-path ''
-      - name: Canonical sitemap ve Teknik Arama kabulü
+      - name: Canonical sitemap, yönlendirme ve Teknik Arama kabulü
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
-          root=Path('/tmp/alo186-authority-165-custom')
-          routes=[
-            '/haberler/elektrik-ark-hatasi-afdd-rcd-sigorta-farki',
-            '/haberler/ups-aku-string-blok-dengesizligi-ic-direnc',
-            '/haberler/ges-string-sigortasi-gpv-ne-zaman-gerekir',
+
+          root = Path('/tmp/alo186-authority-165-custom')
+          primary_routes = [
+              '/haberler/elektrik-ark-hatasi-afdd-rcd-sigorta-farki',
           ]
-          sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
-          search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
-          release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
-          active={item['canonicalPath'] for item in search['entries']}
+          consolidations = {
+              '/haberler/ups-aku-string-blok-dengesizligi-ic-direnc':
+                  '/haberler/ups-aku-string-dengesizligi-zayif-aku-nasil-anlasilir',
+              '/haberler/ges-string-sigortasi-gpv-ne-zaman-gerekir':
+                  '/haberler/ges-pv-string-sigortasi-ters-akim-nasil-secilir',
+          }
+          sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
+          search = json.loads((root / 'arama/search-index.json').read_text(encoding='utf-8'))
+          release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
+          active = {item['canonicalPath'] for item in search['entries']}
+
           assert release['routingVersion'] >= 73, release['routingVersion']
-          # Üretim sayacı yalnız statik Article sayfalarını sayar; routing manifesti
-          # ayrıca farklı teknik article rotaları taşıyabildiği için iki metrik eşit değildir.
-          assert release['articleCount'] >= 163, release['articleCount']
-          for route in routes:
-              target=root/route.strip('/')/'index.html'
+          assert release['articleCount'] >= 161, release['articleCount']
+          declared = {
+              item['aliasPath']: item['canonicalPath']
+              for item in release['contentConsolidation']['aliases']
+          }
+
+          for route in primary_routes:
+              target = root / route.strip('/') / 'index.html'
               assert target.is_file(), target
               assert f'https://www.alo186.com{route}' in sitemap, ('sitemap', route)
               assert route in active, ('search-index', route)
-          print(json.dumps({'routingVersion':release['routingVersion'],'articleCount':release['articleCount'],'routes':routes},ensure_ascii=False))
+
+          for alias, canonical in consolidations.items():
+              alias_file = root / alias.strip('/') / 'index.html'
+              canonical_file = root / canonical.strip('/') / 'index.html'
+              alias_html = alias_file.read_text(encoding='utf-8')
+              assert alias_file.is_file() and canonical_file.is_file()
+              assert declared.get(alias) == canonical, ('consolidation', alias, canonical)
+              assert f'https://www.alo186.com{alias}' not in sitemap, ('alias-sitemap', alias)
+              assert f'https://www.alo186.com{canonical}' in sitemap, ('canonical-sitemap', canonical)
+              assert alias not in active, ('alias-search-index', alias)
+              assert canonical in active, ('canonical-search-index', canonical)
+              assert 'name="robots" content="noindex,follow"' in alias_html
+              assert f'rel="canonical" href="https://www.alo186.com{canonical}"' in alias_html
+              assert f'href="{canonical}"' in alias_html
+
+          print(json.dumps({
+              'routingVersion': release['routingVersion'],
+              'articleCount': release['articleCount'],
+              'primaryRoutes': primary_routes,
+              'consolidations': consolidations,
+          }, ensure_ascii=False))
           PY
       - name: Doğrulanmış içerik artifactı
         uses: actions/upload-artifact@v4
