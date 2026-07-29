@@ -174,7 +174,11 @@ def recompute(site: Path) -> None:
     path = site / "checksums.sha256"
     if path.exists():
         path.unlink()
-    lines = [f"{hashlib.sha256(item.read_bytes()).hexdigest()}  {item.relative_to(site).as_posix()}" for item in sorted(x for x in site.rglob("*") if item.is_file())]
+    files = sorted(item for item in site.rglob("*") if item.is_file())
+    lines = [
+        f"{hashlib.sha256(item.read_bytes()).hexdigest()}  {item.relative_to(site).as_posix()}"
+        for item in files
+    ]
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
