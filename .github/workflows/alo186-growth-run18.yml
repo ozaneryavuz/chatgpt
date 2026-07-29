@@ -106,7 +106,7 @@ jobs:
           entry_targets=[
             'hesaplama/index.html','elektrik-portali/index.html','akilli-urun-secimi/index.html',
             'amazon-elektrik-urunleri/index.html','hesaplama/urun-sonrasi-guvenlik-kontrolu/index.html',
-            'kesinti-hazirlik-atolyesi/index.html',
+            'kesintiye-hazirlik-atolyesi/index.html',
           ]
           for root,prefix in [(Path('/tmp/alo186-run18-custom'),''),(Path('/tmp/alo186-run18-project'),'/chatgpt')]:
             for route in routes: assert (root/route.strip('/')/'index.html').is_file(),route
