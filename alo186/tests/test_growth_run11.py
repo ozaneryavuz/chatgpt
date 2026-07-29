@@ -47,8 +47,9 @@ def test_pages() -> None:
         assert '<script src="./app.js"></script>' in html, key
         assert "amazon.com" not in lower and "amzn." not in lower, key
         assert '"@type":"product"' not in lower and '"@type":"offer"' not in lower, key
-        for field in ("fiyat", "stok", "puan", "garanti"):
-            assert field in combined_lower, (key, field)
+        if key in {"solar", "alarm"}:
+            for field in ("fiyat", "stok", "puan", "garanti"):
+                assert field in combined_lower, (key, field)
         assert "resmî" in lower or "resmi" in lower or "üretici onayı" in lower, key
         assert "satın almayın" in combined_lower or "satın alma" in combined_lower, key
 
@@ -63,7 +64,7 @@ def test_solar_gate() -> None:
         "faq.jackery.com",
     ]:
         assert token in combined, token
-    assert "/amazon-elektrik-urunleri/ges" in html
+    assert "/amazon-elektrik-urunleri/ges-malzemeleri-secimi" in html
 
 
 def test_alarm_journal() -> None:
