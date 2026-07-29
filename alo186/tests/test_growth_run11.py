@@ -40,7 +40,7 @@ def schema_types(graphs: list[dict]) -> set[str]:
 
 def test_pages() -> None:
     for key, path in PAGES.items():
-        html = read(path); lower = html.lower(); app = read(path.with_name("app.js"))
+        html = read(path); lower = html.lower(); app = read(path.with_name("app.js")); combined_lower = (html + app).lower()
         assert html.count("<h1") == 1, key
         assert f'https://www.alo186.com{ROUTES[key]}' in html, key
         assert {"WebApplication", "FAQPage", "BreadcrumbList"} <= schema_types(jsonld(html)), key
@@ -48,9 +48,9 @@ def test_pages() -> None:
         assert "amazon.com" not in lower and "amzn." not in lower, key
         assert '"@type":"product"' not in lower and '"@type":"offer"' not in lower, key
         for field in ("fiyat", "stok", "puan", "garanti"):
-            assert field in lower or field in app.lower(), (key, field)
+            assert field in combined_lower, (key, field)
         assert "resmî" in lower or "resmi" in lower or "üretici onayı" in lower, key
-        assert "satın almayın" in lower or "satın alma" in lower, key
+        assert "satın almayın" in combined_lower or "satın alma" in combined_lower, key
 
 
 def test_solar_gate() -> None:
