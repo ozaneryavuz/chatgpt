@@ -15,19 +15,14 @@ ARTICLES = [
     {
         "slug": "ups-bypass-senkron-degil-kaynak-tolerans-disi",
         "required": [
-            "bypass unavailable",
-            "not synchronized",
-            "source out of tolerance",
-            "senkronizasyon penceresi",
-            "slew rate",
-            "free-running",
-            "faz sırası",
+            "bypass unavailable", "not synchronized", "source out of tolerance",
+            "senkronizasyon penceresi", "slew rate", "free-running", "faz sırası",
             "Son doğrulama: 29 Temmuz 2026",
         ],
         "links": [
-            "/haberler/ups-bypass-nedir-bakim-bypass-kullanimi",
-            "/haberler/ups-eco-mod-bypass-riski",
-            "/haberler/ups-giris-cikis-faz-sirasi-neden-onemli",
+            "/haberler/ups-eco-modu-cift-cevrim-transfer-suresi-kritik-yuk",
+            "/haberler/ups-eco-modu-acik-olmali-mi",
+            "/haberler/ups-cikis-kisa-devre-akimi-sigorta-selektivite",
             "/hesaplama/elektrik-kesintisi-tatbikati/",
             "/hesaplama/teknik-devir-kabul-paketi/",
             "/hizmetler/elektrik-surekliligi-izleme/",
@@ -37,14 +32,8 @@ ARTICLES = [
     {
         "slug": "ges-inverter-reaktif-guc-qu-cosphi-gerilim-destegi",
         "required": [
-            "Q(U)",
-            "cosφ(P)",
-            "sabit reaktif güç",
-            "görünür güç",
-            "P/Q önceliği",
-            "bağlantı noktası",
-            "aktif üretimi",
-            "Son doğrulama: 29 Temmuz 2026",
+            "Q(U)", "cosφ(P)", "sabit reaktif güç", "görünür güç", "P/Q önceliği",
+            "bağlantı noktası", "aktif üretimi", "Son doğrulama: 29 Temmuz 2026",
         ],
         "links": [
             "/haberler/ges-inverter-sebeke-gerilimi-yuksek-hatasi",
@@ -59,13 +48,8 @@ ARTICLES = [
     {
         "slug": "parafudr-kirmizi-gosterge-uzaktan-kontak-degisim",
         "required": [
-            "kırmızı durum penceresi",
-            "uzaktan alarm kontağı",
-            "yedek koruma",
-            "değiştirilebilir kartuş",
-            "faz gerilimi",
-            "BMS/SCADA",
-            "gerilimsiz",
+            "kırmızı durum penceresi", "uzaktan alarm kontağı", "yedek koruma",
+            "değiştirilebilir kartuş", "faz gerilimi", "BMS/SCADA", "gerilimsiz",
             "Son doğrulama: 29 Temmuz 2026",
         ],
         "links": [
@@ -96,9 +80,9 @@ def main() -> None:
     active_paths = {route["canonicalPath"] for route in article_routes}
 
     nearby_existing = {
-        "/haberler/ups-bypass-nedir-bakim-bypass-kullanimi",
-        "/haberler/ups-eco-mod-bypass-riski",
-        "/haberler/ups-giris-cikis-faz-sirasi-neden-onemli",
+        "/haberler/ups-eco-modu-cift-cevrim-transfer-suresi-kritik-yuk",
+        "/haberler/ups-eco-modu-acik-olmali-mi",
+        "/haberler/ups-cikis-kisa-devre-akimi-sigorta-selektivite",
         "/haberler/ges-inverter-sebeke-gerilimi-yuksek-hatasi",
         "/haberler/gunes-paneli-inverter-clipping-dc-ac-orani",
         "/haberler/ges-inverter-sicakta-guc-dusuruyor-temperature-derating",
