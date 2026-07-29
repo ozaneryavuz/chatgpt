@@ -1,0 +1,201 @@
+name: ALO186 affiliate ürün Knowledge Graph kalite kontrolü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/urun-eslestirme/catalog.js'
+      - 'alo186/urun-eslestirme/catalog-knowledge-graph.test.js'
+      - 'alo186/urun-bilgi-grafigi/**'
+      - 'alo186/katalog-guven-durumu/app.js'
+      - 'alo186/deployment/inject_affiliate_product_graph.py'
+      - 'alo186/deployment/inject_growth_run15.py'
+      - 'alo186/deployment/routing-overlays/affiliate-product-knowledge-graph-run34.json'
+      - 'alo186/tests/test_affiliate_product_knowledge_graph.py'
+      - '.github/workflows/alo186-affiliate-product-knowledge-graph.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/urun-eslestirme/catalog.js'
+      - 'alo186/urun-eslestirme/catalog-knowledge-graph.test.js'
+      - 'alo186/urun-bilgi-grafigi/**'
+      - 'alo186/katalog-guven-durumu/app.js'
+      - 'alo186/deployment/inject_affiliate_product_graph.py'
+      - 'alo186/deployment/inject_growth_run15.py'
+      - 'alo186/deployment/routing-overlays/affiliate-product-knowledge-graph-run34.json'
+      - 'alo186/tests/test_affiliate_product_knowledge_graph.py'
+      - '.github/workflows/alo186-affiliate-product-knowledge-graph.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-affiliate-product-graph-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Katalog, yeni model ve Knowledge Graph düğüm testleri
+        run: node alo186/urun-eslestirme/catalog-knowledge-graph.test.js
+
+      - name: Routing, graph JSON, schema ve güven sözleşmeleri
+        run: python alo186/tests/test_affiliate_product_knowledge_graph.py
+
+      - name: JavaScript ve Python sözdizimi
+        run: |
+          node --check alo186/urun-eslestirme/catalog.js
+          node --check alo186/urun-bilgi-grafigi/app.js
+          node --check alo186/katalog-guven-durumu/app.js
+          python -m py_compile alo186/deployment/inject_affiliate_product_graph.py
+          python -m py_compile alo186/deployment/inject_growth_run15.py
+
+      - name: Canonical, içerik niyeti ve cihaz hasarı regresyonları
+        run: |
+          python alo186/tests/test_content_intent_consolidation.py
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Canonical üretim paketini oluştur
+        run: |
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-product-graph-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-product-graph-canonical
+
+      - name: Custom-domain affiliate Product Graph artifactı
+        run: |
+          cp -a /tmp/alo186-product-graph-canonical /tmp/alo186-product-graph-custom
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-product-graph-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-product-graph-custom \
+            --base-path ''
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-product-graph-custom \
+            --base-path '' \
+            > /tmp/alo186-product-graph-custom.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-product-graph-custom \
+            --base-path ''
+
+      - name: Project-path affiliate Product Graph artifactı
+        run: |
+          cp -a /tmp/alo186-product-graph-canonical /tmp/alo186-product-graph-project
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-product-graph-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-product-graph-project \
+            --base-path '/chatgpt'
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-product-graph-project \
+            --base-path '/chatgpt' \
+            > /tmp/alo186-product-graph-project.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-product-graph-project \
+            --base-path '/chatgpt'
+
+      - name: Artifact graph, base-path, affiliate ve keşif sözleşmeleri
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+
+          new_products = {'tp-link-tapo-p110','tp-link-tapo-p110m','ecoflow-river-2','x-sense-xs01'}
+          forbidden = {'price','stock','rating','seller','delivery','warranty','asin','affiliateCommission'}
+          entry_targets = [
+              'amazon-elektrik-urunleri/index.html',
+              'akilli-urun-secimi/index.html',
+              'katalog-guven-durumu/index.html',
+              'elektrik-portali/index.html',
+              'index.html',
+          ]
+          for root, prefix in [
+              (Path('/tmp/alo186-product-graph-custom'), ''),
+              (Path('/tmp/alo186-product-graph-project'), '/chatgpt'),
+          ]:
+              graph_dir=root/'urun-bilgi-grafigi'
+              for relative in ['index.html','styles.css','app.js','product-graph.json']:
+                  assert (graph_dir/relative).is_file(), (root, relative)
+              graph=json.loads((graph_dir/'product-graph.json').read_text(encoding='utf-8'))
+              assert len(graph['needs'])==14
+              assert len(graph['categories'])==14
+              assert len(graph['products'])==11
+              assert new_products.issubset({item['id'] for item in graph['products']})
+              assert graph['commercialPolicy']['noBuyOutcomePreserved'] is True
+              for item in graph['products']:
+                  assert not forbidden.intersection(item.keys()), (item['id'], forbidden.intersection(item.keys()))
+
+              html=(graph_dir/'index.html').read_text(encoding='utf-8')
+              blocks=re.findall(r'<script[^>]+type="application/ld\+json"[^>]*>(.*?)</script>',html,re.S|re.I)
+              payloads=[json.loads(block) for block in blocks]
+              product_nodes=[]
+              for payload in payloads:
+                  product_nodes.extend(node for node in payload.get('@graph',[]) if isinstance(node,dict) and node.get('@type')=='Product')
+              assert len(product_nodes)==11
+              assert not any('offers' in node or 'aggregateRating' in node for node in product_nodes)
+              assert new_products.issubset({node['@id'].split('#product-',1)[1] for node in product_nodes})
+
+              release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
+              pages=json.loads((root/'pages-release.json').read_text(encoding='utf-8'))
+              metadata=release['affiliateProductKnowledgeGraph']
+              assert metadata['productCount']==11
+              assert metadata['manufacturerVerifiedSearchCount']==4
+              assert metadata['exactAsinCount']==7
+              assert metadata['commercialRankingFieldsUsed']==[]
+              assert metadata['noBuyOutcomePreserved'] is True
+              assert pages['affiliateProductKnowledgeGraph']['productCount']==11
+              expected_route=(prefix+'/urun-bilgi-grafigi/' if prefix else '/urun-bilgi-grafigi/')
+              expected_graph=(prefix+'/urun-bilgi-grafigi/product-graph.json' if prefix else '/urun-bilgi-grafigi/product-graph.json')
+              assert metadata['route']==expected_route
+              assert metadata['graph']==expected_graph
+
+              for relative in entry_targets:
+                  text=(root/relative).read_text(encoding='utf-8')
+                  assert 'data-alo186-product-graph-entry="true"' in text, relative
+                  assert expected_route in text, (relative, expected_route)
+
+              search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
+              entry=next(item for item in search['entries'] if item['canonicalPath']=='/urun-bilgi-grafigi/')
+              assert entry['url']==expected_route
+              sw=(root/'sw.js').read_text(encoding='utf-8')
+              assert expected_route in sw and expected_graph in sw
+              manifest=json.loads((root/'manifest.webmanifest').read_text(encoding='utf-8'))
+              assert any(item.get('url')==expected_route for item in manifest.get('shortcuts',[]))
+
+              app=(graph_dir/'app.js').read_text(encoding='utf-8')
+              assert 'sponsored nofollow noopener' in app
+              assert 'localStorage' not in app and 'sessionStorage' not in app
+              assert 'Mevcut ürünüm güvenli biçimde ihtiyacı karşılamıyor' in app
+              assert 'Amazon’da tam model araması' in app
+          PY
+
+      - name: Doğrulanmış affiliate Product Knowledge Graph artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-affiliate-product-knowledge-graph-pages
+          path: /tmp/alo186-product-graph-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
