@@ -1,8 +1,9 @@
 {
-  "version": 1,
+  "version": 2,
   "generatedAt": "2026-07-29",
   "consolidations": [
     {
+      "kind": "same-intent-article",
       "intentKey": "lifepo4-low-temperature-charging",
       "aliasPath": "/haberler/lifepo4-batarya-sogukta-sarj-edilir-mi",
       "canonicalPath": "/haberler/lifepo4-dusuk-sicaklikta-sarj-edilir-mi",
@@ -10,11 +11,20 @@
       "reason": "Aynı kullanıcı sorusunu ve aynı BMS/sıcaklık kararını hedefleyen iki rehber tek canonical kaynakta birleştirildi."
     },
     {
+      "kind": "same-intent-article",
       "intentKey": "edas-voltage-technical-quality-measurement",
       "aliasPath": "/haberler/elektrik-gerilimi-dusuk-yuksek-edas-olcum-talebi",
       "canonicalPath": "/haberler/dusuk-yuksek-voltaj-edas-teknik-kalite-olcumu",
       "label": "Düşük/yüksek voltaj EDAŞ teknik kalite ölçümü",
       "reason": "Aynı EDAŞ ölçüm talebi, bir haftalık teknik kalite kaydı ve EPDK aşamasını hedefleyen iki rehber tek canonical kaynakta birleştirildi."
+    },
+    {
+      "kind": "legacy-commerce",
+      "intentKey": "legacy-amazon-product-center",
+      "aliasPath": "/amazon-elektrik-urunleri",
+      "canonicalPath": "/akilli-urun-secimi",
+      "label": "Eski Amazon elektrik ürünleri merkezi",
+      "reason": "Eski genel ürün rotası, teknik uygunluk, mevcut ürünün yeterliliği, açık satış ortaklığı onayı ve yüksek riskli sistemlerde profesyonel yönlendirme kapılarını atladığı için güvenli Akıllı Ürün Merkezi'ne taşındı."
     }
   ]
 }
