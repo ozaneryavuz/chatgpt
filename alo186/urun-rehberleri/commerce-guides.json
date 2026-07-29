@@ -1,0 +1,386 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-29",
+  "affiliateTag": "alo186hazirlik-21",
+  "canonicalHost": "https://www.alo186.com",
+  "collection": {
+    "title": "Elektrik Ürün Rehberleri ve Amazon Satın Alma Öncesi Kontrol | ALO186",
+    "h1": "Elektrik ürününü aramadan önce teknik ihtiyacı doğrulayın.",
+    "description": "Powerbank, mini UPS, akım korumalı grup priz, power station, acil aydınlatma, duman alarmı, akıllı priz ve GES malzemelerinde satın alma öncesi teknik kontrol rehberleri.",
+    "lead": "Bu merkez ürünleri komisyon veya popülerliğe göre sıralamaz. Önce ücretsiz uygunluk hesabını, mevcut ekipman kontrolünü ve güvenlik sınırını gösterir; yalnız düşük riskli ve kullanıcı tarafından doğrulanabilen kategorilerde Amazon arama kapısını açar."
+  },
+  "guides": [
+    {
+      "slug": "powerbank-usb-c-pd",
+      "category": "powerbank",
+      "risk": "consumer",
+      "affiliatePolicy": "qualified_search",
+      "affiliateEnabled": true,
+      "title": "USB-C PD Powerbank Nasıl Seçilir? Kapasite ve Watt Rehberi | ALO186",
+      "h1": "USB-C PD powerbank seçerken mAh kadar watt ve port düzenine bakın.",
+      "description": "Telefon, tablet ve dizüstü için powerbank seçerken kapasite, gerçek enerji, USB-C PD çıkış gücü, kablo, port paylaşımı ve uçuş sınırlarını kontrol edin.",
+      "eyebrow": "Powerbank · USB-C PD · kapasite · çıkış gücü · 9 dk",
+      "answer": "Telefon için yalnız mAh değerine bakmayın. Şarj etmek istediğiniz cihazın kabul ettiği USB-C PD gücünü, powerbankin tek port ve çoklu port çıkışını, kablo gücünü ve gerçek kullanılabilir enerjiyi birlikte doğrulayın.",
+      "toolPath": "/hesaplama/powerbank-usb-c-uygunluk/",
+      "toolLabel": "Powerbank USB-C uygunluk testini aç",
+      "productCenterPath": "/akilli-urun-secimi?kategori=powerbank",
+      "amazonSearchQuery": "USB C PD powerbank 20000 mAh dijital ekran",
+      "whoFor": [
+        {"title": "Telefon ve tablet", "text": "Günlük yedek enerji, taşınabilirlik ve 20–30 W sınıfı hızlı şarj ihtiyacı olanlar."},
+        {"title": "USB-C dizüstü", "text": "Cihazın kabul ettiği wattı ve powerbankin tek port çıkışını model bazında doğrulayabilenler."},
+        {"title": "Seyahat", "text": "Wh karşılığını, havayolu sınırlarını ve taşıma ağırlığını satın almadan önce kontrol edenler."}
+      ],
+      "criteria": [
+        {"name": "Kapasite", "verify": "mAh yanında Wh değerini ve dönüşüm kayıplarını dikkate alın.", "avoid": "Yalnız yüksek mAh yazısına göre karar vermek."},
+        {"name": "USB-C çıkışı", "verify": "Tek portta sağlanan PD wattı cihaz ihtiyacını karşılamalı.", "avoid": "Toplam çıkış gücünü tek port gücü sanmak."},
+        {"name": "Port paylaşımı", "verify": "İki cihaz bağlıyken gücün nasıl bölündüğünü ürün sayfasında bulun.", "avoid": "Her portun aynı anda azami gücü vereceğini varsaymak."},
+        {"name": "Kablo", "verify": "Kablo akım ve watt sınıfı hedef güce uygun olmalı.", "avoid": "Düşük sınıf kabloyla etiket gücüne ulaşılacağını düşünmek."}
+      ],
+      "noBuy": [
+        "Mevcut powerbank cihazınızı hedef sürede şarj ediyorsa yeni ürün almayın.",
+        "Çıkış gücü, port paylaşımı veya Wh bilgisi bulunamıyorsa ürünü doğrulanmış kabul etmeyin.",
+        "Yalnız kablosuz şarj özelliği için daha düşük kablolu gücü göz ardı etmeyin."
+      ],
+      "gateChecks": [
+        "Cihazımın kabul ettiği USB-C watt değerini doğruladım.",
+        "Tek port ve çoklu port güç paylaşımını kontrol edeceğim.",
+        "Fiyat, stok, satıcı ve garanti bilgisini Amazon sayfasında yeniden doğrulayacağım."
+      ],
+      "faqs": [
+        {"question": "20.000 mAh powerbank dizüstü bilgisayarı şarj eder mi?", "answer": "Yalnız kapasite yeterli değildir. Dizüstünün USB-C PD kabul etmesi ve powerbankin tek port çıkış gücünün cihazın asgari ihtiyacını karşılaması gerekir."},
+        {"question": "100 W yazan powerbank her cihazı 100 W ile şarj eder mi?", "answer": "Hayır. Cihaz, kablo ve kullanılan port aynı protokol ve gücü desteklemeli; birden fazla port kullanılırken güç bölünebilir."},
+        {"question": "Powerbank fiyatlarını neden göstermiyorsunuz?", "answer": "Fiyat, stok, satıcı ve kampanya hızla değişir. ALO186 teknik uygunluk alanlarını gösterir; ticari bilgiler Amazon’un güncel sayfasında doğrulanır."}
+      ],
+      "related": [
+        {"label": "Akıllı ürün eşleştirme", "path": "/akilli-urun-secimi?kategori=powerbank"},
+        {"label": "Kesinti hazırlık planı", "path": "/hesaplama/kesinti-hazirlik-plani/"}
+      ],
+      "terms": ["USB-C Power Delivery", "mAh", "Wh", "tek port çıkış gücü"]
+    },
+    {
+      "slug": "akim-korumali-grup-priz",
+      "category": "surge_strip",
+      "risk": "consumer",
+      "affiliatePolicy": "qualified_search",
+      "affiliateEnabled": true,
+      "title": "Akım Korumalı Grup Priz Nasıl Seçilir? Joule, Amper ve Priz Sayısı | ALO186",
+      "h1": "Akım korumalı grup priz seçerken joule kadar yük ve topraklama koşulunu kontrol edin.",
+      "description": "Akım korumalı grup priz seçiminde joule, nominal amper, toplam watt, priz sayısı, koruma göstergesi ve işlevsel topraklama kontrol listesi.",
+      "eyebrow": "Grup priz · joule · amper · toplam yük · 10 dk",
+      "answer": "Önce bağlanacak cihazların sürekli ve tepe yükünü toplayın. Ürünün nominal amper/watt sınırı, joule değeri, koruma göstergesi ve priz sayısı birlikte yeterli olmalı; koruma işlevi uygun topraklama olmadan varsayılmamalıdır.",
+      "toolPath": "/hesaplama/akim-korumali-grup-priz-uygunluk/",
+      "toolLabel": "Grup priz uygunluk testini aç",
+      "productCenterPath": "/akilli-urun-secimi?kategori=surge_strip",
+      "amazonSearchQuery": "akım korumalı grup priz joule koruma göstergeli",
+      "whoFor": [
+        {"title": "TV ve medya köşesi", "text": "Birden çok fişli elektronik cihazı tek noktada düzenlemek isteyenler."},
+        {"title": "Masaüstü çalışma alanı", "text": "Bilgisayar, monitör ve ağ ekipmanının toplam yükünü hesaplayabilenler."},
+        {"title": "Tek cihaz koruması", "text": "Tekli korumalı priz ile çoklu grup priz ihtiyacını ayıranlar."}
+      ],
+      "criteria": [
+        {"name": "Nominal akım ve watt", "verify": "Toplam sürekli yük etiket sınırının altında kalmalı.", "avoid": "Priz sayısını elektriksel kapasite sanmak."},
+        {"name": "Joule", "verify": "Enerji sönümleme değeri açıkça yazmalı ve ihtiyaçla karşılaştırılmalı.", "avoid": "Koruma kelimesi var diye teknik değeri olmayan ürünü eşdeğer görmek."},
+        {"name": "Gösterge", "verify": "Koruma durumunu gösteren ışık veya üretici kontrol yöntemi bulunmalı.", "avoid": "Koruma elemanı ömrünü sınırsız kabul etmek."},
+        {"name": "Topraklama", "verify": "Priz hattının işlevsel koruma iletkeni uzman ölçümüyle doğrulanmalı.", "avoid": "Grup prizin tesisat kusurunu düzelttiğini düşünmek."}
+      ],
+      "noBuy": [
+        "Mevcut grup priz hasarsız, yeterli kapasitede ve koruma göstergesi sağlıklıysa yeni ürün almayın.",
+        "Yanık izi, gevşeklik, ısınma veya erime varsa ürünü kullanmayın; yalnız yeni grup priz alarak tesisat sorununu kapatmayın.",
+        "Isıtıcı, kettle veya yüksek güçlü cihazları üretici açıkça izin vermiyorsa grup prize bağlamayın."
+      ],
+      "gateChecks": [
+        "Bağlayacağım cihazların toplam wattını hesapladım.",
+        "Ürünün amper, watt ve joule değerlerini aynı ilanda doğrulayacağım.",
+        "Bu ürünün bina tesisatındaki sabit korumanın yerine geçmediğini biliyorum."
+      ],
+      "faqs": [
+        {"question": "Joule değeri ne kadar yüksekse ürün her zaman daha mı iyidir?", "answer": "Hayır. Joule değeri tek ölçüt değildir; nominal akım, toplam yük, gösterge, ürün ömrü ve işlevsel topraklama koşulu birlikte değerlendirilir."},
+        {"question": "Akım korumalı priz topraklama sorununu çözer mi?", "answer": "Hayır. Grup priz tesisatın koruma iletkenini oluşturmaz ve topraklama ölçümünün yerine geçmez."},
+        {"question": "Buzdolabı veya klima grup prize bağlanır mı?", "answer": "Motorlu cihazların kalkış akımı ve üretici talimatı ayrıca değerlendirilmelidir. Uzatma veya grup priz kullanımı üretici tarafından açıkça uygun görülmüyorsa doğrudan sabit prize bağlanmalıdır."}
+      ],
+      "related": [
+        {"label": "Gerilim koruma çözüm seçici", "path": "/hesaplama/gerilim-koruma-cozum-secici/"},
+        {"label": "Parafudr ve gerilim koruma farkı", "path": "/haberler/parafudr-gerilim-koruma-rolesi-farki"}
+      ],
+      "terms": ["joule", "nominal akım", "toplam yük", "koruma göstergesi"]
+    },
+    {
+      "slug": "modem-ont-mini-ups",
+      "category": "mini_ups",
+      "risk": "compatibility",
+      "affiliatePolicy": "qualified_search",
+      "affiliateEnabled": true,
+      "title": "Modem ve Fiber ONT İçin Mini UPS Nasıl Seçilir? 5V, 9V, 12V | ALO186",
+      "h1": "Mini UPS seçerken voltajı değil voltaj, polarite, jak ve wattı birlikte eşleştirin.",
+      "description": "Modem, fiber ONT ve küçük ağ cihazları için mini UPS seçiminde çıkış voltajı, polarite, jak ölçüsü, toplam watt ve kesintisiz geçiş kontrolü.",
+      "eyebrow": "Mini UPS · modem · ONT · polarite · çalışma süresi · 10 dk",
+      "answer": "Modem ve ONT etiketlerindeki voltaj ile akımı ayrı ayrı okuyun. Mini UPS çıkışı aynı voltajı, doğru merkez polaritesini ve uyumlu jak ölçüsünü sağlamalı; toplam watt kapasitesi iki cihazı güvenlik payıyla karşılamalıdır.",
+      "toolPath": "/hesaplama/modem-internet-yedekleme/",
+      "toolLabel": "Modem ve ONT yedekleme hesabını aç",
+      "productCenterPath": "/akilli-urun-secimi?kategori=mini_ups",
+      "amazonSearchQuery": "modem mini UPS 12V 9V 5V fiber ONT",
+      "whoFor": [
+        {"title": "Fiber internet", "text": "Modem ile ayrı ONT cihazını aynı anda yedeklemek isteyenler."},
+        {"title": "Uzaktan çalışma", "text": "Kısa kesintilerde internet bağlantısının yeniden başlamamasını hedefleyenler."},
+        {"title": "Küçük ağ ekipmanı", "text": "Modem, ONT ve düşük güçlü switch toplamını hesaplayabilenler."}
+      ],
+      "criteria": [
+        {"name": "Çıkış voltajı", "verify": "Her cihazın 5 V, 9 V veya 12 V etiket değeri tam eşleşmeli.", "avoid": "Yakın voltajın yeterli olduğunu varsaymak."},
+        {"name": "Polarite", "verify": "Merkez artı/eksi sembolü cihaz ve kabloda aynı olmalı.", "avoid": "Jak oturuyor diye polariteyi doğru kabul etmek."},
+        {"name": "Jak ölçüsü", "verify": "Dış ve iç çap üretici adaptörüyle eşleşmeli.", "avoid": "Gevşek veya zorlanan dönüştürücü kullanmak."},
+        {"name": "Toplam güç", "verify": "Volt × amper ile modem ve ONT toplamını güvenlik payıyla hesaplayın.", "avoid": "Yalnız tek cihazın tüketimini dikkate almak."}
+      ],
+      "noBuy": [
+        "Mevcut UPS kesintide her iki cihazı hedef süre boyunca çalıştırıyorsa yeni ürün almayın.",
+        "Cihaz etiketleri okunmuyorsa veya polarite belirsizse ürün aramasına geçmeyin.",
+        "Şebeke geldiğinde cihazı yeniden başlatan ürün kesintisiz internet hedefini karşılamayabilir."
+      ],
+      "gateChecks": [
+        "Modem ve ONT voltaj, akım ve polarite etiketlerini okudum.",
+        "Jak ölçüsünü veya üretici uyumluluk listesini doğrulayacağım.",
+        "Ürünün geçiş davranışını ve çalışma süresi varsayımını kontrol edeceğim."
+      ],
+      "faqs": [
+        {"question": "12 V modem 9 V çıkışa bağlanır mı?", "answer": "Hayır. Çıkış voltajı üretici etiketindeki değerle eşleşmelidir; yanlış voltaj kararsız çalışma veya hasar riski oluşturabilir."},
+        {"question": "Mini UPS çalışma süresi nasıl hesaplanır?", "answer": "Bataryanın kullanılabilir Wh değeri, toplam modem/ONT wattı ve dönüşüm kaybı birlikte değerlendirilir. Etiket mAh değeri tek başına yeterli değildir."},
+        {"question": "Her mini UPS fiber ONT ile uyumlu mudur?", "answer": "Hayır. ONT voltajı, polaritesi, jakı ve akımı modemden farklı olabilir; iki çıkışın ayrı ayrı uyumu gerekir."}
+      ],
+      "related": [
+        {"label": "UPS çalışma süresi", "path": "/hesaplama/ups-suresi/"},
+        {"label": "Kesinti hazırlık planı", "path": "/hesaplama/kesinti-hazirlik-plani/"}
+      ],
+      "terms": ["mini UPS", "fiber ONT", "DC polarite", "jak ölçüsü"]
+    },
+    {
+      "slug": "tasinabilir-guc-istasyonu",
+      "category": "power_station",
+      "risk": "compatibility",
+      "affiliatePolicy": "qualified_search",
+      "affiliateEnabled": true,
+      "title": "Taşınabilir Güç İstasyonu Nasıl Seçilir? Wh, Watt ve EPS | ALO186",
+      "h1": "Power station seçerken Wh kapasitesini sürekli ve tepe güçten ayırın.",
+      "description": "Taşınabilir güç istasyonu seçiminde kullanılabilir Wh, sürekli ve tepe watt, saf sinüs, EPS geçişi, LiFePO4, şarj ve solar giriş sınırları.",
+      "eyebrow": "Power station · Wh · tepe güç · EPS · LiFePO4 · 12 dk",
+      "answer": "Önce çalıştırılacak cihazların sürekli wattını, motorlu yüklerin kalkış tepesini ve hedef süreyi hesaplayın. Power station kullanılabilir Wh, sürekli/tepe çıkış ve EPS davranışı bu üç sonucu aynı anda karşılamalıdır.",
+      "toolPath": "/hesaplama/power-station-kapasite-eps-uygunluk/",
+      "toolLabel": "Power station kapasite ve EPS testini aç",
+      "productCenterPath": "/akilli-urun-secimi?kategori=power_station",
+      "amazonSearchQuery": "LiFePO4 taşınabilir güç istasyonu saf sinüs power station",
+      "whoFor": [
+        {"title": "Kısa ev kesintileri", "text": "Aydınlatma, internet ve düşük güçlü cihazları taşınabilir biçimde yedeklemek isteyenler."},
+        {"title": "Seyahat ve saha", "text": "AC, USB-C ve DC çıkışlarını aynı cihazda kullanmak isteyenler."},
+        {"title": "Güneşten şarj", "text": "Panel gerilim ve akım sınırlarını tam model kılavuzundan doğrulayabilenler."}
+      ],
+      "criteria": [
+        {"name": "Kullanılabilir enerji", "verify": "Etiket Wh değerinden dönüşüm ve rezerv payını düşerek süre hesabı yapın.", "avoid": "Kapasitenin tamamını AC çıkışta kullanılabilir sanmak."},
+        {"name": "Sürekli güç", "verify": "Aynı anda çalışacak yüklerin toplam wattından yüksek olmalı.", "avoid": "Azami veya tepe gücü sürekli güç gibi okumak."},
+        {"name": "Tepe güç", "verify": "Kompresör ve motor kalkışını karşılayabilmeli.", "avoid": "Yalnız normal çalışma wattına göre seçim yapmak."},
+        {"name": "EPS davranışı", "verify": "Geçiş süresi ve desteklenen yük türleri kılavuzda açık olmalı.", "avoid": "UPS ifadesini bütün hassas cihazlar için kesintisiz kabul etmek."}
+      ],
+      "noBuy": [
+        "Mevcut kapasite hedef süreyi ve tepe yükü karşılıyorsa daha büyük ürün almayın.",
+        "Sürekli çıkış, tepe çıkış veya kullanılabilir Wh alanı belirsizse ürünü karşılaştırmayın.",
+        "Sabit bina beslemesine geri enerji verme amacıyla taşınabilir ürün kullanmayın."
+      ],
+      "gateChecks": [
+        "Sürekli watt, tepe watt ve hedef süre hesabını tamamladım.",
+        "Saf sinüs ve EPS geçiş koşullarını tam model kılavuzunda doğrulayacağım.",
+        "Solar giriş kullanacaksam gerilim, akım, konnektör ve polarite sınırlarını kontrol edeceğim."
+      ],
+      "faqs": [
+        {"question": "1.000 Wh power station 1.000 W cihazı bir saat çalıştırır mı?", "answer": "Genellikle tam bir saat varsayılmaz. Dönüşüm kaybı, rezerv, sıcaklık ve cihazın gerçek tüketimi kullanılabilir süreyi azaltır."},
+        {"question": "Tepe güç ile sürekli güç arasındaki fark nedir?", "answer": "Sürekli güç cihazın uzun süre sağlayabildiği çıkıştır. Tepe güç motor veya kompresör kalkışı gibi kısa süreli yüksek talepler içindir."},
+        {"question": "EPS özelliği bilgisayar için yeterli midir?", "answer": "Geçiş süresi ve desteklenen yük üretici kılavuzunda doğrulanmalıdır. EPS ibaresi tek başına bütün hassas cihazlarda kesintisiz çalışma garantisi değildir."}
+      ],
+      "related": [
+        {"label": "Power station için güneş paneli", "path": "/haberler/power-station-gunes-paneli-nasil-secilir"},
+        {"label": "Yedek güç çözüm seçici", "path": "/hesaplama/yedek-guc-cozum-secici/"}
+      ],
+      "terms": ["Wh", "sürekli güç", "tepe güç", "EPS", "LiFePO4"]
+    },
+    {
+      "slug": "sarjli-acil-aydinlatma",
+      "category": "emergency_light",
+      "risk": "consumer",
+      "affiliatePolicy": "qualified_search",
+      "affiliateEnabled": true,
+      "title": "Şarjlı Acil Aydınlatma Nasıl Seçilir? Lümen ve Çalışma Süresi | ALO186",
+      "h1": "Acil aydınlatmada en parlak modu değil, gerekli lümen ve gerçek süreyi seçin.",
+      "description": "Ev ve küçük işletme için şarjlı acil aydınlatma seçiminde lümen, düşük mod süresi, otomatik yanma, fiziksel düğme, pil göstergesi ve yerleşim.",
+      "eyebrow": "Acil aydınlatma · lümen · süre · otomatik yanma · 8 dk",
+      "answer": "Önce hangi odaların ve kaçış yolunun aydınlanacağını belirleyin. Aynı ışık modundaki lümen ile çalışma süresini karşılaştırın; en yüksek parlaklıkta yazılan kısa süreyi düşük mod süresiyle karıştırmayın.",
+      "toolPath": "/hesaplama/acil-aydinlatma-sure-uygunluk/",
+      "toolLabel": "Acil aydınlatma süre uygunluğunu test et",
+      "productCenterPath": "/akilli-urun-secimi?kategori=emergency_light",
+      "amazonSearchQuery": "şarjlı acil durum lambası pil göstergeli kamp lambası",
+      "whoFor": [
+        {"title": "Ev hazırlığı", "text": "Koridor, mutfak ve temel yaşam alanlarında taşınabilir ışık isteyenler."},
+        {"title": "Küçük işletme", "text": "Elektrik kesilince fiziksel düğmeyle hızlıca kullanılabilen yedek ışık arayanlar."},
+        {"title": "Taşıma ihtiyacı", "text": "Asma, masaüstü ve el feneri işlevlerini kullanım alanına göre ayıranlar."}
+      ],
+      "criteria": [
+        {"name": "Lümen", "verify": "Alan ve kullanım amacı için aynı moddaki ışık çıktısını karşılaştırın.", "avoid": "Yalnız LED sayısına göre karar vermek."},
+        {"name": "Çalışma süresi", "verify": "Düşük, orta ve yüksek mod süreleri ayrı belirtilmeli.", "avoid": "En düşük mod süresini en yüksek parlaklık süresi sanmak."},
+        {"name": "Kontrol", "verify": "Karanlıkta uygulama olmadan fiziksel düğmeyle açılabilmeli.", "avoid": "Yalnız dokunmatik veya uygulama bağımlı ürün seçmek."},
+        {"name": "Pil durumu", "verify": "Şarj göstergesi ve şarj tipi günlük kontrole uygun olmalı.", "avoid": "Aylarca şarj kontrolü yapmadan hazır kabul etmek."}
+      ],
+      "noBuy": [
+        "Mevcut lambalar hedef alanı ve süreyi karşılıyorsa yeni ürün almayın.",
+        "Lümen ile çalışma süresi aynı mod için verilmemişse karşılaştırmayı tamamlanmış saymayın.",
+        "Sabit mevzuat gerektiren acil aydınlatma tesisatı yerine taşınabilir lamba kullanmayın."
+      ],
+      "gateChecks": [
+        "Aydınlatılacak alanı, adet ihtiyacını ve hedef süreyi hesapladım.",
+        "Lümen ve çalışma süresini aynı ışık modu için doğrulayacağım.",
+        "Fiziksel düğme, pil göstergesi ve şarj bağlantısını kontrol edeceğim."
+      ],
+      "faqs": [
+        {"question": "Acil aydınlatmada kaç lümen gerekir?", "answer": "Tek bir sayı her oda için doğru değildir. Alan, yerleşim, yansımalar ve kullanım amacı birlikte değerlendirilmelidir; ücretsiz araç adet ve süre ön hesabı sağlar."},
+        {"question": "Kamp lambası acil aydınlatma yerine geçer mi?", "answer": "Ev hazırlığında taşınabilir ışık sağlayabilir; ancak mevzuata tabi sabit acil aydınlatma sisteminin proje, otomatik test ve bakım şartlarının yerine geçmez."},
+        {"question": "Pil ne sıklıkla kontrol edilmeli?", "answer": "Üretici talimatına uyun ve düzenli işlev testi yapın. Uzun süre kullanılmayan ürünün şarj seviyesi kesinti öncesinde ayrıca kontrol edilmelidir."}
+      ],
+      "related": [
+        {"label": "Kesinti hazırlık planı", "path": "/hesaplama/kesinti-hazirlik-plani/"},
+        {"label": "Elektrik kesintisi kiti", "path": "/hesaplama/elektrik-kesintisi-kiti/"}
+      ],
+      "terms": ["lümen", "çalışma süresi", "otomatik yanma", "pil göstergesi"]
+    },
+    {
+      "slug": "fotoelektrik-duman-alarmi",
+      "category": "smoke_alarm",
+      "risk": "safety",
+      "affiliatePolicy": "qualified_search",
+      "affiliateEnabled": true,
+      "title": "Fotoelektrik Duman Alarmı Nasıl Seçilir? EN 14604 ve Yerleşim | ALO186",
+      "h1": "Duman alarmında sensör kadar standart, ürün yaşı, test ve yerleşimi doğrulayın.",
+      "description": "Fotoelektrik duman alarmı seçiminde EN 14604, test düğmesi, düşük pil uyarısı, ürün ömrü, bağlantı ve doğru yerleşim kontrolü.",
+      "eyebrow": "Duman alarmı · EN 14604 · test · ürün ömrü · 10 dk",
+      "answer": "Ürün ve ambalaj üzerinde EN 14604 bilgisini, test düğmesini, düşük pil uyarısını, üretim/son kullanım bilgisini ve fotoelektrik sensör açıklamasını doğrulayın. Doğru ürün yanlış yere monte edilirse erken uyarı performansı düşebilir.",
+      "toolPath": "/hesaplama/duman-alarmi-yerlesim-bakim-uygunluk/",
+      "toolLabel": "Duman alarmı yerleşim ve bakım testini aç",
+      "productCenterPath": "/akilli-urun-secimi?kategori=smoke_alarm",
+      "amazonSearchQuery": "EN 14604 fotoelektrik duman alarmı test düğmeli",
+      "whoFor": [
+        {"title": "Konut", "text": "Uyuma alanları ve kat geçişleri için temel erken uyarı planı hazırlayanlar."},
+        {"title": "Kiracı ve ev sahibi", "text": "Ürün yaşı, aylık test ve pil değişimi sorumluluğunu görünür tutanlar."},
+        {"title": "Birden fazla kat", "text": "Bağlantılı alarm ihtiyacını yerleşim planıyla birlikte değerlendirenler."}
+      ],
+      "criteria": [
+        {"name": "Standart", "verify": "Ürün ve ambalajda EN 14604 uygunluk bilgisi bulunmalı.", "avoid": "Yalnız ürün başlığındaki alarm ifadesine güvenmek."},
+        {"name": "Test ve uyarı", "verify": "Test düğmesi ile sesli düşük pil uyarısı açıkça belirtilmeli.", "avoid": "Test edilemeyen ürünü çalışıyor kabul etmek."},
+        {"name": "Ürün ömrü", "verify": "Üretim tarihi ve üreticinin önerdiği kullanım ömrü izlenebilmeli.", "avoid": "Sensör ömrünü sınırsız kabul etmek."},
+        {"name": "Yerleşim", "verify": "Tavan/duvar mesafesi ve pişirme alanı uzaklığı üretici talimatına uymalı.", "avoid": "Buhar, hava akımı veya kör noktayı göz ardı etmek."}
+      ],
+      "noBuy": [
+        "Mevcut alarm ürün ömrü içinde, testten geçiyor ve doğru yerleşimdeyse gereksiz değiştirmeyin.",
+        "Standart, üretim tarihi veya test işlevi belirsiz ürünü satın almayın.",
+        "Alarmı yangın güvenliği planının ve düzenli testin tek başına yerine koymayın."
+      ],
+      "gateChecks": [
+        "Kat, uyuma alanı ve pişirme noktalarına göre adet ihtiyacını değerlendirdim.",
+        "EN 14604, test düğmesi, düşük pil uyarısı ve ürün ömrünü doğrulayacağım.",
+        "Montaj ve aylık test talimatını saklayacağım."
+      ],
+      "faqs": [
+        {"question": "Fotoelektrik ve iyonizasyon alarmı arasındaki fark nedir?", "answer": "Sensör teknolojileri farklı yangın gelişimlerine farklı tepki verebilir. Konut ürünü seçiminde üretici kapsamı, standart uygunluğu ve yerel gereklilikler birlikte değerlendirilmelidir."},
+        {"question": "Duman alarmı mutfağa takılır mı?", "answer": "Pişirme buharı yanlış alarma yol açabilir. Üreticinin mesafe ve yerleşim talimatına uyulmalı; uygun alarm türü ve konumu belirlenmelidir."},
+        {"question": "Duman alarmı kaç yılda değiştirilir?", "answer": "Tek bir evrensel süre yerine ürün üzerindeki üretim tarihi ve üreticinin belirtilen kullanım ömrü esas alınmalıdır."}
+      ],
+      "related": [
+        {"label": "Kesinti ve yangın hazırlık planı", "path": "/hesaplama/kesinti-hazirlik-plani/"},
+        {"label": "Elektrik karar motoru", "path": "/karar-motoru"}
+      ],
+      "terms": ["fotoelektrik sensör", "EN 14604", "test düğmesi", "düşük pil uyarısı"]
+    },
+    {
+      "slug": "akilli-priz-enerji-olcer",
+      "category": "smart_plug",
+      "risk": "compatibility",
+      "affiliatePolicy": "qualified_search",
+      "affiliateEnabled": true,
+      "title": "Enerji Ölçerli Akıllı Priz Nasıl Seçilir? Akım, Watt ve Kayıt | ALO186",
+      "h1": "Akıllı priz seçerken 16 A yazısından önce gerçek yükü ve anahtarlama sınırını doğrulayın.",
+      "description": "Enerji ölçerli akıllı priz seçiminde sürekli akım, watt, motor kalkışı, kWh geçmişi, düşük güç çözünürlüğü, yerel kontrol ve bulut bağımlılığı.",
+      "eyebrow": "Akıllı priz · enerji ölçümü · sürekli akım · kWh · 10 dk",
+      "answer": "Bağlanacak cihazın gerçek sürekli akımını ve varsa kalkış akımını belirleyin. Akıllı prizin sürekli anahtarlama sınırı, ölçüm çözünürlüğü, geçmiş kayıt süresi ve internet olmadan çalışma davranışı ihtiyacınıza uymalıdır.",
+      "toolPath": "/hesaplama/akilli-priz-enerji-olcer-uygunluk/",
+      "toolLabel": "Akıllı priz ve enerji ölçer uygunluk testini aç",
+      "productCenterPath": "/akilli-urun-secimi?kategori=smart_plug",
+      "amazonSearchQuery": "enerji ölçerli akıllı priz 16A watt kWh geçmiş kayıt",
+      "whoFor": [
+        {"title": "Bekleme tüketimi", "text": "TV, masaüstü ekipman ve küçük cihazların günlük kWh değerini görmek isteyenler."},
+        {"title": "Zamanlama", "text": "Üretici açıkça izin verilen düşük riskli yüklerde açma-kapama programı kullananlar."},
+        {"title": "Yerel takip", "text": "Bulut hesabı, veri saklama ve internet kesintisi davranışını satın almadan önce sorgulayanlar."}
+      ],
+      "criteria": [
+        {"name": "Sürekli akım", "verify": "Cihazın gerçek akımı ürünün sürekli sınırının altında kalmalı.", "avoid": "Azami etiketi sürekli çalışma kapasitesi sanmak."},
+        {"name": "Yük türü", "verify": "Motorlu veya ısıtıcı yük için üretici açık izni bulunmalı.", "avoid": "Bütün 16 A yükleri aynı kabul etmek."},
+        {"name": "Ölçüm", "verify": "W, kWh, geçmiş süresi ve düşük güç çözünürlüğü ihtiyacı karşılamalı.", "avoid": "Sadece anlık watt gösterimini enerji analizi sanmak."},
+        {"name": "Bağlantı", "verify": "İnternet kesilince zamanlama ve manuel kontrol davranışı bilinmeli.", "avoid": "Bulut hesabı olmadan çalışacağını varsaymak."}
+      ],
+      "noBuy": [
+        "Mevcut enerji ölçer ihtiyacınız olan kayıt süresi ve doğruluğu sağlıyorsa yeni ürün almayın.",
+        "Motor, kompresör veya gözetimsiz ısıtıcı için üretici açık izin vermiyorsa akıllı priz kullanmayın.",
+        "Priz veya fişte ısınma varsa cihaz eklemek yerine elektrik tesisatını kontrol ettirin."
+      ],
+      "gateChecks": [
+        "Bağlayacağım cihazın sürekli akımını ve yük türünü doğruladım.",
+        "Ölçüm geçmişi, düşük güç çözünürlüğü ve dışa aktarma ihtiyacımı belirledim.",
+        "İnternet kesintisi, yerel düğme ve veri hesabı koşullarını kontrol edeceğim."
+      ],
+      "faqs": [
+        {"question": "16 A akıllı priz her 16 A cihaz için uygun mudur?", "answer": "Hayır. Yükün sürekli, motorlu, kapasitif veya rezistif yapısı ve üretici anahtarlama sınırı ayrıca değerlendirilir."},
+        {"question": "Akıllı priz elektrik faturasını ölçer mi?", "answer": "Tüketim takibi sağlar; ölçüm doğruluğu ürün sınıfına bağlıdır ve faturalandırma sayacının yerine geçmez."},
+        {"question": "İnternet giderse program çalışır mı?", "answer": "Modele bağlıdır. Zamanlamanın cihazda mı bulutta mı saklandığı ve manuel düğmenin işlevi ürün sayfasında doğrulanmalıdır."}
+      ],
+      "related": [
+        {"label": "Elektrik faturası zekâ merkezi", "path": "/fatura-analizi"},
+        {"label": "Ekipman bakım planı", "path": "/hesaplama/ekipman-bakim-plani/"}
+      ],
+      "terms": ["akıllı priz", "enerji ölçer", "sürekli akım", "kWh geçmişi"]
+    },
+    {
+      "slug": "ges-malzemeleri",
+      "category": "solar_components",
+      "risk": "professional",
+      "affiliatePolicy": "professional_only",
+      "affiliateEnabled": false,
+      "title": "GES Malzemeleri Nasıl Seçilir? Panel, Kablo, Konnektör ve DC Koruma | ALO186",
+      "h1": "GES malzemesi marka listesinden önce proje değerleriyle seçilir.",
+      "description": "GES paneli, solar kablo, konnektör, DC ayırıcı ve koruma ekipmanında proje akımı, gerilimi, çevre koşulu, standart ve üretici uyumu kontrolü.",
+      "eyebrow": "GES · panel · DC kablo · konnektör · proje doğrulaması · 12 dk",
+      "answer": "Sabit GES malzemeleri tek tek ürün aramasıyla güvenli seçilemez. Dizi Voc/Isc değerleri, seri-paralel yapı, kablo akım taşıma ve gerilim düşümü, konnektör eşleşmesi, çevre koşulu ve koruma koordinasyonu projede birlikte doğrulanmalıdır.",
+      "toolPath": "/hesaplama/gunes-paneli-power-station-uygunluk/",
+      "toolLabel": "Taşınabilir panel uyumluluk testini aç",
+      "productCenterPath": "/haberler/power-station-gunes-paneli-nasil-secilir",
+      "amazonSearchQuery": null,
+      "whoFor": [
+        {"title": "Taşınabilir panel", "text": "Yalnız üreticinin taşınabilir güç istasyonu giriş sınırlarını doğrulayan kullanıcılar."},
+        {"title": "Çatı GES", "text": "Yetkili proje, uygulama ve kabul sürecini birlikte yürüten profesyonel ekipler."},
+        {"title": "Bakım ve değişim", "text": "Tam model ve elektriksel eşdeğerlik kanıtı olmadan parça değiştirmeyen tesisler."}
+      ],
+      "criteria": [
+        {"name": "Dizi gerilimi", "verify": "Soğuk hava düzeltilmiş toplam Voc cihazın mutlak sınırının altında kalmalı.", "avoid": "Yalnız panel wattına göre seçim yapmak."},
+        {"name": "Dizi akımı", "verify": "Isc/Imp, paralel dizi sayısı ve koruma değerleri birlikte hesaplanmalı.", "avoid": "Konnektör ve kabloyu yalnız fiziksel uyuma göre seçmek."},
+        {"name": "Kablo ve çevre", "verify": "UV, sıcaklık, döşeme, akım taşıma ve gerilim düşümü proje koşuluna uymalı.", "avoid": "Genel amaçlı kabloyu solar DC devrede kullanmak."},
+        {"name": "Üretici eşleşmesi", "verify": "Konnektör çiftleri ve ekipman tam model uyumu belgelenmeli.", "avoid": "Farklı üretici konnektörlerini görünüşe göre eşdeğer kabul etmek."}
+      ],
+      "noBuy": [
+        "Proje akım ve gerilim değerleri bulunmadan sabit GES malzemesi satın almayın.",
+        "Konnektör, kablo veya koruma ekipmanını yalnız fiyat ya da görsel benzerlikle değiştirmeyin.",
+        "Taşınabilir panel hesabını çatı GES proje ve kabul sürecinin yerine kullanmayın."
+      ],
+      "gateChecks": [],
+      "faqs": [
+        {"question": "Aynı watt değerindeki iki panel eşdeğer midir?", "answer": "Hayır. Voc, Vmp, Isc, Imp, sıcaklık katsayıları, boyut, konnektör ve mekanik değerler farklı olabilir."},
+        {"question": "Solar kablo kesiti yalnız akıma göre mi seçilir?", "answer": "Hayır. Akım taşıma, gerilim düşümü, sıcaklık, döşeme biçimi, UV ve kısa devre koşulları birlikte değerlendirilir."},
+        {"question": "ALO186 neden bu sayfada Amazon bağlantısı göstermiyor?", "answer": "Sabit GES bileşenlerinde yanlış seçim yangın, ark ve ekipman hasarı riski oluşturabilir. Bu nedenle doğrudan mağaza bağlantısı yerine proje ve profesyonel doğrulama rotası gösterilir."}
+      ],
+      "related": [
+        {"label": "PV string sigortası ve ters akım", "path": "/haberler/ges-pv-string-sigortasi-ters-akim-hesabi"},
+        {"label": "GES inverter izolasyon hatası", "path": "/haberler/ges-inverter-izolasyon-direnci-dusuk-hatasi"}
+      ],
+      "terms": ["Voc", "Isc", "solar kablo", "DC konnektör", "koruma koordinasyonu"]
+    }
+  ]
+}
