@@ -1,0 +1,328 @@
+name: ALO186 ticari yönetişim ve canlı yayın tazeliği
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/**'
+      - 'alo186/hizmetler/**'
+      - 'alo186/kurumsal-on-degerlendirme/**'
+      - 'alo186/urun-eslestirme/catalog.js'
+      - 'alo186/deployment/guard_commerce_routes_v2.py'
+      - 'alo186/deployment/inject_shortlist_growth.py'
+      - 'alo186/tests/test_commerce_governance_v2.py'
+      - '.github/workflows/alo186-commerce-governance-v2.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/**'
+      - 'alo186/hizmetler/**'
+      - 'alo186/kurumsal-on-degerlendirme/**'
+      - 'alo186/urun-eslestirme/catalog.js'
+      - 'alo186/deployment/guard_commerce_routes_v2.py'
+      - 'alo186/deployment/inject_shortlist_growth.py'
+      - 'alo186/tests/test_commerce_governance_v2.py'
+      - '.github/workflows/alo186-commerce-governance-v2.yml'
+  workflow_run:
+    workflows: ['ALO186 GitHub Pages — sunucusuz canlı yayın']
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-commerce-governance-${{ github.event_name }}-${{ github.ref || github.event.workflow_run.head_branch }}
+  cancel-in-progress: true
+
+jobs:
+  artifact_guard:
+    if: github.event_name != 'workflow_run'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Kaynak ticari yönetişim sözleşmeleri
+        run: |
+          set -euo pipefail
+          python alo186/tests/test_commerce_governance_v2.py
+          python -m py_compile alo186/deployment/guard_commerce_routes_v2.py
+          node --check alo186/amazon-elektrik-urunleri/commercial.js
+          node --check alo186/urun-eslestirme/catalog.js
+
+      - name: Mevcut güven ve yayın regresyonları
+        run: |
+          set -euo pipefail
+          python alo186/tests/test_commercial_service_pages.py
+          python alo186/tests/test_commercial_category_pages.py
+          python alo186/tests/test_content_intent_consolidation.py
+          python alo186/tests/test_private_technical_search.py
+          python alo186/tests/device_damage_deadline_guard.py
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+
+      - name: Canonical üretim paketini oluştur
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-commerce-v2-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-commerce-v2-canonical
+
+      - name: Custom-domain Pages artifactı
+        run: |
+          set -euo pipefail
+          cp -a /tmp/alo186-commerce-v2-canonical /tmp/alo186-commerce-v2-custom
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-commerce-v2-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-commerce-v2-custom \
+            --base-path ''
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-commerce-v2-custom \
+            --base-path '' \
+            > /tmp/alo186-commerce-v2-custom-growth.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-commerce-v2-custom \
+            --base-path ''
+          python alo186/deployment/guard_commerce_routes_v2.py \
+            --site /tmp/alo186-commerce-v2-custom \
+            | tee /tmp/alo186-commerce-v2-custom-guard.json
+
+      - name: Project-path Pages artifactı
+        run: |
+          set -euo pipefail
+          cp -a /tmp/alo186-commerce-v2-canonical /tmp/alo186-commerce-v2-project
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-commerce-v2-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-commerce-v2-project \
+            --base-path '/chatgpt'
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-commerce-v2-project \
+            --base-path '/chatgpt' \
+            > /tmp/alo186-commerce-v2-project-growth.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-commerce-v2-project \
+            --base-path '/chatgpt'
+          python alo186/deployment/guard_commerce_routes_v2.py \
+            --site /tmp/alo186-commerce-v2-project \
+            | tee /tmp/alo186-commerce-v2-project-guard.json
+
+      - name: Ticari rota, arama, sitemap ve base-path kabulü
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          commercial = [
+              '/amazon-elektrik-urunleri',
+              '/amazon-elektrik-urunleri/powerbank-usb-c-secimi',
+              '/amazon-elektrik-urunleri/akim-korumali-grup-priz-secimi',
+              '/amazon-elektrik-urunleri/modem-mini-ups-secimi',
+              '/amazon-elektrik-urunleri/acil-aydinlatma-duman-alarmi',
+          ]
+          services = [
+              '/hizmetler/otel-elektrik-surekliligi-denetimi/',
+              '/hizmetler/elektrik-teklif-teknik-inceleme/',
+              '/hizmetler/ges-batarya-ev-sarj-fizibilitesi/',
+          ]
+          for root, prefix in [
+              (Path('/tmp/alo186-commerce-v2-custom'), ''),
+              (Path('/tmp/alo186-commerce-v2-project'), '/chatgpt'),
+          ]:
+              release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
+              pages=json.loads((root/'pages-release.json').read_text(encoding='utf-8'))
+              search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
+              sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
+              entries={item['canonicalPath']: item for item in search['entries']}
+              assert release['routeCount'] == len(release['routes'])
+              assert pages['routeCount'] == release['routeCount']
+              assert release['routingVersion'] >= 41
+              for route in commercial + services:
+                  path=root/route.strip('/')/'index.html'
+                  assert path.is_file(), path
+                  assert f'https://www.alo186.com{route}' in sitemap
+                  assert route in entries, route
+                  expected=(prefix+route) if prefix else route
+                  assert entries[route]['url'] == expected, (entries[route]['url'], expected)
+                  for field in ('price','stock','rating','seller','warranty','affiliateCommission'):
+                      assert field not in entries[route]
+              hub=(root/'amazon-elektrik-urunleri/index.html').read_text(encoding='utf-8').lower()
+              assert 'satış ortaklığı' in hub
+              assert 'amazon.com.tr' not in hub
+              power=(root/'amazon-elektrik-urunleri/powerbank-usb-c-secimi/index.html').read_text(encoding='utf-8')
+              assert 'data-fresh-products' in power
+              for route in commercial[2:]:
+                  html=(root/route.strip('/')/'index.html').read_text(encoding='utf-8')
+                  assert 'data-fresh-products' not in html
+          PY
+
+      - name: Doğrulanmış ticari yönetişim artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-commerce-governance-pages
+          path: |
+            /tmp/alo186-commerce-v2-custom
+            /tmp/alo186-commerce-v2-custom-guard.json
+            /tmp/alo186-commerce-v2-project-guard.json
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
+
+  live_freshness:
+    if: >-
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Canlı release makbuzunun deploy edilen commit ile eşleşmesini bekle
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          rm -f /tmp/alo186-live-release.json /tmp/alo186-live-release.headers
+          ok=false
+          for attempt in $(seq 1 24); do
+            cache_bust="${EXPECTED_SHA}-${attempt}-$(date +%s)"
+            if curl --silent --show-error --fail \
+              --connect-timeout 10 --max-time 25 \
+              -H 'Cache-Control: no-cache, no-store, max-age=0' \
+              -H 'Pragma: no-cache' \
+              -D /tmp/alo186-live-release.headers \
+              "https://www.alo186.com/pages-release.json?deploy=${cache_bust}" \
+              -o /tmp/alo186-live-release.json; then
+              if python - "$EXPECTED_SHA" <<'PY'
+          import json,sys
+          from pathlib import Path
+          expected=sys.argv[1]
+          data=json.loads(Path('/tmp/alo186-live-release.json').read_text(encoding='utf-8'))
+          assert data.get('commit') == expected, (data.get('commit'), expected)
+          assert data.get('hostingMode') == 'github-pages'
+          assert data.get('canonicalHost') == 'https://www.alo186.com'
+          PY
+              then
+                ok=true
+                break
+              fi
+            fi
+            sleep 10
+          done
+          if [ "$ok" != true ]; then
+            echo "Canlı alan adı beklenen deploy commitini sunmuyor: $EXPECTED_SHA" >&2
+            test -f /tmp/alo186-live-release.json && cat /tmp/alo186-live-release.json >&2 || true
+            exit 1
+          fi
+
+      - name: Canlı ticari ve teknik rotaları doğrula
+        shell: bash
+        run: |
+          set -euo pipefail
+          routes=(
+            '/'
+            '/durum/'
+            '/arama/'
+            '/katalog-guven-durumu'
+            '/amazon-elektrik-urunleri'
+            '/amazon-elektrik-urunleri/powerbank-usb-c-secimi'
+            '/amazon-elektrik-urunleri/akim-korumali-grup-priz-secimi'
+            '/amazon-elektrik-urunleri/modem-mini-ups-secimi'
+            '/amazon-elektrik-urunleri/acil-aydinlatma-duman-alarmi'
+            '/hizmetler/otel-elektrik-surekliligi-denetimi/'
+            '/hizmetler/elektrik-teklif-teknik-inceleme/'
+            '/hizmetler/ges-batarya-ev-sarj-fizibilitesi/'
+          )
+          for route in "${routes[@]}"; do
+            file="/tmp/alo186-live-${route//\//_}.html"
+            code=$(curl --silent --show-error --output "$file" \
+              --write-out '%{http_code}' --connect-timeout 10 --max-time 25 \
+              -H 'Cache-Control: no-cache, no-store, max-age=0' \
+              "https://www.alo186.com${route}?commerce_check=$(date +%s)")
+            test "$code" = 200
+          done
+          hub=/tmp/alo186-live-_amazon-elektrik-urunleri.html
+          grep -Fq 'rel="canonical" href="https://www.alo186.com/amazon-elektrik-urunleri"' "$hub"
+          grep -Eqi 'satış ortaklığı|affiliate' "$hub"
+          ! grep -Eqi 'href="https?://(www\.)?(amazon\.com\.tr|amzn\.to)' "$hub"
+          grep -Fq 'data-fresh-products' /tmp/alo186-live-_amazon-elektrik-urunleri_powerbank-usb-c-secimi.html
+          curl --silent --show-error --fail \
+            -H 'Cache-Control: no-cache, no-store, max-age=0' \
+            "https://www.alo186.com/arama/search-index.json?commerce_check=$(date +%s)" \
+            -o /tmp/alo186-live-search-index.json
+
+      - name: Canlı ticari yayın makbuzu
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          python - "$EXPECTED_SHA" <<'PY'
+          import json,sys
+          from datetime import datetime,timezone
+          from pathlib import Path
+
+          release=json.loads(Path('/tmp/alo186-live-release.json').read_text(encoding='utf-8'))
+          search=json.loads(Path('/tmp/alo186-live-search-index.json').read_text(encoding='utf-8'))
+          expected_routes={
+              '/amazon-elektrik-urunleri',
+              '/amazon-elektrik-urunleri/powerbank-usb-c-secimi',
+              '/amazon-elektrik-urunleri/akim-korumali-grup-priz-secimi',
+              '/amazon-elektrik-urunleri/modem-mini-ups-secimi',
+              '/amazon-elektrik-urunleri/acil-aydinlatma-duman-alarmi',
+              '/hizmetler/otel-elektrik-surekliligi-denetimi/',
+              '/hizmetler/elektrik-teklif-teknik-inceleme/',
+              '/hizmetler/ges-batarya-ev-sarj-fizibilitesi/',
+          }
+          indexed={item.get('canonicalPath') for item in search.get('entries', [])}
+          missing=sorted(expected_routes-indexed)
+          assert not missing, missing
+          receipt={
+              'ok': True,
+              'checkedAt': datetime.now(timezone.utc).isoformat(),
+              'expectedCommit': sys.argv[1],
+              'servedCommit': release.get('commit'),
+              'canonicalHost': release.get('canonicalHost'),
+              'hostingMode': release.get('hostingMode'),
+              'commercialRoutes': 5,
+              'paidServiceRoutes': 3,
+              'searchIndexEntryCount': search.get('entryCount'),
+              'directAffiliateCategory': 'powerbank',
+              'unverifiedCommercialClaimsUsed': False,
+              'officialInstitutionImpression': False,
+          }
+          Path('/tmp/alo186-live-commerce-freshness.json').write_text(
+              json.dumps(receipt,ensure_ascii=False,indent=2)+'\n',encoding='utf-8'
+          )
+          print(json.dumps(receipt,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Canlı yayın tazelik tanısını sakla
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-live-commerce-freshness-receipt
+          path: |
+            /tmp/alo186-live-release.json
+            /tmp/alo186-live-release.headers
+            /tmp/alo186-live-search-index.json
+            /tmp/alo186-live-commerce-freshness.json
+            /tmp/alo186-live-*.html
+          if-no-files-found: warn
+          retention-days: 30
