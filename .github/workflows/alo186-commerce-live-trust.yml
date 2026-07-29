@@ -1,0 +1,203 @@
+name: ALO186 ticari güven ve canlı yayın tazelik kontrolü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/deployment/content-consolidations.json'
+      - 'alo186/deployment/apply_content_consolidation.py'
+      - 'alo186/deployment/guard_commerce_routes.py'
+      - 'alo186/deployment/inject_shortlist_growth.py'
+      - 'alo186/urun-eslestirme/**'
+      - 'alo186/tests/test_content_intent_consolidation.py'
+      - 'alo186/tests/test_commerce_route_guard.py'
+      - '.github/workflows/alo186-commerce-live-trust.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/deployment/content-consolidations.json'
+      - 'alo186/deployment/apply_content_consolidation.py'
+      - 'alo186/deployment/guard_commerce_routes.py'
+      - 'alo186/deployment/inject_shortlist_growth.py'
+      - 'alo186/urun-eslestirme/**'
+      - 'alo186/tests/test_content_intent_consolidation.py'
+      - 'alo186/tests/test_commerce_route_guard.py'
+      - '.github/workflows/alo186-commerce-live-trust.yml'
+  workflow_run:
+    workflows: ['ALO186 GitHub Pages — sunucusuz canlı yayın']
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-commerce-live-trust-${{ github.event_name }}-${{ github.ref || github.event.workflow_run.head_branch }}
+  cancel-in-progress: true
+
+jobs:
+  artifact_guard:
+    if: github.event_name != 'workflow_run'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Ticari güven ve canonical sözleşme testleri
+        run: |
+          set -euo pipefail
+          python alo186/tests/test_commerce_route_guard.py
+          python alo186/tests/test_content_intent_consolidation.py
+          node alo186/urun-eslestirme/conversion-growth-core.test.js
+          node alo186/tests/test_trust_revenue_conversion.js
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Canonical artifactı oluştur
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-commerce-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-commerce-canonical
+
+      - name: Gerçek custom-domain yayın zincirini birleştir
+        run: |
+          set -euo pipefail
+          cp -a /tmp/alo186-commerce-canonical /tmp/alo186-commerce-pages
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-commerce-pages \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-commerce-pages \
+            --base-path ''
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-commerce-pages \
+            --base-path ''
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-commerce-pages \
+            --base-path ''
+
+      - name: Statik mağaza bağlantısı ve legacy rota devre kesicisi
+        run: |
+          set -euo pipefail
+          python alo186/deployment/guard_commerce_routes.py \
+            --site /tmp/alo186-commerce-pages \
+            | tee /tmp/alo186-commerce-guard.json
+
+      - name: Doğrulanmış ticari güven artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-commerce-trust-pages
+          path: |
+            /tmp/alo186-commerce-pages
+            /tmp/alo186-commerce-guard.json
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
+
+  live_freshness:
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Canlı release makbuzunun deploy edilen commit ile eşleşmesini bekle
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          rm -f /tmp/alo186-live-release.json /tmp/alo186-live-release.headers
+          ok=false
+          for attempt in $(seq 1 18); do
+            cache_bust="${EXPECTED_SHA}-${attempt}-$(date +%s)"
+            if curl --silent --show-error --fail \
+              --connect-timeout 10 --max-time 25 \
+              -H 'Cache-Control: no-cache, no-store, max-age=0' \
+              -H 'Pragma: no-cache' \
+              -D /tmp/alo186-live-release.headers \
+              "https://www.alo186.com/pages-release.json?deploy=${cache_bust}" \
+              -o /tmp/alo186-live-release.json; then
+              if python - "$EXPECTED_SHA" <<'PY'
+          import json,sys
+          from pathlib import Path
+          expected=sys.argv[1]
+          data=json.loads(Path('/tmp/alo186-live-release.json').read_text(encoding='utf-8'))
+          assert data.get('commit') == expected, (data.get('commit'), expected)
+          assert data.get('hostingMode') == 'github-pages'
+          assert data.get('canonicalHost') == 'https://www.alo186.com'
+          PY
+              then
+                ok=true
+                break
+              fi
+            fi
+            sleep 10
+          done
+          if [ "$ok" != true ]; then
+            echo "Canlı alan adı beklenen deploy commitini sunmuyor: $EXPECTED_SHA" >&2
+            test -f /tmp/alo186-live-release.json && cat /tmp/alo186-live-release.json >&2 || true
+            exit 1
+          fi
+
+      - name: Güvenli ürün merkezi, legacy alias ve yayın durumu rotalarını doğrula
+        shell: bash
+        run: |
+          set -euo pipefail
+          for route in / /durum/ /akilli-urun-secimi /amazon-elektrik-urunleri; do
+            code=$(curl --silent --show-error --output "/tmp/alo186-live-${route//\//_}.html" \
+              --write-out '%{http_code}' --connect-timeout 10 --max-time 25 \
+              -H 'Cache-Control: no-cache, no-store, max-age=0' \
+              "https://www.alo186.com${route}?live_check=$(date +%s)")
+            test "$code" = 200
+          done
+          grep -Fq 'rel="canonical" href="https://www.alo186.com/akilli-urun-secimi"' \
+            /tmp/alo186-live-_amazon-elektrik-urunleri.html
+          grep -Fq 'data-alo186-content-alias="true"' \
+            /tmp/alo186-live-_amazon-elektrik-urunleri.html
+          ! grep -Eqi 'https?://(www\.)?(amazon\.com\.tr|amzn\.to)' \
+            /tmp/alo186-live-_amazon-elektrik-urunleri.html
+
+      - name: Canlı tazelik makbuzu
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          python - "$EXPECTED_SHA" <<'PY'
+          import json,sys
+          from datetime import datetime,timezone
+          from pathlib import Path
+          release=json.loads(Path('/tmp/alo186-live-release.json').read_text(encoding='utf-8'))
+          receipt={
+              'ok': True,
+              'checkedAt': datetime.now(timezone.utc).isoformat(),
+              'expectedCommit': sys.argv[1],
+              'servedCommit': release.get('commit'),
+              'canonicalHost': release.get('canonicalHost'),
+              'hostingMode': release.get('hostingMode'),
+              'routes': ['/', '/durum/', '/akilli-urun-secimi', '/amazon-elektrik-urunleri'],
+              'legacyCommerceAliasSafe': True,
+          }
+          Path('/tmp/alo186-live-freshness.json').write_text(json.dumps(receipt,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print(json.dumps(receipt,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Canlı yayın tazelik tanısını sakla
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-live-freshness-receipt
+          path: |
+            /tmp/alo186-live-release.json
+            /tmp/alo186-live-release.headers
+            /tmp/alo186-live-freshness.json
+            /tmp/alo186-live-*.html
+          if-no-files-found: warn
+          retention-days: 30
