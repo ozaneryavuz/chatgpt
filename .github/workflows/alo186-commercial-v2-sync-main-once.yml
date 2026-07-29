@@ -1,0 +1,31 @@
+name: ALO186 ticari genişleme main senkronizasyonu — tek sefer
+
+on:
+  push:
+    branches: [growth/alo186-commercial-expansion-v2]
+    paths:
+      - '.github/alo186-commercial-v2-sync.trigger'
+      - '.github/workflows/alo186-commercial-v2-sync-main-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: growth/alo186-commercial-expansion-v2
+          fetch-depth: 0
+      - name: Güncel main dalını güvenli biçimde birleştir
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git fetch origin main
+          git merge --no-ff --no-commit -X ours origin/main
+          git rm .github/workflows/alo186-commercial-v2-sync-main-once.yml .github/alo186-commercial-v2-sync.trigger
+          git commit -m 'chore(alo186): ticari genişleme dalını güncel main ile senkronize et'
+          git push origin HEAD:growth/alo186-commercial-expansion-v2
