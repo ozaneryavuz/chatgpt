@@ -58,7 +58,7 @@ def test_ev_contract() -> None:
         "IEC 62196-1:2025", "IEC 62196-2:2025", "Tesla mobil konnektör kontrolü",
         "TTL=540*86400000", "MAX=18", "retentionMode:'per-record'",
         "cableType==='portable'", "purpose==='replacement'", "r.crosscheck",
-        "Kullanımı durdur", "kategori=ev_cable", "Mevcut kabloyla devam edin",
+        "Kullanımı durdur", "kategori=ev_cable", "mevcut kabloyla devam edin",
     ]:
         assert token in combined, token
     assert "Sabit kablolu EVSE onarımı" in read(PAGES["ev"])
