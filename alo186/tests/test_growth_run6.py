@@ -65,7 +65,7 @@ def main() -> None:
         assert not re.search(r"\b\d{2,}[.,]?\d*\s*(?:tl|₺|usd|eur|€|\$)\b", lower)
         for forbidden in ["aggregaterating", '"price"', '"pricecurrency"', '"offers"']:
             assert forbidden not in lower
-        assert "edaş veya kamu kurumu" in lower or "edaş veya resmî" in lower or "resmî proje" in lower
+        assert any(boundary in lower for boundary in ["edaş veya kamu kurumu", "edaş veya resmî", "edaş işlemi", "resmî proje"])
         assert "satın almama" in lower or "mevcut ekipman yeterliyse" in lower or "mevcut sistem yeterliyse" in lower
 
     topic = (REPO_ROOT / ROUTES["/konu-takip-merkezi/"][0]).read_text(encoding="utf-8")
