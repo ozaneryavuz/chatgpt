@@ -1,0 +1,21 @@
+{
+  "version": 45,
+  "generatedAt": "2026-07-29",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/elektrik-bakim-takvimi/index.html",
+      "canonicalPath": "/hesaplama/elektrik-bakim-takvimi/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hizmet-secici/index.html",
+      "canonicalPath": "/hizmet-secici/",
+      "type": "tool"
+    },
+    {
+      "source": "alo186/hesaplama/urun-sonrasi-guvenlik-kontrolu/index.html",
+      "canonicalPath": "/hesaplama/urun-sonrasi-guvenlik-kontrolu/",
+      "type": "calculator"
+    }
+  ]
+}
