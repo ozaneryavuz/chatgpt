@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import sys
 import tempfile
 from pathlib import Path
@@ -31,7 +32,7 @@ def test_affiliate_anchor_policy() -> None:
     safe = (
         '<html><body><p>Reklam / satış ortaklığı: nitelikli satın alımlardan komisyon kazanılabilir.</p>'
         '<p>USB-C powerbank teknik eşleşmesi.</p>'
-        '<a href="https://www.amazon.com.tr/dp/B000000000?tag=alo186hazirlik-21" '
+        '<a href="https://www.amazon.com.tr/dp/B000000000?tag=alo186rehber-21" '
         'rel="sponsored nofollow noopener">Amazon ürün sayfasını aç</a></body></html>'
     )
     assert write_and_scan(safe) == []
@@ -64,6 +65,13 @@ def test_disclosure_equivalence() -> None:
     assert has_independence("ALO186 bağımsız bilgi platformudur; EDAŞ veya kamu kurumu değildir.")
     assert has_independence("Bağımsız elektrik bilgi ağı. Ürün satıcısı değildir.")
     assert not has_independence("Resmî EDAŞ başvuru merkezi.")
+
+
+def direct_catalog_categories(catalog: str) -> list[tuple[str, str, str]]:
+    return re.findall(
+        r"\{id:'([^']+)',name:'[^']+',mode:'direct',risk:'([^']+)',affiliatePolicy:'([^']+)'",
+        catalog,
+    )
 
 
 def test_actual_source_contracts() -> None:
@@ -110,8 +118,17 @@ def test_actual_source_contracts() -> None:
         "if (professionalOnly) return;",
     ):
         assert token in runtime
-    assert catalog.count("mode:'direct'") == 1
-    assert "{id:'powerbank'" in catalog and "verificationMaxAgeDays=45" in catalog
+
+    direct_categories = direct_catalog_categories(catalog)
+    assert direct_categories, "En az bir doğrulanmış düşük riskli doğrudan kategori bulunmalı."
+    assert all(risk == "consumer" for _, risk, _ in direct_categories)
+    assert all(policy == "verified_direct" for _, _, policy in direct_categories)
+    direct_ids = {category_id for category_id, _, _ in direct_categories}
+    assert {"powerbank", "usb_c_charger", "usb_c_cable", "usb_c_hub", "display_cable"}.issubset(direct_ids)
+    assert direct_ids.isdisjoint({"surge_strip", "generator", "inverter", "outlet_tester", "ev_cable", "ups_battery"})
+    assert "verificationMaxAgeDays=45" in catalog
+    assert "affiliateTag='alo186rehber-21'" in catalog
+
     for forbidden in ("product.price", "product.stock", "product.rating", "product.warranty", "affiliateCommission"):
         assert forbidden not in runtime
 
@@ -120,13 +137,15 @@ def main() -> None:
     test_affiliate_anchor_policy()
     test_disclosure_equivalence()
     test_actual_source_contracts()
+    catalog = (REPO_ROOT / "alo186/urun-eslestirme/catalog.js").read_text(encoding="utf-8")
+    direct_count = len(direct_catalog_categories(catalog))
     print(json.dumps({
         "ok": True,
         "commercialPages": len(COMMERCIAL_ROUTES),
         "affiliateCommercialPages": 7,
         "professionalOnlyPages": 1,
         "servicePages": len(SERVICE_ROUTES),
-        "directAffiliateCategories": 1,
+        "directAffiliateCategories": direct_count,
         "highRiskDirectAffiliate": False,
         "professionalOnlyDirectAffiliate": False,
         "unverifiedCommercialClaims": False,
