@@ -42,6 +42,18 @@ def public_url(base_path: str, route: str) -> str:
     return f"{base_path}{route}" if base_path else route
 
 
+def canonical_route_path(value: str, base_path: str) -> str:
+    raw = "/" + str(value or "").strip().strip("/")
+    if raw == "/":
+        return raw
+    if base_path:
+        if raw == base_path:
+            return "/"
+        if raw.startswith(base_path + "/"):
+            return raw[len(base_path) :]
+    return raw
+
+
 def html_text(html: str, tag: str) -> str:
     match = re.search(fr"<{tag}\b[^>]*>(.*?)</{tag}>", html, re.I | re.S)
     if not match:
@@ -134,7 +146,7 @@ def priority(route: dict) -> int:
 
 
 def build_entry(site: Path, route: dict, base_path: str) -> dict | None:
-    canonical_path = route.get("canonicalPath")
+    canonical_path = canonical_route_path(route.get("canonicalPath"), base_path)
     if not canonical_path or canonical_path == CANONICAL_PATH:
         return None
     target = site / canonical_path.strip("/") / "index.html"
@@ -150,6 +162,7 @@ def build_entry(site: Path, route: dict, base_path: str) -> dict | None:
         return None
     description = meta_description(html) or first_excerpt(html)
     topics = jsonld_topics(html)
+    normalized_route = {**route, "canonicalPath": canonical_path}
     return {
         "canonicalPath": canonical_path,
         "url": public_url(base_path, canonical_path),
@@ -160,7 +173,7 @@ def build_entry(site: Path, route: dict, base_path: str) -> dict | None:
         "description": description[:360],
         "excerpt": first_excerpt(html)[:520],
         "topics": topics,
-        "priority": priority(route),
+        "priority": priority(normalized_route),
         "featured": canonical_path in FEATURED_PATHS,
     }
 
