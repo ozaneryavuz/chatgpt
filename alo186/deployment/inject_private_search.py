@@ -13,6 +13,7 @@ INDEX_FILE = SEARCH_DIR / "search-index.json"
 PORTAL = Path("elektrik-portali/index.html")
 GATEWAY = Path("index.html")
 CARD_MARKER = 'data-alo186-search-card="true"'
+ALIAS_MARKER = 'data-alo186-content-alias="true"'
 INDEX_VERSION = 1
 FEATURED_PATHS = {
     "/karar-motoru",
@@ -157,8 +158,10 @@ def build_entry(site: Path, route: dict, base_path: str) -> dict | None:
     if not target.is_file():
         return None
     html = target.read_text(encoding="utf-8", errors="ignore")
+    if ALIAS_MARKER in html or "data-alo186-content-alias='true'" in html:
+        return None
     robots = re.search(r'<meta\s+name=["\']robots["\']\s+content=["\']([^"\']*)["\']', html, re.I)
-    if robots and "noindex" in robots.group(1).casefold():
+    if not base_path and robots and "noindex" in robots.group(1).casefold():
         return None
     title = html_text(html, "title").replace(" | ALO186", "").replace(" — ALO186", "").strip()
     h1 = html_text(html, "h1")
