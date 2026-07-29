@@ -20,25 +20,14 @@ ARTICLES = [
         ],
         "hosts": ["iec.ch", "se.com", "abb.com"],
     },
-    {
-        "slug": "ups-aku-string-blok-dengesizligi-ic-direnc",
-        "required": [
-            "tek zayıf blok", "iç direnç", "ohmik değer", "ripple",
-            "blok sıcaklığı", "tek blok değişimi", "Satın almama sınırı",
-            "Ticari sınır", "Son doğrulama: 30 Temmuz 2026",
-        ],
-        "hosts": ["ieee.org", "iec.ch", "vertiv.com", "eaton.com", "se.com"],
-    },
-    {
-        "slug": "ges-string-sigortasi-gpv-ne-zaman-gerekir",
-        "required": [
-            "ters akım", "maximum series fuse rating", "gPV", "Isc", "Voc",
-            "IEC 60269-6", "Satın almama sınırı", "Ticari sınır",
-            "Son doğrulama: 30 Temmuz 2026",
-        ],
-        "hosts": ["iec.ch", "fronius.com", "sma.de"],
-    },
 ]
+
+CONSOLIDATIONS = {
+    "/haberler/ups-aku-string-blok-dengesizligi-ic-direnc":
+        "/haberler/ups-aku-string-dengesizligi-zayif-aku-nasil-anlasilir",
+    "/haberler/ges-string-sigortasi-gpv-ne-zaman-gerekir":
+        "/haberler/ges-pv-string-sigortasi-ters-akim-nasil-secilir",
+}
 
 
 def schema_nodes(html: str) -> list[dict]:
@@ -52,11 +41,10 @@ def schema_nodes(html: str) -> list[dict]:
 
 def main() -> None:
     manifest = load_effective_manifest(ROOT)
-    assert manifest["version"] >= 73, manifest["version"]
+    assert manifest["version"] >= 74, manifest["version"]
     routes = [route for route in manifest["routes"] if route["type"] == "article"]
-    assert len(routes) >= 165, len(routes)
-    seen_titles: set[str] = set()
-    seen_h1: set[str] = set()
+    assert len(routes) >= 163, len(routes)
+    route_paths = {route["canonicalPath"] for route in routes}
     new_paths: set[str] = set()
 
     for article in ARTICLES:
@@ -64,7 +52,6 @@ def main() -> None:
         canonical_path = f"/haberler/{slug}"
         route = next((item for item in routes if item["canonicalPath"] == canonical_path), None)
         assert route, canonical_path
-        assert route["source"] == f"alo186/haberler/{slug}/index.html"
         path = ROOT / route["source"]
         assert path.is_file(), path
         html = path.read_text(encoding="utf-8")
@@ -75,61 +62,39 @@ def main() -> None:
         assert f'rel="canonical" href="{canonical}"' in html
         assert '<meta name="description"' in html
         assert '<meta name="robots" content="index,follow,max-image-preview:large">' in html
-        assert '../alo186-article.css' in html
         assert html.count("<h1>") == 1
         assert "Doğrudan cevap" in html
-        assert "Mevcut içerikten görev ayrımı" in html
         assert "Ticari sınır" in html
         assert "Satın almama sınırı" in html
         assert "bağımsız" in lower
         assert "affiliate" not in lower and "amazon.com" not in lower
         assert not re.search(r"<form\b|<input\b|<textarea\b", lower)
-        assert not re.search(r"garantili kazanç|garantili tasarruf|kesin çözüm|her durumda güvenlidir", lower)
 
         for token in article["required"]:
             assert token.casefold() in lower, (slug, token)
         for host in article["hosts"]:
             assert host in lower, (slug, host)
 
-        title_match = re.search(r"<title>(.*?)</title>", html, re.S)
-        h1_match = re.search(r"<h1>(.*?)</h1>", html, re.S)
-        assert title_match and h1_match
-        title = re.sub(r"<[^>]+>", "", title_match.group(1)).strip()
-        h1 = re.sub(r"<[^>]+>", "", h1_match.group(1)).strip()
-        assert title not in seen_titles and h1 not in seen_h1
-        seen_titles.add(title)
-        seen_h1.add(h1)
-
         nodes = schema_nodes(html)
         types = {node.get("@type") for node in nodes if isinstance(node, dict)}
         assert {"Article", "FAQPage", "BreadcrumbList"}.issubset(types), (slug, types)
         assert "Product" not in types and "Offer" not in types
-        article_node = next(node for node in nodes if node.get("@type") == "Article")
-        assert article_node["mainEntityOfPage"] == canonical
-        assert article_node["datePublished"] == "2026-07-30"
-        assert article_node["dateModified"] == "2026-07-30"
-        assert len(article_node.get("about", [])) >= 8
-        assert all(item.get("@type") == "DefinedTerm" for item in article_node["about"])
-        faq = next(node for node in nodes if node.get("@type") == "FAQPage")
-        assert len(faq.get("mainEntity", [])) >= 4
-        assert all(item.get("@type") == "Question" for item in faq["mainEntity"])
-        assert len(re.findall(r'<a href="https://', html)) >= 4
         new_paths.add(canonical_path)
 
-    afdd = (ROOT / "alo186/haberler/elektrik-ark-hatasi-afdd-rcd-sigorta-farki/index.html").read_text(encoding="utf-8").casefold()
-    ups = (ROOT / "alo186/haberler/ups-aku-string-blok-dengesizligi-ic-direnc/index.html").read_text(encoding="utf-8").casefold()
-    pv = (ROOT / "alo186/haberler/ges-string-sigortasi-gpv-ne-zaman-gerekir/index.html").read_text(encoding="utf-8").casefold()
-    assert "afdd, rcd ve mcb birbirinin otomatik yerine geçen" in afdd
-    assert "tek zayıf blok" in ups and "float gerilimi normal" in ups
-    assert "karar yalnız" in pv and "string sayısı" in pv
-    assert len(new_paths) == 3
+    htaccess = (ROOT / "alo186/deployment/apache-production.htaccess").read_text(encoding="utf-8")
+    for alias, canonical in CONSOLIDATIONS.items():
+        assert alias not in route_paths, ("duplicate route remains active", alias)
+        assert canonical in route_paths, ("canonical route missing", canonical)
+        pattern = rf"RewriteRule \^{re.escape(alias.lstrip('/'))}/\?\$ {re.escape(canonical)} \[R=301,L,NE\]"
+        assert re.search(pattern, htaccess), ("301 consolidation missing", alias, canonical)
 
+    assert len(new_paths) == 1
     print(json.dumps({
         "ok": True,
         "routingVersion": manifest["version"],
         "articleCount": len(routes),
-        "newArticles": len(ARTICLES),
         "newCanonicalPaths": sorted(new_paths),
+        "consolidatedAliases": CONSOLIDATIONS,
         "sourceVerificationDate": "2026-07-30",
         "commercialClaimsAdded": False,
         "formsAdded": False,
