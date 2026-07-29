@@ -10,11 +10,16 @@ const catalog = require(path.join(productRoot, 'catalog.js'));
 const conversion = require(path.join(productRoot, 'conversion-growth-core.js'));
 const retention = require(path.join(productRoot, 'journey-retention-core.js'));
 
-assert.equal(catalog.categories.length, 13, 'Ürün merkezi 13 kullanıcı niyetini korumalı.');
+assert.equal(catalog.categories.length, 14, 'Ürün merkezi 14 kullanıcı niyetini korumalı.');
 const coCategory = catalog.getCategory('co_alarm');
 assert(coCategory, 'CO alarmı güvenlik niyeti katalogda bulunmalı.');
 assert.equal(coCategory.affiliatePolicy, 'after_tool');
 assert.equal(catalog.productsFor('co_alarm').length, 0, 'CO alarmında doğrulanmış ürün olmadan doğrudan kart açılamaz.');
+const extensionCategory = catalog.getCategory('extension_cord');
+assert(extensionCategory, 'Uzatma kablosu güvenlik niyeti katalogda bulunmalı.');
+assert.equal(extensionCategory.affiliatePolicy, 'after_tool');
+assert.match(extensionCategory.nextStepUrl, /uzatma-kablosu-kablo-makarasi-uygunluk/);
+assert.equal(catalog.productsFor('extension_cord').length, 0, 'Uzatma kablosunda doğrulanmış ürün olmadan doğrudan kart açılamaz.');
 
 const evQuery = conversion.buildQuery('ev_cable', { current: '32', phase: 'three', length: '7_5' });
 assert.match(evQuery, /Type 2/i);
@@ -45,6 +50,7 @@ assert.deepEqual(
 assert.equal(conversion.gateStatus('generator', {}).reason, 'professional_only');
 assert.equal(conversion.getProfile('outlet_tester'), null);
 assert.equal(conversion.getProfile('co_alarm'), null, 'CO alarmı yalnız özel güvenlik aracı sonrasında değerlendirilmelidir.');
+assert.equal(conversion.getProfile('extension_cord'), null, 'Uzatma kablosu yalnız özel uygunluk aracı sonrasında değerlendirilmelidir.');
 
 const professionalRoute = conversion.professionalRoute('generator');
 assert.match(professionalRoute, /^\/kurumsal-elektrik-surekliligi-on-degerlendirme\?/);
@@ -111,4 +117,4 @@ assert.deepEqual(cleanEvent, { category: 'ev_cable', status: 'opened', placement
 assert.equal(conversion.hasForbiddenEventData({ category: 'ev_cable', email: 'blocked@example.com' }), true);
 assert.equal(conversion.hasForbiddenEventData({ category: 'ev_cable', status: 'opened' }), false);
 
-console.log('ALO186 güvenli gelir dönüşümü: 13 niyet, CO güvenlik kapısı, teknik arama, satın almama, profesyonel rota, ICS ve PII korumaları başarılı.');
+console.log('ALO186 güvenli gelir dönüşümü: 14 niyet, uzatma kablosu/CO güvenlik kapıları, teknik arama, satın almama, profesyonel rota, ICS ve PII korumaları başarılı.');
