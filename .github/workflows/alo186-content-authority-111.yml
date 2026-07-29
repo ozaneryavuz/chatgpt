@@ -3,7 +3,7 @@ name: ALO186 içerik otoritesi 111 kaynak rehber kalite kontrolü
 on:
   pull_request:
     paths:
-      - 'alo186/haberler/parafudr-tip-1-tip-2-tip-3-farki-kaskad-koordinasyon/**'
+      - 'alo186/haberler/ges-panel-hotspot-bypass-diyot-termal-kamera/**'
       - 'alo186/haberler/ev-sarj-74-11-22-kw-tek-faz-uc-faz-onboard-charger/**'
       - 'alo186/haberler/elektrik-kesintisi-tazminati-edas-otomatik-odeme-nasil-kontrol-edilir/**'
       - 'alo186/deployment/routing-overlays/content-authority-111-run23.json'
@@ -12,7 +12,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'alo186/haberler/parafudr-tip-1-tip-2-tip-3-farki-kaskad-koordinasyon/**'
+      - 'alo186/haberler/ges-panel-hotspot-bypass-diyot-termal-kamera/**'
       - 'alo186/haberler/ev-sarj-74-11-22-kw-tek-faz-uc-faz-onboard-charger/**'
       - 'alo186/haberler/elektrik-kesintisi-tazminati-edas-otomatik-odeme-nasil-kontrol-edilir/**'
       - 'alo186/deployment/routing-overlays/content-authority-111-run23.json'
@@ -109,7 +109,7 @@ jobs:
           from pathlib import Path
 
           routes = [
-              '/haberler/parafudr-tip-1-tip-2-tip-3-farki-kaskad-koordinasyon',
+              '/haberler/ges-panel-hotspot-bypass-diyot-termal-kamera',
               '/haberler/ev-sarj-74-11-22-kw-tek-faz-uc-faz-onboard-charger',
               '/haberler/elektrik-kesintisi-tazminati-edas-otomatik-odeme-nasil-kontrol-edilir',
           ]
