@@ -60,7 +60,9 @@ def main() -> None:
 
     selector = (REPO_ROOT / ROUTES["/hizmet-secici/"][0]).read_text(encoding="utf-8")
     assert "localStorage" not in selector and "sessionStorage" not in selector
-    assert "Ücretli hizmet gerekmez" in selector or "ücretli hizmet gerektirmez" in selector
+    selector_lower = selector.casefold()
+    assert "hizmet satın almak zorunlu değildir" in selector_lower
+    assert "önce ücretsiz veya resmî adımı tamamlayın" in selector_lower
     assert "risk==='danger'" in selector
     for path in [
         "/edas-bul",
