@@ -48,7 +48,7 @@ def main() -> None:
         assert not re.search(r"\b\d{2,}[.,]?\d*\s*(?:tl|₺|usd|eur|€|\$)\b", lower)
         assert 'type="email"' not in lower and 'type="tel"' not in lower and 'type="file"' not in lower
         assert "açık adres" not in lower or "istenmez" in lower or "almadan" in lower
-        assert "edaş" in lower or "resmî" in lower
+        assert "bağımsız" in lower and ("edaş" in lower or "resmî" in lower or "ürün satmaz" in lower)
 
     maintenance = (REPO_ROOT / ROUTES["/hesaplama/elektrik-bakim-takvimi/"][0]).read_text(encoding="utf-8")
     assert "alo186.maintenance.v1" in maintenance
