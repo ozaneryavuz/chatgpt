@@ -48,6 +48,8 @@ def test_pages() -> None:
         assert "amazon.com" not in lower and "amzn." not in lower, key
         assert '"@type":"product"' not in lower and '"@type":"offer"' not in lower, key
         assert APPS[key].is_file(), key
+    for key in ("extension", "emergency"):
+        lower = read(PAGES[key]).lower()
         assert "fiyat, stok, puan" in lower or "fiyat, stok" in lower, key
     assert "adres, tesis adı" in read(PAGES["emergency"]).lower()
     assert "adres, abone/sayaç numarası" in read(PAGES["voltage"]).lower()
