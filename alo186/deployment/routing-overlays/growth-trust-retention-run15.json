@@ -1,0 +1,43 @@
+{
+  "version": 61,
+  "name": "ALO186 EV cable health, PV cleaning evidence and grounding measurement trend run15",
+  "routes": [
+    {
+      "canonicalPath": "/hesaplama/ev-sarj-kablosu-saglik-gunlugu/",
+      "source": "alo186/hesaplama/ev-sarj-kablosu-saglik-gunlugu/index.html",
+      "type": "calculator",
+      "intent": "EV Type 2 charging cable heat, interruption, lock, contamination and physical damage evidence",
+      "affiliatePolicy": "portable_ev_cable_only_after_confirmed_issue_and_full_safety_gate_fixed_cable_professional_only"
+    },
+    {
+      "canonicalPath": "/hesaplama/ges-panel-temizlik-karar-gunlugu/",
+      "source": "alo186/hesaplama/ges-panel-temizlik-karar-gunlugu/index.html",
+      "type": "calculator",
+      "intent": "PV soiling, comparable performance loss, safe access and cleaning outcome journal",
+      "affiliatePolicy": "none_professional_om_and_no_buy_only"
+    },
+    {
+      "canonicalPath": "/hesaplama/topraklama-olcum-trend-gunlugu/",
+      "source": "alo186/hesaplama/topraklama-olcum-trend-gunlugu/index.html",
+      "type": "business-tool",
+      "intent": "grounding measurement point, method, conditions, trend and professional retest evidence",
+      "affiliatePolicy": "none_professional_measurement_only"
+    }
+  ],
+  "trust": {
+    "rawPersonalDataCollected": false,
+    "directAffiliateLinksAdded": 0,
+    "unverifiedCommercialFieldsUsed": [],
+    "noBuyOutcomePreserved": true,
+    "affiliateDisclosureRequired": true,
+    "officialApprovalClaimed": false,
+    "emergencyCommerceClosed": true,
+    "rooftopCommerceClosed": true,
+    "professionalMeasurementOnly": true,
+    "evCableJournalTtlDays": 540,
+    "pvCleaningJournalTtlDays": 730,
+    "groundingJournalTtlDays": 1095,
+    "qualifiedAffiliateFlows": ["ev_cable_after_confirmed_portable_cable_issue"],
+    "professionalServiceFlows": ["fixed_evse_cable_service", "pv_soiling_performance_om", "grounding_measurement_verification"]
+  }
+}
