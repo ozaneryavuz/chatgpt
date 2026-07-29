@@ -1,0 +1,21 @@
+{
+  "version": 64,
+  "generatedAt": "2026-07-29",
+  "routes": [
+    {
+      "source": "alo186/haberler/kompanzasyon-detuned-reaktor-yuzdesi-rezonans-frekansi/index.html",
+      "canonicalPath": "/haberler/kompanzasyon-detuned-reaktor-yuzdesi-rezonans-frekansi",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/jenerator-shunt-pmg-uyartim-ups-vfd-harmonik/index.html",
+      "canonicalPath": "/haberler/jenerator-shunt-pmg-uyartim-ups-vfd-harmonik",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ev-sarj-rcd-tip-b-rdc-dd-6ma-farki/index.html",
+      "canonicalPath": "/haberler/ev-sarj-rcd-tip-b-rdc-dd-6ma-farki",
+      "type": "article"
+    }
+  ]
+}
