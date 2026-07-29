@@ -2,6 +2,8 @@
   'use strict';
   const $=id=>document.getElementById(id);
   const core=window.Alo186SurgeStripSuitability;
+  const qualificationKey='alo186_affiliate_qualification_v1';
+  const qualificationTtlMs=30*60*1000;
 
   const presets={
     office:{loadType:'office',continuousW:650,peakW:900,hoursDaily:8,requiredOutlets:5,productOutlets:6,ratedCurrentA:16,ratedPowerW:3500,joules:900,usbNeeded:false,usbPorts:0},
@@ -61,13 +63,30 @@
     return `<section class="result-list ${className}"><h3>${escapeHtml(title)}</h3><ul>${items.map(item=>`<li>${escapeHtml(item)}</li>`).join('')}</ul></section>`;
   }
 
+  function saveQualification(result){
+    const now=Date.now();
+    const receipt={
+      schema:'alo186.affiliateQualification.v1',
+      category:'surge_strip',
+      issuedAt:new Date(now).toISOString(),
+      expiresAt:new Date(now+qualificationTtlMs).toISOString(),
+      reviewAt:new Date(now+30*86400000).toISOString(),
+      personalData:false,
+      sourceTool:'surge_strip_suitability',
+      requirements:result.productRequirements
+    };
+    localStorage.setItem(qualificationKey,JSON.stringify(receipt));
+    return receipt;
+  }
+
   function renderGate(result){
     const gate=$('commercialGate');
     gate.classList.remove('hidden');
     if(result.productRouteAllowed){
-      gate.innerHTML=`<span class="eyebrow">Şeffaf ürün rotası</span><h3>Teknik minimumla ürünleri karşılaştırın</h3><p>ALO186 bazı dış ürün bağlantılarından satış ortaklığı komisyonu kazanabilir; kullanıcıya ek maliyet yansımaz. Fiyat, stok, satıcı, puan ve garanti bilgisi ALO186'te gösterilmez ve güncel satıcı sayfasında doğrulanır.</p><label class="check-item"><input type="checkbox" data-confirm-need><span><strong>Mevcut yeterli bir grup prizim yok.</strong><small>Çalışan ve yeterli ürün varsa yeni satın alma gerekmeyebilir.</small></span></label><label class="check-item"><input type="checkbox" data-confirm-affiliate><span><strong>Teknik etiketi ve satış ortaklığı niteliğini anladım.</strong><small>Akım, güç, priz sayısı, koruma göstergesi ve aşırı akım korumasını ürün sayfasında yeniden kontrol edeceğim.</small></span></label><a class="btn btn-primary disabled-link" data-product-route aria-disabled="true" tabindex="-1" href="${result.productRoute}" rel="nofollow">Akıllı Ürün Merkezi'ni aç</a>`;
+      gate.innerHTML=`<span class="eyebrow">Şeffaf ürün rotası</span><h3>Teknik minimumla ürünleri karşılaştırın</h3><p>ALO186 bazı dış ürün bağlantılarından satış ortaklığı komisyonu kazanabilir; kullanıcıya ek maliyet yansımaz. Fiyat, stok, satıcı, puan ve garanti bilgisi ALO186'te gösterilmez ve güncel satıcı sayfasında doğrulanır.</p><label class="check-item"><input type="checkbox" data-confirm-need><span><strong>Mevcut yeterli bir grup prizim yok.</strong><small>Çalışan ve yeterli ürün varsa yeni satın alma gerekmeyebilir.</small></span></label><label class="check-item"><input type="checkbox" data-confirm-affiliate><span><strong>Teknik etiketi ve satış ortaklığı niteliğini anladım.</strong><small>Akım, güç, priz sayısı, koruma göstergesi ve aşırı akım korumasını ürün sayfasında yeniden kontrol edeceğim.</small></span></label><a class="btn btn-primary disabled-link" data-product-route aria-disabled="true" tabindex="-1" href="${result.productRoute}" rel="nofollow">Akıllı Ürün Merkezi'ni aç</a><p class="small" data-gate-status>Teknik geçiş yalnız bu tarayıcıda 30 dakika geçerlidir; ad, adres, iletişim, fiyat veya ürün seri numarası kaydedilmez.</p>`;
       const checks=[...gate.querySelectorAll('input[type="checkbox"]')];
       const link=gate.querySelector('[data-product-route]');
+      const status=gate.querySelector('[data-gate-status]');
       const sync=()=>{
         const enabled=checks.every(item=>item.checked);
         link.classList.toggle('disabled-link',!enabled);
@@ -77,12 +96,21 @@
       checks.forEach(item=>item.addEventListener('change',sync));
       link.addEventListener('click',event=>{
         if(link.getAttribute('aria-disabled')==='true'){event.preventDefault();return;}
-        emit('surge_strip_product_route_opened',{status:result.status,load_type:result.loadType});
+        try{
+          const receipt=saveQualification(result);
+          status.textContent=`Yerel teknik geçiş oluşturuldu; ${new Intl.DateTimeFormat('tr-TR',{hour:'2-digit',minute:'2-digit'}).format(new Date(receipt.expiresAt))} saatine kadar geçerli.`;
+          emit('surge_strip_product_route_opened',{status:result.status,load_type:result.loadType,gate_ttl_minutes:30});
+        }catch(_error){
+          event.preventDefault();
+          status.textContent='Tarayıcı yerel kaydı oluşturamadı. Ürün rotası güvenlik nedeniyle açılmadı.';
+          emit('surge_strip_affiliate_blocked',{status:result.status,reason:'local_gate_storage_failed'});
+        }
       });
     }else if(result.noPurchase){
       gate.innerHTML=`<span class="eyebrow">Satın almama sonucu</span><h3>Mevcut ürününüzü kullanmaya devam edin</h3><p>Güvenlik koşulları ve teknik değerler değişmedikçe yeni ürün gerekmiyor. Koruma göstergesini, fiş/kablo sıcaklığını ve yükü düzenli kontrol edin.</p><a class="btn btn-secondary" href="/hesaplama/ekipman-bakim-plani/">Bakım planına ekle</a>`;
       emit('surge_strip_no_purchase_rendered',{status:result.status});
     }else{
+      try{localStorage.removeItem(qualificationKey);}catch(_error){}
       gate.innerHTML=`<span class="eyebrow">Ticari rota kapalı</span><h3>Önce güvenlik veya teknik eksikliği çözün</h3><p>Bu sonuçta ürün bağlantısı göstermek yanlış seçim veya yangın/elektrik çarpması riskini artırabilir.</p><div class="gate-actions"><a class="btn btn-primary" href="${result.safetyRoute}">Parafudr risk testini aç</a><a class="btn btn-secondary" href="${result.decisionRoute}">112 / 186 / elektrikçi kararını aç</a></div>`;
       emit('surge_strip_affiliate_blocked',{status:result.status,block_count:result.blocks.length,failure_count:result.failures.length,unknown_count:result.unknowns.length});
     }
@@ -127,6 +155,7 @@
     $('results').classList.add('hidden');
     $('commercialGate').classList.add('hidden');
     $('validation').textContent='';
+    try{localStorage.removeItem(qualificationKey);}catch(_error){}
     applyPreset('office');
     $('arac').scrollIntoView({behavior:'smooth',block:'start'});
   }

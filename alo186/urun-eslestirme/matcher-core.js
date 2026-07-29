@@ -95,10 +95,15 @@
     };
   }
 
+  function qualifiedGateAllowed(category,options={}){
+    return Boolean(options.qualified===true&&category&&category.id==='surge_strip'&&category.mode==='guide'&&category.affiliatePolicy==='after_tool');
+  }
+
   function match(categoryId,requirements={},options={}){
     const category=catalog.getCategory(categoryId);
     if(!category)throw new Error('Ürün kategorisi bulunamadı.');
-    if(category.mode!=='direct')return guideResult(category);
+    const qualifiedGate=qualifiedGateAllowed(category,options);
+    if(category.mode!=='direct'&&!qualifiedGate)return guideResult(category);
 
     const now=options.now||new Date();
     const allProducts=catalog.productsFor(categoryId,{now,freshOnly:false});
@@ -116,7 +121,8 @@
       affiliatePolicy:category.affiliatePolicy||'verified_direct',
       staleProductCount,
       freshProductCount:freshProducts.length,
-      catalogFresh:staleProductCount===0
+      catalogFresh:staleProductCount===0,
+      qualifiedGate
     };
   }
 
@@ -127,5 +133,5 @@
     return category?category.description:'';
   }
 
-  return {match,scorePowerbank,scoreSurge,requirementsSummary,knownRatio,guideResult};
+  return {match,scorePowerbank,scoreSurge,requirementsSummary,knownRatio,guideResult,qualifiedGateAllowed};
 });

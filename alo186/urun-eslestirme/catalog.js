@@ -2,14 +2,14 @@
   const api=factory();
   if(typeof module==='object'&&module.exports){module.exports=api;}
   root.Alo186ProductCatalog=api;
-  if(root.document&&typeof api.knowledgeGraph==='function'){
+  if(root&&root.document&&root.document.head&&typeof root.document.createElement==='function'&&typeof api.knowledgeGraph==='function'){
     const id='alo186-affiliate-knowledge-graph';
-    const current=root.document.getElementById(id);
-    if(current)current.remove();
+    const current=typeof root.document.getElementById==='function'?root.document.getElementById(id):null;
+    if(current&&typeof current.remove==='function')current.remove();
     const script=root.document.createElement('script');
     script.id=id;
     script.type='application/ld+json';
-    script.dataset.generated='alo186-affiliate-knowledge-graph';
+    if(script.dataset)script.dataset.generated='alo186-affiliate-knowledge-graph';
     script.textContent=JSON.stringify(api.knowledgeGraph());
     root.document.head.appendChild(script);
   }
@@ -46,7 +46,7 @@
   ];
 
   const products=[
-    {id:'anker-prime-a1336',category:'powerbank',asin:'B0BYNZXFM2',name:'Anker Prime A1336 20.000 mAh 200 W',brand:'Anker',status:'verified_listing',verifiedAt,attributes:{capacityMah:20000,energyWh:72,maxOutputW:200,wireless:false,usbCPorts:2,usbAPorts:1,display:true},strengths:['Yüksek USB-C çıkışı','Dijital ekran','20.000 mAh / 72 Wh'],limits:['Yüksek fiyat ve 544 g ağırlık','Samsung SFC 2.0 desteği ürün sayfasında sınırlı belirtilmiş'],sourceNote:'ASIN ve teknik ürün sayfası alanları kontrol edildi; fiyat ve stok ALO186 tarafından gösterilmez.',url:amazonProductUrl('B0BYNZXFM2')},
+    {id:'anker-prime-a1336',category:'powerbank',asin:'B0BYNZXFM2',name:'Anker Prime A1336 20.000 mAh 200 W',brand:'Anker',status:'verified_listing',verifiedAt,attributes:{capacityMah:20000,energyWh:72,maxOutputW:200,wireless:false,usbCPorts:2,usbAPorts:1,display:true},strengths:['Yüksek USB-C çıkışı','Dijital ekran','20.000 mAh / 72 Wh'],limits:['544 g ağırlık','Samsung SFC 2.0 desteği ürün sayfasında sınırlı belirtilmiş'],sourceNote:'ASIN ve teknik ürün sayfası alanları kontrol edildi; fiyat ve stok ALO186 tarafından gösterilmez.',url:amazonProductUrl('B0BYNZXFM2')},
     {id:'xiaomi-wireless-10000',category:'powerbank',asin:'B09TWRHGWV',name:'Xiaomi 10 W Wireless Power Bank 10.000',brand:'Xiaomi',status:'verified_listing',verifiedAt,attributes:{capacityMah:10000,energyWh:null,maxOutputW:10,wireless:true,usbCPorts:1,usbAPorts:null,display:false},strengths:['Kablosuz şarj','10.000 mAh','Düşük akım modu'],limits:['Yüksek güçlü dizüstü ihtiyacı için uygun kabul edilmemeli','Kablolu maksimum çıkış üründe yeniden doğrulanmalı'],sourceNote:'ASIN, 10.000 mAh ve 10 W kablosuz özellikleri ürün sayfasından kontrol edildi.',url:amazonProductUrl('B09TWRHGWV')},
     {id:'samsung-eb-u2510x',category:'powerbank',asin:'B0CVGVG7NW',name:'Samsung EB-U2510X 10.000 mAh Kablosuz Powerbank',brand:'Samsung',status:'verified_listing',verifiedAt,attributes:{capacityMah:10000,energyWh:null,maxOutputW:null,wireless:true,usbCPorts:null,usbAPorts:null,display:false},strengths:['Kablosuz kullanım','10.000 mAh','Kompakt sınıf'],limits:['Çıkış gücü ve port sayısı Amazon ürün sayfasında satın alma öncesi yeniden doğrulanmalı'],sourceNote:'ASIN, model ve kapasite ürün sayfasından kontrol edildi; eksik teknik alanlar bilinmiyor olarak tutuldu.',url:amazonProductUrl('B0CVGVG7NW')},
     {id:'tuncmatik-tsk6136',category:'surge_strip',asin:'B07CST4766',name:'Tunçmatik TSK6136 PowerSurge 5 Priz 1050 J',brand:'Tunçmatik',status:'verified_listing',verifiedAt,attributes:{outlets:5,joules:1050,maxCurrentA:10,maxPowerW:null,usbPorts:0,cableM:1.5},strengths:['1050 joule','5 çocuk emniyetli priz','1,5 m kablo'],limits:['10 A nominal akım','Pano tipi SPD ve uygun topraklamanın yerine geçmez'],sourceNote:'ASIN, 1050 J, 8000 A tepe, 10 A nominal ve 5 priz bilgileri ürün sayfasından kontrol edildi.',url:amazonProductUrl('B07CST4766')},
@@ -55,50 +55,47 @@
     {id:'cata-ct9186',category:'surge_strip',asin:'B09YTYTZ4J',name:'Cata CT-9186 Tekli Akım Korumalı Priz 918 J',brand:'Cata',status:'verified_listing',verifiedAt,attributes:{outlets:1,joules:918,maxCurrentA:null,maxPowerW:4000,usbPorts:0,cableM:0},strengths:['918 joule','Tek cihaz için kompakt kullanım','LED gösterge'],limits:['Tek priz','4000 W ifadesi ürün sayfasında tekrar doğrulanmalı','Pano tipi koruma yerine geçmez'],sourceNote:'ASIN, 918 J ve 4000 W ürün başlığı/açıklamasından kontrol edildi.',url:amazonProductUrl('B09YTYTZ4J')},
     {id:'philips-spn7040wa-62',category:'surge_strip',asin:'B09Y5VH14K',mpn:'SPN7040WA/62',name:'Philips SPN7040WA/62 4’lü Akım Korumalı Grup Priz 600 J',brand:'Philips',status:'verified_listing',verifiedAt,attributes:{outlets:4,joules:600,maxCurrentA:16,maxPowerW:3680,usbPorts:0,cableM:2,doublePoleSwitch:true},strengths:['4 topraklı priz','600 joule','2 m kablo','16 A / 3680 W'],limits:['Pano tipi SPD ve uygun topraklamanın yerine geçmez','600 J sınıfı daha yüksek darbe enerjisi ihtiyacında ayrıca değerlendirilmelidir'],sourceNote:'ASIN, model, 4 priz, 600 J, 2 m, 16 A ve 3680 W alanları ürün sayfasından doğrulandı; fiyat ve stok gösterilmez.',url:amazonProductUrl('B09Y5VH14K')},
     {id:'tuncmatik-tsk6134',category:'surge_strip',asin:'B08L9LF2WC',mpn:'TSK6134',name:'Tunçmatik TSK6134 PowerSurge 5 Priz 1050 J',brand:'Tunçmatik',status:'verified_listing',verifiedAt,attributes:{outlets:5,joules:1050,maxCurrentA:null,maxPowerW:null,usbPorts:0,cableM:1.5},strengths:['5 priz','1050 joule','1,5 m kablo'],limits:['Nominal akım ve maksimum güç ürün etiketinden satın alma öncesi yeniden doğrulanmalı','Pano tipi SPD yerine geçmez'],sourceNote:'ASIN, model, 5 priz, 1050 J ve 1,5 m alanları ürün listelemesinden doğrulandı; bilinmeyen alanlar null tutuldu.',url:amazonProductUrl('B08L9LF2WC')},
-    {id:'brennenstuhl-eco-line-6',category:'surge_strip',asin:'B07RWYSQKV',name:'Brennenstuhl Eco-Line 6’lı Akım Korumalı Grup Priz',brand:'Brennenstuhl',status:'verified_listing',verifiedAt,attributes:{outlets:6,joules:null,maxCurrentA:null,maxPowerW:null,usbPorts:0,cableM:null,surgeCurrentA:13500},strengths:['6 priz','13.500 A darbe akımı listeleme bilgisi','Çocuk koruma sınıfı'],limits:['Joule, kablo uzunluğu, nominal akım ve güç Amazon sayfasında yeniden doğrulanmalı','Darbe akımı değeri joule değeriyle aynı değildir'],sourceNote:'ASIN, 6 priz ve 13.500 A listeleme alanları doğrulandı; fiyat, stok ve eksik teknik alanlar yayımlanmaz.',url:amazonProductUrl('B07RWYSQKV')}
+    {id:'brennenstuhl-eco-line-6',category:'surge_strip',asin:'B07RWYSQKV',name:'Brennenstuhl Eco-Line 6’lı Akım Korumalı Grup Priz',brand:'Brennenstuhl',status:'verified_listing',verifiedAt,attributes:{outlets:6,joules:null,maxCurrentA:16,maxPowerW:3500,usbPorts:0,cableM:1.5,surgeCurrentA:13500},strengths:['6 priz','13.500 A azami darbe akımı','1,5 m kablo','16 A / 3500 W'],limits:['Joule değeri Amazon sayfasında yeniden doğrulanmalı','Darbe akımı değeri joule değeriyle aynı değildir'],sourceNote:'ASIN; üretici kaynağından 6 priz, 13.500 A, 1,5 m, 16 A ve 3500 W alanları doğrulandı; fiyat ve stok yayımlanmaz.',url:amazonProductUrl('B07RWYSQKV')}
   ];
 
   function dateOnly(value){const date=value instanceof Date?value:new Date(value);return Number.isNaN(date.getTime())?null:new Date(Date.UTC(date.getUTCFullYear(),date.getUTCMonth(),date.getUTCDate()));}
   function verificationStatus(item,now=new Date()){const checked=dateOnly(item&&item.verifiedAt);const today=dateOnly(now);if(!checked||!today)return {fresh:false,ageDays:null,verifiedAt:item&&item.verifiedAt||null,maxAgeDays:verificationMaxAgeDays};const ageDays=Math.max(0,Math.floor((today.getTime()-checked.getTime())/86400000));return {fresh:ageDays<=verificationMaxAgeDays,ageDays,verifiedAt:item.verifiedAt,maxAgeDays:verificationMaxAgeDays};}
   function getCategory(id){return categories.find(c=>c.id===id)||null;}
-  function publicAffiliateEligible(product,options={}){
-    const category=getCategory(product&&product.category);
-    if(!product||product.status!=='verified_listing'||!category)return false;
-    if(category.mode!=='direct'||category.affiliatePolicy!=='verified_direct')return false;
-    return options.freshOnly===false||verificationStatus(product,options.now||new Date()).fresh;
-  }
   function productsFor(category,options={}){const now=options.now||new Date();const freshOnly=Boolean(options.freshOnly);return products.filter(product=>product.category===category&&product.status==='verified_listing'&&(!freshOnly||verificationStatus(product,now).fresh));}
   function searchUrl(category){const c=getCategory(category);return c?amazonSearchUrl(c.searchQuery):'https://www.amazon.com.tr';}
+  function publicAffiliateEligible(product,options={}){const category=getCategory(product&&product.category);const now=options.now||new Date();const freshOnly=options.freshOnly!==false;return Boolean(category&&category.mode==='direct'&&category.affiliatePolicy==='verified_direct'&&product&&product.status==='verified_listing'&&(!freshOnly||verificationStatus(product,now).fresh));}
   function slug(value){return String(value||'').toLocaleLowerCase('tr-TR').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/ı/g,'i').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');}
   function productId(product){return `${siteOrigin}/akilli-urun-secimi/urun/${encodeURIComponent(product.id)}#product`;}
-  function productPageUrl(product){return `${siteOrigin}/akilli-urun-secimi?urun=${encodeURIComponent(product.id)}`;}
+  function productPageUrl(product){return `${siteOrigin}/akilli-urun-secimi?kategori=${encodeURIComponent(product.category)}&urun=${encodeURIComponent(product.id)}`;}
   function brandId(brand){return `${siteOrigin}/knowledge-graph/brand/${slug(brand)}#brand`;}
   function categoryId(category){return `${siteOrigin}/knowledge-graph/category/${encodeURIComponent(category)}#category`;}
-  function additionalProperties(product){return Object.entries(product.attributes||{}).filter(([,value])=>value!==null&&value!==undefined).map(([name,value])=>({'@type':'PropertyValue',name,value}));}
+  function additionalProperties(product){return [...Object.entries(product.attributes||{}).filter(([,value])=>value!==null&&value!==undefined).map(([name,value])=>({'@type':'PropertyValue',name,value})),{'@type':'PropertyValue',name:'Teknik doğrulama tarihi',value:product.verifiedAt},{'@type':'PropertyValue',name:'Ticari ilişki',value:'Amazon satış ortaklığı bağlantısı'}];}
   function productNode(product){
     const identifiers=[{'@type':'PropertyValue',propertyID:'ASIN',value:product.asin}];
     if(product.mpn)identifiers.push({'@type':'PropertyValue',propertyID:'MPN',value:product.mpn});
     return {
-      '@type':'Product','@id':productId(product),name:product.name,url:productPageUrl(product),sku:product.id,identifier:identifiers,
+      '@type':'Product','@id':productId(product),name:product.name,url:productPageUrl(product),sameAs:product.url,sku:product.id,identifier:identifiers,
       ...(product.mpn?{mpn:product.mpn}:{}),brand:{'@id':brandId(product.brand)},category:{'@id':categoryId(product.category)},
-      description:product.sourceNote,additionalProperty:additionalProperties(product),
+      description:product.sourceNote,dateModified:product.verifiedAt,additionalProperty:additionalProperties(product),
       subjectOf:{'@id':`${productPageUrl(product)}#webpage`},mainEntityOfPage:{'@id':`${productPageUrl(product)}#webpage`}
     };
   }
+  function catalogHealth(options={}){const now=options.now||new Date();const fresh=products.filter(product=>product.status==='verified_listing'&&verificationStatus(product,now).fresh);const publicProducts=fresh.filter(product=>publicAffiliateEligible(product,{now}));const checked=dateOnly(verifiedAt);const reviewBy=checked?new Date(checked.getTime()+30*86400000).toISOString().slice(0,10):null;const staleAfter=checked?new Date(checked.getTime()+(verificationMaxAgeDays+1)*86400000).toISOString().slice(0,10):null;return {verifiedAt,verificationMaxAgeDays,totalVerified:fresh.length,publicDirect:publicProducts.length,gatedVerified:fresh.length-publicProducts.length,reviewBy,staleAfter};}
   function knowledgeGraph(options={}){
-    const active=products.filter(product=>publicAffiliateEligible(product,{now:options.now||new Date(),freshOnly:options.freshOnly!==false}));
-    const uniqueBrands=[...new Set(active.map(product=>product.brand))].sort((a,b)=>a.localeCompare(b,'tr'));
+    const now=options.now||new Date();
+    const publicProducts=products.filter(product=>publicAffiliateEligible(product,{now}));
+    const uniqueBrands=[...new Set(publicProducts.map(product=>product.brand))].sort((a,b)=>a.localeCompare(b,'tr'));
     const brands=uniqueBrands.map(name=>({'@type':'Brand','@id':brandId(name),name}));
     const categoryNodes=categories.map(category=>({'@type':'DefinedTerm','@id':categoryId(category.id),termCode:category.id,name:category.name,description:category.description,inDefinedTermSet:{'@id':`${siteOrigin}/knowledge-graph/electrical-product-categories#termset`}}));
-    const itemList={'@type':'ItemList','@id':`${siteOrigin}/akilli-urun-secimi#verified-products`,name:'ALO186 doğrulanmış ve doğrudan yayınlanabilir affiliate ürünleri',numberOfItems:active.length,itemListElement:active.map((product,index)=>({'@type':'ListItem',position:index+1,item:{'@id':productId(product)}}))};
+    const itemList={'@type':'ItemList','@id':`${siteOrigin}/akilli-urun-secimi#verified-products`,name:'ALO186 teknik kapısı tamamlanmış affiliate ürünleri',numberOfItems:publicProducts.length,itemListElement:publicProducts.map((product,index)=>({'@type':'ListItem',position:index+1,item:{'@id':productId(product)}}))};
     const graph=[
       {'@type':'Organization','@id':`${siteOrigin}/#organization`,name:'ALO186',url:`${siteOrigin}/`,description:'Bağımsız elektrik bilgi ve ürün uygunluk platformu.'},
       {'@type':'WebSite','@id':`${siteOrigin}/#website`,url:`${siteOrigin}/`,name:'ALO186',publisher:{'@id':`${siteOrigin}/#organization`}},
       {'@type':'DefinedTermSet','@id':`${siteOrigin}/knowledge-graph/electrical-product-categories#termset`,name:'ALO186 elektrik ürün kategorileri',hasDefinedTerm:categoryNodes.map(node=>({'@id':node['@id']}))},
-      itemList,...categoryNodes,...brands,...active.map(productNode)
+      itemList,...categoryNodes,...brands,...publicProducts.map(productNode)
     ];
     return {'@context':'https://schema.org','@graph':graph};
   }
 
-  return {affiliateTag,verifiedAt,verificationMaxAgeDays,categories,products,getCategory,publicAffiliateEligible,productsFor,verificationStatus,amazonProductUrl,amazonSearchUrl,searchUrl,productId,productNode,knowledgeGraph};
+  return {affiliateTag,verifiedAt,verificationMaxAgeDays,categories,products,getCategory,productsFor,verificationStatus,amazonProductUrl,amazonSearchUrl,searchUrl,publicAffiliateEligible,productId,productNode,catalogHealth,knowledgeGraph};
 });
