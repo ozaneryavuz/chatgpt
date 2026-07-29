@@ -1,0 +1,21 @@
+{
+  "version": 69,
+  "generatedAt": "2026-07-29",
+  "routes": [
+    {
+      "source": "alo186/haberler/ev-sarj-22kw-neden-11kw-74kw-onboard-charger/index.html",
+      "canonicalPath": "/haberler/ev-sarj-22kw-neden-11kw-74kw-onboard-charger",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/elektrik-guc-artisi-edas-baglanti-gorusu-proje/index.html",
+      "canonicalPath": "/haberler/elektrik-guc-artisi-edas-baglanti-gorusu-proje",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/vpp-telemetri-kontrol-protokol-toplayici-hazirlik/index.html",
+      "canonicalPath": "/haberler/vpp-telemetri-kontrol-protokol-toplayici-hazirlik",
+      "type": "article"
+    }
+  ]
+}
