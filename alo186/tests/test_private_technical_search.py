@@ -61,8 +61,10 @@ def test_source_contracts() -> None:
 
     assert "commercialRankingExcluded" in generator
     assert '"price"' in generator and '"stock"' in generator and '"rating"' in generator
-    assert "if robots and \"noindex\"" in generator
+    assert "ALIAS_MARKER" in generator
+    assert "if not base_path and robots and \"noindex\"" in generator
     assert "canonical_path == CANONICAL_PATH" in generator
+    assert "canonical_route_path" in generator
     assert "rawQueryStored" in generator and "commercialRankingUsed" in generator
     assert "search-index.json" in generator
     assert "data-alo186-search-card" in generator
@@ -76,28 +78,31 @@ def test_source_contracts() -> None:
     assert "sunucuya gönderilmez" in placeholder["privacy"]
 
 
-def test_generator_excludes_noindex_and_prefixes_project_urls() -> None:
+def test_generator_excludes_alias_and_prefixes_project_urls() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         site = Path(tmp)
         (site / "arama").mkdir(parents=True)
-        (site / "arama/index.html").write_text("<!doctype html><h1>Arama</h1>", encoding="utf-8")
+        (site / "arama/index.html").write_text(
+            '<!doctype html><html><head><meta name="robots" content="noindex,follow"><title>Arama</title></head><body><h1>Arama</h1></body></html>',
+            encoding="utf-8",
+        )
         (site / "tool").mkdir(parents=True)
         (site / "tool/index.html").write_text(
-            """<!doctype html><html><head><title>UPS Süre Testi | ALO186</title><meta name=\"description\" content=\"UPS çalışma süresini hesaplayın.\"></head><body><h1>UPS kaç saat çalışır?</h1><script type=\"application/ld+json\">{\"@context\":\"https://schema.org\",\"@type\":\"DefinedTerm\",\"name\":\"UPS çalışma süresi\"}</script></body></html>""",
+            """<!doctype html><html><head><title>UPS Süre Testi | ALO186</title><meta name=\"robots\" content=\"noindex,follow\"><meta name=\"description\" content=\"UPS çalışma süresini hesaplayın.\"></head><body><h1>UPS kaç saat çalışır?</h1><script type=\"application/ld+json\">{\"@context\":\"https://schema.org\",\"@type\":\"DefinedTerm\",\"name\":\"UPS çalışma süresi\"}</script></body></html>""",
             encoding="utf-8",
         )
         (site / "alias").mkdir(parents=True)
         (site / "alias/index.html").write_text(
-            "<!doctype html><html><head><title>Eski UPS sayfası</title><meta name=\"robots\" content=\"noindex,follow\"></head><body><h1>Eski içerik</h1></body></html>",
+            '<!doctype html><html><head><title>Eski UPS sayfası</title><meta name="robots" content="noindex,follow"></head><body data-alo186-content-alias="true"><h1>Eski içerik</h1></body></html>',
             encoding="utf-8",
         )
         release = {
             "generatedAt": "2026-07-29",
             "routeCount": 3,
             "routes": [
-                {"canonicalPath": "/arama/", "source": "alo186/arama/index.html", "type": "tool"},
-                {"canonicalPath": "/tool/", "source": "alo186/tool/index.html", "type": "calculator"},
-                {"canonicalPath": "/alias", "source": "alo186/alias/index.html", "type": "article"},
+                {"canonicalPath": "/chatgpt/arama/", "source": "alo186/arama/index.html", "type": "tool"},
+                {"canonicalPath": "/chatgpt/tool/", "source": "alo186/tool/index.html", "type": "calculator"},
+                {"canonicalPath": "/chatgpt/alias", "source": "alo186/alias/index.html", "type": "article"},
             ],
         }
         (site / "alo186-release.json").write_text(json.dumps(release), encoding="utf-8")
@@ -117,13 +122,14 @@ def test_generator_excludes_noindex_and_prefixes_project_urls() -> None:
 
 def main() -> None:
     test_source_contracts()
-    test_generator_excludes_noindex_and_prefixes_project_urls()
+    test_generator_excludes_alias_and_prefixes_project_urls()
     print(json.dumps({
         "ok": True,
         "route": "/arama/",
         "rawQueryStored": False,
         "commercialRankingUsed": False,
-        "noindexAliasesExcluded": True,
+        "projectWideNoindexSearchable": True,
+        "explicitAliasesExcluded": True,
     }, ensure_ascii=False, indent=2))
 
 
