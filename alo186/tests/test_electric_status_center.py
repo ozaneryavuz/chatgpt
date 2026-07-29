@@ -42,7 +42,7 @@ def main():
 
     assert 'max-width:760px' in css
     assert 'min-height:50px' in css
-    assert '"version": 74' in overlay
+    assert '"version": 75' in overlay
     assert '"type": "tool"' in overlay
     assert '"canonicalPath": "/elektrik-durum-merkezi"' in overlay
     print('ALO186 Elektrik Durum Merkezi kalite sözleşmeleri başarılı.')
