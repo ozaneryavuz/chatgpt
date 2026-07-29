@@ -1,0 +1,21 @@
+{
+  "version": 60,
+  "generatedAt": "2026-07-29",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesintisi-tazminati-yillik-uzun-sureli-nasil-odenir/index.html",
+      "canonicalPath": "/haberler/elektrik-kesintisi-tazminati-yillik-uzun-sureli-nasil-odenir",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ups-aku-ic-direnc-impedans-kapasite-testi-farki/index.html",
+      "canonicalPath": "/haberler/ups-aku-ic-direnc-impedans-kapasite-testi-farki",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ev-sarj-ocpp-iso-15118-plug-charge-farki/index.html",
+      "canonicalPath": "/haberler/ev-sarj-ocpp-iso-15118-plug-charge-farki",
+      "type": "article"
+    }
+  ]
+}
