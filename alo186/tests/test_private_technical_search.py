@@ -62,7 +62,7 @@ def test_source_contracts() -> None:
     assert "commercialRankingExcluded" in generator
     assert '"price"' in generator and '"stock"' in generator and '"rating"' in generator
     assert "if robots and \"noindex\"" in generator
-    assert "canonicalPath == CANONICAL_PATH" in generator
+    assert "canonical_path == CANONICAL_PATH" in generator
     assert "rawQueryStored" in generator and "commercialRankingUsed" in generator
     assert "search-index.json" in generator
     assert "data-alo186-search-card" in generator
