@@ -157,7 +157,7 @@ def main() -> None:
     generators = (REPO_ROOT / "alo186/haberler/jenerator-paralel-kw-kvar-yuk-paylasimi-droop-isochronous/index.html").read_text(encoding="utf-8").casefold()
     rcd = (REPO_ROOT / "alo186/haberler/kacak-akim-rolesi-toplam-sizinti-ups-vfd-emc-filtre/index.html").read_text(encoding="utf-8").casefold()
     assert "grid-forming” etiketi tek başına" in gfm and "saf sinüs çıkış" in gfm
-    assert "kW paylaşımını esas olarak".casefold() in generators and "kVAr paylaşımında".casefold() in generators
+    assert "motor governorı" in generators and "reaktif güç ve güç faktörü paylaşımında" in generators
     assert "röleyi büyütmek" in rcd and "üretici tavsiyeleri doğrudan evrensel kural değildir" in rcd
     assert len(new_paths) == 3, new_paths
 
