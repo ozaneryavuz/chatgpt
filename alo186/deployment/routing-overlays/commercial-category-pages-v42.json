@@ -1,0 +1,21 @@
+{
+  "version": 42,
+  "generatedAt": "2026-07-29",
+  "routes": [
+    {
+      "source": "alo186/amazon-elektrik-urunleri/tasinabilir-guc-istasyonu-secimi/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/tasinabilir-guc-istasyonu-secimi",
+      "type": "commerce-guide"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi",
+      "type": "commerce-guide"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/ges-malzemeleri-secimi/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/ges-malzemeleri-secimi",
+      "type": "commerce-guide"
+    }
+  ]
+}

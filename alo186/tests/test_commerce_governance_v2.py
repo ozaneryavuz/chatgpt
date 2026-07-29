@@ -55,8 +55,10 @@ def test_affiliate_anchor_policy() -> None:
 def test_disclosure_equivalence() -> None:
     assert has_no_buy("Mevcut cihaz yeterli ve güvenliyse satın alma yapmayın.")
     assert has_no_buy("Satın almama seçeneği korunur.")
+    assert has_no_buy("Satın almama koruması proje kararının parçasıdır.")
     assert has_no_buy("Elinizdeki ürün yeterliyse yeni ürün almak gerekmeyebilir.")
     assert has_no_buy("Ürün satın alma zorunluluğu yoktur.")
+    assert has_no_buy("Bilgiler yoksa sipariş vermeyin.")
     assert not has_no_buy("En yeni ürünü hemen satın alın.")
 
     assert has_independence("ALO186 bağımsız bilgi platformudur; EDAŞ veya kamu kurumu değildir.")
@@ -65,17 +67,28 @@ def test_disclosure_equivalence() -> None:
 
 
 def test_actual_source_contracts() -> None:
+    affiliate_pages = 0
+    professional_only_pages = 0
     for route, policy in COMMERCIAL_ROUTES.items():
         path = REPO_ROOT / "alo186" / route.strip("/") / "index.html"
         assert path.is_file(), path
         html = path.read_text(encoding="utf-8")
+        lower = html.casefold()
         assert f'rel="canonical" href="https://www.alo186.com{route}"' in html
-        assert "satış ortaklığı" in html.casefold()
-        assert "amazon.com.tr" not in html.casefold(), "Kaynak HTML statik mağaza URL'si içermemeli"
-        if policy["direct"]:
-            assert "data-fresh-products" in html
+        assert "amazon.com.tr" not in lower, "Kaynak HTML statik mağaza URL'si içermemeli"
+        assert "data-fresh-products" in html if policy["direct"] else "data-fresh-products" not in html
+        if policy["affiliate"]:
+            affiliate_pages += 1
+            assert "satış ortaklığı" in lower
         else:
-            assert "data-fresh-products" not in html
+            professional_only_pages += 1
+            assert policy["professional_only"] is True
+            assert 'data-commercial-scope="professional-only"' in html
+            assert "mağaza bağlantısı" in lower
+            assert "data-product-center" not in html
+
+    assert affiliate_pages == 7
+    assert professional_only_pages == 1
 
     for route in SERVICE_ROUTES:
         path = REPO_ROOT / "alo186" / route.strip("/") / "index.html"
@@ -90,7 +103,12 @@ def test_actual_source_contracts() -> None:
 
     runtime = (REPO_ROOT / "alo186/amazon-elektrik-urunleri/commercial.js").read_text(encoding="utf-8")
     catalog = (REPO_ROOT / "alo186/urun-eslestirme/catalog.js").read_text(encoding="utf-8")
-    for token in ("freshOnly: true", "sponsored nofollow noopener", "category.mode === 'direct'"):
+    for token in (
+        "freshOnly: true",
+        "sponsored nofollow noopener",
+        "category.mode === 'direct'",
+        "if (professionalOnly) return;",
+    ):
         assert token in runtime
     assert catalog.count("mode:'direct'") == 1
     assert "{id:'powerbank'" in catalog and "verificationMaxAgeDays=45" in catalog
@@ -105,9 +123,12 @@ def main() -> None:
     print(json.dumps({
         "ok": True,
         "commercialPages": len(COMMERCIAL_ROUTES),
+        "affiliateCommercialPages": 7,
+        "professionalOnlyPages": 1,
         "servicePages": len(SERVICE_ROUTES),
         "directAffiliateCategories": 1,
         "highRiskDirectAffiliate": False,
+        "professionalOnlyDirectAffiliate": False,
         "unverifiedCommercialClaims": False,
     }, ensure_ascii=False, indent=2))
 
