@@ -155,7 +155,7 @@ def main() -> None:
     meter = (REPO_ROOT / "alo186/haberler/elektrik-sayaci-isiniyor-yanik-kokusu-cizirti-edas-elektrikci/index.html").read_text(encoding="utf-8").casefold()
     harmonics = (REPO_ROOT / "alo186/haberler/harmonik-thdi-tdd-pcc-ieee-519-farki/index.html").read_text(encoding="utf-8").casefold()
     ups = (REPO_ROOT / "alo186/haberler/ups-notr-toprak-bypass-4-kutup-ats-npe/index.html").read_text(encoding="utf-8").casefold()
-    assert "iki süreç paralel yürütülmelidir" in meter and "ürünle çözülemez" in meter
+    assert "iki süreç paralel yürütülmelidir" in meter and "tüketici ürünüyle çözülemez" in meter
     assert "düşük yükte alınmış yüksek thdi" in harmonics and "tdd, pcc ve tekil harmonik" in harmonics
     assert "rastgele n–pe bağı" in ups and "normal, batarya, statik bypass ve bakım bypassı" in ups
     assert len(new_paths) == 3, new_paths
