@@ -5,6 +5,8 @@ import json
 import re
 from pathlib import Path
 
+from inject_growth_run22 import run as run_growth_run22
+
 ROUTE = "/hesaplama/kesinti-hazirlik-envanteri/"
 CANONICAL = "https://www.alo186.com" + ROUTE
 SOURCE = "alo186/hesaplama/kesinti-hazirlik-envanteri/index.html"
@@ -167,4 +169,5 @@ def run(site: Path, base_path: str) -> dict:
     update_manifest(site, base_path)
     update_release(site, base_path, entries, risk_gate, offline)
     recompute(site)
-    return {"ok": True, "route": public_url(base_path, ROUTE), "entries": entries, "riskGate": risk_gate, "offline": True}
+    lighting = run_growth_run22(site, base_path)
+    return {"ok": True, "route": public_url(base_path, ROUTE), "entries": entries, "riskGate": risk_gate, "offline": True, "lightingSuitability": lighting}
