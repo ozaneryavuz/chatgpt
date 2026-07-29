@@ -1,0 +1,167 @@
+name: ALO186 kaliteli ticari hizmet sayfaları
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hizmetler/**'
+      - 'alo186/kurumsal-on-degerlendirme/**'
+      - 'alo186/deployment/routing-overlays/commercial-services-run17.json'
+      - 'alo186/tests/test_commercial_service_pages.py'
+      - '.github/workflows/alo186-commercial-service-pages.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hizmetler/**'
+      - 'alo186/kurumsal-on-degerlendirme/**'
+      - 'alo186/deployment/routing-overlays/commercial-services-run17.json'
+      - 'alo186/tests/test_commercial_service_pages.py'
+      - '.github/workflows/alo186-commercial-service-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-commercial-services-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Ticari sayfa, schema, güven ve yönlendirme sözleşmeleri
+        run: python alo186/tests/test_commercial_service_pages.py
+
+      - name: Ortak kapsam oluşturucu JavaScript kontrolü
+        run: node --check alo186/kurumsal-on-degerlendirme/app.js
+
+      - name: Canonical, içerik niyeti ve cihaz hasarı regresyonları
+        run: |
+          python alo186/tests/test_content_intent_consolidation.py
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Canonical üretim paketini oluştur
+        run: |
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-commercial-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-commercial-canonical
+
+      - name: Custom-domain ticari hizmet artifactı
+        run: |
+          cp -a /tmp/alo186-commercial-canonical /tmp/alo186-commercial-custom
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-commercial-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-commercial-custom \
+            --base-path ''
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-commercial-custom \
+            --base-path '' \
+            > /tmp/alo186-commercial-custom.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-commercial-custom \
+            --base-path ''
+
+      - name: Project-path ticari hizmet artifactı
+        run: |
+          cp -a /tmp/alo186-commercial-canonical /tmp/alo186-commercial-project
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-commercial-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-commercial-project \
+            --base-path '/chatgpt'
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-commercial-project \
+            --base-path '/chatgpt' \
+            > /tmp/alo186-commercial-project.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-commercial-project \
+            --base-path '/chatgpt'
+
+      - name: Ticari hizmet, sitemap ve teknik arama artifact sözleşmeleri
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          routes = [
+              '/hizmetler/otel-elektrik-surekliligi-denetimi/',
+              '/hizmetler/elektrik-teklif-teknik-inceleme/',
+              '/hizmetler/ges-batarya-ev-sarj-fizibilitesi/',
+          ]
+          service_keys = ['hotel_audit', 'proposal_review', 'energy_integration']
+          for root, prefix in [
+              (Path('/tmp/alo186-commercial-custom'), ''),
+              (Path('/tmp/alo186-commercial-project'), '/chatgpt'),
+          ]:
+              sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
+              release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
+              search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
+              def canonical_route(value):
+                  if prefix and value.startswith(prefix + '/'):
+                      return value[len(prefix):]
+                  return value
+              route_map={canonical_route(item['canonicalPath']): item for item in release['routes']}
+              search_map={item['canonicalPath']: item for item in search['entries']}
+              for route in routes:
+                  directory=root/route.strip('/')
+                  physical=directory/'index.html'
+                  stylesheet=directory/'styles.css'
+                  assert physical.is_file(), physical
+                  assert stylesheet.is_file() and stylesheet.stat().st_size>5000, stylesheet
+                  html=physical.read_text(encoding='utf-8')
+                  assert 'href="./styles.css"' in html
+                  assert 'Ücretli' in html or 'ücretli' in html
+                  assert 'application/ld+json' in html
+                  assert '<form' not in html.lower()
+                  assert 'amazon.' not in html.lower() and 'amzn.' not in html.lower()
+                  assert f'https://www.alo186.com{route}' in sitemap
+                  artifact_route=prefix+route if prefix else route
+                  assert artifact_route in html or 'rel="canonical"' in html
+                  assert route in route_map and route_map[route]['type']=='service'
+                  assert route in search_map
+                  assert search_map[route]['bucket']=='business'
+                  expected_url=prefix+route if prefix else route
+                  assert search_map[route]['url']==expected_url
+                  for forbidden in ['price','stock','rating','seller','warranty','asin']:
+                      assert forbidden not in search_map[route]
+
+              corporate=(root/'kurumsal-elektrik-surekliligi-on-degerlendirme/index.html').read_text(encoding='utf-8')
+              app=(root/'kurumsal-elektrik-surekliligi-on-degerlendirme/app.js').read_text(encoding='utf-8')
+              for route, key in zip(routes, service_keys):
+                  assert (prefix+route if prefix else route) in corporate
+                  assert key in app
+              assert 'Uzmanlaşmış ticari hizmetler' in corporate
+              assert 'serviceProfiles' in app
+              assert 'localStorage' not in app and 'sessionStorage' not in app
+          PY
+
+      - name: Doğrulanmış ticari hizmet artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-commercial-service-pages
+          path: /tmp/alo186-commercial-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30

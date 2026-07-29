@@ -16,11 +16,17 @@
     outlet_tester:{label:'Priz / RCD ve tesisat ölçümü',problem:'audit',backup:'none',scope:'site'},
     ups_battery:{label:'UPS aküsü ve kartuşu',problem:'backup',backup:'ups',scope:'remote'}
   };
+  const serviceProfiles = {
+    hotel_audit:{label:'Otel Elektrik Sürekliliği ve Risk Denetimi',facility:'hotel',problem:'audit',backup:'both',scope:'site',urgency:'soon',evidence:'partial'},
+    proposal_review:{label:'Bağımsız Elektrik Teklif ve Teknik Şartname İncelemesi',facility:'office',problem:'audit',backup:'none',scope:'remote',urgency:'urgent',evidence:'partial'},
+    energy_integration:{label:'GES, Batarya ve EV Şarj Entegrasyon Fizibilitesi',facility:'hotel',problem:'energy',backup:'solar_storage',scope:'comparison',urgency:'planning',evidence:'partial'}
+  };
 
   const byId = (id) => document.getElementById(id);
   let currentBrief = '';
   let currentSelection = null;
   let sourceCategory = '';
+  let sourceService = '';
 
   function safeChoice(group, id) {
     const value = String(byId(id).value || '');
@@ -33,8 +39,8 @@
 
   function track(name, data = {}) {
     const allowed = {};
-    for (const key of ['facility','problem','backup','scope','urgency','evidence','readiness_band','source_category']) {
-      if (typeof data[key] === 'string' && data[key].length < 60) allowed[key] = data[key];
+    for (const key of ['facility','problem','backup','scope','urgency','evidence','readiness_band','source_category','source_service']) {
+      if (typeof data[key] === 'string' && data[key].length < 80) allowed[key] = data[key];
     }
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({ event: name, ...allowed });
@@ -56,6 +62,22 @@
     track('paid_assessment_source_prefilled',{problem:profile.problem,backup:profile.backup,scope:profile.scope,source_category:category});
   }
 
+  function prefillFromServicePage() {
+    const params = new URLSearchParams(location.search);
+    if (params.get('source') !== 'service_page') return;
+    const service = String(params.get('service') || '');
+    const profile = serviceProfiles[service];
+    if (!profile) return;
+    sourceService = service;
+    for (const key of ['facility','problem','backup','scope','urgency','evidence']) {
+      if (Object.prototype.hasOwnProperty.call(labels[key], profile[key])) byId(key).value = profile[key];
+    }
+    byId('resultTitle').textContent = `${profile.label} için kapsam hazırlığına devam edin.`;
+    byId('resultText').textContent = 'Uzmanlaşmış ticari sayfadan gelen seçimler kişisel veri olmadan ön dolduruldu. Karar zamanı, belge durumu ve istenen kapsamı değiştirerek talebi daraltabilirsiniz.';
+    byId('actionStatus').textContent = 'Bu ön doldurma sözleşme veya ücret onayı değildir. Ücretsiz kapsam özetini oluşturduktan sonra iletişime geçip geçmemeye siz karar verirsiniz.';
+    track('paid_assessment_service_prefilled',{facility:profile.facility,problem:profile.problem,backup:profile.backup,scope:profile.scope,urgency:profile.urgency,evidence:profile.evidence,source_service:service});
+  }
+
   async function copyText(text) {
     if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(text);
     const area = document.createElement('textarea');
@@ -74,6 +96,7 @@
     const link = byId('mailLink');
     const copyButton = byId('copyBriefBtn');
     const printButton = byId('printBriefBtn');
+    prefillFromServicePage();
     prefillFromProductCenter();
 
     form.addEventListener('submit', (event) => {
@@ -88,7 +111,7 @@
       };
       const readable = Object.fromEntries(Object.keys(selection).map((key) => [key, labels[key][selection[key]]]));
       const assessment = core.assess(selection);
-      currentSelection = { ...selection, readiness_band: assessment.band, source_category: sourceCategory };
+      currentSelection = { ...selection, readiness_band: assessment.band, source_category: sourceCategory, source_service: sourceService };
       currentBrief = core.brief(readable, assessment);
 
       byId('resultTitle').textContent = `${readable.facility} için nitelikli ön değerlendirme özeti hazır.`;
@@ -104,8 +127,12 @@
       byId('documentList').innerHTML = assessment.docs.map((item) => `<li>${escapeHtml(item)}</li>`).join('');
       byId('nextStep').textContent = assessment.next;
 
-      const sourceNote = sourceCategory && sourceProfiles[sourceCategory] ? `\nÜrün merkezi başlangıç kategorisi: ${sourceProfiles[sourceCategory].label}\n` : '';
-      const subject = `ALO186 ücretli teknik ön değerlendirme talebi — ${readable.facility}`;
+      const sourceNotes = [];
+      if (sourceCategory && sourceProfiles[sourceCategory]) sourceNotes.push(`Ürün merkezi başlangıç kategorisi: ${sourceProfiles[sourceCategory].label}`);
+      if (sourceService && serviceProfiles[sourceService]) sourceNotes.push(`Uzmanlaşmış hizmet başlangıcı: ${serviceProfiles[sourceService].label}`);
+      const sourceNote = sourceNotes.length ? `\n${sourceNotes.join('\n')}\n` : '';
+      const subjectLabel = sourceService && serviceProfiles[sourceService] ? serviceProfiles[sourceService].label : readable.facility;
+      const subject = `ALO186 ücretli teknik ön değerlendirme talebi — ${subjectLabel}`;
       const body = ['Merhaba,','',currentBrief,sourceNote,'Çalışmaya başlamadan önce kapsam, ücret, teslim biçimi ve gerekiyorsa saha koşullarının yazılı olarak teyit edilmesini rica ederim.'].join('\n');
       link.href = `mailto:bilgi@alo186.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
       link.classList.remove('disabled');
