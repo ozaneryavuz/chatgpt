@@ -55,7 +55,7 @@ ARTICLES = [
         "slug": "k-faktorlu-trafo-nedir-harmonik-yukte-derating",
         "required": [
             "K-faktörlü trafo",
-            "harmonikleri azaltmaz",
+            "harmonikleri azaltmadığını",
             "IEEE C57.110",
             "derating",
             "200% nötr",
