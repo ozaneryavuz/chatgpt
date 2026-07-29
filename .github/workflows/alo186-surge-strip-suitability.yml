@@ -61,13 +61,16 @@ jobs:
           assert.equal(category.mode,'guide');
           assert.equal(category.affiliatePolicy,'after_tool');
           assert.equal(category.nextStepUrl,'https://www.alo186.com/hesaplama/akim-korumali-grup-priz-uygunluk/');
-          assert.equal(catalog.productsFor('surge_strip').length,4);
+          const verified=catalog.productsFor('surge_strip');
+          assert(verified.length>=4,'En az dört doğrulanmış grup priz ürünü korunmalı.');
+          assert.equal(new Set(verified.map(product=>product.id)).size,verified.length);
+          assert(verified.every(product=>product.status==='verified_listing'));
           const route=journey.getJourney('surge_strip');
           assert(route);
           assert.equal(route.calculate.url,'/hesaplama/akim-korumali-grup-priz-uygunluk/');
           assert.equal(route.compare.url,'/akilli-urun-secimi?kategori=surge_strip');
           assert.equal(route.maintenance.length,3);
-          console.log('Surge strip affiliate kapısı ve tekrar ziyaret yolculuğu başarılı.');
+          console.log(`Surge strip affiliate kapısı ve ${verified.length} doğrulanmış ürün yolculuğu başarılı.`);
           NODE
 
       - name: JavaScript sözdizimi

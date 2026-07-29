@@ -61,6 +61,12 @@
   function dateOnly(value){const date=value instanceof Date?value:new Date(value);return Number.isNaN(date.getTime())?null:new Date(Date.UTC(date.getUTCFullYear(),date.getUTCMonth(),date.getUTCDate()));}
   function verificationStatus(item,now=new Date()){const checked=dateOnly(item&&item.verifiedAt);const today=dateOnly(now);if(!checked||!today)return {fresh:false,ageDays:null,verifiedAt:item&&item.verifiedAt||null,maxAgeDays:verificationMaxAgeDays};const ageDays=Math.max(0,Math.floor((today.getTime()-checked.getTime())/86400000));return {fresh:ageDays<=verificationMaxAgeDays,ageDays,verifiedAt:item.verifiedAt,maxAgeDays:verificationMaxAgeDays};}
   function getCategory(id){return categories.find(c=>c.id===id)||null;}
+  function publicAffiliateEligible(product,options={}){
+    const category=getCategory(product&&product.category);
+    if(!product||product.status!=='verified_listing'||!category)return false;
+    if(category.mode!=='direct'||category.affiliatePolicy!=='verified_direct')return false;
+    return options.freshOnly===false||verificationStatus(product,options.now||new Date()).fresh;
+  }
   function productsFor(category,options={}){const now=options.now||new Date();const freshOnly=Boolean(options.freshOnly);return products.filter(product=>product.category===category&&product.status==='verified_listing'&&(!freshOnly||verificationStatus(product,now).fresh));}
   function searchUrl(category){const c=getCategory(category);return c?amazonSearchUrl(c.searchQuery):'https://www.amazon.com.tr';}
   function slug(value){return String(value||'').toLocaleLowerCase('tr-TR').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/ı/g,'i').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');}
@@ -80,11 +86,11 @@
     };
   }
   function knowledgeGraph(options={}){
-    const active=products.filter(product=>product.status==='verified_listing'&&verificationStatus(product,options.now||new Date()).fresh);
+    const active=products.filter(product=>publicAffiliateEligible(product,{now:options.now||new Date(),freshOnly:options.freshOnly!==false}));
     const uniqueBrands=[...new Set(active.map(product=>product.brand))].sort((a,b)=>a.localeCompare(b,'tr'));
     const brands=uniqueBrands.map(name=>({'@type':'Brand','@id':brandId(name),name}));
     const categoryNodes=categories.map(category=>({'@type':'DefinedTerm','@id':categoryId(category.id),termCode:category.id,name:category.name,description:category.description,inDefinedTermSet:{'@id':`${siteOrigin}/knowledge-graph/electrical-product-categories#termset`}}));
-    const itemList={'@type':'ItemList','@id':`${siteOrigin}/akilli-urun-secimi#verified-products`,name:'ALO186 doğrulanmış affiliate ürünleri',numberOfItems:active.length,itemListElement:active.map((product,index)=>({'@type':'ListItem',position:index+1,item:{'@id':productId(product)}}))};
+    const itemList={'@type':'ItemList','@id':`${siteOrigin}/akilli-urun-secimi#verified-products`,name:'ALO186 doğrulanmış ve doğrudan yayınlanabilir affiliate ürünleri',numberOfItems:active.length,itemListElement:active.map((product,index)=>({'@type':'ListItem',position:index+1,item:{'@id':productId(product)}}))};
     const graph=[
       {'@type':'Organization','@id':`${siteOrigin}/#organization`,name:'ALO186',url:`${siteOrigin}/`,description:'Bağımsız elektrik bilgi ve ürün uygunluk platformu.'},
       {'@type':'WebSite','@id':`${siteOrigin}/#website`,url:`${siteOrigin}/`,name:'ALO186',publisher:{'@id':`${siteOrigin}/#organization`}},
@@ -94,5 +100,5 @@
     return {'@context':'https://schema.org','@graph':graph};
   }
 
-  return {affiliateTag,verifiedAt,verificationMaxAgeDays,categories,products,getCategory,productsFor,verificationStatus,amazonProductUrl,amazonSearchUrl,searchUrl,productId,productNode,knowledgeGraph};
+  return {affiliateTag,verifiedAt,verificationMaxAgeDays,categories,products,getCategory,publicAffiliateEligible,productsFor,verificationStatus,amazonProductUrl,amazonSearchUrl,searchUrl,productId,productNode,knowledgeGraph};
 });

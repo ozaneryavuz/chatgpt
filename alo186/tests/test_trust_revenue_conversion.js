@@ -29,7 +29,7 @@ assert.match(evQuery, /7\.5 metre/);
 
 const evUrl = conversion.buildAffiliateUrl('ev_cable', { current: '32', phase: 'three', length: '7_5' });
 assert.match(evUrl, /^https:\/\/www\.amazon\.com\.tr\/s\?k=/);
-assert.match(evUrl, /(?:\?|&)tag=alo186hazirlik-21/);
+assert.equal(new URL(evUrl).searchParams.get('tag'), catalog.affiliateTag);
 
 assert.deepEqual(
   conversion.gateStatus('ev_cable', { toolConfirmed: false, existingInsufficient: true, affiliateAccepted: true }),
