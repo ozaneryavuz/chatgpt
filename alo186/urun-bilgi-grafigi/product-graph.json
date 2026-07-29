@@ -1,0 +1,75 @@
+{
+  "version": "2026-07-29-run34",
+  "generatedAt": "2026-07-29",
+  "canonicalUrl": "https://www.alo186.com/urun-bilgi-grafigi/",
+  "publisher": {
+    "id": "alo186",
+    "name": "ALO186",
+    "url": "https://www.alo186.com",
+    "independentInformationPlatform": true,
+    "officialInstitution": false,
+    "productSeller": false
+  },
+  "commercialPolicy": {
+    "affiliateProgram": "Amazon Türkiye satış ortaklığı",
+    "affiliateDisclosureRequired": true,
+    "commercialRankingFieldsExcluded": [
+      "price",
+      "stock",
+      "rating",
+      "seller",
+      "delivery",
+      "warranty",
+      "affiliateCommission"
+    ],
+    "verificationMaxAgeDays": 45,
+    "noBuyOutcomePreserved": true,
+    "professionalOnlyCategoriesNeverExposeAffiliateLinks": true,
+    "manufacturerVerifiedSearchRequiresExactModelRecheck": true
+  },
+  "needs": [
+    {"id":"mobile-continuity","name":"Mobil cihaz enerji sürekliliği"},
+    {"id":"plug-in-surge-protection","name":"Fişli cihaz darbe koruması"},
+    {"id":"internet-continuity","name":"Modem ve internet sürekliliği"},
+    {"id":"outage-lighting","name":"Kesintide taşınabilir aydınlatma"},
+    {"id":"fire-early-warning","name":"Yangın erken uyarısı"},
+    {"id":"carbon-monoxide-warning","name":"Karbonmonoksit erken uyarısı"},
+    {"id":"portable-backup-energy","name":"Taşınabilir yedek enerji"},
+    {"id":"portable-generation","name":"Taşınabilir elektrik üretimi"},
+    {"id":"dc-ac-conversion","name":"DC–AC dönüşümü ve batarya kullanımı"},
+    {"id":"basic-outlet-screening","name":"Priz ve RCD ön kontrolü"},
+    {"id":"device-energy-measurement","name":"Cihaz bazlı enerji ölçümü"},
+    {"id":"ev-ac-cable","name":"EV AC şarj kablosu uyumu"},
+    {"id":"ups-runtime-restoration","name":"UPS çalışma süresini geri kazanma"},
+    {"id":"temporary-power-extension","name":"Geçici kablo ve makara kullanımı"}
+  ],
+  "categories": [
+    {"id":"powerbank","name":"Powerbank","needIds":["mobile-continuity"],"affiliatePolicy":"verified_direct","risk":"consumer","toolUrls":["/hesaplama/powerbank-usb-c-uygunluk/"],"guideUrls":["/amazon-elektrik-urunleri/powerbank-usb-c-secimi"]},
+    {"id":"surge_strip","name":"Akım korumalı grup priz","needIds":["plug-in-surge-protection"],"affiliatePolicy":"after_tool","risk":"consumer","toolUrls":["/hesaplama/akim-korumali-grup-priz-uygunluk/"],"guideUrls":["/amazon-elektrik-urunleri/akim-korumali-grup-priz-secimi"]},
+    {"id":"mini_ups","name":"Modem mini UPS","needIds":["internet-continuity"],"affiliatePolicy":"after_tool","risk":"compatibility","toolUrls":["/hesaplama/modem-internet-yedekleme/","/hesaplama/yedek-guc-runtime-saglik-gunlugu/"],"guideUrls":["/amazon-elektrik-urunleri/modem-mini-ups-secimi"]},
+    {"id":"emergency_light","name":"Şarjlı acil aydınlatma","needIds":["outage-lighting"],"affiliatePolicy":"after_tool","risk":"consumer","toolUrls":["/hesaplama/acil-aydinlatma-sure-uygunluk/","/hesaplama/acil-aydinlatma-test-bakim-gunlugu/"],"guideUrls":["/amazon-elektrik-urunleri/acil-aydinlatma-duman-alarmi"]},
+    {"id":"smoke_alarm","name":"Fotoelektrik duman alarmı","needIds":["fire-early-warning"],"affiliatePolicy":"after_tool","risk":"safety","toolUrls":["/hesaplama/duman-alarmi-yerlesim-bakim-uygunluk/","/hesaplama/duman-co-alarmi-bakim-gunlugu/"],"guideUrls":["/amazon-elektrik-urunleri/acil-aydinlatma-duman-alarmi"]},
+    {"id":"co_alarm","name":"Karbonmonoksit alarmı","needIds":["carbon-monoxide-warning"],"affiliatePolicy":"after_tool","risk":"safety","toolUrls":["/hesaplama/karbonmonoksit-alarmi-jenerator-guvenligi/","/hesaplama/duman-co-alarmi-bakim-gunlugu/"],"guideUrls":["/amazon-elektrik-urunleri/acil-aydinlatma-duman-alarmi"]},
+    {"id":"power_station","name":"Taşınabilir güç istasyonu","needIds":["portable-backup-energy"],"affiliatePolicy":"after_tool","risk":"compatibility","toolUrls":["/hesaplama/power-station-kapasite-eps-uygunluk/","/hesaplama/power-station-gunes-paneli-uygunluk/","/hesaplama/yedek-guc-runtime-saglik-gunlugu/"],"guideUrls":["/amazon-elektrik-urunleri/tasinabilir-guc-istasyonu-secimi"]},
+    {"id":"generator","name":"Taşınabilir jeneratör","needIds":["portable-generation"],"affiliatePolicy":"after_tool","risk":"safety","toolUrls":["/hesaplama/jenerator-gucu-secimi/","/hesaplama/jenerator-ats-test-gunlugu/"],"guideUrls":["/haberler/jenerator-ups-birlikte-calisir-mi"]},
+    {"id":"inverter","name":"Saf sinüs inverter ve batarya sistemi","needIds":["dc-ac-conversion"],"affiliatePolicy":"after_tool","risk":"compatibility","toolUrls":["/hesaplama/inverter-uygunluk/"],"guideUrls":["/haberler/saf-sinus-modifiye-sinus-inverter-farki"]},
+    {"id":"outlet_tester","name":"Priz ve RCD test cihazı","needIds":["basic-outlet-screening"],"affiliatePolicy":"professional_only","risk":"measurement","toolUrls":["/karar-motoru/"],"guideUrls":["/haberler/prizde-topraklama-var-mi-priz-test-cihazi"]},
+    {"id":"smart_plug","name":"Akıllı priz ve enerji ölçer","needIds":["device-energy-measurement"],"affiliatePolicy":"after_tool","risk":"compatibility","toolUrls":["/hesaplama/akilli-priz-enerji-olcer-uygunluk/","/hesaplama/7-gunluk-cihaz-tuketim-deneyi/"],"guideUrls":["/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi"]},
+    {"id":"ev_cable","name":"Type 2 EV şarj kablosu","needIds":["ev-ac-cable"],"affiliatePolicy":"after_tool","risk":"compatibility","toolUrls":["/hesaplama/ev-sarj-kablosu-uygunluk/","/hesaplama/ev-sarj-kablosu-saglik-gunlugu/"],"guideUrls":["/haberler/tip-2-ev-sarj-kablosu-nasil-secilir"]},
+    {"id":"ups_battery","name":"UPS yedek aküsü ve kartuşu","needIds":["ups-runtime-restoration"],"affiliatePolicy":"after_tool","risk":"compatibility","toolUrls":["/hesaplama/ups-aku-degisim-uygunluk/","/hesaplama/yedek-guc-runtime-saglik-gunlugu/"],"guideUrls":["/haberler/ups-akusu-ne-zaman-degisir"]},
+    {"id":"extension_cord","name":"Uzatma kablosu ve kablo makarası","needIds":["temporary-power-extension"],"affiliatePolicy":"after_tool","risk":"safety","toolUrls":["/hesaplama/uzatma-kablosu-kablo-makarasi-uygunluk/"],"guideUrls":["/haberler/ev-sarj-kablosu-kesiti-gerilim-dusumu-isinma"]}
+  ],
+  "products": [
+    {"id":"anker-prime-a1336","categoryId":"powerbank","name":"Anker Prime A1336 20.000 mAh 200 W","brand":"Anker","model":"A1336","identifier":{"type":"ASIN","value":"B0BYNZXFM2"},"verificationStatus":"verified_listing","verifiedAt":"2026-07-27","linkMode":"asin_detail","needIds":["mobile-continuity"],"technicalProperties":{"capacityMah":20000,"energyWh":72,"maxOutputW":200,"wireless":false},"relatedTools":["/hesaplama/powerbank-usb-c-uygunluk/"],"relatedGuides":["/amazon-elektrik-urunleri/powerbank-usb-c-secimi"],"requiredEvidence":["USB-C PD profili","kablo e-marker","cihaz kabul gücü"]},
+    {"id":"xiaomi-wireless-10000","categoryId":"powerbank","name":"Xiaomi 10 W Wireless Power Bank 10.000","brand":"Xiaomi","model":"Wireless Power Bank 10000","identifier":{"type":"ASIN","value":"B09TWRHGWV"},"verificationStatus":"verified_listing","verifiedAt":"2026-07-27","linkMode":"asin_detail","needIds":["mobile-continuity"],"technicalProperties":{"capacityMah":10000,"maxOutputW":10,"wireless":true},"relatedTools":["/hesaplama/powerbank-usb-c-uygunluk/"],"relatedGuides":["/amazon-elektrik-urunleri/powerbank-usb-c-secimi"],"requiredEvidence":["kablolu maksimum güç","kablosuz cihaz uyumu"]},
+    {"id":"samsung-eb-u2510x","categoryId":"powerbank","name":"Samsung EB-U2510X 10.000 mAh Kablosuz Powerbank","brand":"Samsung","model":"EB-U2510X","identifier":{"type":"ASIN","value":"B0CVGVG7NW"},"verificationStatus":"verified_listing","verifiedAt":"2026-07-27","linkMode":"asin_detail","needIds":["mobile-continuity"],"technicalProperties":{"capacityMah":10000,"wireless":true},"relatedTools":["/hesaplama/powerbank-usb-c-uygunluk/"],"relatedGuides":["/amazon-elektrik-urunleri/powerbank-usb-c-secimi"],"requiredEvidence":["maksimum çıkış gücü","port sayısı"]},
+    {"id":"tuncmatik-tsk6136","categoryId":"surge_strip","name":"Tunçmatik TSK6136 PowerSurge 5 Priz 1050 J","brand":"Tunçmatik","model":"TSK6136","identifier":{"type":"ASIN","value":"B07CST4766"},"verificationStatus":"verified_listing","verifiedAt":"2026-07-27","linkMode":"asin_detail","needIds":["plug-in-surge-protection"],"technicalProperties":{"outlets":5,"joules":1050,"maxCurrentA":10,"cableM":1.5},"relatedTools":["/hesaplama/akim-korumali-grup-priz-uygunluk/"],"relatedGuides":["/amazon-elektrik-urunleri/akim-korumali-grup-priz-secimi"],"requiredEvidence":["işlevsel topraklama","toplam yük","koruma göstergesi"]},
+    {"id":"viko-multilet-6","categoryId":"surge_strip","name":"Viko Multilet Şok Korumalı 6’lı Grup Priz","brand":"Viko","model":"Multilet 6","identifier":{"type":"ASIN","value":"B08L9KVRP1"},"verificationStatus":"verified_listing","verifiedAt":"2026-07-27","linkMode":"asin_detail","needIds":["plug-in-surge-protection"],"technicalProperties":{"outlets":6,"joules":282,"maxCurrentA":16,"maxPowerW":3500},"relatedTools":["/hesaplama/akim-korumali-grup-priz-uygunluk/"],"relatedGuides":["/amazon-elektrik-urunleri/akim-korumali-grup-priz-secimi"],"requiredEvidence":["toplam yük","topraklama","koruma göstergesi"]},
+    {"id":"tuncmatik-tsk5015","categoryId":"surge_strip","name":"Tunçmatik PowerSurge 5 Priz + USB TSK5015","brand":"Tunçmatik","model":"TSK5015","identifier":{"type":"ASIN","value":"B08KW6X13Y"},"verificationStatus":"verified_listing","verifiedAt":"2026-07-27","linkMode":"asin_detail","needIds":["plug-in-surge-protection"],"technicalProperties":{"outlets":5,"usbPorts":2},"relatedTools":["/hesaplama/akim-korumali-grup-priz-uygunluk/"],"relatedGuides":["/amazon-elektrik-urunleri/akim-korumali-grup-priz-secimi"],"requiredEvidence":["joule","nominal akım","USB protokolü"]},
+    {"id":"cata-ct9186","categoryId":"surge_strip","name":"Cata CT-9186 Tekli Akım Korumalı Priz 918 J","brand":"Cata","model":"CT-9186","identifier":{"type":"ASIN","value":"B09YTYTZ4J"},"verificationStatus":"verified_listing","verifiedAt":"2026-07-27","linkMode":"asin_detail","needIds":["plug-in-surge-protection"],"technicalProperties":{"outlets":1,"joules":918,"maxPowerW":4000},"relatedTools":["/hesaplama/akim-korumali-grup-priz-uygunluk/"],"relatedGuides":["/amazon-elektrik-urunleri/akim-korumali-grup-priz-secimi"],"requiredEvidence":["nominal akım","etiket gücü","topraklama"]},
+    {"id":"tp-link-tapo-p110","categoryId":"smart_plug","name":"TP-Link Tapo P110 Enerji İzlemeli Akıllı Priz","brand":"TP-Link","model":"Tapo P110","identifier":{"type":"Model","value":"Tapo P110"},"verificationStatus":"manufacturer_verified_search","verifiedAt":"2026-07-29","linkMode":"exact_model_search","officialSource":"https://www.tp-link.com/tr/home-networking/smart-plug/tapo-p110/","needIds":["device-energy-measurement"],"technicalProperties":{"maxCurrentA":16,"maxPowerW":3680,"energyMonitoring":true,"wifiGHz":2.4,"matter":false,"operatingTempMaxC":35},"relatedTools":["/hesaplama/akilli-priz-enerji-olcer-uygunluk/","/hesaplama/7-gunluk-cihaz-tuketim-deneyi/"],"relatedGuides":["/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi"],"requiredEvidence":["gerçek yük akımı","yük türü","Amazon listesindeki tam model"]},
+    {"id":"tp-link-tapo-p110m","categoryId":"smart_plug","name":"TP-Link Tapo P110M Matter Enerji İzlemeli Akıllı Priz","brand":"TP-Link","model":"Tapo P110M","identifier":{"type":"Model","value":"Tapo P110M"},"verificationStatus":"manufacturer_verified_search","verifiedAt":"2026-07-29","linkMode":"exact_model_search","officialSource":"https://www.tp-link.com/tr/home-networking/smart-plug/tapo-p110m/","needIds":["device-energy-measurement"],"technicalProperties":{"maxCurrentA":16,"maxPowerW":3680,"energyMonitoring":true,"matter":true,"motorHp":1,"operatingTempMaxC":40},"relatedTools":["/hesaplama/akilli-priz-enerji-olcer-uygunluk/","/hesaplama/7-gunluk-cihaz-tuketim-deneyi/"],"relatedGuides":["/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi"],"requiredEvidence":["yük türü","Matter platform/hub uyumu","Amazon listesindeki tam P110M modeli"]},
+    {"id":"ecoflow-river-2","categoryId":"power_station","name":"EcoFlow RIVER 2 Taşınabilir Güç İstasyonu","brand":"EcoFlow","model":"RIVER 2","identifier":{"type":"Model","value":"RIVER 2"},"verificationStatus":"manufacturer_verified_search","verifiedAt":"2026-07-29","linkMode":"exact_model_search","officialSource":"https://ecoflow.com.tr/urun/ecoflow-river-2-tasinabilir-guc-kaynagi/","needIds":["portable-backup-energy"],"technicalProperties":{"capacityWh":256,"continuousW":300,"surgeW":600,"pureSine":true,"chemistry":"LFP","solarVoltageMinV":11,"solarVoltageMaxV":30,"solarCurrentMaxA":8,"solarPowerMaxW":110,"usbCMaxW":60,"epsTransferMs":30},"relatedTools":["/hesaplama/power-station-kapasite-eps-uygunluk/","/hesaplama/power-station-gunes-paneli-uygunluk/","/hesaplama/yedek-guc-runtime-saglik-gunlugu/"],"relatedGuides":["/amazon-elektrik-urunleri/tasinabilir-guc-istasyonu-secimi"],"requiredEvidence":["sürekli/tepe yük","hedef runtime","EPS toleransı","solar Voc ve Isc"]},
+    {"id":"x-sense-xs01","categoryId":"smoke_alarm","name":"X-Sense XS01 Fotoelektrik Duman Alarmı","brand":"X-Sense","model":"XS01","identifier":{"type":"Model","value":"XS01"},"verificationStatus":"manufacturer_verified_search","verifiedAt":"2026-07-29","linkMode":"exact_model_search","officialSource":"https://x-sense.com.tr/urunler/duman-dedektorleri/xs01-duman-alarmi","needIds":["fire-early-warning"],"technicalProperties":{"sensor":"photoelectric","alarmDb":85,"batteryType":"CR123A","batteryLifeYearsClaim":10,"standard":"EN 14604"},"relatedTools":["/hesaplama/duman-alarmi-yerlesim-bakim-uygunluk/","/hesaplama/duman-co-alarmi-bakim-gunlugu/"],"relatedGuides":["/amazon-elektrik-urunleri/acil-aydinlatma-duman-alarmi"],"requiredEvidence":["tam XS01 model kodu","EN 14604 belge kapsamı","üretim/değiştirme tarihi","yerleşim ve test planı"]}
+  ]
+}
