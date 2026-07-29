@@ -1,0 +1,38 @@
+name: ALO186 affiliate product knowledge graph
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/urun-eslestirme/catalog.js'
+      - 'alo186/tests/test_affiliate_knowledge_graph.js'
+      - '.github/workflows/alo186-affiliate-product-knowledge-graph.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/urun-eslestirme/catalog.js'
+      - 'alo186/tests/test_affiliate_knowledge_graph.js'
+      - '.github/workflows/alo186-affiliate-product-knowledge-graph.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-affiliate-knowledge-graph-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript syntax
+        run: node --check alo186/urun-eslestirme/catalog.js
+      - name: Knowledge Graph policy contract
+        run: node alo186/tests/test_affiliate_knowledge_graph.js
+      - name: Existing product matcher regression
+        run: node alo186/tests/test_product_matcher.js
