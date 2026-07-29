@@ -3,6 +3,7 @@
   const KEY = 'alo186.articleFollowup.v1';
   const LIMIT = 12;
   const TTL_DAYS = 365;
+  const ROOT = String.fromCharCode(47);
 
   function parse(value) {
     const date = new Date(value);
@@ -18,7 +19,7 @@
       const due = parse(item.dueAt);
       const path = String(item.path || '').slice(0, 180);
       const title = String(item.title || '').slice(0, 180);
-      if (!saved || !due || saved.getTime() < cutoff || !path.startsWith('/') || !title) return;
+      if (!saved || !due || saved.getTime() < cutoff || !path.startsWith(ROOT) || !title) return;
       unique.set(path, {
         path,
         title,
