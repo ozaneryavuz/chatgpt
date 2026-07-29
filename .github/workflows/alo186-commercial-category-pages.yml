@@ -1,0 +1,162 @@
+name: ALO186 kaliteli ticari kategori sayfaları
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/**'
+      - 'alo186/deployment/routing-overlays/commercial-category-pages-v41.json'
+      - 'alo186/tests/test_commercial_category_pages.py'
+      - '.github/workflows/alo186-commercial-category-pages.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/**'
+      - 'alo186/deployment/routing-overlays/commercial-category-pages-v41.json'
+      - 'alo186/tests/test_commercial_category_pages.py'
+      - '.github/workflows/alo186-commercial-category-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-commercial-pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Ticari sayfa niyet, affiliate ve güvenlik sözleşmeleri
+        run: python alo186/tests/test_commercial_category_pages.py
+
+      - name: Ürün kataloğu ve runtime regresyonları
+        run: |
+          node --check alo186/amazon-elektrik-urunleri/commercial.js
+          node --check alo186/urun-eslestirme/catalog.js
+          node alo186/urun-eslestirme/test.js
+
+      - name: Mevcut yayın, hukuk ve içerik güveni
+        run: |
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+          python alo186/tests/test_content_intent_consolidation.py
+          python alo186/tests/test_private_technical_search.py
+
+      - name: Canonical üretim paketini oluştur
+        run: |
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-commercial-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-commercial-canonical
+
+      - name: Custom-domain Pages artifactı
+        run: |
+          cp -a /tmp/alo186-commercial-canonical /tmp/alo186-commercial-custom
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-commercial-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-commercial-custom \
+            --base-path ''
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-commercial-custom \
+            --base-path '' \
+            > /tmp/alo186-commercial-custom-growth.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-commercial-custom \
+            --base-path ''
+
+      - name: Project-path Pages artifactı
+        run: |
+          cp -a /tmp/alo186-commercial-canonical /tmp/alo186-commercial-project
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-commercial-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-commercial-project \
+            --base-path '/chatgpt'
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-commercial-project \
+            --base-path '/chatgpt' \
+            > /tmp/alo186-commercial-project-growth.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-commercial-project \
+            --base-path '/chatgpt'
+
+      - name: Rota, sitemap, arama, base-path ve ticari güven kabulü
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          routes = [
+              '/amazon-elektrik-urunleri',
+              '/amazon-elektrik-urunleri/powerbank-usb-c-secimi',
+              '/amazon-elektrik-urunleri/akim-korumali-grup-priz-secimi',
+              '/amazon-elektrik-urunleri/modem-mini-ups-secimi',
+              '/amazon-elektrik-urunleri/acil-aydinlatma-duman-alarmi',
+          ]
+          for root, prefix in [
+              (Path('/tmp/alo186-commercial-custom'), ''),
+              (Path('/tmp/alo186-commercial-project'), '/chatgpt'),
+          ]:
+              release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
+              pages=json.loads((root/'pages-release.json').read_text(encoding='utf-8'))
+              search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
+              sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
+              entries={item['canonicalPath']: item for item in search['entries']}
+              assert release['routingVersion'] >= 41
+              assert release['routeCount'] >= 145
+              assert pages['routeCount'] == release['routeCount']
+              for route in routes:
+                  file=root/route.strip('/')/'index.html'
+                  assert file.is_file(), file
+                  html=file.read_text(encoding='utf-8')
+                  assert f'rel="canonical" href="https://www.alo186.com{route}"' in html
+                  assert 'Reklam / satış ortaklığı' in html
+                  assert f'https://www.alo186.com{route}' in sitemap
+                  assert route in entries, route
+                  expected=(prefix+route) if prefix else route
+                  assert entries[route]['url'] == expected
+                  assert 'price' not in entries[route]
+                  assert 'stock' not in entries[route]
+                  assert 'rating' not in entries[route]
+              power=(root/'amazon-elektrik-urunleri/powerbank-usb-c-secimi/index.html').read_text(encoding='utf-8')
+              styles=(prefix+'/amazon-elektrik-urunleri/styles.css') if prefix else '/amazon-elektrik-urunleri/styles.css'
+              catalog=(prefix+'/akilli-urun-secimi/catalog.js') if prefix else '/akilli-urun-secimi/catalog.js'
+              assert styles in power
+              assert catalog in power
+              runtime=(root/'amazon-elektrik-urunleri/commercial.js').read_text(encoding='utf-8')
+              assert 'freshOnly: true' in runtime
+              assert 'sponsored nofollow noopener' in runtime
+              for route in routes[2:]:
+                  html=(root/route.strip('/')/'index.html').read_text(encoding='utf-8').lower()
+                  assert 'amazon.com.tr' not in html
+          PY
+
+      - name: Doğrulanmış kaliteli ticari sayfalar artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-commercial-category-pages
+          path: /tmp/alo186-commercial-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
