@@ -13,25 +13,24 @@ from build_static_site import load_effective_manifest  # noqa: E402
 
 ARTICLES = [
     {
-        "slug": "parafudr-tip-1-tip-2-tip-3-farki-kaskad-koordinasyon",
+        "slug": "ges-panel-hotspot-bypass-diyot-termal-kamera",
         "required": [
-            "Type 1 SPD",
-            "Type 2 SPD",
-            "Type 3 SPD",
-            "Iimp",
-            "10/350 µs",
-            "In",
-            "8/20 µs",
-            "energy coordination",
+            "PV hot spot",
+            "bypass diode",
+            "reverse bias",
+            "infrared thermography",
+            "IEC TS 62446-3",
+            "I-V curve",
+            "thermal runaway",
             "Son doğrulama: 29 Temmuz 2026",
         ],
         "links": [
-            "/haberler/parafudr-uc-up-in-imax-iimp-ne-demek",
-            "/haberler/parafudr-yedek-sigorta-scpd-nasil-secilir",
-            "/haberler/parafudr-baglanti-kablosu-neden-kisa-olmali",
-            "/hesaplama/parafudr-risk-testi/",
+            "/haberler/ges-inverter-riso-dusuk-izolasyon-direnci-arizasi",
+            "/haberler/ges-inverter-afci-dc-ark-hatasi",
+            "/hesaplama/teknik-devir-kabul-paketi/",
+            "/hizmetler/ges-batarya-ev-sarj-fizibilitesi/",
         ],
-        "source_hosts": ["se.com", "phoenixcontact.com", "abb.com"],
+        "source_hosts": ["webstore.iec.ch", "fluke.com", "research-hub.nrel.gov"],
     },
     {
         "slug": "ev-sarj-74-11-22-kw-tek-faz-uc-faz-onboard-charger",
