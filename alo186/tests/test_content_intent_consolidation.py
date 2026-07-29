@@ -67,23 +67,39 @@ def pair_score(left: dict, right: dict) -> tuple[float, int, str]:
 def main() -> None:
     manifest = load_effective_manifest(REPO_ROOT)
     config = load_config()
+    raw_config = json.loads((DEPLOYMENT / "content-consolidations.json").read_text(encoding="utf-8"))
+    kind_by_intent = {
+        str(item.get("intentKey")): str(item.get("kind") or "same-intent-article")
+        for item in raw_config.get("consolidations", [])
+    }
     route_by_path = {route["canonicalPath"]: route for route in manifest["routes"]}
     declared_pairs = {(item["aliasPath"], item["canonicalPath"]) for item in config["consolidations"]}
     alias_paths = {item["aliasPath"] for item in config["consolidations"]}
 
     for item in config["consolidations"]:
+        kind = kind_by_intent.get(item["intentKey"], "same-intent-article")
         alias_route = route_by_path.get(item["aliasPath"])
         target_route = route_by_path.get(item["canonicalPath"])
-        assert alias_route, f"Birleştirilecek alias routing envanterinde yok: {item['aliasPath']}"
         assert target_route, f"Canonical hedef routing envanterinde yok: {item['canonicalPath']}"
-        assert alias_route["type"] == "article" and target_route["type"] == "article"
-        alias_signature = article_signature(alias_route["source"])
-        target_signature = article_signature(target_route["source"])
-        score, common, field = pair_score(alias_signature, target_signature)
-        assert score >= 0.50 and common >= 3, (
-            f"İlan edilen içerik birleştirmesi aynı arama niyetini doğrulamıyor: "
-            f"{item['aliasPath']} → {item['canonicalPath']} ({field}={score:.2f}, ortak={common})"
-        )
+
+        if kind == "same-intent-article":
+            assert alias_route, f"Birleştirilecek alias routing envanterinde yok: {item['aliasPath']}"
+            assert alias_route["type"] == "article" and target_route["type"] == "article"
+            alias_signature = article_signature(alias_route["source"])
+            target_signature = article_signature(target_route["source"])
+            score, common, field = pair_score(alias_signature, target_signature)
+            assert score >= 0.50 and common >= 3, (
+                f"İlan edilen içerik birleştirmesi aynı arama niyetini doğrulamıyor: "
+                f"{item['aliasPath']} → {item['canonicalPath']} ({field}={score:.2f}, ortak={common})"
+            )
+        elif kind == "legacy-commerce":
+            assert item["aliasPath"] == "/amazon-elektrik-urunleri"
+            assert item["canonicalPath"] == "/akilli-urun-secimi"
+            assert target_route["type"] == "tool"
+            if alias_route:
+                assert alias_route["canonicalPath"] in alias_paths
+        else:
+            raise AssertionError(f"Desteklenmeyen consolidation kind: {kind}")
 
     active_articles = [
         route for route in manifest["routes"]
@@ -114,6 +130,7 @@ def main() -> None:
                 "effectiveArticleCount": len([route for route in manifest["routes"] if route["type"] == "article"]),
                 "activeCanonicalArticleCountAfterConsolidation": len(active_articles),
                 "consolidationCount": len(config["consolidations"]),
+                "legacyCommerceAliasCount": sum(1 for value in kind_by_intent.values() if value == "legacy-commerce"),
                 "undeclaredHighSimilarityCollisions": 0,
             },
             ensure_ascii=False,
