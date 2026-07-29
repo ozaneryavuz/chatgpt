@@ -1,0 +1,31 @@
+{
+  "version": 41,
+  "generatedAt": "2026-07-29",
+  "routes": [
+    {
+      "source": "alo186/amazon-elektrik-urunleri/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri",
+      "type": "collection"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/powerbank-usb-c-secimi/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/powerbank-usb-c-secimi",
+      "type": "commerce-guide"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/akim-korumali-grup-priz-secimi/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/akim-korumali-grup-priz-secimi",
+      "type": "commerce-guide"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/modem-mini-ups-secimi/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/modem-mini-ups-secimi",
+      "type": "commerce-guide"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/acil-aydinlatma-duman-alarmi/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/acil-aydinlatma-duman-alarmi",
+      "type": "commerce-guide"
+    }
+  ]
+}
