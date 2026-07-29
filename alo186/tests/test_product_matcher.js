@@ -3,10 +3,10 @@ const catalog=require('../urun-eslestirme/catalog.js');
 const matcher=require('../urun-eslestirme/matcher-core.js');
 
 assert.strictEqual(catalog.affiliateTag,'alo186hazirlik-21');
-assert.strictEqual(catalog.categories.length,12,'On iki ihtiyaç kategorisi bulunmalı.');
+assert.strictEqual(catalog.categories.length,13,'On üç ihtiyaç kategorisi bulunmalı.');
 assert(catalog.productsFor('powerbank').length>=3,'Powerbank kataloğunda en az üç ürün olmalı.');
 assert(catalog.productsFor('surge_strip').length>=3,'Grup priz kataloğunda en az üç doğrulanmış ürün korunmalı.');
-for(const category of ['generator','inverter','smart_plug','ev_cable','ups_battery','smoke_alarm'])assert.strictEqual(catalog.productsFor(category).length,0,`${category} doğrulanmamış ürün kartı taşımamalı.`);
+for(const category of ['generator','inverter','smart_plug','ev_cable','ups_battery','smoke_alarm','co_alarm'])assert.strictEqual(catalog.productsFor(category).length,0,`${category} doğrulanmamış ürün kartı taşımamalı.`);
 
 const asins=catalog.products.map(p=>p.asin);
 assert.strictEqual(new Set(asins).size,asins.length,'ASIN değerleri benzersiz olmalı.');
@@ -38,6 +38,7 @@ const gated={
   surge_strip:'https://www.alo186.com/hesaplama/akim-korumali-grup-priz-uygunluk/',
   mini_ups:'https://www.alo186.com/hesaplama/modem-internet-yedekleme/',
   smoke_alarm:'https://www.alo186.com/hesaplama/duman-alarmi-yerlesim-bakim-uygunluk/',
+  co_alarm:'https://www.alo186.com/hesaplama/karbonmonoksit-alarmi-jenerator-guvenligi/',
   generator:'https://www.alo186.com/hesaplama/jenerator-gucu-secimi/',
   inverter:'https://www.alo186.com/hesaplama/inverter-uygunluk/',
   smart_plug:'https://www.alo186.com/hesaplama/akilli-priz-enerji-olcer-uygunluk/',
@@ -54,4 +55,4 @@ for(const[category,url]of Object.entries(gated)){
 result=matcher.match('emergency_light',{});
 assert.strictEqual(result.professionalSelectionRequired,false);
 assert.throws(()=>matcher.match('olmayan-kategori',{}),/Ürün kategorisi bulunamadı/);
-console.log('Ürün kataloğu ve eşleştirme testleri: 12 kategori, smoke-alarm ve surge-strip teknik kapıları başarılı.');
+console.log('Ürün kataloğu ve eşleştirme testleri: 13 kategori, CO/smoke-alarm ve surge-strip teknik kapıları başarılı.');
