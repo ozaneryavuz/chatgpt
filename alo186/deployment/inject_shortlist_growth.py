@@ -15,6 +15,7 @@ from inject_growth_run8 import run as run_growth_run8
 from inject_growth_run9 import run as run_growth_run9
 from inject_growth_run10 import run as run_growth_run10
 from inject_growth_run11 import run as run_growth_run11
+from inject_growth_run12 import run as run_growth_run12
 from inject_handoff_growth import run as run_handoff_growth
 from inject_private_search import run as run_private_search
 from inject_revenue_trust_proof import run as run_revenue_trust_proof
@@ -179,10 +180,7 @@ def recompute(site: Path) -> None:
     if path.exists():
         path.unlink()
     files = sorted(item for item in site.rglob("*") if item.is_file())
-    lines = [
-        f"{hashlib.sha256(item.read_bytes()).hexdigest()}  {item.relative_to(site).as_posix()}"
-        for item in files
-    ]
+    lines = [f"{hashlib.sha256(item.read_bytes()).hexdigest()}  {item.relative_to(site).as_posix()}" for item in files]
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
@@ -216,6 +214,7 @@ def run(site: Path, base_path: str) -> dict:
     growth_run9 = run_growth_run9(site, base_path)
     growth_run10 = run_growth_run10(site, base_path)
     growth_run11 = run_growth_run11(site, base_path)
+    growth_run12 = run_growth_run12(site, base_path)
     return {
         "ok": True,
         "basePath": base_path,
@@ -237,6 +236,7 @@ def run(site: Path, base_path: str) -> dict:
         "growthRun9": growth_run9,
         "growthRun10": growth_run10,
         "growthRun11": growth_run11,
+        "growthRun12": growth_run12,
     }
 
 
