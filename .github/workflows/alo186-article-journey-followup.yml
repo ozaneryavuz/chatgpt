@@ -87,7 +87,7 @@ jobs:
             --site /tmp/alo186-journey-custom \
             --base-path ''
 
-      - name: Project-path makale yolculuğu artifactı
+      - name: Project-path Pages temel paketini hazırla
         run: |
           cp -a /tmp/alo186-journey-canonical /tmp/alo186-journey-project
           python alo186/deployment/prepare_github_pages.py \
@@ -98,10 +98,16 @@ jobs:
           python alo186/deployment/inject_outcome_runtime.py \
             --site /tmp/alo186-journey-project \
             --base-path '/chatgpt'
+
+      - name: Project-path büyüme ve makale yolculuğu enjeksiyonu
+        run: |
           python alo186/deployment/inject_shortlist_growth.py \
             --site /tmp/alo186-journey-project \
             --base-path '/chatgpt' \
-            > /tmp/alo186-journey-project.json
+            | tee /tmp/alo186-journey-project.json
+
+      - name: Project-path smoke testi
+        run: |
           python alo186/deployment/smoke_github_pages.py \
             --site /tmp/alo186-journey-project \
             --base-path '/chatgpt'
@@ -113,7 +119,6 @@ jobs:
           python - <<'PY'
           import hashlib
           import json
-          import re
           from pathlib import Path
 
           samples = {
