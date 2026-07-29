@@ -5,21 +5,21 @@
     {
       "canonicalPath": "/amazon-elektrik-urunleri/type-2-ev-sarj-kablosu-secimi",
       "source": "alo186/amazon-elektrik-urunleri/type-2-ev-sarj-kablosu-secimi/index.html",
-      "type": "commercial-guide",
+      "type": "commerce-guide",
       "intent": "Type 2 EV cable compatibility before purchase",
       "affiliatePolicy": "after_tool_and_explicit_disclosure"
     },
     {
       "canonicalPath": "/amazon-elektrik-urunleri/ups-yedek-akusu-kartus-secimi",
       "source": "alo186/amazon-elektrik-urunleri/ups-yedek-akusu-kartus-secimi/index.html",
-      "type": "commercial-guide",
+      "type": "commerce-guide",
       "intent": "UPS replacement battery and cartridge compatibility",
       "affiliatePolicy": "professional_only"
     },
     {
       "canonicalPath": "/amazon-elektrik-urunleri/priz-rcd-test-cihazi-secimi",
       "source": "alo186/amazon-elektrik-urunleri/priz-rcd-test-cihazi-secimi/index.html",
-      "type": "commercial-guide",
+      "type": "commerce-guide",
       "intent": "socket tester versus professional RCD and installation measurement",
       "affiliatePolicy": "professional_only"
     }
