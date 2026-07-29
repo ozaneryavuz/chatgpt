@@ -30,6 +30,10 @@ def canonical_path(value: str, base_path: str) -> str:
     return raw
 
 
+def route_identity(value: str) -> str:
+    return "/" + str(value or "").strip().strip("/")
+
+
 def public_url(base_path: str, route: str) -> str:
     route = "/" + route.lstrip("/")
     return f"{base_path}{route}" if base_path else route
@@ -87,20 +91,67 @@ def inject_gateway(site: Path, relative: Path, base_path: str) -> bool:
     return True
 
 
-def update_release(site: Path, injected: int, gateway_cards: int, target_count: int) -> None:
+def register_target(targets: dict[str, tuple[str, bool]], route: str, route_type: str, affiliate: bool) -> None:
+    identity = route_identity(route)
+    excluded = {route_identity(TRUST_ROUTE), route_identity(SAMPLE_ROUTE), route_identity(MONITOR_ROUTE)}
+    if identity == "/" or identity in excluded:
+        return
+    existing = targets.get(identity)
+    if existing:
+        existing_type, existing_affiliate = existing
+        targets[identity] = (
+            "service" if route_type == "service" or existing_type == "service" else existing_type,
+            affiliate or existing_affiliate,
+        )
+    else:
+        targets[identity] = (route_type, affiliate)
+
+
+def discover_targets(site: Path, release: dict, base_path: str) -> dict[str, tuple[str, bool]]:
+    targets: dict[str, tuple[str, bool]] = {}
+
+    for item in release.get("routes", []):
+        route = canonical_path(item.get("canonicalPath"), base_path)
+        route_type = str(item.get("type") or "")
+        identity = route_identity(route)
+        affiliate = identity == "/amazon-elektrik-urunleri" or identity.startswith("/amazon-elektrik-urunleri/")
+        if affiliate or route_type == "service" or identity == route_identity(CORPORATE_ROUTE):
+            register_target(targets, identity, route_type, affiliate)
+
+    commerce_root = site / "amazon-elektrik-urunleri"
+    if commerce_root.is_dir():
+        for index_file in sorted(commerce_root.rglob("index.html")):
+            route = "/" + index_file.parent.relative_to(site).as_posix()
+            register_target(targets, route, "collection", True)
+
+    service_root = site / "hizmetler"
+    if service_root.is_dir():
+        for index_file in sorted(service_root.rglob("index.html")):
+            route = "/" + index_file.parent.relative_to(site).as_posix()
+            register_target(targets, route, "service", False)
+
+    if route_file(site, CORPORATE_ROUTE).is_file():
+        register_target(targets, CORPORATE_ROUTE, "service", False)
+
+    return targets
+
+
+def update_release(site: Path, injected: int, gateway_cards: int, target_count: int, verified_count: int) -> None:
     for filename in ("alo186-release.json", "pages-release.json"):
         path = site / filename
         if not path.is_file():
             continue
         payload = json.loads(path.read_text(encoding="utf-8"))
         payload["revenueTrustProofGrowth"] = {
-            "version": 1,
+            "version": 2,
             "trustRoute": TRUST_ROUTE,
             "sampleDeliverablesRoute": SAMPLE_ROUTE,
             "recurringServiceRoute": MONITOR_ROUTE,
             "targetRouteCount": target_count,
+            "verifiedProtectedRouteCount": verified_count,
             "trustPanelsInjectedThisPass": injected,
             "gatewaySectionsInjectedThisPass": gateway_cards,
+            "targetDiscovery": ["release-manifest", "physical-commerce-routes", "physical-service-routes"],
             "rawPersonalDataCollected": False,
             "automaticRenewal": False,
             "directStoreLinksAdded": 0,
@@ -124,18 +175,11 @@ def run(site: Path, base_path: str = "") -> dict:
     site = site.resolve()
     base_path = normalize_base_path(base_path)
     release = json.loads((site / "alo186-release.json").read_text(encoding="utf-8"))
+    targets = discover_targets(site, release, base_path)
     injected = 0
-    target_count = 0
     missing: list[str] = []
 
-    for item in release.get("routes", []):
-        route = canonical_path(item.get("canonicalPath"), base_path)
-        route_type = str(item.get("type") or "")
-        affiliate = route == "/amazon-elektrik-urunleri" or route.startswith("/amazon-elektrik-urunleri/")
-        target = affiliate or route_type == "service" or route == CORPORATE_ROUTE
-        if not target or route in {TRUST_ROUTE, SAMPLE_ROUTE, MONITOR_ROUTE}:
-            continue
-        target_count += 1
+    for route, (route_type, affiliate) in sorted(targets.items()):
         path = route_file(site, route)
         if not path.is_file():
             missing.append(route)
@@ -149,14 +193,23 @@ def run(site: Path, base_path: str = "") -> dict:
     if missing:
         raise FileNotFoundError("Gelir/güven paneli uygulanacak rotalar eksik: " + ", ".join(sorted(missing)))
 
+    unprotected: list[str] = []
+    for route in sorted(targets):
+        html = route_file(site, route).read_text(encoding="utf-8", errors="ignore")
+        if MARKER not in html:
+            unprotected.append(route)
+    if unprotected:
+        raise RuntimeError("Gelir/güven paneli doğrulanamayan rotalar: " + ", ".join(unprotected))
+
     gateway_cards = int(inject_gateway(site, Path("index.html"), base_path))
     gateway_cards += int(inject_gateway(site, Path("elektrik-portali/index.html"), base_path))
-    update_release(site, injected, gateway_cards, target_count)
+    update_release(site, injected, gateway_cards, len(targets), len(targets) - len(unprotected))
     recompute(site)
     return {
         "ok": True,
         "basePath": base_path,
-        "targetRouteCount": target_count,
+        "targetRouteCount": len(targets),
+        "verifiedProtectedRouteCount": len(targets),
         "trustPanelsInjected": injected,
         "gatewaySectionsInjected": gateway_cards,
         "trustRoute": public_url(base_path, TRUST_ROUTE),
