@@ -20,6 +20,10 @@ FILES = {key: REPO_ROOT / "alo186" / route.strip("/") / "index.html" for key, ro
 EXPECTED_SOURCES = {key: f"alo186/{route.strip('/')}/index.html" for key, route in ROUTES.items()}
 
 
+def tr_lower(text: str) -> str:
+    return text.replace("İ", "i").replace("I", "ı").lower()
+
+
 def jsonld_types(text: str) -> set[str]:
     types: set[str] = set()
     for block in re.findall(r'<script[^>]+type=["\']application/ld\+json["\'][^>]*>(.*?)</script>', text, re.I | re.S):
@@ -50,7 +54,7 @@ def main() -> None:
 
     pages = {key: path.read_text(encoding="utf-8") for key, path in FILES.items()}
     for key, html in pages.items():
-        lower = html.casefold()
+        lower = tr_lower(html)
         assert html.count("<h1") == 1, key
         assert f'https://www.alo186.com{ROUTES[key]}' in html, key
         assert {"WebApplication", "FAQPage", "BreadcrumbList"} <= jsonld_types(html), key
@@ -63,7 +67,7 @@ def main() -> None:
         assert "resmî" in lower or "resmi" in lower or "bağımsız elektrik bilgi ağı" in lower, key
 
     safety = pages["safety"]
-    safety_lower = safety.casefold()
+    safety_lower = tr_lower(safety)
     assert "guvensizurun.ticaret.gov.tr/bildirim/detaysorgu" in safety_lower
     assert "ec.europa.eu/safety-gate-alerts" in safety_lower
     assert "kayıt yokluğu güvenlik onayı değildir" in safety_lower
@@ -75,7 +79,7 @@ def main() -> None:
     assert "30 günlük yeniden kontrol" in safety_lower
 
     passport = pages["passport"]
-    passport_lower = passport.casefold()
+    passport_lower = tr_lower(passport)
     for token in [
         "tam model kodu ve varyant",
         "üretici teknik veri sayfası",
@@ -87,7 +91,7 @@ def main() -> None:
         "commerceReady:commerce",
         "commercialFieldsUsed:[]",
     ]:
-        assert token.casefold() in passport_lower, token
+        assert tr_lower(token) in passport_lower, token
     assert "complete&&safety==='clear'&&need&&disclosure" in passport
     assert "existing==='gap'||existing==='none'" in passport
     assert "localStorage.setItem(K" in passport
@@ -96,7 +100,7 @@ def main() -> None:
     assert "/hesaplama/power-station-kapasite-eps-uygunluk/" in passport
 
     kit = pages["kit"]
-    kit_lower = kit.casefold()
+    kit_lower = tr_lower(kit)
     assert "ilk başarısız testte ürün önerilmez" in kit_lower
     assert "bakım sonrası tekrar test de başarısız" in kit_lower
     assert "bu sonuçta bütün affiliate ve yeni ürün yolları kapalıdır" in kit_lower
