@@ -12,22 +12,22 @@ from build_static_site import load_effective_manifest  # noqa: E402
 
 ARTICLES = [
     {
-        "slug": "kacak-akim-rolesi-tip-s-secicilik-30ma-300ma",
+        "slug": "ups-statik-transfer-salteri-sts-ats-bakim-bypass-farki",
         "required": [
-            "Tip S", "akım seçiciliği", "zaman seçiciliği", "30 mA", "300 mA",
-            "Test düğmesi", "Satın almama sınırı", "Ticari sınır",
+            "STS", "ATS", "bakım bypassı", "çift besleme", "kaynak senkronu",
+            "transfer inhibit", "Satın almama sınırı", "Ticari sınır",
             "Son doğrulama: 29 Temmuz 2026",
         ],
-        "hosts": ["iec.ch", "abb.com", "se.com"],
+        "hosts": ["iec.ch", "vertiv.com"],
     },
     {
-        "slug": "parafudr-ne-zaman-degisir-gosterge-uzak-sinyal",
+        "slug": "enerji-depolama-yardimci-tuketim-hvac-net-rte",
         "required": [
-            "durum penceresi", "uzak sinyal", "termik ayırıcı", "kırmızı", "yeşil",
-            "modül", "Satın almama sınırı", "Ticari sınır",
-            "Son doğrulama: 29 Temmuz 2026",
+            "yardımcı tüketim", "HVAC", "standby", "net round-trip efficiency",
+            "sayaç sınırı", "yardımcı tüketim oranı", "Satın almama sınırı",
+            "Ticari sınır", "Son doğrulama: 29 Temmuz 2026",
         ],
-        "hosts": ["iec.ch", "dehn-international.com"],
+        "hosts": ["iec.ch", "energy.gov", "sandia.gov", "nrel.gov"],
     },
     {
         "slug": "topraklama-olcumu-yagmur-yaz-kis-mevsim-farki",
@@ -116,11 +116,11 @@ def main() -> None:
         assert len(re.findall(r'<a href="https://', html)) >= 4
         new_paths.add(canonical_path)
 
-    rcd = (ROOT / "alo186/haberler/kacak-akim-rolesi-tip-s-secicilik-30ma-300ma/index.html").read_text(encoding="utf-8").casefold()
-    spd = (ROOT / "alo186/haberler/parafudr-ne-zaman-degisir-gosterge-uzak-sinyal/index.html").read_text(encoding="utf-8").casefold()
+    sts = (ROOT / "alo186/haberler/ups-statik-transfer-salteri-sts-ats-bakim-bypass-farki/index.html").read_text(encoding="utf-8").casefold()
+    bess = (ROOT / "alo186/haberler/enerji-depolama-yardimci-tuketim-hvac-net-rte/index.html").read_text(encoding="utf-8").casefold()
     ground = (ROOT / "alo186/haberler/topraklama-olcumu-yagmur-yaz-kis-mevsim-farki/index.html").read_text(encoding="utf-8").casefold()
-    assert "tek başına seçicilik kanıtı değildir" in rcd
-    assert "yeşil gösterge tek başına" in spd
+    assert "bu üçü aynı cihaz değildir" in sts
+    assert "katalogdaki hücre veya pcs verimi" in bess
     assert "aynı yöntem ve bağlantı durumuyla" in ground
     assert len(new_paths) == 3
 
