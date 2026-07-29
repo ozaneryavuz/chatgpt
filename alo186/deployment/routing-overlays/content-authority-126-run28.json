@@ -1,0 +1,21 @@
+{
+  "version": 57,
+  "generatedAt": "2026-07-29",
+  "routes": [
+    {
+      "source": "alo186/haberler/ups-jenerator-boyutlandirma-thdi-guc-faktoru/index.html",
+      "canonicalPath": "/haberler/ups-jenerator-boyutlandirma-thdi-guc-faktoru",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/parafudr-yedek-sigorta-sccr-kisa-devre-koordinasyonu/index.html",
+      "canonicalPath": "/haberler/parafudr-yedek-sigorta-sccr-kisa-devre-koordinasyonu",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/vpp-temel-tuketim-baseline-performans-dogrulama/index.html",
+      "canonicalPath": "/haberler/vpp-temel-tuketim-baseline-performans-dogrulama",
+      "type": "article"
+    }
+  ]
+}
