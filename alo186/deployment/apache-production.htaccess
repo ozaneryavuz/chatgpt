@@ -15,6 +15,11 @@ RewriteCond %{HTTPS} !=on
 RewriteCond %{HTTP:X-Forwarded-Proto} !https [NC]
 RewriteRule ^ https://www.alo186.com%{REQUEST_URI} [R=301,L,NE]
 
+# Aynı arama niyetini hedefleyen yeni teknik rehber yollarını mevcut kanoniklerde
+# birleştir. Query string Apache tarafından korunur; yönlendirme tek atlamalıdır.
+RewriteRule ^haberler/ups-aku-string-blok-dengesizligi-ic-direnc/?$ /haberler/ups-aku-string-dengesizligi-zayif-aku-nasil-anlasilir [R=301,L,NE]
+RewriteRule ^haberler/ges-string-sigortasi-gpv-ne-zaman-gerekir/?$ /haberler/ges-pv-string-sigortasi-ters-akim-nasil-secilir [R=301,L,NE]
+
 # Eski/canlı uygulama manifesti apex origin ile çağırsa da canonical www üzerinde
 # aynı dosya ve doğru MIME türü sunulur. Dosya hesaplama rotasıyla artifact'a girer.
 RewriteRule ^manifest\.webmanifest$ hesaplama/manifest.webmanifest [T=application/manifest+json,L]
