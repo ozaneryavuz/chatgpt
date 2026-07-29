@@ -17,13 +17,13 @@ REQUIRED_REL = {"sponsored", "nofollow", "noopener"}
 DISCLOSURE_PATTERN = re.compile(r"satış\s+ortaklığı|affiliate|nitelikli\s+satın\s+alımlardan\s+komisyon", re.I)
 QUALIFIED_GATE_MARKER = 'data-alo186-affiliate-gate="qualified"'
 DYNAMIC_GATE_PANEL_PATTERN = re.compile(
-    r"<(?:section|div)\b(?=[^>]*\bid=(?:['\"])affiliatePanel\1)"
-    r"(?=[^>]*\bclass=(?:['\"])[^'\"]*\bhidden\b[^'\"]*(?:['\"]))[^>]*>",
+    r"<(?:section|div)\b(?=[^>]*\bid=['\"]affiliatePanel['\"])"
+    r"(?=[^>]*\bclass=['\"][^'\"]*\bhidden\b[^'\"]*['\"])[^>]*>",
     re.I,
 )
 DYNAMIC_GATE_ACK_PATTERN = re.compile(
-    r"<input\b(?=[^>]*\bid=(?:['\"])affiliateAck\1)"
-    r"(?=[^>]*\btype=(?:['\"])checkbox\2)[^>]*>",
+    r"<input\b(?=[^>]*\bid=['\"]affiliateAck['\"])"
+    r"(?=[^>]*\btype=['\"]checkbox['\"])[^>]*>",
     re.I,
 )
 HIGH_RISK_PATTERN = re.compile(
