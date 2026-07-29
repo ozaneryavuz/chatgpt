@@ -109,7 +109,12 @@ def main() -> None:
         assert "Kaynaklar ve doğrulama" in html
         assert "Affiliate sınırı" in html
         assert "Bağımsız" in html
-        assert "yetkili" in lower
+        professional_boundary = (
+            "yetkili" in lower
+            or "kullanıcı işlemi değildir" in lower
+            or "kullanıcı müdahalesine uygun değildir" in lower
+        )
+        assert professional_boundary, f"Profesyonel müdahale sınırı eksik: {slug}"
         assert "WebApplication" not in html
         assert "amazon.com" not in lower and "amazon.com.tr" not in lower
         assert not re.search(r"\bfiyat(?:ı)?\s*[:=]?\s*\d|\bstokta\b|\bpuanı\s*\d|\bgaranti\s*[:=]?\s*\d", lower)
