@@ -1,0 +1,21 @@
+{
+  "version": 40,
+  "generatedAt": "2026-07-29",
+  "routes": [
+    {
+      "source": "alo186/haberler/ev-sarj-acik-pen-korumasi-opdd-nedir/index.html",
+      "canonicalPath": "/haberler/ev-sarj-acik-pen-korumasi-opdd-nedir",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/parafudr-tip-1-tip-2-tip-3-paratoner-secimi/index.html",
+      "canonicalPath": "/haberler/parafudr-tip-1-tip-2-tip-3-paratoner-secimi",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/jenerator-faz-sirasi-ters-motor-ats-kontrolu/index.html",
+      "canonicalPath": "/haberler/jenerator-faz-sirasi-ters-motor-ats-kontrolu",
+      "type": "article"
+    }
+  ]
+}
