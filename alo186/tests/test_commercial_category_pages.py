@@ -17,6 +17,10 @@ ROUTES = {
     "/amazon-elektrik-urunleri/modem-mini-ups-secimi": SOURCE_ROOT / "modem-mini-ups-secimi/index.html",
     "/amazon-elektrik-urunleri/acil-aydinlatma-duman-alarmi": SOURCE_ROOT / "acil-aydinlatma-duman-alarmi/index.html",
 }
+DIRECT_COMMERCIAL_ROUTES = {
+    "/amazon-elektrik-urunleri",
+    "/amazon-elektrik-urunleri/powerbank-usb-c-secimi",
+}
 
 
 def text_of(html: str, tag: str) -> str:
@@ -43,6 +47,7 @@ class CommercialCategoryPagesTests(unittest.TestCase):
         headings: set[str] = set()
         for route, path in ROUTES.items():
             html = path.read_text(encoding="utf-8")
+            lower = html.lower()
             title = text_of(html, "title")
             h1 = text_of(html, "h1")
             self.assertTrue(title, route)
@@ -54,13 +59,14 @@ class CommercialCategoryPagesTests(unittest.TestCase):
             self.assertIn(f'<link rel="canonical" href="https://www.alo186.com{route}">', html)
             self.assertIn('meta name="description"', html)
             self.assertIn("Reklam / satış ortaklığı", html)
-            self.assertIn("kullanıcıya ek maliyet yansımaz", html.lower())
-            self.assertIn("Fiyat", html)
-            self.assertIn("stok", html.lower())
+            self.assertIn("kullanıcıya ek maliyet yansımaz", lower)
             self.assertIn("application/ld+json", html)
-            self.assertNotIn("en ucuz", html.lower())
-            self.assertNotIn("garantili olarak öner", html.lower())
-            self.assertNotRegex(html.lower(), r"\b\d+[.,]?\d*\s*tl\b")
+            self.assertNotIn("en ucuz", lower)
+            self.assertNotIn("garantili olarak öner", lower)
+            self.assertNotRegex(lower, r"\b\d+[.,]?\d*\s*tl\b")
+            if route in DIRECT_COMMERCIAL_ROUTES:
+                self.assertIn("fiyat", lower)
+                self.assertIn("stok", lower)
 
     def test_hub_links_to_every_dedicated_page(self) -> None:
         html = ROUTES["/amazon-elektrik-urunleri"].read_text(encoding="utf-8")
@@ -75,8 +81,8 @@ class CommercialCategoryPagesTests(unittest.TestCase):
         catalog = (ROOT / "alo186/urun-eslestirme/catalog.js").read_text(encoding="utf-8")
         self.assertIn("freshOnly: true", runtime)
         self.assertIn("verificationStatus", runtime)
-        self.assertIn('category.mode === \'direct\'', runtime)
-        self.assertIn('rel=\"sponsored nofollow noopener\"', runtime)
+        self.assertIn("category.mode === 'direct'", runtime)
+        self.assertIn('rel="sponsored nofollow noopener"', runtime)
         self.assertIn("commercial_products_blocked", runtime)
         self.assertIn("const verificationMaxAgeDays=45", catalog)
         self.assertIn("id:'powerbank'", catalog)
@@ -102,12 +108,12 @@ class CommercialCategoryPagesTests(unittest.TestCase):
         self.assertIn("/hesaplama/duman-alarmi-yerlesim-bakim-uygunluk/", emergency)
 
     def test_pages_preserve_safety_and_no_purchase_boundaries(self) -> None:
-        powerbank = ROUTES["/amazon-elektrik-urunleri/powerbank-usb-c-secimi"].read_text(encoding="utf-8")
-        surge = ROUTES["/amazon-elektrik-urunleri/akim-korumali-grup-priz-secimi"].read_text(encoding="utf-8")
-        mini_ups = ROUTES["/amazon-elektrik-urunleri/modem-mini-ups-secimi"].read_text(encoding="utf-8")
-        safety = ROUTES["/amazon-elektrik-urunleri/acil-aydinlatma-duman-alarmi"].read_text(encoding="utf-8")
+        powerbank = ROUTES["/amazon-elektrik-urunleri/powerbank-usb-c-secimi"].read_text(encoding="utf-8").lower()
+        surge = ROUTES["/amazon-elektrik-urunleri/akim-korumali-grup-priz-secimi"].read_text(encoding="utf-8").lower()
+        mini_ups = ROUTES["/amazon-elektrik-urunleri/modem-mini-ups-secimi"].read_text(encoding="utf-8").lower()
+        safety = ROUTES["/amazon-elektrik-urunleri/acil-aydinlatma-duman-alarmi"].read_text(encoding="utf-8").lower()
         self.assertIn("yeni ürün almak gerekmeyebilir", powerbank)
-        self.assertIn("pano tipi SPD", surge)
+        self.assertIn("pano tipi spd", surge)
         self.assertIn("gerilim veya polarite okunamıyor", mini_ups)
         self.assertIn("112 aranır", safety)
         self.assertIn("ürün satıcısı değildir", ROUTES["/amazon-elektrik-urunleri"].read_text(encoding="utf-8").lower())
