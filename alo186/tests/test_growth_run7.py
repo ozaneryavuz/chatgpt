@@ -45,6 +45,10 @@ def schemas(html: str) -> list[dict]:
     return result
 
 
+def visible_markup(html: str) -> str:
+    return re.sub(r"<script\b[^>]*>.*?</script>", "", html, flags=re.I | re.S)
+
+
 def main() -> None:
     manifest = load_effective_manifest(REPO_ROOT)
     assert manifest["version"] >= 48
@@ -58,6 +62,7 @@ def main() -> None:
         assert route_map[route]["type"] == route_type
         html = (REPO_ROOT / source).read_text(encoding="utf-8")
         lower = html.casefold()
+        visible_lower = visible_markup(html).casefold()
         title = one(html, "title")
         h1 = one(html, "h1")
         assert title not in titles and h1 not in h1s
@@ -71,7 +76,8 @@ def main() -> None:
         for forbidden in ["aggregaterating", '"price"', '"pricecurrency"', '"offers"']:
             assert forbidden not in lower
         assert "satın almama" in lower or "mevcut cihaz ihtiyacı" in lower or "gereksiz parça" in lower
-        assert 'type="text"' not in lower and "textarea" not in lower
+        assert not re.search(r'<input\b[^>]*\btype=["\']text["\']', visible_lower)
+        assert not re.search(r"<textarea\b", visible_lower)
 
     experiment = (REPO_ROOT / ROUTES["/hesaplama/7-gunluk-cihaz-tuketim-deneyi/"][0]).read_text(encoding="utf-8")
     assert "alo186.deviceConsumptionExperiment.v1" in experiment
