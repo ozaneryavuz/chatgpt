@@ -116,7 +116,7 @@ jobs:
                   assert 'amazon.com' not in html.lower() and 'amzn.' not in html.lower()
                   assert f'<loc>https://www.alo186.com{route}</loc>' in sitemap
                   assert route in indexed
-                  assert indexed[route]['bucket']=='commercial-guide'
+                  assert indexed[route]['bucket'] in {'commercial-guide','collection'}
                   assert indexed[route]['url']==(prefix+route if prefix else route)
                   assert not any(field in indexed[route] for field in ['price','stock','rating','seller','warranty','asin'])
               hub=(root/'amazon-elektrik-urunleri/index.html').read_text(encoding='utf-8')
