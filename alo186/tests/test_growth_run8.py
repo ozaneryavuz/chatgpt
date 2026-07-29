@@ -17,6 +17,9 @@ ROUTES = {
     "runtime": "/hesaplama/yedek-guc-runtime-saglik-gunlugu/",
 }
 
+LIVE_FEASIBILITY = "/hizmetler/ges-batarya-ev-sarj-fizibilitesi/"
+LEGACY_FEASIBILITY = "/hizmetler/ges-batarya-ev-fizibilitesi/"
+
 
 def read(path: Path) -> str:
     assert path.is_file(), path
@@ -64,6 +67,7 @@ def test_vpp_contract() -> None:
         "incomeEstimate:false",
         "aggregatorRanking:false",
         "officialApproval:false",
+        "assetRequired:true",
         "kişisel veri",
         "gelir garantisi",
         "teias.gov.tr",
@@ -71,7 +75,12 @@ def test_vpp_contract() -> None:
     ]:
         assert token in html, token
     assert "toplayıcı sıralamaz" in html.lower()
-    assert "/hizmetler/ges-batarya-ev-fizibilitesi/" in html
+    assert LIVE_FEASIBILITY in html
+    assert LEGACY_FEASIBILITY not in html
+    assert "if(!assets.length){" in html
+    assert "score=0;" in html
+    assert "if(assets.length&&score>=9)" in html
+    assert "else if(assets.length&&score>=5)" in html
 
 
 def test_ev_contract() -> None:
@@ -84,10 +93,17 @@ def test_ev_contract() -> None:
         "ayrı abonelik",
         "dinamik yük yönetimi",
         "45 günlük",
+        "const MAX_SCORE=11",
+        "maxScore:MAX_SCORE",
+        "${score}/${MAX_SCORE}",
     ]:
         assert token in html, token
     assert "doğrudan affiliate/mağaza yönlendirmesi yapılmaz" in html.lower()
     assert "/hesaplama/teknik-sartname-talep-paketi/" in html
+    assert LIVE_FEASIBILITY in html
+    assert LEGACY_FEASIBILITY not in html
+    assert "maxScore:12" not in html
+    assert "${score}/12" not in html
 
 
 def test_runtime_contract() -> None:
@@ -97,6 +113,11 @@ def test_runtime_contract() -> None:
         "540*86400000",
         "MAX=12",
         "localStorage",
+        "retentionMode:'per-record-fixed'",
+        "Date.parse(createdAtFor(item))+TTL>Date.now()",
+        "precedes(item,focus)",
+        "const repeatedSignificantDrop=",
+        "showCommercial=latest.system!=='desktop'",
         "Mevcut ürünle devam",
         "satın almayın",
         "Affiliate ve yeni ürün yönlendirmesi bu sonuçta kapalıdır",
@@ -106,6 +127,11 @@ def test_runtime_contract() -> None:
         assert token in html, token
     assert "Reklam / satış ortaklığı açıklaması" in html
     assert "fiyat, stok, puan, satıcı" in html.lower()
+    assert "expiresAt:new Date(Date.now()+TTL)" not in html
+    assert "items=items.slice(-MAX);save();" not in html
+    assert "showCommercial=latest.system!=='desktop'}" not in html
+    assert "if(repeatedSignificantDrop)" in html
+    assert "candidate.date<focus.date" in html
 
 
 def test_overlay_and_pipeline() -> None:
