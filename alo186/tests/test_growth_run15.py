@@ -59,6 +59,8 @@ def test_ev_contract() -> None:
         "TTL=540*86400000", "MAX=18", "retentionMode:'per-record'",
         "cableType==='portable'", "purpose==='replacement'", "r.crosscheck",
         "Kullanımı durdur", "kategori=ev_cable", "mevcut kabloyla devam edin",
+        "const safetyEvent=r.burn||r.damage||r.wet", "if(safetyEvent)commercial=false",
+        "Güvenlik olayı sürerken ürün veya satış ortaklığı bağlantısı açılmaz",
     ]:
         assert token in combined, token
     assert "Sabit kablolu EVSE onarımı" in read(PAGES["ev"])
@@ -85,6 +87,9 @@ def test_ground_contract() -> None:
         "TTL=1095*86400000", "MAX=30", "retentionMode:'per-record'", "officialReport:false",
         "method==='stakeless'&&!r.bonded", "Evrensel tek ohm sınırı kullanılmadı",
         "Kazıksız sonuç çevrim direncidir", "affiliateLinks:0",
+        "function methodMetricValid", "method==='soil4'", "method==='stakeless'",
+        "function trendEligible", "trendEligible(a)&&trendEligible(b)",
+        "Yöntem-büyüklük uyuşmuyor", "trend başlangıç referansı olarak kullanılmaz",
     ]:
         assert token in combined, token
     assert "2026 sayfası 17 Temmuz 2026 itibarıyla ön yayımdır" in read(PAGES["ground"])
