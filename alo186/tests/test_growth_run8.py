@@ -51,7 +51,10 @@ def test_pages() -> None:
         assert {"WebApplication", "FAQPage", "BreadcrumbList"} <= types(jsonld(html)), key
         assert "amazon.com" not in lower and "amzn." not in lower, key
         assert '"@type":"product"' not in lower and '"@type":"offer"' not in lower, key
-        assert "ad, adres" in lower or "tesis adı, adres" in lower, key
+        assert "adres" in lower, key
+        assert "kişisel veri" in lower or "kişisel verisiz" in lower, key
+    for key in ("vpp", "ev"):
+        lower = read(PAGES[key]).lower()
         assert "resmî" in lower or "resmi" in lower, key
 
 
