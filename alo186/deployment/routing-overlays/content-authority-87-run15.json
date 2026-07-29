@@ -1,0 +1,21 @@
+{
+  "version": 39,
+  "generatedAt": "2026-07-29",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesintisi-tazminati-nasil-alinir/index.html",
+      "canonicalPath": "/haberler/elektrik-kesintisi-tazminati-nasil-alinir",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ges-pv-string-sigortasi-ters-akim-nasil-secilir/index.html",
+      "canonicalPath": "/haberler/ges-pv-string-sigortasi-ters-akim-nasil-secilir",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ups-cikisinda-kacak-akim-rolesi-notr-toprak/index.html",
+      "canonicalPath": "/haberler/ups-cikisinda-kacak-akim-rolesi-notr-toprak",
+      "type": "article"
+    }
+  ]
+}
