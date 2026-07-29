@@ -4,6 +4,7 @@ import hashlib
 from pathlib import Path
 
 MARKER = 'data-alo186-article-next-step="true"'
+ARTICLE_ROOT = "/haberler/"
 
 
 def normalize_base_path(value: str) -> str:
@@ -28,16 +29,34 @@ def run(site: Path, base_path: str = "") -> dict:
     site = site.resolve()
     base_path = normalize_base_path(base_path)
     if not base_path:
-        return {"ok": True, "basePath": "", "updatedPages": 0}
+        recompute(site)
+        return {"ok": True, "basePath": "", "updatedPages": 0, "remainingRootReferences": 0}
+
     updated = 0
-    source = 'data-path="/'
-    target = f'data-path="{base_path}/'
+    remaining: list[str] = []
+    replacements = (
+        (f'"{ARTICLE_ROOT}', f'"{base_path}{ARTICLE_ROOT}'),
+        (f"'{ARTICLE_ROOT}", f"'{base_path}{ARTICLE_ROOT}"),
+    )
     for path in sorted(site.glob("haberler/*/index.html")):
         text = path.read_text(encoding="utf-8", errors="ignore")
-        if MARKER not in text or source not in text:
+        if MARKER not in text:
             continue
-        text = text.replace(source, target, 1)
-        path.write_text(text, encoding="utf-8")
-        updated += 1
+        original = text
+        for source, target in replacements:
+            text = text.replace(source, target)
+        if text != original:
+            path.write_text(text, encoding="utf-8")
+            updated += 1
+        if f'"{ARTICLE_ROOT}' in text or f"'{ARTICLE_ROOT}" in text:
+            remaining.append(path.relative_to(site).as_posix())
+
     recompute(site)
-    return {"ok": True, "basePath": base_path, "updatedPages": updated}
+    if remaining:
+        raise RuntimeError("Project-path makale kök referansları kaldı: " + ", ".join(remaining[:20]))
+    return {
+        "ok": True,
+        "basePath": base_path,
+        "updatedPages": updated,
+        "remainingRootReferences": 0,
+    }
