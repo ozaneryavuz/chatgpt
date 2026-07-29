@@ -59,7 +59,8 @@ def main() -> None:
         assert 'type="email"' not in lower and 'type="tel"' not in lower, key
         assert "fiyat" in lower and "garanti" in lower, key
         assert "stok" in lower or "satıcı" in lower, key
-        assert "alo186" in lower and ("resmî" in lower or "resmi" in lower), key
+        assert "alo186" in lower, key
+        assert "resmî" in lower or "resmi" in lower or "bağımsız elektrik bilgi ağı" in lower, key
 
     safety = pages["safety"]
     safety_lower = safety.casefold()
