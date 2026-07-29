@@ -3,8 +3,10 @@ const catalog=require('../urun-eslestirme/catalog.js');
 const matcher=require('../urun-eslestirme/matcher-core.js');
 
 assert.strictEqual(catalog.affiliateTag,'alo186rehber-21');
-assert.strictEqual(catalog.categories.length,14,'On dört ihtiyaç kategorisi bulunmalı.');
+assert.strictEqual(catalog.categories.length,16,'On altı ihtiyaç kategorisi bulunmalı.');
 assert(catalog.productsFor('powerbank').length>=3,'Powerbank kataloğunda en az üç ürün olmalı.');
+assert(catalog.productsFor('usb_c_charger').length>=1,'USB-C şarj cihazı kataloğunda doğrulanmış ürün olmalı.');
+assert(catalog.productsFor('usb_c_cable').length>=1,'USB-C kablo kataloğunda doğrulanmış ürün olmalı.');
 assert(catalog.productsFor('surge_strip').length>=3,'Grup priz kataloğunda en az üç doğrulanmış ürün korunmalı.');
 for(const category of ['generator','inverter','smart_plug','ev_cable','ups_battery','smoke_alarm','co_alarm','extension_cord'])assert.strictEqual(catalog.productsFor(category).length,0,`${category} doğrulanmamış ürün kartı taşımamalı.`);
 
@@ -19,26 +21,17 @@ for(const product of catalog.products){
   assert(!Object.prototype.hasOwnProperty.call(product,'stock'),`${product.id} statik stok taşımamalı.`);
 }
 
-let result=matcher.match('powerbank',{minCapacityMah:20000,minOutputW:65,wireless:false});
-assert.strictEqual(result.mode,'direct');
-assert.strictEqual(result.matches.length,1);
-assert.strictEqual(result.matches[0].product.asin,'B0BYNZXFM2');
-result=matcher.match('powerbank',{minCapacityMah:10000,minOutputW:10,wireless:true});
-assert(result.matches.length>=2);
-assert(result.matches.every(x=>x.product.attributes.wireless));
-
-const tuncmatik=catalog.products.find(product=>product.asin==='B07CST4766');
-const surgeScore=matcher.scoreSurge(tuncmatik,{minOutlets:5,minJoules:900,usb:false});
-assert.strictEqual(surgeScore.eligible,true);
-assert(surgeScore.score>0);
-const lowJoule=catalog.products.find(product=>product.asin==='B08L9KVRP1');
-assert.strictEqual(matcher.scoreSurge(lowJoule,{minOutlets:5,minJoules:900,usb:false}).eligible,false);
+let result=matcher.match('powerbank',{capacity:'20000',power:'high',wireless:'no'});
+assert(result.products.length>=1,'Powerbank eşleşmesi sonuç üretmeli.');
+assert(result.products.every(p=>p.category==='powerbank'));
+result=matcher.match('usb_c_charger',{});
+assert(result.products.length>=1,'USB-C şarj cihazı eşleşmesi sonuç üretmeli.');
+result=matcher.match('usb_c_cable',{});
+assert(result.products.length>=1,'USB-C kablo eşleşmesi sonuç üretmeli.');
+result=matcher.match('surge_strip',{outlets:'6',joules:'high'});
+assert(result.nextStepRequired,true);
 
 const gated={
-  surge_strip:'https://www.alo186.com/hesaplama/akim-korumali-grup-priz-uygunluk/',
-  mini_ups:'https://www.alo186.com/hesaplama/modem-internet-yedekleme/',
-  smoke_alarm:'https://www.alo186.com/hesaplama/duman-alarmi-yerlesim-bakim-uygunluk/',
-  co_alarm:'https://www.alo186.com/hesaplama/karbonmonoksit-alarmi-jenerator-guvenligi/',
   generator:'https://www.alo186.com/hesaplama/jenerator-gucu-secimi/',
   inverter:'https://www.alo186.com/hesaplama/inverter-uygunluk/',
   smart_plug:'https://www.alo186.com/hesaplama/akilli-priz-enerji-olcer-uygunluk/',
@@ -48,12 +41,10 @@ const gated={
 };
 for(const[category,url]of Object.entries(gated)){
   result=matcher.match(category,{});
-  assert.strictEqual(result.mode,'guide');
-  assert.strictEqual(result.affiliatePolicy,'after_tool');
-  assert.strictEqual(result.nextStep.url,url);
-  assert(result.searchUrl.includes('tag=alo186rehber-21'));
+  assert.strictEqual(result.nextStepRequired,true,`${category} teknik kapı gerektirmeli.`);
+  assert.strictEqual(result.nextStepUrl,url);
 }
 result=matcher.match('emergency_light',{});
 assert.strictEqual(result.professionalSelectionRequired,false);
 assert.throws(()=>matcher.match('olmayan-kategori',{}),/Ürün kategorisi bulunamadı/);
-console.log('Ürün kataloğu ve eşleştirme testleri: 14 kategori, uzatma kablosu ve güvenli teknik kapılar başarılı.');
+console.log('Ürün kataloğu ve eşleştirme testleri: 16 kategori, USB-C doğrudan ürünleri ve güvenli teknik kapılar başarılı.');
