@@ -121,11 +121,12 @@
     }[status];
 
     return {
-      status,headline,ownership,loadType,continuousW,peakW,hoursDaily,requiredOutlets,productOutlets,ratedCurrentA,ratedPowerW,joules,
+      status,headline,ownership,loadType,continuousW,peakW,hoursDaily,requiredOutlets,productOutlets,ratedCurrentA,ratedPowerW,joules,usbNeeded,usbPorts,
       currentA:round(currentA,2),peakA:round(peakA,2),effectiveCapacityW:Math.round(effectiveCapacityW),screeningLimitW:Math.round(screeningLimitW),
       loadPercent:Math.round(loadRatio*100),screeningPercent:Math.round(screeningRatio*100),recommendedCurrentA,recommendedPowerW,
       productRouteAllowed,noPurchase,blocks,failures,unknowns,warnings,positives,
-      productRoute:'/akilli-urun-secimi?kategori=surge_strip',
+      productRequirements:{minOutlets:requiredOutlets,minJoules:Math.max(250,joules||250),usb:usbNeeded},
+      productRoute:'/akilli-urun-secimi?kategori=surge_strip&gate=local',
       safetyRoute:'/hesaplama/parafudr-risk-testi/',
       decisionRoute:'/karar-motoru'
     };
