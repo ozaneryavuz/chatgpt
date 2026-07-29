@@ -24,7 +24,7 @@ def scripts(html: str) -> list[str]:
 
 def main() -> None:
     manifest = load_effective_manifest(ROOT)
-    assert manifest["version"] >= 70, manifest["version"]
+    assert manifest["version"] >= 71, manifest["version"]
     active = {item["canonicalPath"]: item for item in manifest["routes"]}
     for route, source in ROUTES.items():
         assert route in active, route
@@ -73,7 +73,7 @@ def main() -> None:
 
     assert "DefinedTermSet" in graph
     assert "usb_c_charger" in graph and "usb_c_cable" in graph and "powerbank" in graph
-    assert "Cihaz → protokol → adaptör → kablo" in graph or "Cihaz, protokol, adaptör, kablo" in graph
+    assert "Cihaz, protokol, adaptör, kablo ve powerbank" in graph
     assert "Mevcut zinciri test edin" in graph
     assert "amazon.com.tr" not in graph.casefold()
 
