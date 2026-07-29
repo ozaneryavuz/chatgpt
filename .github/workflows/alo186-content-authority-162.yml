@@ -1,0 +1,90 @@
+name: ALO186 içerik otoritesi 162 kaynak rehber kalite kontrolü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/haberler/kacak-akim-rolesi-tip-s-secicilik-30ma-300ma/**'
+      - 'alo186/haberler/parafudr-ne-zaman-degisir-gosterge-uzak-sinyal/**'
+      - 'alo186/haberler/topraklama-olcumu-yagmur-yaz-kis-mevsim-farki/**'
+      - 'alo186/deployment/routing-overlays/content-authority-162-run41.json'
+      - 'alo186/tests/test_authority_content_run41.py'
+      - '.github/workflows/alo186-content-authority-162.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/kacak-akim-rolesi-tip-s-secicilik-30ma-300ma/**'
+      - 'alo186/haberler/parafudr-ne-zaman-degisir-gosterge-uzak-sinyal/**'
+      - 'alo186/haberler/topraklama-olcumu-yagmur-yaz-kis-mevsim-farki/**'
+      - 'alo186/deployment/routing-overlays/content-authority-162-run41.json'
+      - 'alo186/tests/test_authority_content_run41.py'
+      - '.github/workflows/alo186-content-authority-162.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-authority-162-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Yeni rehberlerin AEO SEO kaynak ve güven sözleşmeleri
+        run: python alo186/tests/test_authority_content_run41.py
+      - name: İçerik niyeti ve mevcut güven regresyonları
+        run: |
+          python alo186/tests/test_content_intent_consolidation.py
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+      - name: Canonical üretim paketini oluştur
+        run: |
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-authority-162-canonical --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-authority-162-canonical
+      - name: Custom-domain Pages artifactını doğrula
+        run: |
+          cp -a /tmp/alo186-authority-162-canonical /tmp/alo186-authority-162-custom
+          python alo186/deployment/prepare_github_pages.py --site /tmp/alo186-authority-162-custom --base-path '' --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py --site /tmp/alo186-authority-162-custom --base-path ''
+          python alo186/deployment/inject_shortlist_growth.py --site /tmp/alo186-authority-162-custom --base-path '' > /tmp/authority162.json
+          python alo186/deployment/smoke_github_pages.py --site /tmp/alo186-authority-162-custom --base-path ''
+      - name: Canonical sitemap ve Teknik Arama kabulü
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('/tmp/alo186-authority-162-custom')
+          routes=[
+            '/haberler/kacak-akim-rolesi-tip-s-secicilik-30ma-300ma',
+            '/haberler/parafudr-ne-zaman-degisir-gosterge-uzak-sinyal',
+            '/haberler/topraklama-olcumu-yagmur-yaz-kis-mevsim-farki',
+          ]
+          sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
+          search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
+          release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
+          active={item['canonicalPath'] for item in search['entries']}
+          assert release['routingVersion'] >= 72
+          assert release['articleCount'] >= 162
+          for route in routes:
+              assert (root/route.strip('/')/'index.html').is_file()
+              assert f'https://www.alo186.com{route}' in sitemap
+              assert route in active
+          PY
+      - name: Doğrulanmış içerik artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-authority-162-pages
+          path: /tmp/alo186-authority-162-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
