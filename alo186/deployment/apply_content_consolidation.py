@@ -30,6 +30,20 @@ def normalize_base_path(value: str) -> str:
     return "/" + cleaned.strip("/")
 
 
+def canonical_route_path(value: str, base_path: str) -> str:
+    text = str(value or "").strip()
+    trailing = text.endswith("/") and text != "/"
+    raw = "/" + text.strip("/")
+    if base_path:
+        if raw == base_path:
+            return "/"
+        if raw.startswith(base_path + "/"):
+            raw = raw[len(base_path) :]
+    if trailing and raw != "/" and not raw.endswith("/"):
+        raw += "/"
+    return raw
+
+
 def public_url(base_path: str, route: str) -> str:
     route = normalize_path(route)
     return f"{base_path}{route}" if base_path else route
@@ -158,13 +172,17 @@ def update_sitemap(site: Path, items: list[dict]) -> dict:
     return {"removed": sorted(removed), "canonicalTargets": sorted(canonical_urls)}
 
 
-def update_release(site: Path, payload: dict) -> dict:
+def update_release(site: Path, payload: dict, base_path: str) -> dict:
     release_path = site / "alo186-release.json"
     if not release_path.is_file():
         raise FileNotFoundError(f"Release envanteri bulunamadı: {release_path}")
     release = json.loads(release_path.read_text(encoding="utf-8"))
     aliases = {item["aliasPath"] for item in payload["consolidations"]}
-    routes = [item for item in release.get("routes", []) if item.get("canonicalPath") not in aliases]
+    routes = [
+        item
+        for item in release.get("routes", [])
+        if canonical_route_path(item.get("canonicalPath"), base_path) not in aliases
+    ]
     release["routes"] = routes
     release["routeCount"] = len(routes)
     release["articleCount"] = sum(1 for item in routes if item.get("type") == "article")
@@ -174,6 +192,7 @@ def update_release(site: Path, payload: dict) -> dict:
         "aliasCount": len(payload["consolidations"]),
         "aliases": payload["consolidations"],
         "sitemapPolicy": "aliases-excluded-canonical-targets-only",
+        "basePathAwareReleaseFiltering": True,
     }
     release_path.write_text(json.dumps(release, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
@@ -185,6 +204,7 @@ def update_release(site: Path, payload: dict) -> dict:
             "version": payload["version"],
             "aliasCount": len(payload["consolidations"]),
             "aliasesExcludedFromSitemap": True,
+            "aliasesExcludedFromProjectRelease": True,
         }
         pages_release_path.write_text(json.dumps(pages, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return {"routeCount": len(routes), "articleCount": release["articleCount"]}
@@ -198,8 +218,6 @@ def update_htaccess(site: Path, items: list[dict]) -> bool:
     block_pattern = re.compile(re.escape(MARKER_START) + r".*?" + re.escape(MARKER_END), re.S)
     rules = [MARKER_START, "<IfModule mod_rewrite.c>", "  RewriteEngine On"]
     for item in items:
-        # normalize_path already constrains aliases to lowercase letters, digits, slashes and hyphens;
-        # no additional regex escaping is needed and readable rules are easier to audit.
         source = item["aliasPath"].lstrip("/")
         destination = f"{CANONICAL_HOST}{item['canonicalPath']}"
         rules.append(f"  RewriteRule ^{source}/?$ {destination} [R=301,L,NE]")
@@ -239,7 +257,7 @@ def apply(site: Path, base_path: str = "", config_path: Path = DEFAULT_CONFIG) -
         alias_file.write_text(redirect_html(item, base_path, include_service_worker), encoding="utf-8")
 
     sitemap = update_sitemap(site, payload["consolidations"])
-    release = update_release(site, payload)
+    release = update_release(site, payload, base_path)
     apache_redirects = update_htaccess(site, payload["consolidations"])
     recompute_checksums(site)
     return {
