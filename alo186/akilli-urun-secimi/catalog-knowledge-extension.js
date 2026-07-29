@@ -8,13 +8,17 @@
     'technicalSource',
     'knowledgeGraphSummary'
   ];
+  void bridgeContract;
   if(typeof module==='object'&&module.exports){
     const catalog=require('../urun-eslestirme/catalog-knowledge-extension.js');
     if(catalog.affiliateTag!==approvedAffiliateTag){
       throw new Error('Onaylı affiliate etiketi korunmadı.');
     }
-    if(!bridgeContract.every((name)=>name==='gated-product-candidates'||name in catalog||catalog.products.some((product)=>product.status===name))){
-      throw new Error('Product Knowledge Graph köprü sözleşmesi eksik.');
+    if(typeof catalog.publicAffiliateEligible!=='function'||typeof catalog.knowledgeGraphSummary!=='function'){
+      throw new Error('Product Knowledge Graph işlevleri eksik.');
+    }
+    if(!catalog.products.some((product)=>product.status==='manufacturer_verified_search'&&product.technicalSource)){
+      throw new Error('Üretici kaynaklı tam model düğümü eksik.');
     }
     module.exports=catalog;
     return;
