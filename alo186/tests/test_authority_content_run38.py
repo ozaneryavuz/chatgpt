@@ -31,7 +31,7 @@ ARTICLES = [
     {
         "slug": "harmonik-thdi-tdd-pcc-ieee-519-farki",
         "required": [
-            "THDi", "TDD", "Point of Common Coupling", "Isc/IL",
+            "THDi", "TDD", "Point of Common Coupling", "I<sub>sc</sub>/I<sub>L</sub>",
             "steady-state", "düşük yükte", "Satın almama sınırı",
             "Son doğrulama: 29 Temmuz 2026",
         ],
