@@ -53,24 +53,24 @@ ARTICLES = [
         "source_hosts": ["tesla.com", "support.wallbox.com"],
     },
     {
-        "slug": "elektrik-kesintisi-tazminati-edas-otomatik-odeme-nasil-kontrol-edilir",
+        "slug": "enerji-depolama-round-trip-efficiency-soh-kabul-testi",
         "required": [
-            "tedarik sürekliliği",
-            "ESÜRE",
-            "ESAYI",
-            "12 saati aşan",
-            "Nisan",
-            "dağıtım bedelinden mahsup",
-            "10 iş günü",
+            "round-trip efficiency",
+            "kullanılabilir enerji",
+            "state of health",
+            "standby losses",
+            "auxiliary loads",
+            "reference performance test",
+            "response time",
             "Son doğrulama: 29 Temmuz 2026",
         ],
         "links": [
-            "/edas-bul",
-            "/hesaplama/kesinti-gunlugu/",
-            "/haberler/planli-elektrik-kesintisi-ne-kadar-once-bildirilir",
-            "/haberler/elektrik-kesintisi-cihaz-hasari-edas-basvurusu",
+            "/hesaplama/inverter-uygunluk/",
+            "/hesaplama/elektrik-kanit-envanteri/",
+            "/hesaplama/teknik-devir-kabul-paketi/",
+            "/hizmetler/ges-batarya-ev-sarj-fizibilitesi/",
         ],
-        "source_hosts": ["epdk.gov.tr"],
+        "source_hosts": ["energy.gov", "nrel.gov", "sandia.gov", "osti.gov"],
     },
 ]
 
@@ -89,6 +89,23 @@ def main() -> None:
     assert manifest["version"] >= 49, manifest["version"]
     article_routes = [route for route in manifest["routes"] if route["type"] == "article"]
     assert len(article_routes) >= 111, len(article_routes)
+
+    active_paths = {route["canonicalPath"] for route in article_routes}
+    duplicate_paths = {
+        "/haberler/parafudr-tip-1-tip-2-tip-3-farki-kaskad-koordinasyon",
+        "/haberler/elektrik-kesintisi-tazminati-edas-otomatik-odeme-nasil-kontrol-edilir",
+    }
+    assert duplicate_paths.isdisjoint(active_paths), duplicate_paths & active_paths
+    assert "/haberler/parafudr-tip-1-tip-2-tip-3-paratoner-secimi" in active_paths
+    assert "/haberler/elektrik-kesintisi-tazminati-nasil-alinir" in active_paths
+    assert not (
+        REPO_ROOT
+        / "alo186/haberler/parafudr-tip-1-tip-2-tip-3-farki-kaskad-koordinasyon/index.html"
+    ).exists()
+    assert not (
+        REPO_ROOT
+        / "alo186/haberler/elektrik-kesintisi-tazminati-edas-otomatik-odeme-nasil-kontrol-edilir/index.html"
+    ).exists()
 
     seen_canonical: set[str] = set()
     seen_titles: set[str] = set()
@@ -165,6 +182,7 @@ def main() -> None:
         "effectiveSourceArticleCount": len(article_routes),
         "newArticleCount": len(ARTICLES),
         "newCanonicalPaths": sorted(seen_canonical),
+        "duplicateCanonicalPathsRemoved": sorted(duplicate_paths),
         "commercialClaimsAdded": False,
         "formsAdded": False,
     }, ensure_ascii=False, indent=2))
