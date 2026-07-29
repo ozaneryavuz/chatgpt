@@ -6,6 +6,7 @@ on:
       - 'alo186/deployment/inject_article_growth.py'
       - 'alo186/deployment/inject_shortlist_growth.py'
       - 'alo186/deployment/normalize_article_followup_paths.py'
+      - 'alo186/deployment/normalize_consolidated_release.py'
       - 'alo186/deployment/assets/article-growth.*'
       - '.github/workflows/alo186-article-inject-diagnostic.yml'
   workflow_dispatch:
@@ -48,6 +49,14 @@ jobs:
             /tmp/sample.html
             /tmp/checksums.sha256
           if-no-files-found: error
+          retention-days: 3
+      - name: Tam project artifactını yükle
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-article-project-debug-pages
+          path: /tmp/project
+          if-no-files-found: error
+          include-hidden-files: true
           retention-days: 3
       - name: Enjeksiyon sonucunu zorunlu kıl
         run: test "$(cat /tmp/inject.status)" = "0"
