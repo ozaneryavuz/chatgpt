@@ -4,7 +4,7 @@ const catalog=require('../urun-eslestirme/catalog.js');
 
 assert.equal(catalog.affiliateTag,'alo186rehber-21');
 assert.equal(catalog.verifiedAt,'2026-07-29');
-assert.ok(catalog.products.length>=10);
+assert.ok(catalog.products.length>=12);
 
 const ids=new Set();
 const asins=new Set();
@@ -17,7 +17,19 @@ for(const product of catalog.products){
   assert.equal(product.status,'verified_listing');
   for(const forbidden of ['price','stock','rating','aggregateRating','review','warranty','seller'])assert.ok(!(forbidden in product),`Yasak ürün alanı: ${forbidden}`);
 }
-for(const id of ['philips-spn7040wa-62','tuncmatik-tsk6134','brennenstuhl-eco-line-6'])assert.ok(ids.has(id),`Yeni ürün eksik: ${id}`);
+for(const id of ['philips-spn7040wa-62','tuncmatik-tsk6134','brennenstuhl-eco-line-6','anker-737-a1289','anker-a1383-20000-87w'])assert.ok(ids.has(id),`Yeni ürün eksik: ${id}`);
+
+const anker737=catalog.products.find(product=>product.id==='anker-737-a1289');
+assert.equal(anker737.asin,'B09VPHVT2Z');
+assert.equal(anker737.mpn,'A1289');
+assert.equal(anker737.attributes.capacityMah,24000);
+assert.equal(anker737.attributes.maxOutputW,140);
+const anker87=catalog.products.find(product=>product.id==='anker-a1383-20000-87w');
+assert.equal(anker87.asin,'B0CXDXP8VR');
+assert.equal(anker87.mpn,'A1383');
+assert.equal(anker87.attributes.maxOutputW,87);
+assert.equal(anker87.attributes.singlePortMaxOutputW,65);
+assert.equal(anker87.attributes.builtInUsbCCable,true);
 
 const now=new Date('2026-07-29T12:00:00Z');
 const publicProducts=catalog.products.filter(product=>catalog.publicAffiliateEligible(product,{now}));
@@ -50,6 +62,10 @@ for(const node of productNodes){
   assert.ok(node.category&&node.category['@id']);
   assert.ok(Array.isArray(node.additionalProperty)&&node.additionalProperty.length>0);
   assert.ok(node.identifier.some(item=>item.propertyID==='ASIN'));
+  if(product.mpn){
+    assert.equal(node.mpn,product.mpn);
+    assert.ok(node.identifier.some(item=>item.propertyID==='MPN'&&item.value===product.mpn));
+  }
   assert.ok(node.additionalProperty.some(item=>item.name==='Teknik doğrulama tarihi'));
   assert.ok(node.additionalProperty.some(item=>item.name==='Ticari ilişki'));
 }
@@ -57,6 +73,8 @@ for(const product of gatedProducts)assert.ok(!productNodes.some(node=>node.sku==
 const itemList=graph.find(node=>node['@type']==='ItemList');
 assert.equal(itemList.numberOfItems,publicProducts.length);
 assert.equal(itemList.itemListElement.length,publicProducts.length);
+assert.ok(productNodes.some(node=>node.sku==='anker-737-a1289'&&node.mpn==='A1289'));
+assert.ok(productNodes.some(node=>node.sku==='anker-a1383-20000-87w'&&node.mpn==='A1383'));
 
 const stalePayload=catalog.knowledgeGraph({now:new Date('2026-09-20T12:00:00Z')});
 assert.equal(stalePayload['@graph'].filter(node=>node['@type']==='Product').length,0);
