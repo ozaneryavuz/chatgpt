@@ -8,6 +8,7 @@ on:
       - 'alo186/deployment/assets/article-growth.*'
       - 'alo186/deployment/inject_article_growth.py'
       - 'alo186/deployment/inject_shortlist_growth.py'
+      - 'alo186/deployment/normalize_article_followup_paths.py'
       - 'alo186/deployment/routing-overlays/**'
       - 'alo186/tests/test_article_growth.py'
       - '.github/workflows/alo186-article-journey-followup.yml'
@@ -19,6 +20,7 @@ on:
       - 'alo186/deployment/assets/article-growth.*'
       - 'alo186/deployment/inject_article_growth.py'
       - 'alo186/deployment/inject_shortlist_growth.py'
+      - 'alo186/deployment/normalize_article_followup_paths.py'
       - 'alo186/deployment/routing-overlays/**'
       - 'alo186/tests/test_article_growth.py'
       - '.github/workflows/alo186-article-journey-followup.yml'
@@ -52,6 +54,7 @@ jobs:
           node --check alo186/hesaplama/teknik-takip-listem/app.js
           node --check alo186/deployment/assets/article-growth.js
           python -m py_compile alo186/deployment/inject_article_growth.py
+          python -m py_compile alo186/deployment/normalize_article_followup_paths.py
 
       - name: İçerik niyeti, canonical ve cihaz hasarı regresyonları
         run: |
@@ -106,11 +109,33 @@ jobs:
             --base-path '/chatgpt' \
             | tee /tmp/alo186-journey-project.json
 
-      - name: Project-path smoke testi
+      - name: Project-path smoke raporunu üret
+        shell: bash
         run: |
+          set +e
           python alo186/deployment/smoke_github_pages.py \
             --site /tmp/alo186-journey-project \
-            --base-path '/chatgpt'
+            --base-path '/chatgpt' \
+            > /tmp/alo186-journey-project-smoke.log 2>&1
+          status=$?
+          echo "$status" > /tmp/alo186-journey-project-smoke.status
+          cat /tmp/alo186-journey-project-smoke.log
+          exit 0
+
+      - name: Project-path smoke tanı artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-article-project-smoke-diagnostic
+          path: |
+            /tmp/alo186-journey-project-smoke.log
+            /tmp/alo186-journey-project-smoke.status
+            /tmp/alo186-journey-project.json
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Project-path smoke sonucunu zorunlu kıl
+        shell: bash
+        run: test "$(cat /tmp/alo186-journey-project-smoke.status)" = "0"
 
       - name: Makale, envanter, takip, affiliate ve base-path sözleşmeleri
         shell: bash
@@ -149,6 +174,8 @@ jobs:
                   assert text.count('data-alo186-article-next-step="true"')==1, canonical
                   assert (prefix+'/assets/article-growth.css' if prefix else '/assets/article-growth.css') in text
                   assert (prefix+'/assets/article-growth.js' if prefix else '/assets/article-growth.js') in text
+                  expected_data_path=(prefix+canonical if prefix else canonical)
+                  assert f'data-path="{expected_data_path}"' in text
                   panel=text.split('data-alo186-article-next-step="true"',1)[1].split('</section>',1)[0]
                   assert 'amazon.' not in panel.lower()
                   assert 'Takip listeme ekle' in panel
