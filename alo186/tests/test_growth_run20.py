@@ -45,6 +45,7 @@ def main() -> None:
 
     assert "sponsored" not in html.lower(), "Araç doğrudan affiliate mağaza bağlantısı taşımamalı"
     assert "amazon.com.tr" not in html.lower(), "Araç doğrudan Amazon URL taşımamalı"
+    assert "alo186rehber-21" not in html, "Affiliate etiketi karar aracına doğrudan sızmamalı"
     assert "/akilli-urun-secimi?kategori=usb_c_charger" in html
     assert "/akilli-urun-secimi?kategori=usb_c_cable" in html
     assert "/akilli-urun-secimi?kategori=usb_c_hub" in html
