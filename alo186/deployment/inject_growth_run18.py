@@ -35,7 +35,7 @@ TARGETS = {
         "Tek ürün kontrolünü resmî kaynak ve kit döngüsüyle tamamlayın",
         "GÜBİS/Safety Gate araması, teknik belge pasaportu ve 90 günlük kit denetimiyle sonraki adımı kanıtlayın.",
     ),
-    Path("kesinti-hazirlik-atolyesi/index.html"): (
+    Path("kesintiye-hazirlik-atolyesi/index.html"): (
         "Hazırlık planınızı 90 günde bir doğrulayın",
         "Yeni ürün listesi oluşturmak yerine mevcut kitin gerçekten çalıştığını test edin; yeterliyse satın almayın.",
     ),
