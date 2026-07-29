@@ -1,5 +1,6 @@
 'use strict';
 
+// Regression coverage for all seven actionable Codex review threads on merged PR #236.
 const assert = require('node:assert/strict');
 const runtime = require('../hesaplama/yedek-guc-runtime-saglik-gunlugu/core.js');
 const vpp = require('../hesaplama/vpp-esnek-yuk-hazirlik/core.js');
