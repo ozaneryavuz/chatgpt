@@ -6,6 +6,8 @@ import json
 import re
 from pathlib import Path
 
+from inject_affiliate_product_graph import run as run_affiliate_product_graph
+
 ROUTES = {
     "ev": "/hesaplama/ev-sarj-kablosu-saglik-gunlugu/",
     "pv": "/hesaplama/ges-panel-temizlik-karar-gunlugu/",
@@ -128,11 +130,13 @@ def add_offline(site: Path, base_path: str) -> int:
     match = re.search(r"const CRITICAL=(\[.*?\]);", text, re.S)
     if not match:
         return 0
-    current = json.loads(match.group(1)); added = 0
+    current = json.loads(match.group(1))
+    added = 0
     for route in ROUTES.values():
         url = public_url(base_path, route)
         if url not in current:
-            current.append(url); added += 1
+            current.append(url)
+            added += 1
     if added:
         path.write_text(text[:match.start(1)] + json.dumps(current, ensure_ascii=False) + text[match.end(1):], encoding="utf-8")
     return added
@@ -142,7 +146,8 @@ def update_manifest(site: Path, base_path: str) -> None:
     path = site / "manifest.webmanifest"
     if not path.is_file():
         return
-    manifest = json.loads(path.read_text(encoding="utf-8")); shortcuts = manifest.setdefault("shortcuts", [])
+    manifest = json.loads(path.read_text(encoding="utf-8"))
+    shortcuts = manifest.setdefault("shortcuts", [])
     for name, route in [("EV Kablo Sağlığı", ROUTES["ev"]), ("GES Temizlik Kararı", ROUTES["pv"]), ("Topraklama Trendi", ROUTES["ground"])]:
         url = public_url(base_path, route)
         if not any(item.get("url") == url for item in shortcuts if isinstance(item, dict)):
@@ -159,21 +164,40 @@ def recompute(site: Path) -> None:
 
 
 def run(site: Path, base_path: str = "") -> dict:
-    site = site.resolve(); base_path = normalize_base_path(base_path)
+    site = site.resolve()
+    base_path = normalize_base_path(base_path)
     for route in ROUTES.values():
         target = site / route.strip("/") / "index.html"
         app = target.with_name("app.js")
         if not target.is_file() or not app.is_file():
             raise FileNotFoundError(f"Growth run15 rota veya app eksik: {target}")
     injected = inject_entries(site, base_path)
-    append_sitemap(site); append_search(site, base_path); update_release(site, base_path, injected)
-    offline_added = add_offline(site, base_path); update_manifest(site, base_path); recompute(site)
-    return {"ok": True, "basePath": base_path, "routes": [public_url(base_path, route) for route in ROUTES.values()], "entryPointsInjected": injected, "offlineAdded": offline_added, "directAffiliateLinksAdded": 0, "rawPersonalDataCollected": False, "emergencyCommerceClosed": True}
+    append_sitemap(site)
+    append_search(site, base_path)
+    update_release(site, base_path, injected)
+    offline_added = add_offline(site, base_path)
+    update_manifest(site, base_path)
+    recompute(site)
+    product_graph = run_affiliate_product_graph(site, base_path)
+    return {
+        "ok": True,
+        "basePath": base_path,
+        "routes": [public_url(base_path, route) for route in ROUTES.values()],
+        "entryPointsInjected": injected,
+        "offlineAdded": offline_added,
+        "directAffiliateLinksAdded": 0,
+        "rawPersonalDataCollected": False,
+        "emergencyCommerceClosed": True,
+        "affiliateProductKnowledgeGraph": product_graph,
+    }
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(); parser.add_argument("--site", type=Path, required=True); parser.add_argument("--base-path", default="")
-    args = parser.parse_args(); print(json.dumps(run(args.site.resolve(), args.base_path), ensure_ascii=False, indent=2))
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--site", type=Path, required=True)
+    parser.add_argument("--base-path", default="")
+    args = parser.parse_args()
+    print(json.dumps(run(args.site.resolve(), args.base_path), ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":

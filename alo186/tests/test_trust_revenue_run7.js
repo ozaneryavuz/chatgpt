@@ -25,8 +25,8 @@ assert.match(catalogApp,/catalog_trust_status_viewed/);
 assert.match(catalogApp,/catalog_trust_category_opened/);
 assert.doesNotMatch(catalogHtml,/amazon\.(com|com\.tr)\//i);
 assert.doesNotMatch(catalogHtml,/"@type"\s*:\s*"Product"/);
-assert.equal(productCatalog.categories.length,12);
-assert.equal(productCatalog.products.length,7);
+assert(productCatalog.categories.length>=14,`Kategori envanteri geriledi: ${productCatalog.categories.length}`);
+assert(productCatalog.products.length>=10,`Doğrulanmış ASIN envanteri geriledi: ${productCatalog.products.length}`);
 assert.equal(productCatalog.verificationMaxAgeDays,45);
 for(const id of ['smart_plug','ev_cable','ups_battery']){
   const category=productCatalog.getCategory(id);
@@ -65,4 +65,4 @@ for(const[name,text]of[['catalog',catalogHtml],['corporate',corporateHtml],['sup
 }
 assert(routing.routes.some(route=>route.source==='alo186/katalog-guven-durumu/index.html'&&route.canonicalPath==='/katalog-guven-durumu'&&route.type==='collection'));
 assert.match(sitemap,/https:\/\/www\.alo186\.com\/katalog-guven-durumu/);
-console.log('ALO186 güvenli büyüme: 12 kategorilik katalog güveni, kurumsal lead ve tedarikçi hazırlığı başarılı.');
+console.log(`ALO186 güvenli büyüme: ${productCatalog.categories.length} kategorilik katalog güveni, ${productCatalog.products.length} doğrulanmış ASIN, kurumsal lead ve tedarikçi hazırlığı başarılı.`);
