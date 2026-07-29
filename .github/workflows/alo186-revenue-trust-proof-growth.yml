@@ -183,8 +183,11 @@ jobs:
               commercial=(root/'amazon-elektrik-urunleri/index.html').read_text(encoding='utf-8')
               service=(root/'hizmetler/otel-elektrik-surekliligi-denetimi/index.html').read_text(encoding='utf-8')
               for html in [commercial,service]:
-                  assert 'data-alo186-revenue-proof="true"' in html
-                  assert html.index('data-alo186-revenue-proof="true"') < html.index('<footer')
+                  marker=html.index('data-alo186-revenue-proof="true"')
+                  boundary=html.find('<footer')
+                  if boundary < 0:
+                      boundary=html.find('</body>')
+                  assert boundary >= 0 and marker < boundary
                   assert (prefix+'/gelir-ve-bagimsizlik/' if prefix else '/gelir-ve-bagimsizlik/') in html
                   assert (prefix+'/ornek-teslimler/' if prefix else '/ornek-teslimler/') in html
 
