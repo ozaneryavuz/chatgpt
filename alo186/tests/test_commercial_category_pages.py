@@ -45,6 +45,10 @@ class CommercialCategoryPagesTests(unittest.TestCase):
     def test_pages_have_unique_intent_canonical_and_visible_commercial_disclosure(self) -> None:
         titles: set[str] = set()
         headings: set[str] = set()
+        runtime = (SOURCE_ROOT / "commercial.js").read_text(encoding="utf-8").lower()
+        self.assertIn("kullanıcıya ek maliyet yansımaz", runtime)
+        self.assertIn("fiyat, stok, satıcı", runtime)
+        self.assertIn("normalizedisclosures", runtime)
         for route, path in ROUTES.items():
             html = path.read_text(encoding="utf-8")
             lower = html.lower()
@@ -59,12 +63,12 @@ class CommercialCategoryPagesTests(unittest.TestCase):
             self.assertIn(f'<link rel="canonical" href="https://www.alo186.com{route}">', html)
             self.assertIn('meta name="description"', html)
             self.assertIn("Reklam / satış ortaklığı", html)
-            self.assertIn("kullanıcıya ek maliyet yansımaz", lower)
             self.assertIn("application/ld+json", html)
             self.assertNotIn("en ucuz", lower)
             self.assertNotIn("garantili olarak öner", lower)
             self.assertNotRegex(lower, r"\b\d+[.,]?\d*\s*tl\b")
             if route in DIRECT_COMMERCIAL_ROUTES:
+                self.assertIn("kullanıcıya ek maliyet yansımaz", lower)
                 self.assertIn("fiyat", lower)
                 self.assertIn("stok", lower)
 
