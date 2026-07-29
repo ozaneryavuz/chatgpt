@@ -1,0 +1,53 @@
+name: ALO186 affiliate trust gate
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/urun-eslestirme/catalog.js'
+      - 'alo186/urun-eslestirme/matcher-core.js'
+      - 'alo186/urun-eslestirme/app.js'
+      - 'alo186/hesaplama/akim-korumali-grup-priz-uygunluk/core.js'
+      - 'alo186/hesaplama/akim-korumali-grup-priz-uygunluk/app.js'
+      - 'alo186/tests/test_affiliate_knowledge_graph.js'
+      - 'alo186/tests/test_affiliate_qualification_gate.js'
+      - '.github/workflows/alo186-affiliate-trust-gate.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/urun-eslestirme/catalog.js'
+      - 'alo186/urun-eslestirme/matcher-core.js'
+      - 'alo186/urun-eslestirme/app.js'
+      - 'alo186/hesaplama/akim-korumali-grup-priz-uygunluk/core.js'
+      - 'alo186/hesaplama/akim-korumali-grup-priz-uygunluk/app.js'
+      - 'alo186/tests/test_affiliate_knowledge_graph.js'
+      - 'alo186/tests/test_affiliate_qualification_gate.js'
+      - '.github/workflows/alo186-affiliate-trust-gate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-affiliate-trust-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript syntax
+        run: |
+          node --check alo186/urun-eslestirme/catalog.js
+          node --check alo186/urun-eslestirme/matcher-core.js
+          node --check alo186/urun-eslestirme/app.js
+          node --check alo186/hesaplama/akim-korumali-grup-priz-uygunluk/core.js
+          node --check alo186/hesaplama/akim-korumali-grup-priz-uygunluk/app.js
+      - name: Affiliate knowledge graph contract
+        run: node alo186/tests/test_affiliate_knowledge_graph.js
+      - name: Qualified affiliate gate contract
+        run: node alo186/tests/test_affiliate_qualification_gate.js
