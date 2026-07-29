@@ -1,0 +1,21 @@
+{
+  "version": 70,
+  "generatedAt": "2026-07-29",
+  "routes": [
+    {
+      "source": "alo186/haberler/gerilim-cukuru-kisa-kesinti-dusuk-gerilim-farki/index.html",
+      "canonicalPath": "/haberler/gerilim-cukuru-kisa-kesinti-dusuk-gerilim-farki",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/enerji-depolama-garanti-throughput-cevrim-takvim-omru-soh/index.html",
+      "canonicalPath": "/haberler/enerji-depolama-garanti-throughput-cevrim-takvim-omru-soh",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/jenerator-yakit-tuketimi-litre-saat-yuk-faktoru/index.html",
+      "canonicalPath": "/haberler/jenerator-yakit-tuketimi-litre-saat-yuk-faktoru",
+      "type": "article"
+    }
+  ]
+}
