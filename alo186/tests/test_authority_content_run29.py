@@ -17,7 +17,7 @@ ARTICLES = [
         "required": [
             "yük akımının nötr iletken empedansı", "N-PE köprüsü", "üçlü harmonikler",
             "tek bir volt sınırı yoktur", "yük altında", "istenmeyen nötr-toprak",
-            "satın almama", "Son doğrulama: 29 Temmuz 2026",
+            "satın almayı zorunlu kılmaz", "Son doğrulama: 29 Temmuz 2026",
         ],
         "links": [
             "/haberler/harmonik-thd-tdd-pcc-olcum-farki",
