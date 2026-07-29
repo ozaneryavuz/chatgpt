@@ -27,6 +27,12 @@
       ['Sensör ve ömür','Fotoelektrik sensör, üretim tarihi ve son kullanım/ürün ömrü belirtilmeli.'],
       ['Yerleşim','Üretici montaj konumuna uyun; mutfak buharı ve hava akımlarını dikkate alın.']
     ],
+    co_alarm:[
+      ['Kaynak güvenliği','Alarm, jeneratörü ev, garaj, balkon, sundurma veya binaya yakın yerde güvenli yapmaz.'],
+      ['Kapsam','Her kat ve uyuma alanlarının dışı için üretici yerleşim talimatını doğrulayın.'],
+      ['Standart ve ömür','EN 50291 uygunluk belgesi, üretim tarihi ve üreticinin değiştirme süresi görünür olmalı.'],
+      ['Test ve güç','Test düğmesi, düşük pil uyarısı ve elektrik kesintisinde pil/pil yedeği bulunmalı.']
+    ],
     power_station:[
       ['Enerji kapasitesi','Hedef süre için Wh hesabını yapın; etiket kapasitesinin tamamı kullanılamaz.'],
       ['Sürekli ve tepe güç','Motor/kompresör kalkış gücü dahil yükü karşılamalı.'],
