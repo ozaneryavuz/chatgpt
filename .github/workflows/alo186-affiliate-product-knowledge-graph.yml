@@ -160,10 +160,14 @@ jobs:
               for payload in payloads:nodes.extend(payload.get('@graph',[]))
               product_nodes=[node for node in nodes if isinstance(node,dict) and node.get('@type')=='Product']
               term_nodes=[node for node in nodes if isinstance(node,dict) and node.get('@type')=='DefinedTerm']
-              assert len(product_nodes)==14
-              assert len(term_nodes)==28
+              candidate_nodes=[node for node in term_nodes if (node.get('inDefinedTermSet')or{}).get('@id','').endswith('/gated-product-candidates#termset')]
+              assert len(product_nodes)==3
+              assert len(term_nodes)==39
+              assert len(candidate_nodes)==11
               assert not any('offers'in node or 'aggregateRating'in node for node in product_nodes)
-              assert new_ids.issubset({node['@id'].split('/')[-1].split('#')[0] for node in product_nodes})
+              assert {node.get('sku') for node in product_nodes}=={'anker-prime-a1336','xiaomi-wireless-10000','samsung-eb-u2510x'}
+              assert not new_ids.intersection({node.get('sku') for node in product_nodes})
+              assert new_ids.issubset({node.get('termCode') for node in candidate_nodes})
 
               release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
               pages=json.loads((root/'pages-release.json').read_text(encoding='utf-8'))
