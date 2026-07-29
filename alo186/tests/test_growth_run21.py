@@ -14,7 +14,7 @@ assert OVERLAY["routes"][0]["canonicalPath"] == "/hesaplama/kesinti-hazirlik-env
 assert "WebApplication" in HTML and "FAQPage" in HTML and "BreadcrumbList" in HTML
 assert "ALO186 EDAŞ, kamu kurumu, ürün satıcısı veya servis değildir" in HTML
 assert "doğrudan mağaza bağlantısı yoktur" in HTML.lower()
-assert "affiliateAccepted" in HTML and "Mevcut ürün yeterliyse" in HTML
+assert "affiliateAccepted" in HTML and "yeniden satın almayın" in HTML.lower()
 assert "TTL=365*86400000" in HTML and "LIMIT=12" in HTML and "90 günlük" in HTML
 assert "localStorage" in HTML and "JSON indir" in HTML and "text/calendar" in HTML
 assert not re.search(r"amazon\.com(?:\.tr)?", HTML, re.I)
