@@ -121,9 +121,13 @@ jobs:
               route_map={item['canonicalPath']: item for item in release['routes']}
               search_map={item['canonicalPath']: item for item in search['entries']}
               for route in routes:
-                  physical=root/route.strip('/')/'index.html'
+                  directory=root/route.strip('/')
+                  physical=directory/'index.html'
+                  stylesheet=directory/'styles.css'
                   assert physical.is_file(), physical
+                  assert stylesheet.is_file() and stylesheet.stat().st_size>5000, stylesheet
                   html=physical.read_text(encoding='utf-8')
+                  assert 'href="./styles.css"' in html
                   assert 'Ücretli' in html or 'ücretli' in html
                   assert 'application/ld+json' in html
                   assert '<form' not in html.lower()
@@ -139,8 +143,6 @@ jobs:
                   for forbidden in ['price','stock','rating','seller','warranty','asin']:
                       assert forbidden not in search_map[route]
 
-              shared=root/'hizmetler/shared/styles.css'
-              assert shared.is_file() and shared.stat().st_size>5000
               corporate=(root/'kurumsal-elektrik-surekliligi-on-degerlendirme/index.html').read_text(encoding='utf-8')
               app=(root/'kurumsal-elektrik-surekliligi-on-degerlendirme/app.js').read_text(encoding='utf-8')
               for route, key in zip(routes, service_keys):
