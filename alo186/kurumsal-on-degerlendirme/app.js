@@ -19,7 +19,8 @@
   const serviceProfiles = {
     hotel_audit:{label:'Otel Elektrik Sürekliliği ve Risk Denetimi',facility:'hotel',problem:'audit',backup:'both',scope:'site',urgency:'soon',evidence:'partial'},
     proposal_review:{label:'Bağımsız Elektrik Teklif ve Teknik Şartname İncelemesi',facility:'office',problem:'audit',backup:'none',scope:'remote',urgency:'urgent',evidence:'partial'},
-    energy_integration:{label:'GES, Batarya ve EV Şarj Entegrasyon Fizibilitesi',facility:'hotel',problem:'energy',backup:'solar_storage',scope:'comparison',urgency:'planning',evidence:'partial'}
+    energy_integration:{label:'GES, Batarya ve EV Şarj Entegrasyon Fizibilitesi',facility:'hotel',problem:'energy',backup:'solar_storage',scope:'comparison',urgency:'planning',evidence:'partial'},
+    continuity_monitoring:{label:'Elektrik Sürekliliği İzleme ve Teknik Takip',facility:'hotel',problem:'audit',backup:'both',scope:'roadmap',urgency:'planning',evidence:'partial'}
   };
 
   const byId = (id) => document.getElementById(id);
