@@ -62,15 +62,28 @@ jobs:
             --bundle /tmp/alo186-consolidation-canonical
 
       - name: Legacy Apache için gerçek 301 ve canonical alias paketi
+        shell: bash
         run: |
+          set -euo pipefail
           cp -a /tmp/alo186-consolidation-canonical /tmp/alo186-consolidation-apache
+          # Bazı paketleyiciler gizli dosyaları yayın katmanında elemeden önce çıkarabilir.
+          # Redirect üreticisi mevcut .htaccess'i korur; dosya yoksa güvenli biçimde oluşturur.
+          touch /tmp/alo186-consolidation-apache/.htaccess
           python alo186/deployment/apply_content_consolidation.py \
             --site /tmp/alo186-consolidation-apache \
             --base-path '' \
             > /tmp/alo186-consolidation-apache.json
-          grep -q 'R=301,L,NE' /tmp/alo186-consolidation-apache/.htaccess
-          grep -q 'lifepo4-batarya-sogukta-sarj-edilir-mi' /tmp/alo186-consolidation-apache/.htaccess
-          grep -q 'elektrik-gerilimi-dusuk-yuksek-edas-olcum-talebi' /tmp/alo186-consolidation-apache/.htaccess
+          grep -Fq 'R=301,L,NE' /tmp/alo186-consolidation-apache/.htaccess
+          grep -Fq 'lifepo4-batarya-sogukta-sarj-edilir-mi' /tmp/alo186-consolidation-apache/.htaccess
+          grep -Fq 'elektrik-gerilimi-dusuk-yuksek-edas-olcum-talebi' /tmp/alo186-consolidation-apache/.htaccess
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          result=json.loads(Path('/tmp/alo186-consolidation-apache.json').read_text(encoding='utf-8'))
+          assert result['ok'] is True
+          assert result['apacheRedirects'] is True
+          assert result['aliasCount']==2
+          PY
 
       - name: GitHub Pages custom-domain artifactını birleştir
         run: |
