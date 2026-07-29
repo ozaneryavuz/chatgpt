@@ -134,20 +134,27 @@ def bucket(route_type: str) -> str:
         return "calculator"
     if route_type in {"business-tool", "service", "partnership"}:
         return "business"
-    if route_type == "collection":
+    if route_type in {"collection", "commerce-guide", "commerce-collection"}:
         return "collection"
     return "tool"
 
 
 def priority(route: dict) -> int:
     path = route.get("canonicalPath", "")
+    route_type = route.get("type", "")
     if path == "/karar-motoru":
         return 120
     if path == "/edas-bul":
         return 115
     if path in FEATURED_PATHS:
         return 100
-    return {"tool": 78, "calculator": 75, "business": 68, "collection": 65, "article": 50}.get(bucket(route.get("type", "")), 45)
+    # Ticari rehberler aranabilir kalır; ancak resmî yönlendirme, ücretsiz
+    # uygunluk araçları ve teknik makaleler ticari niyet tarafından geriye itilmez.
+    if route_type == "commerce-collection":
+        return 55
+    if route_type == "commerce-guide":
+        return 45
+    return {"tool": 78, "calculator": 75, "business": 68, "collection": 65, "article": 50}.get(bucket(route_type), 45)
 
 
 def build_entry(site: Path, route: dict, base_path: str) -> dict | None:
