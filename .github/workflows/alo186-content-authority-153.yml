@@ -73,10 +73,6 @@ jobs:
           python alo186/deployment/inject_outcome_runtime.py \
             --site /tmp/alo186-authority-153-custom \
             --base-path ''
-          python alo186/deployment/inject_shortlist_growth.py \
-            --site /tmp/alo186-authority-153-custom \
-            --base-path '' \
-            > /tmp/alo186-authority-153-custom.json
           python alo186/deployment/smoke_github_pages.py \
             --site /tmp/alo186-authority-153-custom \
             --base-path ''
@@ -92,10 +88,6 @@ jobs:
           python alo186/deployment/inject_outcome_runtime.py \
             --site /tmp/alo186-authority-153-project \
             --base-path '/chatgpt'
-          python alo186/deployment/inject_shortlist_growth.py \
-            --site /tmp/alo186-authority-153-project \
-            --base-path '/chatgpt' \
-            > /tmp/alo186-authority-153-project.json
           python alo186/deployment/smoke_github_pages.py \
             --site /tmp/alo186-authority-153-project \
             --base-path '/chatgpt'
