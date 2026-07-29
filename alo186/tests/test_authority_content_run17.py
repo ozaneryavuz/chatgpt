@@ -123,7 +123,7 @@ def main() -> None:
         assert not re.search(r"\bfiyat(?:ı)?\s*[:=]?\s*\d|\bstokta\b|\bpuanı\s*\d|\bgaranti\s*[:=]?\s*\d", lower)
         assert not re.search(r"<form\b|<input\b|<textarea\b", lower)
         assert not re.search(
-            r"kesinlikle güvenlidir|her durumda güvenlidir|garanti gelir|gelir garantisi (?:sağlar|sunar|verir)",
+            r"kesinlikle güvenlidir|her durumda güvenlidir|sabit ve garantili gelir|kesin gelir sağlar|garantili kazanç sağlar",
             lower,
         )
 
