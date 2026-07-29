@@ -156,7 +156,7 @@ jobs:
               hub=(root/'hesaplama/index.html').read_text(encoding='utf-8')
               portal=(root/'elektrik-portali/index.html').read_text(encoding='utf-8')
               product=(root/'amazon-elektrik-urunleri/index.html').read_text(encoding='utf-8')
-              business=(root/'kurumsal-on-degerlendirme/index.html').read_text(encoding='utf-8')
+              business=(root/'kurumsal-elektrik-surekliligi-on-degerlendirme/index.html').read_text(encoding='utf-8')
               assert 'data-alo186-growth-run9-tools="true"' in hub
               assert 'data-alo186-growth-run9-journey="true"' in portal
               assert 'data-alo186-growth-run9-affiliate="true"' in product
