@@ -6,8 +6,12 @@ import hashlib
 import json
 import re
 import shutil
+import tempfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
+
+from generate_commerce_guides import generate as generate_commerce_guides
+from generate_commerce_guides import inject_collection_link
 
 
 CANONICAL_HOST = "https://www.alo186.com"
@@ -23,6 +27,10 @@ SHARED_STATIC_ASSETS = (
     # Teknik makaleler canonical alt dizinlere taşınırken ortak responsive CSS
     # /haberler kökünde tek kopya olarak yayınlanır.
     ("alo186/haberler/alo186-article.css", "haberler/alo186-article.css"),
+    # Veri modelinden üretilen ürün rehberleri ortak stilleri ve kişisel verisiz
+    # nitelikli Amazon kapısını tek sürümlü asset olarak kullanır.
+    ("alo186/urun-rehberleri/commerce-guide.css", "urun-rehberleri/commerce-guide.css"),
+    ("alo186/urun-rehberleri/commerce-guide.js", "urun-rehberleri/commerce-guide.js"),
 )
 
 ROOT_STATIC_FILES = (
@@ -98,7 +106,7 @@ APPLICATION_TERMS = re.compile(
     r"\b(başvur|basvur|talep|tazmin|dağıtım şirket|dagitim sirket|edaş|edas)\w*",
     re.IGNORECASE,
 )
-WRONG_DEADLINE = re.compile(r"\b30\s*gün\b", re.IGNORECASE)
+WRONG_DEADLINE = re.compile(r"\b30\s+gün\b", re.IGNORECASE)
 
 
 def is_forbidden_public_name(name: str) -> bool:
@@ -185,8 +193,22 @@ def load_effective_manifest(repo_root: Path) -> dict:
     }
 
 
-def copy_route(repo_root: Path, output: Path, route: dict) -> None:
+def generated_route_source(generated_root: Path | None, route: dict) -> Path | None:
+    if generated_root is None or not str(route.get("type", "")).startswith("commerce-"):
+        return None
+    try:
+        relative = Path(route["source"]).relative_to("alo186")
+    except ValueError:
+        return None
+    return generated_root / relative
+
+
+def copy_route(repo_root: Path, output: Path, route: dict, generated_root: Path | None = None) -> None:
     source = repo_root / route["source"]
+    if not source.is_file():
+        generated_source = generated_route_source(generated_root, route)
+        if generated_source is not None:
+            source = generated_source
     if not source.is_file():
         raise FileNotFoundError(f"Kaynak bulunamadı: {source}")
     target_path = route["canonicalPath"].strip("/") or "."
@@ -365,11 +387,19 @@ def build(repo_root: Path, output: Path, commit_sha: str = "local") -> dict:
         shutil.rmtree(output)
     output.mkdir(parents=True)
 
-    for route in manifest["routes"]:
-        copy_route(repo_root, output, route)
+    commerce_release: dict = {}
+    product_center_link_injected = False
+    with tempfile.TemporaryDirectory(prefix="alo186-commerce-") as temporary:
+        generated_root = Path(temporary)
+        commerce_release = generate_commerce_guides(repo_root, generated_root)
 
-    for source_name, target_name in SHARED_STATIC_ASSETS:
-        copy_file(repo_root, output, source_name, target_name)
+        for route in manifest["routes"]:
+            copy_route(repo_root, output, route, generated_root)
+
+        for source_name, target_name in SHARED_STATIC_ASSETS:
+            copy_file(repo_root, output, source_name, target_name)
+
+        product_center_link_injected = inject_collection_link(output)
 
     # Canonical HTML üretmeyen ancak mevcut relatif CSS/JS bağımlılıklarını sağlayan
     # uyumluluk klasörleri de aynı public-only kuralıyla kopyalanır.
@@ -400,6 +430,19 @@ def build(repo_root: Path, output: Path, commit_sha: str = "local") -> dict:
         "routingOverlays": manifest["routingOverlays"],
         "routeCount": len(manifest["routes"]),
         "articleCount": sum(1 for item in manifest["routes"] if item["type"] == "article"),
+        "commerceGuideCount": sum(1 for item in manifest["routes"] if item["type"] == "commerce-guide"),
+        "commerceCollectionCount": sum(
+            1 for item in manifest["routes"] if item["type"] == "commerce-collection"
+        ),
+        "commerceGuides": {
+            "collectionPath": commerce_release.get("collectionPath"),
+            "guideCount": commerce_release.get("guideCount", 0),
+            "affiliateEnabledCount": commerce_release.get("affiliateEnabledCount", 0),
+            "professionalOnlyCount": commerce_release.get("professionalOnlyCount", 0),
+            "staticPricesStored": commerce_release.get("staticPricesStored", False),
+            "staticStockStored": commerce_release.get("staticStockStored", False),
+            "productCenterLinkInjected": product_center_link_injected,
+        },
         "legacyAssetDirectories": list(LEGACY_ASSET_DIRECTORIES),
         "sharedStaticAssets": [target for _, target in SHARED_STATIC_ASSETS],
         "rootStaticFiles": [target for _, target in ROOT_STATIC_FILES],
