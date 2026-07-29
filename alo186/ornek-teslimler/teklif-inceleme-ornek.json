@@ -1,0 +1,38 @@
+{
+  "schema": "alo186.sample-deliverable.v1",
+  "sampleType": "electrical-proposal-scope-review",
+  "fictional": true,
+  "customerClaim": false,
+  "system": "Kurgusal 400 kVA jeneratör ve ATS yenilemesi",
+  "commercialFieldsUsedForTechnicalScore": false,
+  "candidates": ["Teklif A", "Teklif B", "Teklif C"],
+  "scopeMatrix": [
+    {
+      "criterion": "Kalkış yükü ve adım yük hesabı",
+      "A": "included",
+      "B": "unclear",
+      "C": "excluded"
+    },
+    {
+      "criterion": "ATS nötr/RCD topolojisi",
+      "A": "unclear",
+      "B": "included",
+      "C": "unclear"
+    },
+    {
+      "criterion": "Yük testi ve geri dönüş kabulü",
+      "A": "included",
+      "B": "excluded",
+      "C": "unclear"
+    },
+    {
+      "criterion": "As-built, eğitim ve bakım planı",
+      "A": "unclear",
+      "B": "included",
+      "C": "excluded"
+    }
+  ],
+  "sampleQuestion": "ATS nötr anahtarlaması, RCD davranışı ve şebeke–jeneratör geri dönüş testi hangi tek hat ve kabul tutanağıyla doğrulanacak?",
+  "decisionBoundary": "Bu matris kazanan yüklenici veya en ucuz teklif sonucu üretmez; yalnız kapsam boşluklarını görünür kılar.",
+  "disclaimer": "Bütün adaylar ve kapsam durumları kurgusaldır. Resmî proje onayı, yüklenici seçimi veya sözleşme tavsiyesi değildir."
+}

@@ -11,6 +11,7 @@ from inject_article_growth import run as run_article_growth
 from inject_commerce_trust import run as run_commerce_trust
 from inject_handoff_growth import run as run_handoff_growth
 from inject_private_search import run as run_private_search
+from inject_revenue_trust_proof import run as run_revenue_trust_proof
 from normalize_article_followup_paths import run as normalize_article_followup_paths
 from normalize_consolidated_release import run as normalize_consolidated_release
 
@@ -196,6 +197,7 @@ def run(site: Path, base_path: str) -> dict:
     article_journey = run_article_growth(site, base_path)
     followup_paths = normalize_article_followup_paths(site, base_path)
     commerce_trust = run_commerce_trust(site, base_path)
+    revenue_trust_proof = run_revenue_trust_proof(site, base_path)
     return {
         "ok": True,
         "basePath": base_path,
@@ -209,6 +211,7 @@ def run(site: Path, base_path: str) -> dict:
         "articleJourney": article_journey,
         "followupPaths": followup_paths,
         "commerceTrust": commerce_trust,
+        "revenueTrustProof": revenue_trust_proof,
     }
 
 

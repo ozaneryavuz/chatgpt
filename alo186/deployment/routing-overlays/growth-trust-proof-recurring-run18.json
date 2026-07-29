@@ -1,0 +1,21 @@
+{
+  "version": 43,
+  "generatedAt": "2026-07-29",
+  "routes": [
+    {
+      "source": "alo186/gelir-ve-bagimsizlik/index.html",
+      "canonicalPath": "/gelir-ve-bagimsizlik/",
+      "type": "collection"
+    },
+    {
+      "source": "alo186/ornek-teslimler/index.html",
+      "canonicalPath": "/ornek-teslimler/",
+      "type": "collection"
+    },
+    {
+      "source": "alo186/hizmetler/elektrik-surekliligi-izleme/index.html",
+      "canonicalPath": "/hizmetler/elektrik-surekliligi-izleme/",
+      "type": "service"
+    }
+  ]
+}
