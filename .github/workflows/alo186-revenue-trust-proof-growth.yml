@@ -1,0 +1,204 @@
+name: ALO186 gelir şeffaflığı, teslim kanıtı ve tekrarlayan hizmet
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/gelir-ve-bagimsizlik/**'
+      - 'alo186/ornek-teslimler/**'
+      - 'alo186/hizmetler/elektrik-surekliligi-izleme/**'
+      - 'alo186/kurumsal-on-degerlendirme/**'
+      - 'alo186/deployment/inject_revenue_trust_proof.py'
+      - 'alo186/deployment/inject_shortlist_growth.py'
+      - 'alo186/deployment/routing-overlays/growth-trust-proof-recurring-run18.json'
+      - 'alo186/tests/test_revenue_trust_proof_growth.py'
+      - '.github/workflows/alo186-revenue-trust-proof-growth.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/gelir-ve-bagimsizlik/**'
+      - 'alo186/ornek-teslimler/**'
+      - 'alo186/hizmetler/elektrik-surekliligi-izleme/**'
+      - 'alo186/kurumsal-on-degerlendirme/**'
+      - 'alo186/deployment/inject_revenue_trust_proof.py'
+      - 'alo186/deployment/inject_shortlist_growth.py'
+      - 'alo186/deployment/routing-overlays/growth-trust-proof-recurring-run18.json'
+      - 'alo186/tests/test_revenue_trust_proof_growth.py'
+      - '.github/workflows/alo186-revenue-trust-proof-growth.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-revenue-trust-proof-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Gelir, örnek teslim, tekrarlayan hizmet ve fixture sözleşmeleri
+        run: python alo186/tests/test_revenue_trust_proof_growth.py
+
+      - name: JavaScript ve Python sözdizimi
+        run: |
+          node --check alo186/kurumsal-on-degerlendirme/app.js
+          python -m py_compile alo186/deployment/inject_revenue_trust_proof.py
+
+      - name: Ticari güven, içerik niyeti ve cihaz hasarı regresyonları
+        run: |
+          python alo186/tests/test_commercial_service_pages.py
+          python alo186/tests/test_content_intent_consolidation.py
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+          python alo186/tests/guard_commerce_routes_v2.py --source-root .
+
+      - name: Canonical üretim paketini oluştur
+        run: |
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-trust-proof-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-trust-proof-canonical
+
+      - name: Custom-domain büyüme artifactı
+        run: |
+          cp -a /tmp/alo186-trust-proof-canonical /tmp/alo186-trust-proof-custom
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-trust-proof-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-trust-proof-custom \
+            --base-path ''
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-trust-proof-custom \
+            --base-path '' \
+            > /tmp/alo186-trust-proof-custom.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-trust-proof-custom \
+            --base-path ''
+          python alo186/tests/guard_commerce_routes_v2.py \
+            --site /tmp/alo186-trust-proof-custom
+
+      - name: Project-path büyüme artifactı
+        run: |
+          cp -a /tmp/alo186-trust-proof-canonical /tmp/alo186-trust-proof-project
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-trust-proof-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-trust-proof-project \
+            --base-path '/chatgpt'
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-trust-proof-project \
+            --base-path '/chatgpt' \
+            > /tmp/alo186-trust-proof-project.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-trust-proof-project \
+            --base-path '/chatgpt'
+          python alo186/tests/guard_commerce_routes_v2.py \
+            --site /tmp/alo186-trust-proof-project \
+            --base-path '/chatgpt'
+
+      - name: Sitemap, arama, base-path, güven ve tekrar ziyareti doğrula
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          routes = {
+              '/gelir-ve-bagimsizlik/': 'collection',
+              '/ornek-teslimler/': 'collection',
+              '/hizmetler/elektrik-surekliligi-izleme/': 'business',
+          }
+          sample_files = [
+              'otel-sureklilik-ornek.json',
+              'teklif-inceleme-ornek.json',
+              'enerji-fizibilite-ornek.json',
+          ]
+          for root, prefix in [
+              (Path('/tmp/alo186-trust-proof-custom'), ''),
+              (Path('/tmp/alo186-trust-proof-project'), '/chatgpt'),
+          ]:
+              sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
+              release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
+              pages=json.loads((root/'pages-release.json').read_text(encoding='utf-8'))
+              search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
+              route_map={item['canonicalPath'].removeprefix(prefix):item for item in release['routes']}
+              search_map={item['canonicalPath']:item for item in search['entries']}
+
+              for route, bucket in routes.items():
+                  directory=root/route.strip('/')
+                  assert (directory/'index.html').is_file(), directory
+                  assert (directory/'styles.css').is_file(), directory
+                  assert f'https://www.alo186.com{route}' in sitemap
+                  assert route in route_map
+                  assert route in search_map
+                  assert search_map[route]['bucket']==bucket
+                  expected=prefix+route if prefix else route
+                  assert search_map[route]['url']==expected
+                  for forbidden in ['price','stock','rating','seller','warranty','asin','affiliateCommission']:
+                      assert forbidden not in search_map[route]
+
+              for filename in sample_files:
+                  path=root/'ornek-teslimler'/filename
+                  assert path.is_file(), path
+                  payload=json.loads(path.read_text(encoding='utf-8'))
+                  assert payload['fictional'] is True
+                  assert payload['customerClaim'] is False
+
+              meta=release['revenueTrustProofGrowth']
+              pages_meta=pages['revenueTrustProofGrowth']
+              for value in [meta,pages_meta]:
+                  assert value['rawPersonalDataCollected'] is False
+                  assert value['automaticRenewal'] is False
+                  assert value['directStoreLinksAdded']==0
+                  assert value['commercialRankingFieldsUsed']==[]
+              assert meta['targetRouteCount'] >= 9
+
+              for relative in ['index.html','elektrik-portali/index.html']:
+                  html=(root/relative).read_text(encoding='utf-8')
+                  assert 'data-alo186-trust-proof-gateway="true"' in html
+                  for route in routes:
+                      expected=prefix+route if prefix else route
+                      assert expected in html
+
+              commercial=(root/'amazon-elektrik-urunleri/index.html').read_text(encoding='utf-8')
+              service=(root/'hizmetler/otel-elektrik-surekliligi-denetimi/index.html').read_text(encoding='utf-8')
+              for html in [commercial,service]:
+                  assert 'data-alo186-revenue-proof="true"' in html
+                  assert html.index('data-alo186-revenue-proof="true"') < html.index('<footer')
+                  assert (prefix+'/gelir-ve-bagimsizlik/' if prefix else '/gelir-ve-bagimsizlik/') in html
+                  assert (prefix+'/ornek-teslimler/' if prefix else '/ornek-teslimler/') in html
+
+              corporate=(root/'kurumsal-elektrik-surekliligi-on-degerlendirme/index.html').read_text(encoding='utf-8')
+              app=(root/'kurumsal-elektrik-surekliligi-on-degerlendirme/app.js').read_text(encoding='utf-8')
+              assert (prefix+'/hizmetler/elektrik-surekliligi-izleme/' if prefix else '/hizmetler/elektrik-surekliligi-izleme/') in corporate
+              assert 'continuity_monitoring' in app
+              assert 'localStorage' not in app and 'sessionStorage' not in app
+          PY
+
+      - name: Doğrulanmış güven, kanıt ve tekrarlayan hizmet artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-revenue-trust-proof-recurring-pages
+          path: /tmp/alo186-trust-proof-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
