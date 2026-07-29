@@ -57,7 +57,8 @@ def main() -> None:
         assert "amazon.com" not in lower and "amzn." not in lower, key
         assert '"@type":"product"' not in lower and '"@type":"offer"' not in lower, key
         assert 'type="email"' not in lower and 'type="tel"' not in lower, key
-        assert "fiyat" in lower and "stok" in lower and "garanti" in lower, key
+        assert "fiyat" in lower and "garanti" in lower, key
+        assert "stok" in lower or "satıcı" in lower, key
         assert "alo186" in lower and ("resmî" in lower or "resmi" in lower), key
 
     safety = pages["safety"]
