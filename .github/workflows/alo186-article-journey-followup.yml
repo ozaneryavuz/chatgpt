@@ -1,0 +1,241 @@
+name: ALO186 makale yolculuğu ve teknik takip kalite kontrolü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/haberler/**'
+      - 'alo186/hesaplama/teknik-takip-listem/**'
+      - 'alo186/deployment/assets/article-growth.*'
+      - 'alo186/deployment/inject_article_growth.py'
+      - 'alo186/deployment/inject_shortlist_growth.py'
+      - 'alo186/deployment/apply_content_consolidation.py'
+      - 'alo186/deployment/normalize_consolidated_release.py'
+      - 'alo186/deployment/normalize_article_followup_paths.py'
+      - 'alo186/deployment/routing-overlays/**'
+      - 'alo186/tests/test_article_growth.py'
+      - '.github/workflows/alo186-article-journey-followup.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/**'
+      - 'alo186/hesaplama/teknik-takip-listem/**'
+      - 'alo186/deployment/assets/article-growth.*'
+      - 'alo186/deployment/inject_article_growth.py'
+      - 'alo186/deployment/inject_shortlist_growth.py'
+      - 'alo186/deployment/apply_content_consolidation.py'
+      - 'alo186/deployment/normalize_consolidated_release.py'
+      - 'alo186/deployment/normalize_article_followup_paths.py'
+      - 'alo186/deployment/routing-overlays/**'
+      - 'alo186/tests/test_article_growth.py'
+      - '.github/workflows/alo186-article-journey-followup.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-article-journey-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Kaynak, lane, gizlilik ve satın almama sözleşmeleri
+        run: python alo186/tests/test_article_growth.py
+
+      - name: JavaScript ve Python sözdizimi
+        run: |
+          node --check alo186/hesaplama/teknik-takip-listem/app.js
+          node --check alo186/deployment/assets/article-growth.js
+          python -m py_compile alo186/deployment/inject_article_growth.py
+          python -m py_compile alo186/deployment/apply_content_consolidation.py
+          python -m py_compile alo186/deployment/normalize_consolidated_release.py
+          python -m py_compile alo186/deployment/normalize_article_followup_paths.py
+
+      - name: İçerik niyeti, canonical ve cihaz hasarı regresyonları
+        run: |
+          python alo186/tests/test_content_intent_consolidation.py
+          node alo186/tests/test_authority_content.js
+          node alo186/tests/test_release_manifest.js
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Canonical üretim paketini oluştur
+        run: |
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-journey-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-journey-canonical
+
+      - name: Custom-domain makale yolculuğu artifactı
+        run: |
+          cp -a /tmp/alo186-journey-canonical /tmp/alo186-journey-custom
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-journey-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-journey-custom \
+            --base-path ''
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-journey-custom \
+            --base-path '' \
+            > /tmp/alo186-journey-custom.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-journey-custom \
+            --base-path ''
+
+      - name: Project-path Pages temel paketini hazırla
+        run: |
+          cp -a /tmp/alo186-journey-canonical /tmp/alo186-journey-project
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-journey-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-journey-project \
+            --base-path '/chatgpt'
+
+      - name: Project-path büyüme ve makale yolculuğu enjeksiyonu
+        shell: bash
+        run: |
+          set -euo pipefail
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-journey-project \
+            --base-path '/chatgpt' \
+            | tee /tmp/alo186-journey-project.json
+
+      - name: Project-path smoke raporunu üret
+        shell: bash
+        run: |
+          set +e
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-journey-project \
+            --base-path '/chatgpt' \
+            > /tmp/alo186-journey-project-smoke.log 2>&1
+          status=$?
+          echo "$status" > /tmp/alo186-journey-project-smoke.status
+          cat /tmp/alo186-journey-project-smoke.log
+          exit 0
+
+      - name: Project-path smoke tanı artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-article-project-smoke-diagnostic
+          path: |
+            /tmp/alo186-journey-project-smoke.log
+            /tmp/alo186-journey-project-smoke.status
+            /tmp/alo186-journey-project.json
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Project-path smoke sonucunu zorunlu kıl
+        shell: bash
+        run: test "$(cat /tmp/alo186-journey-project-smoke.status)" = "0"
+
+      - name: Makale, envanter, takip, affiliate ve base-path sözleşmeleri
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          samples = {
+              '/haberler/elektrik-kesintisi-tazminati-nasil-alinir': 'official',
+              '/haberler/power-station-gunes-paneli-nasil-secilir': 'consumer',
+              '/haberler/kacak-akim-rolesi-tip-a-tip-ac-farki': 'professional',
+          }
+          for root, prefix in [
+              (Path('/tmp/alo186-journey-custom'), ''),
+              (Path('/tmp/alo186-journey-project'), '/chatgpt'),
+          ]:
+              release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
+              pages=json.loads((root/'pages-release.json').read_text(encoding='utf-8'))
+              meta=release['articleJourney']
+              articles=[route for route in release['routes'] if route.get('type')=='article']
+              assert meta['articleCount']==len(articles)
+              assert sum(meta['laneCounts'].values())==len(articles)
+              assert meta['directAffiliateLinksAdded']==0
+              assert meta['rawNotesStored'] is False
+              assert pages['articleJourney']['followupRoute']==(prefix+'/hesaplama/teknik-takip-listem/' if prefix else '/hesaplama/teknik-takip-listem/')
+
+              for route in articles:
+                  canonical=route['canonicalPath']
+                  if prefix and canonical.startswith(prefix+'/'):
+                      canonical=canonical[len(prefix):]
+                  target=root/canonical.strip('/')/'index.html'
+                  text=target.read_text(encoding='utf-8')
+                  assert text.count('data-alo186-article-next-step="true"')==1, canonical
+                  assert (prefix+'/assets/article-growth.css' if prefix else '/assets/article-growth.css') in text
+                  assert (prefix+'/assets/article-growth.js' if prefix else '/assets/article-growth.js') in text
+                  expected_data_path=(prefix+canonical if prefix else canonical)
+                  assert f'data-path="{expected_data_path}"' in text
+                  panel=text.split('data-alo186-article-next-step="true"',1)[1].split('</section>',1)[0]
+                  assert 'amazon.' not in panel.lower()
+                  assert 'Takip listeme ekle' in panel
+                  assert 'mevcut sistem yeterli' in panel.casefold()
+
+              for canonical, lane in samples.items():
+                  text=(root/canonical.strip('/')/'index.html').read_text(encoding='utf-8')
+                  assert f'data-lane="{lane}"' in text
+                  panel=text.split('data-alo186-article-next-step="true"',1)[1].split('</section>',1)[0]
+                  if lane=='consumer':
+                      assert 'satış ortaklığı bağlantıları içerebilir' in panel
+                      assert (prefix+'/akilli-urun-secimi' if prefix else '/akilli-urun-secimi') in panel
+                  else:
+                      assert 'affiliate bağlantısı' in panel
+                      assert (prefix+'/akilli-urun-secimi' if prefix else '/akilli-urun-secimi') not in panel
+
+              portal=(root/'elektrik-portali/index.html').read_text(encoding='utf-8')
+              gateway=(root/'index.html').read_text(encoding='utf-8')
+              assert 'data-alo186-inventory-strip="true"' in portal
+              assert f'<strong>{len(articles)}</strong><span>aktif canonical teknik rehber' in portal
+              assert 'Sayılar yayın envanterinden otomatik hesaplanır' in portal
+              assert 'data-alo186-followup-entry-card="true"' in portal
+              assert 'data-alo186-followup-entry-card="true"' in gateway
+
+              follow=root/'hesaplama/teknik-takip-listem'
+              for relative in ['index.html','styles.css','app.js']:
+                  assert (follow/relative).is_file()
+              follow_html=(follow/'index.html').read_text(encoding='utf-8')
+              follow_js=(follow/'app.js').read_text(encoding='utf-8')
+              assert 'yalnız bu tarayıcıda' in follow_html
+              assert 'containsPersonalData: false' in follow_js
+              assert 'amazon.com' not in follow_html.lower()
+              assert 'type="email"' not in follow_html.lower()
+
+              sw=(root/'sw.js').read_text(encoding='utf-8')
+              for route in ['/hesaplama/teknik-takip-listem/','/assets/article-growth.css','/assets/article-growth.js']:
+                  expected=prefix+route if prefix else route
+                  assert expected in sw, expected
+              manifest=json.loads((root/'manifest.webmanifest').read_text(encoding='utf-8'))
+              expected_follow=prefix+'/hesaplama/teknik-takip-listem/' if prefix else '/hesaplama/teknik-takip-listem/'
+              assert any(item.get('url')==expected_follow for item in manifest.get('shortcuts',[]))
+
+              checksums={line.split('  ',1)[1]:line.split('  ',1)[0] for line in (root/'checksums.sha256').read_text().splitlines()}
+              for relative in ['assets/article-growth.css','assets/article-growth.js','hesaplama/teknik-takip-listem/index.html']:
+                  assert hashlib.sha256((root/relative).read_bytes()).hexdigest()==checksums[relative]
+          PY
+
+      - name: Doğrulanmış makale yolculuğu artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-article-journey-followup-pages
+          path: /tmp/alo186-journey-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
