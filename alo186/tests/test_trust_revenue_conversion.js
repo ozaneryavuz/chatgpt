@@ -10,7 +10,7 @@ const catalog = require(path.join(productRoot, 'catalog.js'));
 const conversion = require(path.join(productRoot, 'conversion-growth-core.js'));
 const retention = require(path.join(productRoot, 'journey-retention-core.js'));
 
-assert.equal(catalog.categories.length, 14, 'Ürün merkezi 14 kullanıcı niyetini korumalı.');
+assert.equal(catalog.categories.length, 16, 'Ürün merkezi 16 kullanıcı niyetini korumalı.');
 const coCategory = catalog.getCategory('co_alarm');
 assert(coCategory, 'CO alarmı güvenlik niyeti katalogda bulunmalı.');
 assert.equal(coCategory.affiliatePolicy, 'after_tool');
@@ -20,6 +20,11 @@ assert(extensionCategory, 'Uzatma kablosu güvenlik niyeti katalogda bulunmalı.
 assert.equal(extensionCategory.affiliatePolicy, 'after_tool');
 assert.match(extensionCategory.nextStepUrl, /uzatma-kablosu-kablo-makarasi-uygunluk/);
 assert.equal(catalog.productsFor('extension_cord').length, 0, 'Uzatma kablosunda doğrulanmış ürün olmadan doğrudan kart açılamaz.');
+const chargerCategory = catalog.getCategory('usb_c_charger');
+const cableCategory = catalog.getCategory('usb_c_cable');
+assert(chargerCategory&&cableCategory, 'USB-C şarj cihazı ve kablo niyetleri katalogda bulunmalı.');
+assert.equal(chargerCategory.affiliatePolicy, 'verified_direct');
+assert.equal(cableCategory.affiliatePolicy, 'verified_direct');
 
 const evQuery = conversion.buildQuery('ev_cable', { current: '32', phase: 'three', length: '7_5' });
 assert.match(evQuery, /Type 2/i);
@@ -117,4 +122,4 @@ assert.deepEqual(cleanEvent, { category: 'ev_cable', status: 'opened', placement
 assert.equal(conversion.hasForbiddenEventData({ category: 'ev_cable', email: 'blocked@example.com' }), true);
 assert.equal(conversion.hasForbiddenEventData({ category: 'ev_cable', status: 'opened' }), false);
 
-console.log('ALO186 güvenli gelir dönüşümü: 14 niyet, uzatma kablosu/CO güvenlik kapıları, teknik arama, satın almama, profesyonel rota, ICS ve PII korumaları başarılı.');
+console.log('ALO186 güvenli gelir dönüşümü: 16 niyet, USB-C doğrudan ürünleri, uzatma kablosu/CO güvenlik kapıları, teknik arama, satın almama, profesyonel rota, ICS ve PII korumaları başarılı.');

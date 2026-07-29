@@ -73,30 +73,38 @@
   function productPageUrl(product){return `${siteOrigin}/akilli-urun-secimi?kategori=${encodeURIComponent(product.category)}&urun=${encodeURIComponent(product.id)}`;}
   function brandId(brand){return `${siteOrigin}/knowledge-graph/brand/${slug(brand)}#brand`;}
   function categoryId(category){return `${siteOrigin}/knowledge-graph/category/${encodeURIComponent(category)}#category`;}
-  function additionalProperties(product){return [...Object.entries(product.attributes||{}).filter(([,value])=>value!==null&&value!==undefined).map(([name,value])=>({'@type':'PropertyValue',name,value})),{'@type':'PropertyValue',name:'Teknik doğrulama tarihi',value:product.verifiedAt},{'@type':'PropertyValue',name:'Ticari ilişki',value:'Amazon satış ortaklığı bağlantısı'}];}
-  function productNode(product){
+  function additionalProperties(product,publicDirect){return [...Object.entries(product.attributes||{}).filter(([,value])=>value!==null&&value!==undefined).map(([name,value])=>({'@type':'PropertyValue',name,value})),{'@type':'PropertyValue',name:'Teknik doğrulama tarihi',value:product.verifiedAt},{'@type':'PropertyValue',name:'Ticari ilişki',value:publicDirect?'Doğrulanmış Amazon satış ortaklığı bağlantısı':'Teknik uygunluk kapısından sonra açılan Amazon satış ortaklığı yolu'}];}
+  function productNode(product,options={}){
+    const now=options.now||new Date();
+    const publicDirect=options.publicDirect===undefined?publicAffiliateEligible(product,{now}):Boolean(options.publicDirect);
+    const category=getCategory(product.category);
     const identifiers=[{'@type':'PropertyValue',propertyID:'ASIN',value:product.asin}];
     if(product.mpn)identifiers.push({'@type':'PropertyValue',propertyID:'MPN',value:product.mpn});
     return {
-      '@type':'Product','@id':productId(product),name:product.name,url:productPageUrl(product),sameAs:product.url,sku:product.id,identifier:identifiers,
-      ...(product.mpn?{mpn:product.mpn}:{}),brand:{'@id':brandId(product.brand)},category:{'@id':categoryId(product.category)},
-      description:product.sourceNote,dateModified:product.verifiedAt,additionalProperty:additionalProperties(product),
+      '@type':'Product','@id':productId(product),name:product.name,url:productPageUrl(product),sku:product.id,identifier:identifiers,
+      ...(product.mpn?{mpn:product.mpn}:{}),...(publicDirect?{sameAs:product.url}:{}),brand:{'@id':brandId(product.brand)},category:{'@id':categoryId(product.category)},
+      description:product.sourceNote,dateModified:product.verifiedAt,additionalProperty:additionalProperties(product,publicDirect),
+      ...(publicDirect?{}:{potentialAction:{'@type':'ViewAction',target:category&&category.nextStepUrl?category.nextStepUrl:productPageUrl(product),name:category&&category.nextStepLabel?category.nextStepLabel:'Önce teknik uygunluğu doğrula'}}),
       subjectOf:{'@id':`${productPageUrl(product)}#webpage`},mainEntityOfPage:{'@id':`${productPageUrl(product)}#webpage`}
     };
   }
   function catalogHealth(options={}){const now=options.now||new Date();const fresh=products.filter(product=>product.status==='verified_listing'&&verificationStatus(product,now).fresh);const publicProducts=fresh.filter(product=>publicAffiliateEligible(product,{now}));const checked=dateOnly(verifiedAt);const reviewBy=checked?new Date(checked.getTime()+30*86400000).toISOString().slice(0,10):null;const staleAfter=checked?new Date(checked.getTime()+(verificationMaxAgeDays+1)*86400000).toISOString().slice(0,10):null;return {verifiedAt,verificationMaxAgeDays,totalVerified:fresh.length,publicDirect:publicProducts.length,gatedVerified:fresh.length-publicProducts.length,reviewBy,staleAfter};}
   function knowledgeGraph(options={}){
     const now=options.now||new Date();
-    const publicProducts=products.filter(product=>publicAffiliateEligible(product,{now}));
-    const uniqueBrands=[...new Set(publicProducts.map(product=>product.brand))].sort((a,b)=>a.localeCompare(b,'tr'));
+    const verifiedProducts=products.filter(product=>product.status==='verified_listing'&&verificationStatus(product,now).fresh);
+    const publicProducts=verifiedProducts.filter(product=>publicAffiliateEligible(product,{now}));
+    const gatedProducts=verifiedProducts.filter(product=>!publicAffiliateEligible(product,{now,freshOnly:false}));
+    const uniqueBrands=[...new Set(verifiedProducts.map(product=>product.brand))].sort((a,b)=>a.localeCompare(b,'tr'));
     const brands=uniqueBrands.map(name=>({'@type':'Brand','@id':brandId(name),name}));
     const categoryNodes=categories.map(category=>({'@type':'DefinedTerm','@id':categoryId(category.id),termCode:category.id,name:category.name,description:category.description,inDefinedTermSet:{'@id':`${siteOrigin}/knowledge-graph/electrical-product-categories#termset`}}));
-    const itemList={'@type':'ItemList','@id':`${siteOrigin}/akilli-urun-secimi#verified-products`,name:'ALO186 teknik kapısı tamamlanmış affiliate ürünleri',numberOfItems:publicProducts.length,itemListElement:publicProducts.map((product,index)=>({'@type':'ListItem',position:index+1,item:{'@id':productId(product)}}))};
+    const allList={'@type':'ItemList','@id':`${siteOrigin}/akilli-urun-secimi#verified-products`,name:'ALO186 doğrulanmış affiliate ürün bilgi grafiği',numberOfItems:verifiedProducts.length,itemListElement:verifiedProducts.map((product,index)=>({'@type':'ListItem',position:index+1,item:{'@id':productId(product)}}))};
+    const directList={'@type':'ItemList','@id':`${siteOrigin}/akilli-urun-secimi#direct-affiliate-products`,name:'ALO186 doğrudan affiliate uygun ürünleri',numberOfItems:publicProducts.length,itemListElement:publicProducts.map((product,index)=>({'@type':'ListItem',position:index+1,item:{'@id':productId(product)}}))};
+    const gatedList={'@type':'ItemList','@id':`${siteOrigin}/akilli-urun-secimi#tool-gated-products`,name:'ALO186 teknik uygunluk kapılı affiliate ürünleri',numberOfItems:gatedProducts.length,itemListElement:gatedProducts.map((product,index)=>({'@type':'ListItem',position:index+1,item:{'@id':productId(product)}}))};
     const graph=[
       {'@type':'Organization','@id':`${siteOrigin}/#organization`,name:'ALO186',url:`${siteOrigin}/`,description:'Bağımsız elektrik bilgi ve ürün uygunluk platformu.'},
       {'@type':'WebSite','@id':`${siteOrigin}/#website`,url:`${siteOrigin}/`,name:'ALO186',publisher:{'@id':`${siteOrigin}/#organization`}},
       {'@type':'DefinedTermSet','@id':`${siteOrigin}/knowledge-graph/electrical-product-categories#termset`,name:'ALO186 elektrik ürün kategorileri',hasDefinedTerm:categoryNodes.map(node=>({'@id':node['@id']}))},
-      itemList,...categoryNodes,...brands,...publicProducts.map(productNode)
+      allList,directList,gatedList,...categoryNodes,...brands,...verifiedProducts.map(product=>productNode(product,{now,publicDirect:publicAffiliateEligible(product,{now})}))
     ];
     return {'@context':'https://schema.org','@graph':graph};
   }

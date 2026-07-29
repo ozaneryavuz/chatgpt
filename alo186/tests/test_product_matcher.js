@@ -3,8 +3,10 @@ const catalog=require('../urun-eslestirme/catalog.js');
 const matcher=require('../urun-eslestirme/matcher-core.js');
 
 assert.strictEqual(catalog.affiliateTag,'alo186rehber-21');
-assert.strictEqual(catalog.categories.length,14,'On dört ihtiyaç kategorisi bulunmalı.');
+assert.strictEqual(catalog.categories.length,16,'On altı ihtiyaç kategorisi bulunmalı.');
 assert(catalog.productsFor('powerbank').length>=3,'Powerbank kataloğunda en az üç ürün olmalı.');
+assert(catalog.productsFor('usb_c_charger').length>=1,'USB-C şarj cihazı kataloğunda doğrulanmış ürün olmalı.');
+assert(catalog.productsFor('usb_c_cable').length>=1,'USB-C kablo kataloğunda doğrulanmış ürün olmalı.');
 assert(catalog.productsFor('surge_strip').length>=3,'Grup priz kataloğunda en az üç doğrulanmış ürün korunmalı.');
 for(const category of ['generator','inverter','smart_plug','ev_cable','ups_battery','smoke_alarm','co_alarm','extension_cord'])assert.strictEqual(catalog.productsFor(category).length,0,`${category} doğrulanmamış ürün kartı taşımamalı.`);
 
@@ -56,4 +58,4 @@ for(const[category,url]of Object.entries(gated)){
 result=matcher.match('emergency_light',{});
 assert.strictEqual(result.professionalSelectionRequired,false);
 assert.throws(()=>matcher.match('olmayan-kategori',{}),/Ürün kategorisi bulunamadı/);
-console.log('Ürün kataloğu ve eşleştirme testleri: 14 kategori, uzatma kablosu ve güvenli teknik kapılar başarılı.');
+console.log('Ürün kataloğu ve eşleştirme testleri: 16 kategori, USB-C ürünleri, uzatma kablosu ve güvenli teknik kapılar başarılı.');
