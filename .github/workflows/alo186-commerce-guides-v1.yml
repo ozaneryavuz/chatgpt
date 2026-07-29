@@ -1,0 +1,182 @@
+name: ALO186 kaliteli ticari ürün rehberleri v1
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/urun-rehberleri/**'
+      - 'alo186/deployment/generate_commerce_guides.py'
+      - 'alo186/deployment/build_static_site.py'
+      - 'alo186/deployment/inject_private_search.py'
+      - 'alo186/deployment/routing-overlays/commerce-guides-run1.json'
+      - 'alo186/tests/test_commerce_guides_v1.py'
+      - '.github/workflows/alo186-commerce-guides-v1.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/urun-rehberleri/**'
+      - 'alo186/deployment/generate_commerce_guides.py'
+      - 'alo186/deployment/build_static_site.py'
+      - 'alo186/deployment/inject_private_search.py'
+      - 'alo186/deployment/routing-overlays/commerce-guides-run1.json'
+      - 'alo186/tests/test_commerce_guides_v1.py'
+      - '.github/workflows/alo186-commerce-guides-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-commerce-guides-v1-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Ticari sayfa veri modeli, içerik kalitesi ve güven kapıları
+        run: python alo186/tests/test_commerce_guides_v1.py
+
+      - name: Generator ve istemci JavaScript sözdizimi
+        run: |
+          python -m py_compile \
+            alo186/deployment/generate_commerce_guides.py \
+            alo186/deployment/build_static_site.py \
+            alo186/deployment/inject_private_search.py \
+            alo186/tests/test_commerce_guides_v1.py
+          node --check alo186/urun-rehberleri/commerce-guide.js
+
+      - name: İçerik niyeti, canonical ve hukukî süre regresyonları
+        run: |
+          python alo186/tests/test_content_intent_consolidation.py
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+          node alo186/arama/test.js
+          python alo186/tests/test_private_technical_search.py
+
+      - name: Canonical production paketini oluştur
+        run: |
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-commerce-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-commerce-canonical
+
+      - name: Custom-domain Pages artifactı
+        run: |
+          cp -a /tmp/alo186-commerce-canonical /tmp/alo186-commerce-custom
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-commerce-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-commerce-custom \
+            --base-path ''
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-commerce-custom \
+            --base-path '' \
+            > /tmp/alo186-commerce-custom-growth.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-commerce-custom \
+            --base-path ''
+
+      - name: Project-path Pages artifactı
+        run: |
+          cp -a /tmp/alo186-commerce-canonical /tmp/alo186-commerce-project
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-commerce-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-commerce-project \
+            --base-path '/chatgpt'
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-commerce-project \
+            --base-path '/chatgpt' \
+            > /tmp/alo186-commerce-project-growth.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-commerce-project \
+            --base-path '/chatgpt'
+
+      - name: Canonical, base-path, sitemap, search ve affiliate kabulü
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from urllib.parse import urlsplit
+          import re
+
+          routes = [
+              '/urun-rehberleri/',
+              '/urun-rehberleri/powerbank-usb-c-pd',
+              '/urun-rehberleri/akim-korumali-grup-priz',
+              '/urun-rehberleri/modem-ont-mini-ups',
+              '/urun-rehberleri/tasinabilir-guc-istasyonu',
+              '/urun-rehberleri/sarjli-acil-aydinlatma',
+              '/urun-rehberleri/fotoelektrik-duman-alarmi',
+              '/urun-rehberleri/akilli-priz-enerji-olcer',
+              '/urun-rehberleri/ges-malzemeleri',
+          ]
+          for root, prefix in [
+              (Path('/tmp/alo186-commerce-custom'), ''),
+              (Path('/tmp/alo186-commerce-project'), '/chatgpt'),
+          ]:
+              release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
+              pages=json.loads((root/'pages-release.json').read_text(encoding='utf-8'))
+              search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
+              commerce=json.loads((root/'urun-rehberleri/commerce-release.json').read_text(encoding='utf-8'))
+              assert release['commerceGuideCount'] == 8
+              assert release['commerceCollectionCount'] == 1
+              assert commerce['guideCount'] == 8
+              assert commerce['affiliateEnabledCount'] == 7
+              assert commerce['professionalOnlyCount'] == 1
+              assert pages['routeCount'] >= release['routeCount']
+              by_path={entry['canonicalPath']: entry for entry in search['entries']}
+              for route in routes:
+                  page=root/route.strip('/')/'index.html'
+                  assert page.is_file(), page
+                  html=page.read_text(encoding='utf-8')
+                  assert f'https://www.alo186.com{route}' in html
+                  assert f'https://www.alo186.com{route}' in (root/'sitemap.xml').read_text(encoding='utf-8')
+                  assert route in by_path
+                  expected=prefix+route if prefix else route
+                  assert by_path[route]['url'] == expected
+                  assert by_path[route]['bucket'] == 'collection'
+                  assert 'price' not in by_path[route] and 'stock' not in by_path[route] and 'rating' not in by_path[route]
+              for route in routes[1:-1]:
+                  html=(root/route.strip('/')/'index.html').read_text(encoding='utf-8')
+                  links=re.findall(r'<a\b[^>]*href="([^"]*amazon\.com\.tr[^"]*)"[^>]*>', html, re.I)
+                  assert len(links) == 1, (route, links)
+                  assert 'tag=alo186hazirlik-21' in links[0]
+                  assert 'data-alo186-affiliate-gate="qualified"' in html
+                  assert 'rel="sponsored nofollow noopener"' in html
+              ges=(root/'urun-rehberleri/ges-malzemeleri/index.html').read_text(encoding='utf-8')
+              assert 'amazon.com.tr' not in ges.lower()
+              assert 'data-affiliate-policy="professional_only"' in ges
+              product=(root/'akilli-urun-secimi/index.html').read_text(encoding='utf-8')
+              collection_url=prefix+'/urun-rehberleri/' if prefix else '/urun-rehberleri/'
+              assert collection_url in product
+              assert 'amazon-elektrik-urunleri' not in product
+          PY
+
+      - name: Kaliteli ticari Pages artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-commerce-guides-v1-pages
+          path: /tmp/alo186-commerce-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
