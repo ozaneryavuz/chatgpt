@@ -19,17 +19,12 @@
   const verificationMaxAgeDays=45;
   const siteOrigin='https://www.alo186.com';
 
-  function amazonProductUrl(asin){
-    const base=`https://www.amazon.com.tr/dp/${encodeURIComponent(asin)}`;
-    return affiliateTag?`${base}?tag=${encodeURIComponent(affiliateTag)}`:base;
-  }
-  function amazonSearchUrl(query){
-    const base=`https://www.amazon.com.tr/s?k=${encodeURIComponent(query)}`;
-    return affiliateTag?`${base}&tag=${encodeURIComponent(affiliateTag)}`:base;
-  }
+  function amazonProductUrl(asin){const base=`https://www.amazon.com.tr/dp/${encodeURIComponent(asin)}`;return affiliateTag?`${base}?tag=${encodeURIComponent(affiliateTag)}`:base;}
+  function amazonSearchUrl(query){const base=`https://www.amazon.com.tr/s?k=${encodeURIComponent(query)}`;return affiliateTag?`${base}&tag=${encodeURIComponent(affiliateTag)}`:base;}
 
   const categories=[
     {id:'powerbank',name:'Telefon ve mobil cihaz için powerbank',mode:'direct',risk:'consumer',affiliatePolicy:'verified_direct',description:'Kapasite, USB-C çıkış gücü ve kablosuz şarj ihtiyacına göre ürün sayfası teknik verilerini karşılaştırır.',searchQuery:'USB C PD powerbank 20000 mAh dijital ekran'},
+    {id:'usb_c_cable',name:'USB-C hızlı şarj kablosu',mode:'direct',risk:'consumer',affiliatePolicy:'verified_direct',description:'Kablo uzunluğu, beyan edilen güç, konnektör tipi ve cihaz uyumu birlikte değerlendirilir; kablo tek başına hızlı şarjı garanti etmez.',searchQuery:'USB C to USB C 100W şarj kablosu'},
     {id:'surge_strip',name:'Akım korumalı grup priz',mode:'guide',risk:'consumer',affiliatePolicy:'after_tool',nextStepUrl:'https://www.alo186.com/hesaplama/akim-korumali-grup-priz-uygunluk/',nextStepLabel:'Önce yük, priz, joule ve topraklama uygunluğunu test et',description:'Toplam sürekli/tepe yük, etiket amperi ve wattı, joule, priz sayısı, koruma göstergesi, bağlantı ve işlevsel topraklama doğrulanmadan ürün kartı açılmaz. Pano tipi SPD ve tesisat korumasının yerine geçmez.',searchQuery:'akım korumalı grup priz joule'},
     {id:'mini_ups',name:'Modem ve fiber ONT için mini UPS',mode:'guide',risk:'compatibility',affiliatePolicy:'after_tool',nextStepUrl:'https://www.alo186.com/hesaplama/modem-internet-yedekleme/',nextStepLabel:'Önce modem ve ONT hesabını yap',description:'Voltaj, polarite, jak ölçüsü, toplam watt ve geçiş davranışı doğrulanmadan ürün seçilmemelidir.',searchQuery:'modem mini UPS 12V 9V 5V'},
     {id:'emergency_light',name:'Şarjlı acil aydınlatma',mode:'guide',risk:'consumer',affiliatePolicy:'after_tool',nextStepUrl:'https://www.alo186.com/hesaplama/acil-aydinlatma-sure-uygunluk/',nextStepLabel:'Önce lümen, adet ve çalışma süresini test et',description:'Alan, aynı moddaki lümen ve çalışma süresi, otomatik yanma, fiziksel düğme, pil göstergesi ve kullanım ortamı doğrulanmadan ürün seçilmemelidir.',searchQuery:'şarjlı acil durum lambası kamp lambası'},
@@ -48,7 +43,8 @@
   const products=[
     {id:'anker-prime-a1336',category:'powerbank',asin:'B0BYNZXFM2',name:'Anker Prime A1336 20.000 mAh 200 W',brand:'Anker',status:'verified_listing',verifiedAt,attributes:{capacityMah:20000,energyWh:72,maxOutputW:200,wireless:false,usbCPorts:2,usbAPorts:1,display:true},strengths:['Yüksek USB-C çıkışı','Dijital ekran','20.000 mAh / 72 Wh'],limits:['544 g ağırlık','Samsung SFC 2.0 desteği ürün sayfasında sınırlı belirtilmiş'],sourceNote:'ASIN ve teknik ürün sayfası alanları kontrol edildi; fiyat ve stok ALO186 tarafından gösterilmez.',url:amazonProductUrl('B0BYNZXFM2')},
     {id:'xiaomi-wireless-10000',category:'powerbank',asin:'B09TWRHGWV',name:'Xiaomi 10 W Wireless Power Bank 10.000',brand:'Xiaomi',status:'verified_listing',verifiedAt,attributes:{capacityMah:10000,energyWh:null,maxOutputW:10,wireless:true,usbCPorts:1,usbAPorts:null,display:false},strengths:['Kablosuz şarj','10.000 mAh','Düşük akım modu'],limits:['Yüksek güçlü dizüstü ihtiyacı için uygun kabul edilmemeli','Kablolu maksimum çıkış üründe yeniden doğrulanmalı'],sourceNote:'ASIN, 10.000 mAh ve 10 W kablosuz özellikleri ürün sayfasından kontrol edildi.',url:amazonProductUrl('B09TWRHGWV')},
-    {id:'samsung-eb-u2510x',category:'powerbank',asin:'B0CVGVG7NW',name:'Samsung EB-U2510X 10.000 mAh Kablosuz Powerbank',brand:'Samsung',status:'verified_listing',verifiedAt,attributes:{capacityMah:10000,energyWh:null,maxOutputW:null,wireless:true,usbCPorts:null,usbAPorts:null,display:false},strengths:['Kablosuz kullanım','10.000 mAh','Kompakt sınıf'],limits:['Çıkış gücü ve port sayısı Amazon ürün sayfasında satın alma öncesi yeniden doğrulanmalı'],sourceNote:'ASIN, model ve kapasite ürün sayfasından kontrol edildi; eksik teknik alanlar bilinmiyor olarak tutuldu.',url:amazonProductUrl('B0CVGVG7NW')},
+    {id:'samsung-eb-u2510x',category:'powerbank',asin:'B0CVGVG7NW',mpn:'EB-U2510X',name:'Samsung EB-U2510X 10.000 mAh Kablosuz Powerbank',brand:'Samsung',status:'verified_listing',verifiedAt,attributes:{capacityMah:10000,energyWh:null,maxOutputW:null,wireless:true,usbCPorts:2,usbAPorts:0,display:false},strengths:['Kablosuz kullanım','10.000 mAh','İki bağlantı noktası'],limits:['Maksimum çıkış gücü satın alma öncesi ürün sayfasında yeniden doğrulanmalı'],sourceNote:'ASIN, model, 10.000 mAh kapasite ve iki bağlantı noktası ürün sayfasından kontrol edildi; eksik güç alanı null tutuldu.',url:amazonProductUrl('B0CVGVG7NW')},
+    {id:'baseus-crystal-shine-100w-2m',category:'usb_c_cable',asin:'B0B46PHW14',mpn:'CAJY000701',name:'Baseus Crystal Shine USB-C 100 W 2 m Şarj Kablosu',brand:'Baseus',status:'verified_listing',verifiedAt,attributes:{maxPowerW:100,cableM:2,connectorA:'USB-C',connectorB:'USB-C',dataMbps:480},strengths:['100 W beyanı','2 m uzunluk','USB-C–USB-C bağlantı'],limits:['Gerçek şarj gücü adaptör, cihaz ve protokolün ortak sınırıyla belirlenir','E-marker ve tam PD profili satın alma öncesi ürün sayfasında yeniden doğrulanmalı'],sourceNote:'ASIN, model, 100 W, 2 m ve USB-C bağlantı bilgileri ürün sayfasından doğrulandı; fiyat, stok ve puan yayımlanmaz.',url:amazonProductUrl('B0B46PHW14')},
     {id:'tuncmatik-tsk6136',category:'surge_strip',asin:'B07CST4766',name:'Tunçmatik TSK6136 PowerSurge 5 Priz 1050 J',brand:'Tunçmatik',status:'verified_listing',verifiedAt,attributes:{outlets:5,joules:1050,maxCurrentA:10,maxPowerW:null,usbPorts:0,cableM:1.5},strengths:['1050 joule','5 çocuk emniyetli priz','1,5 m kablo'],limits:['10 A nominal akım','Pano tipi SPD ve uygun topraklamanın yerine geçmez'],sourceNote:'ASIN, 1050 J, 8000 A tepe, 10 A nominal ve 5 priz bilgileri ürün sayfasından kontrol edildi.',url:amazonProductUrl('B07CST4766')},
     {id:'viko-multilet-6',category:'surge_strip',asin:'B08L9KVRP1',name:'Viko Multilet Şok Korumalı 6’lı Grup Priz',brand:'Viko',status:'verified_listing',verifiedAt,attributes:{outlets:6,joules:282,maxCurrentA:16,maxPowerW:3500,usbPorts:0,cableM:1.5},strengths:['6 priz','16 A / 3500 W etiket bilgisi','Çocuk koruma'],limits:['282 joule seviyesi','Pano tipi koruma yerine kullanılamaz'],sourceNote:'ASIN, 6 priz, 16 A, 3500 W, 282 J ve 1,7 kV koruma seviyesi ürün açıklamasından kontrol edildi.',url:amazonProductUrl('B08L9KVRP1')},
     {id:'tuncmatik-tsk5015',category:'surge_strip',asin:'B08KW6X13Y',name:'Tunçmatik PowerSurge 5 Priz + USB TSK5015',brand:'Tunçmatik',status:'verified_listing',verifiedAt,attributes:{outlets:5,joules:null,maxCurrentA:null,maxPowerW:null,usbPorts:2,cableM:null},strengths:['5 priz','USB çıkışları','Elektronik cihaz kullanım senaryosu'],limits:['Joule ve nominal akım satın alma öncesi ürün etiketinden doğrulanmalı'],sourceNote:'ASIN, model, 5 priz ve USB özellikleri ürün sayfasından kontrol edildi; bilinmeyen alanlar puanda cezalandırılır.',url:amazonProductUrl('B08KW6X13Y')},
@@ -69,30 +65,35 @@
   function productPageUrl(product){return `${siteOrigin}/akilli-urun-secimi?kategori=${encodeURIComponent(product.category)}&urun=${encodeURIComponent(product.id)}`;}
   function brandId(brand){return `${siteOrigin}/knowledge-graph/brand/${slug(brand)}#brand`;}
   function categoryId(category){return `${siteOrigin}/knowledge-graph/category/${encodeURIComponent(category)}#category`;}
-  function additionalProperties(product){return [...Object.entries(product.attributes||{}).filter(([,value])=>value!==null&&value!==undefined).map(([name,value])=>({'@type':'PropertyValue',name,value})),{'@type':'PropertyValue',name:'Teknik doğrulama tarihi',value:product.verifiedAt},{'@type':'PropertyValue',name:'Ticari ilişki',value:'Amazon satış ortaklığı bağlantısı'}];}
-  function productNode(product){
+  function additionalProperties(product,publicDirect){return [...Object.entries(product.attributes||{}).filter(([,value])=>value!==null&&value!==undefined).map(([name,value])=>({'@type':'PropertyValue',name,value})),{'@type':'PropertyValue',name:'Teknik doğrulama tarihi',value:product.verifiedAt},{'@type':'PropertyValue',name:'Ticari ilişki',value:publicDirect?'Doğrulanmış Amazon satış ortaklığı bağlantısı':'Teknik uygunluk kapısından sonra açılan Amazon satış ortaklığı yolu'}];}
+  function productNode(product,options={}){
+    const publicDirect=options.publicDirect===undefined?publicAffiliateEligible(product,{now:options.now||new Date()}):Boolean(options.publicDirect);
+    const category=getCategory(product.category);
     const identifiers=[{'@type':'PropertyValue',propertyID:'ASIN',value:product.asin}];
     if(product.mpn)identifiers.push({'@type':'PropertyValue',propertyID:'MPN',value:product.mpn});
-    return {
-      '@type':'Product','@id':productId(product),name:product.name,url:productPageUrl(product),sameAs:product.url,sku:product.id,identifier:identifiers,
-      ...(product.mpn?{mpn:product.mpn}:{}),brand:{'@id':brandId(product.brand)},category:{'@id':categoryId(product.category)},
-      description:product.sourceNote,dateModified:product.verifiedAt,additionalProperty:additionalProperties(product),
-      subjectOf:{'@id':`${productPageUrl(product)}#webpage`},mainEntityOfPage:{'@id':`${productPageUrl(product)}#webpage`}
-    };
+    return {'@type':'Product','@id':productId(product),name:product.name,url:productPageUrl(product),sku:product.id,identifier:identifiers,
+      ...(product.mpn?{mpn:product.mpn}:{}),...(publicDirect?{sameAs:product.url}:{}),brand:{'@id':brandId(product.brand)},category:{'@id':categoryId(product.category)},
+      description:product.sourceNote,dateModified:product.verifiedAt,additionalProperty:additionalProperties(product,publicDirect),
+      ...(publicDirect?{}:{potentialAction:{'@type':'ViewAction',target:category&&category.nextStepUrl?category.nextStepUrl:productPageUrl(product),name:category&&category.nextStepLabel?category.nextStepLabel:'Önce teknik uygunluğu doğrula'}}),
+      subjectOf:{'@id':`${productPageUrl(product)}#webpage`},mainEntityOfPage:{'@id':`${productPageUrl(product)}#webpage`}};
   }
   function catalogHealth(options={}){const now=options.now||new Date();const fresh=products.filter(product=>product.status==='verified_listing'&&verificationStatus(product,now).fresh);const publicProducts=fresh.filter(product=>publicAffiliateEligible(product,{now}));const checked=dateOnly(verifiedAt);const reviewBy=checked?new Date(checked.getTime()+30*86400000).toISOString().slice(0,10):null;const staleAfter=checked?new Date(checked.getTime()+(verificationMaxAgeDays+1)*86400000).toISOString().slice(0,10):null;return {verifiedAt,verificationMaxAgeDays,totalVerified:fresh.length,publicDirect:publicProducts.length,gatedVerified:fresh.length-publicProducts.length,reviewBy,staleAfter};}
   function knowledgeGraph(options={}){
     const now=options.now||new Date();
-    const publicProducts=products.filter(product=>publicAffiliateEligible(product,{now}));
-    const uniqueBrands=[...new Set(publicProducts.map(product=>product.brand))].sort((a,b)=>a.localeCompare(b,'tr'));
+    const verifiedProducts=products.filter(product=>product.status==='verified_listing'&&verificationStatus(product,now).fresh);
+    const publicProducts=verifiedProducts.filter(product=>publicAffiliateEligible(product,{now}));
+    const gatedProducts=verifiedProducts.filter(product=>!publicAffiliateEligible(product,{now,freshOnly:false}));
+    const uniqueBrands=[...new Set(verifiedProducts.map(product=>product.brand))].sort((a,b)=>a.localeCompare(b,'tr'));
     const brands=uniqueBrands.map(name=>({'@type':'Brand','@id':brandId(name),name}));
     const categoryNodes=categories.map(category=>({'@type':'DefinedTerm','@id':categoryId(category.id),termCode:category.id,name:category.name,description:category.description,inDefinedTermSet:{'@id':`${siteOrigin}/knowledge-graph/electrical-product-categories#termset`}}));
-    const itemList={'@type':'ItemList','@id':`${siteOrigin}/akilli-urun-secimi#verified-products`,name:'ALO186 teknik kapısı tamamlanmış affiliate ürünleri',numberOfItems:publicProducts.length,itemListElement:publicProducts.map((product,index)=>({'@type':'ListItem',position:index+1,item:{'@id':productId(product)}}))};
+    const allList={'@type':'ItemList','@id':`${siteOrigin}/akilli-urun-secimi#verified-products`,name:'ALO186 doğrulanmış affiliate ürün bilgi grafiği',numberOfItems:verifiedProducts.length,itemListElement:verifiedProducts.map((product,index)=>({'@type':'ListItem',position:index+1,item:{'@id':productId(product)}}))};
+    const directList={'@type':'ItemList','@id':`${siteOrigin}/akilli-urun-secimi#direct-affiliate-products`,name:'ALO186 doğrudan affiliate uygun ürünleri',numberOfItems:publicProducts.length,itemListElement:publicProducts.map((product,index)=>({'@type':'ListItem',position:index+1,item:{'@id':productId(product)}}))};
+    const gatedList={'@type':'ItemList','@id':`${siteOrigin}/akilli-urun-secimi#tool-gated-products`,name:'ALO186 teknik uygunluk kapılı affiliate ürünleri',numberOfItems:gatedProducts.length,itemListElement:gatedProducts.map((product,index)=>({'@type':'ListItem',position:index+1,item:{'@id':productId(product)}}))};
     const graph=[
       {'@type':'Organization','@id':`${siteOrigin}/#organization`,name:'ALO186',url:`${siteOrigin}/`,description:'Bağımsız elektrik bilgi ve ürün uygunluk platformu.'},
       {'@type':'WebSite','@id':`${siteOrigin}/#website`,url:`${siteOrigin}/`,name:'ALO186',publisher:{'@id':`${siteOrigin}/#organization`}},
       {'@type':'DefinedTermSet','@id':`${siteOrigin}/knowledge-graph/electrical-product-categories#termset`,name:'ALO186 elektrik ürün kategorileri',hasDefinedTerm:categoryNodes.map(node=>({'@id':node['@id']}))},
-      itemList,...categoryNodes,...brands,...publicProducts.map(productNode)
+      allList,directList,gatedList,...categoryNodes,...brands,...verifiedProducts.map(product=>productNode(product,{now,publicDirect:publicAffiliateEligible(product,{now})}))
     ];
     return {'@context':'https://schema.org','@graph':graph};
   }
