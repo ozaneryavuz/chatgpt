@@ -10,6 +10,7 @@ from apply_content_consolidation import apply as apply_content_consolidation
 from inject_article_growth import run as run_article_growth
 from inject_handoff_growth import run as run_handoff_growth
 from inject_private_search import run as run_private_search
+from normalize_article_followup_paths import run as normalize_article_followup_paths
 
 CANONICAL = "https://www.alo186.com/hesaplama/teknik-urun-karsilastirma/"
 CANONICAL_PATH = "/hesaplama/teknik-urun-karsilastirma/"
@@ -190,6 +191,7 @@ def run(site: Path, base_path: str) -> dict:
     consolidation = apply_content_consolidation(site, base_path)
     site_search = run_private_search(site, base_path)
     article_journey = run_article_growth(site, base_path)
+    followup_paths = normalize_article_followup_paths(site, base_path)
     return {
         "ok": True,
         "basePath": base_path,
@@ -200,6 +202,7 @@ def run(site: Path, base_path: str) -> dict:
         "contentConsolidation": consolidation,
         "siteSearch": site_search,
         "articleJourney": article_journey,
+        "followupPaths": followup_paths,
     }
 
 
