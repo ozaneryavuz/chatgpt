@@ -1,0 +1,21 @@
+{
+  "version": 50,
+  "generatedAt": "2026-07-29",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/vpp-esnek-yuk-hazirlik/index.html",
+      "canonicalPath": "/hesaplama/vpp-esnek-yuk-hazirlik/",
+      "type": "business-tool"
+    },
+    {
+      "source": "alo186/hesaplama/apartman-site-ev-sarj-karar-paketi/index.html",
+      "canonicalPath": "/hesaplama/apartman-site-ev-sarj-karar-paketi/",
+      "type": "business-tool"
+    },
+    {
+      "source": "alo186/hesaplama/yedek-guc-runtime-saglik-gunlugu/index.html",
+      "canonicalPath": "/hesaplama/yedek-guc-runtime-saglik-gunlugu/",
+      "type": "calculator"
+    }
+  ]
+}
