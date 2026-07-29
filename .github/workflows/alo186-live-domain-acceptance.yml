@@ -1,0 +1,90 @@
+name: ALO186 canlı alan adı tam entegrasyon kabulü
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/**'
+      - '.github/workflows/alo186-live-domain-acceptance.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-live-domain-acceptance-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  live_acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Canlı dağıtımın tamamlanmasını bekle ve kabul et
+        shell: bash
+        run: |
+          set -euo pipefail
+          routes=(
+            '/'
+            '/hesaplama/aydinlatma-ihtiyac-ve-ampul-uygunluk/'
+            '/hesaplama/kesinti-hazirlik-envanteri/'
+            '/akilli-urun-secimi/'
+            '/amazon-elektrik-urunleri/'
+            '/sitemap.xml'
+          )
+          for attempt in $(seq 1 30); do
+            ok=1
+            for route in "${routes[@]}"; do
+              code=$(curl --silent --show-error --location --max-time 20 --output "/tmp/alo186-${attempt}.body" --write-out '%{http_code}' "https://www.alo186.com${route}" || true)
+              if [[ "$code" != "200" ]]; then
+                ok=0
+                break
+              fi
+            done
+            if [[ "$ok" == "1" ]]; then
+              break
+            fi
+            if [[ "$attempt" == "30" ]]; then
+              echo 'Canlı rotalar dağıtım süresi içinde 200 yanıtına ulaşmadı.' >&2
+              exit 1
+            fi
+            sleep 20
+          done
+
+      - name: İçerik, güven ve sitemap sözleşmeleri
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL --max-time 30 https://www.alo186.com/ > /tmp/home.html
+          curl -fsSL --max-time 30 https://www.alo186.com/hesaplama/aydinlatma-ihtiyac-ve-ampul-uygunluk/ > /tmp/lighting.html
+          curl -fsSL --max-time 30 https://www.alo186.com/hesaplama/kesinti-hazirlik-envanteri/ > /tmp/inventory.html
+          curl -fsSL --max-time 30 https://www.alo186.com/akilli-urun-secimi/ > /tmp/products.html
+          curl -fsSL --max-time 30 https://www.alo186.com/sitemap.xml > /tmp/sitemap.xml
+
+          grep -qi 'Bağımsız bilgilendirme platformudur' /tmp/home.html
+          grep -qi 'Amazon.*satış ortaklığı' /tmp/home.html
+          grep -qi 'Aydınlatma İhtiyacı' /tmp/lighting.html
+          grep -qi 'Mevcut ürün yeterliyse' /tmp/lighting.html
+          grep -qi 'Kesinti Hazırlık Envanteri' /tmp/inventory.html
+          grep -qi 'doğrudan mağaza bağlantısı yoktur' /tmp/inventory.html
+          grep -qi 'ALO186.*ürün satıcısı değildir' /tmp/products.html
+          grep -q 'https://www.alo186.com/hesaplama/aydinlatma-ihtiyac-ve-ampul-uygunluk/' /tmp/sitemap.xml
+          grep -q 'https://www.alo186.com/hesaplama/kesinti-hazirlik-envanteri/' /tmp/sitemap.xml
+
+          if grep -Eqi 'priceCurrency|aggregateRating|availability' /tmp/lighting.html /tmp/inventory.html; then
+            echo 'Yeni karar araçlarına doğrulanmamış ticari alan sızdı.' >&2
+            exit 1
+          fi
+
+      - name: Apex ve www alan adı davranışı
+        shell: bash
+        run: |
+          set -euo pipefail
+          apex=$(curl -sSIL --max-time 30 https://alo186.com/ | tr -d '\r')
+          www=$(curl -sSIL --max-time 30 https://www.alo186.com/ | tr -d '\r')
+          printf '%s\n' "$apex" | grep -Eq '^HTTP/.* (200|301|302|307|308)$'
+          printf '%s\n' "$www" | grep -Eq '^HTTP/.* 200$'
+
+      - name: Kabul özeti
+        run: |
+          echo 'ALO186 özel alan adı, yeni karar araçları, ürün merkezi ve sitemap tam entegrasyon kabulü başarılı.'
