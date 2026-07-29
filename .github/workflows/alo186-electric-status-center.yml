@@ -1,0 +1,46 @@
+name: ALO186 Elektrik Durum Merkezi kalite kontrolü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/elektrik-durum-merkezi/**'
+      - 'alo186/deployment/routing-overlays/electric-status-center-run23.json'
+      - 'alo186/tests/test_electric_status_center.py'
+      - '.github/workflows/alo186-electric-status-center.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/elektrik-durum-merkezi/**'
+      - 'alo186/deployment/routing-overlays/electric-status-center-run23.json'
+      - 'alo186/tests/test_electric_status_center.py'
+      - '.github/workflows/alo186-electric-status-center.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Kaynak kalite ve güven sözleşmeleri
+        run: python alo186/tests/test_electric_status_center.py
+      - name: JavaScript sözdizimi
+        run: node --check alo186/elektrik-durum-merkezi/app.js
+      - name: Canonical üretim paketi
+        run: |
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-status-center --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-status-center
+      - name: Rota ve arama kabulü
+        run: |
+          test -f /tmp/alo186-status-center/elektrik-durum-merkezi/index.html
+          grep -q 'https://www.alo186.com/elektrik-durum-merkezi' /tmp/alo186-status-center/sitemap.xml
+          grep -q 'Elektrik Durum Merkezi' /tmp/alo186-status-center/arama/search-index.json
