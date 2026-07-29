@@ -5,7 +5,7 @@ on:
     paths:
       - 'alo186/haberler/jenerator-ats-3-kutuplu-4-kutuplu-notr-anahtarlama/**'
       - 'alo186/haberler/topraklama-direnci-pensle-olculur-mu-kazikli-test-farki/**'
-      - 'alo186/haberler/k-faktorlu-trafo-nedir-harmonik-yukte-derating/**'
+      - 'alo186/haberler/batarya-precharge-on-sarj-kontaktor-kaynamasi/**'
       - 'alo186/deployment/routing-overlays/content-authority-96-run18.json'
       - 'alo186/tests/test_authority_content_run18.py'
       - '.github/workflows/alo186-content-authority-96.yml'
@@ -14,7 +14,7 @@ on:
     paths:
       - 'alo186/haberler/jenerator-ats-3-kutuplu-4-kutuplu-notr-anahtarlama/**'
       - 'alo186/haberler/topraklama-direnci-pensle-olculur-mu-kazikli-test-farki/**'
-      - 'alo186/haberler/k-faktorlu-trafo-nedir-harmonik-yukte-derating/**'
+      - 'alo186/haberler/batarya-precharge-on-sarj-kontaktor-kaynamasi/**'
       - 'alo186/deployment/routing-overlays/content-authority-96-run18.json'
       - 'alo186/tests/test_authority_content_run18.py'
       - '.github/workflows/alo186-content-authority-96.yml'
@@ -111,7 +111,7 @@ jobs:
           routes = [
               '/haberler/jenerator-ats-3-kutuplu-4-kutuplu-notr-anahtarlama',
               '/haberler/topraklama-direnci-pensle-olculur-mu-kazikli-test-farki',
-              '/haberler/k-faktorlu-trafo-nedir-harmonik-yukte-derating',
+              '/haberler/batarya-precharge-on-sarj-kontaktor-kaynamasi',
           ]
           for root, prefix in [
               (Path('/tmp/alo186-authority-96-custom'), ''),
