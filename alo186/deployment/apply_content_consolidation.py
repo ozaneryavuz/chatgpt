@@ -82,7 +82,7 @@ def load_config(path: Path = DEFAULT_CONFIG) -> dict:
     return {"version": int(payload["version"]), "generatedAt": payload.get("generatedAt"), "consolidations": normalized}
 
 
-def redirect_html(item: dict, base_path: str) -> str:
+def redirect_html(item: dict, base_path: str, include_service_worker: bool) -> str:
     target_public = public_url(base_path, item["canonicalPath"])
     canonical_absolute = f"{CANONICAL_HOST}{item['canonicalPath']}"
     title = escape(item["label"])
@@ -90,6 +90,13 @@ def redirect_html(item: dict, base_path: str) -> str:
     target_attr = escape(target_public, quote=True)
     canonical_attr = escape(canonical_absolute, quote=True)
     target_js = json.dumps(target_public, ensure_ascii=False)
+    sw_url = f"{base_path}/sw.js" if base_path else "/sw.js"
+    sw_scope = f"{base_path}/" if base_path else "/"
+    sw_registration = (
+        f'<script data-alo186-pages-sw>if(\'serviceWorker\'in navigator){{addEventListener(\'load\',()=>navigator.serviceWorker.register({json.dumps(sw_url)},{{scope:{json.dumps(sw_scope)}}}).catch(()=>{{}}));}}</script>'
+        if include_service_worker
+        else ""
+    )
     return f"""<!doctype html>
 <html lang="tr">
 <head>
@@ -110,6 +117,7 @@ def redirect_html(item: dict, base_path: str) -> str:
     <p><small>ALO186 bağımsız bilgi platformudur; EDAŞ veya kamu kurumu değildir.</small></p>
   </main>
   <script>location.replace({target_js}+location.search+location.hash);</script>
+  {sw_registration}
 </body>
 </html>
 """
@@ -220,6 +228,7 @@ def apply(site: Path, base_path: str = "", config_path: Path = DEFAULT_CONFIG) -
     site = site.resolve()
     base_path = normalize_base_path(base_path)
     payload = load_config(config_path.resolve())
+    include_service_worker = (site / "sw.js").is_file()
 
     for item in payload["consolidations"]:
         canonical_file = route_file(site, item["canonicalPath"])
@@ -227,7 +236,7 @@ def apply(site: Path, base_path: str = "", config_path: Path = DEFAULT_CONFIG) -
         if not canonical_file.is_file():
             raise FileNotFoundError(f"Canonical birleşim hedefi artifactta eksik: {canonical_file}")
         alias_file.parent.mkdir(parents=True, exist_ok=True)
-        alias_file.write_text(redirect_html(item, base_path), encoding="utf-8")
+        alias_file.write_text(redirect_html(item, base_path, include_service_worker), encoding="utf-8")
 
     sitemap = update_sitemap(site, payload["consolidations"])
     release = update_release(site, payload)
