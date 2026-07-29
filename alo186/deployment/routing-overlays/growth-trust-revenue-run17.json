@@ -1,0 +1,21 @@
+{
+  "version": 65,
+  "generatedAt": "2026-07-29",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/tasinabilir-ev-sarj-cihazi-priz-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/tasinabilir-ev-sarj-cihazi-priz-uygunluk/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/modem-ont-mini-ups-sure-saglik-gunlugu/index.html",
+      "canonicalPath": "/hesaplama/modem-ont-mini-ups-sure-saglik-gunlugu/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/priz-tipi-gerilim-monitoru-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/priz-tipi-gerilim-monitoru-uygunluk/",
+      "type": "calculator"
+    }
+  ]
+}
