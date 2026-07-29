@@ -16,6 +16,7 @@ from inject_growth_run9 import run as run_growth_run9
 from inject_growth_run10 import run as run_growth_run10
 from inject_growth_run11 import run as run_growth_run11
 from inject_growth_run12 import run as run_growth_run12
+from inject_growth_run13 import run as run_growth_run13
 from inject_handoff_growth import run as run_handoff_growth
 from inject_private_search import run as run_private_search
 from inject_revenue_trust_proof import run as run_revenue_trust_proof
@@ -215,6 +216,7 @@ def run(site: Path, base_path: str) -> dict:
     growth_run10 = run_growth_run10(site, base_path)
     growth_run11 = run_growth_run11(site, base_path)
     growth_run12 = run_growth_run12(site, base_path)
+    growth_run13 = run_growth_run13(site, base_path)
     return {
         "ok": True,
         "basePath": base_path,
@@ -237,6 +239,7 @@ def run(site: Path, base_path: str) -> dict:
         "growthRun10": growth_run10,
         "growthRun11": growth_run11,
         "growthRun12": growth_run12,
+        "growthRun13": growth_run13,
     }
 
 
