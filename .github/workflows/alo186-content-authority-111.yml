@@ -5,6 +5,7 @@ on:
     paths:
       - 'alo186/haberler/ges-panel-hotspot-bypass-diyot-termal-kamera/**'
       - 'alo186/haberler/ev-sarj-74-11-22-kw-tek-faz-uc-faz-onboard-charger/**'
+      - 'alo186/haberler/enerji-depolama-round-trip-efficiency-soh-kabul-testi/**'
       - 'alo186/haberler/elektrik-kesintisi-tazminati-edas-otomatik-odeme-nasil-kontrol-edilir/**'
       - 'alo186/deployment/routing-overlays/content-authority-111-run23.json'
       - 'alo186/tests/test_authority_content_run23.py'
@@ -14,6 +15,7 @@ on:
     paths:
       - 'alo186/haberler/ges-panel-hotspot-bypass-diyot-termal-kamera/**'
       - 'alo186/haberler/ev-sarj-74-11-22-kw-tek-faz-uc-faz-onboard-charger/**'
+      - 'alo186/haberler/enerji-depolama-round-trip-efficiency-soh-kabul-testi/**'
       - 'alo186/haberler/elektrik-kesintisi-tazminati-edas-otomatik-odeme-nasil-kontrol-edilir/**'
       - 'alo186/deployment/routing-overlays/content-authority-111-run23.json'
       - 'alo186/tests/test_authority_content_run23.py'
@@ -111,8 +113,16 @@ jobs:
           routes = [
               '/haberler/ges-panel-hotspot-bypass-diyot-termal-kamera',
               '/haberler/ev-sarj-74-11-22-kw-tek-faz-uc-faz-onboard-charger',
-              '/haberler/elektrik-kesintisi-tazminati-edas-otomatik-odeme-nasil-kontrol-edilir',
+              '/haberler/enerji-depolama-round-trip-efficiency-soh-kabul-testi',
           ]
+          removed = {
+              '/haberler/parafudr-tip-1-tip-2-tip-3-farki-kaskad-koordinasyon',
+              '/haberler/elektrik-kesintisi-tazminati-edas-otomatik-odeme-nasil-kontrol-edilir',
+          }
+          preserved = {
+              '/haberler/parafudr-tip-1-tip-2-tip-3-paratoner-secimi',
+              '/haberler/elektrik-kesintisi-tazminati-nasil-alinir',
+          }
           for root, prefix in [
               (Path('/tmp/alo186-authority-111-custom'), ''),
               (Path('/tmp/alo186-authority-111-project'), '/chatgpt'),
@@ -127,6 +137,10 @@ jobs:
               assert release['contentConsolidation']['aliasCount'] == 2
               assert search['entryCount'] >= 153, search['entryCount']
               assert pages['siteSearch']['entryCount'] == search['entryCount']
+              assert removed.isdisjoint(active)
+              assert preserved.issubset(active)
+              for removed_route in removed:
+                  assert f'https://www.alo186.com{removed_route}' not in sitemap
               for route in routes:
                   file=root/route.strip('/')/'index.html'
                   assert file.is_file(), file
