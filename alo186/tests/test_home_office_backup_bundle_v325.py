@@ -57,13 +57,14 @@ def main() -> None:
 
     for token in [
         "requiredPowerbankWh", "requiredMiniUpsWh", "requiredPowerStationWh",
+        "POWERBANK_NOMINAL_LIMIT_WH", "powerbankLimitExceeded",
         "split_dc", "network_only", "powerbank_only", "power_station",
         "ups_path", "active_event", "no_buy", "conditional_purchase",
         "commercialAllowed:true", "../../akilli-urun-secimi?kategori=",
         "home_office_backup_result", "usb_c_charger", "usb_c_cable",
     ]:
         assert token in app
-    assert "scenarios:21" in test
+    assert "scenarios:23" in test
 
     assert "40 çekirdek araç" in hub
     assert './evden-calisma-laptop-modem-yedek-guc-seti/' in hub
@@ -77,14 +78,15 @@ def main() -> None:
         text=True,
     )
     payload = json.loads(result.stdout)
-    assert payload == {"ok": True, "scenarios": 21}
+    assert payload == {"ok": True, "scenarios": 23}
 
     print(json.dumps({
         "ok": True,
         "routingVersion": manifest["version"],
         "route": ROUTE,
-        "decisionScenarios": 21,
+        "decisionScenarios": 23,
         "hubToolCount": 40,
+        "powerbankNominalLimitWh": 100,
         "directStoreLinks": 0,
         "personalDataFields": 0,
         "browserStorage": False,
