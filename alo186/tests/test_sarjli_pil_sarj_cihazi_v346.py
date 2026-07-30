@@ -49,12 +49,11 @@ assert "reviewDays:120" in JS
 assert OVERLAY.exists()
 data=json.loads(OVERLAY.read_text(encoding="utf-8"))
 assert data["version"]==101
-entry=data["entries"][0]
-assert entry["route"]==ROUTE
-assert entry["kind"]=="calculator"
-assert entry["include_in_sitemap"] is True
-assert entry["include_in_search"] is True
-assert entry["privacy_class"]=="no-personal-data"
+assert data["generatedAt"]=="2026-07-30"
+entry=data["routes"][0]
+assert entry["canonicalPath"]==ROUTE
+assert entry["type"]=="calculator"
+assert entry["source"]=="alo186/hesaplama/sarjli-pil-sarj-cihazi-uygunluk/index.html"
 subprocess.run(["node","--check",str(PAGE/"app.js")],check=True)
 completed=subprocess.run(["node",str(PAGE/"app.test.js")],check=True,capture_output=True,text=True)
 payload=json.loads(completed.stdout)
