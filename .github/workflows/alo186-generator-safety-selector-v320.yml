@@ -134,7 +134,8 @@ jobs:
               assert 'localStorage' not in js and 'sessionStorage' not in js
               assert 'fetch(' not in js and 'XMLHttpRequest' not in js
               assert "connection==='backfeed'" in js
-              assert "status:'no_buy'" in js
+              assert "baseResult('no_buy'" in js
+              assert "baseResult('conditional_purchase'" in js
               assert "112’yi arayın" in js
               assert 'type="email"' not in html and 'type="tel"' not in html
 
