@@ -64,12 +64,13 @@ jobs:
           };
           walk(catalog.products);
           const usedForbidden = forbidden.filter((field) => keys.has(field));
-          if (summary.productCount < 30) throw new Error(`Ürün/model sayısı 30 altına düştü: ${summary.productCount}`);
+          if (summary.productCount < 40) throw new Error(`Ürün/model sayısı 40 altına düştü: ${summary.productCount}`);
           if (summary.exactListingCount < 20) throw new Error(`Doğrulanmış ASIN sayısı 20 altına düştü: ${summary.exactListingCount}`);
+          if (summary.manufacturerSearchCount < 20) throw new Error(`Üretici kaynaklı tam model sayısı 20 altına düştü: ${summary.manufacturerSearchCount}`);
           if (direct.length < 13) throw new Error(`Güncel ve doğrudan yayımlanabilir ürün sayısı 13 altına düştü: ${direct.length}. Ürün doğrulamalarını yenileyin.`);
+          if (summary.gatedCandidateCount < 27) throw new Error(`Teknik uygunluk kapılı aday sayısı 27 altına düştü: ${summary.gatedCandidateCount}`);
           if (usedForbidden.length) throw new Error(`Yasak ticari alanlar bulundu: ${usedForbidden.join(', ')}`);
           if (!catalog.affiliateTag || catalog.affiliateTag !== 'alo186rehber-21') throw new Error('Affiliate etiketi korunmadı.');
-          if (!summary.gatedCandidateCount) throw new Error('Teknik uygunluk kapılı adaylar kayboldu.');
           console.log(JSON.stringify({
             productCount: summary.productCount,
             exactAsinCount: summary.exactListingCount,
@@ -112,7 +113,7 @@ jobs:
               '- fiyat, stok, puan, satıcı, teslimat, garanti veya sahte kıtlık ifadesi yayımlanmamalı;',
               '- mevcut ürün yeterliyse “satın alma gerekmiyor” sonucu korunmalı.',
               '',
-              'Hedef: katalogdaki bir sonraki doğrulanmış eşik **35 ürün/model düğümü**.'
+              'Hedef: katalogdaki bir sonraki doğrulanmış eşik **45 ürün/model düğümü**.'
             ].join('\n');
             await github.rest.issues.createComment({
               owner: context.repo.owner,
