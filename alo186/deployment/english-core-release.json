@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "release": "english-core-p0",
   "generatedAt": "2026-07-30",
   "englishRouteCount": 10,
@@ -10,6 +10,12 @@
   "emergencyNumbers": [112, 186, 187],
   "safetyCommerceClosed": true,
   "personalDataRequired": false,
+  "artifactLanguageAudit": {
+    "englishPrefix": "/en/",
+    "englishPrimaryLanguage": "en",
+    "defaultPrimaryLanguage": "tr",
+    "regionalLanguageTagsAccepted": true
+  },
   "acceptance": [
     "self-canonical",
     "reciprocal-hreflang",
@@ -17,6 +23,7 @@
     "indexable-en-routes",
     "istanbul-side-resolution",
     "javascript-free-company-directory",
+    "route-aware-language-audit",
     "custom-domain-build",
     "sitemap-inclusion"
   ]
