@@ -99,7 +99,7 @@ jobs:
               assert any(item['canonicalPath'] == canonical for item in search['entries'])
               assert 'amazon.com.tr' not in html.casefold() and 'amazon.com.tr' not in js.casefold()
               assert 'affiliateLinks:0' in js and 'commercialAllowed:false' in js
-              assert 'Mevcut hazırlık yeterli; yeni ürün aramayın' in html
+              assert 'Mevcut hazırlık yeterli; yeni ürün aramayın' in js
               assert '180 gün sonra' in html and 'expiresAt' in js
               assert 'cpap-bipap-yedek-guc-sure-uygunluk' in js
               assert 'kombi-elektrik-kesintisi-yedek-guc-uygunluk' in js
