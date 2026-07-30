@@ -7,7 +7,10 @@
   if (!body || body.dataset.alo186Ux === 'ready') return;
   body.dataset.alo186Ux = 'ready';
 
-  const configuredBase = script?.dataset.basePath || '';
+  const assetSuffix = '/assets/alo186-ux.js';
+  const scriptPath = script?.src ? new URL(script.src, location.href).pathname : '';
+  const inferredBase = scriptPath.endsWith(assetSuffix) ? scriptPath.slice(0, -assetSuffix.length) : '';
+  const configuredBase = script?.dataset.basePath || inferredBase;
   const basePath = configuredBase === '/' ? '' : configuredBase.replace(/\/+$/, '');
   const route = (path) => {
     const normalized = path.startsWith('/') ? path : `/${path}`;
