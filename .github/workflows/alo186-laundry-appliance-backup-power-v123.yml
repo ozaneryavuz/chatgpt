@@ -1,0 +1,46 @@
+name: ALO186 beyaz eşya yedek güç uygunluğu v123
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/index.html'
+      - 'alo186/hesaplama/camasir-bulasik-kurutma-makinesi-yedek-guc-uygunluk/**'
+      - 'alo186/deployment/routing-overlays/123-laundry-dishwasher-dryer-backup-power.json'
+      - 'alo186/tests/test_laundry_appliance_backup_power_v123.js'
+      - '.github/workflows/alo186-laundry-appliance-backup-power-v123.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/index.html'
+      - 'alo186/hesaplama/camasir-bulasik-kurutma-makinesi-yedek-guc-uygunluk/**'
+      - 'alo186/deployment/routing-overlays/123-laundry-dishwasher-dryer-backup-power.json'
+      - 'alo186/tests/test_laundry_appliance_backup_power_v123.js'
+      - '.github/workflows/alo186-laundry-appliance-backup-power-v123.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-laundry-appliance-backup-v123-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Karar motoru, hesap, güvenlik ve dual Pages kabulü
+        run: node alo186/tests/test_laundry_appliance_backup_power_v123.js
+      - name: Mevcut yayın ve hesaplayıcı regresyonları
+        run: |
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
