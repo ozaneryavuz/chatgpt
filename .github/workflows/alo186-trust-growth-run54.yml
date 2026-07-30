@@ -1,0 +1,111 @@
+name: ALO186 güvenli büyüme ölçümü ve minimum yeterli dönüşüm
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/urun-eslestirme/catalog-trust-growth-run54.js'
+      - 'alo186/hesaplama/usb-c-set-kisa-listesi/**'
+      - 'alo186/deployment/daily_affiliate_growth_report.js'
+      - 'alo186/tests/test_daily_affiliate_growth_report.js'
+      - 'alo186/tests/test_trust_growth_run54.js'
+      - '.github/workflows/alo186-trust-growth-run54.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/urun-eslestirme/catalog-trust-growth-run54.js'
+      - 'alo186/hesaplama/usb-c-set-kisa-listesi/**'
+      - 'alo186/deployment/daily_affiliate_growth_report.js'
+      - 'alo186/tests/test_daily_affiliate_growth_report.js'
+      - 'alo186/tests/test_trust_growth_run54.js'
+      - '.github/workflows/alo186-trust-growth-run54.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-trust-growth-run54-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Güven, katalog ölçümü ve tekrar ziyaret sözleşmeleri
+        run: |
+          set -euo pipefail
+          node alo186/tests/test_trust_growth_run54.js
+          node alo186/tests/test_daily_affiliate_growth_report.js
+          node alo186/hesaplama/usb-c-set-kisa-listesi/app.test.js
+          node alo186/tests/test_qualified_commerce_run53.js
+          python alo186/tests/test_usb_c_shortlist_run28.py
+          node --check alo186/urun-eslestirme/catalog-trust-growth-run54.js
+          node --check alo186/hesaplama/usb-c-set-kisa-listesi/trust-growth-run54.js
+          node --check alo186/deployment/daily_affiliate_growth_report.js
+
+      - name: Affiliate Knowledge Graph ve mevcut ürün regresyonları
+        run: |
+          set -euo pipefail
+          node alo186/tests/test_affiliate_knowledge_graph.js
+          node alo186/tests/test_product_matcher.js
+          node alo186/urun-eslestirme/catalog-knowledge-extension.test.js
+          python alo186/tests/test_affiliate_product_knowledge_graph.py
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Canonical üretim paketi
+        run: |
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-run54-canonical --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-run54-canonical
+
+      - name: Custom-domain ve project-path kabulü
+        shell: bash
+        run: |
+          set -euo pipefail
+          for spec in 'custom|' 'project|/chatgpt'; do
+            name="${spec%%|*}"
+            base="${spec#*|}"
+            target="/tmp/alo186-run54-${name}"
+            cp -a /tmp/alo186-run54-canonical "$target"
+            python alo186/deployment/prepare_github_pages.py --site "$target" --base-path "$base" --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
+            python alo186/deployment/inject_outcome_runtime.py --site "$target" --base-path "$base"
+            python alo186/deployment/inject_shortlist_growth.py --site "$target" --base-path "$base"
+            python alo186/deployment/smoke_github_pages.py --site "$target" --base-path "$base"
+            python - "$target" "$base" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+          root=Path(sys.argv[1]);base=sys.argv[2]
+          route='/hesaplama/usb-c-set-kisa-listesi/'
+          page=root/route.strip('/')/'index.html'
+          loader=page.with_name('catalog-loader.js')
+          trust=page.with_name('trust-growth-run54.js')
+          catalog=root/'akilli-urun-secimi/catalog-trust-growth-run54.js'
+          assert page.is_file() and loader.is_file() and trust.is_file() and catalog.is_file()
+          assert 'catalog-trust-growth-run54.js' in loader.read_text(encoding='utf-8')
+          assert 'trust-growth-run54.js' in loader.read_text(encoding='utf-8')
+          assert 'Minimum yeterli başlangıç' in trust.read_text(encoding='utf-8')
+          assert 'https://alo186.com' in catalog.read_text(encoding='utf-8')
+          assert 'https://www.alo186.com/hesaplama/usb-c-set-kisa-listesi/' not in page.read_text(encoding='utf-8')
+          search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
+          entry=next(item for item in search.get('entries',[]) if item.get('canonicalPath')==route)
+          expected=(base+route) if base else route
+          assert entry['url']==expected
+          PY
+          done
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: alo186-trust-growth-run54-production
+          path: /tmp/alo186-run54-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
