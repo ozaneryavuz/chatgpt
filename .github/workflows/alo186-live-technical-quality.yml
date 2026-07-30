@@ -39,6 +39,7 @@ jobs:
           python -m py_compile \
             alo186/deployment/prepare_github_pages.py \
             alo186/deployment/finalize_live_quality.py \
+            alo186/deployment/repair_live_html_defects.py \
             alo186/deployment/inject_growth_run24.py \
             alo186/tests/test_live_technical_quality.py \
             alo186/tests/live_http_audit.py \
@@ -160,6 +161,16 @@ jobs:
               --only-categories=performance,accessibility,best-practices,seo \
               --output=json \
               --output-path="/tmp/alo186-lighthouse/desktop-${slug}.json"
+          done
+          # Mobil ana sayfa CPU zamanlaması paylaşımlı CI koşullarında gürültülüdür.
+          # İki ek bağımsız ölçüm alınır; kalite sözleşmesi üç çalışmanın medyanını kullanır.
+          for run in 2 3; do
+            npx lighthouse 'http://127.0.0.1:4173/' \
+              --quiet \
+              --chrome-flags='--headless --no-sandbox --disable-dev-shm-usage' \
+              --only-categories=performance,accessibility,best-practices,seo \
+              --output=json \
+              --output-path="/tmp/alo186-lighthouse/mobile-home-run${run}.json"
           done
           python alo186/tests/audit_lighthouse_reports.py \
             --directory /tmp/alo186-lighthouse \
