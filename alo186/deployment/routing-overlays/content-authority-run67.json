@@ -1,0 +1,21 @@
+{
+  "version": 123,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/haberler/kacak-akim-rolesi-ramp-testi-acma-suresi-test-dugmesi-farki/index.html",
+      "canonicalPath": "/haberler/kacak-akim-rolesi-ramp-testi-acma-suresi-test-dugmesi-farki",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ges-mc4-konnektor-uyumsuzluk-krimp-isinma-termal-kontrol/index.html",
+      "canonicalPath": "/haberler/ges-mc4-konnektor-uyumsuzluk-krimp-isinma-termal-kontrol",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/jenerator-yuk-bankasi-testi-bosta-test-yuk-altinda-kabul/index.html",
+      "canonicalPath": "/haberler/jenerator-yuk-bankasi-testi-bosta-test-yuk-altinda-kabul",
+      "type": "article"
+    }
+  ]
+}
