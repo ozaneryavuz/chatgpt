@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 import re
+from html import escape
 from pathlib import Path
 
 CANONICAL_ORIGIN = "https://alo186.com"
@@ -11,6 +12,7 @@ CANONICAL_HOST = "alo186.com"
 LEGACY_ORIGIN = "https://www.alo186.com"
 LEGACY_HOST = "www.alo186.com"
 QUALITY_MARKER = 'data-alo186-technical-quality="true"'
+LAZY_RUNTIME_MARKER = 'data-alo186-interaction-runtime="true"'
 QUALITY_STYLE = (
     '<style data-alo186-technical-quality="true">'
     ':where(img,svg,video,canvas,iframe){max-inline-size:100%}'
@@ -31,6 +33,25 @@ JSON_LD_PATTERN = re.compile(
 TABLE_WRAP_PATTERN = re.compile(
     r'<(?P<tag>div|section)(?P<attrs>[^>]*\bclass=["\'][^"\']*\btable-wrap\b[^"\']*["\'][^>]*)>',
     re.I,
+)
+SCRIPT_SRC_PATTERN = re.compile(
+    r'<script\b(?P<before>[^>]*)\bsrc=["\'](?P<src>[^"\']+)["\'](?P<after>[^>]*)>\s*</script>',
+    re.I,
+)
+OPTIONAL_RUNTIME_SUFFIXES = (
+    "/hesaplama/common.js",
+    "/assets/article-growth.js",
+    "/hesaplama/outcome-bridge.js",
+    "/hesaplama/evidence-wallet.js",
+    "/hesaplama/intent-action-router.js",
+    "/akilli-urun-secimi/outcome-trust-circuit-core.js",
+    "/akilli-urun-secimi/documentation-growth-core.js",
+    "/akilli-urun-secimi/outcome-trust-circuit.js",
+    "/akilli-urun-secimi/documentation-growth.js",
+)
+INTERACTION_RUNTIME_TARGETS = (
+    Path("index.html"),
+    Path("amazon-elektrik-urunleri/index.html"),
 )
 KNOWN_FAQ_BREADCRUMB_DEFECT = '"}]},{"@type":"BreadcrumbList"'
 KNOWN_FAQ_BREADCRUMB_REPAIR = '"}}]},{"@type":"BreadcrumbList"'
@@ -141,6 +162,63 @@ def make_scrollable_regions_accessible(site: Path) -> int:
     return changed_files
 
 
+def defer_optional_runtimes(site: Path) -> tuple[int, int]:
+    """Salt bağlantı sunan iki giriş sayfasında ağır zenginleştirmeleri ilk etkileşime erteler.
+
+    Bağlantılar ve güvenlik metinleri JavaScript olmadan çalışır. Ertelenen modüller
+    yalnız yardımcı kayıt/kişiselleştirme katmanlarıdır; ilk görünümde içerik ekleyip
+    CLS veya uzun görev üretmeleri önlenir. Kullanıcının ilk pointer/klavye/dokunma
+    hareketi sonrasında özgün sırayla yüklenirler.
+    """
+
+    changed_files = 0
+    deferred_scripts = 0
+    for relative in INTERACTION_RUNTIME_TARGETS:
+        path = site / relative
+        if not path.is_file():
+            continue
+        html = path.read_text(encoding="utf-8", errors="ignore")
+        if LAZY_RUNTIME_MARKER in html:
+            continue
+        selected: list[str] = []
+
+        def replace(match: re.Match[str]) -> str:
+            nonlocal deferred_scripts
+            src = match.group("src")
+            source_path = src.split("?", 1)[0].split("#", 1)[0]
+            if not any(source_path.endswith(suffix) for suffix in OPTIONAL_RUNTIME_SUFFIXES):
+                return match.group(0)
+            selected.append(src)
+            deferred_scripts += 1
+            markers = " ".join(
+                re.findall(r'data-alo186-[a-z0-9-]+(?:=["\'][^"\']*["\'])?', match.group(0), re.I)
+            )
+            marker_suffix = (" " + markers) if markers else ""
+            return (
+                '<script type="application/x-alo186-interaction-runtime" '
+                f'data-alo186-lazy-src="{escape(src, quote=True)}"{marker_suffix}></script>'
+            )
+
+        updated = SCRIPT_SRC_PATTERN.sub(replace, html)
+        if not selected:
+            continue
+        loader = (
+            f'<script {LAZY_RUNTIME_MARKER}>'
+            "(()=>{'use strict';let started=false;const load=()=>{if(started)return;started=true;"
+            "const nodes=[...document.querySelectorAll('script[type=\"application/x-alo186-interaction-runtime\"][data-alo186-lazy-src]')];"
+            "let index=0;const next=()=>{const node=nodes[index++];if(!node)return;const script=document.createElement('script');"
+            "script.src=node.dataset.alo186LazySrc;script.async=false;script.onload=next;script.onerror=next;document.body.appendChild(script)};next()};"
+            "addEventListener('pointerdown',load,{once:true,passive:true});addEventListener('touchstart',load,{once:true,passive:true});"
+            "addEventListener('keydown',load,{once:true});})();"
+            "</script>"
+        )
+        if "</body>" not in updated:
+            raise RuntimeError(f"Etkileşim runtime yükleyicisi için body kapanışı yok: {relative}")
+        path.write_text(updated.replace("</body>", loader + "\n</body>", 1), encoding="utf-8")
+        changed_files += 1
+    return changed_files, deferred_scripts
+
+
 def inject_responsive_hardening(site: Path) -> int:
     changed = 0
     for path in sorted(site.rglob("*.html")):
@@ -191,6 +269,11 @@ def validate(site: Path, base_path: str) -> dict:
             failures.append(f"Canonical apex hostta değil: {relative} -> {links[0]}")
         if re.search(r'<meta\s+http-equiv=["\']refresh["\']', html, re.I):
             failures.append(f"Indexlenebilir sayfada meta refresh var: {relative}")
+
+    for relative in INTERACTION_RUNTIME_TARGETS:
+        target = site / relative
+        if target.is_file() and LAZY_RUNTIME_MARKER not in target.read_text(encoding="utf-8", errors="ignore"):
+            failures.append(f"Etkileşim runtime kapısı eksik: {relative}")
 
     robots_path = site / "robots.txt"
     sitemap_path = site / "sitemap.xml"
@@ -254,6 +337,7 @@ def run(site: Path, base_path: str = "") -> dict:
     json_ld_repairs = repair_and_validate_json_ld(site)
     origin_files_changed = normalize_live_origin(site)
     accessible_scroll_files = make_scrollable_regions_accessible(site)
+    deferred_runtime_files, deferred_runtime_scripts = defer_optional_runtimes(site)
     responsive_html_hardened = inject_responsive_hardening(site)
 
     release_path = site / "pages-release.json"
@@ -268,6 +352,8 @@ def run(site: Path, base_path: str = "") -> dict:
             "originFilesChanged": origin_files_changed,
             "responsiveHtmlHardened": responsive_html_hardened,
             "accessibleScrollableRegionFiles": accessible_scroll_files,
+            "interactionDeferredRuntimeFiles": deferred_runtime_files,
+            "interactionDeferredRuntimeScripts": deferred_runtime_scripts,
             "jsonLdRepairs": json_ld_repairs,
             "personalDataFieldsAdded": 0,
             "officialAffiliationClaimed": False,
@@ -282,6 +368,8 @@ def run(site: Path, base_path: str = "") -> dict:
         "jsonLdRepairs": json_ld_repairs,
         "originFilesChanged": origin_files_changed,
         "accessibleScrollableRegionFiles": accessible_scroll_files,
+        "interactionDeferredRuntimeFiles": deferred_runtime_files,
+        "interactionDeferredRuntimeScripts": deferred_runtime_scripts,
         "responsiveHtmlHardened": responsive_html_hardened,
         **validation,
     }
