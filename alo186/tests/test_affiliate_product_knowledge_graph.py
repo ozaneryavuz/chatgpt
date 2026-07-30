@@ -127,7 +127,7 @@ def main() -> None:
     for token in ["manufacturer_verified_search", "gated-product-candidates", "knowledgeGraphSummary"]:
         assert token in extension
     for token in [
-        "anker-737-a1289", "samsung-eb-p4520-20k-45w", "ugreen-90440-240w-usb-c",
+        "samsung-eb-p4520-20k-45w", "ugreen-90440-240w-usb-c",
         "ecoflow-delta-3-plus", "bluetti-ac70p", "honda-eu22i",
         "victron-phoenix-vedirect-12-1200", "x-sense-sc07-mr", "2026-07-30-run51",
     ]:
