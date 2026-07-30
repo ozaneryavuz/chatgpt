@@ -14,7 +14,7 @@ const routes = [
   '/amazon-elektrik-urunleri',
   '/akilli-urun-secimi',
   '/hesaplama/',
-  '/il/adana',
+  '/edas-bul/',
   '/haberler/ups-online-line-interactive-offline-farki',
 ];
 const viewports = [
@@ -28,6 +28,20 @@ const results = [];
 
 function safeName(route) {
   return (route === '/' ? 'home' : route.replace(/^\//, '').replace(/[^a-z0-9]+/gi, '-').replace(/-+$/, ''));
+}
+
+function a11yDetails(violations) {
+  return violations.map(item => ({
+    id: item.id,
+    impact: item.impact,
+    help: item.help,
+    helpUrl: item.helpUrl,
+    nodes: item.nodes.slice(0, 12).map(entry => ({
+      target: entry.target,
+      html: entry.html,
+      failureSummary: entry.failureSummary,
+    })),
+  }));
 }
 
 for (const viewport of viewports) {
@@ -120,7 +134,7 @@ for (const viewport of viewports) {
     });
 
     let axe = { violations: [] };
-    if (!navigationError) {
+    if (!navigationError && responseStatus !== null && responseStatus < 400) {
       await page.addScriptTag({ content: axeSource });
       axe = await page.evaluate(async () => window.axe.run(document, {
         runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa'] },
@@ -155,7 +169,7 @@ for (const viewport of viewports) {
       accessibility: {
         violationCount: axe.violations.length,
         seriousCriticalCount: seriousA11y.length,
-        seriousCritical: seriousA11y.map(item => ({ id: item.id, impact: item.impact, help: item.help, nodes: item.nodes.length })),
+        seriousCritical: a11yDetails(seriousA11y),
       },
       consoleErrors: consoleErrors.slice(0, 20),
       failedRequests: failedRequests.slice(0, 20),
@@ -163,7 +177,9 @@ for (const viewport of viewports) {
       ok: failures.length === 0,
     };
     results.push(record);
-    await page.screenshot({ path: path.join(output, `${viewport.name}-${safeName(route)}.png`), fullPage: true });
+    const basename = `${viewport.name}-${safeName(route)}`;
+    await page.screenshot({ path: path.join(output, `${basename}.png`), fullPage: true });
+    if (failures.length) await writeFile(path.join(output, `${basename}.html`), await page.content());
     await page.close();
   }
   await context.close();
