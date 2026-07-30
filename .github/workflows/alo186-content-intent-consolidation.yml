@@ -66,28 +66,24 @@ jobs:
         run: |
           set -euo pipefail
           cp -a /tmp/alo186-consolidation-canonical /tmp/alo186-consolidation-apache
-          # Bazı paketleyiciler gizli dosyaları yayın katmanında elemeden önce çıkarabilir.
-          # Redirect üreticisi mevcut .htaccess'i korur; dosya yoksa güvenli biçimde oluşturur.
           touch /tmp/alo186-consolidation-apache/.htaccess
           python alo186/deployment/apply_content_consolidation.py \
             --site /tmp/alo186-consolidation-apache \
             --base-path '' \
             > /tmp/alo186-consolidation-apache.json
-          grep -Fq 'R=301,L,NE' /tmp/alo186-consolidation-apache/.htaccess
-          grep -Fq 'lifepo4-batarya-sogukta-sarj-edilir-mi' /tmp/alo186-consolidation-apache/.htaccess
-          grep -Fq 'elektrik-gerilimi-dusuk-yuksek-edas-olcum-talebi' /tmp/alo186-consolidation-apache/.htaccess
-          grep -Fq 'ups-aku-string-blok-dengesizligi-ic-direnc' /tmp/alo186-consolidation-apache/.htaccess
-          grep -Fq 'ges-string-sigortasi-gpv-ne-zaman-gerekir' /tmp/alo186-consolidation-apache/.htaccess
-          grep -Fq 'jenerator-dusuk-yuk-wet-stacking-kurum-load-bank' /tmp/alo186-consolidation-apache/.htaccess
-          grep -Fq 'elektrik-kesintisi-tazminati-otomatik-odeme-12-saat' /tmp/alo186-consolidation-apache/.htaccess
-          grep -Fq 'ups-statik-bypass-bakim-bypassi-backfeed-korumasi' /tmp/alo186-consolidation-apache/.htaccess
           python - <<'PY'
           import json
           from pathlib import Path
+          config=json.loads(Path('alo186/deployment/content-consolidations.json').read_text(encoding='utf-8'))
           result=json.loads(Path('/tmp/alo186-consolidation-apache.json').read_text(encoding='utf-8'))
+          htaccess=Path('/tmp/alo186-consolidation-apache/.htaccess').read_text(encoding='utf-8')
           assert result['ok'] is True
           assert result['apacheRedirects'] is True
-          assert result['aliasCount']==7
+          assert result['aliasCount']==len(config['consolidations'])
+          assert 'R=301,L,NE' in htaccess
+          for item in config['consolidations']:
+              assert item['aliasPath'].lstrip('/') in htaccess
+              assert item['canonicalPath'] in htaccess
           PY
 
       - name: GitHub Pages custom-domain artifactını birleştir
@@ -132,35 +128,37 @@ jobs:
           set -euo pipefail
           python - <<'PY'
           import json
+          import re
+          import xml.etree.ElementTree as ET
           from pathlib import Path
+          from urllib.parse import urlsplit
 
-          pairs = [
-              ('lifepo4-batarya-sogukta-sarj-edilir-mi', 'lifepo4-dusuk-sicaklikta-sarj-edilir-mi'),
-              ('elektrik-gerilimi-dusuk-yuksek-edas-olcum-talebi', 'dusuk-yuksek-voltaj-edas-teknik-kalite-olcumu'),
-              ('ups-aku-string-blok-dengesizligi-ic-direnc', 'ups-aku-string-dengesizligi-zayif-aku-nasil-anlasilir'),
-              ('ges-string-sigortasi-gpv-ne-zaman-gerekir', 'ges-pv-string-sigortasi-ters-akim-nasil-secilir'),
-              ('jenerator-dusuk-yuk-wet-stacking-kurum-load-bank', 'jenerator-dusuk-yuk-wet-stacking-nedir'),
-              ('elektrik-kesintisi-tazminati-otomatik-odeme-12-saat', 'elektrik-kesintisi-tazminati-nasil-alinir'),
-              ('ups-statik-bypass-bakim-bypassi-backfeed-korumasi', 'ups-backfeed-korumasi-bakim-bypass-interlock-guvenli-izolasyon'),
+          config=json.loads(Path('alo186/deployment/content-consolidations.json').read_text(encoding='utf-8'))
+          pairs=[
+              (item['aliasPath'].removeprefix('/haberler/'), item['canonicalPath'].removeprefix('/haberler/'))
+              for item in config['consolidations']
           ]
           for root, prefix in [
               (Path('/tmp/alo186-consolidation-custom'), ''),
               (Path('/tmp/alo186-consolidation-project'), '/chatgpt'),
           ]:
-              sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
+              sitemap_root=ET.parse(root/'sitemap.xml').getroot()
+              sitemap_paths={urlsplit(loc.text or '').path.rstrip('/') for loc in sitemap_root.findall('.//{*}loc') if loc.text}
               release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
               pages=json.loads((root/'pages-release.json').read_text(encoding='utf-8'))
-              assert release['contentConsolidation']['aliasCount']==7
+              assert release['contentConsolidation']['aliasCount']==len(pairs)
               assert pages['contentConsolidation']['aliasesExcludedFromSitemap'] is True
               assert release['routeCount']==len(release['routes'])
               for alias, canonical in pairs:
                   alias_path=root/'haberler'/alias/'index.html'
                   text=alias_path.read_text(encoding='utf-8')
+                  canonical_match=re.search(r'<link\s+rel="canonical"\s+href="([^"]+)"', text, re.I)
+                  assert canonical_match, alias
+                  assert urlsplit(canonical_match.group(1)).path.rstrip('/')==f'/haberler/{canonical}'
                   assert 'name="robots" content="noindex,follow"' in text
-                  assert f'rel="canonical" href="https://alo186.com/haberler/{canonical}"' in text
                   assert f'url={prefix}/haberler/{canonical}' in text
-                  assert f'https://alo186.com/haberler/{alias}' not in sitemap
-                  assert f'https://alo186.com/haberler/{canonical}' in sitemap
+                  assert f'/haberler/{alias}' not in sitemap_paths
+                  assert f'/haberler/{canonical}' in sitemap_paths
           PY
 
       - name: Doğrulanmış canonical birleştirme artifactı
