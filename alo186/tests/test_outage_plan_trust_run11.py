@@ -27,9 +27,8 @@ def main() -> None:
     assert 'rel="canonical" href="https://alo186.com/hesaplama/kesinti-hazirlik-plani/"' in html
     for token in [
         "WebApplication", "DefinedTermSet", "FAQPage", "BreadcrumbList",
-        "Mevcut hazırlık yeterli; yeni ürün aramayın", "Doğrudan affiliate yok",
-        "JSON teknik planı", "Kontrol takvimi (.ics)", "180 gün sonra",
-        "EDAŞ, kamu kurumu, sağlık hizmeti sağlayıcısı veya ürün satıcısı değildir",
+        "Doğrudan affiliate yok", "JSON teknik planı", "Kontrol takvimi (.ics)",
+        "180 gün sonra", "EDAŞ, kamu kurumu, sağlık hizmeti sağlayıcısı veya ürün satıcısı değildir",
         "CPAP / APAP / BiPAP", "Modem / fiber ONT", "Kombi / ısıtma elektroniği",
         "Akvaryum hava", "Kamera, NVR/DVR, PoE switch",
     ]:
@@ -46,7 +45,7 @@ def main() -> None:
     for token in [
         "active_outage", "commercialAllowed:false", "affiliateLinks:0",
         "alo186_outage_plan_v3", "STORAGE_DAYS=180", "expiresAt",
-        "Fiyat veya kampanya kontrolü değildir",
+        "Fiyat veya kampanya kontrolü değildir", "Mevcut hazırlık yeterli; yeni ürün aramayın",
     ]:
         assert token in js, token
 
