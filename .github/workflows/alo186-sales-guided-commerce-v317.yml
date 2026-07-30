@@ -1,0 +1,73 @@
+name: ALO186 satış odaklı kesinti atölyesi kalite kontrolü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/kesinti-hazirlik-atolyesi/**'
+      - 'alo186/tests/test_sales_guided_commerce_v317.py'
+      - '.github/workflows/alo186-sales-guided-commerce-v317.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/kesinti-hazirlik-atolyesi/**'
+      - 'alo186/tests/test_sales_guided_commerce_v317.py'
+      - '.github/workflows/alo186-sales-guided-commerce-v317.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Kaynak satış, güven ve kanonik sözleşmeleri
+        run: |
+          python alo186/tests/test_sales_guided_commerce_v317.py
+          python alo186/tests/test_commerce_governance_v2.py
+          node --check alo186/kesinti-hazirlik-atolyesi/app.js
+      - name: Canonical üretim paketi
+        run: |
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-sales-v317 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-sales-v317
+      - name: Custom-domain satış rotası kabulü
+        run: |
+          cp -a /tmp/alo186-sales-v317 /tmp/alo186-sales-v317-custom
+          python alo186/deployment/prepare_github_pages.py --site /tmp/alo186-sales-v317-custom --base-path '' --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_github_pages.py --site /tmp/alo186-sales-v317-custom --base-path ''
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('/tmp/alo186-sales-v317-custom')
+          route='/kesintiye-hazirlik-atolyesi'
+          page=root/route.strip('/')/'index.html'
+          assert page.is_file(), page
+          html=page.read_text(encoding='utf-8')
+          app=(page.parent/'app.js').read_text(encoding='utf-8')
+          assert 'Bir Amazon Gelir Ortağı olarak nitelikli satın alımlar üzerinden kazanç elde ediyorum.' in html
+          assert 'Satın almama geçerli sonuç' in html
+          assert "hazard === 'danger'" in app
+          assert "existing === 'works'" in app
+          assert 'qualified_affiliate_product_center' in app
+          assert 'paid_b2b' in app
+          assert 'amazon.com.tr' not in (html+app).lower()
+          sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
+          assert 'https://www.alo186.com/kesintiye-hazirlik-atolyesi' in sitemap
+          release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
+          assert any(item['canonicalPath']==route for item in release['routes'])
+          PY
+      - name: Project-path satış rotası kabulü
+        run: |
+          cp -a /tmp/alo186-sales-v317 /tmp/alo186-sales-v317-project
+          python alo186/deployment/prepare_github_pages.py --site /tmp/alo186-sales-v317-project --base-path '/chatgpt' --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_github_pages.py --site /tmp/alo186-sales-v317-project --base-path '/chatgpt'
+          grep -q '/chatgpt/akilli-urun-secimi' /tmp/alo186-sales-v317-project/kesintiye-hazirlik-atolyesi/app.js
+          grep -q '/chatgpt/kurumsal-elektrik-surekliligi-on-degerlendirme' /tmp/alo186-sales-v317-project/kesintiye-hazirlik-atolyesi/app.js
