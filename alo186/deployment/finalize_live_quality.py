@@ -28,6 +28,10 @@ JSON_LD_PATTERN = re.compile(
     r'(<script\b[^>]*type=["\']application/ld\+json["\'][^>]*>)(.*?)(</script>)',
     re.I | re.S,
 )
+TABLE_WRAP_PATTERN = re.compile(
+    r'<(?P<tag>div|section)(?P<attrs>[^>]*\bclass=["\'][^"\']*\btable-wrap\b[^"\']*["\'][^>]*)>',
+    re.I,
+)
 KNOWN_FAQ_BREADCRUMB_DEFECT = '"}]},{"@type":"BreadcrumbList"'
 KNOWN_FAQ_BREADCRUMB_REPAIR = '"}}]},{"@type":"BreadcrumbList"'
 
@@ -109,6 +113,32 @@ def normalize_live_origin(site: Path) -> int:
             path.write_text(updated, encoding="utf-8")
             changed += 1
     return changed
+
+
+def make_scrollable_regions_accessible(site: Path) -> int:
+    """CSS ile kaydırılabilen tablo sarmalayıcılarını klavyeyle odaklanabilir yapar."""
+
+    changed_files = 0
+
+    def replace(match: re.Match[str]) -> str:
+        attrs = match.group("attrs")
+        additions: list[str] = []
+        if not re.search(r"\btabindex\s*=", attrs, re.I):
+            additions.append('tabindex="0"')
+        if not re.search(r"\brole\s*=", attrs, re.I):
+            additions.append('role="region"')
+        if not re.search(r"\baria-(?:label|labelledby)\s*=", attrs, re.I):
+            additions.append('aria-label="Yatay kaydırılabilir tablo"')
+        suffix = (" " + " ".join(additions)) if additions else ""
+        return f'<{match.group("tag")}{attrs}{suffix}>'
+
+    for path in sorted(site.rglob("*.html")):
+        html = path.read_text(encoding="utf-8", errors="ignore")
+        updated = TABLE_WRAP_PATTERN.sub(replace, html)
+        if updated != html:
+            path.write_text(updated, encoding="utf-8")
+            changed_files += 1
+    return changed_files
 
 
 def inject_responsive_hardening(site: Path) -> int:
@@ -223,6 +253,7 @@ def run(site: Path, base_path: str = "") -> dict:
     normalized = normalize_base_path(base_path)
     json_ld_repairs = repair_and_validate_json_ld(site)
     origin_files_changed = normalize_live_origin(site)
+    accessible_scroll_files = make_scrollable_regions_accessible(site)
     responsive_html_hardened = inject_responsive_hardening(site)
 
     release_path = site / "pages-release.json"
@@ -236,6 +267,7 @@ def run(site: Path, base_path: str = "") -> dict:
             "redirectChainRemoved": "www-to-apex",
             "originFilesChanged": origin_files_changed,
             "responsiveHtmlHardened": responsive_html_hardened,
+            "accessibleScrollableRegionFiles": accessible_scroll_files,
             "jsonLdRepairs": json_ld_repairs,
             "personalDataFieldsAdded": 0,
             "officialAffiliationClaimed": False,
@@ -249,13 +281,14 @@ def run(site: Path, base_path: str = "") -> dict:
         "basePath": normalized,
         "jsonLdRepairs": json_ld_repairs,
         "originFilesChanged": origin_files_changed,
+        "accessibleScrollableRegionFiles": accessible_scroll_files,
         "responsiveHtmlHardened": responsive_html_hardened,
         **validation,
     }
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="ALO186 final Pages artifactında canonical, JSON-LD ve responsive kalite sözleşmesini uygular.")
+    parser = argparse.ArgumentParser(description="ALO186 final Pages artifactında canonical, JSON-LD, erişilebilirlik ve responsive kalite sözleşmesini uygular.")
     parser.add_argument("--site", type=Path, required=True)
     parser.add_argument("--base-path", default="")
     args = parser.parse_args()
