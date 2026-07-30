@@ -78,7 +78,7 @@ input, select, textarea { max-width: 100%; font-size: 16px; }
 }
 
 .alo-ux-mobilebar { display: none; }
-.alo-ux-mobilebar a { color: #fff; text-decoration: none; }
+.alo-ux-mobilebar a { min-width: 0; color: #fff; text-decoration: none; }
 .alo-ux-mobilebar span { display: block; margin-top: 2px; font-size: .68rem; }
 .alo-ux-mobilebar b { font-size: 1.05rem; line-height: 1; }
 
@@ -130,7 +130,7 @@ input, select, textarea { max-width: 100%; font-size: 16px; }
     right: 8px;
     bottom: calc(8px + env(safe-area-inset-bottom));
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     overflow: hidden;
     border: 1px solid rgba(255, 255, 255, .16);
     border-radius: 16px;
@@ -167,6 +167,29 @@ input, select, textarea { max-width: 100%; font-size: 16px; }
   p, li { overflow-wrap: anywhere; }
   .alo-ux-toc { border-radius: 13px; }
   .alo-ux-toc nav { grid-template-columns: 1fr; }
+}
+
+@media (prefers-contrast: more) {
+  .alo-ux-toc, .alo-ux-backtop, .alo-ux-mobilebar { border-width: 2px; }
+  .alo-ux-toc a, .alo-ux-mobilebar a { font-weight: 800; }
+}
+
+@media (forced-colors: active) {
+  .alo-ux-mobilebar, .alo-ux-toc, .alo-ux-backtop, .alo-ux-skip {
+    forced-color-adjust: auto;
+    border: 2px solid CanvasText;
+    background: Canvas;
+    color: CanvasText;
+    box-shadow: none;
+  }
+  .alo-ux-mobilebar a, .alo-ux-toc a { color: LinkText; }
+  .alo-ux-mobilebar a[aria-current="page"] {
+    color: HighlightText;
+    background: Highlight;
+  }
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 3px solid Highlight;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
