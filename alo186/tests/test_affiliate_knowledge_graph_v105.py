@@ -32,7 +32,7 @@ assert V105["generatedAt"] == "2026-07-30"
 assert len(V105["intents"]) == 5
 assert len(V105["productClasses"]) == 10
 assert len(intents) == 33
-assert len(products) == 73
+assert len(products) == 75
 assert len({item["id"] for item in V105["productClasses"]}) == 10
 
 v105_intents = {item["id"] for item in V105["intents"]}
