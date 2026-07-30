@@ -5,37 +5,21 @@ import re
 from pathlib import Path
 
 import prepare_github_pages_core as _core
+from finalize_live_quality import CANONICAL_ORIGIN, run as finalize_live_quality
 from prepare_github_pages_core import *  # noqa: F401,F403
 
 
-CANONICAL_ORIGIN = "https://alo186.com"
-LEGACY_ORIGIN = "https://www.alo186.com"
-LEGACY_HOST = "www.alo186.com"
-CANONICAL_HOST = "alo186.com"
-QUALITY_MARKER = 'data-alo186-technical-quality="true"'
-QUALITY_STYLE = (
-    '<style data-alo186-technical-quality="true">'
-    ':where(img,svg,video,canvas,iframe){max-inline-size:100%}'
-    ':where(img,video,canvas){block-size:auto}'
-    ':where(pre,code){overflow-wrap:anywhere;white-space:pre-wrap}'
-    ':where(table){max-inline-size:100%}'
-    ':where(.table-wrap,[role="region"][aria-label*="tablo" i]){max-inline-size:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}'
-    ':where(a,button,input,select,textarea,summary){touch-action:manipulation}'
-    '@media(max-width:720px){:where(h1,h2,h3,p,a,button,summary,th,td){overflow-wrap:anywhere}}'
-    '@media(prefers-reduced-motion:reduce){html:focus-within{scroll-behavior:auto!important}}'
-    '</style>'
-)
 DEVICE_DAMAGE_MARKER = 'data-alo186-device-damage-deadline="true"'
 DEVICE_DAMAGE_ROUTE = "/haberler/elektrik-kesintisi-cihaz-hasari-edas-basvurusu/"
 PRIMARY_START_MARKER = 'data-alo186-primary-start="true"'
 PRIMARY_START_ROUTE = "/elektrik-durum-merkezi/"
-
-# Canlı GitHub Pages katmanı apex alan adına 301 ile sonuçlanıyor. Üretilen
-# canonical, JSON-LD, bridge ve gateway değerleri ilk andan itibaren son URL'yi
-# göstermeli; aksi hâlde her sayfa www -> apex yönlendirme zinciri üretir.
-_core.CANONICAL_ORIGIN = CANONICAL_ORIGIN
 _original_gateway_html = _core.gateway_html
 _original_prepare = _core.prepare
+
+# GitHub Pages canlı katmanı www isteklerini apex alan adına yönlendiriyor. Üretilen
+# gateway, bridge, canonical ve JSON-LD değerleri ilk andan itibaren son URL'yi
+# göstermeli; aksi hâlde her girişte gereksiz www -> apex yönlendirme zinciri oluşur.
+_core.CANONICAL_ORIGIN = CANONICAL_ORIGIN
 
 if PRIMARY_START_ROUTE not in _core.CRITICAL_ROUTES:
     _core.CRITICAL_ROUTES = (_core.CRITICAL_ROUTES[0], PRIMARY_START_ROUTE, *_core.CRITICAL_ROUTES[1:])
@@ -97,89 +81,7 @@ def gateway_html(base_path: str, noindex: bool) -> str:
     anchor = '<section class="grid" aria-label="ALO186 hızlı başlangıç">'
     if anchor not in html:
         raise RuntimeError("Pages gateway hızlı başlangıç alanı bulunamadı.")
-    html = html.replace(anchor, notice + "\n" + anchor + "\n" + primary, 1)
-    return html
-
-
-def normalize_live_origin(site: Path) -> int:
-    """Yayın artifactındaki bütün mutlak site referanslarını gerçek son hosta taşır."""
-
-    changed = 0
-    allowed_suffixes = {".html", ".htm", ".xml", ".txt", ".json", ".js", ".css", ".webmanifest"}
-    for path in sorted(site.rglob("*")):
-        if not path.is_file() or (path.suffix.lower() not in allowed_suffixes and path.name not in {"robots.txt", "sitemap.xml"}):
-            continue
-        text = path.read_text(encoding="utf-8", errors="ignore")
-        updated = text.replace(LEGACY_ORIGIN, CANONICAL_ORIGIN).replace(LEGACY_HOST, CANONICAL_HOST)
-        if updated != text:
-            path.write_text(updated, encoding="utf-8")
-            changed += 1
-    return changed
-
-
-def inject_quality_hardening(site: Path) -> int:
-    """Görsel, tablo ve uzun metinlerin dar görünümde sayfa genişliğini aşmasını önler."""
-
-    changed = 0
-    for path in sorted(site.rglob("*.html")):
-        html = path.read_text(encoding="utf-8", errors="ignore")
-        if QUALITY_MARKER in html:
-            continue
-        if "</head>" not in html:
-            raise RuntimeError(f"HTML head kapanışı bulunamadı: {path.relative_to(site)}")
-        path.write_text(html.replace("</head>", QUALITY_STYLE + "\n</head>", 1), encoding="utf-8")
-        changed += 1
-    return changed
-
-
-def validate_live_quality_contracts(site: Path) -> None:
-    failures: list[str] = []
-    indexable_count = 0
-    for path in sorted(site.rglob("*.html")):
-        html = path.read_text(encoding="utf-8", errors="ignore")
-        relative = path.relative_to(site).as_posix()
-        if QUALITY_MARKER not in html:
-            failures.append(f"Responsive kalite stili eksik: {relative}")
-        if LEGACY_HOST in html or LEGACY_ORIGIN in html:
-            failures.append(f"www host artifactta kaldı: {relative}")
-        robots_match = re.search(r'<meta\s+name=["\']robots["\']\s+content=["\']([^"\']+)', html, re.I)
-        noindex = bool(robots_match and "noindex" in robots_match.group(1).casefold())
-        if noindex:
-            continue
-        indexable_count += 1
-        canonicals = re.findall(r'<link\s+rel=["\']canonical["\']\s+href=["\']([^"\']+)', html, re.I)
-        if len(canonicals) != 1:
-            failures.append(f"Indexlenebilir sayfada canonical sayısı {len(canonicals)}: {relative}")
-        elif not canonicals[0].startswith(CANONICAL_ORIGIN + "/"):
-            failures.append(f"Canonical apex hostta değil: {relative} -> {canonicals[0]}")
-
-    robots_path = site / "robots.txt"
-    sitemap_path = site / "sitemap.xml"
-    if not robots_path.is_file() or f"Sitemap: {CANONICAL_ORIGIN}/sitemap.xml" not in robots_path.read_text(encoding="utf-8"):
-        failures.append("robots.txt apex sitemap adresini taşımıyor")
-    if not sitemap_path.is_file():
-        failures.append("sitemap.xml eksik")
-    else:
-        sitemap = sitemap_path.read_text(encoding="utf-8")
-        if LEGACY_HOST in sitemap or LEGACY_ORIGIN in sitemap:
-            failures.append("sitemap.xml www host taşıyor")
-        if f"<loc>{CANONICAL_ORIGIN}/" not in sitemap:
-            failures.append("sitemap.xml apex canonical URL taşımıyor")
-
-    release_path = site / "pages-release.json"
-    if release_path.is_file():
-        release = json.loads(release_path.read_text(encoding="utf-8"))
-        if release.get("canonicalHost") != CANONICAL_ORIGIN:
-            failures.append("pages-release canonicalHost apex değil")
-        if release.get("customDomain") != CANONICAL_HOST:
-            failures.append("pages-release customDomain apex değil")
-    else:
-        failures.append("pages-release.json eksik")
-
-    if indexable_count == 0:
-        failures.append("Indexlenebilir HTML bulunamadı")
-    if failures:
-        raise RuntimeError("Canlı teknik kalite sözleşmesi başarısız:\n- " + "\n- ".join(failures[:80]))
+    return html.replace(anchor, notice + "\n" + anchor + "\n" + primary, 1)
 
 
 def validate_root_legal_deadline(site: Path, base_path: str) -> None:
@@ -234,28 +136,19 @@ def prepare(site: Path, base_path: str, repository: str, commit: str) -> dict:
     validate_root_legal_deadline(site, normalized)
     validate_root_primary_start(site, normalized)
     update_primary_shortcut(site, normalized)
-    origin_files_changed = normalize_live_origin(site)
-    hardened_html_count = inject_quality_hardening(site)
-
-    result["canonicalHost"] = CANONICAL_ORIGIN
-    result["customDomain"] = CANONICAL_HOST
-    result["rootDeviceDamageDeadline"] = "10 iş günü"
-    result["rootNoApplicationDisclaimer"] = True
-    result["primaryStartRoute"] = _core.public_url(normalized, PRIMARY_START_ROUTE)
-    result["primaryStartMode"] = "progressive-disclosure"
-    result["canonicalOriginFilesChanged"] = origin_files_changed
-    result["responsiveHtmlHardened"] = hardened_html_count
+    quality = finalize_live_quality(site, normalized)
 
     release_path = site / "pages-release.json"
+    release = json.loads(release_path.read_text(encoding="utf-8")) if release_path.is_file() else dict(result)
+    release["rootDeviceDamageDeadline"] = "10 iş günü"
+    release["rootNoApplicationDisclaimer"] = True
+    release["primaryStartRoute"] = _core.public_url(normalized, PRIMARY_START_ROUTE)
+    release["primaryStartMode"] = "progressive-disclosure"
+    release["initialLiveTechnicalQuality"] = quality
     if release_path.is_file():
-        release = json.loads(release_path.read_text(encoding="utf-8"))
-        release.update(result)
         release_path.write_text(json.dumps(release, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-        result = release
-
-    validate_live_quality_contracts(site)
     _core.recompute_checksums(site)
-    return result
+    return release
 
 
 _core.gateway_html = gateway_html
