@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'alo186/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/**'
+      - 'alo186/amazon-elektrik-urunleri/tasinabilir-evse-secimi/**'
       - 'alo186/hesaplama/index.html'
       - 'alo186/deployment/routing-overlays/087-portable-evse-socket-test.json'
       - 'alo186/tests/test_portable_evse_socket_v326.py'
@@ -12,6 +13,7 @@ on:
     branches: [main]
     paths:
       - 'alo186/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/**'
+      - 'alo186/amazon-elektrik-urunleri/tasinabilir-evse-secimi/**'
       - 'alo186/hesaplama/index.html'
       - 'alo186/deployment/routing-overlays/087-portable-evse-socket-test.json'
       - 'alo186/tests/test_portable_evse_socket_v326.py'
@@ -38,7 +40,7 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Hesap ve karar senaryoları
+      - name: Hesap, güven, dönüşüm ve tekrar ziyaret senaryoları
         run: |
           set -euo pipefail
           node alo186/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/app.test.js
@@ -48,6 +50,7 @@ jobs:
         run: |
           set -euo pipefail
           node --check alo186/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/app.js
+          node --check alo186/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/post-mount.js
           python -m py_compile alo186/tests/test_portable_evse_socket_v326.py
           node alo186/tests/test_release_manifest.js
           node alo186/tests/test_portal_hardening.js
@@ -99,39 +102,75 @@ jobs:
             --site /tmp/alo186-portable-evse-project \
             --base-path '/chatgpt'
 
-      - name: Rota, sitemap, teknik arama ve gizlilik kabulü
+      - name: Rota, sitemap, teknik arama, affiliate ve gizlilik kabulü
         run: |
           set -euo pipefail
           python - <<'PY'
           import json
+          import re
           from pathlib import Path
 
-          route='hesaplama/tasinabilir-ev-sarj-priz-uygunluk'
-          route_slug='tasinabilir-ev-sarj-priz-uygunluk/'
+          tool_route='hesaplama/tasinabilir-ev-sarj-priz-uygunluk'
+          guide_route='amazon-elektrik-urunleri/tasinabilir-evse-secimi'
+          tool_slug='tasinabilir-ev-sarj-priz-uygunluk/'
+          guide_slug='tasinabilir-evse-secimi/'
           travel_slug='seyahat-priz-adaptoru-voltaj-uygunluk/'
           for root,prefix in [
               (Path('/tmp/alo186-portable-evse-custom'),''),
               (Path('/tmp/alo186-portable-evse-project'),'/chatgpt'),
           ]:
-              page=root/route/'index.html'
-              app=root/route/'app.js'
-              css=root/route/'styles.css'
-              assert page.is_file() and app.is_file() and css.is_file()
-              html=page.read_text(encoding='utf-8')
+              tool_page=root/tool_route/'index.html'
+              app=root/tool_route/'app.js'
+              post=root/tool_route/'post-mount.js'
+              css=root/tool_route/'styles.css'
+              guide_page=root/guide_route/'index.html'
+              assert all(path.is_file() for path in [tool_page,app,post,css,guide_page])
+              html=tool_page.read_text(encoding='utf-8')
               js=app.read_text(encoding='utf-8')
-              assert route_slug in html
-              assert 'amazon.com' not in (html+js).lower()
-              assert 'localStorage' not in js and 'sessionStorage' not in js and 'fetch(' not in js
+              post_js=post.read_text(encoding='utf-8')
+              guide=guide_page.read_text(encoding='utf-8')
+
+              assert tool_slug in html
+              assert 'amazon.com' not in (html+js+post_js).lower()
+              assert all(token not in js+post_js for token in ['localStorage','sessionStorage','fetch('])
               assert all(token in html for token in ['actualNeed','technicalCheck','affiliateCheck','productLinks'])
+              assert 'tasinabilir-evse-secimi' in post_js
+              assert "form.addEventListener('reset'" in post_js
+              assert "commerce.dataset.categories = '[]'" in post_js
+
+              assert guide_slug in guide
+              assert 'alo186rehber-21' in guide
+              assert 'rel="sponsored nofollow noopener"' in guide
+              assert all(token in guide for token in ['needGate','evidenceGate','affiliateGate','jsonBtn','icsBtn','personalData:false'])
+              assert '"@type":"Product"' not in guide and '"@type":"Offer"' not in guide
+              assert all(token not in guide for token in ['localStorage','sessionStorage','fetch(','type="email"','type="tel"','<textarea'])
+
               hub=(root/'hesaplama/index.html').read_text(encoding='utf-8')
-              assert route_slug in hub and travel_slug in hub
-              assert hub.count('class="tool-card"')>=42
+              assert tool_slug in hub and travel_slug in hub
+              count_match=re.search(r'(\d+) çekirdek araç',hub)
+              assert count_match and int(count_match.group(1))>=41
+
               sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
-              assert route_slug in sitemap
+              assert tool_slug in sitemap and guide_slug in sitemap
               search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
-              entry=next(item for item in search['entries'] if item['canonicalPath']=='/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/')
-              assert entry['url'].endswith('/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/')
-          print(json.dumps({'ok':True,'route':'/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/','directStoreLinks':0,'storage':False,'searchIndexed':True,'hubToolCardsAtLeast':42,'concurrentTravelToolPreserved':True},ensure_ascii=False))
+              tool_entry=next(item for item in search['entries'] if item['canonicalPath']=='/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/')
+              guide_entry=next(item for item in search['entries'] if item['canonicalPath']=='/amazon-elektrik-urunleri/tasinabilir-evse-secimi/')
+              assert tool_entry['url'].endswith('/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/')
+              assert guide_entry['url'].endswith('/amazon-elektrik-urunleri/tasinabilir-evse-secimi/')
+          print(json.dumps({
+              'ok':True,
+              'toolRoute':'/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/',
+              'commerceGuideRoute':'/amazon-elektrik-urunleri/tasinabilir-evse-secimi/',
+              'directStoreLinksInCalculator':0,
+              'affiliateTripleGate':True,
+              'affiliateDisclosure':True,
+              'resetClearsCommerce':True,
+              'jsonRecheck':True,
+              'icsRecheckDays':90,
+              'storage':False,
+              'searchIndexed':True,
+              'concurrentTravelToolPreserved':True
+          },ensure_ascii=False))
           PY
 
       - name: Doğrulanmış site artifactı
