@@ -42,6 +42,15 @@
     return link;
   }
 
+  function generatorSafetyCard(isPortal){
+    const link=document.createElement('a');
+    link.className=isPortal?'card':'tool-card';
+    link.href=publicRoute('/hesaplama/jenerator-guvenli-kullanim-testi/');
+    link.dataset.alo186GeneratorSafetyCard='true';
+    link.innerHTML=isPortal?'<span class="tag">CO · 6,1 m · geri besleme · kablo</span><h2>Jeneratör Güvenli Kullanım Testi</h2><p>Garaj, balkon, egzoz yönü, CO alarmı, uzatma kablosu ve transfer bağlantısını çalıştırmadan önce kontrol edin.</p><b>Güvenlik testini aç →</b>':'<span class="eyebrow">CO · yerleşim · egzoz · bağlantı</span><h2>Jeneratör Güvenli Kullanım Testi</h2><p>6,1 m açıklık mesafesi, CO alarmı, yağmur, kablo, yakıt ve geri besleme riskini tek karar ağacında değerlendirin.</p><b>Jeneratörü çalıştırmadan kontrol et →</b>';
+    return link;
+  }
+
   function injectGrowthCards(){
     const normalized=location.pathname.replace(/\/$/,'');
     const isPortal=normalized.endsWith('/elektrik-portali');
@@ -55,6 +64,7 @@
         if(!grid.querySelector('[data-alo186-outcome-runtime-card]')){
           const outcome=document.createElement('a');outcome.className='card';outcome.href=publicRoute('/hesaplama/cozum-sonucu/');outcome.dataset.alo186OutcomeRuntimeCard='true';outcome.innerHTML=isPortal?'<span class="tag">Kapalı döngü · satın almama · tekrar önleme</span><h2>Çözüm Sonucu Merkezi</h2><p>Karar, hesap, ürün, bakım veya resmî kanalın gerçekten işe yarayıp yaramadığını izleyin.</p><b>Sonucu kaydet ve izle →</b>':'<strong>Çözüm gerçekten işe yaradı mı?</strong><p>Öneri, ürün, bakım veya resmî kanal sonucunu kişisel veri vermeden kaydedin.</p><span>Sonucu kaydet ve izle →</span>';grid.prepend(outcome);
         }
+        if(!grid.querySelector('[data-alo186-generator-safety-card]'))grid.prepend(generatorSafetyCard(true));
         if(!grid.querySelector('[data-alo186-shortlist-runtime-card]'))grid.prepend(shortlistCard(true));
       }
     }
@@ -62,8 +72,9 @@
     const isHub=/\/hesaplama\/?$/.test(location.pathname);
     if(isHub){
       const grid=document.querySelector('section.tool-grid');
+      if(grid&&!grid.querySelector('[data-alo186-generator-safety-card]'))grid.prepend(generatorSafetyCard(false));
       if(grid&&!grid.querySelector('[data-alo186-shortlist-runtime-card]'))grid.prepend(shortlistCard(false));
-      document.querySelectorAll('strong').forEach(node=>{if(/\d+ çekirdek araç/.test(node.textContent||''))node.textContent=(node.textContent||'').replace(/\d+ çekirdek araç/,'34 çekirdek araç');});
+      document.querySelectorAll('strong').forEach(node=>{if(/\d+ çekirdek araç/.test(node.textContent||''))node.textContent=(node.textContent||'').replace(/\d+ çekirdek araç/,'36 çekirdek araç');});
     }
 
     const productCenter=/\/(akilli-urun-secimi|amazon-elektrik-urunleri)\/?$/.test(location.pathname);
