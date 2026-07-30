@@ -135,7 +135,7 @@ jobs:
               assert 'text/calendar' in app and 'application/json' in app
               assert 'actualNeed' in app and 'technicalCheck' in app and 'affiliateCheck' in app
               assert "input.environment==='wet'" in app
-              assert 'Mevcut kaynağın sınıfını doğrulayın' in app
+              assert 'Mevcut kaynağın jeneratör, power station veya inverter sınıfı seçilmedi.' in app
               assert 'elektrikci-is-emri-ozeti' in app
               expected = f'{prefix}{canonical_path}' if prefix else canonical_path
               sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
