@@ -41,14 +41,14 @@ jobs:
           set -euo pipefail
           node alo186/tests/test_affiliate_knowledge_graph.js
           node alo186/tests/test_product_matcher.js
-          node alo186/akilli-urun-secimi/catalog-knowledge-extension.test.js
+          node alo186/urun-eslestirme/catalog-knowledge-extension.test.js
           python alo186/tests/test_affiliate_product_knowledge_graph.py
 
       - name: Satış kataloğu alt sınırı ve güven politikası
         run: |
           set -euo pipefail
           node <<'NODE'
-          const catalog = require('./alo186/urun-eslestirme/catalog-sales-extension.js');
+          const catalog = require('./alo186/urun-eslestirme/catalog-growth-run7.js');
           const now = new Date();
           const summary = catalog.knowledgeGraphSummary({ now });
           const direct = catalog.products.filter((product) => catalog.publicAffiliateEligible(product, { now }));
@@ -64,14 +64,23 @@ jobs:
           };
           walk(catalog.products);
           const usedForbidden = forbidden.filter((field) => keys.has(field));
-          if (summary.productCount < 40) throw new Error(`Ürün/model sayısı 40 altına düştü: ${summary.productCount}`);
+          if (summary.needCount < 23) throw new Error(`İhtiyaç düğümü sayısı 23 altına düştü: ${summary.needCount}`);
+          if (summary.categoryCount < 23) throw new Error(`Kategori sayısı 23 altına düştü: ${summary.categoryCount}`);
+          if (summary.productCount < 55) throw new Error(`Ürün/model sayısı 55 altına düştü: ${summary.productCount}`);
           if (summary.exactListingCount < 20) throw new Error(`Doğrulanmış ASIN sayısı 20 altına düştü: ${summary.exactListingCount}`);
-          if (summary.manufacturerSearchCount < 20) throw new Error(`Üretici kaynaklı tam model sayısı 20 altına düştü: ${summary.manufacturerSearchCount}`);
+          if (summary.manufacturerSearchCount < 35) throw new Error(`Üretici kaynaklı tam model sayısı 35 altına düştü: ${summary.manufacturerSearchCount}`);
           if (direct.length < 13) throw new Error(`Güncel ve doğrudan yayımlanabilir ürün sayısı 13 altına düştü: ${direct.length}. Ürün doğrulamalarını yenileyin.`);
-          if (summary.gatedCandidateCount < 27) throw new Error(`Teknik uygunluk kapılı aday sayısı 27 altına düştü: ${summary.gatedCandidateCount}`);
+          if (summary.gatedCandidateCount < 42) throw new Error(`Teknik uygunluk kapılı aday sayısı 42 altına düştü: ${summary.gatedCandidateCount}`);
           if (usedForbidden.length) throw new Error(`Yasak ticari alanlar bulundu: ${usedForbidden.join(', ')}`);
-          if (!catalog.affiliateTag || catalog.affiliateTag !== 'alo186rehber-21') throw new Error('Affiliate etiketi korunmadı.');
+          if (catalog.affiliateTag !== 'alo186rehber-21') throw new Error('Affiliate etiketi korunmadı.');
+          for (const category of ['computer_ups', 'multimeter', 'thermal_imager', 'battery_charger', 'tool_battery']) {
+            const relation = catalog.categoryRelations[category];
+            if (!relation || !relation.tools || !relation.tools.length) throw new Error(`${category} ücretsiz uygunluk aracına bağlı değil.`);
+            if (catalog.allProductsFor(category).length < 2) throw new Error(`${category} iki kaynaklı model taşımıyor.`);
+          }
           console.log(JSON.stringify({
+            needCount: summary.needCount,
+            categoryCount: summary.categoryCount,
             productCount: summary.productCount,
             exactAsinCount: summary.exactListingCount,
             manufacturerModelCount: summary.manufacturerSearchCount,
@@ -105,15 +114,15 @@ jobs:
               `Durum: **${status}**`,
               `Çalıştırma: ${runUrl}`,
               '',
-              'Sonraki büyüme çalıştırmasında:',
-              '- en az 5 benzersiz ve yüksek niyetli ürün/model adayı değerlendirilmeli;',
-              '- doğrulanmış ASIN yoksa yalnız tam model araması açılmalı;',
-              '- en az 1 satın almaya hazır tamamlayıcı set veya çapraz satış yolu eklenmeli;',
-              '- ürünler ilgili hesaplayıcı, teknik kanıt ve güvenlik kapısıyla bağlanmalı;',
-              '- fiyat, stok, puan, satıcı, teslimat, garanti veya sahte kıtlık ifadesi yayımlanmamalı;',
-              '- mevcut ürün yeterliyse “satın alma gerekmiyor” sonucu korunmalı.',
+              'Korunacak üretim eşikleri:',
+              '- en az 23 kullanıcı ihtiyacı ve 23 teknik kategori;',
+              '- en az 55 kaynaklı ürün/model; 20 doğrulanmış ASIN ve 35 üretici modeli;',
+              '- en az 13 güncel doğrudan ürün ve 42 uygunluk kapılı aday;',
+              '- her yeni yüksek riskli ürün ailesinin ücretsiz hesaplayıcı veya uygunluk testine bağlanması;',
+              '- fiyat, stok, puan, satıcı, teslimat, garanti ve komisyonla sıralama yasağı;',
+              '- mevcut ürün yeterliyse “satın alma gerekmiyor” sonucunun korunması.',
               '',
-              'Hedef: katalogdaki bir sonraki doğrulanmış eşik **45 ürün/model düğümü**.'
+              'Sonraki hedef: **60 ürün/model düğümü** ve en az bir yeni kullanıcı yolculuğu.'
             ].join('\n');
             await github.rest.issues.createComment({
               owner: context.repo.owner,

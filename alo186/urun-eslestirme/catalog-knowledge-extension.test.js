@@ -1,23 +1,23 @@
 'use strict';
 const assert=require('node:assert/strict');
-const catalog=require('./catalog-growth-run6.js');
+const catalog=require('./catalog-growth-run7.js');
 const now=new Date('2026-07-30T12:00:00Z');
 
 assert.equal(catalog.affiliateTag,'alo186rehber-21');
-assert.equal(catalog.needs.length,18);
-assert.equal(catalog.categories.length,18);
-assert.equal(catalog.products.length,45);
+assert.equal(catalog.needs.length,23);
+assert.equal(catalog.categories.length,23);
+assert.equal(catalog.products.length,55);
 assert.deepEqual(catalog.knowledgeGraphSummary({now}),{
-  version:'2026-07-30-run6-growth',generatedAt:'2026-07-30',needCount:18,categoryCount:18,
-  productCount:45,exactListingCount:20,manufacturerSearchCount:25,
-  publicProductCount:13,gatedCandidateCount:32,
+  version:'2026-07-30-run7-user-growth',generatedAt:'2026-07-30',needCount:23,categoryCount:23,
+  productCount:55,exactListingCount:20,manufacturerSearchCount:35,
+  publicProductCount:13,gatedCandidateCount:42,
   affiliatePolicies:['verified_direct','after_tool','professional_only']
 });
 
 const exact=catalog.products.filter(product=>product.status==='verified_listing');
 const models=catalog.products.filter(product=>product.status==='manufacturer_verified_search');
 assert.equal(exact.length,20);
-assert.equal(models.length,25);
+assert.equal(models.length,35);
 for(const product of exact){
   assert.match(product.asin,/^B[A-Z0-9]{9}$/);
   assert(product.url.includes(`/dp/${product.asin}`));
@@ -75,9 +75,19 @@ const modelChecks={
   'anker-341-a8346-hub':{source:'anker.com',ports:7,pdPassThroughW:85,maxResolution:'4K@30Hz'},
   'ugreen-90871-usbc-100w':{source:'ugreen.com',maxPowerW:100,maxCurrentA:5,eMarker:true},
   'anker-prime-a88e2-240w':{source:'anker.com',maxPowerW:240,usbPdEpr:true,video:false},
-  'ugreen-50571-usbc-hdmi':{source:'ugreen.com',maxResolution:'4K@60Hz',direction:'USB-C source to HDMI display'}
+  'ugreen-50571-usbc-hdmi':{source:'ugreen.com',maxResolution:'4K@60Hz',direction:'USB-C source to HDMI display'},
+  'apc-bx1600mi-gr':{source:'se.com',capacityVA:1600,capacityW:900,outletsSchuko:4,avr:true},
+  'cyberpower-cp1500epfclcd':{source:'cyberpower.com',capacityVA:1500,capacityW:900,pureSine:true,activePfcCompatible:true},
+  'fluke-117':{source:'fluke.com',trueRms:true,maxVoltageV:600,currentContinuousA:10,nonContactVoltage:true},
+  'fluke-325':{source:'fluke.com',trueRms:true,acCurrentMaxA:400,dcCurrentMaxA:400,jawMaxMm:30},
+  'flir-c5':{source:'flir.com',thermalResolution:'160x120',temperatureMaxC:400,radiometric:true,ipRating:'IP54'},
+  'bosch-universaltemp-06036831z0':{source:'bosch-diy.com',temperatureMinC:-30,temperatureMaxC:500,opticalRatio:'12:1'},
+  'ctek-mxs-5-0-eu':{source:'ctek.com',batteryVoltageV:12,chargingCurrentA:5,chargingCapacityAhMax:110,maintenanceCapacityAhMax:160},
+  'noco-genius5':{source:'no.co',chargingCurrentA:5,capacityAhMax:120,ipRating:'IP65'},
+  'bosch-procore18v-5-5ah-1600a02149':{source:'bosch-professional.com',voltageV:18,capacityAh:5.5,weightKg:0.955},
+  'milwaukee-m18-hb5-5-4932464712':{source:'milwaukeetool.eu',voltageV:18,capacityAh:5.5,highOutput:true,redlink:true}
 };
-assert.equal(Object.keys(modelChecks).length,25);
+assert.equal(Object.keys(modelChecks).length,35);
 for(const[id,checks]of Object.entries(modelChecks)){
   const product=catalog.getProduct(id);
   assert(product,id);
@@ -107,6 +117,11 @@ assert.ok(catalog.allProductsFor('usb_c_charger').some(product=>product.id==='an
 assert.ok(catalog.allProductsFor('usb_c_cable').some(product=>product.id==='anker-prime-a88e2-240w'));
 assert.ok(catalog.allProductsFor('usb_c_hub').some(product=>product.id==='anker-341-a8346-hub'));
 assert.ok(catalog.allProductsFor('display_cable').some(product=>product.id==='ugreen-50571-usbc-hdmi'));
+for(const category of ['computer_ups','multimeter','thermal_imager','battery_charger','tool_battery']){
+  assert.equal(catalog.allProductsFor(category).length,2,`${category} iki kullanıcı odaklı model taşımalı`);
+  assert.equal(catalog.graphForCategory(category).needs.length,1,`${category} ihtiyaç düğümüne bağlanmalı`);
+  assert(catalog.categoryRelations[category].tools.length,`${category} ücretsiz araca bağlanmalı`);
+}
 for(const category of ['usb_c_charger','usb_c_cable','usb_c_hub','display_cable']){
   assert.equal(catalog.graphForCategory(category).needs.length,1,`${category} ihtiyaç düğümüne bağlanmalı`);
 }
@@ -118,7 +133,7 @@ assert(combined.requiredEvidence.length>=4);
 const publicProducts=catalog.products.filter(product=>catalog.publicAffiliateEligible(product,{now}));
 const gatedProducts=catalog.products.filter(product=>catalog.isCatalogProduct(product)&&!catalog.publicAffiliateEligible(product,{now,freshOnly:false}));
 assert.equal(publicProducts.length,13);
-assert.equal(gatedProducts.length,32);
+assert.equal(gatedProducts.length,42);
 assert(publicProducts.includes(a1289));
 assert(publicProducts.includes(a1383));
 assert(!publicProducts.some(product=>product.status==='manufacturer_verified_search'));
@@ -128,8 +143,8 @@ const productNodes=graph.filter(node=>node['@type']==='Product');
 const termNodes=graph.filter(node=>node['@type']==='DefinedTerm');
 const candidateNodes=termNodes.filter(node=>node.inDefinedTermSet&&node.inDefinedTermSet['@id'].endsWith('/gated-product-candidates#termset'));
 assert.equal(productNodes.length,13);
-assert.equal(termNodes.length,68);
-assert.equal(candidateNodes.length,32);
+assert.equal(termNodes.length,88);
+assert.equal(candidateNodes.length,42);
 assert.equal(graph.filter(node=>node['@type']==='Offer').length,0);
 for(const node of productNodes){
   assert(!('offers'in node));
@@ -154,7 +169,7 @@ assert.equal(stale.filter(node=>node['@type']==='Product').length,0);
 assert.equal(stale.filter(node=>node['@type']==='DefinedTerm'&&node.inDefinedTermSet&&node.inDefinedTermSet['@id'].endsWith('/gated-product-candidates#termset')).length,0);
 
 console.log(JSON.stringify({
-  ok:true,affiliateTag:catalog.affiliateTag,needs:18,categories:18,totalProducts:45,
-  publicProducts:13,gatedCandidates:32,exactAsins:20,manufacturerModels:25,
-  run6ManufacturerModels:5
+  ok:true,affiliateTag:catalog.affiliateTag,needs:23,categories:23,totalProducts:55,
+  publicProducts:13,gatedCandidates:42,exactAsins:20,manufacturerModels:35,
+  run7ManufacturerModels:10,userJourneys:5
 },null,2));

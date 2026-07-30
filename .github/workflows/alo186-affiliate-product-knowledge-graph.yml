@@ -3,34 +3,24 @@ name: ALO186 affiliate ürün Knowledge Graph kalite kontrolü
 on:
   pull_request:
     paths:
-      - 'alo186/akilli-urun-secimi/catalog-knowledge-extension.js'
-      - 'alo186/akilli-urun-secimi/catalog-knowledge-extension.test.js'
-      - 'alo186/urun-eslestirme/catalog-knowledge-extension.js'
-      - 'alo186/urun-eslestirme/catalog-sales-extension.js'
-      - 'alo186/urun-eslestirme/catalog-growth-run6.js'
-      - 'alo186/urun-eslestirme/run6-missing-component-set.js'
-      - 'alo186/urun-eslestirme/catalog-knowledge-extension.test.js'
+      - 'alo186/akilli-urun-secimi/**'
+      - 'alo186/urun-eslestirme/**'
       - 'alo186/urun-bilgi-grafigi/**'
       - 'alo186/katalog-guven-durumu/**'
       - 'alo186/deployment/inject_affiliate_product_graph.py'
       - 'alo186/deployment/inject_growth_run15.py'
-      - 'alo186/tests/test_affiliate_product_knowledge_graph.py'
+      - 'alo186/tests/test_affiliate_product_knowledge_graph*.py'
       - '.github/workflows/alo186-affiliate-product-knowledge-graph.yml'
   push:
     branches: [main]
     paths:
-      - 'alo186/akilli-urun-secimi/catalog-knowledge-extension.js'
-      - 'alo186/akilli-urun-secimi/catalog-knowledge-extension.test.js'
-      - 'alo186/urun-eslestirme/catalog-knowledge-extension.js'
-      - 'alo186/urun-eslestirme/catalog-sales-extension.js'
-      - 'alo186/urun-eslestirme/catalog-growth-run6.js'
-      - 'alo186/urun-eslestirme/run6-missing-component-set.js'
-      - 'alo186/urun-eslestirme/catalog-knowledge-extension.test.js'
+      - 'alo186/akilli-urun-secimi/**'
+      - 'alo186/urun-eslestirme/**'
       - 'alo186/urun-bilgi-grafigi/**'
       - 'alo186/katalog-guven-durumu/**'
       - 'alo186/deployment/inject_affiliate_product_graph.py'
       - 'alo186/deployment/inject_growth_run15.py'
-      - 'alo186/tests/test_affiliate_product_knowledge_graph.py'
+      - 'alo186/tests/test_affiliate_product_knowledge_graph*.py'
       - '.github/workflows/alo186-affiliate-product-knowledge-graph.yml'
   workflow_dispatch:
 
@@ -54,7 +44,7 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Katalog, matcher ve 45 ürün/model sözleşmesi
+      - name: Katalog, matcher ve 55 ürün/model sözleşmesi
         run: |
           set -euo pipefail
           node alo186/tests/test_affiliate_knowledge_graph.js
@@ -65,22 +55,20 @@ jobs:
       - name: JavaScript ve Python sözdizimi
         run: |
           set -euo pipefail
-          node --check alo186/akilli-urun-secimi/catalog-knowledge-extension.js
           node --check alo186/urun-eslestirme/catalog-knowledge-extension.js
           node --check alo186/urun-eslestirme/catalog-sales-extension.js
           node --check alo186/urun-eslestirme/catalog-growth-run6.js
+          node --check alo186/urun-eslestirme/catalog-growth-run7.js
           node --check alo186/urun-eslestirme/run6-missing-component-set.js
-          node --check alo186/urun-bilgi-grafigi/catalog.js
-          node --check alo186/urun-bilgi-grafigi/catalog-knowledge-extension.js
-          node --check alo186/urun-bilgi-grafigi/catalog-sales-extension.js
+          node --check alo186/urun-bilgi-grafigi/catalog-growth-run7.js
           node --check alo186/urun-bilgi-grafigi/app.js
           python -m py_compile alo186/deployment/inject_affiliate_product_graph.py
           python -m py_compile alo186/deployment/inject_growth_run15.py
+          python -m py_compile alo186/tests/test_affiliate_product_knowledge_graph_artifact.py
 
-      - name: Canonical ve güvenlik regresyonları
+      - name: Yayın ve güvenlik regresyonları
         run: |
           set -euo pipefail
-          python alo186/tests/test_content_intent_consolidation.py
           node alo186/tests/test_release_manifest.js
           node alo186/tests/test_portal_hardening.js
           python alo186/tests/device_damage_deadline_guard.py
@@ -100,6 +88,7 @@ jobs:
           for target in custom project; do
             cp -a /tmp/alo186-product-graph-canonical "/tmp/alo186-product-graph-$target"
           done
+
           python alo186/deployment/prepare_github_pages.py \
             --site /tmp/alo186-product-graph-custom \
             --base-path '' \
@@ -130,142 +119,15 @@ jobs:
             --site /tmp/alo186-product-graph-project \
             --base-path '/chatgpt'
 
-      - name: Graph, affiliate kapısı ve keşif sözleşmeleri
-        shell: bash
+      - name: Run7 ürün, içerik ve affiliate güven sözleşmesi
         run: |
           set -euo pipefail
-          python - <<'PY'
-          import json
-          import re
-          from pathlib import Path
-
-          model_ids = {
-              'tp-link-tapo-p110', 'tp-link-tapo-p110m', 'ecoflow-river-2', 'x-sense-xs01',
-              'ugreen-nexode-100w-4port', 'tp-link-tapo-p115', 'tp-link-tapo-p115m',
-              'ecoflow-river-2-max', 'ecoflow-delta-2-max', 'x-sense-xc01-r',
-              'samsung-eb-p4520-20k-45w', 'ugreen-nexode-x-65w-3port',
-              'ugreen-90440-240w-usb-c', 'ecoflow-river-3', 'ecoflow-river-3-plus',
-              'ecoflow-delta-3-plus', 'bluetti-ac70p', 'honda-eu22i',
-              'victron-phoenix-vedirect-12-1200', 'x-sense-sc07-mr',
-              'anker-735-a2668-65w', 'anker-341-a8346-hub', 'ugreen-90871-usbc-100w',
-              'anker-prime-a88e2-240w', 'ugreen-50571-usbc-hdmi'
-          }
-          run6_ids = {
-              'anker-735-a2668-65w', 'anker-341-a8346-hub', 'ugreen-90871-usbc-100w',
-              'anker-prime-a88e2-240w', 'ugreen-50571-usbc-hdmi'
-          }
-          required_public = {'anker-737-a1289', 'anker-a1383-20k-87w'}
-          forbidden = {'price', 'stock', 'rating', 'seller', 'delivery', 'warranty', 'affiliateCommission'}
-          entry_targets = [
-              'amazon-elektrik-urunleri/index.html', 'akilli-urun-secimi/index.html',
-              'katalog-guven-durumu/index.html', 'elektrik-portali/index.html', 'index.html'
-          ]
-
-          for root, prefix in [
-              (Path('/tmp/alo186-product-graph-custom'), ''),
-              (Path('/tmp/alo186-product-graph-project'), '/chatgpt'),
-          ]:
-              graph_dir = root / 'urun-bilgi-grafigi'
-              for relative in [
-                  'index.html', 'styles.css', 'app.js', 'catalog.js',
-                  'catalog-knowledge-extension.js', 'catalog-sales-extension.js',
-                  'catalog-growth-run6.js', 'product-graph.json'
-              ]:
-                  assert (graph_dir / relative).is_file(), (root, relative)
-
-              graph = json.loads((graph_dir / 'product-graph.json').read_text(encoding='utf-8'))
-              assert len(graph['needs']) == 18
-              assert len(graph['categories']) == 18
-              assert len(graph['products']) == 45
-              products = {item['id']: item for item in graph['products']}
-              categories = {item['id']: item for item in graph['categories']}
-              assert model_ids.issubset(products)
-              assert sum(item['verificationStatus'] == 'verified_listing' for item in products.values()) == 20
-              assert sum(item['verificationStatus'] == 'manufacturer_verified_search' for item in products.values()) == 25
-              assert graph['commercialPolicy']['noBuyOutcomePreserved'] is True
-              for item in products.values():
-                  assert not forbidden.intersection(item.keys()), (item['id'], forbidden.intersection(item.keys()))
-              for item_id in model_ids:
-                  item = products[item_id]
-                  assert item['identifier']['type'] == 'Model'
-                  assert item['officialSource'].startswith('https://')
-                  assert item['linkMode'] == 'exact_model_search'
-
-              expected_public = {
-                  item['id'] for item in products.values()
-                  if item['verificationStatus'] == 'verified_listing'
-                  and categories[item['categoryId']]['affiliatePolicy'] == 'verified_direct'
-              }
-              assert len(expected_public) == 13
-              assert required_public.issubset(expected_public)
-              assert not run6_ids.intersection(expected_public)
-
-              html = (graph_dir / 'index.html').read_text(encoding='utf-8')
-              payloads = [json.loads(block) for block in re.findall(
-                  r'<script[^>]+type="application/ld\+json"[^>]*>(.*?)</script>', html, re.S | re.I
-              )]
-              nodes = []
-              for payload in payloads:
-                  nodes.extend(payload.get('@graph', []))
-              product_nodes = [node for node in nodes if isinstance(node, dict) and node.get('@type') == 'Product']
-              term_nodes = [node for node in nodes if isinstance(node, dict) and node.get('@type') == 'DefinedTerm']
-              candidate_nodes = [
-                  node for node in term_nodes
-                  if (node.get('inDefinedTermSet') or {}).get('@id', '').endswith('/gated-product-candidates#termset')
-              ]
-              assert len(product_nodes) == 13
-              assert len(term_nodes) == 68
-              assert len(candidate_nodes) == 32
-              assert not any('offers' in node or 'aggregateRating' in node for node in product_nodes)
-              assert {node.get('sku') for node in product_nodes} == expected_public
-              assert not model_ids.intersection({node.get('sku') for node in product_nodes})
-              assert model_ids.issubset({node.get('termCode') for node in candidate_nodes})
-
-              release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
-              pages = json.loads((root / 'pages-release.json').read_text(encoding='utf-8'))
-              metadata = release['affiliateProductKnowledgeGraph']
-              assert metadata['needCount'] == 18
-              assert metadata['categoryCount'] == 18
-              assert metadata['productCount'] == 45
-              assert metadata['exactAsinCount'] == 20
-              assert metadata['manufacturerVerifiedSearchCount'] == 25
-              assert metadata['publicProductCount'] == 13
-              assert metadata['gatedCandidateCount'] == 32
-              assert metadata['commercialRankingFieldsUsed'] == []
-              assert metadata['noBuyOutcomePreserved'] is True
-              assert pages['affiliateProductKnowledgeGraph']['productCount'] == 45
-
-              expected_route = prefix + '/urun-bilgi-grafigi/' if prefix else '/urun-bilgi-grafigi/'
-              expected_graph = prefix + '/urun-bilgi-grafigi/product-graph.json' if prefix else '/urun-bilgi-grafigi/product-graph.json'
-              assert metadata['route'] == expected_route
-              assert metadata['graph'] == expected_graph
-              for relative in entry_targets:
-                  text = (root / relative).read_text(encoding='utf-8')
-                  assert 'data-alo186-product-graph-entry="true"' in text, relative
-                  assert expected_route in text, (relative, expected_route)
-              matcher = (root / 'akilli-urun-secimi/index.html').read_text(encoding='utf-8')
-              assert 'catalog-sales-extension.js' in matcher
-              assert 'catalog-growth-run6.js' in matcher
-              assert 'run6-missing-component-set.js' in matcher
-              journey = (root / 'akilli-urun-secimi/run6-missing-component-set.js').read_text(encoding='utf-8')
-              assert 'Mevcut zincir yeterli görünüyor' in journey
-              assert '90 günlük yeniden kontrol' in journey
-              assert not re.search(r'amazon\.(?:com|com\.tr)/', journey, re.I)
-
-              search = json.loads((root / 'arama/search-index.json').read_text(encoding='utf-8'))
-              search_entry = next(item for item in search['entries'] if item['canonicalPath'] == '/urun-bilgi-grafigi/')
-              assert search_entry['url'] == expected_route
-              sw = (root / 'sw.js').read_text(encoding='utf-8')
-              assert expected_route in sw and expected_graph in sw
-              manifest = json.loads((root / 'manifest.webmanifest').read_text(encoding='utf-8'))
-              assert any(item.get('url') == expected_route for item in manifest.get('shortcuts', []))
-
-              app = (graph_dir / 'app.js').read_text(encoding='utf-8')
-              assert 'sponsored nofollow noopener' in app
-              assert 'localStorage' not in app and 'sessionStorage' not in app
-              assert 'Mevcut ürünüm güvenli biçimde ihtiyacı karşılamıyor' in app
-              assert 'Amazon’da tam model araması' in app
-          PY
+          python alo186/tests/test_affiliate_product_knowledge_graph_artifact.py \
+            --site /tmp/alo186-product-graph-custom \
+            --base-path ''
+          python alo186/tests/test_affiliate_product_knowledge_graph_artifact.py \
+            --site /tmp/alo186-product-graph-project \
+            --base-path '/chatgpt'
 
       - name: Doğrulanmış Product Knowledge Graph artifactı
         uses: actions/upload-artifact@v4
