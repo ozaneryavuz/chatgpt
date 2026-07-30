@@ -1,0 +1,181 @@
+name: ALO186 Taşınabilir EVSE ve priz uygunluğu
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/**'
+      - 'alo186/amazon-elektrik-urunleri/tasinabilir-evse-secimi/**'
+      - 'alo186/hesaplama/index.html'
+      - 'alo186/deployment/routing-overlays/087-portable-evse-socket-test.json'
+      - 'alo186/tests/test_portable_evse_socket_v326.py'
+      - '.github/workflows/alo186-portable-evse-socket-v326.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/**'
+      - 'alo186/amazon-elektrik-urunleri/tasinabilir-evse-secimi/**'
+      - 'alo186/hesaplama/index.html'
+      - 'alo186/deployment/routing-overlays/087-portable-evse-socket-test.json'
+      - 'alo186/tests/test_portable_evse_socket_v326.py'
+      - '.github/workflows/alo186-portable-evse-socket-v326.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-portable-evse-socket-v326-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Hesap, güven, dönüşüm ve tekrar ziyaret senaryoları
+        run: |
+          set -euo pipefail
+          node alo186/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/app.test.js
+          python alo186/tests/test_portable_evse_socket_v326.py
+
+      - name: Sözdizimi ve mevcut güven regresyonları
+        run: |
+          set -euo pipefail
+          node --check alo186/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/app.js
+          node --check alo186/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/post-mount.js
+          python -m py_compile alo186/tests/test_portable_evse_socket_v326.py
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+          python alo186/tests/test_home_office_backup_bundle_v325.py
+
+      - name: Canonical üretim ve smoke testi
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-portable-evse-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-portable-evse-canonical
+
+      - name: Custom-domain ve project-path Pages üretimi
+        run: |
+          set -euo pipefail
+          for target in custom project; do
+            cp -a /tmp/alo186-portable-evse-canonical "/tmp/alo186-portable-evse-$target"
+          done
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-portable-evse-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-portable-evse-custom \
+            --base-path ''
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-portable-evse-custom \
+            --base-path '' > /tmp/alo186-portable-evse-custom.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-portable-evse-custom \
+            --base-path ''
+
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-portable-evse-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-portable-evse-project \
+            --base-path '/chatgpt'
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-portable-evse-project \
+            --base-path '/chatgpt' > /tmp/alo186-portable-evse-project.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-portable-evse-project \
+            --base-path '/chatgpt'
+
+      - name: Rota, sitemap, teknik arama, affiliate ve gizlilik kabulü
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          tool_route='hesaplama/tasinabilir-ev-sarj-priz-uygunluk'
+          guide_route='amazon-elektrik-urunleri/tasinabilir-evse-secimi'
+          tool_slug='tasinabilir-ev-sarj-priz-uygunluk/'
+          guide_slug='tasinabilir-evse-secimi/'
+          travel_slug='seyahat-priz-adaptoru-voltaj-uygunluk/'
+          for root,prefix in [
+              (Path('/tmp/alo186-portable-evse-custom'),''),
+              (Path('/tmp/alo186-portable-evse-project'),'/chatgpt'),
+          ]:
+              tool_page=root/tool_route/'index.html'
+              app=root/tool_route/'app.js'
+              post=root/tool_route/'post-mount.js'
+              css=root/tool_route/'styles.css'
+              guide_page=root/guide_route/'index.html'
+              assert all(path.is_file() for path in [tool_page,app,post,css,guide_page])
+              html=tool_page.read_text(encoding='utf-8')
+              js=app.read_text(encoding='utf-8')
+              post_js=post.read_text(encoding='utf-8')
+              guide=guide_page.read_text(encoding='utf-8')
+
+              assert tool_slug in html
+              assert 'amazon.com' not in (js+post_js).lower()
+              assert all(token not in js+post_js for token in ['localStorage','sessionStorage','fetch('])
+              assert all(token in html for token in ['actualNeed','technicalCheck','affiliateCheck','productLinks'])
+              assert 'tasinabilir-evse-secimi' in post_js
+              assert "form.addEventListener('reset'" in post_js
+              assert "commerce.dataset.categories = '[]'" in post_js
+
+              assert guide_slug in guide
+              assert 'alo186rehber-21' in guide
+              assert 'rel="sponsored nofollow noopener"' in guide
+              assert all(token in guide for token in ['needGate','evidenceGate','affiliateGate','jsonBtn','icsBtn','personalData:false'])
+              assert '"@type":"Product"' not in guide and '"@type":"Offer"' not in guide
+              assert all(token not in guide for token in ['localStorage','sessionStorage','fetch(','type="email"','type="tel"','<textarea'])
+
+              hub=(root/'hesaplama/index.html').read_text(encoding='utf-8')
+              assert tool_slug in hub and travel_slug in hub
+              assert hub.count('class="tool-card"')>=42
+
+              sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
+              assert tool_slug in sitemap and guide_slug in sitemap
+              search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
+              tool_entry=next(item for item in search['entries'] if item['canonicalPath']=='/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/')
+              guide_entry=next(item for item in search['entries'] if item['canonicalPath']=='/amazon-elektrik-urunleri/tasinabilir-evse-secimi/')
+              assert tool_entry['url'].endswith('/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/')
+              assert guide_entry['url'].endswith('/amazon-elektrik-urunleri/tasinabilir-evse-secimi/')
+          print(json.dumps({
+              'ok':True,
+              'toolRoute':'/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/',
+              'commerceGuideRoute':'/amazon-elektrik-urunleri/tasinabilir-evse-secimi/',
+              'directStoreLinksInCalculatorSource':0,
+              'affiliateTripleGate':True,
+              'affiliateDisclosure':True,
+              'resetClearsCommerce':True,
+              'jsonRecheck':True,
+              'icsRecheckDays':90,
+              'storage':False,
+              'searchIndexed':True,
+              'concurrentTravelToolPreserved':True
+          },ensure_ascii=False))
+          PY
+
+      - name: Doğrulanmış site artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-portable-evse-socket-v326
+          path: /tmp/alo186-portable-evse-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30

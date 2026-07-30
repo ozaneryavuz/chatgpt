@@ -67,9 +67,9 @@ def main() -> None:
         assert token in app
     assert "scenarios:23" in test
 
-    hub_count_match = re.search(r"(\d+) çekirdek araç", hub)
-    assert hub_count_match, "Hesaplama Merkezi araç sayacı bulunamadı."
-    hub_tool_count = int(hub_count_match.group(1))
+    tool_count_match = re.search(r"(\d+) çekirdek araç", hub)
+    assert tool_count_match, "Hesaplama Merkezi araç sayacı bulunamadı."
+    hub_tool_count = int(tool_count_match.group(1))
     assert hub_tool_count >= 40
     assert './evden-calisma-laptop-modem-yedek-guc-seti/' in hub
     assert "Evden Çalışma Laptop ve Modem Yedek Güç Seti" in hub
