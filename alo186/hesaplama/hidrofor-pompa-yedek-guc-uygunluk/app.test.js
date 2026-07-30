@@ -41,6 +41,7 @@ assert.deepEqual(inverterResult.commerceCategories,['inverter']);
 
 const missingClass=app.evaluate({...base,sourceStatus:'existing',sourceType:'auto',sourceContinuousW:1500,sourceSurgeW:7000,sourceWh:5000});
 assert.equal(missingClass.status,'evidence_required','Mevcut kaynak sınıfı seçilmeden no-buy sonucu üretilemez.');
+assert(missingClass.issues.some(item=>item.includes('Mevcut kaynağın sınıfını doğrulayın')));
 
 const blankExisting=app.evaluate({...base,sourceStatus:'existing',sourceType:'generator',sourceContinuousW:'',sourceSurgeW:' '});
 assert.equal(blankExisting.status,'evidence_required','Boş sayısal alanlar sıfır kabul edilmemeli.');
@@ -80,6 +81,19 @@ assert.equal(purged.length,8);
 assert.equal(purged[0].id,'record-0');
 assert(!purged.some(item=>item.id==='expired'));
 
+const storageState=new Map([[app.constants.STORAGE_KEY,JSON.stringify([record,many.at(-1)])]]);
+const fakeStorage={
+  getItem:key=>storageState.has(key)?storageState.get(key):null,
+  setItem:(key,value)=>storageState.set(key,value),
+  removeItem:key=>storageState.delete(key)
+};
+const stored=app.loadStoredRecords(fakeStorage,now);
+assert.equal(stored.length,1,'Süresi dolan kayıt yüklemede temizlenmeli.');
+assert.equal(stored[0].id,record.id);
+assert.equal(JSON.parse(storageState.get(app.constants.STORAGE_KEY)).length,1,'Temizlenmiş dizi persistent storage üzerine yazılmalı.');
+app.loadStoredRecords(fakeStorage,new Date('2028-01-01T00:00:00Z'));
+assert.equal(storageState.has(app.constants.STORAGE_KEY),false,'Bütün kayıtlar süresi dolduysa storage anahtarı kaldırılmalı.');
+
 const payload=app.exportPayload(purged,now);
 assert.equal(payload.schemaVersion,1);
 assert.equal(payload.route,'/hesaplama/hidrofor-pompa-yedek-guc-uygunluk/');
@@ -101,7 +115,7 @@ assert(!Object.values(app.constants.CATEGORY_LINKS).some(item=>item.href.include
 
 console.log(JSON.stringify({
   ok:true,
-  scenarios:22,
+  scenarios:25,
   records:app.constants.MAX_RECORDS,
   reviewDays:app.constants.REVIEW_DAYS,
   route:'/hesaplama/hidrofor-pompa-yedek-guc-uygunluk/'

@@ -85,7 +85,7 @@ def main() -> None:
         "generator",
         "power_station",
         "inverter",
-        "Mevcut kaynağın jeneratör, power station veya inverter sınıfı seçilmedi.",
+        "Mevcut kaynağın sınıfını doğrulayın",
         "String(value??'').trim()",
         "STORAGE_KEY='alo186-pump-backup-records-v1'",
         "MAX_RECORDS=8",
@@ -93,6 +93,7 @@ def main() -> None:
         "REVIEW_DAYS=90",
         "normalizeRecord",
         "purgeRecords",
+        "loadStoredRecords",
         "exportPayload",
         "text/calendar",
         "elektrikci-is-emri-ozeti",
@@ -130,7 +131,7 @@ def main() -> None:
     )
     payload = json.loads(result.stdout)
     assert payload["ok"] is True
-    assert payload["scenarios"] == 22
+    assert payload["scenarios"] == 25
     assert payload["route"] == ROUTE
     assert payload["records"] == 8
     assert payload["reviewDays"] == 90
