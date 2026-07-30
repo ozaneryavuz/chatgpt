@@ -72,13 +72,16 @@ jobs:
           assert 'fiyat, stok' in modem_html.lower()
           assert 'fiyat, stok' in ups_html.lower()
           assert 'id="note"' not in plan_html, 'Free-text note field reintroduces unnecessary personal-data risk.'
-          assert 'localstorage' in plan_html.lower()
-          assert "if(medical)" in plan_js and "if($('internet').checked)" in plan_js
+          assert 'localstorage' in plan_js.lower() and 'expiresAt' in plan_js and 'STORAGE_DAYS=180' in plan_js
+          assert 'flags.medical' in plan_js and 'flags.internet' in plan_js
+          assert 'commercialAllowed:false' in plan_js and 'affiliateLinks:0' in plan_js
+          assert 'Mevcut hazırlık yeterli; yeni ürün aramayın' in plan_js
+          assert 'active_outage' in plan_js
+          assert 'JSON teknik planı' in plan_html and 'Kontrol takvimi (.ics)' in plan_html
           assert ('modem_ont_backup_evaluated' in modem_js or 'modem_backup_calculated' in modem_js)
           assert "state='no_buy'" in modem_js and "state='active'" in modem_js
           assert 'actualNeed' in modem_html and 'technicalCheck' in modem_html and 'affiliateCheck' in modem_html
           assert 'ups_product_route_opened' in ups_js
-          assert 'outage_plan_reviewed' in plan_js
           assert 'product_route_shown' in ups_js
           print('ALO186 growth smoke checks passed.')
           PY
