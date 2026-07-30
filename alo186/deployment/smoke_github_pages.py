@@ -8,7 +8,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import urlsplit
 
-CANONICAL_ORIGIN = "https://www.alo186.com"
+CANONICAL_ORIGIN = "https://alo186.com"
 REQUIRED_FILES = (
     "index.html",
     "404.html",
