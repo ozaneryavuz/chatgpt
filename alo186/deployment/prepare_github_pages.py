@@ -7,6 +7,7 @@ from pathlib import Path
 
 import prepare_github_pages_core as _core
 from finalize_live_quality import CANONICAL_HOST, CANONICAL_ORIGIN as LIVE_CANONICAL_ORIGIN
+from finalize_user_experience import run as finalize_user_experience
 from prepare_github_pages_core import *  # noqa: F401,F403
 
 
@@ -173,6 +174,7 @@ def update_primary_shortcut(site: Path, base_path: str) -> None:
 def prepare(site: Path, base_path: str, repository: str, commit: str) -> dict:
     result = _original_prepare(site, base_path, repository, commit)
     normalized = _core.normalize_base_path(base_path)
+    audit = finalize_user_experience(site, normalized)
     ux = install_sitewide_ux(site, normalized)
     validate_root_legal_deadline(site, normalized)
     validate_root_primary_start(site, normalized)
@@ -189,6 +191,7 @@ def prepare(site: Path, base_path: str, repository: str, commit: str) -> dict:
     release["primaryStartRoute"] = _core.public_url(normalized, PRIMARY_START_ROUTE)
     release["primaryStartMode"] = "progressive-disclosure"
     release["sitewideUx"] = ux
+    release["sitewideUserExperienceAudit"] = audit
     release["liveOriginNormalizationStage"] = "after-all-growth-injectors"
     if release_path.is_file():
         release_path.write_text(json.dumps(release, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
