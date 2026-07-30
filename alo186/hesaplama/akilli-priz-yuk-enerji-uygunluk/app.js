@@ -105,6 +105,7 @@
     }
 
     const needsEnergy=input.energyFeature==='yes'||['energy','both'].includes(input.purpose);
+    const needsControl=['remote','schedule','both'].includes(input.purpose);
     const searchTerm=needsEnergy?'enerji ölçümlü 16A topraklı akıllı priz güvenlik belgeli':'16A topraklı akıllı priz zamanlayıcı güvenlik belgeli';
     const baseExtra={productClass:needsEnergy?'energy_monitoring_smart_plug':'smart_plug',searchTerm};
 
@@ -122,17 +123,17 @@
     if(existingA===null||existingW===null||existingA<=0||existingW<=0){
       return withMetrics(baseResult('evidence_required','Mevcut ürünün hem A hem W sınırını doğrulayın','Tam model teknik föyündeki sürekli amper ve watt sınırlarını birlikte girin. Yalnız “16 A” pazarlama ifadesi yeterli değildir.'),m);
     }
-    if(existingA<m.requiredA||existingW<m.requiredW){
-      return withMetrics(baseResult('replace_candidate','Mevcut ürün kapasite payını karşılamıyor',`Mevcut ${existingW} W / ${existingA} A ürün, hesaplanan en az ${m.requiredW} W / ${m.requiredA.toFixed(1)} A planlama sınırının altında. Yükü azaltın veya yalnız doğrulanmış düşük riskli teknik sınıfı değerlendirin.`,{commercialAllowed:true,...baseExtra}),m);
-    }
-    if(input.certification!=='yes'){
-      return withMetrics(baseResult('evidence_required','Tam model güvenlik belgesini doğrulayın','Üretici adı, model numarası, kullanım kılavuzu ve izlenebilir güvenlik/uygunluk belgesi doğrulanmadan mevcut ürünü yeterli saymayın.'),m);
-    }
     if(input.recallChecked==='recalled'){
       return withMetrics(baseResult('stop_use','Geri çağırılmış ürünü kullanmayın','Tam marka-model için geri çağırma veya kullanım durdurma duyurusu varsa ürünü enerjilendirmeyin; resmî üretici/ürün güvenliği sürecini izleyin. Affiliate yönlendirmesi kapalıdır.'),m);
     }
     if(input.recallChecked!=='yes'){
       return withMetrics(baseResult('evidence_required','Geri çağırma kontrolünü tamamlayın','Tam marka-model için üretici ve resmî ürün güvenliği duyurularını kontrol edin.'),m);
+    }
+    if(existingA<m.requiredA||existingW<m.requiredW){
+      return withMetrics(baseResult('replace_candidate','Mevcut ürün kapasite payını karşılamıyor',`Mevcut ${existingW} W / ${existingA} A ürün, hesaplanan en az ${m.requiredW} W / ${m.requiredA.toFixed(1)} A planlama sınırının altında. Yükü azaltın veya yalnız doğrulanmış düşük riskli teknik sınıfı değerlendirin.`,{commercialAllowed:true,...baseExtra}),m);
+    }
+    if(input.certification!=='yes'){
+      return withMetrics(baseResult('evidence_required','Tam model güvenlik belgesini doğrulayın','Üretici adı, model numarası, kullanım kılavuzu ve izlenebilir güvenlik/uygunluk belgesi doğrulanmadan mevcut ürünü yeterli saymayın.'),m);
     }
     if(input.softwareSupport==='no'){
       return withMetrics(baseResult('planned_replace','Desteği bitmiş IoT ürününü planlı değiştirin','Güvenlik güncellemesi veya üretici desteği sona ermiş bağlı cihaz, hesap ve ağ riski oluşturabilir. Elektriksel yük düşük riskli olsa bile bulut erişimini sınırlayın; acele satın alma yerine desteklenen ve belgeli bir sınıfı planlı değerlendirin.',{commercialAllowed:true,...baseExtra}),m);
@@ -140,8 +141,17 @@
     if(input.softwareSupport!=='yes'){
       return withMetrics(baseResult('evidence_required','Yazılım desteğini doğrulayın','Üreticinin güvenlik güncellemesi, destek süresi, hesap güvenliği ve açık bildirim kanalını kontrol edin.'),m);
     }
-    if(needsEnergy&&input.existingEnergy!=='yes'){
+    if(needsEnergy&&input.existingEnergy==='unknown'){
+      return withMetrics(baseResult('evidence_required','Mevcut ürünün enerji ölçüm özelliğini doğrulayın','W ve kWh ölçümü gerektiğinde bu özelliğin tam modelde bulunduğunu ve yerel/bulut davranışını doğrulayın. Yanıt bilinmeden ürün açığı kabul edilmez.'),m);
+    }
+    if(needsEnergy&&input.existingEnergy==='no'){
       return withMetrics(baseResult('feature_gap','Gerçek ihtiyaç enerji ölçümü','Mevcut ürün elektriksel olarak yeterli olabilir ancak gerekli W/kWh ölçümünü sağlamıyor. Önce haricî güvenilir ölçer veya desteklenen enerji ölçümlü düşük riskli sınıfın gerçekten gerekli olduğunu doğrulayın.',{commercialAllowed:true,...baseExtra}),m);
+    }
+    if(needsControl&&input.existingControl==='unknown'){
+      return withMetrics(baseResult('evidence_required','Mevcut ürünün kontrol özelliğini doğrulayın','Seçilen amaç için uzaktan anahtarlama veya yerel zamanlama desteğinin tam modelde bulunduğunu doğrulayın. Düz enerji ölçer veya yalnız aç-kapa yapan ürün amacı karşılamayabilir.'),m);
+    }
+    if(needsControl&&input.existingControl==='no'){
+      return withMetrics(baseResult('feature_gap','Seçilen kontrol işlevi mevcut üründe yok','Mevcut ürün elektriksel olarak yeterli olsa da seçilen uzaktan kontrol veya zamanlama işlevini sağlamıyor. Önce bu işlevin gerçekten gerekli olduğunu doğrulayın; yalnız düşük riskli desteklenen sınıf değerlendirilebilir.',{commercialAllowed:true,...baseExtra}),m);
     }
     if(input.loadTest==='no'){
       return withMetrics(baseResult('stop_use','Gerçek yük testi başarısız','Isınma, koku, gevşeklik, kararma veya bağlantı kesilmesi görüldüyse mevcut ürünü kullanmayın. Sorun ürün, duvar prizi veya fiş temasından kaynaklanabilir; uzman değerlendirmesi gerekir.'),m);
@@ -149,7 +159,7 @@
     if(input.loadTest!=='yes'){
       return withMetrics(baseResult('test_existing','Önce mevcut ürünü gözetimli test edin','Kapasite ve belgeler yeterli görünüyor. Yeni ürün almadan önce üretici prosedürüne göre 30 dakikalık gözetimli gerçek yük testi yapın; fiş-priz sıcaklığını, gevşekliği ve bağlantı kararlılığını kontrol edin.'),m);
     }
-    return withMetrics(baseResult('no_buy','Mevcut ürün yeterli — yeni ürün almayın',`Mevcut ürün düşük riskli ${m.loadW} W / ${m.loadA.toFixed(2)} A yük için kapasite, fiziksel durum, topraklama, belge, destek, geri çağırma ve gözetimli test eşiklerini karşılıyor. Yaklaşık 30 günlük tüketim ${m.monthlyKwh} kWh; değişiklik ancak yük, amaç veya destek durumu değişirse değerlendirilmelidir.`),m);
+    return withMetrics(baseResult('no_buy','Mevcut ürün yeterli — yeni ürün almayın',`Mevcut ürün düşük riskli ${m.loadW} W / ${m.loadA.toFixed(2)} A yük için kapasite, fiziksel durum, topraklama, belge, destek, gerekli işlevler, geri çağırma ve gözetimli test eşiklerini karşılıyor. Yaklaşık 30 günlük tüketim ${m.monthlyKwh} kWh; değişiklik ancak yük, amaç veya destek durumu değişirse değerlendirilmelidir.`),m);
   }
 
   function statusLabel(status){
@@ -157,7 +167,7 @@
     return map[status]||'Sonuç';
   }
   function nextStep(result){
-    const map={emergency:'Güvenli alana geçin',stop_use:'Enerjiyi güvenle ayırın',professional:'Uzman değerlendirmesi',evidence_required:'Etiket ve belge kontrolü',conditional_purchase:'Teknik sınıf doğrulaması',replace_candidate:'Yük azalt / doğru sınıf',planned_replace:'Acele etmeden planla',feature_gap:'Ölçüm ihtiyacını doğrula',test_existing:'30 dakika gözetimli test',no_buy:'Mevcut ürünü koru'};
+    const map={emergency:'Güvenli alana geçin',stop_use:'Enerjiyi güvenle ayırın',professional:'Uzman değerlendirmesi',evidence_required:'Etiket ve belge kontrolü',conditional_purchase:'Teknik sınıf doğrulaması',replace_candidate:'Yük azalt / doğru sınıf',planned_replace:'Acele etmeden planla',feature_gap:'İhtiyacı yeniden doğrula',test_existing:'30 dakika gözetimli test',no_buy:'Mevcut ürünü koru'};
     return map[result.status]||'Kanıtları kontrol edin';
   }
   function buildSearchUrl(term){
@@ -181,7 +191,7 @@
     let lastResult=null;
 
     const read=()=>{
-      const ids=['activeProblem','useCase','connection','grounded','loadEvidence','loadW','loadA','hoursPerDay','purpose','manufacturerPermission','existingType','existingCondition','existingA','existingW','certification','softwareSupport','recallChecked','loadTest','energyFeature','existingEnergy'];
+      const ids=['activeProblem','useCase','connection','grounded','loadEvidence','loadW','loadA','hoursPerDay','purpose','manufacturerPermission','existingType','existingCondition','existingA','existingW','certification','softwareSupport','recallChecked','loadTest','energyFeature','existingEnergy','existingControl'];
       const data={emergency:doc.getElementById('emergency').checked};
       ids.forEach(id=>{data[id]=doc.getElementById(id).value;});
       return data;
