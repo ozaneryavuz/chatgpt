@@ -8,7 +8,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "alo186/deployment"))
 
-from inject_live_quality_hardening import CANONICAL_ORIGIN, CSS_FILE, CSS_MARKER, run  # noqa: E402
+from inject_live_quality_hardening import CANONICAL_ORIGIN, CSS_FILE, CSS_MARKER  # noqa: E402
+from inject_live_quality_hardening_v2 import run  # noqa: E402
 
 
 def seed(site: Path, base_path: str) -> None:
