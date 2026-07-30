@@ -21,11 +21,17 @@ class AuditParser(HTMLParser):
         self.main = 0
         self.forms = 0
         self.unlabelled_controls = 0
+        self._label_depth = 0
         self._labels_for: set[str] = set()
         self._controls: list[tuple[str, str | None, bool]] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         values = dict(attrs)
+        if tag == "label":
+            self._label_depth += 1
+            if values.get("for"):
+                self._labels_for.add(str(values["for"]))
+            return
         if tag == "img":
             self.images += 1
             if "alt" in values:
@@ -36,14 +42,21 @@ class AuditParser(HTMLParser):
             self.main += 1
         elif tag == "form":
             self.forms += 1
-        elif tag == "label" and values.get("for"):
-            self._labels_for.add(str(values["for"]))
         elif tag in {"input", "select", "textarea"}:
             if tag == "input" and values.get("type", "text").lower() in {"hidden", "submit", "button", "reset", "image"}:
                 return
             control_id = values.get("id")
-            named = bool(values.get("aria-label") or values.get("aria-labelledby") or values.get("title"))
+            named = bool(
+                self._label_depth
+                or values.get("aria-label")
+                or values.get("aria-labelledby")
+                or values.get("title")
+            )
             self._controls.append((tag, control_id, named))
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "label" and self._label_depth:
+            self._label_depth -= 1
 
     def close_audit(self) -> None:
         self.unlabelled_controls = sum(
@@ -59,6 +72,22 @@ def run(command: list[str]) -> None:
 def attr(text: str, tag: str, name: str) -> str | None:
     match = re.search(rf"<{tag}\b[^>]*\b{name}\s*=\s*(['\"])(.*?)\1", text, re.IGNORECASE | re.DOTALL)
     return match.group(2).strip() if match else None
+
+
+def has_meta(text: str, name: str, content: str | None = None) -> bool:
+    for tag in re.findall(r"<meta\b[^>]*>", text, re.IGNORECASE):
+        if not re.search(rf"\bname\s*=\s*(['\"]){re.escape(name)}\1", tag, re.IGNORECASE):
+            continue
+        if content is None or re.search(rf"\bcontent\s*=\s*(['\"]){re.escape(content)}\1", tag, re.IGNORECASE):
+            return True
+    return False
+
+
+def has_canonical(text: str) -> bool:
+    for tag in re.findall(r"<link\b[^>]*>", text, re.IGNORECASE):
+        if re.search(r"\brel\s*=\s*(['\"])[^'\"]*canonical[^'\"]*\1", tag, re.IGNORECASE) and re.search(r"\bhref\s*=", tag, re.IGNORECASE):
+            return True
+    return False
 
 
 source_js = (ROOT / "alo186/assets/alo186-ux.js").read_text(encoding="utf-8")
@@ -128,20 +157,18 @@ with tempfile.TemporaryDirectory(prefix="alo186-ux-v118-") as folder:
         for page in html_files:
             text = page.read_text(encoding="utf-8")
             relative = page.relative_to(target).as_posix()
-            lower = text.lower()
             is_noindex = bool(re.search(r'<meta\b[^>]*name=["\']robots["\'][^>]*content=["\'][^"\']*noindex', text, re.IGNORECASE))
             noindex_pages += int(is_noindex)
 
             if text.count(UX_MARKER) != 2 or expected_css not in text or expected_js not in text or expected_base_attr not in text:
                 missing_ux.append(relative)
             title = re.search(r"<title>(.*?)</title>", text, re.IGNORECASE | re.DOTALL)
-            canonical_match = re.search(r'<link\b[^>]*rel=["\']canonical["\'][^>]*href=["\']([^"\']+)', text, re.IGNORECASE)
             metadata_ok = (
-                '<meta name="viewport"' in lower
+                has_meta(text, "viewport")
                 and title is not None and bool(re.sub(r"\s+", " ", title.group(1)).strip())
-                and canonical_match is not None
-                and '<meta name="referrer" content="strict-origin-when-cross-origin">' in lower
-                and "<html" in lower
+                and has_canonical(text)
+                and has_meta(text, "referrer", "strict-origin-when-cross-origin")
+                and bool(re.search(r"<html\b", text, re.IGNORECASE))
             )
             if not metadata_ok:
                 missing_metadata.append(relative)
