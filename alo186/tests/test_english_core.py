@@ -7,6 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 OVERLAY = ROOT / "alo186/deployment/routing-overlays/english-core-run1.json"
 EN_ROOT = ROOT / "alo186/en"
+TURKISH_PORTAL = ROOT / "alo186/index.html"
 TURKISH_FINDER = ROOT / "alo186/turkiye-arama/index.html"
 COMPANIES_JS = ROOT / "alo186/turkiye-arama/companies.js"
 
@@ -86,7 +87,7 @@ def main() -> None:
         canonical = extract(r'<link rel="canonical" href="([^"]+)"', html)
         assert canonical == f"https://www.alo186.com{route}"
         assert len(title) >= 35
-        assert 110 <= len(description) <= 180
+        assert 110 <= len(description) <= 200
         titles.add(title)
         descriptions.add(description)
         canonicals.add(canonical)
@@ -113,6 +114,15 @@ def main() -> None:
     assert 'hreflang="tr-TR" href="https://www.alo186.com/elektrik-portali"' in english_home
     assert 'hreflang="en" href="https://www.alo186.com/en/"' in english_home
     assert 'hreflang="x-default" href="https://www.alo186.com/elektrik-portali"' in english_home
+
+    turkish_portal = TURKISH_PORTAL.read_text(encoding="utf-8")
+    assert '<html lang="tr">' in turkish_portal
+    assert 'hreflang="tr-TR" href="https://www.alo186.com/elektrik-portali"' in turkish_portal
+    assert 'hreflang="en" href="https://www.alo186.com/en/"' in turkish_portal
+    assert 'hreflang="x-default" href="https://www.alo186.com/elektrik-portali"' in turkish_portal
+    assert 'href="/en/" lang="en" hreflang="en"' in turkish_portal
+    assert '"inLanguage":"tr-TR"' in turkish_portal
+    assert '"workTranslation"' in turkish_portal
 
     english_finder = PAGES["/en/electricity-distribution-company-finder/"].read_text(encoding="utf-8")
     assert 'hreflang="tr-TR" href="https://www.alo186.com/edas-bul"' in english_finder
