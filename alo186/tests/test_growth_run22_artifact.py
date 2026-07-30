@@ -6,7 +6,6 @@ import re
 from pathlib import Path
 
 ROUTE = "/hesaplama/aydinlatma-ihtiyac-ve-ampul-uygunluk/"
-CANONICAL = "https://www.alo186.com" + ROUTE
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--site", type=Path, required=True)
@@ -16,12 +15,21 @@ site = args.site.resolve()
 base = "" if not args.base_path or args.base_path == "/" else "/" + args.base_path.strip("/")
 public = f"{base}{ROUTE}" if base else ROUTE
 
+release_path = site / "alo186-release.json"
+assert release_path.is_file()
+release = json.loads(release_path.read_text(encoding="utf-8"))
+canonical_origin = str(release.get("canonicalHost") or "").rstrip("/")
+assert canonical_origin in {"https://alo186.com", "https://www.alo186.com"}
+canonical = canonical_origin + ROUTE
+
 page = site / "hesaplama/aydinlatma-ihtiyac-ve-ampul-uygunluk/index.html"
 assert page.is_file()
 html = page.read_text(encoding="utf-8")
-assert CANONICAL in html and "affiliateAccepted" in html and "Satın alma gerekmez" in html
+assert canonical in html
+assert "affiliateAccepted" in html
+assert "Satın alma gerekmez" in html
 assert "amazon.com.tr" not in html.lower()
-assert CANONICAL in (site / "sitemap.xml").read_text(encoding="utf-8")
+assert canonical in (site / "sitemap.xml").read_text(encoding="utf-8")
 search = json.loads((site / "arama/search-index.json").read_text(encoding="utf-8"))
 assert any(item.get("canonicalPath") == ROUTE and item.get("url") == public for item in search.get("entries", []))
 critical_match = re.search(r"const CRITICAL=(\[.*?\]);", (site / "sw.js").read_text(encoding="utf-8"), re.S)
@@ -32,10 +40,9 @@ for relative in ["hesaplama/index.html", "elektrik-portali/index.html", "akilli-
     assert 'data-alo186-growth-run22-entry="true"' in (site / relative).read_text(encoding="utf-8")
 amazon = (site / "amazon-elektrik-urunleri/index.html").read_text(encoding="utf-8")
 assert 'data-alo186-lighting-deeplink-run22="true"' in amazon
-release = json.loads((site / "alo186-release.json").read_text(encoding="utf-8"))
 meta = release["lightingSuitabilityCenter"]
 assert meta["recordLimit"] == 8 and meta["recordTtlDays"] == 365 and meta["reviewDays"] == 180
 assert meta["directAffiliateLinksAdded"] == 0 and meta["noBuyOutcomePreserved"] is True and meta["hazardCommerceClosed"] is True
 pages = json.loads((site / "pages-release.json").read_text(encoding="utf-8"))
 assert pages["lightingSuitabilityCenter"]["route"] == public
-print(json.dumps({"ok": True, "route": public, "basePath": base}, ensure_ascii=False))
+print(json.dumps({"ok": True, "route": public, "basePath": base, "canonicalOrigin": canonical_origin}, ensure_ascii=False))
