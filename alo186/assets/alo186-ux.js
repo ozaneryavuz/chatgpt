@@ -2,6 +2,7 @@
   'use strict';
   const doc = document;
   const body = doc.body;
+  const ROOT_PATH = String.fromCharCode(47);
   if (!body || body.dataset.alo186Ux === 'ready') return;
   body.dataset.alo186Ux = 'ready';
 
@@ -67,11 +68,11 @@
     link.setAttribute('rel', [...rel].join(' '));
   });
 
-  const normalizePath = (value) => value.replace(/\/+$/, '') || '/';
+  const normalizePath = (value) => value.replace(/\/+$/, '') || ROOT_PATH;
   const scriptUrl = new URL(doc.currentScript?.src || location.href, location.href);
   const assetSuffix = '/assets/alo186-ux.js';
   const basePath = scriptUrl.pathname.endsWith(assetSuffix) ? scriptUrl.pathname.slice(0, -assetSuffix.length) : '';
-  const publicPath = (route) => `${basePath}${route === '/' ? '/' : route}`.replace(/\/+/g, '/');
+  const publicPath = (route) => `${basePath}${route === ROOT_PATH ? ROOT_PATH : route}`.replace(/\/+/g, ROOT_PATH);
   const current = normalizePath(location.pathname);
   const markCurrent = (root = doc) => {
     root.querySelectorAll('a[href^="/"]').forEach((link) => {
@@ -117,7 +118,7 @@
     nav.className = 'alo-ux-mobilebar';
     nav.setAttribute('aria-label', 'Mobil hızlı erişim');
     nav.innerHTML = [
-      [publicPath('/'), '⌂', 'Ana sayfa'],
+      [publicPath(ROOT_PATH), '⌂', 'Ana sayfa'],
       [publicPath('/edas-bul/'), '186', 'EDAŞ bul'],
       [publicPath('/arama/'), '⌕', 'Ara'],
       [publicPath('/acil-numaralar/'), '!', 'Acil']
