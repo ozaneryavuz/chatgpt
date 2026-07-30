@@ -63,7 +63,8 @@
     }[result.status]||'Teknik sonuç';
     $('resultTitle').textContent=result.title||'Sonuç';
     $('resultSummary').textContent=result.summary||(result.errors||[]).join(' ');
-    $('destinationMetric').textContent=result.destination&&result.destination.voltage?`${result.destination.voltage} V · ${result.destination.frequency} Hz · Tip ${result.destination.plug}`:'Doğrulanmalı';
+    const frequencyLabel=result.destination&&(result.destination.frequencyLabel||(`${result.destination.frequency} Hz`));
+    $('destinationMetric').textContent=result.destination&&result.destination.voltage?`${result.destination.voltage} V · ${frequencyLabel} · Tip ${result.destination.plug}`:'Doğrulanmalı';
     $('requiredMetric').textContent=result.requiredW?`${result.requiredW} W${result.requiredA?` · ${result.requiredA} A`:''}`:'—';
     $('voltageMetric').textContent=result.input?`${result.input.minV}–${result.input.maxV} V · ${result.input.frequency==='50_60'?'50/60':result.input.frequency} Hz`:'—';
     const items=result.actions||result.errors||[];
