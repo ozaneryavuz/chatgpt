@@ -86,7 +86,7 @@ def main() -> None:
         "power_station",
         "inverter",
         "Mevcut kaynağın sınıfını doğrulayın",
-        "String(v??'').trim()",
+        "String(value??'').trim()",
         "STORAGE_KEY='alo186-pump-backup-records-v1'",
         "MAX_RECORDS=8",
         "TTL_DAYS=365",
@@ -97,7 +97,7 @@ def main() -> None:
         "text/calendar",
         "elektrikci-is-emri-ozeti",
     ):
-        assert token in app
+        assert token in app, token
     assert app.index("input.environment==='wet'") < app.index("const fixed=input.connection==='fixed'")
     assert "amazon." not in app.casefold()
     assert "../../akilli-urun-secimi?kategori=" in app
