@@ -2,12 +2,9 @@ name: ALO186 araç footer bağlantıları tek seferlik düzeltme
 
 on:
   push:
-    branches: [fix/alo186-tool-footer-canonical-links]
+    branches: [main]
     paths:
       - '.github/alo186-fix-tool-footer-links.trigger'
-  pull_request:
-    branches: [main]
-    types: [opened, synchronize, reopened]
   workflow_dispatch:
 
 permissions:
@@ -15,12 +12,11 @@ permissions:
 
 jobs:
   patch:
-    if: github.event_name != 'pull_request' || github.head_ref == 'fix/alo186-tool-footer-canonical-links'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: fix/alo186-tool-footer-canonical-links
+          ref: main
           fetch-depth: 0
 
       - uses: actions/setup-python@v5
@@ -105,7 +101,7 @@ if __name__ == "__main__":
           python alo186/tests/test_tool_footer_canonical_links.py
           python .github/scripts/validate_alo186.py
 
-      - name: Geçici workflow'u kaldır ve dala kaydet
+      - name: Geçici workflow'u kaldır ve main dalına kaydet
         shell: bash
         run: |
           set -euo pipefail
@@ -118,4 +114,4 @@ if __name__ == "__main__":
             alo186/hesaplama/sarjli-pil-sarj-cihazi-uygunluk/index.html \
             alo186/tests/test_tool_footer_canonical_links.py
           git commit -m 'fix(alo186): araç footer yasal rotalarını canonical bağlantılara taşı'
-          git push origin HEAD:fix/alo186-tool-footer-canonical-links
+          git push origin HEAD:main
