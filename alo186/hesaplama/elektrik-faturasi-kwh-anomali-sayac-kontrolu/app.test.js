@@ -25,7 +25,7 @@ assert.equal(result.metrics.currentDaily,10);
 assert.equal(result.metrics.previousDaily,10);
 assert.equal(result.code,'no_buy');
 
-result=tool.evaluate(base({currentDays:40,currentKwh:400,previousDays:30,previousKwh:300}));
+result=tool.evaluate(base({currentDays:40,currentKwh:600,previousDays:30,previousKwh:300}));
 assert.equal(result.metrics.periodFlag,true);
 assert.equal(result.code,'official_check');
 
