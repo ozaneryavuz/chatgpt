@@ -26,10 +26,16 @@ for token in (
     "body.dataset.alo186UxCompact = 'true'",
     "Skip to content",
     "Back to top",
+    "alo-ux-toc",
+    "Bu sayfada neler var?",
+    "alo186AltFallback",
+    "figcaption",
 ):
     assert token in ux_js, token
 assert "body:not([data-alo186-ux-compact=true])" in ux_css
 assert "body{padding-bottom" not in ux_css
+assert ".alo-ux-toc" in ux_css
+assert "grid-template-columns:repeat(2" in ux_css
 
 with tempfile.TemporaryDirectory(prefix="alo186-ux-v118-") as folder:
     canonical = Path(folder) / "canonical"
@@ -74,6 +80,8 @@ with tempfile.TemporaryDirectory(prefix="alo186-ux-v118-") as folder:
         assert h1_ratio >= 0.97, {"ratio": h1_ratio, "missing": missing_h1[:20]}
         assert (target / "assets/alo186-ux.css").is_file()
         assert (target / "assets/alo186-ux.js").is_file()
+        for route in ("index.html", "edas-bul/index.html", "arama/index.html", "acil-numaralar/index.html", "elektrik-durum-merkezi/index.html"):
+            assert (target / route).is_file(), route
         release = json.loads((target / "pages-release.json").read_text(encoding="utf-8"))
         assert release["sitewideUx"]["injectedPages"] + release["sitewideUx"]["alreadyInjectedPages"] == len(html_files)
         results.append({
@@ -81,6 +89,7 @@ with tempfile.TemporaryDirectory(prefix="alo186-ux-v118-") as folder:
             "pages": len(html_files),
             "h1Coverage": round(h1_ratio, 4),
             "uxInjected": True,
+            "criticalRoutes": 5,
         })
 
 run(["node", "--check", "alo186/assets/alo186-ux.js"])
@@ -95,6 +104,8 @@ print(json.dumps({
     "tableOverflowGuard": True,
     "externalLinkHardening": True,
     "lazyImages": True,
+    "imageAltFallback": True,
+    "longPageToc": True,
     "backToTop": True,
     "minimumTouchTarget": 44,
 }, ensure_ascii=False))
