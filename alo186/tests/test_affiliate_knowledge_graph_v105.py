@@ -54,8 +54,8 @@ for intent in V105["intents"]:
 assert "loadJson('./catalog-v105-extension.json')" in APP
 assert "[v103, v104, supplement, v105]" in APP
 assert 'id="intentCount">33<' in HTML
-assert 'id="productCount">73<' in HTML
-assert "73 ürün sınıfı" in HTML
+assert 'id="productCount">75<' in HTML
+assert "75 ürün sınıfı" in HTML
 assert 'rel="sponsored nofollow noopener"' in HTML
 assert "alo186rehber-21" in APP
 assert "localStorage" not in APP and "sessionStorage" not in APP
