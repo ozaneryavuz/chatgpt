@@ -75,10 +75,10 @@ for forbidden in ['"@type":"Product"', '"@type":"Offer"', "aggregateRating", "pr
     assert forbidden not in HTML
 for token in [
     "Amazon satış ortaklığı açıklaması", "Daha fazla ürünü",
-    "Mevcut ürün gerçek görevi", "Kullanıcı ve ortam bağlamı",
+    "Mevcut cihaz gerçek görevi", "Kullanıcı ve ortam bağlamı",
     'rel="sponsored nofollow noopener"', "63 ürün sınıfı", "28"
 ]:
-    assert token in HTML
+    assert token in HTML, token
 
 assert "alo186rehber-21" in JS
 assert "professional-gated" in JS
