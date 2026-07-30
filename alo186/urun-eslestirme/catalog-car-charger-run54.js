@@ -40,6 +40,14 @@
   };
   if(!catalog.categories.some((item)=>item.id===portableEvseCategory.id))catalog.categories.push(portableEvseCategory);
 
+  if(root&&root.location&&root.history&&typeof root.URL==='function'&&typeof root.history.replaceState==='function'){
+    const currentUrl=new root.URL(root.location.href);
+    if(currentUrl.searchParams.get('niyet')==='portable_evse'&&!currentUrl.searchParams.has('kategori')){
+      currentUrl.searchParams.set('kategori','portable_evse');
+      root.history.replaceState(root.history.state,'',currentUrl.toString());
+    }
+  }
+
   const need={id:'vehicle-device-charging',name:'Araçta telefon, tablet ve uyumlu dizüstü şarjı'};
   if(Array.isArray(catalog.needs)&&!catalog.needs.some((item)=>item.id===need.id))catalog.needs.push(need);
   if(catalog.categoryNeeds)catalog.categoryNeeds.car_charger=['vehicle-device-charging'];
