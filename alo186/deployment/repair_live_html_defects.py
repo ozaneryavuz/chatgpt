@@ -8,6 +8,8 @@ from pathlib import Path
 REVENUE_MARKER = 'data-alo186-revenue-proof="true"'
 EDAS_STYLE_MARKER = 'data-alo186-edas-mobile-quality="true"'
 PRODUCT_ENTRY_MARKER = 'data-alo186-shortlist-product-entry="true"'
+HOME_RUNTIME_MARKER = 'data-alo186-home-runtime-loader="true"'
+FAVICON_MARKER = 'data-alo186-favicon="true"'
 EDAS_STYLE = (
     '<style data-alo186-edas-mobile-quality="true">'
     '.search-shell>*{min-inline-size:0}'
@@ -38,6 +40,15 @@ SEARCH_INPUT_ROLE_PATTERN = re.compile(
 SEARCH_RESULTS_LABEL_PATTERN = re.compile(
     r'<div\b[^>]*\bid=(?P<quote>["\'])searchResults(?P=quote)[^>]*\baria-(?:label|labelledby)=', re.I
 )
+COMMON_RUNTIME_PATTERN = re.compile(
+    r'<script\b(?=[^>]*data-alo186-common-runtime=["\']true["\'])[^>]*\bsrc=["\'](?P<src>[^"\']+)["\'][^>]*>\s*</script>',
+    re.I,
+)
+ARTICLE_RUNTIME_PATTERN = re.compile(
+    r'<script\b(?=[^>]*data-alo186-article-growth-js=["\']true["\'])[^>]*\bsrc=["\'](?P<src>[^"\']+)["\'][^>]*>\s*</script>',
+    re.I,
+)
+ICON_LINK_PATTERN = re.compile(r'<link\b[^>]*\brel=["\'][^"\']*\bicon\b[^"\']*["\'][^>]*>', re.I)
 
 
 def normalize_base_path(value: str) -> str:
@@ -129,6 +140,60 @@ def stabilize_product_center_layout(site: Path, base_path: str) -> int:
     return changed
 
 
+def ensure_favicon_links(site: Path, base_path: str) -> int:
+    """Tarayıcının /favicon.ico için 404 üretmesini engelleyen mevcut SVG marka ikonunu bağlar."""
+
+    href = public_url(base_path, "/alo186-mark.svg")
+    link = f'<link rel="icon" type="image/svg+xml" href="{href}" {FAVICON_MARKER}>'
+    changed = 0
+    for path in sorted(site.rglob("*.html")):
+        html = path.read_text(encoding="utf-8", errors="ignore")
+        if ICON_LINK_PATTERN.search(html):
+            continue
+        if "</head>" not in html:
+            continue
+        path.write_text(html.replace("</head>", link + "\n</head>", 1), encoding="utf-8")
+        changed += 1
+    return changed
+
+
+def defer_home_support_runtimes(site: Path) -> int:
+    """Ana sayfanın ilk etkileşim yolundan kritik olmayan destek JS'lerini çıkarır.
+
+    Ana sayfadaki bütün yönlendirmeler düz HTML bağlantısıdır. Ortak runtime ve içerik
+    büyüme JS'i yalnız analitik/yardımcı davranış sağlar; ilk kullanıcı etkileşiminde
+    veya altı saniye sonra yüklenmesi işlevi korurken mobil TBT'yi düşürür.
+    """
+
+    path = site / "index.html"
+    if not path.is_file():
+        return 0
+    html = path.read_text(encoding="utf-8", errors="ignore")
+    if HOME_RUNTIME_MARKER in html:
+        return 0
+    common = COMMON_RUNTIME_PATTERN.search(html)
+    article = ARTICLE_RUNTIME_PATTERN.search(html)
+    if not common or not article:
+        raise RuntimeError("Ana sayfa destek runtime scriptleri bulunamadı")
+
+    sources = json.dumps([common.group("src"), article.group("src")], ensure_ascii=False)
+    loader = (
+        f'<script {HOME_RUNTIME_MARKER}>'
+        "(()=>{'use strict';let loaded=false;"
+        f"const sources={sources};"
+        "const load=()=>{if(loaded)return;loaded=true;for(const src of sources){const script=document.createElement('script');script.src=src;script.async=true;document.head.appendChild(script);}};"
+        "for(const event of['pointerdown','keydown','touchstart'])addEventListener(event,load,{once:true,passive:true});"
+        "setTimeout(load,6000);"
+        "})();"
+        "</script>"
+    )
+    start = min(common.start(), article.start())
+    end = max(common.end(), article.end())
+    updated = html[:start] + loader + html[end:]
+    path.write_text(updated, encoding="utf-8")
+    return 1
+
+
 def validate(site: Path) -> None:
     failures: list[str] = []
     for path in sorted(site.rglob("*.html")):
@@ -136,6 +201,8 @@ def validate(site: Path) -> None:
         relative = path.relative_to(site).as_posix()
         if re.search(r'<(?:f|fo|foo|foot|foote)<aside\b[^>]*data-alo186-revenue-proof=', html, re.I):
             failures.append(f"Bölünmüş footer kaldı: {relative}")
+        if not ICON_LINK_PATTERN.search(html):
+            failures.append(f"Favicon bağlantısı eksik: {relative}")
     edas = site / "edas-bul/index.html"
     if edas.is_file():
         html = edas.read_text(encoding="utf-8", errors="ignore")
@@ -153,6 +220,13 @@ def validate(site: Path) -> None:
         path = site / relative
         if path.is_file() and PRODUCT_ENTRY_MARKER not in path.read_text(encoding="utf-8", errors="ignore"):
             failures.append(f"Ürün merkezi ilk HTML karşılaştırma alanı eksik: {relative}")
+    home = site / "index.html"
+    if home.is_file():
+        html = home.read_text(encoding="utf-8", errors="ignore")
+        if HOME_RUNTIME_MARKER not in html:
+            failures.append("Ana sayfa kritik olmayan runtime ertelemesi eksik")
+        if COMMON_RUNTIME_PATTERN.search(html) or ARTICLE_RUNTIME_PATTERN.search(html):
+            failures.append("Ana sayfada doğrudan yüklenen destek runtime kaldı")
     if failures:
         raise RuntimeError("Canlı HTML kabuk kalite sözleşmesi başarısız:\n- " + "\n- ".join(failures))
 
@@ -162,6 +236,8 @@ def run(site: Path, base_path: str = "") -> dict:
     repaired_files, repaired_tags = repair_split_footers(site)
     edas_pages_hardened = harden_edas_search(site)
     product_centers_stabilized = stabilize_product_center_layout(site, base_path)
+    favicon_links_added = ensure_favicon_links(site, base_path)
+    home_runtimes_deferred = defer_home_support_runtimes(site)
     validate(site)
     return {
         "ok": True,
@@ -170,13 +246,15 @@ def run(site: Path, base_path: str = "") -> dict:
         "splitFooterTagsRepaired": repaired_tags,
         "edasPagesHardened": edas_pages_hardened,
         "productCentersStabilized": product_centers_stabilized,
+        "faviconLinksAdded": favicon_links_added,
+        "homeSupportRuntimesDeferred": home_runtimes_deferred,
         "personalDataFieldsAdded": 0,
         "officialAffiliationClaimed": False,
     }
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="ALO186 final artifactındaki bozuk footer, mobil erişilebilirlik ve CLS kusurlarını onarır.")
+    parser = argparse.ArgumentParser(description="ALO186 final artifactındaki bozuk footer, mobil erişilebilirlik, favicon, CLS ve TBT kusurlarını onarır.")
     parser.add_argument("--site", type=Path, required=True)
     parser.add_argument("--base-path", default="")
     args = parser.parse_args()
