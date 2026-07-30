@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import argparse
 import json
+from collections import defaultdict
 from pathlib import Path
+from statistics import median
+from urllib.parse import urlsplit
 
 CATEGORY_MINIMUMS = {
     "accessibility": 0.90,
@@ -14,6 +17,13 @@ METRIC_LIMITS = {
     "mobile": {"largest-contentful-paint": 4000, "cumulative-layout-shift": 0.10, "total-blocking-time": 500},
     "desktop": {"largest-contentful-paint": 3500, "cumulative-layout-shift": 0.10, "total-blocking-time": 300},
 }
+METRIC_KEYS = (
+    "largest-contentful-paint",
+    "cumulative-layout-shift",
+    "total-blocking-time",
+    "first-contentful-paint",
+    "speed-index",
+)
 
 
 def number(value, default: float = 0.0) -> float:
@@ -23,59 +33,90 @@ def number(value, default: float = 0.0) -> float:
         return default
 
 
+def page_key(mode: str, requested_url: str, fallback: str) -> str:
+    path = urlsplit(requested_url).path.rstrip("/") or "/"
+    return f"{mode}:{path or fallback}"
+
+
+def read_report(path: Path) -> dict:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    mode = "desktop" if path.stem.startswith("desktop-") else "mobile"
+    categories = payload.get("categories", {})
+    audits = payload.get("audits", {})
+    scores = {key: number(value.get("score")) for key, value in categories.items() if isinstance(value, dict)}
+    metrics = {key: number(audits.get(key, {}).get("numericValue")) for key in METRIC_KEYS}
+    return {
+        "report": path.name,
+        "mode": mode,
+        "requestedUrl": str(payload.get("requestedUrl") or ""),
+        "finalUrl": str(payload.get("finalUrl") or ""),
+        "scores": scores,
+        "metrics": metrics,
+    }
+
+
+def median_page(group: list[dict]) -> dict:
+    first = group[0]
+    score_keys = sorted({key for report in group for key in report["scores"]})
+    scores = {key: median([report["scores"].get(key, 0.0) for report in group]) for key in score_keys}
+    metrics = {key: median([report["metrics"][key] for report in group]) for key in METRIC_KEYS}
+    return {
+        "reports": [report["report"] for report in group],
+        "runCount": len(group),
+        "mode": first["mode"],
+        "requestedUrl": first["requestedUrl"],
+        "finalUrl": first["finalUrl"],
+        "scores": scores,
+        "metrics": metrics,
+        "aggregation": "median" if len(group) > 1 else "single-run",
+    }
+
+
 def audit(directory: Path) -> dict:
     failures: list[str] = []
-    pages: list[dict] = []
     files = sorted(directory.glob("*.json"))
     if not files:
         raise SystemExit("Lighthouse JSON raporu bulunamadı")
 
-    for path in files:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-        mode = "desktop" if "desktop" in path.stem else "mobile"
-        categories = payload.get("categories", {})
-        audits = payload.get("audits", {})
-        scores = {key: number(value.get("score")) for key, value in categories.items() if isinstance(value, dict)}
-        metrics = {
-            key: number(audits.get(key, {}).get("numericValue"))
-            for key in ("largest-contentful-paint", "cumulative-layout-shift", "total-blocking-time", "first-contentful-paint", "speed-index")
-        }
-        page = {
-            "report": path.name,
-            "mode": mode,
-            "requestedUrl": payload.get("requestedUrl"),
-            "finalUrl": payload.get("finalUrl"),
-            "scores": scores,
-            "metrics": metrics,
-        }
-        pages.append(page)
+    raw_reports = [read_report(path) for path in files]
+    grouped: dict[str, list[dict]] = defaultdict(list)
+    for report in raw_reports:
+        grouped[page_key(report["mode"], report["requestedUrl"], report["report"])].append(report)
+        final_url = report["finalUrl"]
+        if final_url and not (final_url.startswith("http://127.0.0.1:") or final_url.startswith("http://localhost:")):
+            failures.append(f"{report['report']}: beklenmeyen final URL {final_url}")
 
-        performance = scores.get("performance", 0)
+    pages: list[dict] = []
+    for key in sorted(grouped):
+        page = median_page(grouped[key])
+        pages.append(page)
+        mode = page["mode"]
+        label = ",".join(page["reports"])
+        performance = page["scores"].get("performance", 0)
         if performance < PERFORMANCE_MINIMUMS[mode]:
-            failures.append(f"{path.name}: performance {performance:.2f} < {PERFORMANCE_MINIMUMS[mode]:.2f}")
+            failures.append(f"{label}: median performance {performance:.2f} < {PERFORMANCE_MINIMUMS[mode]:.2f}")
         for category, minimum in CATEGORY_MINIMUMS.items():
-            score = scores.get(category, 0)
+            score = page["scores"].get(category, 0)
             if score < minimum:
-                failures.append(f"{path.name}: {category} {score:.2f} < {minimum:.2f}")
+                failures.append(f"{label}: median {category} {score:.2f} < {minimum:.2f}")
         for metric, maximum in METRIC_LIMITS[mode].items():
-            measured = metrics[metric]
+            measured = page["metrics"][metric]
             if measured > maximum:
                 unit = "" if metric == "cumulative-layout-shift" else " ms"
-                failures.append(f"{path.name}: {metric} {measured:.2f}{unit} > {maximum}{unit}")
-
-        final_url = str(payload.get("finalUrl") or "")
-        if final_url and not (final_url.startswith("http://127.0.0.1:") or final_url.startswith("http://localhost:")):
-            failures.append(f"{path.name}: beklenmeyen final URL {final_url}")
+                failures.append(f"{label}: median {metric} {measured:.2f}{unit} > {maximum}{unit}")
 
     summary = {
         "ok": not failures,
         "reportCount": len(files),
+        "pageGroupCount": len(pages),
+        "aggregation": "median-by-mode-and-requested-url",
         "performanceMinimums": PERFORMANCE_MINIMUMS,
         "categoryMinimums": CATEGORY_MINIMUMS,
         "metricLimits": METRIC_LIMITS,
         "failureCount": len(failures),
         "failures": failures,
         "pages": pages,
+        "rawRuns": raw_reports,
     }
     print(json.dumps(summary, ensure_ascii=False, indent=2))
     if failures:
