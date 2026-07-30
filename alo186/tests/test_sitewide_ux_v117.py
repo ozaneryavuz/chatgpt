@@ -72,6 +72,12 @@ with tempfile.TemporaryDirectory(prefix="alo186-ux-v119-") as folder:
             "--repository", "ozaneryavuz/chatgpt",
             "--commit", "ux-v119-test",
         ])
+        run([
+            sys.executable,
+            "alo186/deployment/smoke_github_pages.py",
+            "--site", str(target),
+            "--base-path", base_path,
+        ])
         html_files = sorted(target.rglob("*.html"))
         assert html_files, target
         missing_ux = []
@@ -112,7 +118,9 @@ with tempfile.TemporaryDirectory(prefix="alo186-ux-v119-") as folder:
         for alias, destination in ALIASES.items():
             alias_page = target / alias
             assert alias_page.is_file(), alias
-            assert f"https://alo186.com{destination}" in alias_page.read_text(encoding="utf-8")
+            alias_html = alias_page.read_text(encoding="utf-8")
+            assert f"https://alo186.com{destination}" in alias_html
+            assert 'data-alo186-pages-sw' in alias_html
         release = json.loads((target / "pages-release.json").read_text(encoding="utf-8"))
         assert release["sitewideUx"]["injectedPages"] + release["sitewideUx"]["alreadyInjectedPages"] == len(html_files)
         audit = release["sitewideUserExperienceAudit"]
