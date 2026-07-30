@@ -1,0 +1,130 @@
+name: ALO186 hidrofor ve pompa yedek güç uygunluk testi
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/hidrofor-pompa-yedek-guc-uygunluk/**'
+      - 'alo186/hesaplama/common.js'
+      - 'alo186/deployment/routing-overlays/pump-backup-selector-v321.json'
+      - 'alo186/tests/test_pump_backup_selector_v321.py'
+      - '.github/workflows/alo186-pump-backup-selector-v321.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/hidrofor-pompa-yedek-guc-uygunluk/**'
+      - 'alo186/hesaplama/common.js'
+      - 'alo186/deployment/routing-overlays/pump-backup-selector-v321.json'
+      - 'alo186/tests/test_pump_backup_selector_v321.py'
+      - '.github/workflows/alo186-pump-backup-selector-v321.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-pump-backup-selector-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Karar motoru ve modül sözleşmesi
+        run: |
+          set -euo pipefail
+          node alo186/hesaplama/hidrofor-pompa-yedek-guc-uygunluk/app.test.js
+          python alo186/tests/test_pump_backup_selector_v321.py
+
+      - name: Sözdizimi ve mevcut güvenlik regresyonları
+        run: |
+          set -euo pipefail
+          node --check alo186/hesaplama/hidrofor-pompa-yedek-guc-uygunluk/app.js
+          node --check alo186/hesaplama/common.js
+          python -m py_compile alo186/tests/test_pump_backup_selector_v321.py
+          node alo186/tests/test_release_manifest.js
+          python alo186/tests/test_content_intent_consolidation.py
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Canonical statik site üretimi
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-pump-backup-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-pump-backup-canonical
+          test -f /tmp/alo186-pump-backup-canonical/hesaplama/hidrofor-pompa-yedek-guc-uygunluk/index.html
+          grep -q 'Hidrofor ve Pompa Yedek Güç Uygunluk Testi' /tmp/alo186-pump-backup-canonical/hesaplama/hidrofor-pompa-yedek-guc-uygunluk/index.html
+
+      - name: Custom-domain ve project-path paketlerini hazırla
+        run: |
+          set -euo pipefail
+          cp -a /tmp/alo186-pump-backup-canonical /tmp/alo186-pump-backup-custom
+          cp -a /tmp/alo186-pump-backup-canonical /tmp/alo186-pump-backup-project
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-pump-backup-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-pump-backup-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+
+      - name: Affiliate, gizlilik ve yayın kabulü
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          route_path = 'hesaplama/hidrofor-pompa-yedek-guc-uygunluk'
+          canonical_path = '/hesaplama/hidrofor-pompa-yedek-guc-uygunluk/'
+          for root, prefix in [
+              (Path('/tmp/alo186-pump-backup-custom'), ''),
+              (Path('/tmp/alo186-pump-backup-project'), '/chatgpt'),
+          ]:
+              route = root / route_path
+              for name in ('index.html', 'styles.css', 'app.js'):
+                  assert (route / name).is_file(), (root, name)
+              html = (route / 'index.html').read_text(encoding='utf-8')
+              app = (route / 'app.js').read_text(encoding='utf-8')
+              assert 'Satış ortaklığı açıklaması' in html
+              assert 'doğrudan mağaza bağlantısı açmaz' in html
+              assert 'amazon.com' not in html.casefold()
+              assert 'amazon.' not in app.casefold()
+              assert 'localStorage' not in app and 'sessionStorage' not in app and 'fetch(' not in app
+              assert 'actualNeed' in app and 'technicalCheck' in app and 'affiliateCheck' in app
+              expected = f'{prefix}{canonical_path}' if prefix else canonical_path
+              sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
+              assert expected in sitemap
+              search_file = root / 'arama/search-index.json'
+              assert search_file.is_file()
+              search = json.loads(search_file.read_text(encoding='utf-8'))
+              entry = next(item for item in search['entries'] if item['canonicalPath'] == canonical_path)
+              assert entry['url'] == expected
+              common = (root / 'hesaplama/common.js').read_text(encoding='utf-8')
+              assert canonical_path in common
+              assert 'data-alo186-pump-backup-card' in common
+          PY
+
+      - name: Doğrulanmış artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-pump-backup-selector-pages
+          path: /tmp/alo186-pump-backup-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
