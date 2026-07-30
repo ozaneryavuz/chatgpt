@@ -25,6 +25,8 @@ EXPANSION_ROUTES = {
     "/amazon-elektrik-urunleri/tasinabilir-guc-istasyonu-secimi",
     "/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi",
     "/amazon-elektrik-urunleri/ges-malzemeleri-secimi",
+    "/amazon-elektrik-urunleri/kombi-ups-power-station-secimi",
+    "/amazon-elektrik-urunleri/buzdolabi-dondurucu-power-station-secimi",
 }
 
 
@@ -81,9 +83,11 @@ class CommercialCategoryPagesTests(unittest.TestCase):
         html = ROUTES["/amazon-elektrik-urunleri"].read_text(encoding="utf-8")
         for route in (set(ROUTES) - {"/amazon-elektrik-urunleri"}) | EXPANSION_ROUTES:
             self.assertIn(f'href="{route}"', html)
-        self.assertIn("7 özel rehber", html)
+        expected_guide_count = len((set(ROUTES) - {"/amazon-elektrik-urunleri"}) | EXPANSION_ROUTES)
+        self.assertIn(f"{expected_guide_count} özel rehber", html)
+        self.assertEqual(html.count('class="card route-card"'), expected_guide_count)
         self.assertIn("Mevcut ürün yeterliyse satın alma yok", html)
-        self.assertIn("Sabit tesisatta mağaza linki yok", html)
+        self.assertIn("Aktif tehlikede satış yolu kapalı", html)
 
     def test_direct_affiliate_links_are_freshness_gated_and_only_powerbank_is_direct(self) -> None:
         runtime = (SOURCE_ROOT / "commercial.js").read_text(encoding="utf-8")

@@ -132,9 +132,10 @@ jobs:
                   file=root/route.strip('/')/'index.html'
                   assert file.is_file(), file
                   html=file.read_text(encoding='utf-8')
-                  assert f'rel="canonical" href="https://www.alo186.com{route}"' in html
+                  canonical_hosts=(f'https://www.alo186.com{route}', f'https://alo186.com{route}')
+                  assert any(value in html for value in canonical_hosts), (root, route, 'canonical')
                   assert 'Reklam / satış ortaklığı' in html
-                  assert f'https://www.alo186.com{route}' in sitemap
+                  assert any(value in sitemap for value in canonical_hosts), (root, route, 'sitemap')
                   assert route in entries, route
                   expected=(prefix+route) if prefix else route
                   assert entries[route]['url'] == expected

@@ -1,0 +1,107 @@
+name: ALO186 cihaz odaklı güvenli ticari rehberler v121
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/**'
+      - 'alo186/tests/test_appliance_commerce_guides_v121.py'
+      - 'alo186/deployment/routing-overlays/121-appliance-commerce-guides.json'
+      - '.github/workflows/alo186-appliance-commerce-guides-v121.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/**'
+      - 'alo186/tests/test_appliance_commerce_guides_v121.py'
+      - 'alo186/deployment/routing-overlays/121-appliance-commerce-guides.json'
+      - '.github/workflows/alo186-appliance-commerce-guides-v121.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-appliance-commerce-v121-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Güven, arama niyeti, satın almama ve affiliate kapıları
+        run: |
+          set -euo pipefail
+          python alo186/tests/test_appliance_commerce_guides_v121.py
+          node --check alo186/amazon-elektrik-urunleri/appliance-guide.js
+
+      - name: Mevcut yayın ve portal regresyonları
+        run: |
+          set -euo pipefail
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Canonical üretim ve statik smoke
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-appliance-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-appliance-canonical
+          test -f /tmp/alo186-appliance-canonical/amazon-elektrik-urunleri/kombi-ups-power-station-secimi/index.html
+          test -f /tmp/alo186-appliance-canonical/amazon-elektrik-urunleri/buzdolabi-dondurucu-power-station-secimi/index.html
+          test -f /tmp/alo186-appliance-canonical/amazon-elektrik-urunleri/appliance-guide.js
+
+      - name: Custom-domain ve project-path Pages kabulü
+        shell: bash
+        run: |
+          set -euo pipefail
+          for spec in 'custom|' 'project|/chatgpt'; do
+            name="${spec%%|*}"
+            base="${spec#*|}"
+            target="/tmp/alo186-appliance-${name}"
+            cp -a /tmp/alo186-appliance-canonical "$target"
+            python alo186/deployment/prepare_github_pages.py \
+              --site "$target" \
+              --base-path "$base" \
+              --repository "$GITHUB_REPOSITORY" \
+              --commit "$GITHUB_SHA"
+            python alo186/deployment/inject_outcome_runtime.py --site "$target" --base-path "$base"
+            python alo186/deployment/inject_shortlist_growth.py --site "$target" --base-path "$base" > "/tmp/alo186-appliance-${name}.json"
+            python alo186/deployment/finalize_user_experience.py --site "$target" --base-path "$base" > "/tmp/alo186-appliance-${name}-ux.json"
+            python alo186/deployment/smoke_github_pages.py --site "$target" --base-path "$base"
+
+            for route in \
+              amazon-elektrik-urunleri/kombi-ups-power-station-secimi \
+              amazon-elektrik-urunleri/buzdolabi-dondurucu-power-station-secimi; do
+              test -f "$target/$route/index.html"
+              grep -q 'Reklam / satış ortaklığı açıklaması' "$target/$route/index.html"
+              grep -q 'aria-disabled="true"' "$target/$route/index.html"
+              grep -q 'Amazon arama sonucu uygunluk onayı değildir' "$target/$route/index.html"
+              ! grep -Eqi 'priceCurrency|aggregateRating|"availability"|"@type":"Offer"|"@type":"Product"' "$target/$route/index.html"
+            done
+
+            grep -q 'kombi-ups-power-station-secimi' "$target/sitemap.xml"
+            grep -q 'buzdolabi-dondurucu-power-station-secimi' "$target/sitemap.xml"
+            grep -q 'kombi-ups-power-station-secimi' "$target/arama/search-index.json"
+            grep -q 'buzdolabi-dondurucu-power-station-secimi' "$target/arama/search-index.json"
+            grep -Eq '[0-9]+ özel rehber' "$target/amazon-elektrik-urunleri/index.html"
+          done
+
+      - name: Doğrulanmış üretim artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-appliance-commerce-guides-v121
+          path: /tmp/alo186-appliance-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 45
