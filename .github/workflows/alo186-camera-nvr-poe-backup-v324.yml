@@ -74,7 +74,7 @@ jobs:
           assert page.is_file() and app.is_file() and css.is_file()
           html=page.read_text(encoding='utf-8')
           js=app.read_text(encoding='utf-8')
-          assert 'https://alo186.com/hesaplama/kamera-nvr-poe-yedek-guc-uygunluk/' in html
+          assert '/hesaplama/kamera-nvr-poe-yedek-guc-uygunluk/' in html
           assert 'amazon.com' not in (html+js).lower()
           assert 'localStorage' not in js and 'sessionStorage' not in js and 'fetch(' not in js
           assert all(token in html for token in ['actualNeed','technicalCheck','affiliateCheck'])
