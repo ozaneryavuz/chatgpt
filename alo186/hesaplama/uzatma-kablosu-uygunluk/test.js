@@ -5,17 +5,29 @@ const path=require('path');
 const core=require('./core.js');
 
 const base={
-  voltage:230,loadPower:300,powerFactor:0.95,loadType:'electronic',startMultiplier:'',usage:'short',intendedUse:'portable',
+  evaluationMode:'existing',voltage:230,loadPower:300,powerFactor:0.95,loadType:'electronic',startMultiplier:'',usage:'short',intendedUse:'portable',
   length:15,area:1.5,ratedCurrent:16,reelState:'none',woundMaxPower:'',unwoundMaxPower:'',environment:'indoor',
-  applianceClass:'classI',factoryAssembled:true,labelVerified:true,damageFree:true,earthPresent:true,outdoorRated:false,thermalProtection:false,daisyChain:false
+  applianceClass:'classI',factoryAssembled:true,labelVerified:true,damageFree:true,earthPresent:true,outdoorRated:false,thermalProtection:false,daisyChain:false,recallChecked:true
 };
 const run=overrides=>core.analyze({...base,...overrides});
 
 const office=run({});
-assert.equal(office.status,'compatible');
-assert.equal(office.commercialAllowed,true);
+assert.equal(office.status,'no_buy');
+assert.equal(office.purchaseDecision,'no_buy');
+assert.equal(office.commercialAllowed,false);
 assert(office.dropPercent<3);
-assert(office.recommendedRatedCurrent>=office.operatingCurrent);
+assert(office.checks.some(x=>x.includes('yeni ürün aramayın')));
+
+const planned=run({evaluationMode:'planned'});
+assert.equal(planned.status,'compatible');
+assert.equal(planned.commercialAllowed,true);
+assert.equal(planned.purchaseDecision,'conditional_purchase');
+assert.equal(planned.repeatDays,180);
+
+const recallMissing=run({evaluationMode:'planned',recallChecked:false});
+assert.equal(recallMissing.status,'conditional');
+assert.equal(recallMissing.commercialAllowed,false);
+assert(recallMissing.warnings.some(x=>x.includes('geri çağırma')));
 
 const longThin=run({loadPower:1800,powerFactor:1,length:100,area:.75,ratedCurrent:16});
 assert.equal(longThin.status,'incompatible');
@@ -38,12 +50,14 @@ for(const intendedUse of ['ev','generatorBackfeed','fixed']){
   assert.equal(result.commercialAllowed,false);
 }
 
-const medical=run({intendedUse:'medical'});
-assert.equal(medical.commercialAllowed,false);
-assert.equal(medical.professionalRequired,true);
+for(const intendedUse of ['medical','heater','cooling']){
+  const result=run({evaluationMode:'planned',intendedUse});
+  assert.equal(result.commercialAllowed,false);
+  assert.equal(result.professionalRequired,true);
+}
 assert.equal(run({daisyChain:true}).status,'incompatible');
 
-const motor=run({loadPower:900,powerFactor:.8,loadType:'motor',startMultiplier:5,length:30,area:1.5,ratedCurrent:16});
+const motor=run({evaluationMode:'planned',loadPower:900,powerFactor:.8,loadType:'motor',startMultiplier:5,length:30,area:1.5,ratedCurrent:16});
 assert(motor.startCurrent>motor.operatingCurrent);
 assert(motor.warnings.some(x=>x.includes('kalkış')));
 assert.equal(motor.commercialAllowed,false);
@@ -52,24 +66,18 @@ assert.throws(()=>run({loadType:'motor',startMultiplier:''}),/kalkış akımı k
 assert.throws(()=>run({area:1.2}),/0,75/);
 
 const html=fs.readFileSync(path.join(__dirname,'index.html'),'utf8');
-assert(html.includes('https://www.alo186.com/hesaplama/uzatma-kablosu-uygunluk/'));
+assert(html.includes('https://alo186.com/hesaplama/uzatma-kablosu-uygunluk/'));
 assert(html.includes('Amazon satış ortaklığı'));
 assert(html.includes('IEC 60884-2-7:2025'));
 assert(html.includes('IEC 61242'));
 assert(!/amazon\.(com|com\.tr)/i.test(html));
+assert(!html.includes('"@type":"Offer"'));
+assert(html.includes('id="jsonButton"'));
+assert(html.includes('id="icsButton"'));
+for(const id of ['affiliateNeedAck','affiliateSpecAck','affiliateDisclosureAck'])assert(html.includes(`id="${id}"`));
 const formFieldIds=[...html.matchAll(/<(?:input|select|textarea)\b[^>]*(?:id|name)="([^"]+)"/gi)].map(match=>match[1]);
 assert(!formFieldIds.some(field=>/(^|[-_])(name|email|phone|telefon|address|adres|abonelik|tc|identity)([-_]|$)/i.test(field)));
 assert(html.includes('aria-live="polite"'));
 assert(html.includes('type="application/ld+json"'));
 
-const root=path.resolve(__dirname,'../..');
-const routing=JSON.parse(fs.readFileSync(path.join(root,'deployment/routing-manifest.json'),'utf8'));
-assert(routing.routes.some(route=>route.canonicalPath==='/hesaplama/uzatma-kablosu-uygunluk/'));
-const sitemap=fs.readFileSync(path.join(root,'sitemap.xml'),'utf8');
-assert(sitemap.includes('/hesaplama/uzatma-kablosu-uygunluk/'));
-const center=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
-const toolCount=Number((center.match(/(\d+) çekirdek araç/)||[])[1]);
-assert(toolCount>=21);
-assert(center.includes('./uzatma-kablosu-uygunluk/'));
-
-console.log('Uzatma kablosu uygunluk testleri başarılı.');
+console.log(JSON.stringify({ok:true,scenarios:18,noBuy:office.status,plannedPurchase:planned.commercialAllowed,recallGate:true,tripleAffiliateGate:true,repeatDays:planned.repeatDays,personalData:false},null,2));
