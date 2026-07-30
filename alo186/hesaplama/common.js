@@ -99,5 +99,11 @@
     const documentationCore=document.createElement('script');documentationCore.src=new URL('../akilli-urun-secimi/documentation-growth-core.js',commonUrl).href;documentationCore.dataset.alo186DocumentationCore='true';documentationCore.addEventListener('load',()=>{if(document.querySelector('script[data-alo186-documentation-ui]'))return;const documentationUi=document.createElement('script');documentationUi.src=new URL('../akilli-urun-secimi/documentation-growth.js',commonUrl).href;documentationUi.dataset.alo186DocumentationUi='true';documentationUi.defer=true;document.head.appendChild(documentationUi);},{once:true});document.head.appendChild(documentationCore);
   }
 
-  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',injectGrowthCards,{once:true});document.addEventListener('DOMContentLoaded',loadDocumentationLayer,{once:true});}else{injectGrowthCards();loadDocumentationLayer();}
+  // common.js final body scripti olarak yayımlanır. DOM zaten mevcutsa büyüme kartlarını
+  // DOMContentLoaded sonrasına bırakmak CLS üretir; ilk boyamadan önce senkron ekle.
+  if(document.body)injectGrowthCards();
+  else document.addEventListener('DOMContentLoaded',injectGrowthCards,{once:true});
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',loadDocumentationLayer,{once:true});
+  else loadDocumentationLayer();
 })();
