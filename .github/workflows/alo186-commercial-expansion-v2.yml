@@ -155,7 +155,13 @@ jobs:
               assert 'data-commercial-scope="professional-only"' in ges
               assert 'data-product-center' not in ges
               hub=(root/'amazon-elektrik-urunleri/index.html').read_text(encoding='utf-8')
-              card_blocks=re.findall(r'<article class="card route-card">.*?</article>', hub, re.S)
+              routes_section=re.search(
+                  r'<section class="section" aria-labelledby="routesTitle">(.*?)</section>',
+                  hub,
+                  re.S,
+              )
+              assert routes_section, 'Özel ticari sayfalar bölümü bulunamadı'
+              card_blocks=re.findall(r'<article class="card route-card">.*?</article>', routes_section.group(1), re.S)
               guide_links=set()
               for block in card_blocks:
                   match=re.search(r'href="(/(?:chatgpt/)?amazon-elektrik-urunleri/[^"?#]+)"', block)
