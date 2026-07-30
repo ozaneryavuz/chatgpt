@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -9,6 +10,7 @@ MODULE_PATH = ROOT / "alo186/deployment/check_live_english.py"
 SPEC = importlib.util.spec_from_file_location("check_live_english", MODULE_PATH)
 assert SPEC and SPEC.loader
 MODULE = importlib.util.module_from_spec(SPEC)
+sys.modules[SPEC.name] = MODULE
 SPEC.loader.exec_module(MODULE)
 
 ORIGIN = "https://alo186.com"
@@ -18,7 +20,13 @@ def valid_html(route: str) -> str:
     turkish = MODULE.LANGUAGE_PAIRS[route]
     calls = '<a href="tel:112">112</a><a href="tel:186">186</a>' if route in MODULE.CALL_ROUTES else ""
     gas = '<a href="tel:187">187</a>' if route == "/en/emergency-numbers-turkey/" else ""
-    finder = "81 provinces 21 electricity distribution regions Alo186Companies" if route.endswith("company-finder/") else ""
+    finder = (
+    '<script src="/edas-bul/companies.js"></script>'
+    '<script src="/en/assets/finder.js"></script>'
+    '81 provinces 21 electricity distribution regions'
+    if route.endswith("company-finder/")
+    else ""
+)
     return f'''<!doctype html>
 <html lang="en"><head>
 <meta name="robots" content="index,follow,max-image-preview:large">

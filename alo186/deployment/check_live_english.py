@@ -231,7 +231,12 @@ def validate_english_page(route: str, html: str, origin: str, status: int = 200)
         checks.append("safety-commerce-closed")
 
     if route == "/en/electricity-distribution-company-finder/":
-        required = ("81 provinces", "21 electricity distribution regions", "Alo186Companies")
+        required = (
+    "81 provinces",
+    "21 electricity distribution regions",
+    'src="/edas-bul/companies.js"',
+    'src="/en/assets/finder.js"',
+)
         missing = [token for token in required if token not in html]
         if missing:
             raise LiveValidationError(f"{route} EDAŞ bulucu kapsamı eksik: {', '.join(missing)}")
