@@ -7,6 +7,8 @@ from pathlib import Path
 
 ROUTE = "/hesaplama/kombi-kesinti-yedek-guc-uygunluk/"
 CANONICAL = "https://alo186.com" + ROUTE
+HUB_MARKER = 'data-alo186-boiler-hub-card="true"'
+PANEL_MARKER = 'data-alo186-boiler-continuity-run30="true"'
 
 
 def normalize_base_path(value: str) -> str:
@@ -19,11 +21,9 @@ def run(site: Path, base_path: str) -> dict:
     page = site / ROUTE.strip("/") / "index.html"
     script = page.with_name("app.js")
     styles = page.with_name("styles.css")
-    common_path = site / "hesaplama/common.js"
-    assert page.is_file() and script.is_file() and styles.is_file() and common_path.is_file()
+    assert page.is_file() and script.is_file() and styles.is_file()
     html = page.read_text(encoding="utf-8")
     js = script.read_text(encoding="utf-8")
-    common = common_path.read_text(encoding="utf-8")
     assert html.count("<h1") == 1
     assert "Kombi Kesinti Yedek Güç ve UPS Uygunluğu" in html
     assert "Amazon satış ortaklığı ilişkisi" in html
@@ -43,10 +43,14 @@ def run(site: Path, base_path: str) -> dict:
     sitemap = (site / "sitemap.xml").read_text(encoding="utf-8")
     assert f"<loc>{CANONICAL}</loc>" in sitemap
     expected = f"{base_path}{ROUTE}" if base_path else ROUTE
-    assert "boilerContinuityCard" in common
-    assert ROUTE in common
-    assert "data-alo186-boiler-continuity-card" in common
-    assert "37 çekirdek araç" in common
+    hub = (site / "hesaplama/index.html").read_text(encoding="utf-8")
+    assert HUB_MARKER in hub
+    assert f'href="{expected}"' in hub
+    count_match = re.search(r"(\d+) çekirdek araç", hub)
+    assert count_match and int(count_match.group(1)) >= 37
+    for relative in ["elektrik-portali/index.html", "akilli-urun-secimi/index.html", "amazon-elektrik-urunleri/index.html"]:
+        target = site / relative
+        assert target.is_file() and PANEL_MARKER in target.read_text(encoding="utf-8")
     search_path = site / "arama/search-index.json"
     if search_path.is_file():
         payload = json.loads(search_path.read_text(encoding="utf-8"))
@@ -54,12 +58,14 @@ def run(site: Path, base_path: str) -> dict:
         entry = next(item for item in entries if item.get("canonicalPath") == ROUTE)
         assert entry.get("url") == expected
         assert "kombi" in (entry.get("title", "") + " " + entry.get("description", "")).lower()
-    release_path = site / "pages-release.json"
-    if release_path.is_file():
-        release = json.loads(release_path.read_text(encoding="utf-8"))
-        assert release.get("canonicalHost") == "https://alo186.com"
-        assert release.get("customDomain") == "alo186.com"
-    return {"ok": True, "route": expected, "basePath": base_path, "canonical": CANONICAL, "runtimeToolCount": 37}
+    release = json.loads((site / "alo186-release.json").read_text(encoding="utf-8"))
+    metadata = release.get("boilerContinuitySuitability") or {}
+    assert metadata.get("directAffiliateLinksAdded") == 0
+    assert metadata.get("noBuyOutcomePreserved") is True
+    assert metadata.get("hazardCommerceClosed") is True
+    assert metadata.get("electricBoilerConsumerCommerceClosed") is True
+    assert metadata.get("recordLimit") == 10 and metadata.get("reviewMonths") == 12
+    return {"ok": True, "route": expected, "basePath": base_path, "canonical": CANONICAL, "toolCount": int(count_match.group(1)), "entries": metadata.get("entryCardsInjected")}
 
 
 def main() -> None:

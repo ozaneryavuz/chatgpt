@@ -51,15 +51,6 @@
     return link;
   }
 
-  function boilerContinuityCard(isPortal){
-    const link=document.createElement('a');
-    link.className=isPortal?'card':'tool-card';
-    link.href=publicRoute('/hesaplama/kombi-kesinti-yedek-guc-uygunluk/');
-    link.dataset.alo186BoilerContinuityCard='true';
-    link.innerHTML=isPortal?'<span class="tag">Kombi · gerçek W · Wh · N-PE · CO</span><h2>Kombi Kesinti Yedek Güç Uygunluğu</h2><p>Gazlı ve elektrikli sistemi ayırın; etiket gücü, süre, bağlantı ve mevcut çözüm kanıtına göre satın almama, test veya profesyonel rota alın.</p><b>Kombi süreklilik planını aç →</b>':'<span class="eyebrow">Gazlı / elektrikli · gerçek W · Wh · güvenlik</span><h2>Kombi Kesinti Yedek Güç ve UPS Uygunluğu</h2><p>Etiket elektrik gücü, hedef süre, nötr-toprak/RCD, mevcut çözüm ve CO güvenliğine göre yalnız gerçek eksik için doğru sonraki adımı görün.</p><b>Kombi süreklilik planını aç →</b>';
-    return link;
-  }
-
   function injectGrowthCards(){
     const normalized=location.pathname.replace(/\/$/,'');
     const isPortal=normalized.endsWith('/elektrik-portali');
@@ -73,7 +64,6 @@
         if(!grid.querySelector('[data-alo186-outcome-runtime-card]')){
           const outcome=document.createElement('a');outcome.className='card';outcome.href=publicRoute('/hesaplama/cozum-sonucu/');outcome.dataset.alo186OutcomeRuntimeCard='true';outcome.innerHTML=isPortal?'<span class="tag">Kapalı döngü · satın almama · tekrar önleme</span><h2>Çözüm Sonucu Merkezi</h2><p>Karar, hesap, ürün, bakım veya resmî kanalın gerçekten işe yarayıp yaramadığını izleyin.</p><b>Sonucu kaydet ve izle →</b>':'<strong>Çözüm gerçekten işe yaradı mı?</strong><p>Öneri, ürün, bakım veya resmî kanal sonucunu kişisel veri vermeden kaydedin.</p><span>Sonucu kaydet ve izle →</span>';grid.prepend(outcome);
         }
-        if(!grid.querySelector('[data-alo186-boiler-continuity-card]'))grid.prepend(boilerContinuityCard(true));
         if(!grid.querySelector('[data-alo186-generator-safety-card]'))grid.prepend(generatorSafetyCard(true));
         if(!grid.querySelector('[data-alo186-shortlist-runtime-card]'))grid.prepend(shortlistCard(true));
       }
@@ -82,10 +72,9 @@
     const isHub=/\/hesaplama\/?$/.test(location.pathname);
     if(isHub){
       const grid=document.querySelector('section.tool-grid');
-      if(grid&&!grid.querySelector('[data-alo186-boiler-continuity-card]'))grid.prepend(boilerContinuityCard(false));
       if(grid&&!grid.querySelector('[data-alo186-generator-safety-card]'))grid.prepend(generatorSafetyCard(false));
       if(grid&&!grid.querySelector('[data-alo186-shortlist-runtime-card]'))grid.prepend(shortlistCard(false));
-      document.querySelectorAll('strong').forEach(node=>{if(/\d+ çekirdek araç/.test(node.textContent||''))node.textContent=(node.textContent||'').replace(/\d+ çekirdek araç/,'37 çekirdek araç');});
+      document.querySelectorAll('strong').forEach(node=>{if(/\d+ çekirdek araç/.test(node.textContent||''))node.textContent=(node.textContent||'').replace(/\d+ çekirdek araç/,'36 çekirdek araç');});
     }
 
     const productCenter=/\/(akilli-urun-secimi|amazon-elektrik-urunleri)\/?$/.test(location.pathname);
