@@ -81,23 +81,40 @@
     const script=document.createElement('script');
     script.src=new URL(`${name==='Alo186EvidenceWallet'?'evidence-wallet.js':name==='Alo186IntentActionRouter'?'intent-action-router.js':'outcome-bridge.js'}`,commonUrl).href;
     if(name==='Alo186OutcomeBridge')script.dataset.alo186OutcomeBridge='true';else script.setAttribute(dataKey,'true');
-    script.defer=true;document.head.appendChild(script);
+    script.async=true;document.head.appendChild(script);
   }
 
-  // Compatibility contract: new URL('outcome-bridge.js',current.src)
-  loadRuntime('Alo186OutcomeBridge','data-alo186-outcome-bridge');
-  loadRuntime('Alo186EvidenceWallet','data-alo186-evidence-wallet');
-  loadRuntime('Alo186IntentActionRouter','data-alo186-intent-router');
+  function loadSupportingRuntimes(){
+    // Compatibility contract: new URL('outcome-bridge.js',current.src)
+    loadRuntime('Alo186OutcomeBridge','data-alo186-outcome-bridge');
+    loadRuntime('Alo186EvidenceWallet','data-alo186-evidence-wallet');
+    loadRuntime('Alo186IntentActionRouter','data-alo186-intent-router');
+  }
 
   const productCenter=/\/(akilli-urun-secimi|amazon-elektrik-urunleri)\/?$/.test(location.pathname);
   if(productCenter&&!document.querySelector('script[data-alo186-outcome-trust-core]')){
-    const coreScript=document.createElement('script');coreScript.src=new URL('../urun-eslestirme/outcome-trust-circuit-core.js',commonUrl).href;coreScript.dataset.alo186OutcomeTrustCore='true';coreScript.addEventListener('load',()=>{if(document.querySelector('script[data-alo186-outcome-trust-ui]'))return;const uiScript=document.createElement('script');uiScript.src=new URL('../urun-eslestirme/outcome-trust-circuit.js',commonUrl).href;uiScript.dataset.alo186OutcomeTrustUi='true';uiScript.defer=true;document.head.appendChild(uiScript);},{once:true});document.head.appendChild(coreScript);
+    const coreScript=document.createElement('script');coreScript.src=new URL('../akilli-urun-secimi/outcome-trust-circuit-core.js',commonUrl).href;coreScript.dataset.alo186OutcomeTrustCore='true';coreScript.addEventListener('load',()=>{if(document.querySelector('script[data-alo186-outcome-trust-ui]'))return;const uiScript=document.createElement('script');uiScript.src=new URL('../akilli-urun-secimi/outcome-trust-circuit.js',commonUrl).href;uiScript.dataset.alo186OutcomeTrustUi='true';uiScript.defer=true;document.head.appendChild(uiScript);},{once:true});document.head.appendChild(coreScript);
   }
 
   function loadDocumentationLayer(){
     if(!productCenter||document.querySelector('script[data-alo186-documentation-core]'))return;
-    const documentationCore=document.createElement('script');documentationCore.src=new URL('../urun-eslestirme/documentation-growth-core.js',commonUrl).href;documentationCore.dataset.alo186DocumentationCore='true';documentationCore.addEventListener('load',()=>{if(document.querySelector('script[data-alo186-documentation-ui]'))return;const documentationUi=document.createElement('script');documentationUi.src=new URL('../urun-eslestirme/documentation-growth.js',commonUrl).href;documentationUi.dataset.alo186DocumentationUi='true';documentationUi.defer=true;document.head.appendChild(documentationUi);},{once:true});document.head.appendChild(documentationCore);
+    const documentationCore=document.createElement('script');documentationCore.src=new URL('../akilli-urun-secimi/documentation-growth-core.js',commonUrl).href;documentationCore.dataset.alo186DocumentationCore='true';documentationCore.addEventListener('load',()=>{if(document.querySelector('script[data-alo186-documentation-ui]'))return;const documentationUi=document.createElement('script');documentationUi.src=new URL('../akilli-urun-secimi/documentation-growth.js',commonUrl).href;documentationUi.dataset.alo186DocumentationUi='true';documentationUi.defer=true;document.head.appendChild(documentationUi);},{once:true});document.head.appendChild(documentationCore);
   }
 
-  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',injectGrowthCards,{once:true});document.addEventListener('DOMContentLoaded',loadDocumentationLayer,{once:true});}else{injectGrowthCards();loadDocumentationLayer();}
+  // common.js final body scripti olarak yayımlanır. DOM mevcutsa büyüme kartlarını
+  // DOMContentLoaded sonrasına bırakmak CLS üretir; ilk boyamadan önce senkron ekle.
+  if(document.body)injectGrowthCards();
+  else document.addEventListener('DOMContentLoaded',injectGrowthCards,{once:true});
+
+  // Kanıt cüzdanı, sonuç köprüsü ve niyet yönlendiricisi ilk boyama için kritik değildir.
+  // Mobil ana iş parçacığını rahatlatmak için load sonrasında boşta yükle.
+  const scheduleSupportingRuntimes=()=>{
+    if('requestIdleCallback'in window)window.requestIdleCallback(loadSupportingRuntimes,{timeout:3000});
+    else setTimeout(loadSupportingRuntimes,250);
+  };
+  if(document.readyState==='complete')scheduleSupportingRuntimes();
+  else window.addEventListener('load',scheduleSupportingRuntimes,{once:true});
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',loadDocumentationLayer,{once:true});
+  else loadDocumentationLayer();
 })();

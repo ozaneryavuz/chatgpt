@@ -5,6 +5,7 @@ import re
 from pathlib import Path
 
 import prepare_github_pages_core as _core
+from finalize_live_quality import CANONICAL_HOST, CANONICAL_ORIGIN
 from prepare_github_pages_core import *  # noqa: F401,F403
 
 
@@ -14,6 +15,11 @@ PRIMARY_START_MARKER = 'data-alo186-primary-start="true"'
 PRIMARY_START_ROUTE = "/elektrik-durum-merkezi/"
 _original_gateway_html = _core.gateway_html
 _original_prepare = _core.prepare
+
+# Gateway ve yeni bridge'ler canlı son origin ile doğar. Mevcut kaynak sitemap ve
+# canonical değerlerinin toplu www -> apex normalizasyonu ise bütün growth
+# enjektörleri tamamlandıktan sonra finalize_live_quality katmanında yapılır.
+_core.CANONICAL_ORIGIN = CANONICAL_ORIGIN
 
 if PRIMARY_START_ROUTE not in _core.CRITICAL_ROUTES:
     _core.CRITICAL_ROUTES = (_core.CRITICAL_ROUTES[0], PRIMARY_START_ROUTE, *_core.CRITICAL_ROUTES[1:])
@@ -46,8 +52,8 @@ def gateway_html(base_path: str, noindex: bool) -> str:
     html = html.replace("</style>", style + "</style>", 1)
 
     html = html.replace(
-        "<h1>Elektrik sorununda doğru sonraki adım.</h1><p class=\"lead\">Kesinti, cihaz hasarı, yedek güç veya elektrik güvenliği konusunda önce riski ayırın; sonra resmî kanal, ücretsiz hesaplayıcı veya teknik rehbere ilerleyin.</p>",
-        "<h1>60 saniyede doğru elektrik rotası.</h1><p class=\"lead\">Belirtiyi seçin; ALO186 önce can güvenliğini, sonra 112, 186, EDAŞ, elektrikçi, kanıt ve yedek güç seçeneklerini ayırsın. Kişisel veri istemez, resmî kayıt oluşturmaz.</p>",
+        '<h1>Elektrik sorununda doğru sonraki adım.</h1><p class="lead">Kesinti, cihaz hasarı, yedek güç veya elektrik güvenliği konusunda önce riski ayırın; sonra resmî kanal, ücretsiz hesaplayıcı veya teknik rehbere ilerleyin.</p>',
+        '<h1>60 saniyede doğru elektrik rotası.</h1><p class="lead">Belirtiyi seçin; ALO186 önce can güvenliğini, sonra 112, 186, EDAŞ, elektrikçi, kanıt ve yedek güç seçeneklerini ayırsın. Kişisel veri istemez, resmî kayıt oluşturmaz.</p>',
         1,
     )
 
@@ -75,8 +81,7 @@ def gateway_html(base_path: str, noindex: bool) -> str:
     anchor = '<section class="grid" aria-label="ALO186 hızlı başlangıç">'
     if anchor not in html:
         raise RuntimeError("Pages gateway hızlı başlangıç alanı bulunamadı.")
-    html = html.replace(anchor, notice + "\n" + anchor + "\n" + primary, 1)
-    return html
+    return html.replace(anchor, notice + "\n" + anchor + "\n" + primary, 1)
 
 
 def validate_root_legal_deadline(site: Path, base_path: str) -> None:
@@ -131,21 +136,22 @@ def prepare(site: Path, base_path: str, repository: str, commit: str) -> dict:
     validate_root_legal_deadline(site, normalized)
     validate_root_primary_start(site, normalized)
     update_primary_shortcut(site, normalized)
-    result["rootDeviceDamageDeadline"] = "10 iş günü"
-    result["rootNoApplicationDisclaimer"] = True
-    result["primaryStartRoute"] = _core.public_url(normalized, PRIMARY_START_ROUTE)
-    result["primaryStartMode"] = "progressive-disclosure"
+
     release_path = site / "pages-release.json"
+    release = json.loads(release_path.read_text(encoding="utf-8")) if release_path.is_file() else dict(result)
+    # Yalnız metadata canlı hedefi baştan ilan eder. HTML, sitemap ve JSON-LD origin
+    # dönüşümü growth enjektörlerinden sonra final kalite katmanında uygulanır.
+    release["canonicalHost"] = CANONICAL_ORIGIN
+    release["customDomain"] = CANONICAL_HOST
+    release["rootDeviceDamageDeadline"] = "10 iş günü"
+    release["rootNoApplicationDisclaimer"] = True
+    release["primaryStartRoute"] = _core.public_url(normalized, PRIMARY_START_ROUTE)
+    release["primaryStartMode"] = "progressive-disclosure"
+    release["liveOriginNormalizationStage"] = "after-all-growth-injectors"
     if release_path.is_file():
-        release = json.loads(release_path.read_text(encoding="utf-8"))
-        release["rootDeviceDamageDeadline"] = "10 iş günü"
-        release["rootNoApplicationDisclaimer"] = True
-        release["primaryStartRoute"] = _core.public_url(normalized, PRIMARY_START_ROUTE)
-        release["primaryStartMode"] = "progressive-disclosure"
         release_path.write_text(json.dumps(release, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-        result = release
     _core.recompute_checksums(site)
-    return result
+    return release
 
 
 _core.gateway_html = gateway_html
