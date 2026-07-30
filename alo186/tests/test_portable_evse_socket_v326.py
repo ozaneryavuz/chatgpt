@@ -62,6 +62,7 @@ def main() -> None:
         "stop_use", "wallbox_path", "active_event", "no_buy", "conditional_purchase",
         "commercialAllowed:true", "niyet=portable_evse", "portable_evse_socket_result",
         "portable_evse", "requiredCurrentA", "deliverableKm", "installationCouldMeet",
+        "form.addEventListener('reset'", "clearOutput", "commerce.dataset.categories='[]'",
     ]:
         assert token in app
     assert "scenarios:22" in test
@@ -95,6 +96,7 @@ def main() -> None:
         "personalDataFields": 0,
         "browserStorage": False,
         "affiliateTripleGate": True,
+        "resetClearsCommercialState": True,
         "noBuyOutcomePreserved": True,
         "extensionLeadFailClosed": True,
         "concurrentTravelToolPreserved": True,
