@@ -70,3 +70,5 @@ jobs:
           assert 'Ticari rota kapalı' in js
           assert 'localStorage' not in js and 'sessionStorage' not in js
           PY
+
+      # Bu kalite kapısı, ana daldaki son modül kodunu PR merge ref'i üzerinden doğrular.
