@@ -169,8 +169,13 @@ def audit(site: Path, base_path: str = "") -> dict:
             if re.search(r'<meta\s+http-equiv=["\']refresh["\']', html, re.I):
                 failures.append(f"Indexlenebilir sayfada meta refresh var: {relative}")
 
-        if parser.html_lang.casefold() != "tr":
-            failures.append(f"html lang=tr değil: {relative}")
+        normalized_lang = parser.html_lang.casefold().replace("_", "-").strip()
+            expected_lang = "en" if relative == "en/index.html" or relative.startswith("en/") else "tr"
+            actual_primary_lang = normalized_lang.split("-", 1)[0] if normalized_lang else ""
+            if actual_primary_lang != expected_lang:
+                failures.append(
+                    f"html lang beklenen {expected_lang}, bulunan {parser.html_lang or 'boş'}: {relative}"
+                )
         if "width=device-width" not in meta_content(parser, "viewport"):
             failures.append(f"Mobil viewport eksik: {relative}")
         if LEGACY_HOST in html:
