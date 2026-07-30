@@ -3,6 +3,7 @@ from __future__ import annotations
 import html
 import json
 import re
+import shutil
 from pathlib import Path
 from typing import Any
 
@@ -10,6 +11,8 @@ from typing import Any
 HUB_MARKER = "<!-- ALO186_ARTICLE_CARDS -->"
 HUB_JSONLD_ID = "article-hub-jsonld"
 ARTICLE_BACKLINK_MARKER = 'data-alo186-article-hub-link="true"'
+ARTICLE_STYLE_MARKER = 'data-alo186-article-discovery-style="true"'
+ARTICLE_STYLE_SOURCE = Path("alo186/assets/alo186-article-discovery.css")
 PORTAL_CARD_MARKER = 'data-alo186-article-hub-card="true"'
 CATEGORY_LABELS = {
     "outage-rights": "Kesinti ve haklar",
@@ -97,6 +100,17 @@ def article_records(site: Path, canonical_release: dict[str, Any]) -> list[dict[
     return records
 
 
+def install_discovery_asset(site: Path, base_path: str) -> str:
+    repo_root = Path(__file__).resolve().parents[2]
+    source = repo_root / ARTICLE_STYLE_SOURCE
+    if not source.is_file():
+        raise FileNotFoundError(f"Makale keşif stili eksik: {source}")
+    assets = site / "assets"
+    assets.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(source, assets / source.name)
+    return public_url(base_path, f"/assets/{source.name}")
+
+
 def populate_hub(site: Path, base_path: str, records: list[dict[str, str]]) -> None:
     target = site / "haberler" / "index.html"
     if not target.is_file():
@@ -169,7 +183,12 @@ def populate_hub(site: Path, base_path: str, records: list[dict[str, str]]) -> N
     target.write_text(source, encoding="utf-8")
 
 
-def inject_article_backlinks(site: Path, base_path: str, records: list[dict[str, str]]) -> int:
+def inject_article_backlinks(
+    site: Path,
+    base_path: str,
+    records: list[dict[str, str]],
+    style_url: str,
+) -> int:
     hub_url = public_url(base_path, "/haberler/")
     search_url = public_url(base_path, "/arama/")
     injected = 0
@@ -178,6 +197,10 @@ def inject_article_backlinks(site: Path, base_path: str, records: list[dict[str,
         source = target.read_text(encoding="utf-8")
         if ARTICLE_BACKLINK_MARKER in source:
             continue
+        if "</head>" not in source:
+            raise RuntimeError(f"Makale head alanı bulunamadı: {item['path']}")
+        style = f'<link rel="stylesheet" href="{html.escape(style_url, quote=True)}" {ARTICLE_STYLE_MARKER}>'
+        source = source.replace("</head>", style + "\n</head>", 1)
         navigation = (
             f'<nav class="article-hub-backlink" {ARTICLE_BACKLINK_MARKER} aria-label="Makale gezinme">'
             f'<a href="{html.escape(hub_url, quote=True)}">← Tüm teknik makaleler</a>'
@@ -236,8 +259,9 @@ def run(site: Path, base_path: str, canonical_release: dict[str, Any]) -> dict[s
     records = article_records(site, canonical_release)
     if len(records) < 50:
         raise RuntimeError(f"Teknik makale merkezi beklenenden küçük: {len(records)}")
+    style_url = install_discovery_asset(site, base_path)
     populate_hub(site, base_path, records)
-    backlinks = inject_article_backlinks(site, base_path, records)
+    backlinks = inject_article_backlinks(site, base_path, records, style_url)
     portal_card = inject_portal_card(site, base_path)
     manifest_shortcut = update_manifest(site, base_path)
     counts = {key: sum(1 for item in records if item["category"] == key) for key in CATEGORY_LABELS}
@@ -245,6 +269,7 @@ def run(site: Path, base_path: str, canonical_release: dict[str, Any]) -> dict[s
         raise RuntimeError(f"Makale kategori kapsamı eksik: {counts}")
     return {
         "route": public_url(base_path, "/haberler/"),
+        "style": style_url,
         "articleCount": len(records),
         "categoryCounts": counts,
         "articleBacklinksInjected": backlinks,
