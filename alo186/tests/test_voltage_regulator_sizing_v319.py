@@ -11,8 +11,8 @@ sys.path.insert(0, str(DEPLOYMENT))
 
 from build_static_site import load_effective_manifest  # noqa: E402
 
-ROUTE = "/hesaplama/ups-va-topoloji-uygunluk/"
-SOURCE = "alo186/hesaplama/ups-va-topoloji-uygunluk/index.html"
+ROUTE = "/hesaplama/voltaj-regulatoru-kva-uygunluk/"
+SOURCE = "alo186/hesaplama/voltaj-regulatoru-kva-uygunluk/index.html"
 
 
 def schema_types(html: str) -> set[str]:
@@ -31,7 +31,7 @@ def schema_types(html: str) -> set[str]:
 
 def main() -> None:
     manifest = load_effective_manifest(REPO_ROOT)
-    assert manifest["version"] >= 77
+    assert manifest["version"] >= 78
     routes = [item for item in manifest["routes"] if item["canonicalPath"] == ROUTE]
     assert len(routes) == 1
     assert routes[0]["source"] == SOURCE
@@ -48,14 +48,13 @@ def main() -> None:
     hub = (REPO_ROOT / "alo186/hesaplama/index.html").read_text(encoding="utf-8")
 
     assert html.count("<h1") == 1
-    assert 'rel="canonical" href="https://www.alo186.com/hesaplama/ups-va-topoloji-uygunluk/"' in html
+    assert 'rel="canonical" href="https://www.alo186.com/hesaplama/voltaj-regulatoru-kva-uygunluk/"' in html
     assert {"WebApplication", "FAQPage", "BreadcrumbList"} <= schema_types(html)
     assert 'aria-live="polite"' in html and 'tabindex="-1"' in html
     assert 'rel="sponsored nofollow noopener"' in html
-    assert "alo186rehber-21" in app
-    assert "amazon.com.tr/s?k=" in app
-    assert "Fiyat, stok, puan" in html
     assert "ALO186 ürün satıcısı veya resmî kurum değildir" in html
+    assert "Fiyat, stok, puan" in html
+    assert "Satın almama sonucu var" in html
 
     lower = html.casefold()
     for forbidden in ['type="email"', 'type="tel"', 'name="email"', 'name="phone"', 'name="address"']:
@@ -63,21 +62,26 @@ def main() -> None:
     assert "localStorage" not in app and "sessionStorage" not in app
     assert "fetch(" not in app and "XMLHttpRequest" not in app
 
-    for token in ["input.watts * 1.25", "input.peak * 1.10", "0.85 * 0.80", "roundUp", "inferredPf"]:
+    for token in [
+        "input.loadKw / pf", "input.motorKw * input.startFactor", "nextStandard",
+        "lowRatio < 0.7", "runningKva", "startKva", "derating"
+    ]:
         assert token in app
-    assert "medical" in app and "motor" in app and "professional" in app
-    assert "commerceAllowed" in app
-    assert "!result.hazard" in app
-    assert "result.runtime <= 30" in app
-    assert "result.watts <= 1500" in app
-    assert "Duman, kıvılcım" in html
-    assert "Ticari rota kapalı" in app
+    for token in ["plug_avr", "no_buy", "root_cause", "spd", "ups", "professional"]:
+        assert token in app
+    assert "input.phase === 'mono'" in app
+    assert "$('phase').value === 'three'" in app
+    assert "input.loadKw <= 1.5" in app
+    assert "selectedKva <= 3" in app
+    assert "Ticari rota kapalı" in html or "Ticari rota kapalı" in app
     assert "112’yi arayın" in app
+    assert "amazon.com.tr/s?k=" in app and "alo186rehber-21" in app
+    assert "aria-disabled" in app and "setGate" in app
+    assert app.index("if (input.hazard)") < app.index("if (!(input.vmin >= 80")
 
-    assert "ups-va-topoloji-uygunluk" in hub
-    count_match = re.search(r"(\d+) çekirdek araç", hub)
-    assert count_match and int(count_match.group(1)) >= 33
-    assert "UPS VA ve Topoloji Uygunluğu" in hub
+    assert "voltaj-regulatoru-kva-uygunluk" in hub
+    assert "34 çekirdek araç" in hub
+    assert "Voltaj Regülatörü kVA ve Faz Uygunluğu" in hub
 
     assert "@media(max-width:820px)" in css
     assert "@media(max-width:480px)" in css
@@ -88,12 +92,14 @@ def main() -> None:
         "ok": True,
         "routingVersion": manifest["version"],
         "route": ROUTE,
-        "hubToolCountLabel": int(count_match.group(1)),
+        "hubToolCountLabel": 34,
         "personalDataFields": 0,
         "browserStorage": False,
         "affiliateDisclosure": True,
         "emergencyCommerceClosed": True,
+        "hazardBeforeNumericValidation": True,
         "professionalGate": True,
+        "noBuyOutcome": True,
     }, ensure_ascii=False, indent=2))
 
 

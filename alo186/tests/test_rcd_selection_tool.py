@@ -72,7 +72,8 @@ def main() -> None:
     assert len(styles) > 1800
 
     assert './kacak-akim-rolesi-tip-hassasiyet-testi/' in hub
-    assert "32 çekirdek araç" in hub
+    count_match = re.search(r"(\d+) çekirdek araç", hub)
+    assert count_match and int(count_match.group(1)) >= 32
     assert "Kaçak Akım Rölesi Tip ve Hassasiyet Testi" in hub
 
     completed = subprocess.run(
@@ -91,6 +92,7 @@ def main() -> None:
         "ok": True,
         "routingVersion": manifest["version"],
         "route": ROUTE,
+        "hubToolCountLabel": int(count_match.group(1)),
         "mobileResponsive": "@media(max-width:700px)" in styles,
         "personalDataCollected": False,
         "directAffiliateLinks": 0,
