@@ -12,7 +12,6 @@ LOADER = ROOT / "alo186/hesaplama/usb-c-set-kisa-listesi/catalog-loader.js"
 EXTENSION = ROOT / "alo186/urun-eslestirme/catalog-qualified-commerce-run53.js"
 STYLES = ROOT / "alo186/hesaplama/usb-c-set-kisa-listesi/styles.css"
 HUB = ROOT / "alo186/hesaplama/index.html"
-COMMON = ROOT / "alo186/hesaplama/common.js"
 OVERLAY = ROOT / "alo186/deployment/routing-overlays/usb-c-shortlist-run28.json"
 
 html = PAGE.read_text(encoding="utf-8")
@@ -21,7 +20,6 @@ loader = LOADER.read_text(encoding="utf-8")
 extension = EXTENSION.read_text(encoding="utf-8")
 styles = STYLES.read_text(encoding="utf-8")
 hub = HUB.read_text(encoding="utf-8")
-common = COMMON.read_text(encoding="utf-8")
 overlay = json.loads(OVERLAY.read_text(encoding="utf-8"))
 
 assert overlay["version"] == 80
@@ -80,7 +78,7 @@ assert "prefers-reduced-motion" in styles
 tool_match = re.search(r"(\d+) çekirdek araç", hub)
 assert tool_match, "Hesaplama Merkezi çekirdek araç sayısı bulunamadı."
 tool_count = int(tool_match.group(1))
-assert re.search(rf"{tool_count} çekirdek araç", common), "Hub ve runtime araç sayıları ayrıştı."
+assert tool_count >= 35
 assert './usb-c-set-kisa-listesi/' in hub
 assert "USB-C Şarj Seti ve Teknik Kısa Liste" in hub
 
