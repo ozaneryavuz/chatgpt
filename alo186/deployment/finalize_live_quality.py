@@ -24,6 +24,12 @@ QUALITY_STYLE = (
     '</style>'
 )
 TEXT_SUFFIXES = {".html", ".htm", ".xml", ".txt", ".json", ".js", ".css", ".webmanifest"}
+JSON_LD_PATTERN = re.compile(
+    r'(<script\b[^>]*type=["\']application/ld\+json["\'][^>]*>)(.*?)(</script>)',
+    re.I | re.S,
+)
+KNOWN_FAQ_BREADCRUMB_DEFECT = '"}]},{"@type":"BreadcrumbList"'
+KNOWN_FAQ_BREADCRUMB_REPAIR = '"}}]},{"@type":"BreadcrumbList"'
 
 
 def normalize_base_path(value: str) -> str:
@@ -40,6 +46,56 @@ def canonical_links(html: str) -> list[str]:
         if match:
             links.append(match.group(1))
     return links
+
+
+def repair_and_validate_json_ld(site: Path) -> int:
+    """Bilinen eksik Question kapanışını düzeltir; diğer JSON-LD hatalarında yayını durdurur."""
+
+    repairs = 0
+    failures: list[str] = []
+    for path in sorted(site.rglob("*.html")):
+        html = path.read_text(encoding="utf-8", errors="ignore")
+        relative = path.relative_to(site).as_posix()
+        changed = False
+        rebuilt: list[str] = []
+        cursor = 0
+        for index, match in enumerate(JSON_LD_PATTERN.finditer(html), start=1):
+            block = match.group(2)
+            try:
+                json.loads(block)
+            except json.JSONDecodeError:
+                repaired = block.replace(KNOWN_FAQ_BREADCRUMB_DEFECT, KNOWN_FAQ_BREADCRUMB_REPAIR)
+                if repaired != block:
+                    try:
+                        json.loads(repaired)
+                    except json.JSONDecodeError as exc:
+                        snippet = repaired[max(0, exc.pos - 80): exc.pos + 80]
+                        failures.append(
+                            f"JSON-LD düzeltme sonrası geçersiz: {relative} blok {index}, "
+                            f"satır {exc.lineno} sütun {exc.colno}: {snippet!r}"
+                        )
+                    else:
+                        block = repaired
+                        repairs += 1
+                        changed = True
+                else:
+                    try:
+                        json.loads(block)
+                    except json.JSONDecodeError as exc:
+                        snippet = block[max(0, exc.pos - 80): exc.pos + 80]
+                        failures.append(
+                            f"Bilinmeyen JSON-LD hatası: {relative} blok {index}, "
+                            f"satır {exc.lineno} sütun {exc.colno}: {snippet!r}"
+                        )
+            rebuilt.append(html[cursor:match.start()])
+            rebuilt.append(match.group(1) + block + match.group(3))
+            cursor = match.end()
+        if changed:
+            rebuilt.append(html[cursor:])
+            path.write_text("".join(rebuilt), encoding="utf-8")
+    if failures:
+        raise RuntimeError("Final JSON-LD kalite sözleşmesi başarısız:\n- " + "\n- ".join(failures[:50]))
+    return repairs
 
 
 def normalize_live_origin(site: Path) -> int:
@@ -74,6 +130,7 @@ def validate(site: Path, base_path: str) -> dict:
     indexable_count = 0
     noindex_count = 0
     html_count = 0
+    json_ld_count = 0
 
     for path in sorted(site.rglob("*.html")):
         html_count += 1
@@ -83,6 +140,14 @@ def validate(site: Path, base_path: str) -> dict:
             failures.append(f"Responsive kalite stili eksik: {relative}")
         if LEGACY_ORIGIN in html or LEGACY_HOST in html:
             failures.append(f"www host artifactta kaldı: {relative}")
+        for index, match in enumerate(JSON_LD_PATTERN.finditer(html), start=1):
+            json_ld_count += 1
+            try:
+                json.loads(match.group(2))
+            except json.JSONDecodeError as exc:
+                failures.append(
+                    f"Geçersiz final JSON-LD: {relative} blok {index}, satır {exc.lineno} sütun {exc.colno}"
+                )
         robots_match = re.search(r'<meta\s+name=["\']robots["\']\s+content=["\']([^"\']+)', html, re.I)
         noindex = bool(robots_match and "noindex" in robots_match.group(1).casefold())
         if noindex:
@@ -136,6 +201,7 @@ def validate(site: Path, base_path: str) -> dict:
         "htmlCount": html_count,
         "indexableHtmlCount": indexable_count,
         "noindexHtmlCount": noindex_count,
+        "jsonLdBlockCount": json_ld_count,
         "canonicalOrigin": CANONICAL_ORIGIN,
         "customDomain": CANONICAL_HOST,
     }
@@ -155,6 +221,7 @@ def recompute_checksums(site: Path) -> None:
 def run(site: Path, base_path: str = "") -> dict:
     site = site.resolve()
     normalized = normalize_base_path(base_path)
+    json_ld_repairs = repair_and_validate_json_ld(site)
     origin_files_changed = normalize_live_origin(site)
     responsive_html_hardened = inject_responsive_hardening(site)
 
@@ -169,6 +236,7 @@ def run(site: Path, base_path: str = "") -> dict:
             "redirectChainRemoved": "www-to-apex",
             "originFilesChanged": origin_files_changed,
             "responsiveHtmlHardened": responsive_html_hardened,
+            "jsonLdRepairs": json_ld_repairs,
             "personalDataFieldsAdded": 0,
             "officialAffiliationClaimed": False,
         }
@@ -179,6 +247,7 @@ def run(site: Path, base_path: str = "") -> dict:
     return {
         "ok": True,
         "basePath": normalized,
+        "jsonLdRepairs": json_ld_repairs,
         "originFilesChanged": origin_files_changed,
         "responsiveHtmlHardened": responsive_html_hardened,
         **validation,
@@ -186,7 +255,7 @@ def run(site: Path, base_path: str = "") -> dict:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="ALO186 final Pages artifactında canlı canonical ve responsive kalite sözleşmesini uygular.")
+    parser = argparse.ArgumentParser(description="ALO186 final Pages artifactında canonical, JSON-LD ve responsive kalite sözleşmesini uygular.")
     parser.add_argument("--site", type=Path, required=True)
     parser.add_argument("--base-path", default="")
     args = parser.parse_args()
