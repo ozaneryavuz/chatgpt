@@ -108,6 +108,7 @@ jobs:
           from pathlib import Path
 
           route='hesaplama/evden-calisma-laptop-modem-yedek-guc-seti'
+          canonical='/hesaplama/evden-calisma-laptop-modem-yedek-guc-seti/'
           hub_relative='./evden-calisma-laptop-modem-yedek-guc-seti/'
           for root,prefix in [
               (Path('/tmp/alo186-home-office-custom'),''),
@@ -119,8 +120,9 @@ jobs:
               assert page.is_file() and app.is_file() and css.is_file()
               html=page.read_text(encoding='utf-8')
               js=app.read_text(encoding='utf-8')
-              expected=f"{prefix}/hesaplama/evden-calisma-laptop-modem-yedek-guc-seti/" if prefix else '/hesaplama/evden-calisma-laptop-modem-yedek-guc-seti/'
-              assert expected in html
+              expected=f"{prefix}{canonical}" if prefix else canonical
+              assert any(f'{host}{canonical}' in html for host in ['https://alo186.com','https://www.alo186.com'])
+              assert all(asset in html for asset in ['./app.js','./styles.css'])
               assert 'amazon.com' not in (html+js).lower()
               assert 'localStorage' not in js and 'sessionStorage' not in js and 'fetch(' not in js
               assert all(token in html for token in ['actualNeed','technicalCheck','affiliateCheck','bundleLinks'])
@@ -130,9 +132,9 @@ jobs:
               sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
               assert expected in sitemap
               search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
-              entry=next(item for item in search['entries'] if item['canonicalPath']=='/hesaplama/evden-calisma-laptop-modem-yedek-guc-seti/')
+              entry=next(item for item in search['entries'] if item['canonicalPath']==canonical)
               assert entry['url']==expected
-          print(json.dumps({'ok':True,'route':'/hesaplama/evden-calisma-laptop-modem-yedek-guc-seti/','directStoreLinks':0,'storage':False,'multiCategoryBundle':True,'searchIndexed':True},ensure_ascii=False))
+          print(json.dumps({'ok':True,'route':canonical,'directStoreLinks':0,'storage':False,'multiCategoryBundle':True,'searchIndexed':True},ensure_ascii=False))
           PY
 
       - name: Doğrulanmış site artifactı
