@@ -130,7 +130,7 @@ def test_every_article_is_discoverable_in_custom_and_project_modes() -> None:
             assert (site / "assets/alo186-article-discovery.css").is_file()
 
             audit = pages["sitewideUserExperienceAudit"]
-            assert audit["pageCount"] >= int(pages["routeCount"])
+            assert audit["htmlPagesScanned"] >= int(pages["routeCount"])
             assert audit["brokenInternalLinks"] == 0
 
 
