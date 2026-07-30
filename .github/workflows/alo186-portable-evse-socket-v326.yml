@@ -104,12 +104,14 @@ jobs:
           set -euo pipefail
           python - <<'PY'
           import json
+          import re
           from pathlib import Path
 
           route='hesaplama/tasinabilir-ev-sarj-priz-uygunluk'
           route_slug='tasinabilir-ev-sarj-priz-uygunluk/'
+          travel_slug='seyahat-priz-adaptoru-voltaj-uygunluk/'
           for root,prefix in [
-              (Path('/tmp/alo186-portable-evse-custom'),'') ,
+              (Path('/tmp/alo186-portable-evse-custom'),''),
               (Path('/tmp/alo186-portable-evse-project'),'/chatgpt'),
           ]:
               page=root/route/'index.html'
@@ -124,14 +126,15 @@ jobs:
               assert 'localStorage' not in js and 'sessionStorage' not in js and 'fetch(' not in js
               assert all(token in html for token in ['actualNeed','technicalCheck','affiliateCheck','productLinks'])
               hub=(root/'hesaplama/index.html').read_text(encoding='utf-8')
-              assert route_slug in hub
-              assert '41 çekirdek araç' in hub
+              assert route_slug in hub and travel_slug in hub
+              count=re.search(r'(\d+) çekirdek araç',hub)
+              assert count and int(count.group(1))>=42
               sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
               assert expected in sitemap
               search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
               entry=next(item for item in search['entries'] if item['canonicalPath']=='/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/')
               assert entry['url']==expected
-          print(json.dumps({'ok':True,'route':'/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/','directStoreLinks':0,'storage':False,'searchIndexed':True},ensure_ascii=False))
+          print(json.dumps({'ok':True,'route':'/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/','directStoreLinks':0,'storage':False,'searchIndexed':True,'hubToolCount':42,'concurrentTravelToolPreserved':True},ensure_ascii=False))
           PY
 
       - name: Doğrulanmış site artifactı
