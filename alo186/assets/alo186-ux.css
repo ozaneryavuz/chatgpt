@@ -101,7 +101,8 @@ input, select, textarea { max-width: 100%; font-size: 16px; }
 .alo-ux-toc summary::-webkit-details-marker { display: none; }
 .alo-ux-toc summary::after { content: "+"; float: right; font-size: 1.2rem; }
 .alo-ux-toc[open] summary::after { content: "−"; }
-.alo-ux-toc nav {
+.alo-ux-toc:not([open]) nav { display: none; }
+.alo-ux-toc[open] nav {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: .35rem;
@@ -166,7 +167,7 @@ input, select, textarea { max-width: 100%; font-size: 16px; }
   h1 { hyphens: auto; }
   p, li { overflow-wrap: anywhere; }
   .alo-ux-toc { border-radius: 13px; }
-  .alo-ux-toc nav { grid-template-columns: 1fr; }
+  .alo-ux-toc[open] nav { grid-template-columns: 1fr; }
 }
 
 @media (prefers-contrast: more) {
