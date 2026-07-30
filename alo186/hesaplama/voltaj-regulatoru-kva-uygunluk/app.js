@@ -39,6 +39,27 @@
     };
 
     const nominal = input.phase === 'mono' ? 230 : 400;
+    if (input.hazard) {
+      return {
+        ...input,
+        nominal,
+        pf: null,
+        runningKva: 0,
+        startKva: 0,
+        derating: 1,
+        rawKva: 0,
+        selectedKva: 0,
+        designKw: 0,
+        lowDeviation: 0,
+        highDeviation: 0,
+        deviation: 0,
+        solutionKey: 'hazard',
+        solutionLabel: 'Ticari rota kapalı',
+        reason: 'Nötr, yanık bağlantı, su veya elektrik çarpması şüphesinde regülatör seçimi yapılmaz.',
+        professional: true
+      };
+    }
+
     const maxVoltage = input.phase === 'mono' ? 320 : 520;
     if (!(input.vmin >= 80 && input.vmin <= maxVoltage)) throw new Error('En düşük gerilim değeri geçerli aralıkta olmalıdır.');
     if (!(input.vmax >= 80 && input.vmax <= maxVoltage)) throw new Error('En yüksek gerilim değeri geçerli aralıkta olmalıdır.');
@@ -70,11 +91,7 @@
     let solutionLabel = 'Profesyonel servo/statik regülatör incelemesi';
     let reason = 'Pano, trifaze, motorlu veya yüksek güçlü yükte kısa devre dayanımı, bypass, faz dengesizliği ve koruma koordinasyonu birlikte projelendirilmelidir.';
 
-    if (input.hazard) {
-      solutionKey = 'hazard';
-      solutionLabel = 'Ticari rota kapalı';
-      reason = 'Nötr, yanık bağlantı, su veya elektrik çarpması şüphesinde regülatör seçimi yapılmaz.';
-    } else if (input.problem === 'spike') {
+    if (input.problem === 'spike') {
       solutionKey = 'spd';
       solutionLabel = 'Regülatör değil, SPD/parafudr değerlendirmesi';
       reason = 'Ani darbe ve yıldırım endişesi sürekli gerilim regülasyonundan farklıdır; uygun SPD koordinasyonu değerlendirilmelidir.';
