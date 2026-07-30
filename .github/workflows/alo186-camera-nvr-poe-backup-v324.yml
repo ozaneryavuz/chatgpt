@@ -1,0 +1,96 @@
+name: ALO186 Kamera NVR PoE yedek güç testi
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/kamera-nvr-poe-yedek-guc-uygunluk/**'
+      - 'alo186/deployment/routing-overlays/085-camera-nvr-poe-backup-selector.json'
+      - 'alo186/tests/test_camera_nvr_poe_backup_v324.py'
+      - '.github/workflows/alo186-camera-nvr-poe-backup-v324.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/kamera-nvr-poe-yedek-guc-uygunluk/**'
+      - 'alo186/deployment/routing-overlays/085-camera-nvr-poe-backup-selector.json'
+      - 'alo186/tests/test_camera_nvr_poe_backup_v324.py'
+      - '.github/workflows/alo186-camera-nvr-poe-backup-v324.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-camera-nvr-poe-v324-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Hesap ve karar senaryoları
+        run: |
+          set -euo pipefail
+          node alo186/hesaplama/kamera-nvr-poe-yedek-guc-uygunluk/app.test.js
+          python alo186/tests/test_camera_nvr_poe_backup_v324.py
+
+      - name: Sözdizimi ve mevcut güven regresyonları
+        run: |
+          set -euo pipefail
+          node --check alo186/hesaplama/kamera-nvr-poe-yedek-guc-uygunluk/app.js
+          python -m py_compile alo186/tests/test_camera_nvr_poe_backup_v324.py
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Canonical üretim ve smoke testi
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-camera-poe-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-camera-poe-canonical
+
+      - name: Rota, sitemap, teknik arama ve gizlilik kabulü
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('/tmp/alo186-camera-poe-canonical')
+          route='hesaplama/kamera-nvr-poe-yedek-guc-uygunluk'
+          page=root/route/'index.html'
+          app=root/route/'app.js'
+          css=root/route/'styles.css'
+          assert page.is_file() and app.is_file() and css.is_file()
+          html=page.read_text(encoding='utf-8')
+          js=app.read_text(encoding='utf-8')
+          assert 'https://alo186.com/hesaplama/kamera-nvr-poe-yedek-guc-uygunluk/' in html
+          assert 'amazon.com' not in (html+js).lower()
+          assert 'localStorage' not in js and 'sessionStorage' not in js and 'fetch(' not in js
+          assert all(token in html for token in ['actualNeed','technicalCheck','affiliateCheck'])
+          sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
+          assert '/hesaplama/kamera-nvr-poe-yedek-guc-uygunluk/' in sitemap
+          search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
+          entry=next(item for item in search['entries'] if item['canonicalPath']=='/hesaplama/kamera-nvr-poe-yedek-guc-uygunluk/')
+          assert entry['url']=='/hesaplama/kamera-nvr-poe-yedek-guc-uygunluk/'
+          print(json.dumps({'ok':True,'route':entry['url'],'directStoreLinks':0,'storage':False},ensure_ascii=False))
+          PY
+
+      - name: Doğrulanmış site artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-camera-nvr-poe-backup-v324
+          path: /tmp/alo186-camera-poe-canonical
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
