@@ -13,7 +13,8 @@ from typing import Any
 
 DEFAULT_API_BASE = "https://api.github.com"
 DEFAULT_API_VERSION = "2022-11-28"
-DEFAULT_CUSTOM_DOMAIN = "www.alo186.com"
+DEFAULT_CUSTOM_DOMAIN = "alo186.com"
+LEGACY_CUSTOM_DOMAIN = "www.alo186.com"
 
 
 class PagesBootstrapError(RuntimeError):
@@ -86,7 +87,12 @@ class GitHubPagesApi:
 
 
 def _normalise_domain(value: str | None) -> str:
-    return (value or "").strip().lower().rstrip(".")
+    domain = (value or "").strip().lower().rstrip(".")
+    # Eski workflow/secret girdisi www kullansa bile canlı serving origin apex'tir.
+    # Tek canonical ve tek Pages CNAME sözleşmesi için bu eski girdiyi apex'e indirgeriz.
+    if domain == LEGACY_CUSTOM_DOMAIN:
+        return DEFAULT_CUSTOM_DOMAIN
+    return domain
 
 
 def ensure_pages(
@@ -154,7 +160,7 @@ def ensure_pages(
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="GitHub Pages'i workflow modunda etkinleştirir ve ALO186 custom domainini idempotent ayarlar."
+        description="GitHub Pages'i workflow modunda etkinleştirir ve ALO186 apex custom domainini idempotent ayarlar."
     )
     parser.add_argument("--repository", default=os.getenv("GITHUB_REPOSITORY", ""))
     parser.add_argument("--custom-domain", default=DEFAULT_CUSTOM_DOMAIN)
