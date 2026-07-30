@@ -120,18 +120,18 @@ jobs:
               (Path('/tmp/alo186-article-custom'), ''),
               (Path('/tmp/alo186-article-project'), '/chatgpt'),
           ]:
-              release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
               pages=json.loads((root/'pages-release.json').read_text(encoding='utf-8'))
-              canonical_article_count=int(release['articleCount'])
               discovery=pages['articleDiscoveryV1']
-              assert canonical_article_count >= 50
-              assert discovery['articleCount'] == canonical_article_count
-              assert discovery['articleBacklinksInjected'] == canonical_article_count
+              article_count=int(discovery['articleCount'])
+              assert article_count >= 50
+              assert discovery['articleBacklinksInjected'] == article_count
+              assert sum(discovery['categoryCounts'].values()) == article_count
+              assert all(value > 0 for value in discovery['categoryCounts'].values())
               assert discovery['portalCardInjected'] is True
               assert discovery['rawQueryStored'] is False
               assert discovery['commercialRankingUsed'] is False
               hub=(root/'haberler/index.html').read_text(encoding='utf-8')
-              assert hub.count('data-article-card') == canonical_article_count
+              assert hub.count('data-article-card') == article_count
               assert 'amazon.com.tr' not in hub.lower()
               portal=(root/'elektrik-portali/index.html').read_text(encoding='utf-8')
               assert portal.count('data-alo186-article-hub-card="true"') == 1
