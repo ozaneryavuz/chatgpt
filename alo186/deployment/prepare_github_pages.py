@@ -6,6 +6,7 @@ import shutil
 from pathlib import Path
 
 import prepare_github_pages_core as _core
+from finalize_article_discovery import run as finalize_article_discovery
 from finalize_live_quality import CANONICAL_HOST, CANONICAL_ORIGIN as LIVE_CANONICAL_ORIGIN
 from finalize_user_experience import run as finalize_user_experience
 from prepare_github_pages_core import *  # noqa: F401,F403
@@ -172,8 +173,14 @@ def update_primary_shortcut(site: Path, base_path: str) -> None:
 
 
 def prepare(site: Path, base_path: str, repository: str, commit: str) -> dict:
+    canonical_release_path = site / "alo186-release.json"
+    if not canonical_release_path.is_file():
+        raise FileNotFoundError("Makale merkezi için alo186-release.json bulunamadı.")
+    canonical_release = json.loads(canonical_release_path.read_text(encoding="utf-8"))
+
     result = _original_prepare(site, base_path, repository, commit)
     normalized = _core.normalize_base_path(base_path)
+    article_discovery = finalize_article_discovery(site, normalized, canonical_release)
     audit = finalize_user_experience(site, normalized)
     ux = install_sitewide_ux(site, normalized)
     validate_root_legal_deadline(site, normalized)
@@ -182,8 +189,6 @@ def prepare(site: Path, base_path: str, repository: str, commit: str) -> dict:
 
     release_path = site / "pages-release.json"
     release = json.loads(release_path.read_text(encoding="utf-8")) if release_path.is_file() else dict(result)
-    # Yalnız metadata canlı hedefi baştan ilan eder. HTML, sitemap ve JSON-LD origin
-    # dönüşümü growth enjektörlerinden sonra final kalite katmanında uygulanır.
     release["canonicalHost"] = LIVE_CANONICAL_ORIGIN
     release["customDomain"] = CANONICAL_HOST
     release["rootDeviceDamageDeadline"] = "10 iş günü"
@@ -192,6 +197,7 @@ def prepare(site: Path, base_path: str, repository: str, commit: str) -> dict:
     release["primaryStartMode"] = "progressive-disclosure"
     release["sitewideUx"] = ux
     release["sitewideUserExperienceAudit"] = audit
+    release["articleDiscoveryV1"] = article_discovery
     release["liveOriginNormalizationStage"] = "after-all-growth-injectors"
     if release_path.is_file():
         release_path.write_text(json.dumps(release, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
