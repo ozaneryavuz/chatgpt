@@ -1,0 +1,63 @@
+name: ALO186 satış odaklı ürün danışmanı kalite kontrolü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/kesintiye-hazirlik-atolyesi/**'
+      - 'alo186/urun-secim-danismani/**'
+      - 'alo186/deployment/routing-overlays/sales-guided-commerce-v317.json'
+      - 'alo186/tests/test_sales_guided_commerce_v317.py'
+      - '.github/workflows/alo186-sales-guided-commerce-v317.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/kesintiye-hazirlik-atolyesi/**'
+      - 'alo186/urun-secim-danismani/**'
+      - 'alo186/deployment/routing-overlays/sales-guided-commerce-v317.json'
+      - 'alo186/tests/test_sales_guided_commerce_v317.py'
+      - '.github/workflows/alo186-sales-guided-commerce-v317.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Kaynak satış, güven ve kanonik sözleşmeleri
+        run: |
+          python -m pytest -q alo186/tests/test_sales_guided_commerce_v317.py
+          python alo186/tests/test_commerce_governance_v2.py
+      - name: Canonical üretim paketi
+        run: |
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-sales-v317 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-sales-v317
+      - name: Custom-domain ve satış rotası kabulü
+        run: |
+          python alo186/deployment/prepare_github_pages.py --site /tmp/alo186-sales-v317 --base-path '' --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_github_pages.py --site /tmp/alo186-sales-v317 --base-path ''
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('/tmp/alo186-sales-v317')
+          route='/kesintiye-hazirlik-atolyesi/'
+          page=root/route.strip('/')/'index.html'
+          assert page.is_file(), page
+          html=page.read_text(encoding='utf-8')
+          assert 'Bir Amazon Gelir Ortağı olarak nitelikli satın alımlar üzerinden kazanç elde ediyorum.' in html
+          assert 'rel="sponsored nofollow noopener"' in html
+          assert 'state.existing===\'sufficient\'' in html
+          assert 'm.direct&&!uncertain' in html
+          sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
+          assert 'https://www.alo186.com/kesintiye-hazirlik-atolyesi/' in sitemap
+          assert 'https://www.alo186.com/urun-secim-danismani/' not in sitemap
+          release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
+          assert release['routingVersion'] >= 77
+          assert any(item['canonicalPath']==route for item in release['routes'])
+          PY
