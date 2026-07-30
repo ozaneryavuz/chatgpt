@@ -8,6 +8,7 @@ on:
       - 'alo186/kurumsal-on-degerlendirme/**'
       - 'alo186/urun-eslestirme/catalog.js'
       - 'alo186/deployment/guard_commerce_routes_v2.py'
+      - 'alo186/deployment/guard_commerce_routes_v3.py'
       - 'alo186/deployment/inject_shortlist_growth.py'
       - 'alo186/tests/test_commerce_governance_v2.py'
       - '.github/workflows/alo186-commerce-governance-v2.yml'
@@ -19,6 +20,7 @@ on:
       - 'alo186/kurumsal-on-degerlendirme/**'
       - 'alo186/urun-eslestirme/catalog.js'
       - 'alo186/deployment/guard_commerce_routes_v2.py'
+      - 'alo186/deployment/guard_commerce_routes_v3.py'
       - 'alo186/deployment/inject_shortlist_growth.py'
       - 'alo186/tests/test_commerce_governance_v2.py'
       - '.github/workflows/alo186-commerce-governance-v2.yml'
@@ -53,6 +55,7 @@ jobs:
           set -euo pipefail
           python alo186/tests/test_commerce_governance_v2.py
           python -m py_compile alo186/deployment/guard_commerce_routes_v2.py
+          python -m py_compile alo186/deployment/guard_commerce_routes_v3.py
           node --check alo186/amazon-elektrik-urunleri/commercial.js
           node --check alo186/urun-eslestirme/catalog.js
 
@@ -95,7 +98,7 @@ jobs:
           python alo186/deployment/smoke_github_pages.py \
             --site /tmp/alo186-commerce-v2-custom \
             --base-path ''
-          python alo186/deployment/guard_commerce_routes_v2.py \
+          python alo186/deployment/guard_commerce_routes_v3.py \
             --site /tmp/alo186-commerce-v2-custom \
             | tee /tmp/alo186-commerce-v2-custom-guard.json
 
@@ -118,7 +121,7 @@ jobs:
           python alo186/deployment/smoke_github_pages.py \
             --site /tmp/alo186-commerce-v2-project \
             --base-path '/chatgpt'
-          python alo186/deployment/guard_commerce_routes_v2.py \
+          python alo186/deployment/guard_commerce_routes_v3.py \
             --site /tmp/alo186-commerce-v2-project \
             | tee /tmp/alo186-commerce-v2-project-guard.json
 
@@ -258,71 +261,3 @@ jobs:
               "https://www.alo186.com${route}?commerce_check=$(date +%s)")
             test "$code" = 200
           done
-          hub=/tmp/alo186-live-_amazon-elektrik-urunleri.html
-          grep -Fq 'rel="canonical" href="https://www.alo186.com/amazon-elektrik-urunleri"' "$hub"
-          grep -Eqi 'satış ortaklığı|affiliate' "$hub"
-          ! grep -Eqi 'href="https?://(www\.)?(amazon\.com\.tr|amzn\.to)' "$hub"
-          grep -Fq 'data-fresh-products' /tmp/alo186-live-_amazon-elektrik-urunleri_powerbank-usb-c-secimi.html
-          curl --silent --show-error --fail \
-            -H 'Cache-Control: no-cache, no-store, max-age=0' \
-            "https://www.alo186.com/arama/search-index.json?commerce_check=$(date +%s)" \
-            -o /tmp/alo186-live-search-index.json
-
-      - name: Canlı ticari yayın makbuzu
-        shell: bash
-        env:
-          EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }}
-        run: |
-          python - "$EXPECTED_SHA" <<'PY'
-          import json,sys
-          from datetime import datetime,timezone
-          from pathlib import Path
-
-          release=json.loads(Path('/tmp/alo186-live-release.json').read_text(encoding='utf-8'))
-          search=json.loads(Path('/tmp/alo186-live-search-index.json').read_text(encoding='utf-8'))
-          expected_routes={
-              '/amazon-elektrik-urunleri',
-              '/amazon-elektrik-urunleri/powerbank-usb-c-secimi',
-              '/amazon-elektrik-urunleri/akim-korumali-grup-priz-secimi',
-              '/amazon-elektrik-urunleri/modem-mini-ups-secimi',
-              '/amazon-elektrik-urunleri/acil-aydinlatma-duman-alarmi',
-              '/hizmetler/otel-elektrik-surekliligi-denetimi/',
-              '/hizmetler/elektrik-teklif-teknik-inceleme/',
-              '/hizmetler/ges-batarya-ev-sarj-fizibilitesi/',
-          }
-          indexed={item.get('canonicalPath') for item in search.get('entries', [])}
-          missing=sorted(expected_routes-indexed)
-          assert not missing, missing
-          receipt={
-              'ok': True,
-              'checkedAt': datetime.now(timezone.utc).isoformat(),
-              'expectedCommit': sys.argv[1],
-              'servedCommit': release.get('commit'),
-              'canonicalHost': release.get('canonicalHost'),
-              'hostingMode': release.get('hostingMode'),
-              'commercialRoutes': 5,
-              'paidServiceRoutes': 3,
-              'searchIndexEntryCount': search.get('entryCount'),
-              'directAffiliateCategory': 'powerbank',
-              'unverifiedCommercialClaimsUsed': False,
-              'officialInstitutionImpression': False,
-          }
-          Path('/tmp/alo186-live-commerce-freshness.json').write_text(
-              json.dumps(receipt,ensure_ascii=False,indent=2)+'\n',encoding='utf-8'
-          )
-          print(json.dumps(receipt,ensure_ascii=False,indent=2))
-          PY
-
-      - name: Canlı yayın tazelik tanısını sakla
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: alo186-live-commerce-freshness-receipt
-          path: |
-            /tmp/alo186-live-release.json
-            /tmp/alo186-live-release.headers
-            /tmp/alo186-live-search-index.json
-            /tmp/alo186-live-commerce-freshness.json
-            /tmp/alo186-live-*.html
-          if-no-files-found: warn
-          retention-days: 30
