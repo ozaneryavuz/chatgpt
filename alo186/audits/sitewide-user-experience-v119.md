@@ -51,6 +51,8 @@ Kaynak HTML'deki çoğu Amazon bağlantısı doğru `rel` değerlerini taşısa 
 
 Bazı gelişmiş araçlar kendi mobil alt menüsünü oluşturuyor. Ortak UX katmanı bunu algılamadığı durumda ikinci bir alt menü oluşabiliyordu. Çerez ayarları ve sayfa başına dön düğmesi de aynı sağ-alt alanı kullanabiliyordu.
 
+Gerçek 390 × 844 px Chromium renderında iki ilave mobil regresyon belirlendi: teknik arama sayfasında ikinci bir atlama bağlantısı oluşuyor; kesinti kiti dönemsel kontrolündeki uzun `select` metni belgeyi 390 px yerine 440 px genişliğe taşıyordu. İlk ziyaret analitik tercih penceresi de sabit alt menü ve içerik haritasıyla aynı ekran alanını paylaşabiliyordu.
+
 ### P1 — tablo klavye davranışı
 
 Tabloların çoğunda görünür caption bulunmuyor. Eski ortak katman taşmayan tabloları da klavye sırasına alıyor ve genel bir ad veriyordu. Bu, gereksiz odak durakları ve bağlam kaybı oluşturuyordu.
@@ -85,6 +87,10 @@ Ortak içerik haritası ve mobil navigasyonun bazı eski focus kuralları outlin
 14. CPAP/BiPAP, gaz ve yangın gibi hassas araçların devam rotalarında ürün seçimi yerine acil numaralar, kesinti planı ve teknik merkez gösteriliyor.
 15. İlk yüklemede ve MutationObserver ile sonradan eklenen Amazon bağlantıları `sponsored nofollow noopener` alıyor.
 16. CTA metni ticari ilişkiyi açıkça söylemiyorsa görünür `Satış ortaklığı / Affiliate` rozeti ekleniyor.
+17. Ortak katman mevcut `.skip-link`, `.skip` veya benzer sayfa içi atlama bağlantısını algılıyor; ikinci bağlantı üretmiyor.
+18. `.item`, `.field`, `.form-row`, `.control` ve `.input-group` içindeki uzun form kontrolleri `min-width:0`, `max-width:100%` ve doğrudan `select` için `width:100%` kurallarıyla mobil viewport içine alınıyor.
+19. İlk ziyaret analitik tercih penceresi sabit bir örtü olmaktan çıkarılıp başlık ile ana içerik arasındaki normal belge akışına taşınıyor.
+20. Analitik tercihi verilene kadar ortak ve sayfaya özel mobil dock'lar gizleniyor; seçimden sonra hızlı erişim kendiliğinden geri açılıyor.
 
 ## Kabul kriterleri
 
@@ -99,6 +105,9 @@ Ortak içerik haritası ve mobil navigasyonun bazı eski focus kuralları outlin
 - İngilizce sayfalarda İngilizce mobil hızlı erişim gösteriliyor.
 - `noindex` teknik köprülerde ortak mobil bar ve bağlamsal ticari devam oluşturulmuyor.
 - Mevcut özel mobil dock bulunan sayfalarda ikinci dock üretilmiyor.
+- Mevcut sayfa içi atlama bağlantısı bulunan sayfalarda ortak ikinci atlama bağlantısı üretilmiyor.
+- Uzun seçenek metni taşıyan dar grid/form bileşenleri mobil viewport genişliğini aşmıyor.
+- İlk analitik tercih ekranı sayfa içeriğinin veya mobil hızlı erişim bağlantılarının üstüne gelmiyor.
 - Dinamik Amazon bağlantıları satış ortaklığı ve dış bağlantı güven sözleşmesine otomatik alınıyor.
 - Sağlık, gaz ve yangın bağlamında ürün rotası öne çıkarılmıyor.
 
