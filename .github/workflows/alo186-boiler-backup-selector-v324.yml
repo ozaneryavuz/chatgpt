@@ -1,0 +1,157 @@
+name: ALO186 kombi elektrik kesintisi ve yedek güç uygunluğu
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/kombi-elektrik-kesintisi-yedek-guc-uygunluk/**'
+      - 'alo186/hesaplama/common.js'
+      - 'alo186/deployment/routing-overlays/085-boiler-backup-selector.json'
+      - 'alo186/tests/test_boiler_backup_selector_v324.py'
+      - '.github/workflows/alo186-boiler-backup-selector-v324.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/kombi-elektrik-kesintisi-yedek-guc-uygunluk/**'
+      - 'alo186/hesaplama/common.js'
+      - 'alo186/deployment/routing-overlays/085-boiler-backup-selector.json'
+      - 'alo186/tests/test_boiler_backup_selector_v324.py'
+      - '.github/workflows/alo186-boiler-backup-selector-v324.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-boiler-backup-selector-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Karar motoru ve kaynak güven sözleşmeleri
+        run: |
+          set -euo pipefail
+          node alo186/hesaplama/kombi-elektrik-kesintisi-yedek-guc-uygunluk/app.test.js
+          python alo186/tests/test_boiler_backup_selector_v324.py
+
+      - name: Sözdizimi ve mevcut güven regresyonları
+        run: |
+          set -euo pipefail
+          node --check alo186/hesaplama/kombi-elektrik-kesintisi-yedek-guc-uygunluk/app.js
+          node --check alo186/hesaplama/common.js
+          python -m py_compile alo186/tests/test_boiler_backup_selector_v324.py
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_technical_shortlist_growth.js
+          python alo186/tests/test_content_intent_consolidation.py
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Canonical statik site üretimi
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-boiler-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-boiler-canonical
+          test -f /tmp/alo186-boiler-canonical/hesaplama/kombi-elektrik-kesintisi-yedek-guc-uygunluk/index.html
+
+      - name: Custom-domain ve project-path paketleri
+        run: |
+          set -euo pipefail
+          cp -a /tmp/alo186-boiler-canonical /tmp/alo186-boiler-custom
+          cp -a /tmp/alo186-boiler-canonical /tmp/alo186-boiler-project
+
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-boiler-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-boiler-custom \
+            --base-path ''
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-boiler-custom \
+            --base-path '' > /tmp/alo186-boiler-custom.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-boiler-custom \
+            --base-path ''
+
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-boiler-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-boiler-project \
+            --base-path '/chatgpt'
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-boiler-project \
+            --base-path '/chatgpt' > /tmp/alo186-boiler-project.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-boiler-project \
+            --base-path '/chatgpt'
+
+      - name: Affiliate, gizlilik ve yayın kabulü
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+
+          route_path='hesaplama/kombi-elektrik-kesintisi-yedek-guc-uygunluk'
+          canonical_path='/hesaplama/kombi-elektrik-kesintisi-yedek-guc-uygunluk/'
+          for root,prefix in [
+              (Path('/tmp/alo186-boiler-custom'),''),
+              (Path('/tmp/alo186-boiler-project'),'/chatgpt'),
+          ]:
+              route=root/route_path
+              for name in ('index.html','styles.css','app.js'):
+                  assert (route/name).is_file(),(root,name)
+              html=(route/'index.html').read_text(encoding='utf-8')
+              app=(route/'app.js').read_text(encoding='utf-8')
+              assert 'Kombi Elektrik Kesintisi ve Yedek Güç Uygunluk Testi' in html
+              assert 'Satış ortaklığı açıklaması' in html
+              assert 'Amazon satış ortaklığı bağlantılarıdır' in html
+              assert 'doğrudan Amazon bağlantısı yoktur' in html
+              assert '187' in html and '112' in html
+              assert 'amazon.com.tr/' not in html.casefold()
+              assert 'amazon.com.tr/' not in app.casefold()
+              for forbidden in ('localStorage','sessionStorage','fetch(','XMLHttpRequest','navigator.geolocation'):
+                  assert forbidden not in app
+              assert 'emergency_gas' in app
+              assert 'no_electrical_solution' in app
+              assert 'no_buy' in app
+              assert 'active_event' in app
+              expected=f'{prefix}{canonical_path}' if prefix else canonical_path
+              sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
+              assert f'<loc>https://alo186.com{canonical_path}</loc>' in sitemap
+              search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
+              entry=next(item for item in search['entries'] if item['canonicalPath']==canonical_path)
+              assert entry['url']==expected
+              common=(root/'hesaplama/common.js').read_text(encoding='utf-8')
+              assert canonical_path in common
+              assert 'data-alo186-boiler-backup-card' in common
+              counts=[int(value) for value in re.findall(r'(\d+) çekirdek araç',common)]
+              assert counts and max(counts)>=39
+          PY
+
+      - name: Doğrulanmış artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-boiler-backup-selector-pages
+          path: /tmp/alo186-boiler-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
