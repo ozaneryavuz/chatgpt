@@ -18,136 +18,246 @@ on:
       - 'alo186/sitemap.xml'
       - 'alo186/urun-eslestirme/**'
       - '.github/workflows/alo186-calculators-ci.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
+  pull-requests: read
+
+concurrency:
+  group: alo186-calculators-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: '3.12'
+  NODE_VERSION: '22'
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 18
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
-      - name: Hesap motoru testleri
-        run: node alo186/tests/test_calc_core.js
-      - name: Parafudr risk testi senaryoları
-        run: node alo186/hesaplama/parafudr-risk-testi/test.js
-      - name: Jeneratör gücü seçimi senaryoları
-        run: node alo186/hesaplama/jenerator-gucu-secimi/test.js
-      - name: EV şarj uygunluk senaryoları
-        run: node alo186/hesaplama/ev-sarj-uygunluk/test.js
-      - name: Kesinti günlüğü senaryoları
-        run: node alo186/hesaplama/kesinti-gunlugu/test.js
-      - name: İnverter uygunluk senaryoları
-        run: node alo186/hesaplama/inverter-uygunluk/test.js
-      - name: Ekipman bakım planı senaryoları
-        run: node alo186/hesaplama/ekipman-bakim-plani/test.js
-      - name: Yedek güç çözüm seçici senaryoları
-        run: node alo186/hesaplama/yedek-guc-cozum-secici/test.js
-      - name: Yedek güç maliyet karşılaştırması senaryoları
-        run: node alo186/hesaplama/yedek-guc-maliyet-karsilastirma/test.js
-      - name: Gerilim koruma çözüm seçici senaryoları
-        run: node alo186/hesaplama/gerilim-koruma-cozum-secici/test.js
-      - name: Gerilim koruma çözüm seçici güven ve affiliate sözleşmesi
+          node-version: ${{ env.NODE_VERSION }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Değişiklik kapsamını belirle
+        id: scope
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const isPullRequest = context.eventName === 'pull_request';
+            let files = [];
+            if (isPullRequest) {
+              const response = await github.paginate(
+                github.rest.pulls.listFiles,
+                {
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: context.issue.number,
+                  per_page: 100
+                }
+              );
+              files = response.map((item) => item.filename).sort();
+            }
+
+            const exactFullRegressionFiles = new Set([
+              '.github/workflows/alo186-calculators-ci.yml',
+              'alo186/deployment/routing-manifest.json',
+              'alo186/sitemap.xml',
+              'alo186/hesaplama/index.html',
+              'alo186/hesaplama/styles.css',
+              'alo186/hesaplama/app.js',
+              'alo186/hesaplama/calc-core.js',
+              'alo186/tests/test_calc_core.js',
+              'alo186/tests/test_release_manifest.js',
+              'alo186/tests/test_portal_hardening.js',
+              'alo186/tests/device_damage_deadline_guard.py'
+            ]);
+            const fullRegressionPrefixes = ['alo186/urun-eslestirme/'];
+            const full = !isPullRequest || files.some((file) =>
+              exactFullRegressionFiles.has(file) ||
+              fullRegressionPrefixes.some((prefix) => file.startsWith(prefix))
+            );
+
+            const calculatorModules = [...new Set(
+              files
+                .map((file) => file.match(/^alo186\/hesaplama\/([^/]+)\//)?.[1])
+                .filter(Boolean)
+            )].sort();
+            const changedTests = files.filter((file) =>
+              /^alo186\/tests\/test_[^/]+\.(py|js)$/.test(file)
+            );
+            const changedJson = files.filter((file) => file.endsWith('.json'));
+            const plan = {
+              event: context.eventName,
+              fullRegression: full,
+              calculatorModules,
+              changedTests,
+              changedJson,
+              changedFileCount: files.length
+            };
+
+            core.setOutput('full', String(full));
+            core.setOutput('files_b64', Buffer.from(files.join('\n')).toString('base64'));
+            core.setOutput('modules', calculatorModules.join(','));
+            core.summary
+              .addHeading('ALO186 akıllı hesaplayıcı doğrulama planı')
+              .addRaw(`- Değişen dosya: **${files.length}**\n`)
+              .addRaw(`- Değişen hesaplayıcı modülü: **${calculatorModules.length}**\n`)
+              .addRaw(`- Tam regresyon: **${full ? 'evet' : 'hayır'}**\n`)
+              .addCodeBlock(JSON.stringify(plan, null, 2), 'json');
+            await core.summary.write();
+
+      - name: Değişen modülleri hızlı doğrula
+        if: github.event_name == 'pull_request'
+        env:
+          CHANGED_FILES_B64: ${{ steps.scope.outputs.files_b64 }}
         shell: bash
         run: |
           set -euo pipefail
-          file='alo186/hesaplama/gerilim-koruma-cozum-secici/index.html'
-          grep -q 'Belirtiye dayalı ön değerlendirmedir' "$file"
-          grep -q 'Reklam / satış ortaklığı açıklaması' "$file"
-          grep -q 'Ticari ürün yönlendirmesi kapatıldı' "$file"
-          grep -q 'Kişisel veri yok' "$file"
+          printf '%s' "$CHANGED_FILES_B64" | base64 --decode > /tmp/alo186-changed-files.txt
+
+          python - <<'PY'
+          from __future__ import annotations
+
+          import html
+          import json
+          import re
+          import subprocess
+          import sys
+          from pathlib import Path
+
+          root = Path.cwd()
+          changed = [
+              line.strip()
+              for line in Path('/tmp/alo186-changed-files.txt').read_text(encoding='utf-8').splitlines()
+              if line.strip()
+          ]
+          module_dirs = sorted({
+              root / '/'.join(path.split('/')[:3])
+              for path in changed
+              if re.match(r'^alo186/hesaplama/[^/]+/', path)
+          })
+
+          def run(command: list[str]) -> None:
+              print('+', ' '.join(command), flush=True)
+              subprocess.run(command, cwd=root, check=True)
+
+          executed_tests: set[Path] = set()
+          checked_js: set[Path] = set()
+          checked_html: set[Path] = set()
+          checked_json: set[Path] = set()
+          checked_python: set[Path] = set()
+
+          for directory in module_dirs:
+              if not directory.is_dir():
+                  continue
+              for js_file in sorted(directory.rglob('*.js')):
+                  run(['node', '--check', str(js_file.relative_to(root))])
+                  checked_js.add(js_file)
+              candidates = sorted({
+                  *directory.glob('test.js'),
+                  *directory.glob('*.test.js'),
+                  *directory.glob('tests/*.js'),
+              })
+              for test_file in candidates:
+                  if test_file.is_file() and test_file not in executed_tests:
+                      run(['node', str(test_file.relative_to(root))])
+                      executed_tests.add(test_file)
+
+          for relative in changed:
+              path = root / relative
+              if not path.is_file():
+                  continue
+              if path.suffix == '.html':
+                  text = path.read_text(encoding='utf-8')
+                  lowered = text.casefold()
+                  assert '<!doctype html' in lowered, f'Doctype eksik: {relative}'
+                  assert re.search(r'<title>\s*\S.*?</title>', text, re.I | re.S), f'Title eksik: {relative}'
+                  assert re.search(r'<meta\b[^>]*\bname=["\']description["\'][^>]*>', text, re.I), f'Description eksik: {relative}'
+                  assert re.search(r'<link\b[^>]*\brel=["\']canonical["\'][^>]*>', text, re.I), f'Canonical eksik: {relative}'
+                  assert len(re.findall(r'<h1\b', text, re.I)) == 1, f'Tek H1 sözleşmesi bozuk: {relative}'
+                  ids = [html.unescape(value) for value in re.findall(r'\bid=["\']([^"\']+)["\']', text, re.I)]
+                  duplicates = sorted({value for value in ids if ids.count(value) > 1})
+                  assert not duplicates, f'Yinelenen DOM id: {relative}: {duplicates}'
+                  checked_html.add(path)
+              elif path.suffix == '.json':
+                  json.loads(path.read_text(encoding='utf-8'))
+                  checked_json.add(path)
+              elif path.suffix == '.py' and relative.startswith('alo186/tests/test_'):
+                  run([sys.executable, '-m', 'py_compile', relative])
+                  run([sys.executable, relative])
+                  checked_python.add(path)
+              elif path.suffix == '.js' and path not in checked_js:
+                  run(['node', '--check', relative])
+                  checked_js.add(path)
+
+          if module_dirs and not (executed_tests or checked_python):
+              raise SystemExit('Değişen hesaplayıcı modülü için çalıştırılabilir test bulunamadı.')
+
+          summary = {
+              'changedFiles': len(changed),
+              'moduleDirectories': [str(path.relative_to(root)) for path in module_dirs],
+              'javascriptSyntaxFiles': len(checked_js),
+              'javascriptTests': len(executed_tests),
+              'pythonTests': len(checked_python),
+              'htmlContracts': len(checked_html),
+              'jsonContracts': len(checked_json),
+          }
+          print(json.dumps(summary, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Tam hesap motoru ve güven regresyonu
+        if: github.event_name != 'pull_request' || steps.scope.outputs.full == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          node alo186/tests/test_calc_core.js
+          node alo186/hesaplama/parafudr-risk-testi/test.js
+          node alo186/hesaplama/jenerator-gucu-secimi/test.js
+          node alo186/hesaplama/ev-sarj-uygunluk/test.js
+          node alo186/hesaplama/kesinti-gunlugu/test.js
+          node alo186/hesaplama/inverter-uygunluk/test.js
+          node alo186/hesaplama/ekipman-bakim-plani/test.js
+          node alo186/hesaplama/yedek-guc-cozum-secici/test.js
+          node alo186/hesaplama/yedek-guc-maliyet-karsilastirma/test.js
+          node alo186/hesaplama/gerilim-koruma-cozum-secici/test.js
+
+          declare -A required_texts=(
+            ['alo186/hesaplama/gerilim-koruma-cozum-secici/index.html']='Belirtiye dayalı ön değerlendirmedir|Reklam / satış ortaklığı açıklaması|Ticari ürün yönlendirmesi kapatıldı|Kişisel veri yok'
+            ['alo186/hesaplama/yedek-guc-maliyet-karsilastirma/index.html']='Güncel fiyat iddiası yok|zorunlu sonuç değildir|ALO186 örnek veya ortalama fiyat doldurmaz|Reklam / satış ortaklığı açıklaması|Tıbbi cihaz seçimi kaydedilmez'
+            ['alo186/hesaplama/yedek-guc-cozum-secici/index.html']='Çözüm sınıfı ön değerlendirmesidir|Reklam / satış ortaklığı açıklaması|Ticari ürün yönlendirmesi kapatıldı|Kişisel veri yok'
+            ['alo186/hesaplama/kesinti-gunlugu/index.html']='Resmî kayıt değildir|Reklam / satış ortaklığı açıklaması|Ticari ürün yönlendirmesi kapatıldı|https://www.epdk.gov.tr/|https://www.alo186.com/edas-bul'
+            ['alo186/hesaplama/ekipman-bakim-plani/index.html']='Hatırlatma aracıdır; bakım talimatı değildir|Normal sonuçta satış yok|Reklam / satış ortaklığı açıklaması|ALO186 herhangi bir markanın temsilcisi değildir'
+          )
+          for file in "${!required_texts[@]}"; do
+            IFS='|' read -r -a needles <<< "${required_texts[$file]}"
+            for needle in "${needles[@]}"; do
+              grep -Fqi "$needle" "$file"
+            done
+            if grep -Eqi 'amazon\.(com\.tr|com)/' "$file"; then
+              echo "Doğrudan Amazon bağlantısı bulundu: $file" >&2
+              exit 1
+            fi
+          done
+
           grep -q 'gerilim-koruma-cozum-secici' alo186/deployment/routing-manifest.json
-          grep -q 'hesaplama/gerilim-koruma-cozum-secici/' alo186/sitemap.xml
-          if grep -Eqi 'amazon\.(com\.tr|com)/' "$file"; then
-            echo 'Gerilim koruma seçicide doğrudan Amazon bağlantısı bulundu.' >&2
-            exit 1
-          fi
-          if grep -Eqi 'type="(email|tel|text)"|name="(address|phone|email|subscription|tc|identity|note)' "$file"; then
-            echo 'Gerilim koruma seçicide kişisel veri veya serbest metin alanı bulundu.' >&2
-            exit 1
-          fi
-      - name: Yedek güç maliyet karşılaştırması güven ve affiliate sözleşmesi
-        shell: bash
-        run: |
-          set -euo pipefail
-          file='alo186/hesaplama/yedek-guc-maliyet-karsilastirma/index.html'
-          grep -q 'Güncel fiyat iddiası yok' "$file"
-          grep -qi 'zorunlu sonuç değildir' "$file"
-          grep -q 'ALO186 örnek veya ortalama fiyat doldurmaz' "$file"
-          grep -q 'Reklam / satış ortaklığı açıklaması' "$file"
-          grep -q 'Tıbbi cihaz seçimi kaydedilmez' "$file"
           grep -q 'yedek-guc-maliyet-karsilastirma' alo186/deployment/routing-manifest.json
-          grep -q 'hesaplama/yedek-guc-maliyet-karsilastirma/' alo186/sitemap.xml
-          if grep -Eqi 'amazon\.(com\.tr|com)/' "$file"; then
-            echo 'Yedek güç maliyet karşılaştırmasında doğrudan Amazon bağlantısı bulundu.' >&2
-            exit 1
-          fi
-          if grep -Eqi 'type="(email|tel|text)"|name="(address|phone|email|subscription|company|contact|note)' "$file"; then
-            echo 'Yedek güç maliyet karşılaştırmasında kişisel veri veya serbest metin alanı bulundu.' >&2
-            exit 1
-          fi
-      - name: Yedek güç çözüm seçici güven ve affiliate sözleşmesi
-        shell: bash
-        run: |
-          set -euo pipefail
-          file='alo186/hesaplama/yedek-guc-cozum-secici/index.html'
-          grep -q 'Çözüm sınıfı ön değerlendirmesidir' "$file"
-          grep -q 'Reklam / satış ortaklığı açıklaması' "$file"
-          grep -q 'Ticari ürün yönlendirmesi kapatıldı' "$file"
-          grep -q 'Kişisel veri yok' "$file"
           grep -q 'yedek-guc-cozum-secici' alo186/deployment/routing-manifest.json
-          grep -q 'hesaplama/yedek-guc-cozum-secici/' alo186/sitemap.xml
-          if grep -Eqi 'amazon\.(com\.tr|com)/' "$file"; then
-            echo 'Yedek güç çözüm seçicide doğrudan Amazon bağlantısı bulundu.' >&2
-            exit 1
-          fi
-          if grep -Eqi 'type="(email|tel|text)"|name="(address|phone|email|subscription|tc|identity)' "$file"; then
-            echo 'Yedek güç çözüm seçicide kişisel veri alanı bulundu.' >&2
-            exit 1
-          fi
-      - name: Kesinti günlüğü güven ve veri minimizasyonu sözleşmesi
-        shell: bash
-        run: |
-          set -euo pipefail
-          file='alo186/hesaplama/kesinti-gunlugu/index.html'
-          grep -q 'Resmî kayıt değildir' "$file"
-          grep -q 'Reklam / satış ortaklığı açıklaması' "$file"
-          grep -q 'Ticari ürün yönlendirmesi kapatıldı' "$file"
-          grep -q 'https://www.epdk.gov.tr/' "$file"
-          grep -q 'https://www.alo186.com/edas-bul' "$file"
           grep -q 'kesinti-gunlugu' alo186/deployment/routing-manifest.json
-          grep -q 'hesaplama/kesinti-gunlugu/' alo186/sitemap.xml
-          if grep -Eqi 'type="(email|tel|text)"|name="(address|phone|email|subscription|tc)' "$file"; then
-            echo 'Kesinti günlüğünde kişisel veri veya serbest metin alanı bulundu.' >&2
-            exit 1
-          fi
-          if grep -Eqi 'amazon\.(com\.tr|com)/' "$file"; then
-            echo 'Kesinti günlüğünde doğrudan Amazon bağlantısı bulundu.' >&2
-            exit 1
-          fi
-      - name: Ekipman bakım planı güven ve affiliate sözleşmesi
-        shell: bash
-        run: |
-          set -euo pipefail
-          file='alo186/hesaplama/ekipman-bakim-plani/index.html'
-          grep -q 'Hatırlatma aracıdır; bakım talimatı değildir' "$file"
-          grep -q 'Normal sonuçta satış yok' "$file"
-          grep -q 'Reklam / satış ortaklığı açıklaması' "$file"
-          grep -q 'ALO186 herhangi bir markanın temsilcisi değildir' "$file"
           grep -q 'ekipman-bakim-plani' alo186/deployment/routing-manifest.json
-          grep -q 'hesaplama/ekipman-bakim-plani/' alo186/sitemap.xml
-          if grep -Eqi 'type="(email|tel|text)"|name="(address|phone|email|subscription|serial|model|note)' "$file"; then
-            echo 'Ekipman bakım planında kişisel veri, seri/model veya serbest metin alanı bulundu.' >&2
-            exit 1
-          fi
-          if grep -Eqi 'amazon\.(com\.tr|com)/' "$file"; then
-            echo 'Ekipman bakım planında doğrudan Amazon bağlantısı bulundu.' >&2
-            exit 1
-          fi
-      - name: HTML temel kontrolleri
+
+      - name: Tam HTML ve JavaScript kaynak taraması
+        if: github.event_name != 'pull_request' || steps.scope.outputs.full == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -157,10 +267,28 @@ jobs:
             grep -qi 'meta name="description"' "$file"
             grep -qi 'rel="canonical"' "$file"
           done < <(find alo186/hesaplama -name '*.html' -type f | sort)
-      - name: JavaScript sözdizimi
-        shell: bash
-        run: |
-          set -euo pipefail
+
           while IFS= read -r file; do
             node --check "$file"
           done < <(find alo186/hesaplama -name '*.js' -type f | sort)
+
+      - name: Doğrulama süre ve kapsam özeti
+        if: always()
+        shell: bash
+        env:
+          FULL_REGRESSION: ${{ steps.scope.outputs.full }}
+          MODULES: ${{ steps.scope.outputs.modules }}
+        run: |
+          {
+            echo '## ALO186 hesaplayıcı doğrulama sonucu'
+            echo
+            echo "- Event: \`${GITHUB_EVENT_NAME}\`"
+            echo "- Tam regresyon: **${FULL_REGRESSION}**"
+            echo "- Değişen modüller: \`${MODULES:-yok}\`"
+            if [[ "$GITHUB_EVENT_NAME" == 'pull_request' && "$FULL_REGRESSION" != 'true' ]]; then
+              echo '- Mod: **değişen modül hızlı kapısı**'
+              echo '- Tam site taraması main push sonrasına bırakıldı.'
+            else
+              echo '- Mod: **tam hesaplayıcı regresyonu**'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
