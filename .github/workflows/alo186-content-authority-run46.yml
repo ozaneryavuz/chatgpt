@@ -1,0 +1,92 @@
+name: ALO186 içerik otoritesi run46 kalite kontrolü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/haberler/ges-rapid-shutdown-dc-izolator-afci-farki/**'
+      - 'alo186/haberler/bess-soc-soh-kullanilabilir-enerji-kapasite-testi/**'
+      - 'alo186/haberler/vpp-temel-tuketim-degeri-baseline-telemetri-uzlastirma/**'
+      - 'alo186/deployment/routing-overlays/content-authority-run46.json'
+      - 'alo186/tests/test_authority_content_run46.py'
+      - '.github/workflows/alo186-content-authority-run46.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/ges-rapid-shutdown-dc-izolator-afci-farki/**'
+      - 'alo186/haberler/bess-soc-soh-kullanilabilir-enerji-kapasite-testi/**'
+      - 'alo186/haberler/vpp-temel-tuketim-degeri-baseline-telemetri-uzlastirma/**'
+      - 'alo186/deployment/routing-overlays/content-authority-run46.json'
+      - 'alo186/tests/test_authority_content_run46.py'
+      - '.github/workflows/alo186-content-authority-run46.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-authority-run46-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Yeni rehberlerin AEO SEO kaynak ve güven sözleşmeleri
+        run: python alo186/tests/test_authority_content_run46.py
+      - name: İçerik niyeti ve mevcut güven regresyonları
+        run: |
+          python alo186/tests/test_content_intent_consolidation.py
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+      - name: Canonical üretim paketini oluştur
+        run: |
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-authority-run46-canonical --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-authority-run46-canonical
+      - name: Custom-domain yayın katmanını hazırla
+        run: |
+          cp -a /tmp/alo186-authority-run46-canonical /tmp/alo186-authority-run46-custom
+          python alo186/deployment/prepare_github_pages.py --site /tmp/alo186-authority-run46-custom --base-path '' --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py --site /tmp/alo186-authority-run46-custom --base-path ''
+          python alo186/deployment/inject_shortlist_growth.py --site /tmp/alo186-authority-run46-custom --base-path '' > /tmp/authority-run46.json
+          python alo186/deployment/smoke_github_pages.py --site /tmp/alo186-authority-run46-custom --base-path ''
+      - name: Canonical sitemap ve Teknik Arama kabulü
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('/tmp/alo186-authority-run46-custom')
+          routes=[
+            '/haberler/ges-rapid-shutdown-dc-izolator-afci-farki',
+            '/haberler/bess-soc-soh-kullanilabilir-enerji-kapasite-testi',
+            '/haberler/vpp-temel-tuketim-degeri-baseline-telemetri-uzlastirma',
+          ]
+          sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
+          search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
+          release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
+          pages=json.loads((root/'pages-release.json').read_text(encoding='utf-8'))
+          host=(pages.get('canonicalHost') or release.get('canonicalHost') or 'https://alo186.com').rstrip('/')
+          active={item.get('canonicalPath','').rstrip('/') for item in search['entries']}
+          assert release['routingVersion'] >= 81, release['routingVersion']
+          for route in routes:
+              assert (root/route.strip('/')/'index.html').is_file(), route
+              assert f'{host}{route}' in sitemap, ('sitemap', host, route)
+              assert route in active, ('search-index', route)
+          print(json.dumps({'routingVersion':release['routingVersion'],'canonicalHost':host,'routes':routes,'searchEntries':len(active)},ensure_ascii=False))
+          PY
+      - name: Doğrulanmış içerik artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-authority-run46-pages
+          path: /tmp/alo186-authority-run46-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
