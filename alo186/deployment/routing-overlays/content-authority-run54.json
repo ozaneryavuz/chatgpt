@@ -1,0 +1,21 @@
+{
+  "version": 90,
+  "generatedAt": "2026-07-30",
+  "routes": [
+    {
+      "source": "alo186/haberler/ev-sarj-ocpp-internet-kesilirse-offline-calismasi/index.html",
+      "canonicalPath": "/haberler/ev-sarj-ocpp-internet-kesilirse-offline-calismasi",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/jenerator-yuk-siralama-load-shedding-motor-kalkisi/index.html",
+      "canonicalPath": "/haberler/jenerator-yuk-siralama-load-shedding-motor-kalkisi",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ges-string-voc-sogukta-artar-inverter-dc-gerilim-siniri/index.html",
+      "canonicalPath": "/haberler/ges-string-voc-sogukta-artar-inverter-dc-gerilim-siniri",
+      "type": "article"
+    }
+  ]
+}
