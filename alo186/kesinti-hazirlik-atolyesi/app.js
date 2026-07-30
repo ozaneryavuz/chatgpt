@@ -198,7 +198,7 @@
       resultText.textContent = 'Gerçek eksik ve teknik kanıt birlikte doğrulandı. Önce ücretsiz hesabı tamamlayın; sonuç yetersizse yalnız ilgili düşük riskli ürün sınıfını şeffaf ürün merkezinde karşılaştırın.';
       actions.innerHTML = action(plan.calculate[0], plan.calculate[1], { route: 'free_tool' })
         + action(plan.product[0], plan.product[1], { kind: 'affiliate', route: 'qualified_affiliate_product_center', commercial: 'affiliate' })
-        + outcomeAction(selection, 'qualified_affiliate_product_center');
+        + outcomeAction(selection, 'affiliate_product_center');
       disclosure.classList.remove('hidden');
       track('sales_funnel_rendered', { ...selection, route: 'qualified_affiliate_product_center', segment: 'qualified-consumer' });
       return;
