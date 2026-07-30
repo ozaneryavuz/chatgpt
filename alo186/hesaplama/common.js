@@ -51,6 +51,15 @@
     return link;
   }
 
+  function emergencyLightingCard(isPortal){
+    const link=document.createElement('a');
+    link.className=isPortal?'card':'tool-card';
+    link.href=publicRoute('/hesaplama/acil-aydinlatma-sure-lumen-uygunluk/');
+    link.dataset.alo186EmergencyLightingCard='true';
+    link.innerHTML=isPortal?'<span class="tag">Lümen · lux · Wh · çalışma süresi</span><h2>Acil Aydınlatma Süre ve Lümen Testi</h2><p>Şarjlı lamba, powerbank veya güç istasyonunun alan, ışık akısı ve hedef süreye yaklaşık uygunluğunu hesaplayın.</p><b>Aydınlatma hesabını aç →</b>':'<span class="eyebrow">Lümen · watt · Wh · süre</span><h2>Acil Aydınlatma Uygunluk Testi</h2><p>Kesintide ışık yeterliliğini ve çalışma süresini birlikte hesaplayın; mevcut çözüm yeterliyse yeni ürün almayın.</p><b>Süre ve lümeni hesapla →</b>';
+    return link;
+  }
+
   function injectGrowthCards(){
     const normalized=location.pathname.replace(/\/$/,'');
     const isPortal=normalized.endsWith('/elektrik-portali');
@@ -64,6 +73,7 @@
         if(!grid.querySelector('[data-alo186-outcome-runtime-card]')){
           const outcome=document.createElement('a');outcome.className='card';outcome.href=publicRoute('/hesaplama/cozum-sonucu/');outcome.dataset.alo186OutcomeRuntimeCard='true';outcome.innerHTML=isPortal?'<span class="tag">Kapalı döngü · satın almama · tekrar önleme</span><h2>Çözüm Sonucu Merkezi</h2><p>Karar, hesap, ürün, bakım veya resmî kanalın gerçekten işe yarayıp yaramadığını izleyin.</p><b>Sonucu kaydet ve izle →</b>':'<strong>Çözüm gerçekten işe yaradı mı?</strong><p>Öneri, ürün, bakım veya resmî kanal sonucunu kişisel veri vermeden kaydedin.</p><span>Sonucu kaydet ve izle →</span>';grid.prepend(outcome);
         }
+        if(!grid.querySelector('[data-alo186-emergency-lighting-card]'))grid.prepend(emergencyLightingCard(true));
         if(!grid.querySelector('[data-alo186-generator-safety-card]'))grid.prepend(generatorSafetyCard(true));
         if(!grid.querySelector('[data-alo186-shortlist-runtime-card]'))grid.prepend(shortlistCard(true));
       }
@@ -72,9 +82,10 @@
     const isHub=/\/hesaplama\/?$/.test(location.pathname);
     if(isHub){
       const grid=document.querySelector('section.tool-grid');
+      if(grid&&!grid.querySelector('[data-alo186-emergency-lighting-card]'))grid.prepend(emergencyLightingCard(false));
       if(grid&&!grid.querySelector('[data-alo186-generator-safety-card]'))grid.prepend(generatorSafetyCard(false));
       if(grid&&!grid.querySelector('[data-alo186-shortlist-runtime-card]'))grid.prepend(shortlistCard(false));
-      document.querySelectorAll('strong').forEach(node=>{if(/\d+ çekirdek araç/.test(node.textContent||''))node.textContent=(node.textContent||'').replace(/\d+ çekirdek araç/,'36 çekirdek araç');});
+      document.querySelectorAll('strong').forEach(node=>{if(/\d+ çekirdek araç/.test(node.textContent||''))node.textContent=(node.textContent||'').replace(/\d+ çekirdek araç/,'37 çekirdek araç');});
     }
 
     const productCenter=/\/(akilli-urun-secimi|amazon-elektrik-urunleri)\/?$/.test(location.pathname);
@@ -96,7 +107,6 @@
   }
 
   function loadSupportingRuntimes(){
-    // Compatibility contract: new URL('outcome-bridge.js',current.src)
     loadRuntime('Alo186OutcomeBridge','data-alo186-outcome-bridge');
     loadRuntime('Alo186EvidenceWallet','data-alo186-evidence-wallet');
     loadRuntime('Alo186IntentActionRouter','data-alo186-intent-router');
@@ -112,13 +122,9 @@
     const documentationCore=document.createElement('script');documentationCore.src=new URL('../akilli-urun-secimi/documentation-growth-core.js',commonUrl).href;documentationCore.dataset.alo186DocumentationCore='true';documentationCore.addEventListener('load',()=>{if(document.querySelector('script[data-alo186-documentation-ui]'))return;const documentationUi=document.createElement('script');documentationUi.src=new URL('../akilli-urun-secimi/documentation-growth.js',commonUrl).href;documentationUi.dataset.alo186DocumentationUi='true';documentationUi.defer=true;document.head.appendChild(documentationUi);},{once:true});document.head.appendChild(documentationCore);
   }
 
-  // common.js final body scripti olarak yayımlanır. DOM mevcutsa büyüme kartlarını
-  // DOMContentLoaded sonrasına bırakmak CLS üretir; ilk boyamadan önce senkron ekle.
   if(document.body)injectGrowthCards();
   else document.addEventListener('DOMContentLoaded',injectGrowthCards,{once:true});
 
-  // Kanıt cüzdanı, sonuç köprüsü ve niyet yönlendiricisi ilk boyama için kritik değildir.
-  // Mobil ana iş parçacığını rahatlatmak için load sonrasında boşta yükle.
   const scheduleSupportingRuntimes=()=>{
     if('requestIdleCallback'in window)window.requestIdleCallback(loadSupportingRuntimes,{timeout:3000});
     else setTimeout(loadSupportingRuntimes,250);
