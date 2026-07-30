@@ -4,7 +4,7 @@ const matcher=require('../urun-eslestirme/matcher-core.js');
 
 assert.strictEqual(catalog.affiliateTag,'alo186rehber-21');
 assert.strictEqual(catalog.categories.length,18,'On sekiz ihtiyaç kategorisi bulunmalı.');
-assert(catalog.productsFor('powerbank').length>=3,'Powerbank kataloğunda en az üç ürün olmalı.');
+assert(catalog.productsFor('powerbank').length>=5,'Powerbank kataloğunda en az beş ürün olmalı.');
 assert(catalog.productsFor('usb_c_charger').length>=1,'USB-C şarj cihazı kataloğunda doğrulanmış ürün olmalı.');
 assert(catalog.productsFor('usb_c_cable').length>=2,'USB-C kablo kataloğunda en az iki doğrulanmış ürün olmalı.');
 assert(catalog.productsFor('usb_c_hub').length>=2,'USB-C hub kataloğunda en az iki doğrulanmış ürün olmalı.');
@@ -25,8 +25,21 @@ for(const product of catalog.products){
 
 let result=matcher.match('powerbank',{minCapacityMah:20000,minOutputW:65,wireless:false});
 assert.strictEqual(result.mode,'direct');
+assert.strictEqual(result.matches.length,3);
+assert(result.matches.every(item=>item.product.attributes.maxOutputW>=65));
+assert(result.matches.some(item=>item.product.asin==='B0CXDXP8VR'),'65 W dahili kablolu seçenek görünmeli.');
+
+result=matcher.match('powerbank',{minCapacityMah:20000,minOutputW:100,wireless:false});
+assert.strictEqual(result.matches.length,2);
+assert(result.matches.every(item=>item.product.attributes.maxOutputW>=100));
+assert(result.matches.some(item=>item.product.asin==='B09VPHVT2Z'));
+assert(result.matches.some(item=>item.product.asin==='B0BYNZXFM2'));
+assert(!result.matches.some(item=>item.product.asin==='B0CXDXP8VR'),'87 W toplam / 65 W tek cihaz ürünü 100 W ihtiyacına sızmamalı.');
+
+result=matcher.match('powerbank',{minCapacityMah:20000,minOutputW:140,wireless:false});
 assert.strictEqual(result.matches.length,1);
-assert.strictEqual(result.matches[0].product.asin,'B0BYNZXFM2');
+assert.strictEqual(result.matches[0].product.asin,'B09VPHVT2Z');
+
 result=matcher.match('powerbank',{minCapacityMah:10000,minOutputW:10,wireless:true});
 assert(result.matches.length>=2);
 assert(result.matches.every(x=>x.product.attributes.wireless));
@@ -60,4 +73,4 @@ for(const[category,url]of Object.entries(gated)){
 result=matcher.match('emergency_light',{});
 assert.strictEqual(result.professionalSelectionRequired,false);
 assert.throws(()=>matcher.match('olmayan-kategori',{}),/Ürün kategorisi bulunamadı/);
-console.log('Ürün kataloğu ve eşleştirme testleri: 18 kategori, USB-C hub/görüntü kabloları, uzatma kablosu ve güvenli teknik kapılar başarılı.');
+console.log('Ürün kataloğu ve eşleştirme testleri: 18 kategori, beş powerbank, tek cihaz/toplam güç ayrımı ve güvenli teknik kapılar başarılı.');

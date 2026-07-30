@@ -4,7 +4,7 @@ const catalog=require('../urun-eslestirme/catalog.js');
 
 assert.equal(catalog.affiliateTag,'alo186rehber-21');
 assert.equal(catalog.verifiedAt,'2026-07-29');
-assert.ok(catalog.products.length>=18);
+assert.ok(catalog.products.length>=20);
 
 const ids=new Set();
 const asins=new Set();
@@ -17,7 +17,7 @@ for(const product of catalog.products){
   assert.equal(product.status,'verified_listing');
   for(const forbidden of ['price','stock','rating','aggregateRating','review','warranty','seller'])assert.ok(!(forbidden in product),`Yasak ürün alanı: ${forbidden}`);
 }
-for(const id of ['philips-spn7040wa-62','tuncmatik-tsk6134','brennenstuhl-eco-line-6','anker-313-a2677','samsung-ep-t6530-trio-65w','baseus-cafule-catklf-gg1','baseus-crystal-shine-100w-2m','ugreen-7in1-60515','anker-555-8in1','ugreen-usbc-dp14-2m','ugreen-usbc-dp14-3m'])assert.ok(ids.has(id),`Yeni ürün eksik: ${id}`);
+for(const id of ['philips-spn7040wa-62','tuncmatik-tsk6134','brennenstuhl-eco-line-6','anker-313-a2677','samsung-ep-t6530-trio-65w','baseus-cafule-catklf-gg1','baseus-crystal-shine-100w-2m','ugreen-7in1-60515','anker-555-8in1','ugreen-usbc-dp14-2m','ugreen-usbc-dp14-3m','anker-737-a1289','anker-a1383-20k-87w'])assert.ok(ids.has(id),`Yeni ürün eksik: ${id}`);
 
 const now=new Date('2026-07-30T12:00:00Z');
 const verifiedProducts=catalog.products.filter(product=>product.status==='verified_listing'&&catalog.verificationStatus(product,now).fresh);
@@ -64,7 +64,7 @@ for(const node of productNodes){
     assert.match(node.potentialAction.target,/^https:\/\/www\.alo186\.com\//);
   }
 }
-for(const id of ['anker-313-a2677','samsung-ep-t6530-trio-65w','baseus-cafule-catklf-gg1','ugreen-7in1-60515','ugreen-usbc-dp14-2m']){
+for(const id of ['anker-313-a2677','samsung-ep-t6530-trio-65w','baseus-cafule-catklf-gg1','ugreen-7in1-60515','ugreen-usbc-dp14-2m','anker-prime-a1336','anker-737-a1289','anker-a1383-20k-87w']){
   const node=productNodes.find(item=>item.sku===id);
   assert.ok(node,`Yeni Product düğümü eksik: ${id}`);
   assert.ok(node.identifier.some(item=>item.propertyID==='MPN'));
@@ -72,6 +72,16 @@ for(const id of ['anker-313-a2677','samsung-ep-t6530-trio-65w','baseus-cafule-ca
 const samsungNode=productNodes.find(item=>item.sku==='samsung-ep-t6530-trio-65w');
 assert.equal(samsungNode.dateModified,'2026-07-30');
 assert.ok(samsungNode.additionalProperty.some(item=>item.name==='multiPortDistribution'&&item.value==='35W+25W+5W'));
+for(const [id,single,total] of [['anker-prime-a1336',100,200],['anker-737-a1289',140,140],['anker-a1383-20k-87w',65,87]]){
+  const node=productNodes.find(item=>item.sku===id);
+  assert.equal(node.dateModified,'2026-07-30');
+  assert.ok(node.additionalProperty.some(item=>item.name==='maxSingleDeviceW'&&item.value===single),`${id} tek cihaz gücü eksik`);
+  assert.ok(node.additionalProperty.some(item=>item.name==='totalOutputW'&&item.value===total),`${id} toplam güç eksik`);
+}
+const a1383=verifiedProducts.find(item=>item.id==='anker-a1383-20k-87w');
+assert.equal(a1383.attributes.maxOutputW,65,'Matcher tek cihaz çıkışını kullanmalı.');
+assert.equal(a1383.attributes.totalOutputW,87,'Toplam çoklu port gücü ayrı tutulmalı.');
+assert.equal(a1383.attributes.builtInUsbCCable,true);
 for(const group of productGroupNodes){
   assert.ok(Array.isArray(group.hasVariant)&&group.hasVariant.length===2);
   assert.ok(Array.isArray(group.variesBy)&&group.variesBy.includes('https://schema.org/size'));
