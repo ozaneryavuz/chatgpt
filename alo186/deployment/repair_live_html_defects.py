@@ -8,6 +8,7 @@ from pathlib import Path
 REVENUE_MARKER = 'data-alo186-revenue-proof="true"'
 EDAS_STYLE_MARKER = 'data-alo186-edas-mobile-quality="true"'
 PRODUCT_ENTRY_MARKER = 'data-alo186-shortlist-product-entry="true"'
+PRODUCT_COMPONENT_STYLE_MARKER = 'data-alo186-product-component-quality="true"'
 FAVICON_MARKER = 'data-alo186-favicon="true"'
 EDAS_STYLE = (
     '<style data-alo186-edas-mobile-quality="true">'
@@ -19,6 +20,20 @@ EDAS_STYLE = (
     '.route-row{grid-template-columns:minmax(76px,auto) minmax(0,1fr)}'
     '.route-row strong{overflow-wrap:anywhere}'
     '@media(max-width:900px){.search-shell{grid-template-columns:minmax(0,1fr)!important}}'
+    '</style>'
+)
+PRODUCT_COMPONENT_STYLE = (
+    '<style data-alo186-product-component-quality="true">'
+    '#run6-missing-component-set,'
+    '#run6-missing-component-set>.panel,'
+    '.run6-component-grid,'
+    '.run6-component,'
+    '.run6-component label{min-inline-size:0;max-inline-size:100%}'
+    '.run6-component-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))!important}'
+    '.run6-component{overflow:hidden}'
+    '.run6-component label{display:grid!important;gap:8px;overflow-wrap:anywhere}'
+    '.run6-component select{inline-size:100%;max-inline-size:100%;min-inline-size:0}'
+    '.run6-gates label{min-inline-size:0;max-inline-size:100%;overflow-wrap:anywhere}'
     '</style>'
 )
 
@@ -131,6 +146,21 @@ def stabilize_product_center_layout(site: Path, base_path: str) -> int:
     return changed
 
 
+def harden_product_component_grid(site: Path) -> int:
+    """USB-C eksik bileşen kartlarının select metinleriyle taşmasını engeller."""
+
+    path = site / "akilli-urun-secimi/index.html"
+    if not path.is_file():
+        return 0
+    html = path.read_text(encoding="utf-8", errors="ignore")
+    if PRODUCT_COMPONENT_STYLE_MARKER in html:
+        return 0
+    if "</head>" not in html:
+        raise RuntimeError("Akıllı Ürün Merkezi head kapanışı bulunamadı")
+    path.write_text(html.replace("</head>", PRODUCT_COMPONENT_STYLE + "\n</head>", 1), encoding="utf-8")
+    return 1
+
+
 def ensure_favicon_links(site: Path, base_path: str) -> int:
     """Tarayıcının /favicon.ico için 404 üretmesini engelleyen mevcut SVG marka ikonunu bağlar."""
 
@@ -174,6 +204,9 @@ def validate(site: Path) -> None:
         path = site / relative
         if path.is_file() and PRODUCT_ENTRY_MARKER not in path.read_text(encoding="utf-8", errors="ignore"):
             failures.append(f"Ürün merkezi ilk HTML karşılaştırma alanı eksik: {relative}")
+    product_center = site / "akilli-urun-secimi/index.html"
+    if product_center.is_file() and PRODUCT_COMPONENT_STYLE_MARKER not in product_center.read_text(encoding="utf-8", errors="ignore"):
+        failures.append("Akıllı Ürün Merkezi USB-C bileşen taşma koruması eksik")
     if failures:
         raise RuntimeError("Canlı HTML kabuk kalite sözleşmesi başarısız:\n- " + "\n- ".join(failures))
 
@@ -183,6 +216,7 @@ def run(site: Path, base_path: str = "") -> dict:
     repaired_files, repaired_tags = repair_split_footers(site)
     edas_pages_hardened = harden_edas_search(site)
     product_centers_stabilized = stabilize_product_center_layout(site, base_path)
+    product_component_pages_hardened = harden_product_component_grid(site)
     favicon_links_added = ensure_favicon_links(site, base_path)
     validate(site)
     return {
@@ -192,6 +226,7 @@ def run(site: Path, base_path: str = "") -> dict:
         "splitFooterTagsRepaired": repaired_tags,
         "edasPagesHardened": edas_pages_hardened,
         "productCentersStabilized": product_centers_stabilized,
+        "productComponentPagesHardened": product_component_pages_hardened,
         "faviconLinksAdded": favicon_links_added,
         "personalDataFieldsAdded": 0,
         "officialAffiliationClaimed": False,
@@ -199,7 +234,7 @@ def run(site: Path, base_path: str = "") -> dict:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="ALO186 final artifactındaki bozuk footer, mobil erişilebilirlik, favicon ve CLS kusurlarını onarır.")
+    parser = argparse.ArgumentParser(description="ALO186 final artifactındaki bozuk footer, mobil erişilebilirlik, favicon, CLS ve ürün bileşen taşma kusurlarını onarır.")
     parser.add_argument("--site", type=Path, required=True)
     parser.add_argument("--base-path", default="")
     args = parser.parse_args()
