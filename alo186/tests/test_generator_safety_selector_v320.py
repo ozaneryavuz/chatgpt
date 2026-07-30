@@ -90,7 +90,9 @@ def main() -> None:
     assert "generatorSafetyCard" in common
     assert "data-alo186-generator-safety-card" in common
     assert "/hesaplama/jenerator-guvenli-kullanim-testi/" in common
-    assert "36 çekirdek araç" in common
+    count_matches = [int(value) for value in re.findall(r"(\d+) çekirdek araç", common)]
+    assert count_matches, "Hesaplama Merkezi araç sayısı etiketi bulunamadı"
+    assert max(count_matches) >= 36, "Yeni araçlar eski modül regresyonunu kırmamalı"
 
     print(json.dumps({
         "ok": True,
@@ -104,6 +106,7 @@ def main() -> None:
         "affiliateDisclosure": True,
         "emergencyCommerceClosed": True,
         "noBuyOutcome": True,
+        "minimumToolCount": max(count_matches),
     }, ensure_ascii=False, indent=2))
 
 
