@@ -1,0 +1,675 @@
+{
+  "version": 104,
+  "generatedAt": "2026-07-30",
+  "intents": [
+    {
+      "id": "priz-topraklama-on-kontrol",
+      "label": "Priz bağlantısını ve RCD işlevini güvenle ön kontrol etmek",
+      "routes": [
+        "/hesaplama/priz-test-cihazi-topraklama-on-kontrol/",
+        "/karar-motoru/"
+      ],
+      "productClasses": [
+        "priz-test-cihazi-type-ef",
+        "rcd-testli-priz-test-cihazi",
+        "temassiz-gerilim-dedektoru"
+      ]
+    },
+    {
+      "id": "olcum-cihazi-secimi",
+      "label": "Göreve uygun multimetre, pens ve ön kontrol cihazını seçmek",
+      "routes": [
+        "/hesaplama/multimetre-pensampermetre-cat-uygunluk/",
+        "/hesaplama/termal-kamera-kizilotesi-termometre-uygunluk/"
+      ],
+      "productClasses": [
+        "true-rms-multimetre-cat",
+        "true-rms-pens-ampermetre",
+        "temassiz-gerilim-dedektoru",
+        "termal-kamera"
+      ]
+    },
+    {
+      "id": "arac-aku-bakimi",
+      "label": "Araç aküsünü güvenle şarj etmek ve marş hazırlığı yapmak",
+      "routes": [
+        "/hesaplama/arac-aku-sarj-cihazi-takviye-uygunluk/",
+        "/hesaplama/ekipman-bakim-plani/"
+      ],
+      "productClasses": [
+        "arac-aku-akilli-sarj-cihazi",
+        "arac-takviye-cihazi",
+        "aku-kutup-basi-koruyucu"
+      ]
+    },
+    {
+      "id": "akulu-alet-platformu",
+      "label": "Akülü el aleti batarya ve şarj platformunu tamamlamak",
+      "routes": [
+        "/hesaplama/akulu-el-aleti-batarya-sarj-uygunluk/",
+        "/elektrik-portali"
+      ],
+      "productClasses": [
+        "akulu-alet-yedek-batarya",
+        "akulu-alet-sarj-cihazi"
+      ]
+    },
+    {
+      "id": "kritik-ev-cihazlari-yedek-guc",
+      "label": "Buzdolabı, kombi ve bilgisayarı kesintide güvenle yedeklemek",
+      "routes": [
+        "/hesaplama/buzdolabi-dondurucu-yedek-guc-uygunluk/",
+        "/hesaplama/kombi-kazan-yedek-guc-uygunluk/",
+        "/hesaplama/bilgisayar-gaming-pc-nas-ups-uygunluk/"
+      ],
+      "productClasses": [
+        "buzdolabi-dondurucu-termometresi",
+        "bilgisayar-nas-saf-sinus-ups",
+        "kombi-saf-sinus-ups",
+        "power-station"
+      ]
+    },
+    {
+      "id": "mikromobilite-sarj-guvenligi",
+      "label": "E-bisiklet ve scooter için yalnız onaylı şarj cihazını doğrulamak",
+      "routes": [
+        "/hesaplama/elektrikli-bisiklet-scooter-sarj-cihazi-uygunluk/",
+        "/acil-numaralar/"
+      ],
+      "productClasses": [
+        "e-bisiklet-scooter-onayli-sarj-cihazi",
+        "duman-alarmi"
+      ]
+    },
+    {
+      "id": "tasinabilir-ev-sarj",
+      "label": "Taşınabilir EVSE, Type 2 kablo ve priz sınırını doğrulamak",
+      "routes": [
+        "/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/",
+        "/hesaplama/ev-sarj-uygunluk/"
+      ],
+      "productClasses": [
+        "tasinabilir-evse",
+        "type2-kablo",
+        "evse-kablo-askisi"
+      ]
+    },
+    {
+      "id": "led-aydinlatma-besleme",
+      "label": "Şerit LED güç kaynağı, kontrolcü ve düşük gerilim bağlantısını seçmek",
+      "routes": [
+        "/hesaplama/serit-led-guc-kaynagi-uygunluk/",
+        "/elektrik-portali"
+      ],
+      "productClasses": [
+        "led-serit-sabit-gerilim-guc-kaynagi",
+        "led-dimmer-kontrolcu",
+        "led-kablo-konnektor-seti"
+      ]
+    }
+  ],
+  "productClasses": [
+    {
+      "id": "priz-test-cihazi-type-ef",
+      "label": "Type E/F priz bağlantı ön kontrol cihazı",
+      "risk": "consumer-gated",
+      "search": "Type E F 230V priz test cihazı faz nötr toprak gösterge güvenlik belgeli",
+      "needs": ["priz-topraklama-on-kontrol", "ev-ofis-konforu"],
+      "requiredEvidence": [
+        "Type E/F ve 230 V uyumu",
+        "göstergelerin hangi hataları ayırt ettiği",
+        "tam model kullanım kılavuzu",
+        "bilinen sağlam prizde çalışma kontrolü"
+      ],
+      "guide": "/hesaplama/priz-test-cihazi-topraklama-on-kontrol/",
+      "symptoms": [
+        "prizde faz nötr veya toprak bağlantısı konusunda şüphe var",
+        "taşınma sonrası prizleri hızlıca sınıflandırmak gerekiyor"
+      ],
+      "avoidWhen": [
+        "priz gevşek, ıslak, kararmış veya aşırı ısınıyor",
+        "sonuç topraklama direnci ya da hata çevrim empedansı ölçümü gibi yorumlanacak"
+      ],
+      "noBuyWhen": [
+        "mevcut cihaz Type E/F 230 V uyumlu ve bilinen sağlam prizde tutarlı çalışıyor"
+      ],
+      "companions": ["rcd-testli-priz-test-cihazi"]
+    },
+    {
+      "id": "rcd-testli-priz-test-cihazi",
+      "label": "RCD test düğmeli priz ön kontrol cihazı",
+      "risk": "consumer-gated",
+      "search": "Type E F 230V RCD test düğmeli priz test cihazı kullanım kılavuzlu",
+      "needs": ["priz-topraklama-on-kontrol"],
+      "requiredEvidence": [
+        "RCD test işlevinin cihaz kılavuzundaki kapsamı",
+        "tesisattaki RCD tipinin ve devrenin doğrulanması",
+        "test sonrası güvenli yeniden enerjilendirme",
+        "açma süresi ve akımını ölçmediğinin anlaşılması"
+      ],
+      "guide": "/hesaplama/priz-test-cihazi-topraklama-on-kontrol/",
+      "symptoms": [
+        "RCD test düğmesinin temel işlevi kontrol edilmek isteniyor"
+      ],
+      "avoidWhen": [
+        "kritik cihazlar habersiz enerjisiz kalabilir",
+        "RCD açma akımı veya milisaniye süresi ölçülmek isteniyor"
+      ],
+      "noBuyWhen": [
+        "mevcut test cihazı aynı işlevi güvenli ve tutarlı biçimde yerine getiriyor"
+      ],
+      "companions": ["priz-test-cihazi-type-ef"]
+    },
+    {
+      "id": "temassiz-gerilim-dedektoru",
+      "label": "Temassız gerilim dedektörü",
+      "risk": "professional-gated",
+      "search": "temassız gerilim dedektörü CAT III ayarlanabilir hassasiyet çalışma doğrulamalı",
+      "needs": ["priz-topraklama-on-kontrol", "olcum-cihazi-secimi"],
+      "requiredEvidence": [
+        "ölçüm kategorisi ve gerilim aralığı",
+        "kullanım öncesi ve sonrası bilinen kaynakta çalışma kontrolü",
+        "enerjisizlik kanıtı olarak kullanılmayacağının anlaşılması",
+        "kullanıcının elektriksel yetkinliği"
+      ],
+      "guide": "/hesaplama/multimetre-pensampermetre-cat-uygunluk/",
+      "symptoms": [
+        "kabloda veya priz çevresinde gerilim varlığına ilişkin hızlı ön kontrol gerekiyor"
+      ],
+      "avoidWhen": [
+        "enerjisiz çalışma kararı yalnız bu cihazla verilecek",
+        "açık enerjili bölüme yaklaşmak veya pano kapağı açmak gerekiyor"
+      ],
+      "noBuyWhen": [
+        "yetkin kişi mevcut cihazı bilinen kaynakta doğrulayıp görev sınırları içinde kullanabiliyor"
+      ],
+      "companions": ["true-rms-multimetre-cat"]
+    },
+    {
+      "id": "true-rms-multimetre-cat",
+      "label": "True RMS ve uygun CAT sınıflı dijital multimetre",
+      "risk": "professional-gated",
+      "search": "True RMS dijital multimetre CAT III CAT IV sigortalı akım girişi güvenlik belgeli",
+      "needs": ["olcum-cihazi-secimi", "olcum-ve-bakim"],
+      "requiredEvidence": [
+        "ölçüm noktasına uygun CAT seviyesi",
+        "cihaz ve prob takımının ayrı gerilim sınırları",
+        "yüksek kesme kapasiteli giriş sigortaları",
+        "yetkinlik ve güvenli çalışma yöntemi"
+      ],
+      "guide": "/hesaplama/multimetre-pensampermetre-cat-uygunluk/",
+      "symptoms": [
+        "değişken hızlı sürücü veya elektronik yükte kararlı olmayan AC ölçümü",
+        "gerilim, direnç ve süreklilik için tek cihaz ihtiyacı"
+      ],
+      "avoidWhen": [
+        "CAT ve prob sınıfı belirsiz",
+        "enerjili devrede direnç, süreklilik veya kapasite ölçülecek"
+      ],
+      "noBuyWhen": [
+        "mevcut multimetre ve problar ölçüm noktasının CAT, gerilim ve işlev gereksinimini karşılıyor"
+      ],
+      "companions": ["true-rms-pens-ampermetre"]
+    },
+    {
+      "id": "true-rms-pens-ampermetre",
+      "label": "True RMS pensampermetre",
+      "risk": "professional-gated",
+      "search": "True RMS pens ampermetre AC DC inrush CAT III çene açıklığı güvenlik belgeli",
+      "needs": ["olcum-cihazi-secimi", "olcum-ve-bakim"],
+      "requiredEvidence": [
+        "beklenen azami ve kalkış akımı",
+        "AC veya AC/DC ölçüm gereksinimi",
+        "inrush kayıt işlevi ve ölçüm süresi",
+        "iletken çapı, çene açıklığı ve CAT seviyesi"
+      ],
+      "guide": "/hesaplama/multimetre-pensampermetre-cat-uygunluk/",
+      "symptoms": [
+        "motor kalkış akımı veya devre yükü ölçülmek isteniyor",
+        "devreyi açmadan akım karşılaştırması gerekiyor"
+      ],
+      "avoidWhen": [
+        "kaçak akım miliamper seviyesinde ölçülecek ancak cihazın çözünürlüğü uygun değil",
+        "iletkenler ayrılmadan çok damarlı kablonun tamamı kavranacak"
+      ],
+      "noBuyWhen": [
+        "mevcut pens akım aralığı, çözünürlük, True RMS ve inrush ihtiyacını karşılıyor"
+      ],
+      "companions": ["true-rms-multimetre-cat"]
+    },
+    {
+      "id": "arac-aku-akilli-sarj-cihazi",
+      "label": "Araç aküsü için akıllı şarj ve bakım cihazı",
+      "risk": "consumer-gated",
+      "search": "12V akıllı araç akü şarj bakım cihazı AGM EFB GEL sıcaklık kompanzasyonlu",
+      "needs": ["arac-aku-bakimi"],
+      "requiredEvidence": [
+        "akü nominal gerilimi ve kimyası",
+        "Ah kapasitesi ve üretici azami şarj akımı",
+        "AGM EFB GEL veya LiFePO4 için doğru profil",
+        "ters kutup, kıvılcım ve sıcaklık koruması"
+      ],
+      "guide": "/hesaplama/arac-aku-sarj-cihazi-takviye-uygunluk/",
+      "symptoms": [
+        "araç uzun süre bekliyor ve akü zayıflıyor",
+        "akü kontrollü biçimde doldurulmak isteniyor"
+      ],
+      "avoidWhen": [
+        "akü şişmiş, çatlamış, sızdırıyor veya donmuş olabilir",
+        "akü sürekli boşalıyor ancak alternatör ve parazitik tüketim kontrol edilmedi"
+      ],
+      "noBuyWhen": [
+        "mevcut cihaz akü kimyasını, gerilimini ve izin verilen akımı karşılayıp gözetimli testi geçti"
+      ],
+      "companions": ["aku-kutup-basi-koruyucu"]
+    },
+    {
+      "id": "arac-takviye-cihazi",
+      "label": "Taşınabilir araç akü takviye cihazı",
+      "risk": "consumer-gated",
+      "search": "12V araç akü takviye cihazı ters kutup kıvılcım korumalı tam model",
+      "needs": ["arac-aku-bakimi", "seyahat-karavan"],
+      "requiredEvidence": [
+        "araç ve motor sınıfı",
+        "yalnız 12 V veya üreticinin belirttiği sistem gerilimi",
+        "ters kutup ve kısa devre koruması",
+        "üreticinin bağlantı ve saklama talimatı"
+      ],
+      "guide": "/hesaplama/arac-aku-sarj-cihazi-takviye-uygunluk/",
+      "symptoms": [
+        "yolculuk öncesi marş yedeği isteniyor"
+      ],
+      "avoidWhen": [
+        "24 V ağır araç veya çift akü sistemi",
+        "hibrit veya elektrikli aracın bağlantı noktası kılavuzdan doğrulanmadı"
+      ],
+      "noBuyWhen": [
+        "akü ve şarj sistemi sağlıklı, mevcut takviye cihazı şarjlı ve tam model uyumlu"
+      ],
+      "companions": ["usb-sarjli-fener"]
+    },
+    {
+      "id": "akulu-alet-yedek-batarya",
+      "label": "Akülü el aleti için platform uyumlu yedek batarya",
+      "risk": "consumer-gated",
+      "search": "akülü el aleti orijinal platform uyumlu Li ion yedek batarya tam model",
+      "needs": ["akulu-alet-platformu"],
+      "requiredEvidence": [
+        "tam marka ve batarya platformu",
+        "nominal voltaj ve kimya",
+        "aletin yüksek çıkışlı batarya gereksinimi",
+        "BMS, sıcaklık sensörü ve mekanik kilit uyumu"
+      ],
+      "guide": "/hesaplama/akulu-el-aleti-batarya-sarj-uygunluk/",
+      "symptoms": [
+        "tek batarya iş akışını kesiyor",
+        "mevcut batarya gerçek görevde yetersiz çalışma süresi veriyor"
+      ],
+      "avoidWhen": [
+        "yalnız fiziksel olarak oturması uyumluluk kanıtı sayılıyor",
+        "markalar arası adaptörle şarj veya yüksek güçlü kullanım planlanıyor"
+      ],
+      "noBuyWhen": [
+        "mevcut batarya sayısı ve kapasitesi gerçek işi karşılıyor, hücre ve terminal durumu sağlam"
+      ],
+      "companions": ["akulu-alet-sarj-cihazi"]
+    },
+    {
+      "id": "akulu-alet-sarj-cihazi",
+      "label": "Akülü el aleti için platform uyumlu şarj cihazı",
+      "risk": "consumer-gated",
+      "search": "akülü el aleti orijinal platform uyumlu Li ion şarj cihazı tam model",
+      "needs": ["akulu-alet-platformu"],
+      "requiredEvidence": [
+        "batarya platformu ve tam model uyumu",
+        "kimya ve nominal voltaj",
+        "hızlı şarjın üretici tarafından desteklenmesi",
+        "sıcaklık ve hücre izleme davranışı"
+      ],
+      "guide": "/hesaplama/akulu-el-aleti-batarya-sarj-uygunluk/",
+      "symptoms": [
+        "mevcut şarj cihazı arızalı veya iş akışına göre çok yavaş"
+      ],
+      "avoidWhen": [
+        "üçüncü taraf adaptörle farklı marka batarya şarj edilecek",
+        "batarya şişmiş, ıslanmış, çatlamış veya aşırı ısınıyor"
+      ],
+      "noBuyWhen": [
+        "mevcut şarj cihazı platform uyumlu, güvenli ve çalışma süresini karşılıyor"
+      ],
+      "companions": ["akulu-alet-yedek-batarya"]
+    },
+    {
+      "id": "buzdolabi-dondurucu-termometresi",
+      "label": "Buzdolabı ve dondurucu sıcaklık alarmı",
+      "risk": "consumer",
+      "search": "buzdolabı dondurucu dijital termometre sıcaklık alarmı min max kayıtlı",
+      "needs": ["kritik-ev-cihazlari-yedek-guc", "evde-elektrik-kesintisi"],
+      "requiredEvidence": [
+        "buzdolabı ve dondurucu ölçüm aralığı",
+        "min maks kayıt ve alarm eşikleri",
+        "sensör yerleşimi",
+        "pil durumu ve karşılaştırma testi"
+      ],
+      "guide": "/hesaplama/buzdolabi-dondurucu-yedek-guc-uygunluk/",
+      "symptoms": [
+        "kesintide gıda sıcaklığı bilinmiyor",
+        "kapı açılması veya kompresör arızası geç fark ediliyor"
+      ],
+      "avoidWhen": [
+        "tek hava sıcaklığı ölçümüyle gıdanın güvenli olduğu varsayılacak"
+      ],
+      "noBuyWhen": [
+        "mevcut cihaz güvenilir min maks kayıt ve alarm veriyor, pil ve sensör testi güncel"
+      ],
+      "companions": ["power-station"]
+    },
+    {
+      "id": "bilgisayar-nas-saf-sinus-ups",
+      "label": "Bilgisayar, NAS ve ağ için saf sinüs UPS",
+      "risk": "consumer-gated",
+      "search": "saf sinüs UPS bilgisayar NAS aktif PFC USB kapatma W VA yük süre eğrisi",
+      "needs": ["kritik-ev-cihazlari-yedek-guc", "internet-surekliligi", "ups-bakim"],
+      "requiredEvidence": [
+        "gerçek toplam yük wattı",
+        "UPS'in hem W hem VA sınırı",
+        "saf sinüs ve aktif PFC uyumu",
+        "yük süre eğrisi ve otomatik kapatma desteği"
+      ],
+      "guide": "/hesaplama/bilgisayar-gaming-pc-nas-ups-uygunluk/",
+      "symptoms": [
+        "kesintide bilgisayar aniden kapanıyor",
+        "NAS veya ağ cihazında veri kaybı riski var"
+      ],
+      "avoidWhen": [
+        "bilgisayar PSU etiketi gerçek tüketim sanılıyor",
+        "lazer yazıcı veya yüksek kalkışlı yük UPS çıkışına bağlanacak"
+      ],
+      "noBuyWhen": [
+        "mevcut UPS W, VA, saf sinüs ve gerçek süre testini karşılıyor, akü sağlığı yeterli"
+      ],
+      "companions": ["priz-tipi-enerji-olcer", "modem-mini-ups"]
+    },
+    {
+      "id": "kombi-saf-sinus-ups",
+      "label": "Kombi için saf sinüs yedek güç sistemi",
+      "risk": "professional-gated",
+      "search": "kombi saf sinüs UPS faz nötr 230V 50Hz pompa fan kalkış uyumlu",
+      "needs": ["kritik-ev-cihazlari-yedek-guc"],
+      "requiredEvidence": [
+        "kombinin gerçek elektrik giriş gücü",
+        "pompa ve fan başlangıç gücü",
+        "faz nötr ve nötr toprak düzeni",
+        "baca, bakım ve CO alarmı koşulları"
+      ],
+      "guide": "/hesaplama/kombi-kazan-yedek-guc-uygunluk/",
+      "symptoms": [
+        "kesintide kombi ve sirkülasyon duruyor"
+      ],
+      "avoidWhen": [
+        "gaz kokusu, CO alarmı veya baca sorunu var",
+        "sabit bağlantı ya da jeneratör transferi gerekiyor"
+      ],
+      "noBuyWhen": [
+        "mevcut kaynak gerçek ısıtma testinde sürekli W, tepe W, Wh ve faz nötr koşullarını karşılıyor"
+      ],
+      "companions": ["karbonmonoksit-alarmi"]
+    },
+    {
+      "id": "e-bisiklet-scooter-onayli-sarj-cihazi",
+      "label": "Üretici onaylı e-bisiklet veya scooter şarj cihazı",
+      "risk": "professional-gated",
+      "search": "e bisiklet scooter üretici onaylı yedek şarj cihazı tam model output polarite",
+      "needs": ["mikromobilite-sarj-guvenligi"],
+      "requiredEvidence": [
+        "tam cihaz marka ve model kodu",
+        "üretici onaylı OUTPUT voltajı ve azami akım",
+        "konektör, pin dizilimi ve polarite",
+        "geri çağırma ve güvenlik belgesi kontrolü"
+      ],
+      "guide": "/hesaplama/elektrikli-bisiklet-scooter-sarj-cihazi-uygunluk/",
+      "symptoms": [
+        "orijinal şarj cihazı kayıp veya arızalı"
+      ],
+      "avoidWhen": [
+        "universal veya yalnız fişi uyan şarj cihazı düşünülüyor",
+        "batarya şişmiş, ıslanmış, darbe almış veya aşırı ısınıyor"
+      ],
+      "noBuyWhen": [
+        "mevcut üretici onaylı şarj cihazı normal çalışıyor ve tam model geri çağırması bulunmuyor"
+      ],
+      "companions": ["duman-alarmi"]
+    },
+    {
+      "id": "tasinabilir-evse",
+      "label": "Taşınabilir Mode 2 EV şarj cihazı",
+      "risk": "professional-gated",
+      "search": "taşınabilir Mode 2 EVSE ayarlanabilir akım sıcaklık sensörü RCD DC kaçak koruma",
+      "needs": ["tasinabilir-ev-sarj", "ev-sarj"],
+      "requiredEvidence": [
+        "priz ve devrenin sürekli akım kapasitesi",
+        "PE sürekliliği ve RCD DC kaçak koruma zinciri",
+        "araç AC kabul gücü",
+        "fiş sıcaklık izleme ve dış ortam IP sınıfı"
+      ],
+      "guide": "/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/",
+      "symptoms": [
+        "seyahatte veya geçici kullanımda araç şarjı gerekiyor"
+      ],
+      "avoidWhen": [
+        "uzatma, makara, çoklayıcı veya dönüştürücü kullanılacak",
+        "priz ısınıyor, gevşek veya devre paylaşımı belirsiz"
+      ],
+      "noBuyWhen": [
+        "mevcut EVSE günlük ihtiyacı karşılıyor ve priz sıcaklık testi ile koruma zinciri doğrulandı"
+      ],
+      "companions": ["type2-kablo", "tasimabilir-evse-koruyucu-canta", "evse-kablo-askisi"]
+    },
+    {
+      "id": "evse-kablo-askisi",
+      "label": "EV şarj kablosu askısı ve konektör yuvası",
+      "risk": "consumer",
+      "search": "Type 2 EV şarj kablosu askısı konektör yuvası duvar montaj kuru saklama",
+      "needs": ["tasinabilir-ev-sarj", "ev-sarj"],
+      "requiredEvidence": [
+        "Type 2 konektör uyumu",
+        "kablo bükülme yarıçapı",
+        "dış ortam ve UV dayanımı",
+        "montaj yüzeyi ve su birikmesini önleyen yerleşim"
+      ],
+      "guide": "/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/",
+      "symptoms": [
+        "şarj kablosu yerde, ıslak veya ezilme riski altında kalıyor"
+      ],
+      "avoidWhen": [
+        "askı kabloyu keskin açıyla büküyor veya konektörde su tutuyor"
+      ],
+      "noBuyWhen": [
+        "mevcut kuru saklama düzeni kablo ve konektörü ezilme, su ve güneşten koruyor"
+      ],
+      "companions": ["type2-kablo", "tasimabilir-evse-koruyucu-canta"]
+    },
+    {
+      "id": "led-serit-sabit-gerilim-guc-kaynagi",
+      "label": "Şerit LED için kapalı gövdeli sabit gerilim güç kaynağı",
+      "risk": "consumer-gated",
+      "search": "12V 24V sabit voltaj LED güç kaynağı kapalı gövde aşırı akım sıcaklık korumalı",
+      "needs": ["led-aydinlatma-besleme"],
+      "requiredEvidence": [
+        "şerit LED'in 12 V veya 24 V sınıfı",
+        "metre başına watt ve toplam uzunluk",
+        "en az yüzde 20 güç rezervi",
+        "kapalı gövde, havalandırma ve üretici korumaları"
+      ],
+      "guide": "/hesaplama/serit-led-guc-kaynagi-uygunluk/",
+      "symptoms": [
+        "şerit LED uçlara doğru kararıyor",
+        "güç kaynağı ısınıyor veya korumaya geçiyor"
+      ],
+      "avoidWhen": [
+        "açık 230 V terminalli sürücü tüketici tarafından bağlanacak",
+        "şerit sabit akım modülü veya araç elektriği uygulaması"
+      ],
+      "noBuyWhen": [
+        "mevcut güç kaynağı voltaj, sürekli W, sıcaklık ve gerilim düşümü testini karşılıyor"
+      ],
+      "companions": ["led-dimmer-kontrolcu", "led-kablo-konnektor-seti"]
+    },
+    {
+      "id": "led-dimmer-kontrolcu",
+      "label": "Şerit LED için düşük gerilim dimmer veya kontrolcü",
+      "risk": "consumer-gated",
+      "search": "12V 24V LED dimmer kontrolcü toplam akım PWM güvenlik korumalı",
+      "needs": ["led-aydinlatma-besleme"],
+      "requiredEvidence": [
+        "şerit gerilimi",
+        "toplam ve kanal başına akım",
+        "tek renk RGB RGBW kontrol tipi",
+        "PWM uyumu ve terminal sıcaklığı"
+      ],
+      "guide": "/hesaplama/serit-led-guc-kaynagi-uygunluk/",
+      "symptoms": [
+        "dimmer ısınıyor, titreme yapıyor veya tam parlaklıkta kapanıyor"
+      ],
+      "avoidWhen": [
+        "kontrolcü akım sınırı toplam şerit akımından düşük",
+        "230 V tarafında açık terminal bağlantısı gerekiyor"
+      ],
+      "noBuyWhen": [
+        "mevcut kontrolcü doğru gerilim, kanal ve akım sınıfında kararlı çalışıyor"
+      ],
+      "companions": ["led-serit-sabit-gerilim-guc-kaynagi", "led-kablo-konnektor-seti"]
+    },
+    {
+      "id": "led-kablo-konnektor-seti",
+      "label": "Şerit LED için düşük gerilim kablo ve konektör seti",
+      "risk": "consumer-gated",
+      "search": "12V 24V LED şerit kablo konektör seti akıma uygun kesit kilitli bağlantı",
+      "needs": ["led-aydinlatma-besleme", "kablo-duzeni"],
+      "requiredEvidence": [
+        "iletken kesiti ve toplam akım",
+        "şerit genişliği ve pin sayısı",
+        "konektör akım sınırı",
+        "besleme uzunluğu ve gerilim düşümü"
+      ],
+      "guide": "/hesaplama/serit-led-guc-kaynagi-uygunluk/",
+      "symptoms": [
+        "konektör kararıyor veya bağlantıda parlaklık düşüyor"
+      ],
+      "avoidWhen": [
+        "yüksek akım ince klipsli konektörden geçirilecek",
+        "erimiş veya kararmış bağlantı yeniden kullanılacak"
+      ],
+      "noBuyWhen": [
+        "mevcut kablo ve bağlantılar kesit, sıcaklık ve gerilim düşümü açısından yeterli"
+      ],
+      "companions": ["led-serit-sabit-gerilim-guc-kaynagi", "led-dimmer-kontrolcu"]
+    }
+  ],
+  "journeys": [
+    {
+      "id": "home-office-kesinti",
+      "label": "Kesintide internet ve home office sürekliliği",
+      "problem": "Modem, ONT, bilgisayar ve NAS için tek büyük ürün almak yerine yükleri ayırın.",
+      "steps": [
+        "Priz tipi enerji ölçerle gerçek W değerlerini belirleyin.",
+        "Modem ve ONT için DC mini UPS uygunluğunu ayrı hesaplayın.",
+        "Bilgisayar ve NAS için UPS'in W, VA, saf sinüs ve süre eğrisini doğrulayın.",
+        "Mevcut sistem süre ve geçiş testini karşılıyorsa yeni ürün almayın."
+      ],
+      "productClasses": ["priz-tipi-enerji-olcer", "modem-mini-ups", "bilgisayar-nas-saf-sinus-ups"],
+      "route": "/hesaplama/bilgisayar-gaming-pc-nas-ups-uygunluk/"
+    },
+    {
+      "id": "buzdolabi-kombi-kesinti",
+      "label": "Buzdolabı ve kombi için ayrı yedek güç kararı",
+      "problem": "Kompresör kalkışı ile kombi pompa-fan davranışı aynı ürün sınıfı değildir.",
+      "steps": [
+        "Buzdolabı sıcaklığını ve kompresör kalkışını ayrı izleyin.",
+        "Kombinin ısıl kW değerini elektrik tüketimi sanmayın.",
+        "Sürekli W, tepe W, Wh, saf sinüs ve gerçek başlatma testini tamamlayın.",
+        "Gaz, CO veya sabit tesisat riski varsa mağaza yolunu kapatın."
+      ],
+      "productClasses": ["buzdolabi-dondurucu-termometresi", "power-station", "kombi-saf-sinus-ups"],
+      "route": "/hesaplama/yedek-guc-cozum-secici/"
+    },
+    {
+      "id": "priz-olcum-once",
+      "label": "Priz ve ölçüm cihazında önce görev sınırı",
+      "problem": "Gösterge lambası, temassız kalem ve multimetre farklı kanıtlar üretir.",
+      "steps": [
+        "Prizin fiziksel durumunu kontrol edin.",
+        "Priz test cihazını yalnız temel bağlantı ön kontrolü için kullanın.",
+        "Enerjisizlik veya pano ölçümünü yetkin kişi ve uygun CAT cihazıyla yapın.",
+        "Mevcut cihaz görev sınırını karşılıyorsa yeni ölçü aleti almayın."
+      ],
+      "productClasses": ["priz-test-cihazi-type-ef", "rcd-testli-priz-test-cihazi", "true-rms-multimetre-cat", "true-rms-pens-ampermetre"],
+      "route": "/hesaplama/priz-test-cihazi-topraklama-on-kontrol/"
+    },
+    {
+      "id": "arac-aku-kis-hazirligi",
+      "label": "Araç aküsü ve yolculuk öncesi marş hazırlığı",
+      "problem": "Şarj cihazı, bakım cihazı ve takviye cihazı aynı ihtiyacı çözmez.",
+      "steps": [
+        "Akü kimyası, gerilim ve Ah değerini doğrulayın.",
+        "Sürekli boşalmada alternatör ve parazitik tüketimi ölçtürün.",
+        "Bakım için akıllı şarj cihazı, yol acili için uygun takviye cihazını ayırın.",
+        "Şişmiş, donmuş veya sızdıran aküde ürün kullanmayın."
+      ],
+      "productClasses": ["arac-aku-akilli-sarj-cihazi", "arac-takviye-cihazi", "aku-kutup-basi-koruyucu"],
+      "route": "/hesaplama/arac-aku-sarj-cihazi-takviye-uygunluk/"
+    },
+    {
+      "id": "akulu-alet-ekosistemi",
+      "label": "Akülü el aleti platformunda gereksiz bataryayı önleme",
+      "problem": "Aynı voltaj yazması veya fiziksel oturması platform uyumu değildir.",
+      "steps": [
+        "Tam marka, seri ve batarya platformunu doğrulayın.",
+        "Mevcut bataryanın gerçek iş süresini ve sağlık durumunu test edin.",
+        "Yüksek güçlü alet için üreticinin yüksek çıkışlı batarya şartını kontrol edin.",
+        "Mevcut kapasite işi karşılıyorsa yalnız solo alet veya hiçbir ürün alın."
+      ],
+      "productClasses": ["akulu-alet-yedek-batarya", "akulu-alet-sarj-cihazi"],
+      "route": "/hesaplama/akulu-el-aleti-batarya-sarj-uygunluk/"
+    },
+    {
+      "id": "mikromobilite-sarj",
+      "label": "E-bisiklet ve scooter şarjında tam model doğrulaması",
+      "problem": "Universal şarj cihazı fiziksel olarak uysa bile bataryayla güvenli çalışmayabilir.",
+      "steps": [
+        "Tam cihaz modelini ve üretici onaylı OUTPUT değerini bulun.",
+        "Voltaj, akım, pin dizilimi ve polariteyi birebir karşılaştırın.",
+        "Geri çağırma ve batarya fiziksel durumunu kontrol edin.",
+        "Üretici onayı yoksa Amazon araması yerine üretici veya yetkili servis kullanın."
+      ],
+      "productClasses": ["e-bisiklet-scooter-onayli-sarj-cihazi", "duman-alarmi"],
+      "route": "/hesaplama/elektrikli-bisiklet-scooter-sarj-cihazi-uygunluk/"
+    },
+    {
+      "id": "ev-sarj-seyahat",
+      "label": "Seyahatte taşınabilir EV şarjı",
+      "problem": "Daha yüksek amperli EVSE, zayıf veya paylaşımlı prizi güvenli hale getirmez.",
+      "steps": [
+        "Priz, devre, PE ve RCD/DC kaçak koruma zincirini doğrulatın.",
+        "Araç kabulü ve devre sınırına göre EVSE akımını ayarlayın.",
+        "Uzatma, makara, çoklayıcı ve dönüştürücü kullanmayın.",
+        "Mevcut EVSE günlük ihtiyacı ve sıcaklık testini karşılıyorsa yenisini almayın."
+      ],
+      "productClasses": ["tasinabilir-evse", "type2-kablo", "evse-kablo-askisi"],
+      "route": "/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/"
+    },
+    {
+      "id": "serit-led-ariza",
+      "label": "Şerit LED kararma ve ısınma sorununu ayırmak",
+      "problem": "Güç kaynağı, kablo düşümü ve kontrolcü akım sınırı birlikte değerlendirilmelidir.",
+      "steps": [
+        "Metre başına watt ve toplam uzunluğu doğrulayın.",
+        "Güç kaynağına rezerv ekleyin ve kablo gerilim düşümünü hesaplayın.",
+        "Kontrolcü ve konektör akım sınırlarını ayrı kontrol edin.",
+        "Mevcut sistem sıcaklık ve gerilim düşümü testini geçiyorsa yeni ürün almayın."
+      ],
+      "productClasses": ["led-serit-sabit-gerilim-guc-kaynagi", "led-dimmer-kontrolcu", "led-kablo-konnektor-seti"],
+      "route": "/hesaplama/serit-led-guc-kaynagi-uygunluk/"
+    }
+  ]
+}
