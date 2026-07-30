@@ -107,7 +107,6 @@ jobs:
           set -euo pipefail
           python - <<'PY'
           import json
-          import re
           from pathlib import Path
 
           tool_route='hesaplama/tasinabilir-ev-sarj-priz-uygunluk'
@@ -147,8 +146,7 @@ jobs:
 
               hub=(root/'hesaplama/index.html').read_text(encoding='utf-8')
               assert tool_slug in hub and travel_slug in hub
-              count_match=re.search(r'(\d+) çekirdek araç',hub)
-              assert count_match and int(count_match.group(1))>=41
+              assert hub.count('class="tool-card"')>=42
 
               sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
               assert tool_slug in sitemap and guide_slug in sitemap
