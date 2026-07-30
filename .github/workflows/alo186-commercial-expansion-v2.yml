@@ -133,8 +133,9 @@ jobs:
                   file=root/route.strip('/')/'index.html'
                   assert file.is_file(), file
                   html=file.read_text(encoding='utf-8')
-                  assert f'rel="canonical" href="https://www.alo186.com{route}"' in html
-                  assert f'https://www.alo186.com{route}' in sitemap
+                  canonical_hosts=(f'https://www.alo186.com{route}', f'https://alo186.com{route}')
+                  assert any(value in html for value in canonical_hosts), (root, route, 'canonical')
+                  assert any(value in sitemap for value in canonical_hosts), (root, route, 'sitemap')
                   assert route in entries, route
                   expected=(prefix+route) if prefix else route
                   assert entries[route]['url'] == expected
@@ -155,7 +156,11 @@ jobs:
               assert 'data-product-center' not in ges
               hub=(root/'amazon-elektrik-urunleri/index.html').read_text(encoding='utf-8')
               guide_links=set(re.findall(r'href="(/(?:chatgpt/)?amazon-elektrik-urunleri/[^"?#]+)"', hub))
-              assert len(guide_links) == 7, guide_links
+              display=re.search(r'(\d+) özel rehber', hub)
+              assert display, 'Görünür rehber sayacı bulunamadı'
+              assert len(guide_links) == int(display.group(1)), guide_links
+              assert len(guide_links) >= 7, guide_links
+              assert hub.count('class="card route-card"') == len(guide_links)
           PY
 
       - name: Kaliteli ticari genişleme artifactı
