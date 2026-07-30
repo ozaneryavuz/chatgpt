@@ -43,6 +43,7 @@ for token in (
     "wrapper.dataset.overflow = String(overflowing)",
     "header,.hero,[data-critical-media]",
     "publicPath(ROOT_PATH)",
+    "routePath('assets', 'alo186-ux.js')",
 ):
     assert token in ux_js, token
 for forbidden in ("publicPath('/')", "|| '/'", "route === '/'", ".replace(/\\/+/g, '/')"):
@@ -50,6 +51,8 @@ for forbidden in ("publicPath('/')", "|| '/'", "route === '/'", ".replace(/\\/+/
 assert "body:not([data-alo186-ux-compact=true])" in ux_css
 assert "body{padding-bottom" not in ux_css
 assert ".alo-ux-toc" in ux_css
+assert ".alo-ux-toc:not([open]) nav{display:none}" in ux_css
+assert ".alo-ux-toc[open] nav{display:grid" in ux_css
 assert "grid-template-columns:repeat(2" in ux_css
 assert ".alo-table-scroll[data-overflow=true]" in ux_css
 assert ".alo-ux-mobilebar a:focus-visible" in ux_css
@@ -129,6 +132,7 @@ print(json.dumps({
     "activePageState": True,
     "tableOverflowGuard": "focus-only-when-overflowing",
     "keyboardFocusVisible": True,
+    "collapsedTocInteractiveOverlapBlocked": True,
     "externalLinkHardening": True,
     "criticalImagesProtected": True,
     "imageAltFallback": True,
