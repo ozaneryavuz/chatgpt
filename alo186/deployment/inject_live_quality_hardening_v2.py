@@ -5,6 +5,7 @@ import json
 import re
 from pathlib import Path
 
+import finalize_user_entrypoints as entrypoints
 import inject_live_quality_hardening as core
 from prepare_github_pages import UX_MARKER, install_sitewide_ux
 
@@ -202,6 +203,7 @@ def run(site: Path, base_path: str = "") -> dict:
     update_sitewide_ux_release(site / "alo186-release.json", ux)
     update_sitewide_ux_release(site / "pages-release.json", ux)
     result = core.run(site, normalized)
+    result["finalUserEntryPoints"] = entrypoints.run(site, normalized)
     result["sitewideUxFinal"] = {
         **ux,
         "finalHtmlPages": int(ux.get("injectedPages", 0)) + int(ux.get("alreadyInjectedPages", 0)),
