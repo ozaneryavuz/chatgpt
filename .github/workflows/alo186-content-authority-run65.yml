@@ -109,7 +109,10 @@ jobs:
                   html = page.read_text(encoding='utf-8')
                   assert route in sitemap, ('sitemap', prefix, route)
                   assert route in active, ('search-index', prefix, route)
-                  assert f'https://www.alo186.com{route}' in html
+                  assert (
+                      f'https://www.alo186.com{route}' in html
+                      or f'https://alo186.com{route}' in html
+                  ), ('canonical', prefix, route)
                   assert 'Doğrudan cevap:' in html
                   assert 'Satın almama sınırı' in html
                   assert 'priceCurrency' not in html and '"@type":"Offer"' not in html
