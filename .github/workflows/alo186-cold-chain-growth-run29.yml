@@ -8,6 +8,7 @@ on:
       - 'alo186/deployment/routing-overlays/cold-chain-growth-run29.json'
       - 'alo186/deployment/repair_live_html_defects.py'
       - 'alo186/tests/test_cold_chain_growth_run29*.py'
+      - 'alo186/tests/test_release_manifest.js'
       - '.github/workflows/alo186-cold-chain-growth-run29.yml'
   push:
     branches: [main]
@@ -17,6 +18,7 @@ on:
       - 'alo186/deployment/routing-overlays/cold-chain-growth-run29.json'
       - 'alo186/deployment/repair_live_html_defects.py'
       - 'alo186/tests/test_cold_chain_growth_run29*.py'
+      - 'alo186/tests/test_release_manifest.js'
       - '.github/workflows/alo186-cold-chain-growth-run29.yml'
   workflow_dispatch:
 
