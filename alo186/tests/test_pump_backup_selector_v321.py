@@ -83,8 +83,11 @@ def main() -> None:
         "generator",
         "power_station",
         "inverter",
+        "Mevcut kaynağın sınıfını doğrulayın",
+        "String(v??'').trim()",
     ):
         assert token in app
+    assert app.index("input.environment==='wet'") < app.index("const fixed=input.connection==='fixed'")
     assert "amazon." not in app.casefold()
     assert "../../akilli-urun-secimi?kategori=" in app
 
@@ -101,7 +104,7 @@ def main() -> None:
     )
     payload = json.loads(result.stdout)
     assert payload["ok"] is True
-    assert payload["scenarios"] == 13
+    assert payload["scenarios"] == 18
     assert payload["route"] == ROUTE
 
     print(json.dumps({
