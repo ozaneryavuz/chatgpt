@@ -19,9 +19,11 @@ def run(site: Path, base_path: str) -> dict:
     page = site / ROUTE.strip("/") / "index.html"
     script = page.with_name("app.js")
     styles = page.with_name("styles.css")
-    assert page.is_file() and script.is_file() and styles.is_file()
+    common_path = site / "hesaplama/common.js"
+    assert page.is_file() and script.is_file() and styles.is_file() and common_path.is_file()
     html = page.read_text(encoding="utf-8")
     js = script.read_text(encoding="utf-8")
+    common = common_path.read_text(encoding="utf-8")
     assert html.count("<h1") == 1
     assert "Kombi Kesinti Yedek Güç ve UPS Uygunluğu" in html
     assert "Amazon satış ortaklığı ilişkisi" in html
@@ -40,11 +42,11 @@ def run(site: Path, base_path: str) -> dict:
         assert "index" in robots.group(1).lower() and "noindex" not in robots.group(1).lower()
     sitemap = (site / "sitemap.xml").read_text(encoding="utf-8")
     assert f"<loc>{CANONICAL}</loc>" in sitemap
-    hub = (site / "hesaplama/index.html").read_text(encoding="utf-8")
     expected = f"{base_path}{ROUTE}" if base_path else ROUTE
-    assert expected in hub or "./kombi-kesinti-yedek-guc-uygunluk/" in hub
-    count_match = re.search(r"(\d+) çekirdek araç", hub)
-    assert count_match and int(count_match.group(1)) >= 37
+    assert "boilerContinuityCard" in common
+    assert ROUTE in common
+    assert "data-alo186-boiler-continuity-card" in common
+    assert "37 çekirdek araç" in common
     search_path = site / "arama/search-index.json"
     if search_path.is_file():
         payload = json.loads(search_path.read_text(encoding="utf-8"))
@@ -57,7 +59,7 @@ def run(site: Path, base_path: str) -> dict:
         release = json.loads(release_path.read_text(encoding="utf-8"))
         assert release.get("canonicalHost") == "https://alo186.com"
         assert release.get("customDomain") == "alo186.com"
-    return {"ok": True, "route": expected, "basePath": base_path, "canonical": CANONICAL, "toolCount": int(count_match.group(1))}
+    return {"ok": True, "route": expected, "basePath": base_path, "canonical": CANONICAL, "runtimeToolCount": 37}
 
 
 def main() -> None:
