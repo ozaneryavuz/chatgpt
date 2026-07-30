@@ -128,7 +128,10 @@ jobs:
           set -euo pipefail
           python - <<'PY'
           import json
+          import re
+          import xml.etree.ElementTree as ET
           from pathlib import Path
+          from urllib.parse import urlsplit
 
           config=json.loads(Path('alo186/deployment/content-consolidations.json').read_text(encoding='utf-8'))
           pairs=[
@@ -139,7 +142,8 @@ jobs:
               (Path('/tmp/alo186-consolidation-custom'), ''),
               (Path('/tmp/alo186-consolidation-project'), '/chatgpt'),
           ]:
-              sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
+              sitemap_root=ET.parse(root/'sitemap.xml').getroot()
+              sitemap_paths={urlsplit(loc.text or '').path.rstrip('/') for loc in sitemap_root.findall('.//{*}loc') if loc.text}
               release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
               pages=json.loads((root/'pages-release.json').read_text(encoding='utf-8'))
               assert release['contentConsolidation']['aliasCount']==len(pairs)
@@ -148,11 +152,13 @@ jobs:
               for alias, canonical in pairs:
                   alias_path=root/'haberler'/alias/'index.html'
                   text=alias_path.read_text(encoding='utf-8')
+                  canonical_match=re.search(r'<link\s+rel="canonical"\s+href="([^"]+)"', text, re.I)
+                  assert canonical_match, alias
+                  assert urlsplit(canonical_match.group(1)).path.rstrip('/')==f'/haberler/{canonical}'
                   assert 'name="robots" content="noindex,follow"' in text
-                  assert f'rel="canonical" href="https://www.alo186.com/haberler/{canonical}"' in text
                   assert f'url={prefix}/haberler/{canonical}' in text
-                  assert f'https://www.alo186.com/haberler/{alias}' not in sitemap
-                  assert f'https://www.alo186.com/haberler/{canonical}' in sitemap
+                  assert f'/haberler/{alias}' not in sitemap_paths
+                  assert f'/haberler/{canonical}' in sitemap_paths
           PY
 
       - name: Doğrulanmış canonical birleştirme artifactı
