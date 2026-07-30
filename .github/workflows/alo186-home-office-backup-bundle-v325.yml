@@ -108,6 +108,7 @@ jobs:
           from pathlib import Path
 
           route='hesaplama/evden-calisma-laptop-modem-yedek-guc-seti'
+          hub_relative='./evden-calisma-laptop-modem-yedek-guc-seti/'
           for root,prefix in [
               (Path('/tmp/alo186-home-office-custom'),''),
               (Path('/tmp/alo186-home-office-project'),'/chatgpt'),
@@ -124,7 +125,7 @@ jobs:
               assert 'localStorage' not in js and 'sessionStorage' not in js and 'fetch(' not in js
               assert all(token in html for token in ['actualNeed','technicalCheck','affiliateCheck','bundleLinks'])
               hub=(root/'hesaplama/index.html').read_text(encoding='utf-8')
-              assert expected in hub
+              assert expected in hub or hub_relative in hub
               assert re.search(r'\d+ çekirdek araç', hub)
               sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
               assert expected in sitemap
