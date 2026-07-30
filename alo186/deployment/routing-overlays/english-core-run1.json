@@ -1,0 +1,26 @@
+{
+  "version": 102,
+  "generatedAt": "2026-07-30",
+  "routes": [
+    {
+      "source": "alo186/en/index.html",
+      "canonicalPath": "/en/",
+      "type": "collection"
+    },
+    {
+      "source": "alo186/en/electricity-outage-turkey/index.html",
+      "canonicalPath": "/en/electricity-outage-turkey/",
+      "type": "guide"
+    },
+    {
+      "source": "alo186/en/electricity-distribution-company-finder/index.html",
+      "canonicalPath": "/en/electricity-distribution-company-finder/",
+      "type": "tool"
+    },
+    {
+      "source": "alo186/en/emergency-numbers-turkey/index.html",
+      "canonicalPath": "/en/emergency-numbers-turkey/",
+      "type": "guide"
+    }
+  ]
+}
