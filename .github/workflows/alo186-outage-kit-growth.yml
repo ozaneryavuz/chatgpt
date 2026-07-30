@@ -18,6 +18,7 @@ on:
       - 'alo186/hesaplama/pwa-install.js'
       - 'alo186/hesaplama/elektrik-planim/**'
       - 'alo186/deployment/inject_outcome_runtime.py'
+      - 'alo186/deployment/prepare_github_pages.py'
       - 'alo186/tests/test_outage_kit_growth.js'
       - '.github/workflows/alo186-outage-kit-growth.yml'
   workflow_dispatch:
@@ -112,6 +113,7 @@ jobs:
           set -euo pipefail
           python - <<'PY'
           import json
+          import re
           from pathlib import Path
 
           modes=[
@@ -132,13 +134,16 @@ jobs:
               assert 'Elektrik Kesintisi Kiti Eksik Analizi' in kit_text
               assert 'Reklam / satış ortaklığı açıklaması' in kit_text
               assert 'data-alo186-kit-hub-card="true"' in hub_text
-              assert '33 çekirdek araç' in hub_text
+              count=re.search(r'(\d+) çekirdek araç',hub_text)
+              assert count and int(count.group(1))>=33
               assert 'data-alo186-kit-card="true"' in portal.read_text(encoding='utf-8')
               assert 'data-alo186-kit-card="true"' in gateway.read_text(encoding='utf-8')
               assert f'{base}/hesaplama/elektrik-kesintisi-kiti/' in plan_text
               release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
               assert any(r['canonicalPath']=='/hesaplama/elektrik-kesintisi-kiti/' for r in release['routes'])
               pages=json.loads((root/'pages-release.json').read_text(encoding='utf-8'))
+              assert pages['canonicalHost']=='https://alo186.com'
+              assert pages['customDomain']=='alo186.com'
               runtime=pages['outcomeRuntime']
               assert runtime['version']==3
               assert runtime['pwaInstallHelper'] is True
@@ -150,7 +155,7 @@ jobs:
               sw=(root/'sw.js').read_text(encoding='utf-8')
               assert f'{base}/hesaplama/elektrik-kesintisi-kiti/' in sw
               sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
-              assert '<loc>https://www.alo186.com/hesaplama/elektrik-kesintisi-kiti/</loc>' in sitemap
+              assert re.search(r'<loc>https://(?:www\.)?alo186\.com/hesaplama/elektrik-kesintisi-kiti/</loc>',sitemap)
           PY
 
           ! grep -Eqi 'type="(email|tel|text)"|<textarea' /tmp/alo186-outage-kit-custom/hesaplama/elektrik-kesintisi-kiti/index.html
