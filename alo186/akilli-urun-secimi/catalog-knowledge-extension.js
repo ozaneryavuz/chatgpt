@@ -6,7 +6,8 @@
     'publicAffiliateEligible',
     'gated-product-candidates',
     'technicalSource',
-    'knowledgeGraphSummary'
+    'knowledgeGraphSummary',
+    'connector-specific-display-relations'
   ];
   void bridgeContract;
 
@@ -14,33 +15,53 @@
     if(!catalog||!Array.isArray(catalog.needs)||!catalog.categoryNeeds||!catalog.categoryRelations)return catalog;
     const additions=[
       {id:'usb-c-hub-connectivity',name:'USB-C hub bağlantı, güç bütçesi ve görüntü uyumu'},
-      {id:'usb-c-display-output',name:'USB-C görüntü çıkışı ve DisplayPort Alt Mode uyumu'}
+      {id:'usb-c-display-output',name:'USB-C görüntü çıkışı ve DisplayPort Alt Mode uyumu'},
+      {id:'display-link-compatibility',name:'HDMI ve DisplayPort bağlantı, sürüm ve görüntü modu uyumu'}
     ];
     for(const need of additions){if(!catalog.needs.some(item=>item.id===need.id))catalog.needs.push(need);}
-    catalog.categoryNeeds.usb_c_hub=['usb-c-hub-connectivity'];
-    catalog.categoryNeeds.display_cable=['usb-c-display-output'];
-    catalog.categoryRelations.usb_c_hub={
+
+    const hubRelation={
+      needs:['usb-c-hub-connectivity'],
       tools:['/hesaplama/usb-c-urun-kabul-testi/'],
       guides:['/urun-bilgi-grafigi/usb-c-ekosistemi/'],
       evidence:['host USB-C veri/görüntü desteği','PD geçiş gücü ve haricî adaptör','port türü ve toplam güç bütçesi','gerekli veri ve görüntü işlevi']
     };
-    catalog.categoryRelations.display_cable={
+    const usbDisplayRelation={
+      needs:['usb-c-display-output'],
       tools:['/hesaplama/usb-c-urun-kabul-testi/'],
       guides:['/urun-bilgi-grafigi/usb-c-ekosistemi/'],
       evidence:['host DisplayPort Alt Mode veya Thunderbolt desteği','hedef çözünürlük ve yenileme hızı','kablo yönü ve uzunluğu','görüntü zinciri uyumluluğu']
     };
+    const nativeDisplayRelation={
+      needs:['display-link-compatibility'],
+      tools:[],
+      guides:['/urun-bilgi-grafigi/'],
+      evidence:['kaynak ve hedef konektör','HDMI veya DisplayPort sürümü','hedef çözünürlük ve yenileme hızı','kablo yönü ve uzunluğu']
+    };
+
+    catalog.categoryNeeds.usb_c_hub=[...hubRelation.needs];
+    catalog.categoryNeeds.display_cable=[...usbDisplayRelation.needs,...nativeDisplayRelation.needs];
+    catalog.categoryRelations.usb_c_hub={tools:[...hubRelation.tools],guides:[...hubRelation.guides],evidence:[...hubRelation.evidence]};
+    catalog.categoryRelations.display_cable={
+      tools:[],
+      guides:['/urun-bilgi-grafigi/'],
+      evidence:['kaynak ve hedef konektör','HDMI veya DisplayPort sürümü','hedef çözünürlük ve yenileme hızı','kablo yönü ve uzunluğu']
+    };
+
     for(const product of catalog.products||[]){
-      if((product.category==='usb_c_hub'||product.category==='display_cable')&&(!Array.isArray(product.needIds)||!product.needIds.length)){
-        product.needIds=[...catalog.categoryNeeds[product.category]];
+      if(product.category==='usb_c_hub'){
+        if(!Array.isArray(product.needIds)||!product.needIds.length)product.needIds=[...hubRelation.needs];
+        if(!Array.isArray(product.relatedTools)||!product.relatedTools.length)product.relatedTools=[...hubRelation.tools];
+        if(!Array.isArray(product.relatedGuides)||!product.relatedGuides.length)product.relatedGuides=[...hubRelation.guides];
+        if(!Array.isArray(product.requiredEvidence)||!product.requiredEvidence.length)product.requiredEvidence=[...hubRelation.evidence];
       }
-      if((product.category==='usb_c_hub'||product.category==='display_cable')&&(!Array.isArray(product.relatedTools)||!product.relatedTools.length)){
-        product.relatedTools=[...catalog.categoryRelations[product.category].tools];
-      }
-      if((product.category==='usb_c_hub'||product.category==='display_cable')&&(!Array.isArray(product.relatedGuides)||!product.relatedGuides.length)){
-        product.relatedGuides=[...catalog.categoryRelations[product.category].guides];
-      }
-      if((product.category==='usb_c_hub'||product.category==='display_cable')&&(!Array.isArray(product.requiredEvidence)||!product.requiredEvidence.length)){
-        product.requiredEvidence=[...catalog.categoryRelations[product.category].evidence];
+      if(product.category==='display_cable'){
+        const connectorA=String(product.attributes&&product.attributes.connectorA||'').trim().toUpperCase();
+        const relation=connectorA==='USB-C'?usbDisplayRelation:nativeDisplayRelation;
+        product.needIds=[...relation.needs];
+        product.relatedTools=[...relation.tools];
+        product.relatedGuides=[...relation.guides];
+        product.requiredEvidence=[...relation.evidence];
       }
     }
     return catalog;
