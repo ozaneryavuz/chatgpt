@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import re
 import shutil
+from html import escape
 from pathlib import Path
 
 import prepare_github_pages_core as _core
@@ -33,6 +34,53 @@ if PRIMARY_START_ROUTE not in _core.CRITICAL_ROUTES:
     _core.CRITICAL_ROUTES = (_core.CRITICAL_ROUTES[0], PRIMARY_START_ROUTE, *_core.CRITICAL_ROUTES[1:])
 
 
+def _page_language(path: Path, site: Path, text: str) -> str:
+    relative = path.relative_to(site).as_posix().lower()
+    if relative.startswith("en/"):
+        return "en"
+    html_match = re.search(r"<html\b([^>]*)>", text, re.IGNORECASE)
+    if html_match:
+        lang_match = re.search(r"\blang\s*=\s*(['\"])([^'\"]+)\1", html_match.group(1), re.IGNORECASE)
+        if lang_match and lang_match.group(2).lower().startswith("en"):
+            return "en"
+    return "tr"
+
+
+def _ensure_html_language(text: str, language: str) -> tuple[str, bool]:
+    match = re.search(r"<html\b([^>]*)>", text, re.IGNORECASE)
+    if not match:
+        return text, False
+    lang_match = re.search(r"\blang\s*=\s*(['\"])([^'\"]+)\1", match.group(1), re.IGNORECASE)
+    if lang_match:
+        current = "en" if lang_match.group(2).lower().startswith("en") else "tr"
+        if current == language:
+            return text, False
+        replaced_tag = (
+            match.group(0)[: lang_match.start(2) + len("<html")]
+            if False else None
+        )
+        full_tag = match.group(0)
+        corrected_tag = re.sub(
+            r"(\blang\s*=\s*['\"])[^'\"]+(['\"])",
+            rf"\g<1>{language}\g<2>",
+            full_tag,
+            count=1,
+            flags=re.IGNORECASE,
+        )
+        return text[: match.start()] + corrected_tag + text[match.end() :], True
+    replacement = match.group(0)[:-1] + f' lang="{language}">'
+    return text[: match.start()] + replacement + text[match.end() :], True
+
+
+def _ensure_referrer_policy(text: str) -> tuple[str, bool]:
+    if re.search(r'<meta\b[^>]*\bname\s*=\s*(["\'])referrer\1', text, re.IGNORECASE):
+        return text, False
+    if "</head>" not in text:
+        return text, False
+    meta = '<meta name="referrer" content="strict-origin-when-cross-origin">'
+    return text.replace("</head>", meta + "\n</head>", 1), True
+
+
 def install_sitewide_ux(site: Path, base_path: str) -> dict:
     repo_root = Path(__file__).resolve().parents[2]
     assets = site / "assets"
@@ -47,22 +95,50 @@ def install_sitewide_ux(site: Path, base_path: str) -> dict:
     js_url = _core.public_url(base_path, "/assets/alo186-ux.js")
     injected = 0
     skipped = 0
+    language_fixed = 0
+    referrer_fixed = 0
+    language_counts = {"tr": 0, "en": 0}
     for path in sorted(site.rglob("*.html")):
         text = path.read_text(encoding="utf-8")
+        language = _page_language(path, site, text)
+        language_counts[language] = language_counts.get(language, 0) + 1
+        text, fixed_language = _ensure_html_language(text, language)
+        text, fixed_referrer = _ensure_referrer_policy(text)
+        language_fixed += int(fixed_language)
+        referrer_fixed += int(fixed_referrer)
         if UX_MARKER in text:
+            path.write_text(text, encoding="utf-8")
             skipped += 1
             continue
         if "</head>" not in text or "</body>" not in text:
             raise RuntimeError(f"UX katmanı için geçersiz HTML: {path.relative_to(site)}")
         link = f'<link rel="stylesheet" href="{css_url}" {UX_MARKER}>'
-        script = f'<script src="{js_url}" defer {UX_MARKER}></script>'
+        script = (
+            f'<script src="{js_url}" defer {UX_MARKER} '
+            f'data-base-path="{escape(base_path, quote=True)}"></script>'
+        )
         text = text.replace("</head>", link + "\n</head>", 1)
         text = text.replace("</body>", script + "\n</body>", 1)
         path.write_text(text, encoding="utf-8")
         injected += 1
     if not injected and not skipped:
         raise RuntimeError("Site geneli UX katmanı için HTML sayfası bulunamadı.")
-    return {"injectedPages": injected, "alreadyInjectedPages": skipped, "css": css_url, "js": js_url}
+    return {
+        "version": 119,
+        "injectedPages": injected,
+        "alreadyInjectedPages": skipped,
+        "languageFixedPages": language_fixed,
+        "referrerFixedPages": referrer_fixed,
+        "languagePages": language_counts,
+        "css": css_url,
+        "js": js_url,
+        "basePathAware": True,
+        "languageAware": True,
+        "englishMobileNavigation": True,
+        "contextualNextSteps": True,
+        "longPageToc": True,
+        "dynamicAffiliateLinkHardening": True,
+    }
 
 
 def gateway_html(base_path: str, noindex: bool) -> str:
