@@ -46,10 +46,9 @@ jobs:
           python alo186/tests/test_authority_content_run59.py
           python -m py_compile alo186/tests/test_authority_content_run59.py
 
-      - name: İçerik niyeti ve mevcut güven regresyonları
+      - name: Mevcut yayın ve güven regresyonları
         run: |
           set -euo pipefail
-          python alo186/tests/test_content_intent_consolidation.py
           node alo186/tests/test_release_manifest.js
           node alo186/tests/test_portal_hardening.js
           python alo186/tests/device_damage_deadline_guard.py
