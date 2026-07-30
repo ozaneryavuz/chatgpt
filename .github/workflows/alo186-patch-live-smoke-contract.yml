@@ -1,0 +1,83 @@
+name: ALO186 patch English live smoke contract
+
+on:
+  push:
+    branches:
+      - agent/alo186-english-live-smoke
+    paths:
+      - '.github/workflows/alo186-patch-live-smoke-contract.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: alo186-patch-live-smoke-contract
+  cancel-in-progress: false
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/alo186-english-live-smoke
+          persist-credentials: true
+
+      - name: Patch and execute live smoke contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          checker = Path('alo186/deployment/check_live_english.py')
+          text = checker.read_text(encoding='utf-8')
+          old = '        required = ("81 provinces", "21 electricity distribution regions", "Alo186Companies")\n'
+          new = '''        required = (
+              "81 provinces",
+              "21 electricity distribution regions",
+              'src="/edas-bul/companies.js"',
+              'src="/en/assets/finder.js"',
+          )
+          '''
+          if old not in text:
+              raise SystemExit('Finder checker token block not found')
+          checker.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          test = Path('alo186/tests/test_live_english_smoke.py')
+          text = test.read_text(encoding='utf-8')
+          if 'import sys\n' not in text:
+              text = text.replace('import json\n', 'import json\nimport sys\n', 1)
+          old = 'MODULE = importlib.util.module_from_spec(SPEC)\nSPEC.loader.exec_module(MODULE)\n'
+          new = 'MODULE = importlib.util.module_from_spec(SPEC)\nsys.modules[SPEC.name] = MODULE\nSPEC.loader.exec_module(MODULE)\n'
+          if old not in text:
+              raise SystemExit('Dynamic module import block not found')
+          text = text.replace(old, new, 1)
+          old = '    finder = "81 provinces 21 electricity distribution regions Alo186Companies" if route.endswith("company-finder/") else ""\n'
+          new = '''    finder = (
+              '<script src="/edas-bul/companies.js"></script>'
+              '<script src="/en/assets/finder.js"></script>'
+              '81 provinces 21 electricity distribution regions'
+              if route.endswith("company-finder/")
+              else ""
+          )
+          '''
+          if old not in text:
+              raise SystemExit('Synthetic finder fixture not found')
+          test.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
+
+          python -m py_compile \
+            alo186/deployment/check_live_english.py \
+            alo186/tests/test_live_english_smoke.py
+          python alo186/tests/test_live_english_smoke.py
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm '.github/workflows/alo186-patch-live-smoke-contract.yml'
+          git add \
+            alo186/deployment/check_live_english.py \
+            alo186/tests/test_live_english_smoke.py
+          git commit -m 'test: align live finder smoke with published assets'
+          git push origin HEAD:agent/alo186-english-live-smoke
