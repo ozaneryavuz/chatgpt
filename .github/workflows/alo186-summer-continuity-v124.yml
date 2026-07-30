@@ -1,0 +1,51 @@
+name: ALO186 yaz sürekliliği ve güvenli büyüme v124
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/klima-yedek-guc-uygunluk/**'
+      - 'alo186/hesaplama/kamp-karavan-power-station-gunes-paneli-uygunluk/**'
+      - 'alo186/sektor-rehberi/yaz-elektrik-kesintisi-hazirlik-merkezi/**'
+      - 'alo186/deployment/routing-overlays/124-summer-continuity.json'
+      - 'alo186/tests/test_summer_continuity_v124.py'
+      - '.github/workflows/alo186-summer-continuity-v124.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/klima-yedek-guc-uygunluk/**'
+      - 'alo186/hesaplama/kamp-karavan-power-station-gunes-paneli-uygunluk/**'
+      - 'alo186/sektor-rehberi/yaz-elektrik-kesintisi-hazirlik-merkezi/**'
+      - 'alo186/deployment/routing-overlays/124-summer-continuity.json'
+      - 'alo186/tests/test_summer_continuity_v124.py'
+      - '.github/workflows/alo186-summer-continuity-v124.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-summer-continuity-v124-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Üç yeni niyet, güven sınırı ve dual Pages kabulü
+        run: python alo186/tests/test_summer_continuity_v124.py
+
+      - name: Mevcut kullanıcı ve yayın regresyonları
+        run: |
+          python alo186/tests/test_sitewide_user_experience_v120.py
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
