@@ -10,6 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 UX_MARKER = 'data-alo186-sitewide-ux="true"'
 TECHNICAL_HTML_EXCEPTIONS = {"404.html"}
+UNRESOLVED_ROOT_REFERENCE = re.compile(r'(?P<quote>["\'`])/(?!/)(?P<rest>[^"\'`\s<>]*)')
 
 
 def run(command: list[str]) -> None:
@@ -19,6 +20,7 @@ def run(command: list[str]) -> None:
 ux_js = (ROOT / "alo186/assets/alo186-ux.js").read_text(encoding="utf-8")
 ux_css = (ROOT / "alo186/assets/alo186-ux.css").read_text(encoding="utf-8")
 for token in (
+    "const ROOT = String.fromCharCode(47)",
     "const isIndexable = !robots.includes('noindex')",
     "const isTurkish",
     "markCurrent(nav)",
@@ -32,16 +34,18 @@ for token in (
     "figcaption",
 ):
     assert token in ux_js, token
+root_reference = UNRESOLVED_ROOT_REFERENCE.search(ux_js)
+assert root_reference is None, f"UX JavaScript project-path dışına çıkan kök referans taşıyor: {root_reference.group(0)!r}"
 assert "body:not([data-alo186-ux-compact=true])" in ux_css
 assert "body{padding-bottom" not in ux_css
 assert ".alo-ux-toc" in ux_css
 assert "grid-template-columns:repeat(2" in ux_css
 
-with tempfile.TemporaryDirectory(prefix="alo186-ux-v118-") as folder:
+with tempfile.TemporaryDirectory(prefix="alo186-ux-v119-") as folder:
     canonical = Path(folder) / "canonical"
     custom = Path(folder) / "custom"
     project = Path(folder) / "project"
-    run([sys.executable, "alo186/deployment/build_static_site.py", "--output", str(canonical), "--commit", "ux-v118-test"])
+    run([sys.executable, "alo186/deployment/build_static_site.py", "--output", str(canonical), "--commit", "ux-v119-test"])
 
     results = []
     for target, base_path in ((custom, ""), (project, "/chatgpt")):
@@ -52,7 +56,25 @@ with tempfile.TemporaryDirectory(prefix="alo186-ux-v118-") as folder:
             "--site", str(target),
             "--base-path", base_path,
             "--repository", "ozaneryavuz/chatgpt",
-            "--commit", "ux-v118-test",
+            "--commit", "ux-v119-test",
+        ])
+        run([
+            sys.executable,
+            "alo186/deployment/inject_outcome_runtime.py",
+            "--site", str(target),
+            "--base-path", base_path,
+        ])
+        run([
+            sys.executable,
+            "alo186/deployment/inject_shortlist_growth.py",
+            "--site", str(target),
+            "--base-path", base_path,
+        ])
+        run([
+            sys.executable,
+            "alo186/deployment/smoke_github_pages.py",
+            "--site", str(target),
+            "--base-path", base_path,
         ])
         html_files = sorted(target.rglob("*.html"))
         assert html_files, target
@@ -90,6 +112,7 @@ with tempfile.TemporaryDirectory(prefix="alo186-ux-v118-") as folder:
             "h1Coverage": round(h1_ratio, 4),
             "uxInjected": True,
             "criticalRoutes": 5,
+            "fullPagesSmoke": True,
         })
 
 run(["node", "--check", "alo186/assets/alo186-ux.js"])
@@ -99,6 +122,7 @@ print(json.dumps({
     "technicalExceptions": sorted(TECHNICAL_HTML_EXCEPTIONS),
     "mobileUtilityBar": "indexable-tr-only",
     "projectPathAware": True,
+    "projectPathSmoke": True,
     "localizedUtilities": True,
     "activePageState": True,
     "tableOverflowGuard": True,
