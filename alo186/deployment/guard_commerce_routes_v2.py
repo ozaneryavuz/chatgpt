@@ -52,6 +52,7 @@ ATTR_PATTERN = re.compile(
     r"(?P<name>[a-zA-Z_:][-a-zA-Z0-9_:.]*)\s*=\s*(?P<quote>['\"])(?P<value>.*?)(?P=quote)",
     re.S,
 )
+CANONICAL_ORIGIN = "https://alo186.com"
 
 COMMERCIAL_ROUTES = {
     "/amazon-elektrik-urunleri": {"direct": False, "affiliate": True, "professional_only": False},
@@ -104,7 +105,7 @@ def route_file(site: Path, route: str) -> Path:
 
 
 def canonical_expected(route: str) -> str:
-    return f"https://www.alo186.com{route}"
+    return f"{CANONICAL_ORIGIN}{route}"
 
 
 def scan_affiliate_anchors(path: Path, site: Path) -> list[str]:
@@ -112,7 +113,6 @@ def scan_affiliate_anchors(path: Path, site: Path) -> list[str]:
     relative = path.relative_to(site).as_posix()
     errors: list[str] = []
     has_disclosure = bool(DISCLOSURE_PATTERN.search(text_only(html)))
-
     for match in ANCHOR_PATTERN.finditer(html):
         attrs = attributes(match.group("attrs"))
         href = attrs.get("href", "")
@@ -124,7 +124,6 @@ def scan_affiliate_anchors(path: Path, site: Path) -> list[str]:
             errors.append(f"{relative}: affiliate bağlantısında eksik rel tokenları: {', '.join(sorted(missing))}")
         if not has_disclosure:
             errors.append(f"{relative}: affiliate bağlantısı var fakat görünür satış ortaklığı açıklaması yok")
-
         context = text_only(html[max(0, match.start() - 900): min(len(html), match.end() + 900)])
         risky = HIGH_RISK_PATTERN.search(context)
         if risky:
@@ -184,7 +183,6 @@ def validate_commercial_pages(site: Path) -> tuple[list[str], dict]:
             errors.append(f"{route}: guide kategoride doğrudan ürün konteyneri bulunmamalı")
         if policy["professional_only"] and has_product_center:
             errors.append(f"{route}: professional-only sayfada ürün merkezine ticari CTA bulunmamalı")
-
     return errors, {
         "commercialPageCount": len(COMMERCIAL_ROUTES),
         "directCommercialPageCount": direct_pages,
@@ -264,7 +262,6 @@ def validate_runtime(site: Path) -> tuple[list[str], dict]:
         errors.append(f"catalog.js: yalnız powerbank doğrudan kategori olmalı; bulunan={direct_ids}")
     if "verificationMaxAgeDays=45" not in catalog:
         errors.append("catalog.js: 45 günlük katalog tazelik sınırı eksik")
-
     return errors, {"directCategoryCount": len(direct_ids), "directCategoryIds": direct_ids}
 
 
@@ -272,7 +269,6 @@ def validate_site(site: Path) -> dict:
     site = site.resolve()
     if not site.is_dir():
         raise FileNotFoundError(f"Site artifactı bulunamadı: {site}")
-
     errors: list[str] = []
     for path in sorted(site.rglob("*.html")):
         errors.extend(scan_affiliate_anchors(path, site))
@@ -282,7 +278,6 @@ def validate_site(site: Path) -> dict:
     errors.extend(commercial_errors)
     errors.extend(service_errors)
     errors.extend(runtime_errors)
-
     result = {
         "ok": not errors,
         "htmlFileCount": len(list(site.rglob("*.html"))),
