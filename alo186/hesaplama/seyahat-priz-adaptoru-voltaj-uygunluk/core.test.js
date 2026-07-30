@@ -19,7 +19,7 @@ assert.equal(result.status,'no_buy','Yeterli mevcut Class II adaptör yeni alı�
 result=run({destination:'us',minV:220,maxV:240});
 assert.equal(result.status,'voltage_mismatch');
 assert.equal(result.commerceAllowed,false);
-assert.match(result.summary,/voltaj|dönüştürmez/i);
+assert.match(result.summary,/uyumsuz|çözmez/i);
 
 result=run({destination:'us',minV:100,maxV:240,frequency:'50_60'});
 assert.equal(result.status,'conditional_purchase');
