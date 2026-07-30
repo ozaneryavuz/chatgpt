@@ -1,0 +1,35 @@
+'use strict';
+const assert=require('node:assert/strict');
+const tool=require('./app.js');
+const base={
+  emergency:false,lifeSustaining:'no',deviceType:'cpap',wetOrDamaged:'no',activeOutage:'no',clinicalPlan:'yes',manufacturerCompatibility:'yes',recallChecked:'yes',deviceModel:'ResMed AirSense 11',configurationW:65,targetHours:8,configurationVerified:'yes',outputCompatibility:'yes',fixedInstallation:'no',generatorTransfer:'no',existingSource:'none',sourceContinuousW:'',sourceWh:'',transferTest:'unknown',actualNightTest:'unknown'
+};
+const run=(patch)=>tool.calculate({...base,...patch});
+assert.equal(run({emergency:true}).status,'emergency');
+assert.equal(run({lifeSustaining:'yes'}).status,'professional');
+assert.equal(run({deviceType:'ventilator'}).status,'professional');
+assert.equal(run({wetOrDamaged:'yes'}).status,'stop_use');
+assert.equal(run({activeOutage:'yes'}).status,'active_outage');
+assert.equal(run({clinicalPlan:'no'}).status,'evidence_required');
+assert.equal(run({manufacturerCompatibility:'unknown'}).status,'evidence_required');
+assert.equal(run({recallChecked:'no'}).status,'stop_use');
+assert.equal(run({configurationW:'',deviceModel:'ResMed AirSense 11'}).status,'evidence_required');
+assert.equal(run({configurationVerified:'no'}).status,'evidence_required');
+assert.equal(run({outputCompatibility:'no'}).status,'stop_use');
+assert.equal(run({fixedInstallation:'yes'}).status,'professional');
+const candidate=run({});
+assert.equal(candidate.status,'conditional_purchase');
+assert.equal(candidate.metrics.requiredContinuousW,90);
+assert.equal(candidate.metrics.requiredNominalWh,770);
+assert(candidate.searchUrl.includes('tag=alo186rehber-21'));
+assert(!candidate.searchUrl.includes('email'));
+const noBuy=run({existingSource:'power_station',sourceContinuousW:100,sourceWh:1000,transferTest:'yes',actualNightTest:'yes'});
+assert.equal(noBuy.status,'no_buy');
+assert.equal(noBuy.commercialAllowed,false);
+assert(noBuy.metrics.estimatedRuntimeHours>10);
+const gap=run({existingSource:'ups',sourceContinuousW:60,sourceWh:400,transferTest:'no',actualNightTest:'no'});
+assert.equal(gap.status,'gap_found');
+assert(gap.gaps.includes('sürekli W'));
+assert(gap.gaps.includes('Wh'));
+assert.equal(tool.AFFILIATE_TAG,'alo186rehber-21');
+console.log(JSON.stringify({ok:true,scenarios:16,requiredContinuousW:candidate.metrics.requiredContinuousW,requiredNominalWh:candidate.metrics.requiredNominalWh,noBuy:noBuy.status},null,2));
