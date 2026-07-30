@@ -45,7 +45,8 @@ for token in (
     "publicPath(ROOT_PATH)",
 ):
     assert token in ux_js, token
-assert not re.search(r"(['\"])/\1", ux_js), "Project-path paketinde tek başına kök URL sabiti kalamaz"
+for forbidden in ("publicPath('/')", "|| '/'", "route === '/'", ".replace(/\\/+/g, '/')"):
+    assert forbidden not in ux_js, f"Project-path kök URL sabiti kalamaz: {forbidden}"
 assert "body:not([data-alo186-ux-compact=true])" in ux_css
 assert "body{padding-bottom" not in ux_css
 assert ".alo-ux-toc" in ux_css
