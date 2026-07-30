@@ -8,7 +8,7 @@ PAGE=ROOT/'alo186/hesaplama/powerbank-ucak-wh-uygunluk/index.html'
 APP=PAGE.with_name('app.js')
 CSS=PAGE.with_name('styles.css')
 TEST=PAGE.with_name('app.test.js')
-OVERLAY=ROOT/'alo186/deployment/routing-overlays/095-powerbank-ucak-wh-uygununluk.json'
+OVERLAY=ROOT/'alo186/deployment/routing-overlays/095-powerbank-ucak-wh-uygunluk.json'
 WORKFLOW=ROOT/'.github/workflows/alo186-powerbank-ucak-wh-v334.yml'
 CANONICAL='/hesaplama/powerbank-ucak-wh-uygunluk/'
 for path in (PAGE,APP,CSS,TEST,OVERLAY,WORKFLOW): assert path.is_file(),f'missing {path}'
