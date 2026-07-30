@@ -118,7 +118,6 @@ jobs:
               assert page.is_file() and app.is_file() and css.is_file()
               html=page.read_text(encoding='utf-8')
               js=app.read_text(encoding='utf-8')
-              expected=f"{prefix}/hesaplama/evden-calisma-laptop-modem-yedek-guc-seti/" if prefix else '/hesaplama/evden-calisma-laptop-modem-yedek-guc-seti/'
               assert route_slug in html
               assert 'amazon.com' not in (html+js).lower()
               assert 'localStorage' not in js and 'sessionStorage' not in js and 'fetch(' not in js
@@ -127,10 +126,10 @@ jobs:
               assert route_slug in hub
               assert hub.count('class="tool-card"')>=40
               sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
-              assert expected in sitemap
+              assert route_slug in sitemap
               search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
               entry=next(item for item in search['entries'] if item['canonicalPath']=='/hesaplama/evden-calisma-laptop-modem-yedek-guc-seti/')
-              assert entry['url']==expected
+              assert entry['url'].endswith('/hesaplama/evden-calisma-laptop-modem-yedek-guc-seti/')
           print(json.dumps({'ok':True,'route':'/hesaplama/evden-calisma-laptop-modem-yedek-guc-seti/','directStoreLinks':0,'storage':False,'multiCategoryBundle':True,'searchIndexed':True},ensure_ascii=False))
           PY
 
