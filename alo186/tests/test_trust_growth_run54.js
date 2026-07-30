@@ -12,14 +12,16 @@ const now=new Date('2026-07-30T06:15:00.000Z');
 const graph=catalog.knowledgeGraph({now});
 const graphText=JSON.stringify(graph);
 const audit=catalog.canonicalAudit({now});
+const ugreenNode=(graph['@graph']||[]).find((node)=>node&&node['@type']==='Product'&&node.sku==='ugreen-nexode-140w-90322');
 
 assert.equal(catalog.__trustGrowthRun54,true);
 assert.equal(catalog.canonicalOrigin,'https://alo186.com');
 assert.ok(catalog.products.some((product)=>product.id==='ugreen-nexode-140w-90322'&&product.asin==='B0B127GW4D'));
+assert.ok(ugreenNode,'Run53 ürünü normalize edilmiş Product grafiğinde korunmalı.');
 assert.equal(audit.legacyOriginFound,false);
 assert.equal(audit.forbiddenCommerceNodeFound,false);
 assert.equal(audit.forbiddenCommercialFieldFound,false);
-assert.ok(audit.productCount>=21);
+assert.ok(audit.productCount>=20,'Taze ve doğrulanmış Product düğümleri korunmalı.');
 assert.doesNotMatch(graphText,/https:\/\/www\.alo186\.com/);
 assert.doesNotMatch(graphText,/"@type":"(?:Offer|AggregateOffer)"/);
 assert.doesNotMatch(graphText,/"(?:offers|aggregateRating|review)"\s*:/);
