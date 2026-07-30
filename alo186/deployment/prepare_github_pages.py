@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+import shutil
 from pathlib import Path
 
 import prepare_github_pages_core as _core
@@ -17,6 +18,9 @@ DEVICE_DAMAGE_MARKER = 'data-alo186-device-damage-deadline="true"'
 DEVICE_DAMAGE_ROUTE = "/haberler/elektrik-kesintisi-cihaz-hasari-edas-basvurusu/"
 PRIMARY_START_MARKER = 'data-alo186-primary-start="true"'
 PRIMARY_START_ROUTE = "/elektrik-durum-merkezi/"
+UX_MARKER = 'data-alo186-sitewide-ux="true"'
+UX_CSS_SOURCE = Path("alo186/assets/alo186-ux.css")
+UX_JS_SOURCE = Path("alo186/assets/alo186-ux.js")
 _original_gateway_html = _core.gateway_html
 _original_prepare = _core.prepare
 
@@ -27,6 +31,38 @@ _core.CANONICAL_ORIGIN = LIVE_CANONICAL_ORIGIN
 
 if PRIMARY_START_ROUTE not in _core.CRITICAL_ROUTES:
     _core.CRITICAL_ROUTES = (_core.CRITICAL_ROUTES[0], PRIMARY_START_ROUTE, *_core.CRITICAL_ROUTES[1:])
+
+
+def install_sitewide_ux(site: Path, base_path: str) -> dict:
+    repo_root = Path(__file__).resolve().parents[2]
+    assets = site / "assets"
+    assets.mkdir(parents=True, exist_ok=True)
+    for source_relative in (UX_CSS_SOURCE, UX_JS_SOURCE):
+        source = repo_root / source_relative
+        if not source.is_file():
+            raise FileNotFoundError(f"Site geneli UX assetı eksik: {source}")
+        shutil.copy2(source, assets / source.name)
+
+    css_url = _core.public_url(base_path, "/assets/alo186-ux.css")
+    js_url = _core.public_url(base_path, "/assets/alo186-ux.js")
+    injected = 0
+    skipped = 0
+    for path in sorted(site.rglob("*.html")):
+        text = path.read_text(encoding="utf-8")
+        if UX_MARKER in text:
+            skipped += 1
+            continue
+        if "</head>" not in text or "</body>" not in text:
+            raise RuntimeError(f"UX katmanı için geçersiz HTML: {path.relative_to(site)}")
+        link = f'<link rel="stylesheet" href="{css_url}" {UX_MARKER}>'
+        script = f'<script src="{js_url}" defer {UX_MARKER}></script>'
+        text = text.replace("</head>", link + "\n</head>", 1)
+        text = text.replace("</body>", script + "\n</body>", 1)
+        path.write_text(text, encoding="utf-8")
+        injected += 1
+    if not injected and not skipped:
+        raise RuntimeError("Site geneli UX katmanı için HTML sayfası bulunamadı.")
+    return {"injectedPages": injected, "alreadyInjectedPages": skipped, "css": css_url, "js": js_url}
 
 
 def gateway_html(base_path: str, noindex: bool) -> str:
@@ -137,6 +173,7 @@ def update_primary_shortcut(site: Path, base_path: str) -> None:
 def prepare(site: Path, base_path: str, repository: str, commit: str) -> dict:
     result = _original_prepare(site, base_path, repository, commit)
     normalized = _core.normalize_base_path(base_path)
+    ux = install_sitewide_ux(site, normalized)
     validate_root_legal_deadline(site, normalized)
     validate_root_primary_start(site, normalized)
     update_primary_shortcut(site, normalized)
@@ -151,6 +188,7 @@ def prepare(site: Path, base_path: str, repository: str, commit: str) -> dict:
     release["rootNoApplicationDisclaimer"] = True
     release["primaryStartRoute"] = _core.public_url(normalized, PRIMARY_START_ROUTE)
     release["primaryStartMode"] = "progressive-disclosure"
+    release["sitewideUx"] = ux
     release["liveOriginNormalizationStage"] = "after-all-growth-injectors"
     if release_path.is_file():
         release_path.write_text(json.dumps(release, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
