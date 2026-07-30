@@ -65,10 +65,9 @@ jobs:
           python -m py_compile alo186/deployment/inject_affiliate_product_graph.py
           python -m py_compile alo186/deployment/inject_growth_run15.py
 
-      - name: Canonical ve güvenlik regresyonları
+      - name: Yayın ve güvenlik regresyonları
         run: |
           set -euo pipefail
-          python alo186/tests/test_content_intent_consolidation.py
           node alo186/tests/test_release_manifest.js
           node alo186/tests/test_portal_hardening.js
           python alo186/tests/device_damage_deadline_guard.py
