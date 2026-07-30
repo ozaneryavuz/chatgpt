@@ -3,7 +3,7 @@ name: ALO186 içerik otoritesi run47 kalite kontrolü
 on:
   pull_request:
     paths:
-      - 'alo186/haberler/jenerator-ats-3-kutup-4-kutup-notr-anahtarlama/**'
+      - 'alo186/haberler/kacak-akim-rolesi-ramp-testi-acma-akimi-suresi/**'
       - 'alo186/haberler/gerilim-kalitesi-sikayeti-class-a-olcum-edas-basvuru/**'
       - 'alo186/haberler/ev-sarj-fisi-kablosu-neden-isinir/**'
       - 'alo186/deployment/routing-overlays/content-authority-run47.json'
@@ -12,7 +12,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'alo186/haberler/jenerator-ats-3-kutup-4-kutup-notr-anahtarlama/**'
+      - 'alo186/haberler/kacak-akim-rolesi-ramp-testi-acma-akimi-suresi/**'
       - 'alo186/haberler/gerilim-kalitesi-sikayeti-class-a-olcum-edas-basvuru/**'
       - 'alo186/haberler/ev-sarj-fisi-kablosu-neden-isinir/**'
       - 'alo186/deployment/routing-overlays/content-authority-run47.json'
@@ -65,7 +65,7 @@ jobs:
           from pathlib import Path
           root=Path('/tmp/alo186-authority-run47-custom')
           routes=[
-            '/haberler/jenerator-ats-3-kutup-4-kutup-notr-anahtarlama',
+            '/haberler/kacak-akim-rolesi-ramp-testi-acma-akimi-suresi',
             '/haberler/gerilim-kalitesi-sikayeti-class-a-olcum-edas-basvuru',
             '/haberler/ev-sarj-fisi-kablosu-neden-isinir',
           ]
