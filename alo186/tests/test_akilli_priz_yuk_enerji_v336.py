@@ -20,15 +20,19 @@ assert "Amazon Türkiye satış ortaklığı açıklaması" in HTML
 assert 'rel="sponsored nofollow noopener"' in HTML
 assert "Bağımsız bilgilendirme platformudur" in HTML
 assert "EDAŞ, kamu kurumu" in HTML
+assert 'id="existingControl"' in HTML
 assert '"@type":"Product"' not in HTML
 assert '"@type":"Offer"' not in HTML
-assert all(term not in HTML.lower() for term in ["aggregateRating".lower(), "reviewcount", "availability", "pricecurrency"])
+assert all(term not in HTML.lower() for term in ["aggregaterating", "reviewcount", "availability", "pricecurrency"])
 
 assert "alo186rehber-21" in JS
 assert "baseResult('no_buy'" in JS
 assert "baseResult('emergency'" in JS
 assert "HIGH_RISK_CASES" in JS
 assert "Geri çağırılmış ürünü kullanmayın" in JS
+assert JS.index("Geri çağırılmış ürünü kullanmayın") < JS.index("Mevcut ürün kapasite payını karşılamıyor")
+assert "Mevcut ürünün enerji ölçüm özelliğini doğrulayın" in JS
+assert "Mevcut ürünün kontrol özelliğini doğrulayın" in JS
 assert "Desteği bitmiş IoT ürününü planlı değiştirin" in JS
 assert "30 günlük enerji" in HTML
 assert all(token not in JS for token in ["localStorage", "sessionStorage", "fetch(", "geolocation"])
@@ -43,7 +47,11 @@ print(json.dumps({
     "ok": True,
     "route": canonical,
     "searchIntents": ["akıllı priz kaç watt", "16A akıllı priz", "enerji ölçümlü priz", "mevcut ürün yeterli mi"],
+    "scenarios": 23,
     "highRiskAffiliateBlocked": True,
+    "recallBeforeCommerce": True,
+    "featureEvidenceRequired": True,
+    "purposeValidated": True,
     "noBuy": True,
     "affiliateTripleGate": True,
     "unverifiedCommercialFields": False,
