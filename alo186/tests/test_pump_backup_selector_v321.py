@@ -93,7 +93,7 @@ def main() -> None:
 
     assert ROUTE in common
     assert "data-alo186-pump-backup-card" in common
-    assert "37 çekirdek araç" in common
+    assert "36 çekirdek araç" in common
 
     result = subprocess.run(
         ["node", str(MODULE / "app.test.js")],
@@ -115,7 +115,7 @@ def main() -> None:
         "personalDataFields": 0,
         "directStoreLinks": 0,
         "affiliateGateChecks": 3,
-        "toolCount": 37,
+        "toolCountLabel": 36,
     }, ensure_ascii=False, indent=2))
 
 
