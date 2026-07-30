@@ -59,10 +59,12 @@ for(const basePath of ['','/chatgpt']){
   fs.cpSync(canonical,target,{recursive:true});
   execFileSync('python',[path.join(ROOT,'alo186','deployment','prepare_github_pages.py'),'--site',target,'--base-path',basePath,'--repository','ozaneryavuz/chatgpt','--commit','laundry-v123-test'],{cwd:ROOT,stdio:'pipe'});
   execFileSync('python',[path.join(ROOT,'alo186','deployment','smoke_github_pages.py'),'--site',target,'--base-path',basePath],{cwd:ROOT,stdio:'pipe'});
-  const page=fs.readFileSync(path.join(target,'hesaplama',route,'index.html'),'utf8');
+  const routeDir=path.join(target,'hesaplama',route);
+  const page=fs.readFileSync(path.join(routeDir,'index.html'),'utf8');
+  const runtime=fs.readFileSync(path.join(routeDir,'app.js'),'utf8');
   const expectedAsset=`${basePath}/assets/alo186-ux.js`||'/assets/alo186-ux.js';
   assert.ok(page.includes(expectedAsset));
-  assert.ok(page.includes('sponsored nofollow noopener'));
+  assert.ok(runtime.includes('sponsored nofollow noopener'));
   assert.ok(fs.readFileSync(path.join(target,'sitemap.xml'),'utf8').includes(`/hesaplama/${route}/`));
 }
 fs.rmSync(temp,{recursive:true,force:true});
