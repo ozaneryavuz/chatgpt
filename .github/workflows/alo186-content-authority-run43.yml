@@ -3,7 +3,7 @@ name: ALO186 içerik otoritesi run43 kalite kontrolü
 on:
   pull_request:
     paths:
-      - 'alo186/haberler/jenerator-dusuk-yuk-wet-stacking-minimum-yuk/**'
+      - 'alo186/haberler/ups-eco-modu-online-cift-cevrim-farki/**'
       - 'alo186/haberler/ev-sarj-acik-pen-arizasi-topraklama-korumasi/**'
       - 'alo186/haberler/kompanzasyon-detuned-reaktor-yuzde-7-ne-demek/**'
       - 'alo186/deployment/routing-overlays/content-authority-run43.json'
@@ -12,7 +12,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'alo186/haberler/jenerator-dusuk-yuk-wet-stacking-minimum-yuk/**'
+      - 'alo186/haberler/ups-eco-modu-online-cift-cevrim-farki/**'
       - 'alo186/haberler/ev-sarj-acik-pen-arizasi-topraklama-korumasi/**'
       - 'alo186/haberler/kompanzasyon-detuned-reaktor-yuzde-7-ne-demek/**'
       - 'alo186/deployment/routing-overlays/content-authority-run43.json'
@@ -65,7 +65,7 @@ jobs:
           from pathlib import Path
           root=Path('/tmp/alo186-authority-run43-custom')
           routes=[
-            '/haberler/jenerator-dusuk-yuk-wet-stacking-minimum-yuk',
+            '/haberler/ups-eco-modu-online-cift-cevrim-farki',
             '/haberler/ev-sarj-acik-pen-arizasi-topraklama-korumasi',
             '/haberler/kompanzasyon-detuned-reaktor-yuzde-7-ne-demek',
           ]
