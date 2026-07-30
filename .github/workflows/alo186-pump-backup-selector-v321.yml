@@ -7,6 +7,7 @@ on:
       - 'alo186/hesaplama/common.js'
       - 'alo186/deployment/routing-overlays/pump-backup-selector-v321.json'
       - 'alo186/tests/test_pump_backup_selector_v321.py'
+      - 'alo186/tests/test_technical_shortlist_growth.js'
       - '.github/workflows/alo186-pump-backup-selector-v321.yml'
   push:
     branches: [main]
@@ -15,6 +16,7 @@ on:
       - 'alo186/hesaplama/common.js'
       - 'alo186/deployment/routing-overlays/pump-backup-selector-v321.json'
       - 'alo186/tests/test_pump_backup_selector_v321.py'
+      - 'alo186/tests/test_technical_shortlist_growth.js'
       - '.github/workflows/alo186-pump-backup-selector-v321.yml'
   workflow_dispatch:
 
@@ -40,7 +42,7 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Karar motoru ve modül sözleşmesi
+      - name: Karar motoru, kayıt ve tekrar ziyaret sözleşmesi
         run: |
           set -euo pipefail
           node alo186/hesaplama/hidrofor-pompa-yedek-guc-uygunluk/app.test.js
@@ -53,6 +55,7 @@ jobs:
           node --check alo186/hesaplama/common.js
           python -m py_compile alo186/tests/test_pump_backup_selector_v321.py
           node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_technical_shortlist_growth.js
           python alo186/tests/test_content_intent_consolidation.py
           python alo186/tests/device_damage_deadline_guard.py
 
@@ -103,11 +106,12 @@ jobs:
             --site /tmp/alo186-pump-backup-project \
             --base-path '/chatgpt'
 
-      - name: Affiliate, gizlilik ve yayın kabulü
+      - name: Affiliate, gizlilik, tekrar ziyaret ve yayın kabulü
         run: |
           set -euo pipefail
           python - <<'PY'
           import json
+          import re
           from pathlib import Path
 
           route_path = 'hesaplama/hidrofor-pompa-yedek-guc-uygunluk'
@@ -125,10 +129,14 @@ jobs:
               assert 'doğrudan mağaza bağlantısı açmaz' in html
               assert 'amazon.com' not in html.casefold()
               assert 'amazon.' not in app.casefold()
-              assert 'localStorage' not in app and 'sessionStorage' not in app and 'fetch(' not in app
+              assert 'sessionStorage' not in app and 'fetch(' not in app
+              assert "STORAGE_KEY='alo186-pump-backup-records-v1'" in app
+              assert 'MAX_RECORDS=8' in app and 'TTL_DAYS=365' in app and 'REVIEW_DAYS=90' in app
+              assert 'text/calendar' in app and 'application/json' in app
               assert 'actualNeed' in app and 'technicalCheck' in app and 'affiliateCheck' in app
               assert "input.environment==='wet'" in app
               assert 'Mevcut kaynağın sınıfını doğrulayın' in app
+              assert 'elektrikci-is-emri-ozeti' in app
               expected = f'{prefix}{canonical_path}' if prefix else canonical_path
               sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
               assert f'<loc>https://alo186.com{canonical_path}</loc>' in sitemap
@@ -140,6 +148,8 @@ jobs:
               common = (root / 'hesaplama/common.js').read_text(encoding='utf-8')
               assert canonical_path in common
               assert 'data-alo186-pump-backup-card' in common
+              count = re.search(r'(\d+) çekirdek araç', common)
+              assert count and int(count.group(1)) >= 36
           PY
 
       - name: Doğrulanmış artifact
