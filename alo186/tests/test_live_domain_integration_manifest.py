@@ -70,7 +70,7 @@ for token in [
 
 for token in [
     "custom-domain alo186.com",
-    "inject_live_quality_hardening.py",
+    "inject_live_quality_hardening_v2.py",
     "upload-pages-artifact@v4",
     "deploy-pages@v4",
 ]:
