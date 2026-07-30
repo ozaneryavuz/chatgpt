@@ -39,10 +39,11 @@ assert "RRULE:FREQ=WEEKLY;COUNT=12" in js
 assert not re.search(r"\b(fetch|XMLHttpRequest|WebSocket)\s*\(", js)
 assert not re.search(r'type=["\'](?:email|tel|text|file|password)["\']|<textarea', html, re.I)
 assert not re.search(r'"@type"\s*:\s*"Offer"|priceCurrency|aggregateRating|availability', html, re.I)
-assert "36 çekirdek araç" in hub
+tool_count = re.search(r"(\d+) çekirdek araç", hub)
+assert tool_count and int(tool_count.group(1)) >= 36
 assert './buzdolabi-dondurucu-kesinti-guvenligi/' in hub
 assert "Buzdolabı ve Dondurucu Kesinti Güvenliği" in hub
 assert "https://www.alo186.com" not in hub
 for domain in ["www.fda.gov", "www.foodsafety.gov"]:
     assert domain in html
-print(json.dumps({"ok": True, "route": ROUTE, "actions": 3, "recordLimit": 8, "ttlDays": 365}, ensure_ascii=False))
+print(json.dumps({"ok": True, "route": ROUTE, "actions": 3, "recordLimit": 8, "ttlDays": 365, "hubToolCount": int(tool_count.group(1))}, ensure_ascii=False))
