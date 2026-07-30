@@ -62,8 +62,9 @@
   const robots = doc.querySelector('meta[name="robots"]')?.content?.toLowerCase() || '';
   const isIndexable = !robots.includes('noindex');
   const isTurkish = (doc.documentElement.lang || 'tr').toLowerCase().startsWith('tr');
-  const headings = main ? [...main.querySelectorAll('h2')].filter((heading) => heading.textContent.trim()) : [];
-  if (main && isIndexable && headings.length >= 4 && main.textContent.trim().length > 2600 && !main.querySelector('.alo-ux-toc')) {
+  const tocDisabled = main?.hasAttribute('data-alo186-toc-disabled') || false;
+  const headings = main ? [...main.querySelectorAll('h2')].filter((heading) => heading.textContent.trim() && !heading.closest('[data-alo186-toc-skip]')) : [];
+  if (main && !tocDisabled && isIndexable && headings.length >= 4 && main.textContent.trim().length > 2600 && !main.querySelector('.alo-ux-toc')) {
     const slugCounts = new Map();
     headings.forEach((heading, index) => {
       if (heading.id) return;
