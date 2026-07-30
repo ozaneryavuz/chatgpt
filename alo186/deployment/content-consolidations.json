@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "generatedAt": "2026-07-30",
   "consolidations": [
     {
@@ -29,6 +29,27 @@
       "canonicalPath": "/haberler/ges-pv-string-sigortasi-ters-akim-nasil-secilir",
       "label": "GES gPV string sigortası ve ters akım seçimi",
       "reason": "Isc, ters akım, maksimum seri sigorta değeri, inverter topolojisi ve gPV seçimini hedefleyen iki rehber tek canonical kaynakta birleştirildi."
+    },
+    {
+      "intentKey": "generator-low-load-wet-stacking",
+      "aliasPath": "/haberler/jenerator-dusuk-yuk-wet-stacking-kurum-load-bank",
+      "canonicalPath": "/haberler/jenerator-dusuk-yuk-wet-stacking-nedir",
+      "label": "Jeneratör düşük yük ve wet stacking",
+      "reason": "Aynı düşük yük, wet stacking, egzoz kurumu ve load bank kararını hedefleyen iki rehber; önce yayımlanan kapsamlı URL üzerinde birleştirildi."
+    },
+    {
+      "intentKey": "outage-compensation-automatic-payment-12-hours",
+      "aliasPath": "/haberler/elektrik-kesintisi-tazminati-otomatik-odeme-12-saat",
+      "canonicalPath": "/haberler/elektrik-kesintisi-tazminati-nasil-alinir",
+      "label": "Elektrik kesintisi tazminatı ve 12 saat kuralı",
+      "reason": "Otomatik ödeme, yıllık kesinti eşikleri, 12 saati aşan kesinti ve kanıt takibini açıklayan iki rehber; önce yayımlanan kullanıcı rotasında birleştirildi."
+    },
+    {
+      "intentKey": "ups-bypass-backfeed-safe-isolation",
+      "aliasPath": "/haberler/ups-statik-bypass-bakim-bypassi-backfeed-korumasi",
+      "canonicalPath": "/haberler/ups-backfeed-korumasi-bakim-bypass-interlock-guvenli-izolasyon",
+      "label": "UPS bypass, backfeed ve güvenli izolasyon",
+      "reason": "Statik bypass, bakım bypassı, backfeed, interlock ve gerilimsizlik doğrulamasını hedefleyen iki rehber; daha kapsamlı güvenli izolasyon rotasında birleştirildi."
     }
   ]
 }
