@@ -24,7 +24,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 35
     outputs:
       pages_ready: ${{ steps.pages_mode.outputs.pages_ready }}
       base_path: ${{ steps.pages_mode.outputs.base_path }}
@@ -53,6 +53,8 @@ jobs:
           node alo186/tests/test_technical_shortlist_growth.js
           python alo186/tests/device_damage_deadline_guard.py
           python alo186/tests/test_github_pages_bootstrap.py
+          python alo186/tests/test_live_quality_hardening.py
+          python alo186/tests/test_live_domain_integration_manifest.py
 
       - name: Canonical statik siteyi oluştur
         shell: bash
@@ -65,112 +67,33 @@ jobs:
             --bundle /tmp/alo186-canonical
 
       - name: Custom-domain ve github.io alt-yol modlarını birlikte test et
-        id: dual_mode
-        continue-on-error: true
         shell: bash
         run: |
-          set -uo pipefail
-          rm -rf /tmp/alo186-pages-diagnostics
-          mkdir -p /tmp/alo186-pages-diagnostics
-          custom_status=0
-          project_status=0
-
-          cp -a /tmp/alo186-canonical /tmp/alo186-pages-custom
-          python alo186/deployment/prepare_github_pages.py \
-            --site /tmp/alo186-pages-custom \
-            --base-path '' \
-            --repository "$GITHUB_REPOSITORY" \
-            --commit "$GITHUB_SHA" \
-            > /tmp/alo186-pages-diagnostics/custom-prepare.json 2> /tmp/alo186-pages-diagnostics/custom-prepare.err || custom_status=$?
-          if [ "$custom_status" -eq 0 ]; then
+          set -euo pipefail
+          for spec in 'custom|' 'project|/chatgpt'; do
+            name=${spec%%|*}
+            base=${spec#*|}
+            site="/tmp/alo186-pages-${name}"
+            rm -rf "$site"
+            cp -a /tmp/alo186-canonical "$site"
+            python alo186/deployment/prepare_github_pages.py \
+              --site "$site" \
+              --base-path "$base" \
+              --repository "$GITHUB_REPOSITORY" \
+              --commit "$GITHUB_SHA"
             python alo186/deployment/inject_outcome_runtime.py \
-              --site /tmp/alo186-pages-custom \
-              --base-path '' \
-              > /tmp/alo186-pages-diagnostics/custom-outcome-runtime.json 2> /tmp/alo186-pages-diagnostics/custom-outcome-runtime.err || custom_status=$?
-          fi
-          if [ "$custom_status" -eq 0 ]; then
+              --site "$site" \
+              --base-path "$base"
             python alo186/deployment/inject_shortlist_growth.py \
-              --site /tmp/alo186-pages-custom \
-              --base-path '' \
-              > /tmp/alo186-pages-diagnostics/custom-shortlist-growth.json 2> /tmp/alo186-pages-diagnostics/custom-shortlist-growth.err || custom_status=$?
-          fi
-          if [ "$custom_status" -eq 0 ]; then
+              --site "$site" \
+              --base-path "$base"
             python alo186/deployment/smoke_github_pages.py \
-              --site /tmp/alo186-pages-custom \
-              --base-path '' \
-              > /tmp/alo186-pages-diagnostics/custom-smoke.json 2> /tmp/alo186-pages-diagnostics/custom-smoke.err || custom_status=$?
-          fi
-
-          cp -a /tmp/alo186-canonical /tmp/alo186-pages-project
-          python alo186/deployment/prepare_github_pages.py \
-            --site /tmp/alo186-pages-project \
-            --base-path '/chatgpt' \
-            --repository "$GITHUB_REPOSITORY" \
-            --commit "$GITHUB_SHA" \
-            > /tmp/alo186-pages-diagnostics/project-prepare.json 2> /tmp/alo186-pages-diagnostics/project-prepare.err || project_status=$?
-          if [ "$project_status" -eq 0 ]; then
-            python alo186/deployment/inject_outcome_runtime.py \
-              --site /tmp/alo186-pages-project \
-              --base-path '/chatgpt' \
-              > /tmp/alo186-pages-diagnostics/project-outcome-runtime.json 2> /tmp/alo186-pages-diagnostics/project-outcome-runtime.err || project_status=$?
-          fi
-          if [ "$project_status" -eq 0 ]; then
-            python alo186/deployment/inject_shortlist_growth.py \
-              --site /tmp/alo186-pages-project \
-              --base-path '/chatgpt' \
-              > /tmp/alo186-pages-diagnostics/project-shortlist-growth.json 2> /tmp/alo186-pages-diagnostics/project-shortlist-growth.err || project_status=$?
-          fi
-          if [ "$project_status" -eq 0 ]; then
-            python alo186/deployment/smoke_github_pages.py \
-              --site /tmp/alo186-pages-project \
-              --base-path '/chatgpt' \
-              > /tmp/alo186-pages-diagnostics/project-smoke.json 2> /tmp/alo186-pages-diagnostics/project-smoke.err || project_status=$?
-          fi
-
-          {
-            echo "custom_status=$custom_status"
-            echo "project_status=$project_status"
-            echo "custom_file_count=$(find /tmp/alo186-pages-custom -type f | wc -l | tr -d ' ')"
-            echo "project_file_count=$(find /tmp/alo186-pages-project -type f | wc -l | tr -d ' ')"
-          } | tee /tmp/alo186-pages-diagnostics/status.txt
-          {
-            echo "custom_status=$custom_status"
-            echo "project_status=$project_status"
-          } >> "$GITHUB_OUTPUT"
-
-          for log in /tmp/alo186-pages-diagnostics/*.err /tmp/alo186-pages-diagnostics/*-smoke.json; do
-            [ -f "$log" ] || continue
-            if [ -s "$log" ]; then
-              echo "===== $log ====="
-              cat "$log"
-            fi
+              --site "$site" \
+              --base-path "$base"
+            python alo186/deployment/inject_live_quality_hardening_v2.py \
+              --site "$site" \
+              --base-path "$base"
           done
-
-          if [ "$custom_status" -ne 0 ] || [ "$project_status" -ne 0 ]; then
-            exit 1
-          fi
-
-      - name: Dual-mode tanı paketini sakla
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: alo186-github-pages-dual-mode-diagnostics
-          path: |
-            /tmp/alo186-pages-diagnostics
-            /tmp/alo186-pages-custom/pages-release.json
-            /tmp/alo186-pages-custom/route-bridges.json
-            /tmp/alo186-pages-project/pages-release.json
-            /tmp/alo186-pages-project/route-bridges.json
-          if-no-files-found: warn
-          retention-days: 7
-
-      - name: Dual-mode test sonucunu uygula
-        if: steps.dual_mode.outcome == 'failure'
-        shell: bash
-        run: |
-          echo "Custom-domain status: ${{ steps.dual_mode.outputs.custom_status }}" >&2
-          echo "Project-base status: ${{ steps.dual_mode.outputs.project_status }}" >&2
-          exit 1
 
       - name: Pages yönetici tokenı durumunu belirle
         id: pages_admin
@@ -186,7 +109,7 @@ jobs:
             echo 'token_present=false' >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Pages workflow modunu ve www custom domainini otomatik hazırla
+      - name: Pages workflow modunu ve apex custom domainini otomatik hazırla
         id: pages_bootstrap
         if: github.event_name != 'pull_request' && steps.pages_admin.outputs.token_present == 'true'
         shell: bash
@@ -196,7 +119,7 @@ jobs:
           set -euo pipefail
           python alo186/deployment/bootstrap_github_pages.py \
             --repository "$GITHUB_REPOSITORY" \
-            --custom-domain www.alo186.com \
+            --custom-domain alo186.com \
             > /tmp/alo186-pages-bootstrap.json
           cat /tmp/alo186-pages-bootstrap.json
 
@@ -242,12 +165,13 @@ jobs:
             printf 'base_path=/chatgpt\n' >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Yayınlanacak Pages artifactını hazırla
+      - name: Yayınlanacak Pages artifactını hazırla ve son kalite katmanını uygula
         shell: bash
         env:
           PAGES_BASE_PATH: ${{ steps.pages_mode.outputs.base_path }}
         run: |
           set -euo pipefail
+          rm -rf /tmp/alo186-pages-site
           cp -a /tmp/alo186-canonical /tmp/alo186-pages-site
           python alo186/deployment/prepare_github_pages.py \
             --site /tmp/alo186-pages-site \
@@ -263,12 +187,18 @@ jobs:
           python alo186/deployment/smoke_github_pages.py \
             --site /tmp/alo186-pages-site \
             --base-path "$PAGES_BASE_PATH"
+          python alo186/deployment/inject_live_quality_hardening_v2.py \
+            --site /tmp/alo186-pages-site \
+            --base-path "$PAGES_BASE_PATH" \
+            | tee /tmp/alo186-live-quality-hardening.json
 
       - name: Pages önizleme artifactını sakla
         uses: actions/upload-artifact@v4
         with:
           name: alo186-github-pages-preview
-          path: /tmp/alo186-pages-site
+          path: |
+            /tmp/alo186-pages-site
+            /tmp/alo186-live-quality-hardening.json
           if-no-files-found: error
           include-hidden-files: true
           retention-days: 30
@@ -285,7 +215,6 @@ jobs:
           PAGES_READY: ${{ steps.pages_mode.outputs.pages_ready }}
           BASE_PATH: ${{ steps.pages_mode.outputs.base_path }}
           ADMIN_TOKEN_PRESENT: ${{ steps.pages_admin.outputs.token_present }}
-          BOOTSTRAP_OUTCOME: ${{ steps.pages_bootstrap.outcome }}
         run: |
           {
             echo '## ALO186 GitHub Pages'
@@ -293,15 +222,10 @@ jobs:
             echo "- Pages yapılandırması hazır: **$PAGES_READY**"
             echo "- Build base path: \`$BASE_PATH\`"
             echo "- Yönetici bootstrap tokenı mevcut: **${ADMIN_TOKEN_PRESENT:-false}**"
-            echo "- Otomatik bootstrap sonucu: **${BOOTSTRAP_OUTCOME:-skipped}**"
-            echo '- Hosting modu: GitHub Pages — Natro web hosting veya CDN gerektirmez.'
-            echo '- Kritik elektrik rehberleri service worker ile çevrimdışı önbelleğe alınır.'
-            echo '- Ortak çözüm sonucu runtimeı bütün HTML rotalarına enjekte edilir.'
-            echo '- Teknik kısa liste rotası, şeffaf affiliate kapısı ve 14 günlük karar makbuzu Pages artifactına eklenir.'
-            if [ "$PAGES_READY" != 'true' ]; then
-              echo
-              echo '> Bir defalık seçeneklerden biri uygulanmalı: Settings → Pages → Source: GitHub Actions; veya Administration(write)+Pages(write) yetkili fine-grained PAT, ALO186_PAGES_ADMIN_TOKEN repository secretı olarak eklenmelidir.'
-            fi
+            echo '- Custom domain hedefi: `alo186.com`'
+            echo '- Canonical, sitemap, robots ve release kimliği apex origin üzerinde birleştirildi.'
+            echo '- 44 px dokunma hedefi, görünür odak, taşma ve bilinen kontrast seçicileri son artifact katmanında sertleştirildi.'
+            echo '- Cihaz hasarı başvurusu için 10 iş günü fail-closed koruması uygulandı.'
           } >> "$GITHUB_STEP_SUMMARY"
 
   deploy:

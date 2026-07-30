@@ -1,8 +1,8 @@
 {
-  "version": 2,
+  "version": 3,
   "integratedAt": "2026-07-30",
   "productionOrigin": "https://alo186.com",
-  "canonicalOrigin": "https://www.alo186.com",
+  "canonicalOrigin": "https://alo186.com",
   "apexOrigin": "https://alo186.com",
   "wwwOrigin": "https://www.alo186.com",
   "minimumReleaseRouteCount": 275,
@@ -28,7 +28,8 @@
     "routeCount>=275",
     "deviceDamageDeadline=10 iş günü",
     "rootDeviceDamageDeadline=10 iş günü",
-    "canonicalHost matches canonicalOrigin"
+    "canonicalHost=https://alo186.com",
+    "liveTechnicalQuality.minimumTouchTargetCssPx=44"
   ],
   "requiredTrustSignals": [
     "independent_information_platform",
@@ -38,7 +39,7 @@
     "no_unverified_price_stock_rating_warranty",
     "no_buy_outcome_preserved"
   ],
-  "knownBlockingCondition": "productionOrigin and canonicalOrigin are split until DNS and GitHub Pages custom domain are unified",
+  "knownBlockingCondition": "Canlı apex alan adı güncel GitHub Pages pages-release.json kimliğini ve zorunlu rotaları sunana kadar yayın kabulü fail-closed kalır.",
   "acceptanceWorkflow": ".github/workflows/alo186-live-domain-acceptance.yml",
   "identityGuard": "alo186/tests/live_release_identity_guard.py"
 }

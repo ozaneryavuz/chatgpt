@@ -6,16 +6,20 @@ on:
       - 'alo186/tests/live_site_technical_audit.py'
       - 'alo186/tests/live_site_technical_audit_v2.py'
       - 'alo186/tests/test_live_domain_integration_manifest.py'
+      - 'alo186/tests/test_live_quality_hardening.py'
       - 'alo186/deployment/live-domain-integration.json'
+      - 'alo186/deployment/inject_live_quality_hardening.py'
       - 'alo186/deployment/prepare_github_pages_core.py'
       - 'alo186/deployment/routing-manifest.json'
       - '.github/workflows/alo186-live-domain-acceptance.yml'
       - '.github/workflows/alo186-live-technical-quality.yml'
+      - '.github/workflows/alo186-github-pages.yml'
   push:
     branches: [main]
     paths:
       - 'alo186/**'
       - '.github/workflows/alo186-live-technical-quality.yml'
+      - '.github/workflows/alo186-github-pages.yml'
   workflow_dispatch:
 
 permissions:
@@ -28,7 +32,7 @@ concurrency:
 jobs:
   audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 55
+    timeout-minutes: 65
     steps:
       - uses: actions/checkout@v4
 
@@ -46,6 +50,46 @@ jobs:
           python -m playwright install --with-deps chromium
           npm install --no-save axe-core@4.10.3
 
+      - name: Push sonrası güncel Pages release kimliğini bekle
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 45); do
+            code=$(curl --silent --show-error --location --max-time 20 --output /tmp/alo186-pages-release.json --write-out '%{http_code}' https://alo186.com/pages-release.json || true)
+            if [[ "$code" == "200" ]]; then
+              if python - "$GITHUB_SHA" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+          expected=sys.argv[1]
+          try:
+              payload=json.loads(Path('/tmp/alo186-pages-release.json').read_text(encoding='utf-8'))
+          except Exception:
+              raise SystemExit(1)
+          if payload.get('commit') != expected:
+              raise SystemExit(1)
+          if payload.get('canonicalHost') != 'https://alo186.com':
+              raise SystemExit(1)
+          if int(payload.get('routeCount') or 0) < 275:
+              raise SystemExit(1)
+          quality=payload.get('liveTechnicalQuality') or {}
+          if quality.get('minimumTouchTargetCssPx') != 44:
+              raise SystemExit(1)
+          PY
+              then
+                echo "Güncel release görünür: deneme=$attempt commit=$GITHUB_SHA"
+                break
+              fi
+            fi
+            if [[ "$attempt" == "45" ]]; then
+              echo 'Canlı apex alan adı güncel GitHub Pages release kimliğini 15 dakika içinde sunmadı.' >&2
+              echo 'DNS/custom-host hâlâ eski yayın yüzeyine gidiyor olabilir.' >&2
+              exit 1
+            fi
+            sleep 20
+          done
+
       - name: Canlı mobil ve masaüstü denetimi
         id: live_audit
         continue-on-error: true
@@ -58,6 +102,7 @@ jobs:
       - name: Kaynak ve yayın regresyonları
         run: |
           python alo186/tests/test_live_domain_integration_manifest.py
+          python alo186/tests/test_live_quality_hardening.py
           python alo186/tests/test_content_intent_consolidation.py
           python alo186/tests/device_damage_deadline_guard.py
           node alo186/tests/test_release_manifest.js
@@ -82,8 +127,13 @@ jobs:
           include-hidden-files: true
           retention-days: 30
 
-      - name: P0/P1 kalite kapısı
-        if: always()
+      - name: Pull request canlı bulgularını bilgilendirme olarak tut
+        if: always() && github.event_name == 'pull_request'
+        run: |
+          echo 'Pull request sırasında canlı alan adı önceki release’i gösterebilir; P0/P1 bulguları artifactta raporlanır fakat merge kapısı yalnız kaynak regresyonlarıdır.' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Push sonrası P0/P1 kalite kapısı
+        if: always() && github.event_name != 'pull_request'
         run: |
           if [[ ! -f /tmp/alo186-live-technical-audit/audit.json ]]; then
             echo 'Denetim JSON raporu yok.' >&2
@@ -96,5 +146,5 @@ jobs:
           summary=report.get('summary',{})
           print(json.dumps({'preferredOrigin':report.get('preferredOrigin'),'summary':summary},ensure_ascii=False,indent=2))
           if int(summary.get('P0',0)) or int(summary.get('P1',0)):
-              raise SystemExit('Canlı teknik kalite denetiminde P0/P1 bulguları var.')
+              raise SystemExit('Güncel canlı release teknik kalite denetiminde P0/P1 bulguları var.')
           PY
