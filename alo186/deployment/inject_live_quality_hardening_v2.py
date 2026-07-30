@@ -53,6 +53,13 @@ def wrong_damage_deadline_contexts(text: str) -> list[str]:
     return contexts
 
 
+def physical_route(route: str, base_path: str) -> str:
+    value = str(route or "")
+    if base_path and (value == base_path or value.startswith(base_path + "/")):
+        value = value[len(base_path):] or "/"
+    return value
+
+
 def validate(site: Path, base_path: str) -> dict:
     failures: list[str] = []
     html_count = 0
@@ -112,7 +119,8 @@ def validate(site: Path, base_path: str) -> dict:
         route_count = len(routes)
         for item in routes:
             route = item.get("canonicalPath") if isinstance(item, dict) else None
-            if route and not core.route_exists(site, route):
+            target_route = physical_route(route, base_path) if route else None
+            if target_route and not core.route_exists(site, target_route):
                 failures.append(f"Release rotası fiziksel olarak eksik: {route}")
 
     robots = site / "robots.txt"
