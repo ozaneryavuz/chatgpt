@@ -1,0 +1,117 @@
+name: ALO186 içerik otoritesi run64 kalite kontrolü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/haberler/ges-inverter-afci-dc-ark-hatasi-alarmi-kapatilir-mi/**'
+      - 'alo186/haberler/santiye-elektrigi-gecici-baglanti-edas-basvurusu/**'
+      - 'alo186/haberler/kacak-akim-rolesi-selektivite-s-tipi-ust-alt-rcd/**'
+      - 'alo186/deployment/routing-overlays/content-authority-run64.json'
+      - 'alo186/tests/test_authority_content_run64.py'
+      - '.github/workflows/alo186-content-authority-run64.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/ges-inverter-afci-dc-ark-hatasi-alarmi-kapatilir-mi/**'
+      - 'alo186/haberler/santiye-elektrigi-gecici-baglanti-edas-basvurusu/**'
+      - 'alo186/haberler/kacak-akim-rolesi-selektivite-s-tipi-ust-alt-rcd/**'
+      - 'alo186/deployment/routing-overlays/content-authority-run64.json'
+      - 'alo186/tests/test_authority_content_run64.py'
+      - '.github/workflows/alo186-content-authority-run64.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-authority-run64-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Yeni rehberlerin AEO SEO kaynak ve güven sözleşmeleri
+        run: |
+          set -euo pipefail
+          python alo186/tests/test_authority_content_run64.py
+          python -m py_compile alo186/tests/test_authority_content_run64.py
+
+      - name: Mevcut yayın ve güven regresyonları
+        run: |
+          set -euo pipefail
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Canonical üretim paketini oluştur
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-authority-run64-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-authority-run64-canonical
+
+      - name: Custom-domain yayın katmanını hazırla
+        run: |
+          set -euo pipefail
+          cp -a /tmp/alo186-authority-run64-canonical /tmp/alo186-authority-run64-custom
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-authority-run64-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-authority-run64-custom \
+            --base-path ''
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-authority-run64-custom \
+            --base-path '' > /tmp/authority-run64.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-authority-run64-custom \
+            --base-path ''
+
+      - name: Sitemap ve Teknik Arama kabulü
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root=Path('/tmp/alo186-authority-run64-custom')
+          routes=[
+            '/haberler/ges-inverter-afci-dc-ark-hatasi-alarmi-kapatilir-mi',
+            '/haberler/santiye-elektrigi-gecici-baglanti-edas-basvurusu',
+            '/haberler/kacak-akim-rolesi-selektivite-s-tipi-ust-alt-rcd',
+          ]
+          sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
+          search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
+          release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
+          active={item.get('canonicalPath','').rstrip('/') for item in search['entries']}
+          assert release['routingVersion'] >= 106, release['routingVersion']
+          for route in routes:
+              page=root/route.strip('/')/'index.html'
+              assert page.is_file(), route
+              assert route in sitemap, ('sitemap',route)
+              assert route in active, ('search-index',route)
+          print(json.dumps({'routingVersion':release['routingVersion'],'routes':routes,'searchEntries':len(active)},ensure_ascii=False))
+          PY
+
+      - name: Doğrulanmış içerik artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-authority-run64-pages
+          path: /tmp/alo186-authority-run64-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
