@@ -3,16 +3,20 @@ name: ALO186 yüksek güçlü ev aleti power station uygunluğu v122
 on:
   pull_request:
     paths:
+      - 'alo186/hesaplama/index.html'
       - 'alo186/hesaplama/yuksek-guclu-ev-aleti-power-station-uygunluk/**'
       - 'alo186/deployment/routing-overlays/122-high-power-appliance-power-station.json'
       - 'alo186/tests/test_high_power_appliance_power_station.js'
+      - 'alo186/tests/test_high_power_appliance_catalog.js'
       - '.github/workflows/alo186-high-power-appliance-v122.yml'
   push:
     branches: [main]
     paths:
+      - 'alo186/hesaplama/index.html'
       - 'alo186/hesaplama/yuksek-guclu-ev-aleti-power-station-uygunluk/**'
       - 'alo186/deployment/routing-overlays/122-high-power-appliance-power-station.json'
       - 'alo186/tests/test_high_power_appliance_power_station.js'
+      - 'alo186/tests/test_high_power_appliance_catalog.js'
       - '.github/workflows/alo186-high-power-appliance-v122.yml'
   workflow_dispatch:
 
@@ -37,6 +41,8 @@ jobs:
           node-version: '22'
       - name: Karar, güvenlik, gizlilik ve dual Pages kabulü
         run: node alo186/tests/test_high_power_appliance_power_station.js
+      - name: Hesaplama Merkezi ve canonical rota entegrasyonu
+        run: node alo186/tests/test_high_power_appliance_catalog.js
       - name: Mevcut yayın ve hesaplayıcı regresyonları
         run: |
           node alo186/tests/test_release_manifest.js
