@@ -1,0 +1,159 @@
+name: ALO186 Modem ve ONT güvenli gelir yolu
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/modem-internet-yedekleme/**'
+      - 'alo186/hesaplama/index.html'
+      - '.github/workflows/alo186-modem-ont-trust-v328.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/modem-internet-yedekleme/**'
+      - 'alo186/hesaplama/index.html'
+      - '.github/workflows/alo186-modem-ont-trust-v328.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-modem-ont-trust-v328-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Karar motoru ve JavaScript doğrulaması
+        run: |
+          set -euo pipefail
+          node alo186/hesaplama/modem-internet-yedekleme/app.test.js
+          node --check alo186/hesaplama/modem-internet-yedekleme/app.js
+
+      - name: Güven, affiliate ve gizlilik sözleşmesi
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          page=Path('alo186/hesaplama/modem-internet-yedekleme/index.html').read_text(encoding='utf-8')
+          app=Path('alo186/hesaplama/modem-internet-yedekleme/app.js').read_text(encoding='utf-8')
+          hub=Path('alo186/hesaplama/index.html').read_text(encoding='utf-8')
+
+          required=[
+              'actualNeed','technicalCheck','affiliateCheck',
+              'Amazon satış ortaklığı bağlantısı',
+              'rel="sponsored nofollow noopener"',
+              'Mevcut çözüm yeterli: yeni ürün almayın',
+              'Aktif kesintide satış yok',
+              '90 günlük kontrol takvimi',
+              'ALO186 internet işletmecisi, EDAŞ, kamu kurumu veya ürün satıcısı değildir',
+          ]
+          for token in required:
+              assert token in page or token in app, token
+
+          forbidden=[
+              '"@type":"Offer"','"@type":"Product"','"availability":',
+              '"aggregateRating":','"review":','"warranty":',
+              'localStorage','sessionStorage','fetch('
+          ]
+          for token in forbidden:
+              assert token not in page and token not in app, token
+
+          assert 'alo186rehber-21' in app
+          assert "state='no_buy'" in app
+          assert "state='active'" in app
+          assert "state='hazard'" in app
+          assert 'commerceAllowed=false' in app
+          assert './modem-internet-yedekleme/' in hub
+          assert '44 çekirdek araç' in hub
+          print({'ok':True,'tripleGate':True,'noBuy':True,'activeOutageCommerce':False,'unverifiedCommercialFields':False,'personalStorage':False,'revisitDays':90})
+          PY
+
+      - name: Mevcut yayın regresyonları
+        run: |
+          set -euo pipefail
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Canonical statik site üretimi
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-modem-ont-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-modem-ont-canonical
+
+      - name: Custom-domain ve project-path Pages kabulü
+        run: |
+          set -euo pipefail
+          for target in custom project; do
+            cp -a /tmp/alo186-modem-ont-canonical "/tmp/alo186-modem-ont-$target"
+          done
+
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-modem-ont-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-modem-ont-custom \
+            --base-path ''
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-modem-ont-custom \
+            --base-path '' > /tmp/alo186-modem-ont-custom.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-modem-ont-custom \
+            --base-path ''
+
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-modem-ont-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-modem-ont-project \
+            --base-path '/chatgpt'
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-modem-ont-project \
+            --base-path '/chatgpt' > /tmp/alo186-modem-ont-project.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-modem-ont-project \
+            --base-path '/chatgpt'
+
+      - name: Üretilmiş rota kabulü
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          for root in [Path('/tmp/alo186-modem-ont-custom'),Path('/tmp/alo186-modem-ont-project')]:
+              route=root/'hesaplama/modem-internet-yedekleme'
+              assert (route/'index.html').is_file()
+              assert (route/'app.js').is_file()
+              assert (route/'styles.css').is_file()
+              html=(route/'index.html').read_text(encoding='utf-8')
+              assert 'modem-internet-yedekleme/' in html
+              assert 'Amazon satış ortaklığı bağlantısı' in html
+              assert '90 günlük kontrol takvimi' in html
+          print({'ok':True,'route':'/hesaplama/modem-internet-yedekleme/','customDomain':True,'projectPath':True})
+          PY
+
+      - name: Doğrulanmış site artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-modem-ont-trust-v328
+          path: /tmp/alo186-modem-ont-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
