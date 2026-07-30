@@ -104,7 +104,6 @@ jobs:
           set -euo pipefail
           python - <<'PY'
           import json
-          import re
           from pathlib import Path
 
           route='hesaplama/tasinabilir-ev-sarj-priz-uygunluk'
@@ -127,14 +126,13 @@ jobs:
               assert all(token in html for token in ['actualNeed','technicalCheck','affiliateCheck','productLinks'])
               hub=(root/'hesaplama/index.html').read_text(encoding='utf-8')
               assert route_slug in hub and travel_slug in hub
-              count=re.search(r'(\d+) çekirdek araç',hub)
-              assert count and int(count.group(1))>=42
+              assert hub.count('class="tool-card"')>=42
               sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
               assert expected in sitemap
               search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
               entry=next(item for item in search['entries'] if item['canonicalPath']=='/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/')
               assert entry['url']==expected
-          print(json.dumps({'ok':True,'route':'/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/','directStoreLinks':0,'storage':False,'searchIndexed':True,'hubToolCount':42,'concurrentTravelToolPreserved':True},ensure_ascii=False))
+          print(json.dumps({'ok':True,'route':'/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/','directStoreLinks':0,'storage':False,'searchIndexed':True,'hubToolCardsAtLeast':42,'concurrentTravelToolPreserved':True},ensure_ascii=False))
           PY
 
       - name: Doğrulanmış site artifactı
