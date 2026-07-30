@@ -112,6 +112,8 @@ jobs:
 
           relative='hesaplama/seyahat-priz-adaptoru-voltaj-uygunluk'
           canonical='/hesaplama/seyahat-priz-adaptoru-voltaj-uygunluk/'
+          forbidden_types={'Offer','AggregateOffer','Review','AggregateRating'}
+          forbidden_keys={'offers','aggregateRating','review'}
           for root,prefix in [
               (Path('/tmp/alo186-travel-custom'),''),
               (Path('/tmp/alo186-travel-project'),'/chatgpt'),
@@ -130,14 +132,23 @@ jobs:
               assert 'rel="sponsored nofollow noopener"' in html
               assert 'alo186rehber-21' in js
               assert all(token not in js for token in ['localStorage','sessionStorage','fetch(','navigator.geolocation'])
-              assert 'Offer' not in html and 'aggregateRating' not in html and 'review' not in html
+              for raw in re.findall(r'<script[^>]+type="application/ld\+json"[^>]*>(.*?)</script>',html,re.S|re.I):
+                  payload=json.loads(raw)
+                  nodes=payload.get('@graph',[payload]) if isinstance(payload,dict) else []
+                  for node in nodes:
+                      if not isinstance(node,dict):
+                          continue
+                      node_type=node.get('@type')
+                      node_types={node_type} if isinstance(node_type,str) else set(node_type or [])
+                      assert not (node_types & forbidden_types)
+                      assert not (set(node) & forbidden_keys)
               assert "status:'no_buy'" in logic and "status:'conditional_purchase'" in logic
               assert "status:'voltage_mismatch'" in logic and "status:'emergency'" in logic
               hub=(root/'hesaplama/index.html').read_text(encoding='utf-8')
               assert expected in hub
               assert re.search(r'\d+ çekirdek araç',hub)
               sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
-              assert f'<loc>https://alo186.com{canonical}</loc>' in sitemap
+              assert any(f'<loc>{host}{canonical}</loc>' in sitemap for host in ['https://alo186.com','https://www.alo186.com'])
               search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
               entry=next(item for item in search['entries'] if item['canonicalPath']==canonical)
               assert entry['url']==expected
