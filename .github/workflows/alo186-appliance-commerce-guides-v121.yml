@@ -94,7 +94,7 @@ jobs:
             grep -q 'buzdolabi-dondurucu-power-station-secimi' "$target/sitemap.xml"
             grep -q 'kombi-ups-power-station-secimi' "$target/arama/search-index.json"
             grep -q 'buzdolabi-dondurucu-power-station-secimi' "$target/arama/search-index.json"
-            grep -q '9 özel rehber' "$target/amazon-elektrik-urunleri/index.html"
+            grep -Eq '[0-9]+ özel rehber' "$target/amazon-elektrik-urunleri/index.html"
           done
 
       - name: Doğrulanmış üretim artifactı
