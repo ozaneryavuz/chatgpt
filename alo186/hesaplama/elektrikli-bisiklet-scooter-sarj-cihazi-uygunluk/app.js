@@ -1,0 +1,57 @@
+(function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;if(root&&root.document)api.mount(root.document);})(typeof globalThis!=='undefined'?globalThis:this,function(){'use strict';
+const AFFILIATE_TAG='alo186rehber-21';
+const n=v=>{if(v===null||v===undefined||v==='')return null;const x=Number(String(v).replace(',','.'));return Number.isFinite(x)?x:null;};
+const round=(v,d=1)=>Math.round(v*(10**d))/(10**d);
+const result=(status,title,summary,extra={})=>({status,title,summary,commercialAllowed:false,searchUrl:null,...extra});
+function calculate(input={}){
+ if(input.emergency)return result('emergency','Cihazı şarj etmeyin; güvenli alana geçin','Şişme, duman, tıslama, kıvılcım, yoğun ısı, yanık kokusu veya elektrik çarpması riski varsa şarjı başlatmayın. Güvenliyse enerjiyi kestirin, çıkış yolunu kapatmadan uzaklaşın ve yangın/yaralanma riski varsa 112’yi arayın.');
+ const condition=input.batteryCondition||'unknown';
+ if(['swollen','hot','hissing','smoking','wet','impact'].includes(condition))return result('stop_use','Batarya veya şarj cihazını kullanmayın','Hasarlı, ıslanmış, darbe almış, şişmiş, olağandışı ısınan, ses çıkaran veya koku/duman oluşturan lityum batarya tüketici ürünü seçimiyle çözülemez. Üretici/yetkili servis ve güvenli bertaraf yolu gerekir.');
+ if(condition==='modified')return result('professional','Modifiye veya yeniden paketlenmiş bataryayı şarj etmeyin','Hücre değişimi, BMS müdahalesi, farklı voltaj dönüşümü veya yetkisiz tamir güvenli şarj cihazı seçimini belirsiz kılar. Üretici veya yetkin batarya servisi doğrulaması olmadan kullanmayın.');
+ if(condition!=='normal')return result('evidence_required','Bataryanın fiziksel durumunu doğrulayın','Şişme, çatlak, su teması, darbe, olağandışı ısı/koku ve yetkisiz müdahale bulunmadığını kontrol edin.');
+ const supervision=input.supervision||'unknown';
+ if(['overnight','away'].includes(supervision))return result('stop_use','Uyurken veya evde yokken şarj etmeyin','Şarj işlemi uyanık ve hazır bir yetişkinin gözetiminde yapılmalı; tamamlandığında cihaz prizden ayrılmalıdır.');
+ if(supervision!=='awake')return result('evidence_required','Şarj gözetimini doğrulayın','Şarj boyunca uyanık ve yakın olacağınızı, işlem tamamlandığında fişi çekeceğinizi doğrulayın.');
+ const extension=input.extensionUse||'unknown';
+ if(['extension','reel','multiplug','adapter'].includes(extension))return result('stop_use','Uzatma, makara veya çoklayıcı kullanmayın','Şarj cihazını doğrudan sağlam ve uygun duvar prizine bağlayın. Uzatma, kablo makarası, çoklayıcı ve uyumsuz dönüştürücü ısınma ve temas riskini artırır.');
+ if(extension!=='none')return result('evidence_required','Priz bağlantısını doğrulayın','Arada uzatma, makara, çoklayıcı veya dönüştürücü bulunmadığını doğrulayın.');
+ const socket=input.socketCondition||'unknown';
+ if(['warm','loose','damaged'].includes(socket))return result('stop_use','Prizi kullanmayın','Isınan, gevşek, kararmış veya hasarlı priz yetkili elektrikçi tarafından kontrol edilmeden şarja devam etmeyin.');
+ if(socket!=='normal')return result('evidence_required','Priz durumunu doğrulayın','Prizin sağlam, kuru, gevşeklik ve ısınma belirtisi olmayan bir duvar prizi olduğunu doğrulayın.');
+ if(input.location==='escape_route')return result('stop_use','Kaçış yolunda şarj etmeyin','Koridor, merdiven, kapı önü veya çıkışı engelleyebilecek alanda şarj ya da depolama yapmayın.');
+ if(input.location==='combustible')return result('stop_use','Yanıcı malzemelerden uzaklaştırın','Batarya ve şarj cihazını yatak, koltuk, perde, karton, tekstil veya kolay tutuşan malzemelerin yanında şarj etmeyin.');
+ if(!['clear_room','garage'].includes(input.location||''))return result('evidence_required','Güvenli şarj alanını doğrulayın','Şarj alanı kuru, havalandırılabilir, kaçış yolunu kapatmayan ve yanıcı malzemelerden uzak olmalıdır.');
+ const currentState=input.currentCharger||'unknown';
+ if(currentState==='works'&&input.manufacturerApproval==='yes'&&input.actualChargeTest==='yes')return result('no_buy','Mevcut onaylı şarj cihazını kullanın; yeni ürün almayın','Üretici tarafından onaylı mevcut şarj cihazı fiziksel olarak sağlam ve gerçek şarj testinde normal çalışıyorsa yeni ürün gerekmez.',{metrics:{dcPowerW:round((n(input.requiredOutputV)||0)*(n(input.requiredMaxA)||0),0)}});
+ if(currentState==='works'&&input.manufacturerApproval!=='yes')return result('evidence_required','Mevcut şarj cihazının model onayını doğrulayın','Çalışıyor olması uyumlu ve güvenli olduğunu kanıtlamaz. Üretici kılavuzu veya üreticiden alınmış yazılı uyumluluk gerekir.');
+ if(!['missing','damaged','works'].includes(currentState))return result('evidence_required','Mevcut şarj cihazı durumunu seçin','Orijinal/onaylı şarj cihazının mevcut, kayıp veya hasarlı olduğunu belirtin.');
+ if(input.manufacturerApproval==='no')return result('stop_use','Universal veya onaysız şarj cihazı kullanmayın','Yalnız fişin uyması veya voltajın benzemesi güvenli uyumluluk değildir. Cihaz üreticisinin bu model için onayladığı yedek şarj cihazı dışında ürün seçmeyin.');
+ if(input.manufacturerApproval!=='yes')return result('evidence_required','Üretici onayı gerekli','Cihazın marka-modeli için üretici tarafından onaylanmış yedek şarj cihazı modelini veya teknik belgesini bulun.');
+ const model=String(input.deviceModel||'').trim();
+ if(model.length<3)return result('evidence_required','Cihaz marka ve modelini doğrulayın','Amazon araması açılmadan önce cihazın tam marka-model kodu üretici etiketi veya kılavuzdan yazılmalıdır.');
+ const requiredV=n(input.requiredOutputV),maxA=n(input.requiredMaxA),candidateV=n(input.candidateOutputV),candidateA=n(input.candidateOutputA);
+ if(requiredV===null||requiredV<5||requiredV>100)return result('evidence_required','Üretici onaylı çıkış voltajı gerekli','Batarya nominal voltajından şarj voltajı tahmin etmeyin. Kılavuz veya orijinal şarj etiketi üzerindeki OUTPUT voltajını girin.');
+ if(maxA===null||maxA<=0||maxA>20)return result('evidence_required','Üretici onaylı azami akım gerekli','Kılavuz veya orijinal şarj etiketi üzerindeki onaylı çıkış akımını girin.');
+ if(candidateV===null||candidateV<5||candidateV>100||candidateA===null||candidateA<=0||candidateA>20)return result('evidence_required','Aday şarj cihazı çıkış değerleri gerekli','Aday ürünün OUTPUT volt ve amper değerlerini etiketinden girin. INPUT değerlerini kullanmayın.');
+ const tolerance=Math.max(0.1,requiredV*0.0025);
+ if(Math.abs(candidateV-requiredV)>tolerance)return result('stop_use','Çıkış voltajı eşleşmiyor',`Onaylı değer ${requiredV} V iken aday şarj cihazı ${candidateV} V. Batarya nominal voltajına bakarak bu farkı kabul etmeyin.`);
+ if(candidateA>maxA+0.01)return result('stop_use','Aday şarj akımı onaylı sınırı aşıyor',`Aday ${candidateA} A, üretici onaylı sınır ${maxA} A. Daha yüksek amper etiketi otomatik olarak güvenli veya daha hızlı değildir.`);
+ if(input.connectorMatch==='no'||input.polarityMatch==='no')return result('stop_use','Konnektör veya polarite eşleşmiyor','Fişin fiziksel olarak girmesi yeterli değildir. Konnektör, pin dizilimi ve DC polarite üretici belgesiyle birebir eşleşmelidir.');
+ if(input.connectorMatch!=='yes'||input.polarityMatch!=='yes')return result('evidence_required','Konnektör ve polariteyi doğrulayın','Tam konnektör tipi, pin dizilimi ve polarite üretici belgesi veya yetkili servis kaydıyla doğrulanmalıdır.');
+ if(input.safetyEvidence==='no')return result('stop_use','Güvenlik uygunluğu kanıtlanmayan ürünü seçmeyin','Üretici/model kimliği, uygunluk işareti ve izlenebilir teknik belge bulunmayan şarj cihazı affiliate sonucuna açılmaz.');
+ if(input.safetyEvidence!=='yes')return result('evidence_required','Ürün güvenlik belgesini doğrulayın','Şarj cihazının üretici/model kimliği, uygunluk işareti ve uygulanabilir güvenlik standardı/teknik dosya kanıtını doğrulayın.');
+ if(input.recallChecked==='no')return result('stop_use','Geri çağırma veya güvenlik uyarısı bulunan ürünü kullanmayın','Ürün veya model hakkında aktif geri çağırma/güvenlik uyarısı varsa satın alma ve kullanım yolunu kapatın.');
+ if(input.recallChecked!=='yes')return result('evidence_required','Geri çağırma kontrolü gerekli','Üretici ve resmî ürün güvenliği/geri çağırma kaynaklarında marka-modeli kontrol edin.');
+ const dcPowerW=round(candidateV*candidateA,0);
+ const query=`${model} ${requiredV}V ${maxA}A üretici onaylı şarj cihazı`;
+ return result('conditional_purchase','Yalnız tam model onaylı yedek şarj cihazına ilerleyin','Teknik eşleşme sağlandı. Amazon sonuçlarında model, çıkış voltajı, akım, konnektör, polarite, üretici onayı ve güvenlik belgesini yeniden doğrulamadan satın almayın.',{commercialAllowed:true,metrics:{requiredOutputV:requiredV,maxApprovedA:maxA,candidateOutputV:candidateV,candidateOutputA:candidateA,dcPowerW},searchUrl:`https://www.amazon.com.tr/s?k=${encodeURIComponent(query)}&tag=${AFFILIATE_TAG}`});
+}
+function mount(doc){const form=doc.getElementById('microForm');if(!form)return;const resultBox=doc.getElementById('result'),commerce=doc.getElementById('commerce'),link=doc.getElementById('affiliateLink');let last=null;
+ const value=id=>{const el=doc.getElementById(id);return el?el.value:'';};
+ const read=()=>({emergency:doc.getElementById('emergency').checked,batteryCondition:value('batteryCondition'),supervision:value('supervision'),extensionUse:value('extensionUse'),socketCondition:value('socketCondition'),location:value('location'),currentCharger:value('currentCharger'),manufacturerApproval:value('manufacturerApproval'),actualChargeTest:value('actualChargeTest'),deviceModel:value('deviceModel'),requiredOutputV:value('requiredOutputV'),requiredMaxA:value('requiredMaxA'),candidateOutputV:value('candidateOutputV'),candidateOutputA:value('candidateOutputA'),connectorMatch:value('connectorMatch'),polarityMatch:value('polarityMatch'),safetyEvidence:value('safetyEvidence'),recallChecked:value('recallChecked')});
+ function render(r){last=r;resultBox.className=`panel status-${r.status}`;resultBox.innerHTML=`<span class="badge">${r.status.replaceAll('_',' ')}</span><h2>${r.title}</h2><p>${r.summary}</p>${r.metrics?`<div class="metrics"><article><span>Onaylı çıkış</span><strong>${r.metrics.requiredOutputV||'—'} V</strong></article><article><span>Aday akım</span><strong>${r.metrics.candidateOutputA||'—'} A</strong></article><article><span>Yaklaşık DC güç</span><strong>${r.metrics.dcPowerW||'—'} W</strong></article></div>`:''}`;commerce.classList.toggle('hidden',!r.commercialAllowed);link.classList.add('hidden');link.removeAttribute('href');doc.querySelectorAll('.gate input').forEach(x=>x.checked=false);resultBox.focus();}
+ form.addEventListener('submit',e=>{e.preventDefault();render(calculate(read()));});
+ form.addEventListener('reset',()=>setTimeout(()=>{last=null;resultBox.className='panel hidden';resultBox.innerHTML='';commerce.classList.add('hidden');link.classList.add('hidden');link.removeAttribute('href');},0));
+ doc.querySelectorAll('.gate input').forEach(x=>x.addEventListener('change',()=>{const ok=[...doc.querySelectorAll('.gate input')].every(i=>i.checked);if(ok&&last&&last.commercialAllowed&&last.searchUrl){link.href=last.searchUrl;link.rel='sponsored nofollow noopener';link.classList.remove('hidden');}else{link.classList.add('hidden');link.removeAttribute('href');}}));
+}
+return{calculate,mount,AFFILIATE_TAG};});
