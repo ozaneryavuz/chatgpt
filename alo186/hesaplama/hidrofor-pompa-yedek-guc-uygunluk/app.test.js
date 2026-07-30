@@ -3,6 +3,7 @@ const assert=require('node:assert/strict');
 const app=require('./app.js');
 const base={emergency:false,pumpType:'domestic',phase:'single',voltage:230,ratedCurrent:5,powerFactor:.8,startMethod:'direct',connection:'plug',otherLoadW:0,targetHours:2,environment:'dry',protection:'rated',sourceStatus:'none',sourceType:'auto',sourceContinuousW:'',sourceSurgeW:'',sourceWh:''};
 const calc=app.calculations(base);assert.equal(calc.runningW,920);assert.equal(calc.requiredContinuousW,1150);assert.equal(calc.requiredSurgeW,6348);assert.equal(calc.requiredWh,2706);
+const defaultPf=app.calculations({...base,powerFactor:''});assert.equal(defaultPf.pf,.8);assert.equal(defaultPf.runningW,920);
 assert.equal(app.evaluate({...base,emergency:true}).status,'emergency');
 assert.equal(app.evaluate({...base,pumpType:'fire'}).status,'professional');
 assert.equal(app.evaluate({...base,phase:'three',voltage:400}).status,'professional');
@@ -16,4 +17,4 @@ const inv=app.evaluate({...base,ratedCurrent:2,startMethod:'soft',sourceType:'in
 const noBuy=app.evaluate({...base,sourceStatus:'existing',sourceType:'generator',sourceContinuousW:1500,sourceSurgeW:7000});assert.equal(noBuy.status,'no_buy');assert.equal(noBuy.commerceClosed,true);
 const weak=app.evaluate({...base,sourceStatus:'existing',sourceType:'generator',sourceContinuousW:500,sourceSurgeW:1000});assert.equal(weak.status,'conditional_purchase');
 assert.equal(app.constants.START_MULTIPLIER.direct,6);assert.equal(app.constants.START_MULTIPLIER.soft,3);assert.equal(app.constants.START_MULTIPLIER.vfd,1.5);assert(!Object.values(app.constants.CATEGORY_LINKS).some(x=>x.href.includes('amazon.')));
-console.log(JSON.stringify({ok:true,scenarios:12,route:'/hesaplama/hidrofor-pompa-yedek-guc-uygunluk/'},null,2));
+console.log(JSON.stringify({ok:true,scenarios:13,route:'/hesaplama/hidrofor-pompa-yedek-guc-uygunluk/'},null,2));
