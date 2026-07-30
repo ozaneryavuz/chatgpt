@@ -1,0 +1,175 @@
+{
+  "version": 105,
+  "generatedAt": "2026-07-30",
+  "intents": [
+    {
+      "id": "telefon-hizli-sarj",
+      "label": "Telefon ve tablette doğru USB-C hızlı şarj zincirini kurmak",
+      "routes": ["/hesaplama/usb-c-set-kisa-listesi/", "/hesaplama/usb-c-sarj-zinciri-uygunluk/"],
+      "productClasses": ["usb-c-sarj-20w", "usb-c-pps-45w", "usb-c-kablo-100w"]
+    },
+    {
+      "id": "dizustu-yuksek-guc",
+      "label": "Dizüstü bilgisayar için 65–140 W USB-C güç zinciri seçmek",
+      "routes": ["/hesaplama/usb-c-set-kisa-listesi/", "/hesaplama/usb-c-urun-kabul-testi/"],
+      "productClasses": ["usb-c-pd31-140w", "usb-c-kablo-240w", "usb-c-hub-pd"]
+    },
+    {
+      "id": "harici-ekran",
+      "label": "USB-C, HDMI ve DisplayPort ile doğru görüntü bağlantısını kurmak",
+      "routes": ["/hesaplama/usb-c-set-kisa-listesi/", "/urun-bilgi-grafigi/usb-c-ekosistemi/"],
+      "productClasses": ["hdmi-21-kablo", "displayport-14-kablo", "usb-c-displayport-kablo", "usb-c-hdmi-kablo"]
+    },
+    {
+      "id": "seyahat-calisma-seti",
+      "label": "Seyahat ve esnek çalışmada yalnız gerekli şarj ve bağlantı bileşenlerini seçmek",
+      "routes": ["/hesaplama/usb-c-set-kisa-listesi/", "/hesaplama/seyahat-priz-adaptoru-voltaj-uygunluk/"],
+      "productClasses": ["usb-c-sarj-20w", "usb-c-pd31-140w", "usb-c-hub-4in1", "usb-c-kablo-100w"]
+    }
+  ],
+  "productClasses": [
+    {
+      "id": "usb-c-sarj-20w",
+      "label": "Tek port 20 W USB-C PD şarj cihazı",
+      "risk": "consumer",
+      "search": "USB-C PD 20W tek port GaN şarj cihazı",
+      "needs": ["telefon-hizli-sarj", "seyahat-calisma-seti", "mobil-enerji"],
+      "requiredEvidence": ["cihazın kabul ettiği güç", "USB-C PD profili", "kablo uçları ve güç sınıfı", "tek port ihtiyacının yeterli olması"],
+      "profiles": ["telefon kullanıcısı", "tablet kullanıcısı", "seyahat eden kullanıcı"],
+      "environments": ["ev", "ofis", "otel ve seyahat"],
+      "guide": "/hesaplama/usb-c-set-kisa-listesi/",
+      "signals": ["telefonun mevcut adaptörle yavaş şarj olması", "seyahatte küçük tek portlu adaptör ihtiyacı"],
+      "avoidWhen": ["mevcut adaptör aynı cihazı gereken hızda ve güvenle şarj ediyor", "kablo veya cihaz protokolü bilinmiyor", "adaptörde aşırı ısınma, koku veya fiziksel hasar var"]
+    },
+    {
+      "id": "usb-c-pps-45w",
+      "label": "45 W USB-C PD/PPS şarj cihazı",
+      "risk": "consumer",
+      "search": "USB-C PD PPS 45W tek port şarj cihazı 5A kablo",
+      "needs": ["telefon-hizli-sarj", "mobil-enerji"],
+      "requiredEvidence": ["cihazın PPS veya üretici hızlı şarj desteği", "gerekli 5 A kablo", "tek cihaz güç ihtiyacı", "adaptörün gerçek port profili"],
+      "profiles": ["hızlı şarj destekli telefon kullanıcısı", "USB-C tablet kullanıcısı"],
+      "environments": ["ev", "ofis", "seyahat"],
+      "guide": "/hesaplama/usb-c-sarj-zinciri-uygunluk/",
+      "signals": ["45 W destekli cihazın daha düşük güçte şarj olması", "adaptör uygun görünmesine rağmen hızlı şarj ibaresinin çıkmaması"],
+      "avoidWhen": ["cihaz 45 W veya PPS desteklemiyor", "mevcut adaptör ve kablo ihtiyacı karşılıyor", "kablo 5 A gereksinimini karşılamıyor"]
+    },
+    {
+      "id": "usb-c-pd31-140w",
+      "label": "140 W USB-C PD 3.1 dizüstü şarj cihazı",
+      "risk": "consumer-gated",
+      "search": "USB-C PD 3.1 140W dizüstü şarj cihazı 240W kablo",
+      "needs": ["dizustu-yuksek-guc", "seyahat-calisma-seti"],
+      "requiredEvidence": ["dizüstünün 100 W üzeri güç kabulü", "USB PD 3.1 EPR desteği", "240 W veya uygun MagSafe kablo", "tek port ve toplam güç ayrımı"],
+      "profiles": ["yüksek güçlü USB-C dizüstü kullanıcısı", "mobil profesyonel"],
+      "environments": ["ev-ofis", "ortak çalışma alanı", "seyahat"],
+      "guide": "/hesaplama/usb-c-set-kisa-listesi/",
+      "signals": ["yük altında dizüstü bataryasının azalmaya devam etmesi", "yüksek güçlü adaptörün yalnız düşük profilde çalışması"],
+      "avoidWhen": ["cihaz 65 W veya daha düşük güçle ihtiyacı karşılıyor", "PD 3.1/EPR veya kablo desteği doğrulanmadı", "yalnız toplam çoklu port gücü 140 W olarak yazıyor"]
+    },
+    {
+      "id": "usb-c-kablo-100w",
+      "label": "100 W / 5 A USB-C güç ve temel veri kablosu",
+      "risk": "consumer",
+      "search": "USB-C USB-C 100W 5A e-marker 480Mbps kablo",
+      "needs": ["telefon-hizli-sarj", "dizustu-yuksek-guc", "seyahat-calisma-seti", "mobil-enerji"],
+      "requiredEvidence": ["5 A ve 100 W etiketi", "e-marker gereksinimi", "uzunluk", "gerekli veri hızının temel USB 2 sınıfıyla karşılanması"],
+      "profiles": ["telefon, tablet ve 100 W'a kadar dizüstü kullanıcısı"],
+      "environments": ["masaüstü", "çanta ve seyahat", "araç"],
+      "guide": "/hesaplama/usb-c-set-kisa-listesi/",
+      "signals": ["adaptör yeterli olduğu hâlde dizüstünün düşük güçte şarj olması", "kablonun yalnız belirli yönde veya aralıklı çalışması"],
+      "avoidWhen": ["240 W EPR gerekiyor", "10 Gbps veya görüntü aktarımı gerekiyor", "mevcut kablo güvenli ve ihtiyacı karşılıyor"]
+    },
+    {
+      "id": "usb-c-kablo-240w",
+      "label": "240 W USB-C EPR güç kablosu",
+      "risk": "consumer-gated",
+      "search": "USB-C 240W EPR e-marker şarj kablosu",
+      "needs": ["dizustu-yuksek-guc"],
+      "requiredEvidence": ["USB PD 3.1 EPR gereksinimi", "240 W kablo işaretlemesi", "uygun e-marker", "veri ve görüntü ihtiyacının ayrıca doğrulanması"],
+      "profiles": ["100 W üzeri USB-C dizüstü kullanıcısı"],
+      "environments": ["ev-ofis", "mobil çalışma"],
+      "guide": "/hesaplama/usb-c-set-kisa-listesi/",
+      "signals": ["140 W sınıfı adaptörün beklenen güce çıkmaması"],
+      "avoidWhen": ["cihaz 100 W veya altında çalışıyor", "yalnız şarj gücü etiketiyle 10 Gbps veya görüntü bekleniyor"]
+    },
+    {
+      "id": "usb-c-hub-4in1",
+      "label": "Sade USB-C 4'ü 1 arada hub",
+      "risk": "consumer-gated",
+      "search": "USB-C 4 in 1 hub HDMI iki USB-A 100W PD",
+      "needs": ["seyahat-calisma-seti", "ev-ofis-konforu", "harici-ekran"],
+      "requiredEvidence": ["kaynak USB-C portunun görüntü desteği", "HDMI çözünürlük/yenileme sınırı", "USB veri hızı", "PD geçişinde hub tüketimi ve haricî adaptör"],
+      "profiles": ["ince dizüstü kullanıcısı", "seyahat eden çalışan"],
+      "environments": ["ev-ofis", "toplantı odası", "seyahat"],
+      "guide": "/hesaplama/usb-c-urun-kabul-testi/",
+      "signals": ["dizüstünde HDMI ve USB-A port eksikliği", "tek kabloyla masa düzeni ihtiyacı"],
+      "avoidWhen": ["Gigabit Ethernet veya kart okuyucu gerçekten gerekli", "kaynak port görüntü vermiyor", "mevcut hub gerekli bütün işlevleri sağlıyor"]
+    },
+    {
+      "id": "usb-c-hub-pd",
+      "label": "PD geçişli çok portlu USB-C hub",
+      "risk": "consumer-gated",
+      "search": "USB-C hub HDMI Ethernet kart okuyucu 100W PD 10Gbps",
+      "needs": ["dizustu-yuksek-guc", "ev-ofis-konforu", "harici-ekran"],
+      "requiredEvidence": ["gerekli portların gerçek kullanımı", "host veri ve görüntü desteği", "PD geçiş üst sınırı ve iç tüketim", "haricî adaptörün dahil olup olmadığı"],
+      "profiles": ["çok çevre birimli dizüstü kullanıcısı", "ev-ofis kullanıcısı"],
+      "environments": ["masaüstü çalışma", "toplantı odası"],
+      "guide": "/hesaplama/usb-c-set-kisa-listesi/",
+      "signals": ["hub bağlıyken dizüstü şarj gücünün düşmesi", "aynı anda veri, görüntü ve şarj ihtiyacı"],
+      "avoidWhen": ["kullanılmayacak ekstra portlar tek satın alma gerekçesi", "PD etiketi adaptör dahil sanılıyor", "host port yeteneği bilinmiyor"]
+    },
+    {
+      "id": "hdmi-21-kablo",
+      "label": "Ultra High Speed HDMI 2.1 görüntü kablosu",
+      "risk": "consumer-gated",
+      "search": "HDMI 2.1 48Gbps 8K60 4K120 VRR eARC kablo",
+      "needs": ["harici-ekran", "ev-ofis-konforu"],
+      "requiredEvidence": ["kaynak ve ekran HDMI sürümü", "hedef çözünürlük ve yenileme hızı", "kablo uzunluğu", "VRR/eARC gibi gerçekten kullanılacak özellikler"],
+      "profiles": ["oyuncu", "yüksek yenilemeli monitör kullanıcısı", "ev sineması kullanıcısı"],
+      "environments": ["masaüstü", "salon ve ev sineması"],
+      "guide": "/hesaplama/usb-c-set-kisa-listesi/",
+      "signals": ["4K yüksek yenilemede görüntü kesilmesi", "eARC veya VRR işlevinin çalışmaması"],
+      "avoidWhen": ["mevcut HDMI kablo hedef çözünürlüğü karşılıyor", "sorun ekran veya kaynak port ayarından kaynaklanıyor", "yalnız 1080p/60 Hz kullanım var"]
+    },
+    {
+      "id": "displayport-14-kablo",
+      "label": "DisplayPort 1.4 yüksek yenileme kablosu",
+      "risk": "consumer-gated",
+      "search": "DisplayPort 1.4 32.4Gbps 8K60 4K144 kablo",
+      "needs": ["harici-ekran", "ev-ofis-konforu"],
+      "requiredEvidence": ["kaynak ve ekran DisplayPort sürümü", "hedef çözünürlük ve yenileme", "kablo yönü ve uzunluğu", "ekran kartı ve monitör bant genişliği"],
+      "profiles": ["oyuncu", "profesyonel monitör kullanıcısı"],
+      "environments": ["masaüstü çalışma ve oyun"],
+      "guide": "/hesaplama/usb-c-urun-kabul-testi/",
+      "signals": ["yüksek yenilemede ekran kararması veya bağlantı kopması"],
+      "avoidWhen": ["mevcut kablo hedef modu güvenle çalıştırıyor", "sorun ekran kartı sürücüsü veya monitör ayarından kaynaklanıyor"]
+    },
+    {
+      "id": "usb-c-displayport-kablo",
+      "label": "USB-C ile DisplayPort 1.4 görüntü kablosu",
+      "risk": "consumer-gated",
+      "search": "USB-C DisplayPort 1.4 çift yönlü 8K60 4K144 kablo",
+      "needs": ["harici-ekran", "dizustu-yuksek-guc"],
+      "requiredEvidence": ["USB-C portunda DisplayPort Alt Mode veya Thunderbolt", "kablonun yönü", "hedef çözünürlük ve yenileme", "şarj taşımadığının anlaşılması"],
+      "profiles": ["USB-C dizüstü kullanıcısı", "yüksek yenilemeli monitör kullanıcısı"],
+      "environments": ["ev-ofis", "mobil iş istasyonu"],
+      "guide": "/hesaplama/usb-c-urun-kabul-testi/",
+      "signals": ["USB-C portu veri sağlıyor fakat monitöre görüntü gitmiyor", "yüksek yenilemede bağlantı kararsız"],
+      "avoidWhen": ["kaynak USB-C portunda görüntü çıkışı yok", "aynı kablodan şarj geçişi bekleniyor", "mevcut kablo ihtiyacı karşılıyor"]
+    },
+    {
+      "id": "usb-c-hdmi-kablo",
+      "label": "USB-C ile HDMI görüntü kablosu",
+      "risk": "consumer-gated",
+      "search": "USB-C HDMI 4K60 görüntü kablosu Alt Mode",
+      "needs": ["harici-ekran", "seyahat-calisma-seti"],
+      "requiredEvidence": ["kaynak USB-C görüntü çıkışı", "HDMI hedef çözünürlük ve yenileme", "kablonun tek yönlü/çift yönlü yapısı", "şarj geçişi olup olmadığı"],
+      "profiles": ["sunum yapan kullanıcı", "TV veya projektör bağlayan kullanıcı"],
+      "environments": ["toplantı odası", "otel", "ev"],
+      "guide": "/hesaplama/usb-c-urun-kabul-testi/",
+      "signals": ["USB-C cihazı TV veya projektöre bağlama ihtiyacı"],
+      "avoidWhen": ["telefon veya dizüstü USB-C görüntü çıkışı desteklemiyor", "kablo üzerinden aynı anda şarj bekleniyor", "mevcut adaptör veya hub görüntü ihtiyacını karşılıyor"]
+    }
+  ]
+}
