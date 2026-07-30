@@ -29,6 +29,12 @@
   doc.querySelectorAll('img').forEach((image, index) => {
     if (index > 0 && !image.hasAttribute('loading')) image.loading = 'lazy';
     if (!image.hasAttribute('decoding')) image.decoding = 'async';
+    if (!image.hasAttribute('alt')) {
+      const caption = image.closest('figure')?.querySelector('figcaption')?.textContent?.trim();
+      const label = image.getAttribute('aria-label') || image.getAttribute('title') || caption || '';
+      image.alt = label;
+      image.dataset.alo186AltFallback = label ? 'derived' : 'decorative';
+    }
   });
 
   doc.querySelectorAll('a[target="_blank"]').forEach((link) => {
@@ -41,9 +47,7 @@
   const normalizePath = (value) => value.replace(/\/+$/, '') || '/';
   const scriptUrl = new URL(doc.currentScript?.src || location.href, location.href);
   const assetSuffix = '/assets/alo186-ux.js';
-  const basePath = scriptUrl.pathname.endsWith(assetSuffix)
-    ? scriptUrl.pathname.slice(0, -assetSuffix.length)
-    : '';
+  const basePath = scriptUrl.pathname.endsWith(assetSuffix) ? scriptUrl.pathname.slice(0, -assetSuffix.length) : '';
   const publicPath = (route) => `${basePath}${route === '/' ? '/' : route}`.replace(/\/+/g, '/');
   const current = normalizePath(location.pathname);
   const markCurrent = (root = doc) => {
@@ -57,6 +61,34 @@
   const robots = doc.querySelector('meta[name="robots"]')?.content?.toLowerCase() || '';
   const isIndexable = !robots.includes('noindex');
   const isTurkish = (doc.documentElement.lang || 'tr').toLowerCase().startsWith('tr');
+  const headings = main ? [...main.querySelectorAll('h2')].filter((heading) => heading.textContent.trim()) : [];
+  if (main && isIndexable && headings.length >= 4 && main.textContent.trim().length > 2600 && !main.querySelector('.alo-ux-toc')) {
+    const slugCounts = new Map();
+    headings.forEach((heading, index) => {
+      if (heading.id) return;
+      const base = heading.textContent.trim().toLocaleLowerCase(isTurkish ? 'tr-TR' : 'en-US')
+        .normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9çğıöşü]+/gi, '-').replace(/^-|-$/g, '') || `section-${index + 1}`;
+      const count = (slugCounts.get(base) || 0) + 1;
+      slugCounts.set(base, count);
+      heading.id = count === 1 ? base : `${base}-${count}`;
+    });
+    const toc = doc.createElement('details');
+    toc.className = 'alo-ux-toc';
+    toc.innerHTML = `<summary>${isTurkish ? 'Bu sayfada neler var?' : 'On this page'}</summary><nav aria-label="${isTurkish ? 'Sayfa içeriği' : 'Page contents'}"></nav>`;
+    const tocNav = toc.querySelector('nav');
+    headings.slice(0, 12).forEach((heading) => {
+      const link = doc.createElement('a');
+      link.href = `#${heading.id}`;
+      link.textContent = heading.textContent.trim();
+      tocNav.appendChild(link);
+    });
+    const h1 = main.querySelector('h1');
+    const anchor = h1?.closest('section,article,header') || h1;
+    if (anchor?.parentNode) anchor.parentNode.insertBefore(toc, anchor.nextSibling);
+    else main.prepend(toc);
+  }
+
   if (isIndexable && isTurkish) {
     const nav = doc.createElement('nav');
     nav.className = 'alo-ux-mobilebar';
