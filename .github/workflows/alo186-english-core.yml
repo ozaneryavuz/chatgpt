@@ -1,0 +1,125 @@
+name: ALO186 English core AEO release
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/en/**'
+      - 'alo186/turkiye-arama/index.html'
+      - 'alo186/deployment/routing-overlays/english-core-run1.json'
+      - 'alo186/tests/test_english_core.py'
+      - '.github/workflows/alo186-english-core.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/en/**'
+      - 'alo186/turkiye-arama/index.html'
+      - 'alo186/deployment/routing-overlays/english-core-run1.json'
+      - 'alo186/tests/test_english_core.py'
+      - '.github/workflows/alo186-english-core.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-english-core-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: English content, hreflang and safety contracts
+        run: |
+          set -euo pipefail
+          python alo186/tests/test_english_core.py
+          python -m py_compile alo186/tests/test_english_core.py
+          node --check alo186/en/assets/finder.js
+
+      - name: Existing portal regressions
+        run: |
+          set -euo pipefail
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Build canonical production bundle
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-english-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-english-canonical
+
+      - name: Prepare custom-domain GitHub Pages bundle
+        run: |
+          set -euo pipefail
+          cp -a /tmp/alo186-english-canonical /tmp/alo186-english-custom
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-english-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-english-custom \
+            --base-path ''
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-english-custom \
+            --base-path '' > /tmp/english-shortlist-growth.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-english-custom \
+            --base-path ''
+
+      - name: English route and sitemap acceptance
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+
+          root = Path('/tmp/alo186-english-custom')
+          routes = [
+              '/en/',
+              '/en/electricity-outage-turkey/',
+              '/en/electricity-distribution-company-finder/',
+              '/en/emergency-numbers-turkey/',
+          ]
+          sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
+          release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
+          assert release['routingVersion'] >= 102, release['routingVersion']
+          for route in routes:
+              page = root / route.strip('/') / 'index.html'
+              assert page.is_file(), route
+              html = page.read_text(encoding='utf-8')
+              assert '<html lang="en">' in html, route
+              canonical = re.search(r'<link rel="canonical" href="([^"]+)"', html)
+              assert canonical and canonical.group(1) == f'https://www.alo186.com{route}', route
+              assert f'https://www.alo186.com{route}' in sitemap, route
+              assert 'href="tel:112"' in html and 'href="tel:186"' in html, route
+          assert (root / 'en/assets/styles.css').is_file()
+          assert (root / 'en/assets/finder.js').is_file()
+          assert (root / 'edas-bul/companies.js').is_file()
+          print(json.dumps({'routingVersion': release['routingVersion'], 'routes': routes}, ensure_ascii=False))
+          PY
+
+      - name: Upload validated English artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-english-core-site
+          path: /tmp/alo186-english-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
