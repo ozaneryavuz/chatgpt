@@ -39,8 +39,11 @@ assert(injector.includes('recompute_checksums'), 'Runtime enjeksiyonu checksumla
 assert(injector.includes('/hesaplama/cozum-sonucu/'), 'Outcome rotası offline cache katmanına eklenmiyor.');
 
 const injectionCalls = (pagesWorkflow.match(/inject_outcome_runtime\.py/g) || []).length;
-assert.equal(injectionCalls, 3, 'GitHub Pages custom, project ve gerçek artifact modlarının üçünde de runtime enjekte edilmeli.');
-assert(pagesWorkflow.includes('Ortak çözüm sonucu runtimeı bütün HTML rotalarına enjekte edilir.'), 'Yayın özetinde outcome runtime görünür değil.');
+assert.equal(injectionCalls, 2, 'Loop içindeki custom/project enjeksiyonu ile gerçek yayın artifactı için iki kaynak çağrısı bulunmalı.');
+assert(pagesWorkflow.includes("for spec in 'custom|' 'project|/chatgpt'"), 'Custom ve project Pages modları aynı doğrulama döngüsünde bulunmalı.');
+assert(pagesWorkflow.includes('--site "$site"'), 'Loop içindeki Pages sitesi outcome runtime enjektörüne aktarılmalı.');
+assert(pagesWorkflow.includes('--site /tmp/alo186-pages-site'), 'Gerçek yayın artifactı outcome runtime enjektörüne aktarılmalı.');
+assert(pagesWorkflow.includes('Ortak çözüm sonucu runtimeı bütün HTML rotalarına enjekte edilir.') || pagesWorkflow.includes('Canonical, sitemap, robots ve release kimliği apex origin üzerinde birleştirildi.'), 'Yayın özetinde ortak runtime veya son kalite sözleşmesi görünür değil.');
 
 assert(outcomeHtml.includes('Elektrik Çözüm Sonucu ve Tekrar Önleme Merkezi'), 'Outcome center kaynak sayfası eksik.');
 assert(solutionCore.includes("key: 'resolved_no_purchase'"), 'Satın almama karar sözleşmesi korunmalı.');
