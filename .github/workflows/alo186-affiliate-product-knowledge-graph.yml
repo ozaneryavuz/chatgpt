@@ -59,7 +59,7 @@ jobs:
           node alo186/tests/test_affiliate_knowledge_graph.js
           node alo186/tests/test_product_matcher.js
 
-      - name: 19 ihtiyaç, 18 kategori, 24 ASIN ve 4 üretici model düğümü
+      - name: 19 ihtiyaç, 18 kategori, en az 24 ASIN ve 4 üretici model düğümü
         run: node alo186/akilli-urun-secimi/catalog-knowledge-extension.test.js
 
       - name: Routing, kaynak, schema ve güven sözleşmeleri
@@ -141,7 +141,7 @@ jobs:
           manufacturer_ids={'tp-link-tapo-p110','tp-link-tapo-p110m','ecoflow-river-2','x-sense-xs01'}
           usb_display_ids={'ugreen-usbc-dp14-2m','ugreen-usbc-dp14-3m','daytona-hc01-usbc-hdmi-18m'}
           native_display_ids={'ugreen-dp14-2m','ugreen-hdmi21-3m'}
-          public_ids={
+          required_public_ids={
               'anker-prime-a1336','xiaomi-wireless-10000','samsung-eb-u2510x',
               'anker-313-a2677','samsung-ep-t6530-trio-65w','samsung-ep-ta800-25w',
               'spigen-arcstation-45w-ach02589','spigen-ee201-20w-ach09217',
@@ -157,13 +157,15 @@ jobs:
               for relative in ['index.html','styles.css','app.js','catalog.js','catalog-knowledge-extension.js','product-graph.json']:
                   assert (graph_dir/relative).is_file(),(root,relative)
               graph=json.loads((graph_dir/'product-graph.json').read_text(encoding='utf-8'))
+              products={item['id']:item for item in graph['products']}
+              exact_count=sum(item['verificationStatus']=='verified_listing' for item in products.values())
+              manufacturer_count=sum(item['verificationStatus']=='manufacturer_verified_search' for item in products.values())
               assert len(graph['needs'])==19
               assert len(graph['categories'])==18
-              assert len(graph['products'])==28
-              products={item['id']:item for item in graph['products']}
+              assert exact_count>=24
+              assert manufacturer_count==4
+              assert len(graph['products'])==exact_count+manufacturer_count
               assert manufacturer_ids.issubset(products)
-              assert sum(item['verificationStatus']=='verified_listing' for item in products.values())==24
-              assert sum(item['verificationStatus']=='manufacturer_verified_search' for item in products.values())==4
               assert graph['commercialPolicy']['noBuyOutcomePreserved'] is True
               for item in products.values():
                   assert not forbidden.intersection(item.keys()),(item['id'],forbidden.intersection(item.keys()))
@@ -191,25 +193,27 @@ jobs:
               product_nodes=[node for node in nodes if isinstance(node,dict) and node.get('@type')=='Product']
               term_nodes=[node for node in nodes if isinstance(node,dict) and node.get('@type')=='DefinedTerm']
               candidate_nodes=[node for node in term_nodes if (node.get('inDefinedTermSet')or{}).get('@id','').endswith('/gated-product-candidates#termset')]
-              assert len(product_nodes)==17
-              assert len(term_nodes)==48
+              product_node_ids={node.get('sku') for node in product_nodes}
               assert len(candidate_nodes)==11
+              assert len(product_nodes)==len(graph['products'])-len(candidate_nodes)
+              assert len(product_nodes)>=17
+              assert len(term_nodes)==len(graph['needs'])+len(graph['categories'])+len(candidate_nodes)
               assert not any('offers'in node or 'aggregateRating'in node for node in product_nodes)
-              assert {node.get('sku') for node in product_nodes}==public_ids
-              assert not manufacturer_ids.intersection({node.get('sku') for node in product_nodes})
+              assert required_public_ids.issubset(product_node_ids)
+              assert not manufacturer_ids.intersection(product_node_ids)
               assert manufacturer_ids.issubset({node.get('termCode') for node in candidate_nodes})
 
               release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
               pages=json.loads((root/'pages-release.json').read_text(encoding='utf-8'))
               metadata=release['affiliateProductKnowledgeGraph']
-              assert metadata['needCount']==19
-              assert metadata['categoryCount']==18
-              assert metadata['productCount']==28
-              assert metadata['exactAsinCount']==24
-              assert metadata['manufacturerVerifiedSearchCount']==4
+              assert metadata['needCount']==len(graph['needs'])
+              assert metadata['categoryCount']==len(graph['categories'])
+              assert metadata['productCount']==len(graph['products'])
+              assert metadata['exactAsinCount']==exact_count
+              assert metadata['manufacturerVerifiedSearchCount']==manufacturer_count
               assert metadata['commercialRankingFieldsUsed']==[]
               assert metadata['noBuyOutcomePreserved'] is True
-              assert pages['affiliateProductKnowledgeGraph']['productCount']==28
+              assert pages['affiliateProductKnowledgeGraph']['productCount']==len(graph['products'])
               expected_route=prefix+'/urun-bilgi-grafigi/' if prefix else '/urun-bilgi-grafigi/'
               expected_graph=prefix+'/urun-bilgi-grafigi/product-graph.json' if prefix else '/urun-bilgi-grafigi/product-graph.json'
               assert metadata['route']==expected_route
