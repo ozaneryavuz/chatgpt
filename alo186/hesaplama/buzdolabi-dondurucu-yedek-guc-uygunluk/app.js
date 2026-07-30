@@ -42,21 +42,35 @@
   }
 
   function foodSafetyWindow(input={}){
-    if(input.doorClosed!=='yes')return {hours:null,label:'Kapı açıldı veya kapalı tutulacağı doğrulanmadı',note:'4/24/48 saatlik resmî süreler yalnız kapı kapalı tutulduğunda kullanılan yaklaşık rehber değerlerdir.'};
-    if(input.applianceType==='fridge')return {hours:4,label:'Yaklaşık 4 saat',note:'Buzdolabı kapısı açılmazsa yaklaşık 4 saat soğuk kalabilir; gıda termometresiyle 4,4 °C veya altını doğrulayın.'};
+    const unknown={hours:null,refrigeratorHours:null,freezerHours:null,label:'Kapı açıldı veya kapalı tutulacağı doğrulanmadı',note:'4/24/48 saatlik resmî süreler yalnız kapı kapalı tutulduğunda kullanılan yaklaşık rehber değerlerdir.'};
+    if(input.doorClosed!=='yes')return unknown;
+
+    if(input.applianceType==='fridge'){
+      return {hours:4,refrigeratorHours:4,freezerHours:null,label:'Buzdolabı yaklaşık 4 saat',note:'Kapı açılmazsa buzdolabı yaklaşık 4 saat soğuk kalabilir; gerçek sıcaklığı cihaz termometresiyle 4 °C (40 °F) veya altında doğrulayın.'};
+    }
+
     if(input.applianceType==='fridge_freezer'){
-      return input.freezerFill==='full'
-        ? {hours:48,label:'Dondurucu bölümü yaklaşık 48 saat',note:'Tam dolu dondurucu bölümü kapı açılmazsa yaklaşık 48 saat sıcaklığı koruyabilir.'}
-        : input.freezerFill==='half'
-          ? {hours:24,label:'Dondurucu bölümü yaklaşık 24 saat',note:'Yarı dolu dondurucu bölümü kapı açılmazsa yaklaşık 24 saat sıcaklığı koruyabilir.'}
-          : {hours:4,label:'Buzdolabı bölümü yaklaşık 4 saat',note:'Doluluk bilinmiyorsa dondurucu için 24/48 saat varsayımı kullanmayın; buzdolabı bölümü için 4 saatlik kapalı-kapı rehberini esas alın.'};
+      const freezerHours=input.freezerFill==='full'?48:input.freezerFill==='half'?24:null;
+      const freezerText=freezerHours?`dondurucu yaklaşık ${freezerHours} saat`:'dondurucu doluluğu doğrulanmalı';
+      const freezerNote=freezerHours
+        ? `${input.freezerFill==='full'?'Tam':'Yarı'} dolu dondurucu bölümü kapı açılmazsa yaklaşık ${freezerHours} saat sıcaklığı koruyabilir.`
+        : 'Dondurucunun tam veya yarı dolu olduğu bilinmeden 24/48 saatlik süre kullanılmaz.';
+      return {
+        hours:4,
+        refrigeratorHours:4,
+        freezerHours,
+        label:`Buzdolabı yaklaşık 4 saat · ${freezerText}`,
+        note:`Buzdolabı bölümü için 4 saatlik sınır her durumda ayrıca korunur. ${freezerNote} Gerçek sıcaklığı termometreyle doğrulayın.`
+      };
     }
+
     if(['upright_freezer','chest_freezer'].includes(input.applianceType)){
-      if(input.freezerFill==='full')return {hours:48,label:'Yaklaşık 48 saat',note:'Tam dolu dondurucu kapı açılmazsa yaklaşık 48 saat sıcaklığı koruyabilir.'};
-      if(input.freezerFill==='half')return {hours:24,label:'Yaklaşık 24 saat',note:'Yarı dolu dondurucu kapı açılmazsa yaklaşık 24 saat sıcaklığı koruyabilir.'};
-      return {hours:null,label:'Doluluk doğrulanmalı',note:'Dondurucunun tam veya yarı dolu olduğu bilinmeden 24/48 saatlik rehber süre seçilmez.'};
+      if(input.freezerFill==='full')return {hours:48,refrigeratorHours:null,freezerHours:48,label:'Dondurucu yaklaşık 48 saat',note:'Tam dolu dondurucu kapı açılmazsa yaklaşık 48 saat sıcaklığı koruyabilir.'};
+      if(input.freezerFill==='half')return {hours:24,refrigeratorHours:null,freezerHours:24,label:'Dondurucu yaklaşık 24 saat',note:'Yarı dolu dondurucu kapı açılmazsa yaklaşık 24 saat sıcaklığı koruyabilir.'};
+      return {hours:null,refrigeratorHours:null,freezerHours:null,label:'Dondurucu doluluğu doğrulanmalı',note:'Dondurucunun tam veya yarı dolu olduğu bilinmeden 24/48 saatlik rehber süre seçilmez.'};
     }
-    return {hours:null,label:'Ticari cihaz için genel süre kullanılmaz',note:'Ticari soğutucuda ürün yükü, kapı kullanımı, sıcaklık kaydı ve işletme prosedürü birlikte değerlendirilmelidir.'};
+
+    return {hours:null,refrigeratorHours:null,freezerHours:null,label:'Ticari cihaz için genel süre kullanılmaz',note:'Ticari soğutucuda ürün yükü, kapı kullanımı, sıcaklık kaydı ve işletme prosedürü birlikte değerlendirilmelidir.'};
   }
 
   function calculations(input={}){
@@ -68,8 +82,13 @@
     const hours=n(input.targetHours);
     if(!(hours>0))return null;
 
+    const phaseFactor=input.phase==='three'?Math.sqrt(3):1;
     let runningW=labelW;
-    if(!(runningW>0)&&voltage>0&&current>0)runningW=voltage*current*pf;
+    let powerFromCurrent=false;
+    if(!(runningW>0)&&voltage>0&&current>0){
+      runningW=phaseFactor*voltage*current*pf;
+      powerFromCurrent=true;
+    }
     if(!(runningW>0))return null;
 
     const explicitStartup=n(input.startupW);
@@ -81,9 +100,8 @@
     const defaultDuty=DUTY_CYCLE_DEFAULT[input.applianceType]??null;
     const dutyPct=explicitDuty??defaultDuty;
     if(!(dutyPct>0&&dutyPct<=100))return null;
-    const duty=dutyPct/100;
 
-    const compressorAverageW=runningW*duty;
+    const compressorAverageW=runningW*(dutyPct/100);
     const averageW=compressorAverageW+otherW;
     const totalRunningW=runningW+otherW;
     const requiredContinuousW=totalRunningW*RESERVE;
@@ -92,14 +110,45 @@
     const approximateVA=requiredContinuousW/0.8;
 
     return {
-      labelW:labelW>0?round(labelW):null,voltage:voltage>0?round(voltage):null,current:current>0?round(current,2):null,
-      pf:round(pf,2),pfAssumed:n(input.powerFactor)===null,runningW:round(runningW),startupW:round(startupW),
-      startupAssumed:!(explicitStartup>0),multiplier:explicitStartup>0?null:multiplier,
-      dutyPct:round(dutyPct),dutyAssumed:explicitDuty===null,compressorAverageW:round(compressorAverageW),
-      otherW:round(otherW),averageW:round(averageW),totalRunningW:round(totalRunningW),
-      requiredContinuousW:round(requiredContinuousW),requiredSurgeW:round(requiredSurgeW),
-      requiredWh:round(requiredWh),approximateVA:round(approximateVA),targetHours:round(hours,2)
+      labelW:labelW>0?round(labelW):null,
+      voltage:voltage>0?round(voltage):null,
+      current:current>0?round(current,2):null,
+      phaseFactor:round(phaseFactor,3),
+      powerFromCurrent,
+      pf:round(pf,2),
+      pfAssumed:n(input.powerFactor)===null,
+      runningW:round(runningW),
+      startupW:round(startupW),
+      startupAssumed:!(explicitStartup>0),
+      multiplier:explicitStartup>0?null:multiplier,
+      dutyPct:round(dutyPct),
+      dutyAssumed:explicitDuty===null,
+      compressorAverageW:round(compressorAverageW),
+      otherW:round(otherW),
+      averageW:round(averageW),
+      totalRunningW:round(totalRunningW),
+      requiredContinuousW:round(requiredContinuousW),
+      requiredSurgeW:round(requiredSurgeW),
+      requiredWh:round(requiredWh),
+      approximateVA:round(approximateVA),
+      targetHours:round(hours,2)
     };
+  }
+
+  function foodSafetyIssues(input,safety,outageHours){
+    return uniq([
+      input.doorClosed!=='yes'&&'Kapı açıldıysa resmî 4/24/48 saat rehber süreleri doğrudan kullanılamaz.',
+      outageHours!==null&&safety.refrigeratorHours!==null&&outageHours>safety.refrigeratorHours&&`Buzdolabı bölümü için yaklaşık ${safety.refrigeratorHours} saatlik kapalı-kapı rehber penceresi aşıldı.`,
+      outageHours!==null&&safety.freezerHours!==null&&outageHours>safety.freezerHours&&`Dondurucu bölümü için yaklaşık ${safety.freezerHours} saatlik kapalı-kapı rehber penceresi aşıldı.`
+    ]);
+  }
+
+  function chooseCategory(input,metrics){
+    if(input.sourceType==='power_station')return 'power_station';
+    if(input.sourceType==='inverter')return 'inverter';
+    if(input.sourceType==='generator')return 'generator';
+    return metrics.requiredContinuousW<=1500&&metrics.requiredSurgeW<=3000&&metrics.requiredWh<=3000&&metrics.targetHours<=12
+      ?'power_station':'generator';
   }
 
   function evaluate(input={}){
@@ -135,6 +184,7 @@
     const targetHours=n(input.targetHours);
     const outageHours=n(input.outageHours);
     const hasRunningData=labelW>0||(voltage>0&&current>0);
+
     if(!hasRunningData)evidence.push('Etiket giriş gücü veya V/A bilgisi doğrulanmadı.');
     if(labelW!==null&&(labelW<20||labelW>10000))evidence.push('Etiket giriş gücü 20–10.000 W aralığında olmalıdır.');
     if(voltage!==null&&(voltage<100||voltage>500))evidence.push('Etiket gerilimi 100–500 V aralığında olmalıdır.');
@@ -171,7 +221,7 @@
       result.foodSafety=safety;
       result.issues=uniq([
         fixed&&'Sabit tesisat bağlantısı transfer, koruma ve nötr düzeni gerektirir.',
-        three&&'Trifaze sistemde faz sırası, dengesizlik ve kaynak regülasyonu doğrulanmalıdır.',
+        three&&'Trifaze V/A hesabında √3 katsayısı kullanıldı; faz sırası, dengesizlik ve kaynak regülasyonu ayrıca doğrulanmalıdır.',
         commercial&&'Ticari soğuk zincirde sıcaklık kaydı, alarm ve işletme prosedürü gerekir.',
         highPower&&'Gerçek giriş gücü tüketici tipi taşınabilir kaynak sınırını aşıyor.'
       ]);
@@ -180,6 +230,7 @@
       return result;
     }
 
+    let sourceAssessment=null;
     if(input.sourceStatus==='existing'){
       const continuous=n(input.sourceContinuousW);
       const surge=n(input.sourceSurgeW);
@@ -201,8 +252,35 @@
       const waveformOk=input.waveform==='pure';
       const outputOk=input.outputSpec==='confirmed';
       const startOk=input.startTest==='success';
+      const capacityIssues=uniq([
+        !continuousOk&&`Mevcut kaynağın ${round(continuous)} W sürekli gücü, gereken yaklaşık ${metrics.requiredContinuousW} W değerinin altında.`,
+        !surgeOk&&`Mevcut kaynağın ${round(surge)} W tepe gücü, kompresör için gereken yaklaşık ${metrics.requiredSurgeW} W değerinin altında.`,
+        !whOk&&`Mevcut kaynağın ${round(wh)} Wh enerjisi, hedef süre için gereken yaklaşık ${metrics.requiredWh} Wh değerinin altında.`
+      ]);
+      const compatibilityIssues=uniq([
+        !waveformOk&&'Saf sinüs çıkış doğrulanmadı.',
+        !outputOk&&'230 V / 50 Hz ve üretici cihaz kullanım uygunluğu doğrulanmadı.',
+        !startOk&&(input.startTest==='failed'?'Kontrollü kompresör başlatma testi başarısız oldu.':'Kontrollü kompresör başlatma testi yapılmadı.')
+      ]);
+      sourceAssessment={continuousOk,surgeOk,whOk,waveformOk,outputOk,startOk,capacityIssues,compatibilityIssues};
+    }
 
-      if(continuousOk&&surgeOk&&whOk&&waveformOk&&outputOk&&startOk){
+    if(input.scenario==='active'){
+      const result=base('active_event','Aktif kesintide önce gıda güvenliği ve mevcut kaynak sınırlarını yönetin','Ürün teslimatını anlık çözüm olarak beklemeyin. Kapıları kapalı tutun, sıcaklığı termometreyle izleyin ve yetersiz kaynağı zorlamayın.');
+      result.metrics=metrics;
+      result.foodSafety=safety;
+      result.issues=uniq([
+        ...foodSafetyIssues(input,safety,outageHours),
+        ...(sourceAssessment?sourceAssessment.capacityIssues:[]),
+        ...(sourceAssessment?sourceAssessment.compatibilityIssues:[])
+      ]);
+      result.steps=['Kapıları mümkün olduğunca kapalı tutun.','Buzdolabında gerçek sıcaklığı 4 °C (40 °F) veya altında termometreyle doğrulayın.','Kaynak kapasitesi veya başlatma testi yetersizse cihazı tekrar tekrar çalıştırmayı denemeyin.','Güvenli süre aşılacaksa buz/soğutucu ve gıda imha kararını resmî gıda güvenliği rehberine göre uygulayın.'];
+      result.toolKeys=['compare'];
+      return result;
+    }
+
+    if(sourceAssessment){
+      if(!sourceAssessment.capacityIssues.length&&!sourceAssessment.compatibilityIssues.length){
         const result=base('no_buy','Mevcut kaynak doğrulanmış eşikleri karşılıyorsa yeni ürün almayın','Girilen teknik değerler ve kontrollü kompresör başlatma testine göre mevcut kaynak yeterli görünüyor.');
         result.metrics=metrics;
         result.foodSafety=safety;
@@ -210,48 +288,27 @@
         result.toolKeys=['compare'];
         return result;
       }
-
-      if(continuousOk&&surgeOk&&whOk&&(!waveformOk||!outputOk||!startOk)){
+      if(!sourceAssessment.capacityIssues.length&&sourceAssessment.compatibilityIssues.length){
         const result=base('evidence_required','Güç değerleri yeterli görünse de uyumluluk kanıtı eksik','Kompresör ve elektronik kart için dalga biçimi, 230 V / 50 Hz çıkış ve gerçek başlatma testi doğrulanmadan uygunluk sonucu verilmez.');
         result.metrics=metrics;
         result.foodSafety=safety;
-        result.issues=uniq([
-          !waveformOk&&'Saf sinüs çıkış doğrulanmadı.',
-          !outputOk&&'230 V / 50 Hz ve üretici cihaz kullanım uygunluğu doğrulanmadı.',
-          !startOk&&(input.startTest==='failed'?'Kontrollü kompresör başlatma testi başarısız oldu.':'Kontrollü kompresör başlatma testi yapılmadı.')
-        ]);
+        result.issues=sourceAssessment.compatibilityIssues;
         result.steps=['Kaynağı üretici talimatına uygun yük altında test edin; korumaya geçerse daha büyük ürün satın almadan kök nedeni doğrulayın.'];
         result.toolKeys=['compare'];
         return result;
       }
     }
 
-    if(input.scenario==='active'){
-      const result=base('active_event','Aktif kesintide önce gıda güvenliği süresini yönetin','Ürün teslimatını anlık çözüm olarak beklemeyin. Kapıları kapalı tutun, sıcaklığı termometreyle izleyin ve gerektiğinde buzlu soğutucuya aktarın.');
-      result.metrics=metrics;
-      result.foodSafety=safety;
-      result.issues=uniq([
-        input.doorClosed!=='yes'&&'Kapı açıldıysa resmî 4/24/48 saat rehber süreleri doğrudan kullanılamaz.',
-        outageHours!==null&&safety.hours!==null&&outageHours>safety.hours&&`Girilen kesinti süresi ${safety.label.toLocaleLowerCase()} rehber penceresini aşıyor.`
-      ]);
-      result.steps=['Kapıları mümkün olduğunca kapalı tutun.','Buzdolabında 4,4 °C veya altını termometreyle doğrulayın.','Güvenli süre aşılacaksa buz/soğutucu ve gıda imha kararını resmî gıda güvenliği rehberine göre uygulayın.'];
-      result.toolKeys=['compare'];
-      return result;
-    }
-
-    let category='generator';
-    if(input.sourceType==='power_station'||(input.sourceType==='auto'&&metrics.requiredContinuousW<=1500&&metrics.requiredSurgeW<=3000&&metrics.requiredWh<=3000&&metrics.targetHours<=12))category='power_station';
-    else if(input.sourceType==='inverter')category='inverter';
-    else if(input.sourceType==='generator')category='generator';
-
+    const category=chooseCategory(input,metrics);
     const result=base('conditional_purchase','Kaynak yetersiz veya eksik; yalnız hesaplanan sınıfa ilerleyin','Bu sonuç belirli marka/model onayı değildir. Sürekli güç, kompresör başlangıcı, saf sinüs, çıkış kararlılığı ve enerji kapasitesi birlikte doğrulanmalıdır.');
     result.metrics=metrics;
     result.foodSafety=safety;
-    result.issues=[
+    result.issues=uniq([
+      ...(sourceAssessment?sourceAssessment.capacityIssues:[]),
       `En az yaklaşık ${metrics.requiredContinuousW} W sürekli güç gerekir.`,
       `Kompresör başlangıcı için yaklaşık ${metrics.requiredSurgeW} W kısa süreli kapasite gerekir.`,
       ...(['power_station','inverter'].includes(category)?[`Hedef süre için yaklaşık ${metrics.requiredWh} Wh nominal enerji gerekir.`]:[])
-    ];
+    ]);
     result.steps=['Üretici sayfasında sürekli güç ile tepe/X-Boost değerini ayırın.','Saf sinüs, 230 V / 50 Hz çıkış ve kompresör kullanım uygunluğunu doğrulayın.','Cihazı kontrollü gerçek başlatma ve süre testiyle kabul edin.'];
     result.commerceCategories=[category];
     result.toolKeys=[category];
@@ -281,7 +338,12 @@
       const wrap=doc.createElement('div');wrap.className='metrics';
       entries.forEach(([label,value])=>{const article=doc.createElement('article');const span=doc.createElement('span');span.textContent=label;const strong=doc.createElement('strong');strong.textContent=value;article.append(span,strong);wrap.appendChild(article);});
       area.appendChild(wrap);
-      const note=doc.createElement('p');note.className='privacy';note.textContent=`${metrics.pfAssumed?'Güç faktörü 0,85 varsayıldı. ':''}${metrics.startupAssumed?`Kalkış gücü cihaz türü için ${metrics.multiplier}× planlama katsayısıyla tahmin edildi. `:'Kalkış gücü üretici değeriyle hesaplandı. '}${metrics.dutyAssumed?`Enerji hesabında %${metrics.dutyPct} çalışma oranı varsayıldı; sıcak ortam ve kapı açılması tüketimi artırabilir.`:`Enerji hesabında girilen %${metrics.dutyPct} çalışma oranı kullanıldı.`}`;area.appendChild(note);
+      const notes=[];
+      if(metrics.pfAssumed)notes.push('Güç faktörü 0,85 varsayıldı.');
+      if(metrics.powerFromCurrent&&metrics.phaseFactor>1)notes.push('Trifaze V/A hesabında √3 katsayısı kullanıldı.');
+      notes.push(metrics.startupAssumed?`Kalkış gücü cihaz türü için ${metrics.multiplier}× planlama katsayısıyla tahmin edildi.`:'Kalkış gücü üretici değeriyle hesaplandı.');
+      notes.push(metrics.dutyAssumed?`Enerji hesabında %${metrics.dutyPct} çalışma oranı varsayıldı; sıcak ortam ve kapı açılması tüketimi artırabilir.`:`Enerji hesabında girilen %${metrics.dutyPct} çalışma oranı kullanıldı.`);
+      const note=doc.createElement('p');note.className='privacy';note.textContent=notes.join(' ');area.appendChild(note);
     };
     const renderSafety=safety=>{
       const area=$('foodSafetyArea');area.innerHTML='';
@@ -293,6 +355,7 @@
     };
     const renderTools=keys=>{const area=$('toolLinks');area.innerHTML='';keys.forEach(key=>{const item=TOOL_LINKS[key];if(!item)return;const a=doc.createElement('a');a.className='button';a.href=item.href;a.textContent=item.label;area.appendChild(a);});};
     const updateGate=()=>{$('openProducts').disabled=!gateReady($('actualNeed').checked,$('technicalCheck').checked,$('affiliateCheck').checked);};
+    const track=(event,payload)=>{if(typeof globalThis!=='undefined'&&typeof globalThis.Alo186Track==='function')globalThis.Alo186Track(event,payload);};
 
     function render(result){
       lastResult=result;
@@ -311,7 +374,7 @@
       ['actualNeed','technicalCheck','affiliateCheck'].forEach(id=>{$(id).checked=false;});
       $('openProducts').disabled=true;
       resultBox.focus();
-      if(window.Alo186Track)window.Alo186Track('calculator_result',{tool:'fridge_freezer_backup',result_status:result.status});
+      track('calculator_result',{tool:'fridge_freezer_backup',result_status:result.status});
     }
 
     form.addEventListener('submit',event=>{event.preventDefault();render(evaluate(input()));});
@@ -323,10 +386,10 @@
       if(!lastResult||lastResult.commerceClosed||!gateReady($('actualNeed').checked,$('technicalCheck').checked,$('affiliateCheck').checked))return;
       lastResult.commerceCategories.forEach(key=>{const item=CATEGORY_LINKS[key];if(!item)return;const a=doc.createElement('a');a.className='button';a.href=item.href;a.textContent=item.label;productLinks.appendChild(a);});
       productLinks.focus();
-      if(window.Alo186Track)window.Alo186Track('affiliate_category_gate_open',{tool:'fridge_freezer_backup',categories:lastResult.commerceCategories.join(',')});
+      track('affiliate_category_gate_open',{tool:'fridge_freezer_backup',categories:lastResult.commerceCategories.join(',')});
     });
     showExisting();
   }
 
-  return {ROUTE,PF_DEFAULT,RESERVE,SURGE_RESERVE,BATTERY_EFF,USABLE,START_MULTIPLIER,DUTY_CYCLE_DEFAULT,foodSafetyWindow,calculations,evaluate,gateReady,init};
+  return {ROUTE,PF_DEFAULT,RESERVE,SURGE_RESERVE,BATTERY_EFF,USABLE,START_MULTIPLIER,DUTY_CYCLE_DEFAULT,foodSafetyWindow,calculations,foodSafetyIssues,evaluate,gateReady,init};
 });
