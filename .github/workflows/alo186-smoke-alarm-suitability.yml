@@ -86,7 +86,8 @@ jobs:
           test -f "/tmp/alo186-smoke-pages/$route/app.js"
           grep -q 'Duman Alarmı Yerleşim ve Bakım Uygunluk Testi' "/tmp/alo186-smoke-pages/$route/index.html"
           grep -q 'Satış ortaklığı açıklaması' "/tmp/alo186-smoke-pages/$route/index.html"
-          grep -q '31 çekirdek araç' /tmp/alo186-smoke-pages/hesaplama/index.html
+          grep -Eq '[0-9]+ çekirdek araç' /tmp/alo186-smoke-pages/hesaplama/index.html
+          grep -q 'duman-alarmi-yerlesim-bakim-uygunluk' /tmp/alo186-smoke-pages/hesaplama/index.html
           grep -q 'duman-alarmi-yerlesim-bakim-uygunluk' /tmp/alo186-smoke-pages/sitemap.xml
           grep -q 'duman-alarmi-yerlesim-bakim-uygunluk' /tmp/alo186-smoke-pages/akilli-urun-secimi/catalog.js
           grep -q 'duman-alarmi-yerlesim-bakim-uygunluk' /tmp/alo186-smoke-pages/akilli-urun-secimi/journey-retention-core.js

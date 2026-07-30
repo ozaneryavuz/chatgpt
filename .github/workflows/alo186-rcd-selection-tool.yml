@@ -1,0 +1,153 @@
+name: ALO186 kaçak akım rölesi seçim ve açma testi
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/kacak-akim-rolesi-tip-hassasiyet-testi/**'
+      - 'alo186/hesaplama/index.html'
+      - 'alo186/deployment/routing-overlays/rcd-selection-troubleshooting-run35.json'
+      - 'alo186/tests/test_rcd_selection_tool.py'
+      - '.github/workflows/alo186-rcd-selection-tool.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/kacak-akim-rolesi-tip-hassasiyet-testi/**'
+      - 'alo186/hesaplama/index.html'
+      - 'alo186/deployment/routing-overlays/rcd-selection-troubleshooting-run35.json'
+      - 'alo186/tests/test_rcd_selection_tool.py'
+      - '.github/workflows/alo186-rcd-selection-tool.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-rcd-selection-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: RCD karar motoru ve güven sözleşmeleri
+        run: |
+          node alo186/hesaplama/kacak-akim-rolesi-tip-hassasiyet-testi/app.test.js
+          python alo186/tests/test_rcd_selection_tool.py
+
+      - name: JavaScript ve Python sözdizimi
+        run: |
+          node --check alo186/hesaplama/kacak-akim-rolesi-tip-hassasiyet-testi/app.js
+          python -m py_compile alo186/tests/test_rcd_selection_tool.py
+
+      - name: Mevcut güven ve routing regresyonları
+        run: |
+          python alo186/tests/test_content_intent_consolidation.py
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Canonical üretim paketini oluştur
+        run: |
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-rcd-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-rcd-canonical
+
+      - name: Custom-domain Pages artifactı
+        run: |
+          cp -a /tmp/alo186-rcd-canonical /tmp/alo186-rcd-custom
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-rcd-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-rcd-custom \
+            --base-path ''
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-rcd-custom \
+            --base-path '' \
+            > /tmp/alo186-rcd-custom.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-rcd-custom \
+            --base-path ''
+
+      - name: Project-path Pages artifactı
+        run: |
+          cp -a /tmp/alo186-rcd-canonical /tmp/alo186-rcd-project
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-rcd-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-rcd-project \
+            --base-path '/chatgpt'
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-rcd-project \
+            --base-path '/chatgpt' \
+            > /tmp/alo186-rcd-project.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-rcd-project \
+            --base-path '/chatgpt'
+
+      - name: Final artifact kabulü
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+
+          route='/hesaplama/kacak-akim-rolesi-tip-hassasiyet-testi/'
+          relative='./kacak-akim-rolesi-tip-hassasiyet-testi/'
+          for root,prefix in [(Path('/tmp/alo186-rcd-custom'),''),(Path('/tmp/alo186-rcd-project'),'/chatgpt')]:
+              page=root/route.strip('/')/'index.html'
+              app=page.with_name('app.js')
+              styles=page.with_name('styles.css')
+              assert page.is_file() and app.is_file() and styles.is_file()
+              html=page.read_text(encoding='utf-8')
+              js=app.read_text(encoding='utf-8')
+              assert html.count('<h1')==1
+              assert 'Kaçak Akım Rölesi Tipi ve Hassasiyet Uygunluk Testi' in html
+              assert 'Sabit pano cihazında doğrudan affiliate yönlendirmesi kapalıdır' in html
+              assert 'amazon.com' not in html.lower() and 'amzn.' not in html.lower()
+              assert 'localStorage' not in js and 'sessionStorage' not in js
+              blocks=re.findall(r'<script[^>]+type="application/ld\+json"[^>]*>(.*?)</script>',html,re.S|re.I)
+              types=set()
+              for block in blocks:
+                  payload=json.loads(block)
+                  for node in payload.get('@graph',[payload]):
+                      value=node.get('@type') if isinstance(node,dict) else None
+                      if isinstance(value,str):types.add(value)
+              assert {'WebApplication','DefinedTermSet','FAQPage','BreadcrumbList'}<=types
+              expected=prefix+route if prefix else route
+              search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
+              entry=next(item for item in search['entries'] if item['canonicalPath']==route)
+              assert entry['url']==expected
+              sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
+              assert f'<loc>https://www.alo186.com{route}</loc>' in sitemap
+              hub=(root/'hesaplama/index.html').read_text(encoding='utf-8')
+              assert relative in hub or expected in hub
+              assert 'Kaçak Akım Rölesi Tip ve Hassasiyet Testi' in hub
+          PY
+
+      - name: Doğrulanmış RCD modül artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-rcd-selection-tool-pages
+          path: /tmp/alo186-rcd-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
