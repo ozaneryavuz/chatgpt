@@ -69,7 +69,6 @@
     const frequencyCompatible=destination.frequency===null?input.frequency==='50_60':supportsFrequency(input.frequency,destination.frequency);
     const plugNeeded=destination.plug!=='C/F';
     const highPower=['heater','motor'].includes(input.deviceType)||input.deviceW>1000;
-    const frequencySensitive=['motor','other_sensitive'].includes(input.deviceType);
 
     if(!voltageCompatible){
       return {...base,status:'voltage_mismatch',title:'Priz adaptörü voltajı dönüştürmez',summary:`Cihaz etiketi ${input.minV}–${input.maxV} V; hedef şebeke yaklaşık ${destination.voltage} V. Yalnız fiş biçimini değiştiren adaptör bu uyumsuzluğu çözmez.`,actions:['Cihaz üreticisinden uygun voltaj dönüştürücü veya çift gerilimli alternatif doğrulayın.','Saç kurutma, ısıtıcı, su ısıtıcı ve motorlu yüksek güçlü cihazlarda küçük seyahat dönüştürücüsü kullanmayın.','Uygunluk kanıtı olmadan ürünü prize takmayın.']};
@@ -83,19 +82,22 @@
       return {...base,status:'evidence',title:'Japonya’daki hedef bölgenin frekansını doğrulayın',summary:'Japonya’da şebeke frekansı bölgeye göre 50 veya 60 Hz olabilir. Tek frekanslı cihazda şehir/bölge bilgisi doğrulanmadan ürün yolu açılmaz.',actions:['Konaklama veya cihaz üreticisi üzerinden hedef bölgenin 50/60 Hz bilgisini doğrulayın.','Motor, saat ve pompa gibi frekansa duyarlı cihazları kanıt olmadan çalıştırmayın.']};
     }
 
-    if(highPower){
-      return {...base,status:'professional',title:'Yüksek güçlü cihaz için genel adaptör rotası kapalı',summary:'Isıtıcı, saç kurutma, ütü, su ısıtıcı ve motorlu yüksek güçlü cihazlarda temas, topraklama, sigorta ve sürekli akım riski vardır.',actions:['Cihaz çift gerilimli değilse hedef ülkede uygun cihaz kullanın.','Yalnız ülkeye özel, topraklamayı koruyan ve sürekli güç değeri açık ürünleri üretici talimatıyla doğrulayın.','Adaptörleri art arda bağlamayın ve çoklu prizle yükü büyütmeyin.']};
+    if(!frequencyCompatible){
+      return {...base,status:'frequency_mismatch',title:'Frekans uyumu doğrulanmadı',summary:`Cihaz etiketi ${input.frequency==='50'?'50':'60'} Hz; hedef şebeke ${destination.frequencyLabel}. Fiş adaptörü frekansı değiştirmez.`,actions:['Cihazı üretici onayı olmadan çalıştırmayın.','Hedef ülkede uygun cihaz kullanmayı veya profesyonel dönüştürme çözümünü değerlendirin.','Frekans uyumsuzluğu giderilmeden affiliate veya mağaza yoluna ilerlemeyin.']};
     }
 
-    if(!frequencyCompatible&&frequencySensitive){
-      return {...base,status:'frequency_mismatch',title:'Frekans uyumu doğrulanmadı',summary:`Cihaz etiketi ${input.frequency==='50'?'50':'60'} Hz; hedef şebeke ${destination.frequencyLabel}. Fiş adaptörü frekansı değiştirmez.`,actions:['Motorlu veya zamanlamaya bağlı cihazı üretici onayı olmadan çalıştırmayın.','Hedef ülkede uygun cihaz kullanmayı veya profesyonel dönüştürme çözümünü değerlendirin.']};
+    if(highPower){
+      return {...base,status:'professional',title:'Yüksek güçlü cihaz için genel adaptör rotası kapalı',summary:'Isıtıcı, saç kurutma, ütü, su ısıtıcı ve motorlu yüksek güçlü cihazlarda temas, topraklama, sigorta ve sürekli akım riski vardır.',actions:['Cihaz çift gerilimli değilse hedef ülkede uygun cihaz kullanın.','Yalnız ülkeye özel, topraklamayı koruyan ve sürekli güç değeri açık ürünleri üretici talimatıyla doğrulayın.','Adaptörleri art arda bağlamayın ve çoklu prizle yükü büyütmeyin.']};
     }
 
     if(!plugNeeded){
       return {...base,status:'no_buy',title:'Yeni priz adaptörü gerekmiyor',summary:'Türkiye/Avrupa C/F fiş biçimi ve cihazın gerilim-frekans etiketi hedef şebekeyle uyumlu görünüyor.',actions:['Fiş, kablo ve adaptörde hasar olmadığını kontrol edin.','Cihaz üreticisinin ülkeye özel uyarılarını yeniden okuyun.','Mevcut şarj cihazınız yeterliyse yeni ürün almayın.']};
     }
 
-    const adapterCapacityW=Math.max(input.adapterMaxW,input.adapterMaxA>0?input.adapterMaxA*destination.voltage:0);
+    const capacityLimits=[];
+    if(input.adapterMaxW>0)capacityLimits.push(input.adapterMaxW);
+    if(input.adapterMaxA>0)capacityLimits.push(input.adapterMaxA*destination.voltage);
+    const adapterCapacityW=capacityLimits.length?Math.min(...capacityLimits):0;
     const earthRequired=input.earthClass==='earth_required';
     const existingAdequate=input.existingAdapter==='yes'&&
       input.safetyEvidence==='yes'&&input.recallChecked==='yes'&&
