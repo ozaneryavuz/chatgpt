@@ -34,6 +34,13 @@ table { max-width: 100%; border-collapse: collapse; }
 a, button, input, select, textarea, summary { touch-action: manipulation; }
 button, a[role="button"], input[type="submit"], input[type="button"] { min-height: 44px; }
 input, select, textarea { max-width: 100%; font-size: 16px; }
+:where(.item, .field, .form-row, .control, .input-group) > * {
+  min-width: 0;
+  max-width: 100%;
+}
+:where(.item, .field, .form-row, .control, .input-group) > select {
+  width: 100%;
+}
 :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
   outline: 3px solid var(--alo-ux-focus);
   outline-offset: 3px;
@@ -203,6 +210,13 @@ a[data-alo-affiliate-badge="true"]::after {
   white-space: nowrap;
 }
 
+body[data-alo186-consent-banner-visible="true"] #alo186-consent {
+  position: relative !important;
+  inset: auto !important;
+  width: min(calc(100% - 24px), 760px);
+  margin: .75rem auto 1rem !important;
+}
+
 @media (max-width: 900px) {
   .alo-ux-next-grid { grid-template-columns: 1fr; }
   .alo-ux-next-grid a { min-height: 96px; }
@@ -211,6 +225,12 @@ a[data-alo-affiliate-badge="true"]::after {
 @media (max-width: 720px) {
   body:not([data-alo186-ux-compact="true"]) {
     padding-bottom: calc(68px + env(safe-area-inset-bottom));
+  }
+  body[data-alo186-consent-banner-visible="true"] {
+    padding-bottom: 0;
+  }
+  body[data-alo186-consent-banner-visible="true"] :where(.alo-ux-mobilebar, .mobile-dock, .bottom-dock, [data-mobile-dock="true"]) {
+    display: none !important;
   }
   .alo-ux-mobilebar {
     position: fixed;
@@ -251,6 +271,9 @@ a[data-alo-affiliate-badge="true"]::after {
   body:not([data-alo186-ux-compact="true"]) .alo186-consent,
   body:not([data-alo186-ux-compact="true"]) .alo186-consent-settings {
     bottom: calc(78px + env(safe-area-inset-bottom));
+  }
+  body[data-alo186-consent-banner-visible="true"] #alo186-consent {
+    bottom: auto !important;
   }
   h1 { hyphens: auto; }
   p, li { overflow-wrap: anywhere; }
