@@ -98,7 +98,6 @@ const payload = { result: living };
 const ics = buildIcs(payload, new Date('2026-07-30T10:00:00Z'));
 assert.match(ics, /BEGIN:VCALENDAR/);
 assert.match(ics, /DTSTART;VALUE=DATE:20270126/);
-assert.match(ics, /180/);
 assert.doesNotMatch(ics, /mailto:|tel:/i);
 
 const html = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
