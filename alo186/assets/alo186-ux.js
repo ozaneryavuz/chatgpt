@@ -5,6 +5,7 @@
   if (!body || body.dataset.alo186Ux === 'ready') return;
   body.dataset.alo186Ux = 'ready';
 
+  const ROOT = String.fromCharCode(47);
   const main = doc.querySelector('main');
   if (main && !main.id) main.id = 'main-content';
   if (main && !doc.querySelector(`a[href="#${CSS.escape(main.id)}"]`)) {
@@ -44,14 +45,14 @@
     link.setAttribute('rel', [...rel].join(' '));
   });
 
-  const normalizePath = (value) => value.replace(/\/+$/, '') || '/';
+  const normalizePath = (value) => value.replace(/\/+$/, '') || ROOT;
   const scriptUrl = new URL(doc.currentScript?.src || location.href, location.href);
-  const assetSuffix = '/assets/alo186-ux.js';
+  const assetSuffix = `${ROOT}assets${ROOT}alo186-ux.js`;
   const basePath = scriptUrl.pathname.endsWith(assetSuffix) ? scriptUrl.pathname.slice(0, -assetSuffix.length) : '';
-  const publicPath = (route) => `${basePath}${route === '/' ? '/' : route}`.replace(/\/+/g, '/');
+  const publicPath = (route) => `${basePath}${route === ROOT ? ROOT : route}`.replace(/\/+/g, ROOT);
   const current = normalizePath(location.pathname);
   const markCurrent = (root = doc) => {
-    root.querySelectorAll('a[href^="/"]').forEach((link) => {
+    root.querySelectorAll(`a[href^="${ROOT}"]`).forEach((link) => {
       const target = normalizePath(new URL(link.href, location.origin).pathname);
       if (target === current) link.setAttribute('aria-current', 'page');
     });
@@ -94,10 +95,10 @@
     nav.className = 'alo-ux-mobilebar';
     nav.setAttribute('aria-label', 'Mobil hızlı erişim');
     nav.innerHTML = [
-      [publicPath('/'), '⌂', 'Ana sayfa'],
-      [publicPath('/edas-bul/'), '186', 'EDAŞ bul'],
-      [publicPath('/arama/'), '⌕', 'Ara'],
-      [publicPath('/acil-numaralar/'), '!', 'Acil']
+      [publicPath(ROOT), '⌂', 'Ana sayfa'],
+      [publicPath(`${ROOT}edas-bul/`), '186', 'EDAŞ bul'],
+      [publicPath(`${ROOT}arama/`), '⌕', 'Ara'],
+      [publicPath(`${ROOT}acil-numaralar/`), '!', 'Acil']
     ].map(([href, icon, label]) => `<a href="${href}"><b aria-hidden="true">${icon}</b><span>${label}</span></a>`).join('');
     body.appendChild(nav);
     markCurrent(nav);
