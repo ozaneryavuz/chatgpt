@@ -155,12 +155,17 @@ jobs:
               assert 'data-commercial-scope="professional-only"' in ges
               assert 'data-product-center' not in ges
               hub=(root/'amazon-elektrik-urunleri/index.html').read_text(encoding='utf-8')
-              guide_links=set(re.findall(r'href="(/(?:chatgpt/)?amazon-elektrik-urunleri/[^"?#]+)"', hub))
+              card_blocks=re.findall(r'<article class="card route-card">.*?</article>', hub, re.S)
+              guide_links=set()
+              for block in card_blocks:
+                  match=re.search(r'href="(/(?:chatgpt/)?amazon-elektrik-urunleri/[^"?#]+)"', block)
+                  assert match, block[:160]
+                  guide_links.add(match.group(1))
               display=re.search(r'(\d+) özel rehber', hub)
               assert display, 'Görünür rehber sayacı bulunamadı'
               assert len(guide_links) == int(display.group(1)), guide_links
               assert len(guide_links) >= 7, guide_links
-              assert hub.count('class="card route-card"') == len(guide_links)
+              assert len(card_blocks) == len(guide_links)
           PY
 
       - name: Kaliteli ticari genişleme artifactı
