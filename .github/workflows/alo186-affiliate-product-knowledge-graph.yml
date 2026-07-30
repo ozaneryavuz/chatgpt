@@ -9,7 +9,7 @@ on:
       - 'alo186/katalog-guven-durumu/**'
       - 'alo186/deployment/inject_affiliate_product_graph.py'
       - 'alo186/deployment/inject_growth_run15.py'
-      - 'alo186/tests/test_affiliate_product_knowledge_graph.py'
+      - 'alo186/tests/test_affiliate_product_knowledge_graph*.py'
       - '.github/workflows/alo186-affiliate-product-knowledge-graph.yml'
   push:
     branches: [main]
@@ -20,7 +20,7 @@ on:
       - 'alo186/katalog-guven-durumu/**'
       - 'alo186/deployment/inject_affiliate_product_graph.py'
       - 'alo186/deployment/inject_growth_run15.py'
-      - 'alo186/tests/test_affiliate_product_knowledge_graph.py'
+      - 'alo186/tests/test_affiliate_product_knowledge_graph*.py'
       - '.github/workflows/alo186-affiliate-product-knowledge-graph.yml'
   workflow_dispatch:
 
@@ -64,6 +64,7 @@ jobs:
           node --check alo186/urun-bilgi-grafigi/app.js
           python -m py_compile alo186/deployment/inject_affiliate_product_graph.py
           python -m py_compile alo186/deployment/inject_growth_run15.py
+          python -m py_compile alo186/tests/test_affiliate_product_knowledge_graph_artifact.py
 
       - name: Yayın ve güvenlik regresyonları
         run: |
@@ -121,105 +122,12 @@ jobs:
       - name: Run7 ürün, içerik ve affiliate güven sözleşmesi
         run: |
           set -euo pipefail
-          python - <<'PY'
-          import json
-          import re
-          from pathlib import Path
-
-          run7_models = {
-              'apc-bx1600mi-gr', 'cyberpower-cp1500epfclcd',
-              'fluke-117', 'fluke-325', 'flir-c5',
-              'bosch-universaltemp-06036831z0', 'ctek-mxs-5-0-eu',
-              'noco-genius5', 'bosch-procore18v-5-5ah-1600a02149',
-              'milwaukee-m18-hb5-5-4932464712'
-          }
-          run7_categories = {'computer_ups', 'multimeter', 'thermal_imager', 'battery_charger', 'tool_battery'}
-          expected_tools = {
-              '/hesaplama/bilgisayar-gaming-pc-nas-ups-uygunluk/',
-              '/hesaplama/multimetre-pensampermetre-cat-uygunluk/',
-              '/hesaplama/termal-kamera-kizilotesi-termometre-uygunluk/',
-              '/hesaplama/arac-aku-sarj-cihazi-takviye-uygunluk/',
-              '/hesaplama/akulu-el-aleti-batarya-sarj-uygunluk/'
-          }
-          forbidden = {'price', 'stock', 'rating', 'seller', 'delivery', 'warranty', 'affiliateCommission'}
-
-          for root, prefix in [
-              (Path('/tmp/alo186-product-graph-custom'), ''),
-              (Path('/tmp/alo186-product-graph-project'), '/chatgpt'),
-          ]:
-              graph_dir = root / 'urun-bilgi-grafigi'
-              matcher_dir = root / 'akilli-urun-secimi'
-              for path in [
-                  graph_dir / 'index.html', graph_dir / 'product-graph.json',
-                  graph_dir / 'catalog-growth-run7.js',
-                  matcher_dir / 'catalog-growth-run6.js', matcher_dir / 'catalog-growth-run7.js'
-              ]:
-                  assert path.is_file(), path
-
-              graph = json.loads((graph_dir / 'product-graph.json').read_text(encoding='utf-8'))
-              assert graph['version'] == '2026-07-30-run7-user-growth'
-              assert len(graph['needs']) == 23
-              assert len(graph['categories']) == 23
-              assert len(graph['products']) == 55
-              categories = {item['id']: item for item in graph['categories']}
-              products = {item['id']: item for item in graph['products']}
-              assert run7_categories.issubset(categories)
-              assert run7_models.issubset(products)
-              assert sum(item['verificationStatus'] == 'verified_listing' for item in products.values()) == 20
-              assert sum(item['verificationStatus'] == 'manufacturer_verified_search' for item in products.values()) == 35
-              assert graph['commercialPolicy']['noBuyOutcomePreserved'] is True
-              assert graph['commercialPolicy']['manufacturerVerifiedSearchRequiresExactModelRecheck'] is True
-              for item_id in run7_models:
-                  item = products[item_id]
-                  assert item['identifier']['type'] == 'Model'
-                  assert item['linkMode'] == 'exact_model_search'
-                  assert item['officialSource'].startswith('https://')
-                  assert item['relatedTools']
-                  assert len(item['requiredEvidence']) >= 4
-                  assert not forbidden.intersection(item)
-              assert expected_tools.issubset({url for item in products.values() for url in item.get('relatedTools', [])})
-
-              html = (graph_dir / 'index.html').read_text(encoding='utf-8')
-              assert '55 ürün/model düğümü' in html
-              assert 'Beş yeni kullanıcı yolculuğu' in html
-              assert 'catalog-growth-run7.js' in html
-              payloads = [json.loads(block) for block in re.findall(
-                  r'<script[^>]+type="application/ld\+json"[^>]*>(.*?)</script>', html, re.S | re.I
-              )]
-              nodes = [node for payload in payloads for node in payload.get('@graph', [])]
-              product_nodes = [node for node in nodes if isinstance(node, dict) and node.get('@type') == 'Product']
-              term_nodes = [node for node in nodes if isinstance(node, dict) and node.get('@type') == 'DefinedTerm']
-              candidates = [
-                  node for node in term_nodes
-                  if (node.get('inDefinedTermSet') or {}).get('@id', '').endswith('/gated-product-candidates#termset')
-              ]
-              assert len(product_nodes) == 13
-              assert len(term_nodes) == 88
-              assert len(candidates) == 42
-              assert run7_models.issubset({node.get('termCode') for node in candidates})
-              assert not run7_models.intersection({node.get('sku') for node in product_nodes})
-              assert not any('offers' in node or 'aggregateRating' in node for node in product_nodes)
-
-              release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
-              pages = json.loads((root / 'pages-release.json').read_text(encoding='utf-8'))
-              metadata = release['affiliateProductKnowledgeGraph']
-              assert metadata['needCount'] == 23
-              assert metadata['categoryCount'] == 23
-              assert metadata['productCount'] == 55
-              assert metadata['exactAsinCount'] == 20
-              assert metadata['manufacturerVerifiedSearchCount'] == 35
-              assert metadata['publicProductCount'] == 13
-              assert metadata['gatedCandidateCount'] == 42
-              assert metadata['commercialRankingFieldsUsed'] == []
-              assert metadata['noBuyOutcomePreserved'] is True
-              assert pages['affiliateProductKnowledgeGraph']['productCount'] == 55
-
-              matcher = (matcher_dir / 'index.html').read_text(encoding='utf-8')
-              assert 'catalog-growth-run6.js' in matcher
-              assert 'catalog-growth-run7.js' in matcher
-              expected_route = prefix + '/urun-bilgi-grafigi/' if prefix else '/urun-bilgi-grafigi/'
-              assert metadata['route'] == expected_route
-          PY
+          python alo186/tests/test_affiliate_product_knowledge_graph_artifact.py \
+            --site /tmp/alo186-product-graph-custom \
+            --base-path ''
+          python alo186/tests/test_affiliate_product_knowledge_graph_artifact.py \
+            --site /tmp/alo186-product-graph-project \
+            --base-path '/chatgpt'
 
       - name: Doğrulanmış Product Knowledge Graph artifactı
         uses: actions/upload-artifact@v4
