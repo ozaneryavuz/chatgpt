@@ -5,7 +5,7 @@ import re
 from pathlib import Path
 
 import prepare_github_pages_core as _core
-from finalize_live_quality import CANONICAL_ORIGIN
+from finalize_live_quality import CANONICAL_HOST, CANONICAL_ORIGIN
 from prepare_github_pages_core import *  # noqa: F401,F403
 
 
@@ -139,6 +139,10 @@ def prepare(site: Path, base_path: str, repository: str, commit: str) -> dict:
 
     release_path = site / "pages-release.json"
     release = json.loads(release_path.read_text(encoding="utf-8")) if release_path.is_file() else dict(result)
+    # Yalnız metadata canlı hedefi baştan ilan eder. HTML, sitemap ve JSON-LD origin
+    # dönüşümü growth enjektörlerinden sonra final kalite katmanında uygulanır.
+    release["canonicalHost"] = CANONICAL_ORIGIN
+    release["customDomain"] = CANONICAL_HOST
     release["rootDeviceDamageDeadline"] = "10 iş günü"
     release["rootNoApplicationDisclaimer"] = True
     release["primaryStartRoute"] = _core.public_url(normalized, PRIMARY_START_ROUTE)
