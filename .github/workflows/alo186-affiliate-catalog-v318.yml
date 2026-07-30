@@ -34,7 +34,7 @@ jobs:
       - name: Katalog, güven ve tekillik sözleşmeleri
         run: |
           node --check alo186/urun-eslestirme/catalog.js
-          python -m pytest -q alo186/tests/test_affiliate_catalog_expansion_v318.py
+          python alo186/tests/test_affiliate_catalog_expansion_v318.py
           python alo186/tests/test_commerce_governance_v2.py
       - name: Katalog sağlık ve Knowledge Graph kabulü
         run: |
