@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 from pathlib import Path
 
 TRUST_ROUTE = "/gelir-ve-bagimsizlik/"
@@ -43,13 +44,24 @@ def route_file(site: Path, route: str) -> Path:
     return site / route.strip("/") / "index.html"
 
 
+def last_match_start(html: str, pattern: str) -> int:
+    """Case-insensitive etiketi özgün metindeki gerçek indeksle bulur.
+
+    `html.lower().rfind(...)` Türkçe büyük İ gibi karakterlerde metin uzunluğunu
+    değiştirebildiği için sonraki etiketi iki karakter içeriden bölebilir.
+    """
+
+    matches = list(re.finditer(pattern, html, re.I))
+    return matches[-1].start() if matches else -1
+
+
 def insert_before_end(html: str, block: str) -> tuple[str, bool]:
     if MARKER in html:
         return html, False
-    footer_index = html.lower().rfind("<footer")
+    footer_index = last_match_start(html, r"<footer\b")
     if footer_index >= 0:
         return html[:footer_index] + block + html[footer_index:], True
-    body_index = html.lower().rfind("</body>")
+    body_index = last_match_start(html, r"</body\s*>")
     if body_index >= 0:
         return html[:body_index] + block + html[body_index:], True
     raise RuntimeError("HTML footer/body kapanış etiketi bulunamadı")
@@ -82,8 +94,7 @@ def inject_gateway(site: Path, relative: Path, base_path: str) -> bool:
     html = path.read_text(encoding="utf-8", errors="ignore")
     if GATEWAY_MARKER in html:
         return False
-    marker = "</main>"
-    index = html.lower().rfind(marker)
+    index = last_match_start(html, r"</main\s*>")
     if index < 0:
         return False
     html = html[:index] + gateway_block(base_path) + html[index:]
@@ -109,7 +120,6 @@ def register_target(targets: dict[str, tuple[str, bool]], route: str, route_type
 
 def discover_targets(site: Path, release: dict, base_path: str) -> dict[str, tuple[str, bool]]:
     targets: dict[str, tuple[str, bool]] = {}
-
     for item in release.get("routes", []):
         route = canonical_path(item.get("canonicalPath"), base_path)
         route_type = str(item.get("type") or "")
@@ -132,7 +142,6 @@ def discover_targets(site: Path, release: dict, base_path: str) -> dict[str, tup
 
     if route_file(site, CORPORATE_ROUTE).is_file():
         register_target(targets, CORPORATE_ROUTE, "service", False)
-
     return targets
 
 
@@ -143,7 +152,7 @@ def update_release(site: Path, injected: int, gateway_cards: int, target_count: 
             continue
         payload = json.loads(path.read_text(encoding="utf-8"))
         payload["revenueTrustProofGrowth"] = {
-            "version": 2,
+            "version": 3,
             "trustRoute": TRUST_ROUTE,
             "sampleDeliverablesRoute": SAMPLE_ROUTE,
             "recurringServiceRoute": MONITOR_ROUTE,
@@ -152,6 +161,7 @@ def update_release(site: Path, injected: int, gateway_cards: int, target_count: 
             "trustPanelsInjectedThisPass": injected,
             "gatewaySectionsInjectedThisPass": gateway_cards,
             "targetDiscovery": ["release-manifest", "physical-commerce-routes", "physical-service-routes"],
+            "unicodeSafeInsertion": True,
             "rawPersonalDataCollected": False,
             "automaticRenewal": False,
             "directStoreLinksAdded": 0,
@@ -194,12 +204,17 @@ def run(site: Path, base_path: str = "") -> dict:
         raise FileNotFoundError("Gelir/güven paneli uygulanacak rotalar eksik: " + ", ".join(sorted(missing)))
 
     unprotected: list[str] = []
+    malformed: list[str] = []
     for route in sorted(targets):
         html = route_file(site, route).read_text(encoding="utf-8", errors="ignore")
         if MARKER not in html:
             unprotected.append(route)
+        if re.search(r"<fo<(?:aside|section)\b", html, re.I) or "oter&gt;" in html:
+            malformed.append(route)
     if unprotected:
         raise RuntimeError("Gelir/güven paneli doğrulanamayan rotalar: " + ", ".join(unprotected))
+    if malformed:
+        raise RuntimeError("Gelir/güven paneli HTML etiketi böldü: " + ", ".join(malformed))
 
     gateway_cards = int(inject_gateway(site, Path("index.html"), base_path))
     gateway_cards += int(inject_gateway(site, Path("elektrik-portali/index.html"), base_path))
@@ -215,6 +230,7 @@ def run(site: Path, base_path: str = "") -> dict:
         "trustRoute": public_url(base_path, TRUST_ROUTE),
         "sampleDeliverablesRoute": public_url(base_path, SAMPLE_ROUTE),
         "recurringServiceRoute": public_url(base_path, MONITOR_ROUTE),
+        "unicodeSafeInsertion": True,
         "directStoreLinksAdded": 0,
         "automaticRenewal": False,
     }
