@@ -8,14 +8,13 @@
   const CHARGING_EFFICIENCY=0.90;
   const SINGLE_PHASE_V=230;
   const THREE_PHASE_V=400;
-  const AFFILIATE_TAG='alo186rehber-21';
   const OUTLETS={
-    schuko:{label:'Ev tipi topraklı priz',phase:'single',maxA:10,portable:true,queryLabel:'Schuko 10A'},
-    cee_blue_16:{label:'CEE mavi 16 A',phase:'single',maxA:16,portable:true,queryLabel:'CEE mavi 16A'},
-    cee_blue_32:{label:'CEE mavi 32 A',phase:'single',maxA:32,portable:true,queryLabel:'CEE mavi 32A'},
-    cee_red_16:{label:'CEE kırmızı trifaze 16 A',phase:'three',maxA:16,portable:true,queryLabel:'CEE kırmızı trifaze 16A'},
-    cee_red_32:{label:'CEE kırmızı trifaze 32 A',phase:'three',maxA:32,portable:true,queryLabel:'CEE kırmızı trifaze 32A'},
-    wallbox:{label:'Sabit wallbox / şarj ünitesi',phase:'unknown',maxA:null,portable:false,queryLabel:''}
+    schuko:{label:'Ev tipi topraklı priz',phase:'single',maxA:10,portable:true},
+    cee_blue_16:{label:'CEE mavi 16 A',phase:'single',maxA:16,portable:true},
+    cee_blue_32:{label:'CEE mavi 32 A',phase:'single',maxA:32,portable:true},
+    cee_red_16:{label:'CEE kırmızı trifaze 16 A',phase:'three',maxA:16,portable:true},
+    cee_red_32:{label:'CEE kırmızı trifaze 32 A',phase:'three',maxA:32,portable:true},
+    wallbox:{label:'Sabit wallbox / şarj ünitesi',phase:'unknown',maxA:null,portable:false}
   };
   const CATEGORY_LABELS={portable_evse:'Taşınabilir EV şarj cihazı sınıfı'};
 
@@ -26,18 +25,6 @@
   };
   const round=(value,digits=2)=>Math.round(value*(10**digits))/(10**digits);
   const makeResult=(status,title,summary,extra={})=>({status,title,summary,commercialAllowed:false,categories:[],...extra});
-
-  function amazonSearchUrl(query){
-    return `https://www.amazon.com.tr/s?k=${encodeURIComponent(query)}&tag=${encodeURIComponent(AFFILIATE_TAG)}`;
-  }
-
-  function searchQueryForResult(result){
-    const metrics=result&&result.metrics;
-    if(!metrics)return '';
-    const outlet=Object.values(OUTLETS).find(item=>item.label===metrics.outletLabel);
-    const outletText=outlet&&outlet.queryLabel?outlet.queryLabel:metrics.outletLabel;
-    return `Type 2 taşınabilir EV şarj cihazı EVSE ${outletText} ${metrics.usableCurrentA}A 6mA DC RCD ayarlanabilir akım`;
-  }
 
   function powerKw(phase,currentA){
     return phase==='three'
@@ -221,30 +208,30 @@
       $('outdoorEvidence').classList.toggle('hidden',$('outdoorUse').value!=='yes');
       $('existingFields').classList.toggle('hidden',$('sourceStatus').value!=='existing');
     };
-    ['outdoorUse','sourceStatus'].forEach(id=>$(id)?.addEventListener('change',toggle));
-    toggle();
-
     const clearOutput=()=>{
-      const result=$('result');
-      result.hidden=true;
-      result.className='panel result';
+      const box=$('result');
+      box.hidden=true;
+      box.className='panel result';
       $('resultBadge').textContent='';
       $('resultTitle').textContent='';
       $('resultSummary').textContent='';
       $('metrics').innerHTML='';
-      $('nextTool').removeAttribute('href');
-      $('nextTool').classList.add('hidden');
+      const next=$('nextTool');
+      next.removeAttribute('href');
+      next.classList.add('hidden');
       const commerce=$('commerce');
       commerce.classList.add('hidden');
       commerce.dataset.categories='[]';
-      commerce.dataset.searchQuery='';
       ['actualNeed','technicalCheck','affiliateCheck'].forEach(id=>{$(id).checked=false;});
       $('productLinks').innerHTML='';
     };
+    ['outdoorUse','sourceStatus'].forEach(id=>$(id)?.addEventListener('change',toggle));
+    toggle();
 
     form.addEventListener('reset',()=>{
       clearOutput();
-      if(typeof queueMicrotask==='function')queueMicrotask(toggle);else setTimeout(toggle,0);
+      if(root&&typeof root.setTimeout==='function')root.setTimeout(toggle,0);
+      else toggle();
     });
 
     form.addEventListener('submit',event=>{
@@ -267,7 +254,6 @@
       const commerce=$('commerce');
       commerce.classList.toggle('hidden',!out.commercialAllowed);
       commerce.dataset.categories=JSON.stringify(out.categories||[]);
-      commerce.dataset.searchQuery=out.commercialAllowed?searchQueryForResult(out):'';
       ['actualNeed','technicalCheck','affiliateCheck'].forEach(id=>{$(id).checked=false;});
       $('productLinks').innerHTML='';
       box.scrollIntoView({behavior:'smooth',block:'start'});
@@ -278,25 +264,21 @@
     const refreshGate=()=>{
       const commerce=$('commerce');
       const enabled=!commerce.classList.contains('hidden')&&['actualNeed','technicalCheck','affiliateCheck'].every(id=>$(id).checked);
+      const categories=JSON.parse(commerce.dataset.categories||'[]');
       const target=$('productLinks');
       target.innerHTML='';
       if(!enabled)return;
-      const query=commerce.dataset.searchQuery;
-      if(!query)return;
-      const link=doc.createElement('a');
-      link.className='button primary';
-      link.href=amazonSearchUrl(query);
-      link.target='_blank';
-      link.rel='sponsored nofollow noopener';
-      link.textContent='Amazon’da teknik EVSE aramasını aç';
-      link.dataset.category='portable_evse';
-      link.addEventListener('click',()=>{
-        if(root.Alo186Track)root.Alo186Track('affiliate_search_opened',{category:'portable_evse',placement:'portable_evse_socket_tool'});
+      categories.forEach(category=>{
+        const link=doc.createElement('a');
+        link.className='button primary';
+        link.href='../../akilli-urun-secimi?kaynak=tasinabilir-ev-sarj-priz&niyet=portable_evse';
+        link.textContent='Teknik ürün merkezini aç';
+        link.dataset.category=category;
+        target.appendChild(link);
       });
-      target.appendChild(link);
     };
     ['actualNeed','technicalCheck','affiliateCheck'].forEach(id=>$(id)?.addEventListener('change',refreshGate));
   }
 
-  return{calculate,mount,powerKw,currentForKw,amazonSearchUrl,searchQueryForResult,OUTLETS,CATEGORY_LABELS,CHARGING_EFFICIENCY,SINGLE_PHASE_V,THREE_PHASE_V,AFFILIATE_TAG};
+  return{calculate,mount,powerKw,currentForKw,OUTLETS,CATEGORY_LABELS,CHARGING_EFFICIENCY,SINGLE_PHASE_V,THREE_PHASE_V};
 });
