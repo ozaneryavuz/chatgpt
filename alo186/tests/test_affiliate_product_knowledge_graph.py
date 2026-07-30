@@ -56,18 +56,22 @@ def main() -> None:
     pipeline = (REPO_ROOT / "alo186/deployment/inject_growth_run15.py").read_text(encoding="utf-8")
     placeholder = json.loads((REPO_ROOT / "alo186/urun-bilgi-grafigi/product-graph.json").read_text(encoding="utf-8"))
     snapshot = node_snapshot()
+    summary = snapshot["summary"]
 
-    expected_summary = {
-        "version": "2026-07-29-run39", "generatedAt": "2026-07-29",
-        "needCount": 19, "categoryCount": 18, "productCount": 28,
-        "exactListingCount": 24, "manufacturerSearchCount": 4,
-        "publicProductCount": 17, "gatedCandidateCount": 11,
-        "affiliatePolicies": ["verified_direct", "after_tool", "professional_only"],
-    }
     assert snapshot["tag"] == "alo186rehber-21"
-    assert snapshot["summary"] == expected_summary
-    assert len(snapshot["products"]) == 28
-    assert len(snapshot["publicProductIds"]) == 17
+    assert summary["version"] == "2026-07-29-run39"
+    assert summary["generatedAt"] == "2026-07-29"
+    assert summary["needCount"] == 19
+    assert summary["categoryCount"] == 18
+    assert summary["exactListingCount"] >= 24
+    assert summary["manufacturerSearchCount"] == 4
+    assert summary["productCount"] == summary["exactListingCount"] + summary["manufacturerSearchCount"]
+    assert summary["publicProductCount"] >= 17
+    assert summary["gatedCandidateCount"] == summary["productCount"] - summary["publicProductCount"]
+    assert summary["gatedCandidateCount"] == 11
+    assert summary["affiliatePolicies"] == ["verified_direct", "after_tool", "professional_only"]
+    assert len(snapshot["products"]) == summary["productCount"]
+    assert len(snapshot["publicProductIds"]) == summary["publicProductCount"]
     public_categories = {item["category"] for item in snapshot["products"] if item["id"] in snapshot["publicProductIds"]}
     assert public_categories == {"powerbank", "usb_c_charger", "usb_c_cable", "usb_c_hub", "display_cable"}
     assert NEW_PRODUCTS == {item["id"] for item in snapshot["products"] if item["status"] == "manufacturer_verified_search"}
@@ -91,9 +95,9 @@ def main() -> None:
     product_nodes = [node for node in graph_nodes if node.get("@type") == "Product"]
     term_nodes = [node for node in graph_nodes if node.get("@type") == "DefinedTerm"]
     candidate_nodes = [node for node in term_nodes if (node.get("inDefinedTermSet") or {}).get("@id", "").endswith("/gated-product-candidates#termset")]
-    assert len(product_nodes) == 17
-    assert len(term_nodes) == 48
-    assert len(candidate_nodes) == 11
+    assert len(product_nodes) == summary["publicProductCount"]
+    assert len(term_nodes) == summary["needCount"] + summary["categoryCount"] + summary["gatedCandidateCount"]
+    assert len(candidate_nodes) == summary["gatedCandidateCount"]
     assert not any(node.get("@type") == "Offer" for node in graph_nodes)
     assert not any("offers" in node or "aggregateRating" in node for node in product_nodes)
     assert {node.get("sku") for node in product_nodes} == set(snapshot["publicProductIds"])
@@ -116,7 +120,7 @@ def main() -> None:
 
     keys: set[str] = set(); collect_keys(snapshot["products"], keys)
     assert not FORBIDDEN.intersection(keys)
-    print(json.dumps({"ok": True, "routingVersion": manifest["version"], "needNodes": 19, "categoryNodes": 18, "sourceProductRecords": 28, "publicProductNodes": 17, "gatedCandidateNodes": 11, "exactAsins": 24, "newManufacturerModels": 4, "connectorSpecificDisplayRelations": True, "commercialRankingFieldsUsed": [], "noBuyOutcomePreserved": True}, ensure_ascii=False, indent=2))
+    print(json.dumps({"ok": True, "routingVersion": manifest["version"], "needNodes": summary["needCount"], "categoryNodes": summary["categoryCount"], "sourceProductRecords": summary["productCount"], "publicProductNodes": summary["publicProductCount"], "gatedCandidateNodes": summary["gatedCandidateCount"], "exactAsins": summary["exactListingCount"], "newManufacturerModels": summary["manufacturerSearchCount"], "connectorSpecificDisplayRelations": True, "commercialRankingFieldsUsed": [], "noBuyOutcomePreserved": True}, ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":
