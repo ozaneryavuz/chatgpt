@@ -1,0 +1,95 @@
+name: ALO186 kombi kesinti yedek güç ve güvenli dönüşüm
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/kombi-kesinti-yedek-guc-uygunluk/**'
+      - 'alo186/deployment/inject_boiler_continuity_growth.py'
+      - 'alo186/deployment/inject_growth_run21.py'
+      - 'alo186/deployment/routing-overlays/boiler-continuity-growth-run30.json'
+      - 'alo186/tests/test_boiler_continuity_growth_run30*.py'
+      - '.github/workflows/alo186-boiler-continuity-growth-run30.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/kombi-kesinti-yedek-guc-uygunluk/**'
+      - 'alo186/deployment/inject_boiler_continuity_growth.py'
+      - 'alo186/deployment/inject_growth_run21.py'
+      - 'alo186/deployment/routing-overlays/boiler-continuity-growth-run30.json'
+      - 'alo186/tests/test_boiler_continuity_growth_run30*.py'
+      - '.github/workflows/alo186-boiler-continuity-growth-run30.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-boiler-continuity-run30-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Kombi kararları ve güven sözleşmeleri
+        run: |
+          set -euo pipefail
+          node alo186/hesaplama/kombi-kesinti-yedek-guc-uygunluk/app.test.js
+          python alo186/tests/test_boiler_continuity_growth_run30.py
+          node --check alo186/hesaplama/kombi-kesinti-yedek-guc-uygunluk/app.js
+          python -m py_compile \
+            alo186/deployment/inject_boiler_continuity_growth.py \
+            alo186/deployment/inject_growth_run21.py \
+            alo186/tests/test_boiler_continuity_growth_run30.py \
+            alo186/tests/test_boiler_continuity_growth_run30_artifact.py
+
+      - name: Mevcut affiliate, güven ve routing regresyonları
+        run: |
+          set -euo pipefail
+          node alo186/tests/test_affiliate_knowledge_graph.js
+          node alo186/tests/test_product_matcher.js
+          node alo186/tests/test_trust_revenue_conversion.js
+          node alo186/tests/test_release_manifest.js
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Canonical üretim paketi
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py --output /tmp/boiler-canonical --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/boiler-canonical
+
+      - name: Custom-domain ve project-path kabulü
+        shell: bash
+        run: |
+          set -euo pipefail
+          for spec in 'custom|' 'project|/chatgpt'; do
+            name="${spec%%|*}"
+            base="${spec#*|}"
+            target="/tmp/boiler-${name}"
+            cp -a /tmp/boiler-canonical "$target"
+            python alo186/deployment/prepare_github_pages.py --site "$target" --base-path "$base" --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
+            python alo186/deployment/inject_outcome_runtime.py --site "$target" --base-path "$base"
+            python alo186/deployment/inject_shortlist_growth.py --site "$target" --base-path "$base"
+            python alo186/deployment/repair_live_html_defects.py --site "$target" --base-path "$base"
+            python alo186/deployment/finalize_live_quality.py --site "$target" --base-path "$base"
+            python alo186/deployment/smoke_github_pages.py --site "$target" --base-path "$base"
+            python alo186/tests/test_boiler_continuity_growth_run30_artifact.py --site "$target" --base-path "$base"
+          done
+
+      - name: Doğrulanmış kombi süreklilik artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-boiler-continuity-run30
+          path: /tmp/boiler-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30

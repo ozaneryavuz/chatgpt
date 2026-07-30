@@ -5,6 +5,7 @@ import json
 import re
 from pathlib import Path
 
+from inject_boiler_continuity_growth import run as run_boiler_continuity
 from inject_growth_run22 import run as run_growth_run22
 
 ROUTE = "/hesaplama/kesinti-hazirlik-envanteri/"
@@ -33,7 +34,7 @@ def append_sitemap(site: Path) -> None:
     path = site / "sitemap.xml"
     text = path.read_text(encoding="utf-8")
     if f"<loc>{CANONICAL}</loc>" not in text:
-        text = text.replace("</urlset>", f"<url><loc>{CANONICAL}</loc></url></urlset>", 1)
+        text = text.replace("</urlset>", f"<url><loc>{CANONICAL}</loc></urlset>", 1)
         path.write_text(text, encoding="utf-8")
 
 
@@ -170,4 +171,5 @@ def run(site: Path, base_path: str) -> dict:
     update_release(site, base_path, entries, risk_gate, offline)
     recompute(site)
     lighting = run_growth_run22(site, base_path)
-    return {"ok": True, "route": public_url(base_path, ROUTE), "entries": entries, "riskGate": risk_gate, "offline": True, "lightingSuitability": lighting}
+    boiler = run_boiler_continuity(site, base_path)
+    return {"ok": True, "route": public_url(base_path, ROUTE), "entries": entries, "riskGate": risk_gate, "offline": True, "lightingSuitability": lighting, "boilerContinuity": boiler}
