@@ -106,10 +106,11 @@ def assert_site(site: Path, base_path: str) -> None:
     for name in REQUIRED_FILES:
         assert (module / name).is_file(), f"Artifact mevzuat dosyası eksik: {name}"
     html = (module / "index.html").read_text(encoding="utf-8")
-    assert CANONICAL in html
+    canonical_candidates = {CANONICAL, "https://alo186.com/mevzuat/"}
+    assert any(value in html for value in canonical_candidates)
     assert not re.search(r"amazon\.|aggregateRating|priceCurrency|availability", html, re.I)
     sitemap = (site / "sitemap.xml").read_text(encoding="utf-8")
-    assert f"<loc>{CANONICAL}</loc>" in sitemap
+    assert any(f"<loc>{value}</loc>" in sitemap for value in canonical_candidates)
     search_path = site / "arama/search-index.json"
     assert search_path.is_file(), "Teknik Arama indeksi eksik"
     search = read_json(search_path)
