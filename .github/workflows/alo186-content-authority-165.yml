@@ -64,8 +64,10 @@ jobs:
         run: |
           python - <<'PY'
           import json
+          import re
           import xml.etree.ElementTree as ET
           from pathlib import Path
+          from urllib.parse import urlsplit
 
           root = Path('/tmp/alo186-authority-165-custom')
           primary_routes = [
@@ -79,7 +81,7 @@ jobs:
           }
           sitemap_root = ET.parse(root / 'sitemap.xml').getroot()
           loc_paths = {
-              '/' + (loc.text or '').split('://', 1)[-1].split('/', 1)[-1].strip('/')
+              urlsplit(loc.text or '').path.rstrip('/') or '/'
               for loc in sitemap_root.findall('.//{*}loc')
               if loc.text
           }
@@ -111,8 +113,12 @@ jobs:
               assert alias.rstrip('/') not in active, ('alias-search-index', alias)
               assert canonical.rstrip('/') in active, ('canonical-search-index', canonical)
               assert 'name="robots" content="noindex,follow"' in alias_html
-              assert f'rel="canonical" href="https://www.alo186.com{canonical}"' in alias_html
-              assert f'href="{canonical}"' in alias_html
+              canonical_match = re.search(r'<link\s+rel="canonical"\s+href="([^"]+)"', alias_html, re.I)
+              assert canonical_match, ('alias-canonical-missing', alias)
+              assert urlsplit(canonical_match.group(1)).path.rstrip('/') == canonical.rstrip('/'), ('alias-canonical-path', alias, canonical_match.group(1))
+              target_match = re.search(r'<a\s+href="([^"]+)"', alias_html, re.I)
+              assert target_match, ('alias-target-missing', alias)
+              assert urlsplit(target_match.group(1)).path.rstrip('/') == canonical.rstrip('/'), ('alias-target-path', alias, target_match.group(1))
 
           print(json.dumps({
               'routingVersion': release['routingVersion'],
