@@ -75,15 +75,15 @@ const ownedVerified = {
   recall: "yes",
   knownGood: "passed"
 };
-check("owned suitable no-buy", withBase(Object.assign({ rcdFunctional: true }, ownedVerified)), "no-buy", (d) => {
+check("owned suitable no-buy", withBase(Object.assign({}, ownedVerified, { rcdFunctional: true })), "no-buy", (d) => {
   assert.equal(d.commerceEligible, false);
   assert.match(d.title, /yeni ürün almayın/i);
 });
-check("owned display suitable", withBase(Object.assign({ voltageDisplay: true, testerType: "display" }, ownedVerified)), "no-buy");
-check("owned basic suitable", withBase(Object.assign({ testerType: "basic" }, ownedVerified)), "no-buy");
-check("owned class too low", withBase(Object.assign({ rcdFunctional: true, testerType: "basic" }, ownedVerified)), "replace", (d) => assert.equal(d.commerceEligible, true));
-check("owned display too low", withBase(Object.assign({ voltageDisplay: true, testerType: "basic" }, ownedVerified)), "replace");
-check("candidate compatible", withBase(Object.assign({ ownership: "candidate", rcdFunctional: true }, ownedVerified)), "candidate", (d) => assert.equal(d.commerceEligible, true));
+check("owned display suitable", withBase(Object.assign({}, ownedVerified, { voltageDisplay: true, testerType: "display" })), "no-buy");
+check("owned basic suitable", withBase(Object.assign({}, ownedVerified, { testerType: "basic" })), "no-buy");
+check("owned class too low", withBase(Object.assign({}, ownedVerified, { rcdFunctional: true, testerType: "basic" })), "replace", (d) => assert.equal(d.commerceEligible, true));
+check("owned display too low", withBase(Object.assign({}, ownedVerified, { voltageDisplay: true, testerType: "basic" })), "replace");
+check("candidate compatible", withBase(Object.assign({}, ownedVerified, { ownership: "candidate", rcdFunctional: true })), "candidate", (d) => assert.equal(d.commerceEligible, true));
 
 check("unknown tester type", withBase({ ownership: "owned" }), "evidence");
 check("plug mismatch", withBase(Object.assign({}, ownedVerified, { plugCompatibility: "no" })), "replace");
@@ -99,7 +99,7 @@ assert.match(url, /^https:\/\/www\.amazon\.com\.tr\/s\?k=/);
 assert.match(url, /tag=alo186rehber-21$/);
 assert.match(decodeURIComponent(url), /RCD test/);
 scenarios += 3;
-assert.equal(affiliateUrl(evaluate(withBase(Object.assign({ rcdFunctional: true }, ownedVerified)))), "");
+assert.equal(affiliateUrl(evaluate(withBase(Object.assign({}, ownedVerified, { rcdFunctional: true })))), "");
 scenarios += 1;
 
 assert.equal(requiredType(withBase({ rcdFunctional: true })), "rcd");
