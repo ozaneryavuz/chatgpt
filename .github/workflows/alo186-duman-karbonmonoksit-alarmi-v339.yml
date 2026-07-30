@@ -1,0 +1,155 @@
+name: ALO186 duman ve karbonmonoksit alarmı uygunluk testi
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/duman-karbonmonoksit-alarmi-uygunluk/**'
+      - 'alo186/deployment/routing-overlays/099-duman-karbonmonoksit-alarmi-uygunluk.json'
+      - 'alo186/tests/test_duman_karbonmonoksit_alarmi_v338.py'
+      - '.github/workflows/alo186-duman-karbonmonoksit-alarmi-v339.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/duman-karbonmonoksit-alarmi-uygunluk/**'
+      - 'alo186/deployment/routing-overlays/099-duman-karbonmonoksit-alarmi-uygunluk.json'
+      - 'alo186/tests/test_duman_karbonmonoksit_alarmi_v338.py'
+      - '.github/workflows/alo186-duman-karbonmonoksit-alarmi-v339.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-duman-co-alarmi-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Karar motoru, güvenlik ve yayın sözleşmesi
+        run: |
+          set -euo pipefail
+          node alo186/hesaplama/duman-karbonmonoksit-alarmi-uygunluk/app.test.js
+          node --check alo186/hesaplama/duman-karbonmonoksit-alarmi-uygunluk/app.js
+          python alo186/tests/test_duman_karbonmonoksit_alarmi_v338.py
+
+      - name: Mevcut yayın ve güven regresyonları
+        run: |
+          set -euo pipefail
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Canonical üretim ve statik smoke
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-smoke-co-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-smoke-co-canonical
+
+      - name: Custom-domain ve project-path Pages kabulü
+        run: |
+          set -euo pipefail
+          for target in custom project; do
+            cp -a /tmp/alo186-smoke-co-canonical "/tmp/alo186-smoke-co-$target"
+          done
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-smoke-co-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-smoke-co-custom \
+            --base-path ''
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-smoke-co-custom \
+            --base-path '' > /tmp/alo186-smoke-co-custom.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-smoke-co-custom \
+            --base-path ''
+
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-smoke-co-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-smoke-co-project \
+            --base-path '/chatgpt'
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-smoke-co-project \
+            --base-path '/chatgpt' > /tmp/alo186-smoke-co-project.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-smoke-co-project \
+            --base-path '/chatgpt'
+
+      - name: Sitemap, Teknik Arama, affiliate ve gizlilik kabulü
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          canonical = '/hesaplama/duman-karbonmonoksit-alarmi-uygunluk/'
+          relative = 'hesaplama/duman-karbonmonoksit-alarmi-uygunluk'
+          for root, prefix in [
+              (Path('/tmp/alo186-smoke-co-custom'), ''),
+              (Path('/tmp/alo186-smoke-co-project'), '/chatgpt'),
+          ]:
+              page = root / relative / 'index.html'
+              app = root / relative / 'app.js'
+              css = root / relative / 'styles.css'
+              assert all(path.is_file() for path in [page, app, css])
+              html = page.read_text(encoding='utf-8')
+              js = app.read_text(encoding='utf-8')
+              expected = f'{prefix}{canonical}' if prefix else canonical
+              assert canonical in (root / 'sitemap.xml').read_text(encoding='utf-8')
+              search = json.loads((root / 'arama/search-index.json').read_text(encoding='utf-8'))
+              entry = next(item for item in search['entries'] if item['canonicalPath'] == canonical)
+              assert entry['url'].endswith(canonical)
+              assert entry['url'] in {canonical, expected}
+              assert 'Amazon Türkiye satış ortaklığı açıklaması' in html
+              assert 'sponsored nofollow noopener' in html
+              assert 'alo186rehber-21' in js
+              assert all(token not in js for token in ['localStorage', 'sessionStorage', 'fetch(', 'geolocation'])
+              assert "baseResult('no_buy'" in js
+              assert "baseResult('emergency'" in js
+              assert 'PROFESSIONAL' in js
+              assert 'Geri çağırılmış alarmı güvenilir kabul etmeyin' in js
+              assert 'Kapsama görevleri ürün adedi değildir' in js
+              assert '"@type":"Product"' not in html and '"@type":"Offer"' not in html
+          print(json.dumps({
+              'ok': True,
+              'route': canonical,
+              'scenarios': 29,
+              'affiliateTripleGate': True,
+              'noBuy': True,
+              'emergencyCommerceBlocked': True,
+              'professionalUseBlocked': True,
+              'personalData': False,
+              'storage': False,
+              'searchIndexed': True,
+              'revisitDays': 30,
+          }, ensure_ascii=False))
+          PY
+
+      - name: Doğrulanmış site artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-duman-karbonmonoksit-alarmi-v339-pages
+          path: /tmp/alo186-smoke-co-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
