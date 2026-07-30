@@ -208,8 +208,31 @@
       $('outdoorEvidence').classList.toggle('hidden',$('outdoorUse').value!=='yes');
       $('existingFields').classList.toggle('hidden',$('sourceStatus').value!=='existing');
     };
+    const clearOutput=()=>{
+      const box=$('result');
+      box.hidden=true;
+      box.className='panel result';
+      $('resultBadge').textContent='';
+      $('resultTitle').textContent='';
+      $('resultSummary').textContent='';
+      $('metrics').innerHTML='';
+      const next=$('nextTool');
+      next.removeAttribute('href');
+      next.classList.add('hidden');
+      const commerce=$('commerce');
+      commerce.classList.add('hidden');
+      commerce.dataset.categories='[]';
+      ['actualNeed','technicalCheck','affiliateCheck'].forEach(id=>{$(id).checked=false;});
+      $('productLinks').innerHTML='';
+    };
     ['outdoorUse','sourceStatus'].forEach(id=>$(id)?.addEventListener('change',toggle));
     toggle();
+
+    form.addEventListener('reset',()=>{
+      clearOutput();
+      if(root&&typeof root.setTimeout==='function')root.setTimeout(toggle,0);
+      else toggle();
+    });
 
     form.addEventListener('submit',event=>{
       event.preventDefault();
