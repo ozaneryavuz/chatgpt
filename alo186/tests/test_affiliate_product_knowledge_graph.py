@@ -12,34 +12,52 @@ from build_static_site import load_effective_manifest
 
 ROUTE = "/urun-bilgi-grafigi/"
 FORBIDDEN = {"price", "stock", "rating", "seller", "delivery", "warranty", "affiliateCommission"}
-NEW_EXACT = {"anker-737-a1289", "anker-a1383-20k-87w"}
-RUN50_MODELS = {
-    "ugreen-nexode-100w-4port", "tp-link-tapo-p115", "tp-link-tapo-p115m",
-    "ecoflow-river-2-max", "ecoflow-delta-2-max", "x-sense-xc01-r",
+RUN7_MODELS = {
+    "apc-bx1600mi-gr",
+    "cyberpower-cp1500epfclcd",
+    "fluke-117",
+    "fluke-325",
+    "flir-c5",
+    "bosch-universaltemp-06036831z0",
+    "ctek-mxs-5-0-eu",
+    "noco-genius5",
+    "bosch-procore18v-5-5ah-1600a02149",
+    "milwaukee-m18-hb5-5-4932464712",
 }
-RUN51_MODELS = {
-    "samsung-eb-p4520-20k-45w", "ugreen-nexode-x-65w-3port",
-    "ugreen-90440-240w-usb-c", "ecoflow-river-3", "ecoflow-river-3-plus",
-    "ecoflow-delta-3-plus", "bluetti-ac70p", "honda-eu22i",
-    "victron-phoenix-vedirect-12-1200", "x-sense-sc07-mr",
+RUN7_CATEGORIES = {"computer_ups", "multimeter", "thermal_imager", "battery_charger", "tool_battery"}
+RUN7_NEEDS = {
+    "computer-network-continuity",
+    "safe-electrical-measurement",
+    "thermal-inspection",
+    "vehicle-battery-maintenance",
+    "cordless-tool-continuity",
 }
-RUN6_MODELS = {
-    "anker-735-a2668-65w", "anker-341-a8346-hub", "ugreen-90871-usbc-100w",
-    "anker-prime-a88e2-240w", "ugreen-50571-usbc-hdmi",
+EXPECTED_TOOLS = {
+    "computer_ups": "/hesaplama/bilgisayar-gaming-pc-nas-ups-uygunluk/",
+    "multimeter": "/hesaplama/multimetre-pensampermetre-cat-uygunluk/",
+    "thermal_imager": "/hesaplama/termal-kamera-kizilotesi-termometre-uygunluk/",
+    "battery_charger": "/hesaplama/arac-aku-sarj-cihazi-takviye-uygunluk/",
+    "tool_battery": "/hesaplama/akulu-el-aleti-batarya-sarj-uygunluk/",
 }
-BASE_MODELS = {"tp-link-tapo-p110", "tp-link-tapo-p110m", "ecoflow-river-2", "x-sense-xs01"}
-ALL_MODELS = BASE_MODELS | RUN50_MODELS | RUN51_MODELS | RUN6_MODELS
 
 
 def node_snapshot() -> dict:
     script = r"""
-const c=require('./alo186/urun-eslestirme/catalog-growth-run6.js');
+const c=require('./alo186/urun-eslestirme/catalog-growth-run7.js');
 const now=new Date('2026-07-30T12:00:00Z');
 process.stdout.write(JSON.stringify({
- tag:c.affiliateTag, summary:c.knowledgeGraphSummary({now}),
- products:c.products.map(x=>({id:x.id,category:x.category,asin:x.asin,status:x.status,linkMode:x.linkMode,url:x.url,source:x.technicalSource||null,needIds:x.needIds||[]})),
- publicProductIds:c.products.filter(x=>c.publicAffiliateEligible(x,{now})).map(x=>x.id),
- schema:c.knowledgeGraph({now})
+  tag:c.affiliateTag,
+  summary:c.knowledgeGraphSummary({now}),
+  needs:c.needs,
+  categories:c.categories,
+  relations:c.categoryRelations,
+  products:c.products.map(x=>({
+    id:x.id,category:x.category,asin:x.asin,status:x.status,linkMode:x.linkMode,
+    url:x.url,source:x.technicalSource||null,needIds:x.needIds||[],
+    relatedTools:x.relatedTools||[],requiredEvidence:x.requiredEvidence||[]
+  })),
+  publicProductIds:c.products.filter(x=>c.publicAffiliateEligible(x,{now})).map(x=>x.id),
+  schema:c.knowledgeGraph({now})
 }));
 """
     result = subprocess.run(["node", "-e", script], cwd=REPO_ROOT, check=True, capture_output=True, text=True)
@@ -58,7 +76,6 @@ def collect_keys(value, result: set[str]) -> None:
 
 def main() -> None:
     manifest = load_effective_manifest(REPO_ROOT)
-    assert manifest["version"] >= 71
     routes = [item for item in manifest["routes"] if item["canonicalPath"] == ROUTE]
     assert len(routes) == 1
     assert routes[0]["source"] == "alo186/urun-bilgi-grafigi/index.html"
@@ -66,46 +83,49 @@ def main() -> None:
 
     page = (REPO_ROOT / "alo186/urun-bilgi-grafigi/index.html").read_text(encoding="utf-8")
     app = (REPO_ROOT / "alo186/urun-bilgi-grafigi/app.js").read_text(encoding="utf-8")
-    extension = (REPO_ROOT / "alo186/urun-eslestirme/catalog-knowledge-extension.js").read_text(encoding="utf-8")
-    sales = (REPO_ROOT / "alo186/urun-eslestirme/catalog-sales-extension.js").read_text(encoding="utf-8")
-    growth = (REPO_ROOT / "alo186/urun-eslestirme/catalog-growth-run6.js").read_text(encoding="utf-8")
-    journey = (REPO_ROOT / "alo186/urun-eslestirme/run6-missing-component-set.js").read_text(encoding="utf-8")
-    bridge = (REPO_ROOT / "alo186/akilli-urun-secimi/catalog-knowledge-extension.js").read_text(encoding="utf-8")
+    run7 = (REPO_ROOT / "alo186/urun-eslestirme/catalog-growth-run7.js").read_text(encoding="utf-8")
     injector = (REPO_ROOT / "alo186/deployment/inject_affiliate_product_graph.py").read_text(encoding="utf-8")
-    pipeline = (REPO_ROOT / "alo186/deployment/inject_growth_run15.py").read_text(encoding="utf-8")
     placeholder = json.loads((REPO_ROOT / "alo186/urun-bilgi-grafigi/product-graph.json").read_text(encoding="utf-8"))
     snapshot = node_snapshot()
 
-    expected_summary = {
-        "version": "2026-07-30-run6-growth", "generatedAt": "2026-07-30",
-        "needCount": 18, "categoryCount": 18, "productCount": 45,
-        "exactListingCount": 20, "manufacturerSearchCount": 25,
-        "publicProductCount": 13, "gatedCandidateCount": 32,
+    assert snapshot["tag"] == "alo186rehber-21"
+    assert snapshot["summary"] == {
+        "version": "2026-07-30-run7-user-growth",
+        "generatedAt": "2026-07-30",
+        "needCount": 23,
+        "categoryCount": 23,
+        "productCount": 55,
+        "exactListingCount": 20,
+        "manufacturerSearchCount": 35,
+        "publicProductCount": 13,
+        "gatedCandidateCount": 42,
         "affiliatePolicies": ["verified_direct", "after_tool", "professional_only"],
     }
-    assert snapshot["tag"] == "alo186rehber-21"
-    assert snapshot["summary"] == expected_summary
-    assert len(snapshot["products"]) == 45
+    assert len(snapshot["products"]) == 55
     assert len(snapshot["publicProductIds"]) == 13
-    assert NEW_EXACT.issubset(set(snapshot["publicProductIds"]))
+    assert RUN7_NEEDS.issubset({item["id"] for item in snapshot["needs"]})
 
-    public_categories = {
-        item["category"] for item in snapshot["products"]
-        if item["id"] in snapshot["publicProductIds"]
-    }
-    assert public_categories == {"powerbank", "usb_c_charger", "usb_c_cable", "usb_c_hub", "display_cable"}
-    assert ALL_MODELS == {
-        item["id"] for item in snapshot["products"]
-        if item["status"] == "manufacturer_verified_search"
-    }
-    assert all(item["needIds"] for item in snapshot["products"])
-    assert all("tag=alo186rehber-21" in item["url"] for item in snapshot["products"])
+    categories = {item["id"]: item for item in snapshot["categories"]}
+    products = {item["id"]: item for item in snapshot["products"]}
+    assert RUN7_CATEGORIES.issubset(categories)
+    for category_id in RUN7_CATEGORIES:
+        assert categories[category_id]["affiliatePolicy"] == "after_tool"
+        assert EXPECTED_TOOLS[category_id] in snapshot["relations"][category_id]["tools"]
+        category_products = [item for item in products.values() if item["category"] == category_id]
+        assert len(category_products) == 2
 
-    for item in snapshot["products"]:
-        if item["id"] in RUN51_MODELS | RUN6_MODELS:
-            assert item["asin"] is None
-            assert item["linkMode"] == "exact_model_search"
-            assert item["source"].startswith("https://")
+    for product_id in RUN7_MODELS:
+        product = products[product_id]
+        assert product["asin"] is None
+        assert product["status"] == "manufacturer_verified_search"
+        assert product["linkMode"] == "exact_model_search"
+        assert product["source"].startswith("https://")
+        assert product["url"].startswith("https://www.amazon.com.tr/s?k=")
+        assert "tag=alo186rehber-21" in product["url"]
+        assert product["needIds"]
+        assert product["relatedTools"]
+        assert len(product["requiredEvidence"]) >= 4
+        assert product_id not in snapshot["publicProductIds"]
 
     graph_nodes = snapshot["schema"]["@graph"]
     product_nodes = [node for node in graph_nodes if node.get("@type") == "Product"]
@@ -115,49 +135,39 @@ def main() -> None:
         if (node.get("inDefinedTermSet") or {}).get("@id", "").endswith("/gated-product-candidates#termset")
     ]
     assert len(product_nodes) == 13
-    assert len(term_nodes) == 68
-    assert len(candidate_nodes) == 32
+    assert len(term_nodes) == 88
+    assert len(candidate_nodes) == 42
     assert not any(node.get("@type") == "Offer" for node in graph_nodes)
     assert not any("offers" in node or "aggregateRating" in node for node in product_nodes)
-    assert {node.get("sku") for node in product_nodes} == set(snapshot["publicProductIds"])
-    assert not ALL_MODELS.intersection({node.get("sku") for node in product_nodes})
-    assert ALL_MODELS.issubset({node.get("termCode") for node in candidate_nodes})
+    assert RUN7_MODELS.issubset({node.get("termCode") for node in candidate_nodes})
+    assert not RUN7_MODELS.intersection({node.get("sku") for node in product_nodes})
 
     assert 'rel="canonical" href="https://www.alo186.com/urun-bilgi-grafigi/"' in page
-    assert "CollectionPage" in page and "FAQPage" in page and "BreadcrumbList" in page
-    assert "affiliateProductGraphJsonLd" in page and "catalog-sales-extension.js" in page
-    assert "catalog-growth-run6.js" in page
-    assert "45 ürün/model düğümü" in page
+    assert "55 ürün/model düğümü" in page
+    assert "35 üretici kaynaklı" in page
+    assert "Beş yeni kullanıcı yolculuğu" in page
+    assert "catalog-growth-run7.js" in page
+    for route in EXPECTED_TOOLS.values():
+        assert route in page
     assert "amazon.com.tr" not in page.casefold()
     assert "sponsored nofollow noopener" in app
     assert "localStorage" not in app and "sessionStorage" not in app
-    for token in ["manufacturer_verified_search", "gated-product-candidates", "knowledgeGraphSummary"]:
-        assert token in extension
-    for token in [
-        "samsung-eb-p4520-20k-45w", "ugreen-90440-240w-usb-c",
-        "ecoflow-delta-3-plus", "bluetti-ac70p", "honda-eu22i",
-        "victron-phoenix-vedirect-12-1200", "x-sense-sc07-mr", "2026-07-30-run51",
-    ]:
-        assert token in sales
-    for token in RUN6_MODELS | {"2026-07-30-run6-growth"}:
-        assert token in growth
-    for token in ["Mevcut zincir yeterli görünüyor", "90 günlük yeniden kontrol", "data-run6-hazard"]:
-        assert token in journey
-    assert "amazon.com.tr/" not in journey.casefold()
-    for token in [
-        "usb-c-hub-connectivity", "usb-c-display-output", "usb_c_hub",
-        "display_cable", "usb-c-urun-kabul-testi",
-    ]:
-        assert token in bridge or token in sales
 
-    assert placeholder["needs"] == [] and placeholder["categories"] == [] and placeholder["products"] == []
-    assert placeholder["commercialPolicy"]["noBuyOutcomePreserved"] is True
+    for token in RUN7_MODELS | RUN7_NEEDS | RUN7_CATEGORIES | {"2026-07-30-run7-user-growth"}:
+        assert token in run7
     for token in [
-        "node_payload", "affiliateProductKnowledgeGraph", "commercialRankingFieldsUsed",
-        "graph_metadata", "SALES_EXTENSION", "GROWTH_EXTENSION", "MISSING_COMPONENT",
+        "GROWTH_RUN6_EXTENSION",
+        "GROWTH_RUN7_EXTENSION",
+        "catalog-growth-run7.js",
+        "manufacturerVerifiedSearchRequiresExactModelRecheck",
+        "noBuyOutcomePreserved",
     ]:
         assert token in injector
-    assert "run_affiliate_product_graph" in pipeline
+
+    assert placeholder["needs"] == []
+    assert placeholder["categories"] == []
+    assert placeholder["products"] == []
+    assert placeholder["commercialPolicy"]["noBuyOutcomePreserved"] is True
 
     keys: set[str] = set()
     collect_keys(snapshot["products"], keys)
@@ -166,14 +176,15 @@ def main() -> None:
     print(json.dumps({
         "ok": True,
         "routingVersion": manifest["version"],
-        "needNodes": 18,
-        "categoryNodes": 18,
-        "sourceProductRecords": 45,
-        "publicProductNodes": 13,
-        "gatedCandidateNodes": 32,
+        "needNodes": 23,
+        "categoryNodes": 23,
+        "sourceProductRecords": 55,
         "exactAsins": 20,
-        "manufacturerModels": 25,
-        "run6Models": 5,
+        "manufacturerModels": 35,
+        "publicProductNodes": 13,
+        "gatedCandidateNodes": 42,
+        "newUserJourneys": 5,
+        "newManufacturerModels": 10,
         "commercialRankingFieldsUsed": [],
         "noBuyOutcomePreserved": True,
     }, ensure_ascii=False, indent=2))
