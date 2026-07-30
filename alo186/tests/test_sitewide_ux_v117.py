@@ -17,6 +17,10 @@ CRITICAL_USER_ROUTES = {
     "edas-bul/index.html",
     "arama/index.html",
     "acil-numaralar/index.html",
+    "en/index.html",
+    "en/electricity-outage-turkey/index.html",
+    "en/electricity-distribution-company-finder/index.html",
+    "en/emergency-numbers-turkey/index.html",
 }
 
 
@@ -40,6 +44,7 @@ ux_css = (ROOT / "alo186/assets/alo186-ux.css").read_text(encoding="utf-8")
 for token in (
     "const isIndexable = !robots.includes('noindex')",
     "const isTurkish",
+    "const isEnglish",
     "markCurrent(nav)",
     "String.fromCharCode(47)",
     "const basePath = scriptUrl.pathname.endsWith(assetSuffix)",
@@ -57,23 +62,40 @@ for token in (
     "header,.hero,[data-critical-media]",
     "alo186ConsentSettingsVisible",
     "requestAnimationFrame(updateTop)",
+    "electricity-distribution-company-finder",
+    "emergency-numbers-turkey",
+    "journeyData",
+    "alo186NextSteps",
+    "aloAffiliateBadge",
+    "linkObserver",
+    "sponsored",
+    "nofollow",
+    "Mevcut ürünün yeterli olup olmadığını önce kontrol edin",
 ):
     assert token in ux_js, token
 
-assert "body:not([data-alo186-ux-compact=\"true\"])" in ux_css
+for token in (
+    'body:not([data-alo186-ux-compact="true"])',
+    '.alo-table-scroll[data-overflow="true"]',
+    '.alo-ux-toc',
+    '.alo-ux-next',
+    '.alo-ux-next-grid',
+    'a[data-alo-affiliate-badge="true"]::after',
+    '.alo-ux-mobilebar a:focus-visible',
+    'alo186-consent-settings',
+    'prefers-contrast: more',
+    'forced-colors: active',
+):
+    assert token in ux_css, token
 assert "body{padding-bottom" not in ux_css.replace(" ", "")
-assert ".alo-table-scroll[data-overflow=\"true\"]" in ux_css
-assert ".alo-ux-toc" in ux_css
 assert "grid-template-columns: repeat(2" in ux_css
-assert ".alo-ux-mobilebar a:focus-visible" in ux_css
-assert "alo186-consent-settings" in ux_css
 assert not re.search(r"outline\s*:\s*(?:0|none)\b", ux_css, re.I), "Klavye odağı bastırılamaz"
 assert not unresolved_root_literals(
     ux_js,
-    {"assets", "edas-bul", "arama", "acil-numaralar"},
+    {"assets", "edas-bul", "arama", "acil-numaralar", "en"},
 ), "Site geneli JS project-path dışında kök rota taşımamalı"
 
-with tempfile.TemporaryDirectory(prefix="alo186-ux-v119-") as folder:
+with tempfile.TemporaryDirectory(prefix="alo186-ux-v120-") as folder:
     canonical = Path(folder) / "canonical"
     custom = Path(folder) / "custom"
     project = Path(folder) / "project"
@@ -83,7 +105,7 @@ with tempfile.TemporaryDirectory(prefix="alo186-ux-v119-") as folder:
         "--output",
         str(canonical),
         "--commit",
-        "ux-v119-test",
+        "ux-v120-test",
     ])
 
     results = []
@@ -99,7 +121,7 @@ with tempfile.TemporaryDirectory(prefix="alo186-ux-v119-") as folder:
             "--repository",
             "ozaneryavuz/chatgpt",
             "--commit",
-            "ux-v119-test",
+            "ux-v120-test",
         ])
         run([
             sys.executable,
@@ -152,6 +174,9 @@ with tempfile.TemporaryDirectory(prefix="alo186-ux-v119-") as folder:
             "h1Coverage": round(h1_ratio, 4),
             "criticalRoutes": len(CRITICAL_USER_ROUTES),
             "projectPathSmoke": True,
+            "englishMobileNavigation": True,
+            "contextualNextSteps": True,
+            "dynamicAffiliateHardening": True,
             "uxInjected": True,
         })
 
@@ -161,7 +186,7 @@ print(json.dumps({
     "targets": results,
     "technicalExceptions": sorted(TECHNICAL_HTML_EXCEPTIONS),
     "criticalRoutes": sorted(CRITICAL_USER_ROUTES),
-    "mobileUtilityBar": "indexable-tr-only-with-native-dock-deduplication",
+    "mobileUtilityBar": "indexable-tr-and-en-with-native-dock-deduplication",
     "projectPathAware": True,
     "localizedUtilities": True,
     "activePageState": True,
@@ -171,9 +196,12 @@ print(json.dumps({
     "dynamicLinkFallbackNames": True,
     "keyboardFocusVisible": True,
     "externalLinkHardening": True,
+    "dynamicAffiliateHardening": True,
+    "affiliateDisclosureBadge": True,
     "criticalImagesProtected": True,
     "imageAltFallback": True,
     "longPageToc": True,
+    "contextualNextSteps": True,
     "consentDockCollisionGuard": True,
     "backToTop": "request-animation-frame-throttled",
     "minimumTouchTarget": 44,
