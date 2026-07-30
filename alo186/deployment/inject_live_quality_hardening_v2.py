@@ -6,6 +6,7 @@ import re
 from pathlib import Path
 
 import inject_live_quality_hardening as core
+from prepare_github_pages import UX_MARKER, install_sitewide_ux
 
 
 _original_normalize_text = core.normalize_text
@@ -60,11 +61,32 @@ def physical_route(route: str, base_path: str) -> str:
     return value
 
 
+def update_sitewide_ux_release(path: Path, ux: dict) -> None:
+    if not path.is_file():
+        return
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    existing = payload.get("sitewideUx") if isinstance(payload.get("sitewideUx"), dict) else {}
+    existing.update(
+        {
+            "finalInjectedPages": int(ux.get("injectedPages", 0)),
+            "finalAlreadyInjectedPages": int(ux.get("alreadyInjectedPages", 0)),
+            "finalHtmlPages": int(ux.get("injectedPages", 0)) + int(ux.get("alreadyInjectedPages", 0)),
+            "finalizedAfterGrowthInjectors": True,
+            "css": ux.get("css"),
+            "js": ux.get("js"),
+        }
+    )
+    payload["sitewideUx"] = existing
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
 def validate(site: Path, base_path: str) -> dict:
     failures: list[str] = []
     html_count = 0
     canonical_count = 0
     css_href = core.public_url(base_path, f"/{core.CSS_FILE}")
+    ux_css_href = core.public_url(base_path, "/assets/alo186-ux.css")
+    ux_js_src = core.public_url(base_path, "/assets/alo186-ux.js")
 
     css_path = site / core.CSS_FILE
     if not css_path.is_file():
@@ -74,6 +96,11 @@ def validate(site: Path, base_path: str) -> dict:
         for token in ("min-height:44px", "focus-visible", ".amazon-intent-card small", "overflow-wrap:anywhere"):
             if token not in css:
                 failures.append(f"Canlı kalite CSS sözleşmesi eksik: {token}")
+
+    if not (site / "assets/alo186-ux.css").is_file():
+        failures.append("Site geneli UX CSS artifactı eksik")
+    if not (site / "assets/alo186-ux.js").is_file():
+        failures.append("Site geneli UX JavaScript artifactı eksik")
 
     for path in core.iter_text_files(site):
         try:
@@ -87,14 +114,17 @@ def validate(site: Path, base_path: str) -> dict:
         if path.suffix.lower() not in {".html", ".htm"}:
             continue
         html_count += 1
+        relative = path.relative_to(site)
         if core.CSS_MARKER not in text or css_href not in text:
-            failures.append(f"Canlı kalite stylesheet bağlantısı eksik: {path.relative_to(site)}")
+            failures.append(f"Canlı kalite stylesheet bağlantısı eksik: {relative}")
+        if text.count(UX_MARKER) != 2 or ux_css_href not in text or ux_js_src not in text:
+            failures.append(f"Final site geneli UX katmanı eksik veya yinelenmiş: {relative}")
         canonical_match = core.CANONICAL_RE.search(text)
         if canonical_match:
             canonical_count += 1
             canonical = canonical_match.group(1)
             if canonical != core.CANONICAL_ORIGIN and not canonical.startswith(core.CANONICAL_ORIGIN + "/"):
-                failures.append(f"Canonical origin yanlış: {path.relative_to(site)} → {canonical}")
+                failures.append(f"Canonical origin yanlış: {relative} → {canonical}")
 
     for release_name in ("alo186-release.json", "pages-release.json"):
         release_path = site / release_name
@@ -110,6 +140,11 @@ def validate(site: Path, base_path: str) -> dict:
             failures.append(f"{release_name} kişisel veri güven sözleşmesi eksik")
         if quality.get("officialInstitutionClaimed") is not False:
             failures.append(f"{release_name} resmî kurum güven sözleşmesi eksik")
+        sitewide = release.get("sitewideUx") or {}
+        if sitewide.get("finalizedAfterGrowthInjectors") is not True:
+            failures.append(f"{release_name} final site geneli UX aşaması eksik")
+        if sitewide.get("finalHtmlPages") != html_count:
+            failures.append(f"{release_name} final HTML/UX sayfa sayısı eşleşmiyor")
 
     route_count = 0
     core_release = site / "alo186-release.json"
@@ -147,6 +182,8 @@ def validate(site: Path, base_path: str) -> dict:
         "htmlCount": html_count,
         "canonicalCount": canonical_count,
         "releaseRouteCount": route_count,
+        "sitewideUxHtmlCount": html_count,
+        "sitewideUxFinalizedAfterGrowthInjectors": True,
         "deviceDamageDeadline": "10 iş günü",
         "minimumTouchTargetCssPx": 44,
         "personalDataCollectionAdded": False,
@@ -156,11 +193,25 @@ def validate(site: Path, base_path: str) -> dict:
 
 core.normalize_text = normalize_text
 core.validate = validate
-run = core.run
+
+
+def run(site: Path, base_path: str = "") -> dict:
+    site = site.resolve()
+    normalized = core.normalize_base_path(base_path)
+    ux = install_sitewide_ux(site, normalized)
+    update_sitewide_ux_release(site / "alo186-release.json", ux)
+    update_sitewide_ux_release(site / "pages-release.json", ux)
+    result = core.run(site, normalized)
+    result["sitewideUxFinal"] = {
+        **ux,
+        "finalHtmlPages": int(ux.get("injectedPages", 0)) + int(ux.get("alreadyInjectedPages", 0)),
+        "finalizedAfterGrowthInjectors": True,
+    }
+    return result
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="ALO186 canlı artifactına apex canonical ve erişilebilirlik hardening uygular.")
+    parser = argparse.ArgumentParser(description="ALO186 canlı artifactına apex canonical, erişilebilirlik ve final site geneli UX hardening uygular.")
     parser.add_argument("--site", type=Path, required=True)
     parser.add_argument("--base-path", default="")
     args = parser.parse_args()
