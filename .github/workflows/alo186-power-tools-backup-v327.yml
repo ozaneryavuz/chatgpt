@@ -1,0 +1,142 @@
+name: ALO186 elektrikli el aleti ve kompresör yedek güç testi
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/elektrikli-el-aleti-kompresor-yedek-guc-uygunluk/**'
+      - 'alo186/hesaplama/index.html'
+      - 'alo186/deployment/routing-overlays/088-power-tools-backup.json'
+      - 'alo186/tests/test_power_tools_backup_v327.py'
+      - '.github/workflows/alo186-power-tools-backup-v327.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/elektrikli-el-aleti-kompresor-yedek-guc-uygunluk/**'
+      - 'alo186/hesaplama/index.html'
+      - 'alo186/deployment/routing-overlays/088-power-tools-backup.json'
+      - 'alo186/tests/test_power_tools_backup_v327.py'
+      - '.github/workflows/alo186-power-tools-backup-v327.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-power-tools-backup-v327-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Hesap ve karar senaryoları
+        run: |
+          set -euo pipefail
+          node alo186/hesaplama/elektrikli-el-aleti-kompresor-yedek-guc-uygunluk/app.test.js
+          python alo186/tests/test_power_tools_backup_v327.py
+
+      - name: Sözdizimi ve mevcut güven regresyonları
+        run: |
+          set -euo pipefail
+          node --check alo186/hesaplama/elektrikli-el-aleti-kompresor-yedek-guc-uygunluk/app.js
+          python -m py_compile alo186/tests/test_power_tools_backup_v327.py
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Canonical üretim ve smoke testi
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-power-tools-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-power-tools-canonical
+
+      - name: Custom-domain ve project-path Pages üretimi
+        run: |
+          set -euo pipefail
+          for target in custom project; do
+            cp -a /tmp/alo186-power-tools-canonical "/tmp/alo186-power-tools-$target"
+          done
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-power-tools-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-power-tools-custom \
+            --base-path ''
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-power-tools-custom \
+            --base-path '' > /tmp/alo186-power-tools-custom.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-power-tools-custom \
+            --base-path ''
+
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-power-tools-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-power-tools-project \
+            --base-path '/chatgpt'
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-power-tools-project \
+            --base-path '/chatgpt' > /tmp/alo186-power-tools-project.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-power-tools-project \
+            --base-path '/chatgpt'
+
+      - name: Rota, sitemap, Teknik Arama ve gizlilik kabulü
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          route='hesaplama/elektrikli-el-aleti-kompresor-yedek-guc-uygunluk'
+          for root,prefix in [
+              (Path('/tmp/alo186-power-tools-custom'),''),
+              (Path('/tmp/alo186-power-tools-project'),'/chatgpt'),
+          ]:
+              page=root/route/'index.html'
+              app=root/route/'app.js'
+              css=root/route/'styles.css'
+              assert page.is_file() and app.is_file() and css.is_file()
+              html=page.read_text(encoding='utf-8')
+              js=app.read_text(encoding='utf-8')
+              expected=f"{prefix}/hesaplama/elektrikli-el-aleti-kompresor-yedek-guc-uygunluk/" if prefix else '/hesaplama/elektrikli-el-aleti-kompresor-yedek-guc-uygunluk/'
+              assert expected in html
+              assert 'amazon.com' not in (html+js).lower()
+              assert 'localStorage' not in js and 'sessionStorage' not in js and 'fetch(' not in js
+              assert all(token in html for token in ['actualNeed','technicalCheck','affiliateCheck','productLinks'])
+              hub=(root/'hesaplama/index.html').read_text(encoding='utf-8')
+              assert expected in hub
+              assert '41 çekirdek araç' in hub
+              sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
+              assert expected in sitemap
+              search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
+              entry=next(item for item in search['entries'] if item['canonicalPath']=='/hesaplama/elektrikli-el-aleti-kompresor-yedek-guc-uygunluk/')
+              assert entry['url']==expected
+          print(json.dumps({'ok':True,'route':'/hesaplama/elektrikli-el-aleti-kompresor-yedek-guc-uygunluk/','directStoreLinks':0,'storage':False,'affiliateTripleGate':True,'searchIndexed':True},ensure_ascii=False))
+          PY
+
+      - name: Doğrulanmış site artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-power-tools-backup-v327
+          path: /tmp/alo186-power-tools-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
