@@ -1,8 +1,5 @@
 'use strict';
 const assert=require('node:assert/strict');
-
-// Üretimdeki sıra: katalog → Knowledge Graph → satış genişletmesi.
-// Satış uzantısını doğrudan require etmek, bu zinciri temiz bir Node sürecinde kurar.
 const catalog=require('./catalog-sales-extension.js');
 const now=new Date('2026-07-30T12:00:00Z');
 
@@ -29,20 +26,29 @@ for(const product of exact){
   assert(product.needIds.length,`${product.id} ihtiyaç ilişkisi eksik`);
 }
 
-const exactAdditions={
-  'anker-737-a1289':{asin:'B09VPHVT2Z',capacityMah:24000,maxOutputW:140,source:'anker.com'},
-  'anker-a1383-20k-87w':{asin:'B0CXDXP8VR',capacityMah:20000,maxOutputW:87,source:'anker.com'}
-};
-for(const[id,expected]of Object.entries(exactAdditions)){
-  const product=catalog.getProduct(id);
-  assert(product,id);
-  assert.equal(product.asin,expected.asin);
-  assert.equal(product.verifiedAt,'2026-07-30');
-  assert.equal(product.attributes.capacityMah,expected.capacityMah);
-  assert.equal(product.attributes.maxOutputW,expected.maxOutputW);
-  assert(product.technicalSource.includes(expected.source));
-  assert.equal(catalog.productLinkLabel(product),'Amazon ürün sayfasını aç');
-}
+const a1289=catalog.getProduct('anker-737-a1289');
+assert(a1289);
+assert.equal(a1289.asin,'B09VPHVT2Z');
+assert.equal(a1289.mpn,'A1289');
+assert.equal(a1289.verifiedAt,'2026-07-30');
+assert.equal(a1289.attributes.capacityMah,24000);
+assert.equal(a1289.attributes.maxOutputW,140);
+assert.equal(a1289.attributes.maxSingleDeviceW,140);
+assert.equal(a1289.attributes.totalOutputW,140);
+assert.match(a1289.sourceNote,/Anker teknik kaynaklarıyla/);
+assert.equal(catalog.productLinkLabel(a1289),'Amazon ürün sayfasını aç');
+
+const a1383=catalog.getProduct('anker-a1383-20k-87w');
+assert(a1383);
+assert.equal(a1383.asin,'B0CXDXP8VR');
+assert.equal(a1383.mpn,'A1383');
+assert.equal(a1383.verifiedAt,'2026-07-30');
+assert.equal(a1383.attributes.capacityMah,20000);
+assert.equal(a1383.attributes.maxOutputW,65,'Tek cihaz gücü 65 W olarak korunmalı.');
+assert.equal(a1383.attributes.maxSingleDeviceW,65);
+assert.equal(a1383.attributes.totalOutputW,87,'87 W yalnız toplam çoklu-port gücüdür.');
+assert.match(a1383.sourceNote,/Anker teknik kaynağıyla/);
+assert.equal(catalog.productLinkLabel(a1383),'Amazon ürün sayfasını aç');
 
 const modelAdditions={
   'tp-link-tapo-p110':{source:'tp-link.com',maxCurrentA:16,maxPowerW:3680},
@@ -87,8 +93,8 @@ const publicProducts=catalog.products.filter(product=>catalog.publicAffiliateEli
 const gatedProducts=catalog.products.filter(product=>catalog.isCatalogProduct(product)&&!catalog.publicAffiliateEligible(product,{now,freshOnly:false}));
 assert.equal(publicProducts.length,13);
 assert.equal(gatedProducts.length,17);
-assert(publicProducts.some(product=>product.id==='anker-737-a1289'));
-assert(publicProducts.some(product=>product.id==='anker-a1383-20k-87w'));
+assert(publicProducts.includes(a1289));
+assert(publicProducts.includes(a1383));
 assert(!publicProducts.some(product=>product.status==='manufacturer_verified_search'));
 
 const graph=catalog.knowledgeGraph({now})['@graph'];
@@ -121,4 +127,4 @@ const stale=catalog.knowledgeGraph({now:new Date('2027-01-01T12:00:00Z')})['@gra
 assert.equal(stale.filter(node=>node['@type']==='Product').length,0);
 assert.equal(stale.filter(node=>node['@type']==='DefinedTerm'&&node.inDefinedTermSet&&node.inDefinedTermSet['@id'].endsWith('/gated-product-candidates#termset')).length,0);
 
-console.log(JSON.stringify({ok:true,affiliateTag:catalog.affiliateTag,needs:18,categories:18,totalProducts:30,publicProducts:13,gatedCandidates:17,exactAsins:20,manufacturerModels:10,newProducts:8},null,2));
+console.log(JSON.stringify({ok:true,affiliateTag:catalog.affiliateTag,needs:18,categories:18,totalProducts:30,publicProducts:13,gatedCandidates:17,exactAsins:20,manufacturerModels:10,newManufacturerModels:6,existingExactProductsEnriched:2},null,2));
