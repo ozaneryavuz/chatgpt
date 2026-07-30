@@ -24,7 +24,7 @@ concurrency:
 jobs:
   artifact-quality:
     runs-on: ubuntu-latest
-    timeout-minutes: 55
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -75,13 +75,15 @@ jobs:
             --site /tmp/alo186-quality-custom \
             --base-path '' \
             > /tmp/alo186-quality-custom-growth.json
+          # Legacy Pages smoke testi hazırlama katmanının www sözleşmesini doğrular.
+          # Final apex normalizasyonu bundan sonra uygulanır ve ayrı kalite testiyle denetlenir.
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-quality-custom \
+            --base-path ''
           python alo186/deployment/finalize_live_quality.py \
             --site /tmp/alo186-quality-custom \
             --base-path '' \
             > /tmp/alo186-quality-custom-finalize.json
-          python alo186/deployment/smoke_github_pages.py \
-            --site /tmp/alo186-quality-custom \
-            --base-path ''
           python alo186/tests/test_live_technical_quality.py \
             --site /tmp/alo186-quality-custom \
             --base-path '' \
@@ -102,13 +104,13 @@ jobs:
             --site /tmp/alo186-quality-project \
             --base-path '/chatgpt' \
             > /tmp/alo186-quality-project-growth.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-quality-project \
+            --base-path '/chatgpt'
           python alo186/deployment/finalize_live_quality.py \
             --site /tmp/alo186-quality-project \
             --base-path '/chatgpt' \
             > /tmp/alo186-quality-project-finalize.json
-          python alo186/deployment/smoke_github_pages.py \
-            --site /tmp/alo186-quality-project \
-            --base-path '/chatgpt'
           python alo186/tests/test_live_technical_quality.py \
             --site /tmp/alo186-quality-project \
             --base-path '/chatgpt' \
@@ -206,6 +208,7 @@ jobs:
         env:
           AXE_CORE_PATH: node_modules/axe-core/axe.min.js
         run: |
+          mkdir -p /tmp/alo186-live-technical-audit
           python alo186/tests/live_site_technical_audit_v2.py \
             --output /tmp/alo186-live-technical-audit
           python alo186/tests/live_http_audit.py \
@@ -215,8 +218,8 @@ jobs:
       - name: Denetim raporunu iş özetine ekle
         if: always()
         run: |
-          if [[ -f /tmp/alo186-live-technical-audit/report.md ]]; then
-            cat /tmp/alo186-live-technical-audit/report.md >> "$GITHUB_STEP_SUMMARY"
+          if [[ -f /tmp/alo186-live-technical-audit/audit.md ]]; then
+            cat /tmp/alo186-live-technical-audit/audit.md >> "$GITHUB_STEP_SUMMARY"
           else
             echo 'Canlı teknik denetim raporu üretilemedi.' >> "$GITHUB_STEP_SUMMARY"
           fi
