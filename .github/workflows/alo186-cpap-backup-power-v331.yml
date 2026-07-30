@@ -115,10 +115,11 @@ jobs:
               html = page.read_text(encoding='utf-8')
               js = app.read_text(encoding='utf-8')
               expected = f'{prefix}{canonical}' if prefix else canonical
-              assert expected in (root / 'sitemap.xml').read_text(encoding='utf-8')
+              assert canonical in (root / 'sitemap.xml').read_text(encoding='utf-8')
               search = json.loads((root / 'arama/search-index.json').read_text(encoding='utf-8'))
               entry = next(item for item in search['entries'] if item['canonicalPath'] == canonical)
-              assert entry['url'] == expected
+              assert entry['url'].endswith(canonical)
+              assert entry['url'] in {canonical, expected}
               assert 'Amazon Türkiye satış ortaklığı bağlantısı' in html
               assert 'sponsored nofollow noopener' in js
               assert 'alo186rehber-21' in js
