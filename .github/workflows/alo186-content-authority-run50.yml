@@ -1,0 +1,92 @@
+name: ALO186 içerik otoritesi run50 kalite kontrolü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/haberler/ev-sarj-dinamik-yuk-yonetimi-ct-sayac-faz-eslesmesi/**'
+      - 'alo186/haberler/hibrit-inverter-backup-notr-toprak-bagi-rcd-atmasi/**'
+      - 'alo186/haberler/jenerator-mars-akusu-sarj-cihazi-on-isitici-start-hazirligi/**'
+      - 'alo186/deployment/routing-overlays/content-authority-run50.json'
+      - 'alo186/tests/test_authority_content_run50.py'
+      - '.github/workflows/alo186-content-authority-run50.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/ev-sarj-dinamik-yuk-yonetimi-ct-sayac-faz-eslesmesi/**'
+      - 'alo186/haberler/hibrit-inverter-backup-notr-toprak-bagi-rcd-atmasi/**'
+      - 'alo186/haberler/jenerator-mars-akusu-sarj-cihazi-on-isitici-start-hazirligi/**'
+      - 'alo186/deployment/routing-overlays/content-authority-run50.json'
+      - 'alo186/tests/test_authority_content_run50.py'
+      - '.github/workflows/alo186-content-authority-run50.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-authority-run50-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Yeni rehberlerin AEO SEO kaynak ve güven sözleşmeleri
+        run: python alo186/tests/test_authority_content_run50.py
+      - name: İçerik niyeti ve mevcut güven regresyonları
+        run: |
+          python alo186/tests/test_content_intent_consolidation.py
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+      - name: Canonical üretim paketini oluştur
+        run: |
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-authority-run50-canonical --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-authority-run50-canonical
+      - name: Custom-domain yayın katmanını hazırla
+        run: |
+          cp -a /tmp/alo186-authority-run50-canonical /tmp/alo186-authority-run50-custom
+          python alo186/deployment/prepare_github_pages.py --site /tmp/alo186-authority-run50-custom --base-path '' --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py --site /tmp/alo186-authority-run50-custom --base-path ''
+          python alo186/deployment/inject_shortlist_growth.py --site /tmp/alo186-authority-run50-custom --base-path '' > /tmp/authority-run50.json
+          python alo186/deployment/smoke_github_pages.py --site /tmp/alo186-authority-run50-custom --base-path ''
+      - name: Canonical sitemap ve Teknik Arama kabulü
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('/tmp/alo186-authority-run50-custom')
+          routes=[
+            '/haberler/ev-sarj-dinamik-yuk-yonetimi-ct-sayac-faz-eslesmesi',
+            '/haberler/hibrit-inverter-backup-notr-toprak-bagi-rcd-atmasi',
+            '/haberler/jenerator-mars-akusu-sarj-cihazi-on-isitici-start-hazirligi',
+          ]
+          sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
+          search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
+          release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
+          pages=json.loads((root/'pages-release.json').read_text(encoding='utf-8'))
+          host=(pages.get('canonicalHost') or release.get('canonicalHost') or 'https://alo186.com').rstrip('/')
+          active={item.get('canonicalPath','').rstrip('/') for item in search['entries']}
+          assert release['routingVersion'] >= 85, release['routingVersion']
+          for route in routes:
+              assert (root/route.strip('/')/'index.html').is_file(), route
+              assert f'{host}{route}' in sitemap, ('sitemap', host, route)
+              assert route in active, ('search-index', route)
+          print(json.dumps({'routingVersion':release['routingVersion'],'canonicalHost':host,'routes':routes,'searchEntries':len(active)},ensure_ascii=False))
+          PY
+      - name: Doğrulanmış içerik artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-authority-run50-pages
+          path: /tmp/alo186-authority-run50-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
