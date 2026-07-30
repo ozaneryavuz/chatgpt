@@ -1,4 +1,4 @@
-name: ALO186 affiliate ürün Knowledge Graph v102
+name: ALO186 affiliate ürün Knowledge Graph v104
 
 on:
   pull_request:
@@ -42,6 +42,7 @@ jobs:
           python alo186/tests/test_affiliate_knowledge_graph_v102.py
           python -m py_compile alo186/tests/test_affiliate_knowledge_graph_v102.py
           node --check alo186/affiliate-knowledge-graph/app.js
+          python -m json.tool alo186/affiliate-knowledge-graph/catalog-extension-v104.json >/dev/null
 
       - name: Mevcut yayın ve güven regresyonları
         run: |
@@ -107,23 +108,34 @@ jobs:
               (Path('/tmp/alo186-affiliate-kg-custom'),''),
               (Path('/tmp/alo186-affiliate-kg-project'),'/chatgpt'),
           ]:
-              for name in ['index.html','app.js','styles.css','catalog.json']:
+              for name in [
+                  'index.html','app.js','styles.css','catalog.json',
+                  'catalog-extension-v103.json','catalog-extension-v104.json'
+              ]:
                   assert (root/relative/name).is_file(), (root,name)
               assert canonical in (root/'sitemap.xml').read_text(encoding='utf-8')
               search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
               entry=next(item for item in search['entries'] if item['canonicalPath']==canonical)
               expected=f'{prefix}{canonical}' if prefix else canonical
               assert entry['url'] in {canonical,expected}
-              catalog=json.loads((root/relative/'catalog.json').read_text(encoding='utf-8'))
-              assert len(catalog['intents'])>=12
-              assert len(catalog['productClasses'])>=23
-          print(json.dumps({'ok':True,'route':canonical,'intents':12,'productClasses':23,'searchIndexed':True}))
+              base=json.loads((root/relative/'catalog.json').read_text(encoding='utf-8'))
+              ext103=json.loads((root/relative/'catalog-extension-v103.json').read_text(encoding='utf-8'))
+              ext104=json.loads((root/relative/'catalog-extension-v104.json').read_text(encoding='utf-8'))
+              assert len(base['intents'])+len(ext103['intents'])+len(ext104['intents'])==26
+              assert len(base['productClasses'])+len(ext103['productClasses'])+len(ext104['productClasses'])==57
+              assert len(ext104['journeys'])==8
+              html=(root/relative/'index.html').read_text(encoding='utf-8')
+              assert '57 ürün sınıfı' in html
+              assert '8 karar paketi' in html
+              assert 'rel="sponsored nofollow noopener"' in html
+              assert '"@type":"Product"' not in html and '"@type":"Offer"' not in html
+          print(json.dumps({'ok':True,'route':canonical,'intents':26,'productClasses':57,'journeys':8,'searchIndexed':True}))
           PY
 
       - name: Doğrulanmış site artifactı
         uses: actions/upload-artifact@v4
         with:
-          name: alo186-affiliate-knowledge-graph-v102-pages
+          name: alo186-affiliate-knowledge-graph-v104-pages
           path: /tmp/alo186-affiliate-kg-custom
           if-no-files-found: error
           include-hidden-files: true
