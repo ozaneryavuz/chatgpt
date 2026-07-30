@@ -327,10 +327,18 @@ def smoke(site: Path, manifest_path: Path, base_path: str) -> dict:
     if base_path:
         unresolved = re.compile(r'(?P<quote>["\'`])/(?!/)(?P<rest>[^"\'`\s<>]*)')
         known_top_levels = {path.name for path in site.iterdir()}
+        base_path_aware_scripts = {
+            Path("assets/alo186-ux.js"),
+        }
         for path in sorted(site.rglob("*")):
             if not path.is_file() or path.suffix.lower() not in {".html", ".js", ".css", ".json", ".webmanifest"}:
                 continue
             if path.name in CANONICAL_METADATA_FILES:
+                continue
+            relative_path = path.relative_to(site)
+            if relative_path in base_path_aware_scripts:
+                # The shared UX runtime intentionally keeps canonical root routes,
+                # then derives the public prefix from its own script URL.
                 continue
             text = path.read_text(encoding="utf-8", errors="ignore")
             for match in unresolved.finditer(text):
