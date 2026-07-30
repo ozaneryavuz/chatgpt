@@ -11,7 +11,7 @@
   }
 
   function mergeCatalog(base, extension) {
-    const intentMap = new Map(base.intents.map((item) => [item.id, { ...item, productClasses: [...item.productClasses] }]));
+    const intentMap = new Map(base.intents.map((item) => [item.id, { ...item, productClasses: [...(item.productClasses || [])] }]));
     extension.intents.forEach((item) => intentMap.set(item.id, item));
     const productMap = new Map(base.productClasses.map((item) => [item.id, item]));
     extension.productClasses.forEach((item) => productMap.set(item.id, item));
@@ -30,7 +30,7 @@
 
   function matches(item) {
     const intentMatch = state.intent === 'all' || item.needs.includes(state.intent);
-    const text = [item.label, item.search, ...item.requiredEvidence, ...(item.symptoms || []), ...(item.avoidWhen || []), ...item.needs].join(' ').toLocaleLowerCase('tr-TR');
+    const text = [item.label, item.search, ...item.requiredEvidence, ...(item.symptoms || item.signals || []), ...(item.avoidWhen || []), ...(item.profiles || []), ...(item.environments || []), ...item.needs].join(' ').toLocaleLowerCase('tr-TR');
     return intentMatch && (!state.query || text.includes(state.query));
   }
 
@@ -74,7 +74,7 @@
     if (!list.length) {
       const empty = document.createElement('div');
       empty.className = 'empty';
-      empty.innerHTML = '<strong>Eşleşme bulunamadı.</strong><p>Arama ifadesini sadeleştirin veya ücretsiz Akıllı Ürün Merkezi üzerinden ihtiyacı yeniden sınıflandırın.</p><a class="button" href="/akilli-urun-secimi">Akıllı ürün merkezini aç</a>';
+      empty.innerHTML = '<strong>Eşleşme bulunamadı.</strong><p>Belirtiyi sadeleştirin veya ücretsiz Akıllı Ürün Merkezi üzerinden ihtiyacı yeniden sınıflandırın.</p><a class="button" href="/akilli-urun-secimi">Akıllı ürün merkezini aç</a>';
       host.appendChild(empty);
       return;
     }
@@ -88,9 +88,13 @@
       card.querySelector('.why').textContent = item.search;
       appendList(card.querySelector('.evidence ul'), item.requiredEvidence);
       const symptoms = card.querySelector('.symptoms');
-      if (item.symptoms?.length) appendList(symptoms.querySelector('ul'), item.symptoms); else symptoms.hidden = true;
+      const symptomItems = item.symptoms || item.signals || [];
+      if (symptomItems.length) appendList(symptoms.querySelector('ul'), symptomItems); else symptoms.hidden = true;
       const avoid = card.querySelector('.avoid');
       if (item.avoidWhen?.length) appendList(avoid.querySelector('ul'), item.avoidWhen); else avoid.hidden = true;
+      const context = card.querySelector('.context');
+      const contextItems = [...(item.profiles || []), ...(item.environments || [])];
+      if (contextItems.length) appendList(context.querySelector('ul'), contextItems); else context.hidden = true;
       const guide = card.querySelector('.guide');
       guide.href = item.guide;
       const confirm = card.querySelector('.confirm');
@@ -123,8 +127,13 @@
   }
 
   async function boot() {
-    const [base, extension] = await Promise.all([loadJson('./catalog.json'), loadJson('./catalog-extension-v103.json')]);
-    state.catalog = mergeCatalog(base, extension);
+    const [base, v103, v104, supplement] = await Promise.all([
+      loadJson('./catalog.json'),
+      loadJson('./catalog-extension-v103.json'),
+      loadJson('./catalog-v104-extension.json'),
+      loadJson('./catalog-v104-supplement.json')
+    ]);
+    state.catalog = [v103, v104, supplement].reduce((catalog, extension) => mergeCatalog(catalog, extension), base);
     $('intentCount').textContent = state.catalog.intents.length;
     $('productCount').textContent = state.catalog.productClasses.length;
     $('search').addEventListener('input', (event) => {
