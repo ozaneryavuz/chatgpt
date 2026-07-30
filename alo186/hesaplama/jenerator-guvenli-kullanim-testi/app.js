@@ -6,6 +6,7 @@
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
   'use strict';
 
+  const runtimeRoot=typeof globalThis!=='undefined'?globalThis:{};
   const DISTANCE_MIN_M=6.1;
   const CATEGORY_LINKS={
     generator:{label:'Jeneratör ürün sınıfını aç',href:'../../akilli-urun-secimi?kategori=generator'},
@@ -21,7 +22,9 @@
 
   const uniq=values=>[...new Set(values.filter(Boolean))];
   const num=value=>{
-    const parsed=Number(String(value??'').replace(',','.'));
+    const raw=String(value??'').trim();
+    if(!raw)return null;
+    const parsed=Number(raw.replace(',','.'));
     return Number.isFinite(parsed)?parsed:null;
   };
 
@@ -235,7 +238,7 @@
       renderCommerce(result.commerceClosed?[]:(result.commerceCategories||[]));
       resultEl.focus({preventScroll:true});
       resultEl.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
-      if(root.Alo186Track)root.Alo186Track('generator_safety_result',{status:result.status,commerce_categories:(result.commerceCategories||[]).join('|')||'none'});
+      if(runtimeRoot.Alo186Track)runtimeRoot.Alo186Track('generator_safety_result',{status:result.status,commerce_categories:(result.commerceCategories||[]).join('|')||'none'});
     }
 
     form.addEventListener('submit',event=>{event.preventDefault();$('validation').textContent='';render(evaluate(collect()));});
