@@ -54,7 +54,7 @@ assert "aria-disabled" in APP
 assert "affiliateGate" in HTML and "affiliateGate" in APP
 assert "JSON sonuç fişi" in HTML and ".ics" not in HTML.lower()
 assert "BEGIN:VCALENDAR" in APP and "7 gün önce" in HTML
-assert "adapterleri art arda" in CORE.lower()
+assert "adaptörleri art arda" in CORE.lower()
 assert "recallChecked==='no'" in CORE
 assert "50/60 Hz (bölgeye göre)" in CORE
 assert "@media(max-width:580px)" in CSS
