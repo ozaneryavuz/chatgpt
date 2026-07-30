@@ -151,10 +151,10 @@ jobs:
                   alias_path=root/'haberler'/alias/'index.html'
                   text=alias_path.read_text(encoding='utf-8')
                   assert 'name="robots" content="noindex,follow"' in text
-                  assert f'rel="canonical" href="https://www.alo186.com/haberler/{canonical}"' in text
+                  assert f'rel="canonical" href="https://alo186.com/haberler/{canonical}"' in text
                   assert f'url={prefix}/haberler/{canonical}' in text
-                  assert f'https://www.alo186.com/haberler/{alias}' not in sitemap
-                  assert f'https://www.alo186.com/haberler/{canonical}' in sitemap
+                  assert f'https://alo186.com/haberler/{alias}' not in sitemap
+                  assert f'https://alo186.com/haberler/{canonical}' in sitemap
           PY
 
       - name: Doğrulanmış canonical birleştirme artifactı
