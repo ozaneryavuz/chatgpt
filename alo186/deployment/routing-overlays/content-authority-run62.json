@@ -1,0 +1,21 @@
+{
+  "version": 100,
+  "generatedAt": "2026-07-30",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-faturasi-itiraz-sayac-okuma-carpim-faktoru-tarife-hatasi/index.html",
+      "canonicalPath": "/haberler/elektrik-faturasi-itiraz-sayac-okuma-carpim-faktoru-tarife-hatasi",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/jenerator-senkronizasyon-hatasi-ansi-25-dead-bus-kapama/index.html",
+      "canonicalPath": "/haberler/jenerator-senkronizasyon-hatasi-ansi-25-dead-bus-kapama",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/bess-grid-forming-grid-following-black-start-ada-calismasi/index.html",
+      "canonicalPath": "/haberler/bess-grid-forming-grid-following-black-start-ada-calismasi",
+      "type": "article"
+    }
+  ]
+}
