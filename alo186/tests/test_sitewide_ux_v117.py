@@ -10,6 +10,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 UX_MARKER = 'data-alo186-sitewide-ux="true"'
 TECHNICAL_HTML_EXCEPTIONS = {"404.html"}
+CRITICAL_USER_ROUTES = {
+    "index.html",
+    "edas-bul/index.html",
+    "arama/index.html",
+    "acil-numaralar/index.html",
+    "elektrik-durum-merkezi/index.html",
+}
 
 
 def run(command: list[str]) -> None:
@@ -30,18 +37,28 @@ for token in (
     "Bu sayfada neler var?",
     "alo186AltFallback",
     "figcaption",
+    "ResizeObserver",
+    "wrapper.tabIndex = overflowing ? 0 : -1",
+    "wrapper.dataset.overflow = String(overflowing)",
+    "header,.hero,[data-critical-media]",
 ):
     assert token in ux_js, token
 assert "body:not([data-alo186-ux-compact=true])" in ux_css
 assert "body{padding-bottom" not in ux_css
 assert ".alo-ux-toc" in ux_css
 assert "grid-template-columns:repeat(2" in ux_css
+assert ".alo-table-scroll[data-overflow=true]" in ux_css
+assert ".alo-ux-mobilebar a:focus-visible" in ux_css
+assert ".alo-ux-backtop:focus-visible" in ux_css
+assert ".alo-ux-toc a:focus-visible" in ux_css
+assert ".alo-ux-toc summary:focus-visible" in ux_css
+assert not re.search(r"outline\s*:\s*(?:0|none)\b", ux_css, re.I), "Klavye odağı bastırılamaz"
 
-with tempfile.TemporaryDirectory(prefix="alo186-ux-v118-") as folder:
+with tempfile.TemporaryDirectory(prefix="alo186-ux-v119-") as folder:
     canonical = Path(folder) / "canonical"
     custom = Path(folder) / "custom"
     project = Path(folder) / "project"
-    run([sys.executable, "alo186/deployment/build_static_site.py", "--output", str(canonical), "--commit", "ux-v118-test"])
+    run([sys.executable, "alo186/deployment/build_static_site.py", "--output", str(canonical), "--commit", "ux-v119-test"])
 
     results = []
     for target, base_path in ((custom, ""), (project, "/chatgpt")):
@@ -52,13 +69,15 @@ with tempfile.TemporaryDirectory(prefix="alo186-ux-v118-") as folder:
             "--site", str(target),
             "--base-path", base_path,
             "--repository", "ozaneryavuz/chatgpt",
-            "--commit", "ux-v118-test",
+            "--commit", "ux-v119-test",
         ])
         html_files = sorted(target.rglob("*.html"))
         assert html_files, target
         missing_ux = []
         missing_metadata = []
         missing_h1 = []
+        relative_files = {page.relative_to(target).as_posix() for page in html_files}
+        assert CRITICAL_USER_ROUTES <= relative_files, sorted(CRITICAL_USER_ROUTES - relative_files)
         for page in html_files:
             text = page.read_text(encoding="utf-8")
             relative = page.relative_to(target).as_posix()
@@ -76,12 +95,13 @@ with tempfile.TemporaryDirectory(prefix="alo186-ux-v118-") as folder:
                 missing_h1.append(relative)
         assert not missing_ux, missing_ux[:20]
         assert not missing_metadata, missing_metadata[:20]
+        assert not (CRITICAL_USER_ROUTES & set(missing_h1)), {
+            "criticalRoutesWithoutH1": sorted(CRITICAL_USER_ROUTES & set(missing_h1)),
+        }
         h1_ratio = (len(html_files) - len(missing_h1)) / len(html_files)
         assert h1_ratio >= 0.97, {"ratio": h1_ratio, "missing": missing_h1[:20]}
         assert (target / "assets/alo186-ux.css").is_file()
         assert (target / "assets/alo186-ux.js").is_file()
-        for route in ("index.html", "edas-bul/index.html", "arama/index.html", "acil-numaralar/index.html", "elektrik-durum-merkezi/index.html"):
-            assert (target / route).is_file(), route
         release = json.loads((target / "pages-release.json").read_text(encoding="utf-8"))
         assert release["sitewideUx"]["injectedPages"] + release["sitewideUx"]["alreadyInjectedPages"] == len(html_files)
         results.append({
@@ -89,7 +109,7 @@ with tempfile.TemporaryDirectory(prefix="alo186-ux-v118-") as folder:
             "pages": len(html_files),
             "h1Coverage": round(h1_ratio, 4),
             "uxInjected": True,
-            "criticalRoutes": 5,
+            "criticalRoutes": len(CRITICAL_USER_ROUTES),
         })
 
 run(["node", "--check", "alo186/assets/alo186-ux.js"])
@@ -97,13 +117,15 @@ print(json.dumps({
     "ok": True,
     "targets": results,
     "technicalExceptions": sorted(TECHNICAL_HTML_EXCEPTIONS),
+    "criticalRoutes": sorted(CRITICAL_USER_ROUTES),
     "mobileUtilityBar": "indexable-tr-only",
     "projectPathAware": True,
     "localizedUtilities": True,
     "activePageState": True,
-    "tableOverflowGuard": True,
+    "tableOverflowGuard": "focus-only-when-overflowing",
+    "keyboardFocusVisible": True,
     "externalLinkHardening": True,
-    "lazyImages": True,
+    "criticalImagesProtected": True,
     "imageAltFallback": True,
     "longPageToc": True,
     "backToTop": True,
