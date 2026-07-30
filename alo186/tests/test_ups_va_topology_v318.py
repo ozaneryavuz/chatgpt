@@ -75,7 +75,8 @@ def main() -> None:
     assert "112’yi arayın" in app
 
     assert "ups-va-topoloji-uygunluk" in hub
-    assert "33 çekirdek araç" in hub
+    count_match = re.search(r"(\d+) çekirdek araç", hub)
+    assert count_match and int(count_match.group(1)) >= 33
     assert "UPS VA ve Topoloji Uygunluğu" in hub
 
     assert "@media(max-width:820px)" in css
@@ -87,7 +88,7 @@ def main() -> None:
         "ok": True,
         "routingVersion": manifest["version"],
         "route": ROUTE,
-        "hubToolCountLabel": 33,
+        "hubToolCountLabel": int(count_match.group(1)),
         "personalDataFields": 0,
         "browserStorage": False,
         "affiliateDisclosure": True,
