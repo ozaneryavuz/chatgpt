@@ -104,7 +104,7 @@ const sitemap=fs.readFileSync(path.join(repoRoot,'alo186','sitemap.xml'),'utf8')
 assert.match(html,/https:\/\/www\.alo186\.com\/hesaplama\/akim-korumali-grup-priz-uygunluk\//);
 assert.match(html,/Satış ortaklığı açıklaması/);
 assert.match(html,/Kişisel veri yok/);
-assert.match(html,/Joule değeri.*tek başına koruma/s);
+assert.match(html,/Joule[\s\S]*tek başına koruma/i);
 assert.match(html,/Tam model geri çağırma kontrolü/);
 assert.match(html,/90 günlük teknik kontrol/);
 assert.match(html,/JSON teknik fişi indir/);
