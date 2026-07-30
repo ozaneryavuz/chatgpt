@@ -54,6 +54,12 @@ with tempfile.TemporaryDirectory(prefix="alo186-ux-v118-") as folder:
             "--repository", "ozaneryavuz/chatgpt",
             "--commit", "ux-v118-test",
         ])
+        run([
+            sys.executable,
+            "alo186/deployment/smoke_github_pages.py",
+            "--site", str(target),
+            "--base-path", base_path,
+        ])
         html_files = sorted(target.rglob("*.html"))
         assert html_files, target
         missing_ux = []
