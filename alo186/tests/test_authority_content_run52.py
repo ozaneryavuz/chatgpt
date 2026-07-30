@@ -20,11 +20,11 @@ PAGES = {
         "sources": ("webstore.iec.ch", "productinfo.se.com"),
         "separation": "UPS backfeed korumasını statik ve bakım bypassından ayırmayı; haricî ayırıcı, shunt trip, yardımcı kontak, mekanik interlock ve çok kaynaklı güvenli izolasyon kabulünü",
     },
-    "/haberler/ev-sarj-6ma-dc-rdc-dd-tip-a-tip-b-rcd-farki": {
-        "path": ROOT / "alo186/haberler/ev-sarj-6ma-dc-rdc-dd-tip-a-tip-b-rcd-farki/index.html",
-        "intent": ("6 mA", "RDC-DD", "Tip A", "Tip B", "IEC 62955", "Mode 3", "commissioning"),
-        "sources": ("webstore.iec.ch", "se.com", "abb.com"),
-        "separation": "Mode 3 şarjda 6 mA düzgün DC algılamayı; IEC 62955 RDC-DD, upstream 30 mA Tip A/F veya Tip B RCD ve port bazlı commissioning kanıtı üzerinden ayırmayı",
+    "/haberler/elektrik-baglanti-gucu-yuzde-20-artarsa-guc-artirimi-edas-basvurusu": {
+        "path": ROOT / "alo186/haberler/elektrik-baglanti-gucu-yuzde-20-artarsa-guc-artirimi-edas-basvurusu/index.html",
+        "intent": ("bağlantı gücü", "yüzde 20", "güç artırımı", "bağlantı görüşü", "talep gücü", "tadilat projesi", "EDAŞ"),
+        "sources": ("epdk.gov.tr", "tuketici.epdk.gov.tr", "tedas.gov.tr"),
+        "separation": "mesken dışı tesiste bağlantı gücünün yüzde 20'den fazla artmasını; kurulu güç, gerçek talep, EDAŞ bağlantı görüşü, tadilat projesi, dağıtım kapasitesi ve kabul kanıtı üzerinden yönetmeyi",
     },
 }
 
@@ -96,7 +96,7 @@ def main() -> None:
     established = (
         "/haberler/k-faktor-trafo-harmonik-yuklerde-nasil-secilir",
         "/haberler/ups-epo-rpo-acil-kapatma-nasil-calisir",
-        "/haberler/ev-sarj-dinamik-yuk-yonetimi-ct-sayac-faz-eslesmesi",
+        "/haberler/ev-sarj-rcd-tip-b-rdc-dd-6ma-farki",
     )
     assert not set(established) & set(PAGES)
 
