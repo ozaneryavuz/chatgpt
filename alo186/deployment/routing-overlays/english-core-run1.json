@@ -1,5 +1,5 @@
 {
-  "version": 105,
+  "version": 106,
   "generatedAt": "2026-07-30",
   "routes": [
     {
@@ -51,6 +51,16 @@
       "source": "alo186/en/affiliate-disclosure/index.html",
       "canonicalPath": "/en/affiliate-disclosure/",
       "type": "policy"
+    },
+    {
+      "source": "alo186/elektrik-kesintisi/index.html",
+      "canonicalPath": "/elektrik-kesintisi",
+      "type": "guide"
+    },
+    {
+      "source": "alo186/acil-numaralar/index.html",
+      "canonicalPath": "/acil-numaralar",
+      "type": "guide"
     },
     {
       "source": "alo186/hakkimizda/index.html",
