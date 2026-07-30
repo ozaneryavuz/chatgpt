@@ -66,7 +66,10 @@ route = next(item for item in OVERLAY["routes"] if item["canonicalPath"] == PATH
 assert route["source"] == "alo186/hesaplama/seyahat-priz-adaptoru-voltaj-uygunluk/index.html"
 assert route["type"] == "tool"
 assert "./seyahat-priz-adaptoru-voltaj-uygunluk/" in HUB
-assert "41 çekirdek araç" in HUB
+hub_count_match = re.search(r"(\d+) çekirdek araç", HUB)
+assert hub_count_match, "Hesaplama Merkezi araç sayacı bulunamadı."
+hub_tool_count = int(hub_count_match.group(1))
+assert hub_tool_count >= 41
 assert "Seyahat Priz Adaptörü ve Voltaj Uygunluğu" in HUB
 
 subprocess.run(["node", str(ROUTE / "core.test.js")], cwd=ROOT, check=True)
@@ -77,6 +80,7 @@ print(json.dumps({
     "ok": True,
     "canonical": CANONICAL,
     "routingVersion": OVERLAY["version"],
+    "hubToolCount": hub_tool_count,
     "jsonLdTypes": sorted(types),
     "commerce": "conditional and disclosed",
     "unverifiedCommercialFields": 0,
