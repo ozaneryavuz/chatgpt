@@ -1,0 +1,21 @@
+{
+  "version": 124,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/klima-yedek-guc-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/klima-yedek-guc-uygunluk/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/kamp-karavan-power-station-gunes-paneli-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/kamp-karavan-power-station-gunes-paneli-uygunluk/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/sektor-rehberi/yaz-elektrik-kesintisi-hazirlik-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/yaz-elektrik-kesintisi-hazirlik-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
