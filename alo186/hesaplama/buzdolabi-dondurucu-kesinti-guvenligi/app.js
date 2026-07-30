@@ -37,7 +37,7 @@
 
   function thresholdFor(appliance){
     if(appliance==='freezer_full')return 48;
-    if(appliance==='freezer_half')return 24;
+    if(appliance==='freezer_half'||appliance==='both')return 24;
     return 4;
   }
 
@@ -115,7 +115,7 @@
         }
       }
       if(includesFreezer(input.appliance)){
-        const threshold=input.appliance==='freezer_half'?24:48;
+        const threshold=thresholdFor(input.appliance);
         if(input.freezerTemp!==null||input.iceCrystals==='yes'){
           const safeRef=(input.freezerTemp!==null&&input.freezerTemp<=4)||input.iceCrystals==='yes';
           freezerStatus=safeRef?'cold_evidence_present':'above_reference';
@@ -123,7 +123,8 @@
           if(!safeRef)severity='warn';
         }else if(input.hours<=threshold&&input.doorsClosed){
           freezerStatus='within_time_guide';
-          steps.push(`${input.appliance==='freezer_half'?'Yarı dolu':'Tam dolu veya doluluğu belirtilmeyen'} dondurucu için ${threshold} saat rehberi aşılmadı; kapıyı kapalı tutun.`);
+          const fullness=input.appliance==='freezer_full'?'Tam dolu':'Yarı dolu veya doluluğu bilinmeyen';
+          steps.push(`${fullness} dondurucu için ${threshold} saat rehberi aşılmadı; kapıyı kapalı tutun.`);
         }else{
           freezerStatus='evidence_needed';severity='warn';
           steps.push(`Dondurucu için ${threshold} saat rehberi aşıldı veya kapı açıldı; sıcaklık ya da buz kristali kanıtı olmadan güvenli kabul etmeyin.`);
