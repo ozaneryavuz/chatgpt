@@ -23,6 +23,8 @@ for token in (
     "const ROOT = String.fromCharCode(47)",
     "const isIndexable = !robots.includes('noindex')",
     "const isTurkish",
+    "const tocDisabled = main?.hasAttribute('data-alo186-toc-disabled')",
+    "heading.closest('[data-alo186-toc-skip]')",
     "markCurrent(nav)",
     "const basePath = scriptUrl.pathname.endsWith(assetSuffix)",
     "body.dataset.alo186UxCompact = 'true'",
@@ -76,6 +78,12 @@ with tempfile.TemporaryDirectory(prefix="alo186-ux-v119-") as folder:
             "--site", str(target),
             "--base-path", base_path,
         ])
+        run([
+            sys.executable,
+            "alo186/deployment/inject_live_quality_hardening_v2.py",
+            "--site", str(target),
+            "--base-path", base_path,
+        ])
         html_files = sorted(target.rglob("*.html"))
         assert html_files, target
         missing_ux = []
@@ -105,12 +113,15 @@ with tempfile.TemporaryDirectory(prefix="alo186-ux-v119-") as folder:
         for route in ("index.html", "edas-bul/index.html", "arama/index.html", "acil-numaralar/index.html", "elektrik-durum-merkezi/index.html"):
             assert (target / route).is_file(), route
         release = json.loads((target / "pages-release.json").read_text(encoding="utf-8"))
-        assert release["sitewideUx"]["injectedPages"] + release["sitewideUx"]["alreadyInjectedPages"] == len(html_files)
+        assert release["sitewideUx"]["finalizedAfterGrowthInjectors"] is True
+        assert release["sitewideUx"]["finalHtmlPages"] == len(html_files)
+        assert release["sitewideUx"]["finalInjectedPages"] + release["sitewideUx"]["finalAlreadyInjectedPages"] == len(html_files)
         results.append({
             "target": "custom" if not base_path else "project",
             "pages": len(html_files),
             "h1Coverage": round(h1_ratio, 4),
             "uxInjected": True,
+            "uxFinalizedAfterGrowthInjectors": True,
             "criticalRoutes": 5,
             "fullPagesSmoke": True,
         })
@@ -123,6 +134,7 @@ print(json.dumps({
     "mobileUtilityBar": "indexable-tr-only",
     "projectPathAware": True,
     "projectPathSmoke": True,
+    "finalizedAfterGrowthInjectors": True,
     "localizedUtilities": True,
     "activePageState": True,
     "tableOverflowGuard": True,
