@@ -68,7 +68,7 @@ jobs:
           path.write_text(text,encoding='utf-8')
           PY
 
-      - name: Kalıcı sitemap regresyonunu ve canonical sözleşmesini ekle
+      - name: Kalıcı sitemap regresyonunu ekle
         shell: bash
         run: |
           set -euo pipefail
@@ -92,17 +92,6 @@ jobs:
                   assert paths=={'/existing','/haberler/elektrik-ark-hatasi-afdd-rcd-sigorta-farki'},paths
               print({'ok':True,'policy':'active release routes reconciled after growth injectors'})
           if __name__=='__main__': main()
-          PY
-          python - <<'PY'
-          from pathlib import Path
-          path=Path('.github/workflows/alo186-content-intent-consolidation.yml')
-          text=path.read_text(encoding='utf-8')
-          anchor="              assert release['routeCount']==len(release['routes'])\n"
-          addition='''              from urllib.parse import urlsplit\n              import xml.etree.ElementTree as ET\n              sitemap_paths={(urlsplit(node.text or '').path.rstrip('/') or '/') for node in ET.fromstring(sitemap).iter() if node.tag.endswith('loc')}\n              active_paths={(urlsplit(str(item.get('canonicalPath') or '')).path.rstrip('/') or '/') for item in release['routes']}\n              assert active_paths <= sitemap_paths, ('release-routes-missing-from-sitemap', sorted(active_paths-sitemap_paths))\n'''
-          if 'release-routes-missing-from-sitemap' not in text:
-              if anchor not in text: raise SystemExit('workflow doğrulama noktası bulunamadı')
-              text=text.replace(anchor,anchor+addition,1)
-          path.write_text(text,encoding='utf-8')
           PY
 
       - name: Güven, no-buy, Knowledge Graph ve yayın kabulü
@@ -136,22 +125,19 @@ jobs:
           assert active<=paths,sorted(active-paths)
           assert release['contentConsolidation']['aliasCount']==len(config['consolidations'])
           assert result['sitemapReconciliation']['activeRouteCount']==len(release['routes'])
-          assert 'sales-missing-parts' in planner or 'Eksik Parça Planlayıcı' in planner
+          assert 'Eksik Parça Planlayıcı' in planner
           print({'ok':True,'routes':len(active),'aliases':len(config['consolidations']),'sitemapAdded':result['sitemapReconciliation']['addedCount'],'planner':True})
           PY
 
-      - name: Geçici görevleri kaldır ve ana dala kaydet
+      - name: Kalıcı uygulama ve regresyonu ana dala kaydet
         shell: bash
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          rm -f \
-            .github/workflows/alo186-run9-growth-finalize-once.yml \
-            .github/workflows/alo186-run9-canonical-revenue-foundation-once.yml \
-            .github/alo186-run9-canonical-revenue-foundation.trigger \
-            .github/alo186-run9-sitemap-reconcile.trigger
-          git add -A
-          git commit -m 'feat(alo186): eksik parça planlayıcıyı ve aktif sitemap uzlaştırmasını yayımla'
+          git add \
+            alo186/deployment/inject_shortlist_growth.py \
+            alo186/tests/test_release_sitemap_reconciliation.py
+          git commit -m 'feat(alo186): aktif release rotalarını sitemap ile son aşamada uzlaştır'
           git pull --rebase origin main
           git push origin HEAD:main
