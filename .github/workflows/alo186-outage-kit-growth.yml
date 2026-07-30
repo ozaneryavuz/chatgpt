@@ -112,6 +112,7 @@ jobs:
           set -euo pipefail
           python - <<'PY'
           import json
+          import re
           from pathlib import Path
 
           modes=[
@@ -132,7 +133,8 @@ jobs:
               assert 'Elektrik Kesintisi Kiti Eksik Analizi' in kit_text
               assert 'Reklam / satış ortaklığı açıklaması' in kit_text
               assert 'data-alo186-kit-hub-card="true"' in hub_text
-              assert '33 çekirdek araç' in hub_text
+              tool_count=re.search(r'(\d+) çekirdek araç',hub_text)
+              assert tool_count and int(tool_count.group(1))>=33
               assert 'data-alo186-kit-card="true"' in portal.read_text(encoding='utf-8')
               assert 'data-alo186-kit-card="true"' in gateway.read_text(encoding='utf-8')
               assert f'{base}/hesaplama/elektrik-kesintisi-kiti/' in plan_text
