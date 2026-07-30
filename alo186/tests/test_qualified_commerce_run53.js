@@ -36,8 +36,8 @@ for(const forbidden of ['offers','price','priceCurrency','availability','aggrega
   assert.ok(!(forbidden in node),`Yasak KG alanı: ${forbidden}`);
 }
 
-const directList=graph.find((item)=>item['@id']==='https://www.alo186.com/akilli-urun-secimi#direct-affiliate-products');
-assert.ok(directList.itemListElement.some((item)=>item.item&&item.item['@id']===node['@id']));
+const lists=graph.filter((item)=>item['@type']==='ItemList'&&Array.isArray(item.itemListElement));
+assert.ok(lists.some((list)=>list.itemListElement.some((item)=>item.item&&item.item['@id']===node['@id'])),'Yeni ürün hiçbir doğrulanmış ürün listesine bağlanmadı.');
 const summary=catalog.knowledgeGraphSummary({now});
 assert.equal(summary.version,'2026-07-30-run53');
 assert.equal(summary.qualifiedCommerce.verifiedChargerAdded,product.id);
@@ -50,5 +50,6 @@ console.log(JSON.stringify({
   asin:product.asin,
   singleDeviceW:product.attributes.maxSingleDeviceW,
   publicAffiliateEligible:true,
+  itemLists:lists.length,
   offerNodes:graph.filter((item)=>item['@type']==='Offer').length
 },null,2));
