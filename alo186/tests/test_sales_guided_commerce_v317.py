@@ -71,3 +71,17 @@ def test_privacy_accessibility_and_schema_contract():
     assert '"@type":"BreadcrumbList"' in html
     for forbidden in ('type="email"', 'type="tel"', 'name="address"', 'name="subscription"', '"@type":"Product"', '"@type":"Offer"'):
         assert forbidden not in html
+
+
+def main():
+    test_sales_advisor_route_exists()
+    test_single_canonical_and_alias_contract()
+    test_affiliate_links_are_transparent_and_tagged()
+    test_safety_and_no_buy_gates_block_commerce()
+    test_high_risk_and_uncertain_paths_are_not_direct_affiliate()
+    test_privacy_accessibility_and_schema_contract()
+    print("ALO186 satış odaklı ürün danışmanı kalite sözleşmeleri başarılı.")
+
+
+if __name__ == "__main__":
+    main()
