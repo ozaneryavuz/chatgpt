@@ -1,0 +1,82 @@
+name: ALO186 home office internet sürekliliği kalite kontrolü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/home-office-internet-sureklilik-plani/**'
+      - 'alo186/deployment/inject_growth_run24.py'
+      - 'alo186/deployment/inject_growth_run22.py'
+      - 'alo186/deployment/routing-overlays/growth-trust-revenue-run24.json'
+      - 'alo186/tests/test_growth_run24*.py'
+      - '.github/workflows/alo186-growth-run24.yml'
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-growth-run24-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Kaynak güven, arama niyeti ve saklama sözleşmeleri
+        run: python alo186/tests/test_growth_run24.py
+      - name: JavaScript ve Python sözdizimi
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import re
+          from pathlib import Path
+          text=Path('alo186/hesaplama/home-office-internet-sureklilik-plani/index.html').read_text(encoding='utf-8')
+          scripts=re.findall(r'<script(?![^>]+application/ld\+json)[^>]*>(.*?)</script>',text,re.I|re.S)
+          assert len(scripts)==1,len(scripts)
+          Path('/tmp/run24.js').write_text(scripts[0],encoding='utf-8')
+          PY
+          node --check /tmp/run24.js
+          python -m py_compile alo186/deployment/inject_growth_run24.py alo186/deployment/inject_growth_run22.py
+      - name: Mevcut affiliate ve güven regresyonları
+        run: |
+          node alo186/tests/test_affiliate_knowledge_graph.js
+          node alo186/tests/test_product_matcher.js
+          node alo186/tests/test_trust_revenue_conversion.js
+          python alo186/tests/device_damage_deadline_guard.py
+      - name: Canonical paket
+        run: |
+          python alo186/deployment/build_static_site.py --output /tmp/run24-canonical --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/run24-canonical
+      - name: Custom-domain ve project-path kabulü
+        shell: bash
+        run: |
+          set -euo pipefail
+          for spec in 'custom|' 'project|/chatgpt'; do
+            name="${spec%%|*}"
+            base="${spec#*|}"
+            target="/tmp/run24-${name}"
+            cp -a /tmp/run24-canonical "$target"
+            python alo186/deployment/prepare_github_pages.py --site "$target" --base-path "$base" --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
+            python alo186/deployment/inject_outcome_runtime.py --site "$target" --base-path "$base"
+            python alo186/deployment/inject_shortlist_growth.py --site "$target" --base-path "$base"
+            python alo186/deployment/smoke_github_pages.py --site "$target" --base-path "$base"
+            python alo186/tests/test_growth_run24_artifact.py --site "$target" --base-path "$base"
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: alo186-home-office-continuity
+          path: /tmp/run24-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30

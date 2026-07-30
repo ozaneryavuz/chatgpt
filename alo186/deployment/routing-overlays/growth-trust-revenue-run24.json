@@ -1,0 +1,21 @@
+{
+  "version": 76,
+  "generatedAt": "2026-07-30",
+  "routes": [
+    {
+      "canonicalPath": "/hesaplama/home-office-internet-sureklilik-plani/",
+      "source": "alo186/hesaplama/home-office-internet-sureklilik-plani/index.html",
+      "type": "tool",
+      "title": "Home Office İnternet ve Elektrik Süreklilik Planı",
+      "intent": [
+        "elektrik kesintisinde internet nasıl devam eder",
+        "modem ups alsam internet çalışır mı",
+        "ont los ışığı elektrik kesintisi",
+        "home office elektrik kesintisi",
+        "modem mini ups kaç saat",
+        "internet kesintisi saha dolabı",
+        "laptop modem ups çalışma süresi"
+      ]
+    }
+  ]
+}
