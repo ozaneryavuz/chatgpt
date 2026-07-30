@@ -130,7 +130,7 @@ jobs:
               assert expected in hub or hub_relative in hub
               assert re.search(r'\d+ çekirdek araç', hub)
               sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
-              assert expected in sitemap
+              assert any(f'<loc>{host}{canonical}</loc>' in sitemap for host in ['https://alo186.com','https://www.alo186.com'])
               search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
               entry=next(item for item in search['entries'] if item['canonicalPath']==canonical)
               assert entry['url']==expected
