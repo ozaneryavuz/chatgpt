@@ -1,28 +1,11 @@
 {
   "version": 101,
-  "entries": [
+  "generatedAt": "2026-07-30",
+  "routes": [
     {
-      "route": "/hesaplama/sarjli-pil-sarj-cihazi-uygunluk/",
-      "source": "hesaplama/sarjli-pil-sarj-cihazi-uygunluk/index.html",
-      "kind": "calculator",
-      "title": "Şarjlı Pil ve Şarj Cihazı Uygunluk Testi",
-      "description": "AA, AAA ve 9 V şarjlı pilleri kimya, mAh, yuva akımı, bağımsız kanal, güvenlik kesmeleri ve yaklaşık şarj süresiyle değerlendirin.",
-      "include_in_sitemap": true,
-      "include_in_search": true,
-      "privacy_class": "no-personal-data",
-      "schema_types": [
-        "WebApplication",
-        "DefinedTermSet",
-        "FAQPage",
-        "BreadcrumbList"
-      ],
-      "signals": [
-        "rechargeable-battery",
-        "nimh",
-        "charger-compatibility",
-        "affiliate-transparent",
-        "no-buy"
-      ]
+      "source": "alo186/hesaplama/sarjli-pil-sarj-cihazi-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/sarjli-pil-sarj-cihazi-uygunluk/",
+      "type": "calculator"
     }
   ]
 }
