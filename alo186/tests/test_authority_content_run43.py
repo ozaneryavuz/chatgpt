@@ -6,10 +6,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 
 PAGES = {
-    "jenerator-dusuk-yuk-wet-stacking-minimum-yuk": {
-        "canonical": "https://www.alo186.com/haberler/jenerator-dusuk-yuk-wet-stacking-minimum-yuk",
-        "tokens": ["Wet stacking", "Load bank", "ISO 8528-1", "Satın almama sınırı", "Mevcut içerikten görev ayrımı"],
-        "sources": ["cat.com", "iso.org/standard/68539", "iso.org/standard/85962"],
+    "ups-eco-modu-online-cift-cevrim-farki": {
+        "canonical": "https://www.alo186.com/haberler/ups-eco-modu-online-cift-cevrim-farki",
+        "tokens": ["UPS ECO mode", "Online double conversion", "IEC 62040-3", "Satın almama sınırı", "Mevcut içerikten görev ayrımı"],
+        "sources": ["webstore.iec.ch/en/publication/60140", "se.com/us/en/faqs/FAQ000264322", "vertiv.com"],
     },
     "ev-sarj-acik-pen-arizasi-topraklama-korumasi": {
         "canonical": "https://www.alo186.com/haberler/ev-sarj-acik-pen-arizasi-topraklama-korumasi",
@@ -58,7 +58,7 @@ def main() -> None:
     routes = overlay["routes"]
     assert len(routes) == 3
     assert {item["canonicalPath"] for item in routes} == {
-        "/haberler/jenerator-dusuk-yuk-wet-stacking-minimum-yuk",
+        "/haberler/ups-eco-modu-online-cift-cevrim-farki",
         "/haberler/ev-sarj-acik-pen-arizasi-topraklama-korumasi",
         "/haberler/kompanzasyon-detuned-reaktor-yuzde-7-ne-demek",
     }
