@@ -108,7 +108,7 @@ for token in [
     "Amazon satış ortaklığı açıklaması",
     "Daha fazla ürünü",
     "57 ürün sınıfı",
-    "26 kullanıcı ihtiyacı",
+    "26 kullanıcı ihtiyacını",
     "8 karar paketi",
     "Karar paketi nedir?",
     "Birlikte değerlendirin; ayrı ayrı doğrulayın",
