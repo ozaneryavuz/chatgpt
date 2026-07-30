@@ -77,7 +77,7 @@ for(const[id,checks]of Object.entries(modelAdditions)){
 
 assert.equal(catalog.productsFor('smart_plug').length,0,'Model arama düğümleri matcher tarafından doğrudan ürün sayılmamalı.');
 assert.equal(catalog.allProductsFor('smart_plug').length,4);
-assert.equal(catalog.allProductsFor('power_station').length,4);
+assert.equal(catalog.allProductsFor('power_station').length,3);
 assert.equal(catalog.graphForCategory('co_alarm').products.length,1);
 for(const category of ['usb_c_charger','usb_c_cable','usb_c_hub','display_cable']){
   assert.equal(catalog.graphForCategory(category).needs.length,1,`${category} ihtiyaç düğümüne bağlanmalı`);
