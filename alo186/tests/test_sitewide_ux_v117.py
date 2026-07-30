@@ -16,11 +16,26 @@ def run(command: list[str]) -> None:
     subprocess.run(command, cwd=ROOT, check=True)
 
 
-with tempfile.TemporaryDirectory(prefix="alo186-ux-v117-") as folder:
+ux_js = (ROOT / "alo186/assets/alo186-ux.js").read_text(encoding="utf-8")
+ux_css = (ROOT / "alo186/assets/alo186-ux.css").read_text(encoding="utf-8")
+for token in (
+    "const isIndexable = !robots.includes('noindex')",
+    "const isTurkish",
+    "markCurrent(nav)",
+    "const basePath = scriptUrl.pathname.endsWith(assetSuffix)",
+    "body.dataset.alo186UxCompact = 'true'",
+    "Skip to content",
+    "Back to top",
+):
+    assert token in ux_js, token
+assert "body:not([data-alo186-ux-compact=true])" in ux_css
+assert "body{padding-bottom" not in ux_css
+
+with tempfile.TemporaryDirectory(prefix="alo186-ux-v118-") as folder:
     canonical = Path(folder) / "canonical"
     custom = Path(folder) / "custom"
     project = Path(folder) / "project"
-    run([sys.executable, "alo186/deployment/build_static_site.py", "--output", str(canonical), "--commit", "ux-v117-test"])
+    run([sys.executable, "alo186/deployment/build_static_site.py", "--output", str(canonical), "--commit", "ux-v118-test"])
 
     results = []
     for target, base_path in ((custom, ""), (project, "/chatgpt")):
@@ -31,7 +46,7 @@ with tempfile.TemporaryDirectory(prefix="alo186-ux-v117-") as folder:
             "--site", str(target),
             "--base-path", base_path,
             "--repository", "ozaneryavuz/chatgpt",
-            "--commit", "ux-v117-test",
+            "--commit", "ux-v118-test",
         ])
         html_files = sorted(target.rglob("*.html"))
         assert html_files, target
@@ -55,9 +70,6 @@ with tempfile.TemporaryDirectory(prefix="alo186-ux-v117-") as folder:
                 missing_h1.append(relative)
         assert not missing_ux, missing_ux[:20]
         assert not missing_metadata, missing_metadata[:20]
-        assert set(missing_h1) <= TECHNICAL_HTML_EXCEPTIONS | set(missing_h1)
-        # 404 ve bazı teknik köprü sayfalarında H1 bulunmayabilir; oran kullanıcı
-        # sayfalarının genel kalitesini koruyacak kadar yüksek olmalıdır.
         h1_ratio = (len(html_files) - len(missing_h1)) / len(html_files)
         assert h1_ratio >= 0.97, {"ratio": h1_ratio, "missing": missing_h1[:20]}
         assert (target / "assets/alo186-ux.css").is_file()
@@ -67,7 +79,6 @@ with tempfile.TemporaryDirectory(prefix="alo186-ux-v117-") as folder:
         results.append({
             "target": "custom" if not base_path else "project",
             "pages": len(html_files),
-            "metadataPages": len(html_files) - len(TECHNICAL_HTML_EXCEPTIONS & {p.relative_to(target).as_posix() for p in html_files}),
             "h1Coverage": round(h1_ratio, 4),
             "uxInjected": True,
         })
@@ -77,7 +88,10 @@ print(json.dumps({
     "ok": True,
     "targets": results,
     "technicalExceptions": sorted(TECHNICAL_HTML_EXCEPTIONS),
-    "mobileUtilityBar": True,
+    "mobileUtilityBar": "indexable-tr-only",
+    "projectPathAware": True,
+    "localizedUtilities": True,
+    "activePageState": True,
     "tableOverflowGuard": True,
     "externalLinkHardening": True,
     "lazyImages": True,

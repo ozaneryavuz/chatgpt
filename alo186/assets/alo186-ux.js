@@ -7,11 +7,11 @@
 
   const main = doc.querySelector('main');
   if (main && !main.id) main.id = 'main-content';
-  if (main && !doc.querySelector('a[href="#main-content"],a[href="#content"],a[href="#main"]')) {
+  if (main && !doc.querySelector(`a[href="#${CSS.escape(main.id)}"]`)) {
     const skip = doc.createElement('a');
     skip.className = 'alo-ux-skip';
     skip.href = `#${main.id}`;
-    skip.textContent = 'İçeriğe geç';
+    skip.textContent = doc.documentElement.lang.toLowerCase().startsWith('en') ? 'Skip to content' : 'İçeriğe geç';
     body.prepend(skip);
   }
 
@@ -21,7 +21,7 @@
     wrapper.className = 'alo-table-scroll';
     wrapper.tabIndex = 0;
     wrapper.setAttribute('role', 'region');
-    wrapper.setAttribute('aria-label', table.querySelector('caption')?.textContent?.trim() || 'Kaydırılabilir tablo');
+    wrapper.setAttribute('aria-label', table.querySelector('caption')?.textContent?.trim() || (doc.documentElement.lang.toLowerCase().startsWith('en') ? 'Scrollable table' : 'Kaydırılabilir tablo'));
     table.parentNode.insertBefore(wrapper, table);
     wrapper.appendChild(table);
   });
@@ -38,27 +38,45 @@
     link.setAttribute('rel', [...rel].join(' '));
   });
 
-  const current = location.pathname.replace(/\/$/, '') || '/';
-  doc.querySelectorAll('a[href^="/"]').forEach((link) => {
-    const target = new URL(link.href, location.origin).pathname.replace(/\/$/, '') || '/';
-    if (target === current) link.setAttribute('aria-current', 'page');
-  });
+  const normalizePath = (value) => value.replace(/\/+$/, '') || '/';
+  const scriptUrl = new URL(doc.currentScript?.src || location.href, location.href);
+  const assetSuffix = '/assets/alo186-ux.js';
+  const basePath = scriptUrl.pathname.endsWith(assetSuffix)
+    ? scriptUrl.pathname.slice(0, -assetSuffix.length)
+    : '';
+  const publicPath = (route) => `${basePath}${route === '/' ? '/' : route}`.replace(/\/+/g, '/');
+  const current = normalizePath(location.pathname);
+  const markCurrent = (root = doc) => {
+    root.querySelectorAll('a[href^="/"]').forEach((link) => {
+      const target = normalizePath(new URL(link.href, location.origin).pathname);
+      if (target === current) link.setAttribute('aria-current', 'page');
+    });
+  };
+  markCurrent();
 
-  const nav = doc.createElement('nav');
-  nav.className = 'alo-ux-mobilebar';
-  nav.setAttribute('aria-label', 'Mobil hızlı erişim');
-  nav.innerHTML = [
-    ['/', '⌂', 'Ana sayfa'],
-    ['/edas-bul', '186', 'EDAŞ bul'],
-    ['/arama/', '⌕', 'Ara'],
-    ['/acil-numaralar/', '!', 'Acil']
-  ].map(([href, icon, label]) => `<a href="${href}"><b aria-hidden="true">${icon}</b><span>${label}</span></a>`).join('');
-  body.appendChild(nav);
+  const robots = doc.querySelector('meta[name="robots"]')?.content?.toLowerCase() || '';
+  const isIndexable = !robots.includes('noindex');
+  const isTurkish = (doc.documentElement.lang || 'tr').toLowerCase().startsWith('tr');
+  if (isIndexable && isTurkish) {
+    const nav = doc.createElement('nav');
+    nav.className = 'alo-ux-mobilebar';
+    nav.setAttribute('aria-label', 'Mobil hızlı erişim');
+    nav.innerHTML = [
+      [publicPath('/'), '⌂', 'Ana sayfa'],
+      [publicPath('/edas-bul/'), '186', 'EDAŞ bul'],
+      [publicPath('/arama/'), '⌕', 'Ara'],
+      [publicPath('/acil-numaralar/'), '!', 'Acil']
+    ].map(([href, icon, label]) => `<a href="${href}"><b aria-hidden="true">${icon}</b><span>${label}</span></a>`).join('');
+    body.appendChild(nav);
+    markCurrent(nav);
+  } else {
+    body.dataset.alo186UxCompact = 'true';
+  }
 
   const top = doc.createElement('button');
   top.type = 'button';
   top.className = 'alo-ux-backtop';
-  top.setAttribute('aria-label', 'Sayfanın başına dön');
+  top.setAttribute('aria-label', isTurkish ? 'Sayfanın başına dön' : 'Back to top');
   top.textContent = '↑';
   top.addEventListener('click', () => window.scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }));
   body.appendChild(top);
