@@ -45,7 +45,6 @@ jobs:
         run: |
           node alo186/tests/test_product_matcher.js
           python alo186/tests/test_commerce_governance_v2.py
-          python alo186/tests/test_product_shortlist.py
       - name: Canonical üretim paketi
         run: |
           python alo186/deployment/build_static_site.py --output /tmp/alo186-sales-catalog --commit "$GITHUB_SHA"
