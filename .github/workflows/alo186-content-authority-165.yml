@@ -79,6 +79,7 @@ jobs:
           sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
           search = json.loads((root / 'arama/search-index.json').read_text(encoding='utf-8'))
           release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
+          canonical_host = release['canonicalHost'].rstrip('/')
           active = {item['canonicalPath'] for item in search['entries']}
 
           assert release['routingVersion'] >= 73, release['routingVersion']
@@ -91,7 +92,7 @@ jobs:
           for route in primary_routes:
               target = root / route.strip('/') / 'index.html'
               assert target.is_file(), target
-              assert f'https://www.alo186.com{route}' in sitemap, ('sitemap', route)
+              assert f'{canonical_host}{route}' in sitemap, ('sitemap', route)
               assert route in active, ('search-index', route)
 
           for alias, canonical in consolidations.items():
@@ -100,12 +101,12 @@ jobs:
               alias_html = alias_file.read_text(encoding='utf-8')
               assert alias_file.is_file() and canonical_file.is_file()
               assert declared.get(alias) == canonical, ('consolidation', alias, canonical)
-              assert f'https://www.alo186.com{alias}' not in sitemap, ('alias-sitemap', alias)
-              assert f'https://www.alo186.com{canonical}' in sitemap, ('canonical-sitemap', canonical)
+              assert f'{canonical_host}{alias}' not in sitemap, ('alias-sitemap', alias)
+              assert f'{canonical_host}{canonical}' in sitemap, ('canonical-sitemap', canonical)
               assert alias not in active, ('alias-search-index', alias)
               assert canonical in active, ('canonical-search-index', canonical)
               assert 'name="robots" content="noindex,follow"' in alias_html
-              assert f'rel="canonical" href="https://www.alo186.com{canonical}"' in alias_html
+              assert f'rel="canonical" href="{canonical_host}{canonical}"' in alias_html
               assert f'href="{canonical}"' in alias_html
 
           print(json.dumps({
