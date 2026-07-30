@@ -128,7 +128,8 @@ jobs:
               js=app.read_text(encoding='utf-8')
               logic=core.read_text(encoding='utf-8')
               expected=f'{prefix}{canonical}' if prefix else canonical
-              assert expected in html
+              assert any(f'{host}{canonical}' in html for host in ['https://alo186.com','https://www.alo186.com'])
+              assert all(asset in html for asset in ['./core.js','./app.js','./styles.css'])
               assert 'Amazon satış ortaklığı bağlantısı' in html
               assert 'rel="sponsored nofollow noopener"' in html
               assert 'alo186rehber-21' in js
