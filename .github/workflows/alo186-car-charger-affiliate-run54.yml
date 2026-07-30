@@ -1,0 +1,84 @@
+name: ALO186 araç içi şarj affiliate kalite kontrolü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/urun-eslestirme/catalog-car-charger-run54.js'
+      - 'alo186/urun-eslestirme/index.html'
+      - 'alo186/tests/test_car_charger_affiliate_run54.js'
+      - '.github/workflows/alo186-car-charger-affiliate-run54.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/urun-eslestirme/catalog-car-charger-run54.js'
+      - 'alo186/urun-eslestirme/index.html'
+      - 'alo186/tests/test_car_charger_affiliate_run54.js'
+      - '.github/workflows/alo186-car-charger-affiliate-run54.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-car-charger-affiliate-run54-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: JavaScript ve Product Knowledge Graph sözleşmesi
+        run: |
+          node --check alo186/urun-eslestirme/catalog-car-charger-run54.js
+          node --check alo186/urun-eslestirme/matcher-core.js
+          node --check alo186/urun-eslestirme/app.js
+          node alo186/tests/test_car_charger_affiliate_run54.js
+          node alo186/tests/test_affiliate_knowledge_graph.js
+
+      - name: Canonical production paketini oluştur
+        run: |
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-car-charger-run54 \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-car-charger-run54
+
+      - name: Ürün yükleme ve affiliate kabulü
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f /tmp/alo186-car-charger-run54/akilli-urun-secimi/catalog-car-charger-run54.js
+          grep -Fq 'catalog-car-charger-run54.js' /tmp/alo186-car-charger-run54/akilli-urun-secimi/index.html
+          grep -Fq 'rel="canonical" href="https://www.alo186.com/akilli-urun-secimi"' /tmp/alo186-car-charger-run54/akilli-urun-secimi/index.html
+          grep -Fq 'Reklam / satış ortaklığı:' /tmp/alo186-car-charger-run54/akilli-urun-secimi/index.html
+          grep -Fq 'rel="sponsored nofollow noopener"' /tmp/alo186-car-charger-run54/akilli-urun-secimi/app.js
+          node /tmp/alo186-car-charger-run54/tests/test_car_charger_affiliate_run54.js
+
+      - name: Custom-domain Pages paketini doğrula
+        run: |
+          cp -a /tmp/alo186-car-charger-run54 /tmp/alo186-car-charger-run54-pages
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-car-charger-run54-pages \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-car-charger-run54-pages \
+            --base-path ''
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-car-charger-run54-pages \
+            --base-path '' \
+            > /tmp/alo186-car-charger-run54-growth.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-car-charger-run54-pages \
+            --base-path ''
