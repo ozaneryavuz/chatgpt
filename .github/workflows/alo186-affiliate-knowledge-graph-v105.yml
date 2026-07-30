@@ -1,0 +1,65 @@
+name: ALO186 affiliate Knowledge Graph v105
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/affiliate-knowledge-graph/**'
+      - 'alo186/tests/test_affiliate_knowledge_graph_v105.py'
+      - '.github/workflows/alo186-affiliate-knowledge-graph-v105.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/affiliate-knowledge-graph/**'
+      - 'alo186/tests/test_affiliate_knowledge_graph_v105.py'
+      - '.github/workflows/alo186-affiliate-knowledge-graph-v105.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-affiliate-kg-v105-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: V105 veri ve kullanıcı güven sözleşmesi
+        run: |
+          set -euo pipefail
+          python -m json.tool alo186/affiliate-knowledge-graph/catalog-v105-extension.json >/dev/null
+          node --check alo186/affiliate-knowledge-graph/app.js
+          python alo186/tests/test_affiliate_knowledge_graph_v105.py
+          python -m py_compile alo186/tests/test_affiliate_knowledge_graph_v105.py
+
+      - name: Canonical üretim paketi
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-kg-v105 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-kg-v105
+          test -f /tmp/alo186-kg-v105/affiliate-knowledge-graph/catalog-v105-extension.json
+
+      - name: Mevcut yayın ve güven regresyonları
+        run: |
+          set -euo pipefail
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Doğrulanmış site artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-affiliate-knowledge-graph-v105-pages
+          path: /tmp/alo186-kg-v105
+          if-no-files-found: error
+          retention-days: 30
