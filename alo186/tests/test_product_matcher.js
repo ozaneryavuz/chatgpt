@@ -1,11 +1,13 @@
 const assert=require('assert');
+const fs=require('fs');
+const path=require('path');
 const catalog=require('../urun-eslestirme/catalog.js');
 const matcher=require('../urun-eslestirme/matcher-core.js');
 
 assert.strictEqual(catalog.affiliateTag,'alo186rehber-21');
 assert.strictEqual(catalog.categories.length,18,'On sekiz ihtiyaç kategorisi bulunmalı.');
 assert(catalog.productsFor('powerbank').length>=5,'Powerbank kataloğunda en az beş ürün olmalı.');
-assert(catalog.productsFor('usb_c_charger').length>=1,'USB-C şarj cihazı kataloğunda doğrulanmış ürün olmalı.');
+assert(catalog.productsFor('usb_c_charger').length>=2,'USB-C şarj cihazı kataloğunda en az iki doğrulanmış ürün olmalı.');
 assert(catalog.productsFor('usb_c_cable').length>=2,'USB-C kablo kataloğunda en az iki doğrulanmış ürün olmalı.');
 assert(catalog.productsFor('usb_c_hub').length>=2,'USB-C hub kataloğunda en az iki doğrulanmış ürün olmalı.');
 assert(catalog.productsFor('display_cable').length>=2,'Görüntü kablosu kataloğunda en az iki doğrulanmış ürün olmalı.');
@@ -19,8 +21,7 @@ for(const product of catalog.products){
   assert(product.url.includes(`/dp/${product.asin}`),`${product.id} doğrudan ürün URL'si içermeli.`);
   assert(product.url.includes('tag=alo186rehber-21'),`${product.id} affiliate etiketi içermeli.`);
   assert(product.verifiedAt&&product.sourceNote,`${product.id} doğrulama kaydı içermeli.`);
-  assert(!Object.prototype.hasOwnProperty.call(product,'price'),`${product.id} statik fiyat taşımamalı.`);
-  assert(!Object.prototype.hasOwnProperty.call(product,'stock'),`${product.id} statik stok taşımamalı.`);
+  for(const key of ['price','stock','rating','aggregateRating','review','seller','delivery','warranty','availability','offers'])assert(!Object.prototype.hasOwnProperty.call(product,key),`${product.id} yasak ticari alan taşımamalı: ${key}`);
 }
 
 let result=matcher.match('powerbank',{minCapacityMah:20000,minOutputW:65,wireless:false});
@@ -51,6 +52,51 @@ assert(surgeScore.score>0);
 const lowJoule=catalog.products.find(product=>product.asin==='B08L9KVRP1');
 assert.strictEqual(matcher.scoreSurge(lowJoule,{minOutlets:5,minJoules:900,usb:false}).eligible,false);
 
+// 1. USB-C şarj cihazı: güç, port ve protokol niyeti birlikte uygulanmalı.
+result=matcher.match('usb_c_charger',{minOutputW:65,minUsbCPorts:2,multiPort:true});
+assert.strictEqual(result.mode,'direct');
+assert.strictEqual(result.matches.length,1,'65 W ve iki USB-C isteyen kullanıcıya yalnız uygun çok portlu adaptör gösterilmeli.');
+assert.strictEqual(result.matches[0].product.asin,'B09W2HP21R');
+result=matcher.match('usb_c_charger',{minOutputW:100,minUsbCPorts:1});
+assert.strictEqual(result.matches.length,0,'100 W gereksinimi için daha düşük güçlü ürün gösterilmemeli.');
+result=matcher.match('usb_c_charger',{minOutputW:45,requirePps:true});
+assert.strictEqual(result.matches.length,0,'PPS teknik kayıtta doğrulanmadıysa sonuç fail-closed olmalı.');
+result=matcher.match('usb_c_charger',{minOutputW:140,requirePd31:true});
+assert.strictEqual(result.matches.length,0,'PD 3.1 doğrulanmış adaptör yoksa genel ürün araması açılmamalı.');
+
+// 2. USB-C kablo: şarj gücü ile veri hızı aynı özellik sayılmamalı.
+result=matcher.match('usb_c_cable',{minPowerW:100,minLengthM:2,minDataGbps:0});
+assert.strictEqual(result.matches.length,1);
+assert.strictEqual(result.matches[0].product.asin,'B0B46PHW14');
+result=matcher.match('usb_c_cable',{minPowerW:60,minLengthM:1,minDataGbps:10});
+assert.strictEqual(result.matches.length,0,'Yüksek hızlı veri kanıtı olmayan şarj kablosu 10 Gbps sonucuna sızmamalı.');
+result=matcher.match('usb_c_cable',{minPowerW:240,minLengthM:1,requireEpr:true});
+assert.strictEqual(result.matches.length,0,'240 W EPR doğrulanmamış kablo gösterilmemeli.');
+
+// 3. USB-C hub: kullanılacak özellikler ve satın almama/güvenlik kapıları ayrılmalı.
+result=matcher.match('usb_c_hub',{needHdmi:true,needEthernet:true,minPdPassThroughW:65,needCardReader:true,minDataGbps:0});
+assert.strictEqual(result.matches.length,2,'HDMI, Ethernet, kart okuyucu ve PD ihtiyacını karşılayan iki doğrulanmış hub korunmalı.');
+result=matcher.match('usb_c_hub',{needHdmi:true,minPdPassThroughW:65,minDataGbps:10});
+assert.strictEqual(result.matches.length,1,'10 Gbps kanıtı bulunan hub tek başına gösterilmeli.');
+assert.strictEqual(result.matches[0].product.asin,'B0DJN3NDCP');
+for(const category of ['usb_c_charger','usb_c_cable','usb_c_hub']){
+  result=matcher.match(category,{existingSufficient:true});
+  assert.strictEqual(result.mode,'direct');
+  assert.strictEqual(result.blockReason,'no_buy');
+  assert.strictEqual(result.matches.length,0,'Mevcut ürün yeterliyse affiliate sonucu olmamalı.');
+  result=matcher.match(category,{hazard:true});
+  assert.strictEqual(result.blockReason,'hazard');
+  assert.strictEqual(result.matches.length,0,'Fiziksel riskte bütün ticari sonuçlar kapanmalı.');
+  const markup=matcher.intentMarkup(category);
+  assert(markup.includes('existingSufficient')&&markup.includes('hazard'),`${category} kullanıcı arayüzünde satın almama ve güvenlik kapıları görünür olmalı.`);
+}
+assert(matcher.intentMarkup('usb_c_charger').includes('requirePd31'));
+assert(matcher.intentMarkup('usb_c_cable').includes('minDataGbps'));
+assert(matcher.intentMarkup('usb_c_hub').includes('needCardReader'));
+assert.match(matcher.requirementsSummary('usb_c_charger',{minOutputW:65,minUsbCPorts:2,requirePd31:true}),/65 W\+.*2 USB-C.*PD 3\.1/);
+assert.match(matcher.requirementsSummary('usb_c_cable',{minPowerW:100,minLengthM:2,minDataGbps:10}),/10 Gbps/);
+assert.match(matcher.requirementsSummary('usb_c_hub',{minPdPassThroughW:65,needEthernet:true,needCardReader:true}),/Ethernet.*kart okuyucu/);
+
 const gated={
   surge_strip:'https://www.alo186.com/hesaplama/akim-korumali-grup-priz-uygunluk/',
   mini_ups:'https://www.alo186.com/hesaplama/modem-internet-yedekleme/',
@@ -73,4 +119,8 @@ for(const[category,url]of Object.entries(gated)){
 result=matcher.match('emergency_light',{});
 assert.strictEqual(result.professionalSelectionRequired,false);
 assert.throws(()=>matcher.match('olmayan-kategori',{}),/Ürün kategorisi bulunamadı/);
-console.log('Ürün kataloğu ve eşleştirme testleri: 18 kategori, beş powerbank, tek cihaz/toplam güç ayrımı ve güvenli teknik kapılar başarılı.');
+
+const matcherSource=fs.readFileSync(path.join(__dirname,'../urun-eslestirme/matcher-core.js'),'utf8');
+assert(matcherSource.includes('Amazon')===false,'Matcher güven kapıları Amazon marka baskısı üretmemeli.');
+assert(!/price|stock|aggregateRating|warranty/i.test(JSON.stringify({directIntentCategories:[...matcher.directIntentCategories]})));
+console.log('Ürün kataloğu ve eşleştirme testleri: USB-C adaptör, kablo ve hub teknik niyetleri; satın almama ve fiziksel risk kapıları başarılı.');
