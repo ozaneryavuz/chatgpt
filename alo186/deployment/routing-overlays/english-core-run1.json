@@ -1,5 +1,5 @@
 {
-  "version": 102,
+  "version": 105,
   "generatedAt": "2026-07-30",
   "routes": [
     {
@@ -21,6 +21,66 @@
       "source": "alo186/en/emergency-numbers-turkey/index.html",
       "canonicalPath": "/en/emergency-numbers-turkey/",
       "type": "guide"
+    },
+    {
+      "source": "alo186/en/about/index.html",
+      "canonicalPath": "/en/about/",
+      "type": "about"
+    },
+    {
+      "source": "alo186/en/editorial-methodology/index.html",
+      "canonicalPath": "/en/editorial-methodology/",
+      "type": "policy"
+    },
+    {
+      "source": "alo186/en/sources/index.html",
+      "canonicalPath": "/en/sources/",
+      "type": "collection"
+    },
+    {
+      "source": "alo186/en/privacy/index.html",
+      "canonicalPath": "/en/privacy/",
+      "type": "policy"
+    },
+    {
+      "source": "alo186/en/contact/index.html",
+      "canonicalPath": "/en/contact/",
+      "type": "page"
+    },
+    {
+      "source": "alo186/en/affiliate-disclosure/index.html",
+      "canonicalPath": "/en/affiliate-disclosure/",
+      "type": "policy"
+    },
+    {
+      "source": "alo186/hakkimizda/index.html",
+      "canonicalPath": "/hakkimizda",
+      "type": "about"
+    },
+    {
+      "source": "alo186/yayin-ilkeleri/index.html",
+      "canonicalPath": "/yayin-ilkeleri",
+      "type": "policy"
+    },
+    {
+      "source": "alo186/kaynaklar/index.html",
+      "canonicalPath": "/kaynaklar",
+      "type": "collection"
+    },
+    {
+      "source": "alo186/gizlilik/index.html",
+      "canonicalPath": "/gizlilik",
+      "type": "policy"
+    },
+    {
+      "source": "alo186/iletisim/index.html",
+      "canonicalPath": "/iletisim",
+      "type": "page"
+    },
+    {
+      "source": "alo186/yasal/amazon-satis-ortakligi/index.html",
+      "canonicalPath": "/yasal/amazon-satis-ortakligi",
+      "type": "policy"
     }
   ]
 }
