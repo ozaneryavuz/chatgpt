@@ -85,7 +85,7 @@ def main() -> None:
         "generator",
         "power_station",
         "inverter",
-        "Mevcut kaynağın sınıfını doğrulayın",
+        "Mevcut kaynağın jeneratör, power station veya inverter sınıfı seçilmedi.",
         "String(value??'').trim()",
         "STORAGE_KEY='alo186-pump-backup-records-v1'",
         "MAX_RECORDS=8",
