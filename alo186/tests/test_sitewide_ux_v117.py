@@ -9,6 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 UX_MARKER = 'data-alo186-sitewide-ux="true"'
+TECHNICAL_HTML_EXCEPTIONS = {"404.html"}
 
 
 def run(command: list[str]) -> None:
@@ -48,12 +49,13 @@ with tempfile.TemporaryDirectory(prefix="alo186-ux-v117-") as folder:
                 'rel="canonical"',
                 "<html",
             )
-            if any(token not in text for token in required):
+            if relative not in TECHNICAL_HTML_EXCEPTIONS and any(token not in text for token in required):
                 missing_metadata.append(relative)
             if not re.search(r"<h1\b", text, re.I):
                 missing_h1.append(relative)
         assert not missing_ux, missing_ux[:20]
         assert not missing_metadata, missing_metadata[:20]
+        assert set(missing_h1) <= TECHNICAL_HTML_EXCEPTIONS | set(missing_h1)
         # 404 ve bazı teknik köprü sayfalarında H1 bulunmayabilir; oran kullanıcı
         # sayfalarının genel kalitesini koruyacak kadar yüksek olmalıdır.
         h1_ratio = (len(html_files) - len(missing_h1)) / len(html_files)
@@ -65,6 +67,7 @@ with tempfile.TemporaryDirectory(prefix="alo186-ux-v117-") as folder:
         results.append({
             "target": "custom" if not base_path else "project",
             "pages": len(html_files),
+            "metadataPages": len(html_files) - len(TECHNICAL_HTML_EXCEPTIONS & {p.relative_to(target).as_posix() for p in html_files}),
             "h1Coverage": round(h1_ratio, 4),
             "uxInjected": True,
         })
@@ -73,6 +76,7 @@ run(["node", "--check", "alo186/assets/alo186-ux.js"])
 print(json.dumps({
     "ok": True,
     "targets": results,
+    "technicalExceptions": sorted(TECHNICAL_HTML_EXCEPTIONS),
     "mobileUtilityBar": True,
     "tableOverflowGuard": True,
     "externalLinkHardening": True,
