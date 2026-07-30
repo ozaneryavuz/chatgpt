@@ -1,0 +1,124 @@
+name: ALO186 acil aydınlatma süre ve lümen testi
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/acil-aydinlatma-sure-lumen-uygunluk/**'
+      - 'alo186/hesaplama/common.js'
+      - 'alo186/deployment/routing-overlays/emergency-lighting-selector-v321.json'
+      - 'alo186/tests/test_emergency_lighting_selector_v321.py'
+      - '.github/workflows/alo186-emergency-lighting-selector-v321.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/acil-aydinlatma-sure-lumen-uygunluk/**'
+      - 'alo186/hesaplama/common.js'
+      - 'alo186/deployment/routing-overlays/emergency-lighting-selector-v321.json'
+      - 'alo186/tests/test_emergency_lighting_selector_v321.py'
+      - '.github/workflows/alo186-emergency-lighting-selector-v321.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-emergency-lighting-selector-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Karar motoru ve modül sözleşmesi
+        run: |
+          set -euo pipefail
+          node alo186/hesaplama/acil-aydinlatma-sure-lumen-uygunluk/app.test.js
+          python alo186/tests/test_emergency_lighting_selector_v321.py
+
+      - name: Sözdizimi ve güvenlik regresyonları
+        run: |
+          set -euo pipefail
+          node --check alo186/hesaplama/acil-aydinlatma-sure-lumen-uygunluk/app.js
+          node --check alo186/hesaplama/common.js
+          python -m py_compile alo186/tests/test_emergency_lighting_selector_v321.py
+          node alo186/tests/test_release_manifest.js
+          python alo186/tests/test_content_intent_consolidation.py
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Canonical statik site üretimi
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-emergency-lighting-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-emergency-lighting-canonical
+          test -f /tmp/alo186-emergency-lighting-canonical/hesaplama/acil-aydinlatma-sure-lumen-uygunluk/index.html
+          grep -q 'Acil Aydınlatma Süre, Lümen ve Enerji Uygunluk Testi' /tmp/alo186-emergency-lighting-canonical/hesaplama/acil-aydinlatma-sure-lumen-uygunluk/index.html
+
+      - name: Custom-domain ve project-path paketleri
+        run: |
+          set -euo pipefail
+          cp -a /tmp/alo186-emergency-lighting-canonical /tmp/alo186-emergency-lighting-custom
+          cp -a /tmp/alo186-emergency-lighting-canonical /tmp/alo186-emergency-lighting-project
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-emergency-lighting-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-emergency-lighting-custom \
+            --base-path ''
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-emergency-lighting-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-emergency-lighting-project \
+            --base-path '/chatgpt'
+
+      - name: Affiliate, gizlilik ve keşif kabulü
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          for root, prefix in [
+              (Path('/tmp/alo186-emergency-lighting-custom'), ''),
+              (Path('/tmp/alo186-emergency-lighting-project'), '/chatgpt'),
+          ]:
+              route = root / 'hesaplama/acil-aydinlatma-sure-lumen-uygunluk'
+              html = (route / 'index.html').read_text(encoding='utf-8')
+              app = (route / 'app.js').read_text(encoding='utf-8')
+              assert 'Satış ortaklığı açıklaması' in html
+              assert 'doğrudan mağaza bağlantısı açmaz' in html
+              assert 'amazon.com' not in html.casefold()
+              assert 'amazon.' not in app.casefold()
+              assert 'localStorage' not in app and 'sessionStorage' not in app and 'fetch(' not in app
+              assert 'actualNeed' in app and 'technicalCheck' in app and 'affiliateCheck' in app
+              expected = prefix + '/hesaplama/acil-aydinlatma-sure-lumen-uygunluk/' if prefix else '/hesaplama/acil-aydinlatma-sure-lumen-uygunluk/'
+              search = json.loads((root / 'arama/search-index.json').read_text(encoding='utf-8'))
+              entry = next(item for item in search['entries'] if item['canonicalPath'] == '/hesaplama/acil-aydinlatma-sure-lumen-uygunluk/')
+              assert entry['url'] == expected
+              assert expected in (root / 'sitemap.xml').read_text(encoding='utf-8')
+          PY
+
+      - name: Doğrulanmış artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-emergency-lighting-selector-pages
+          path: /tmp/alo186-emergency-lighting-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
