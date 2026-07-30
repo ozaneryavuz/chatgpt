@@ -9,7 +9,7 @@ ROUTE = "/hesaplama/kombi-kesinti-yedek-guc-uygunluk/"
 HTML = (ROOT / "alo186/hesaplama/kombi-kesinti-yedek-guc-uygunluk/index.html").read_text(encoding="utf-8")
 JS = (ROOT / "alo186/hesaplama/kombi-kesinti-yedek-guc-uygunluk/app.js").read_text(encoding="utf-8")
 CSS = (ROOT / "alo186/hesaplama/kombi-kesinti-yedek-guc-uygunluk/styles.css").read_text(encoding="utf-8")
-HUB = (ROOT / "alo186/hesaplama/index.html").read_text(encoding="utf-8")
+COMMON = (ROOT / "alo186/hesaplama/common.js").read_text(encoding="utf-8")
 OVERLAY = json.loads((ROOT / "alo186/deployment/routing-overlays/boiler-continuity-growth-run30.json").read_text(encoding="utf-8"))
 
 assert OVERLAY["version"] == 82
@@ -32,10 +32,12 @@ for phrase in [
 assert "RRULE:FREQ=MONTHLY;COUNT=12" in JS
 assert "localStorage" in JS and "LIMIT=10" in JS and "TTL=365*86400000" in JS
 assert "state:'no_buy'" in JS and "state:'emergency'" in JS and "state:'qualified'" in JS
-assert "37 çekirdek araç" in HUB
-assert "./kombi-kesinti-yedek-guc-uygunluk/" in HUB
+assert "boilerContinuityCard" in COMMON
+assert ROUTE in COMMON
+assert "data-alo186-boiler-continuity-card" in COMMON
+assert "37 çekirdek araç" in COMMON
 assert "min-inline-size:0" in CSS and "@media(max-width:640px)" in CSS
 assert not re.search(r"amazon\.(?:com|com\.tr)|amzn\.", HTML + JS, re.I)
 assert not re.search(r'"@type"\s*:\s*"(?:Product|Offer)"|priceCurrency|aggregateRating|availability', HTML, re.I)
 assert not re.search(r'type=["\'](?:email|tel|text|file)["\']|<textarea', HTML, re.I)
-print(json.dumps({"ok": True, "route": ROUTE, "actions": 3, "toolCount": 37}, ensure_ascii=False))
+print(json.dumps({"ok": True, "route": ROUTE, "actions": 3, "runtimeToolCount": 37}, ensure_ascii=False))
