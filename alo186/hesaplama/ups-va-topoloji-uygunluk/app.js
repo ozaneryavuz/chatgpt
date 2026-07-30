@@ -64,7 +64,7 @@
     if (hazard) {
       $('state').textContent = 'Kullanmayı durdurun';
       $('title').textContent = 'Fiziksel veya elektriksel güvenlik riski seçildi.';
-      $('summary').textContent = 'UPS'i veya aküyü açmayın, şarj etmeyin ve teste devam etmeyin. Enerjiyi güvenli biçimde kestirin; duman veya yangın riski varsa güvenli alana geçerek 112’yi arayın.';
+      $('summary').textContent = "UPS'i veya aküyü açmayın, şarj etmeyin ve teste devam etmeyin. Enerjiyi güvenli biçimde kestirin; duman veya yangın riski varsa güvenli alana geçerek 112’yi arayın.";
       $('va').textContent = 'Hesap yok';
       $('watt').textContent = 'Hesap yok';
       $('wh').textContent = 'Hesap yok';
@@ -108,7 +108,7 @@
       setGate($('affiliate'), gate);
     } else {
       $('professionalText').textContent = result.topologyKey === 'mini'
-        ? 'DC mini UPS veya ağ UPS'i seçmeden önce voltaj, polarite, jak ve toplam watt hesabını tamamlayın. Genel mağaza araması bu aşamada açılmaz.'
+        ? "DC mini UPS veya ağ UPS'i seçmeden önce voltaj, polarite, jak ve toplam watt hesabını tamamlayın. Genel mağaza araması bu aşamada açılmaz."
         : 'Kritik, uzun süreli, rack, online UPS veya yüksek güçlü yükte tek ürün bağlantısı yerine proje, seçicilik, akü ve kabul koşulları birlikte doğrulanmalıdır.';
       $('professional').classList.remove('hidden');
     }
