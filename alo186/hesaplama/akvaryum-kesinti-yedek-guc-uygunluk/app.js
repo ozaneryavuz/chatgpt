@@ -60,8 +60,9 @@
 
     const heaterAverageW = heaterW * (heaterDutyPct / 100);
     const lifeSupportW = airPumpW + filterW + returnPumpW + heaterAverageW + otherW;
+    const lifeSupportPeakW = airPumpW + filterW + returnPumpW + heaterW + otherW;
     const fullSystemW = lifeSupportW + lightingW;
-    const requiredContinuousW = roundUp(Math.max(lifeSupportW, 1) * OUTPUT_HEADROOM, 10);
+    const requiredContinuousW = roundUp(Math.max(lifeSupportPeakW, 1) * OUTPUT_HEADROOM, 10);
     const requiredNominalWh = roundUp((lifeSupportW * outageHours) / EFFICIENCY / USABLE_FRACTION, 10);
     const fullSystemWh = roundUp((fullSystemW * outageHours) / EFFICIENCY / USABLE_FRACTION, 10);
 
@@ -171,6 +172,7 @@
       tankLabel: TANK_LABELS[tankType],
       heaterAverageW: Math.round(heaterAverageW),
       lifeSupportW: Math.round(lifeSupportW),
+      lifeSupportPeakW: Math.round(lifeSupportPeakW),
       fullSystemW: Math.round(fullSystemW),
       requiredContinuousW,
       requiredNominalWh,
@@ -185,6 +187,7 @@
         `AC dönüşüm verimi: ${Math.round(EFFICIENCY * 100)}%`,
         `Kullanılabilir enerji oranı: ${Math.round(USABLE_FRACTION * 100)}%`,
         `Sürekli çıkış payı: ${Math.round((OUTPUT_HEADROOM - 1) * 100)}%`,
+        'Sürekli W hesabında ısıtıcı etiket gücü tam yük; Wh hesabında çalışma oranına göre ortalama yük olarak kullanılır.',
         'Aydınlatma yaşam destek hesabına dahil edilmez; tam sistem hesabında ayrı gösterilir.',
         'Sonuç veterinerlik, akvaryum uzmanlığı veya sabit tesisat projesi değildir.'
       ]
