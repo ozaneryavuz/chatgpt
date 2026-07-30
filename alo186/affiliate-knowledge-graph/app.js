@@ -10,9 +10,27 @@
     return `https://www.amazon.com.tr/s?k=${encodeURIComponent(item.search)}&tag=${TAG}`;
   }
 
+  function mergeCatalog(base, extension) {
+    const intentMap = new Map(base.intents.map((item) => [item.id, { ...item, productClasses: [...item.productClasses] }]));
+    extension.intents.forEach((item) => intentMap.set(item.id, item));
+    const productMap = new Map(base.productClasses.map((item) => [item.id, item]));
+    extension.productClasses.forEach((item) => productMap.set(item.id, item));
+    const productClasses = [...productMap.values()];
+    const byIntent = new Map();
+    productClasses.forEach((product) => product.needs.forEach((need) => {
+      if (!byIntent.has(need)) byIntent.set(need, []);
+      byIntent.get(need).push(product.id);
+    }));
+    const intents = [...intentMap.values()].map((intent) => ({
+      ...intent,
+      productClasses: [...new Set([...(intent.productClasses || []), ...(byIntent.get(intent.id) || [])])]
+    }));
+    return { ...base, version: extension.version, generatedAt: extension.generatedAt, intents, productClasses };
+  }
+
   function matches(item) {
     const intentMatch = state.intent === 'all' || item.needs.includes(state.intent);
-    const text = [item.label, item.search, ...item.requiredEvidence, ...item.needs].join(' ').toLocaleLowerCase('tr-TR');
+    const text = [item.label, item.search, ...item.requiredEvidence, ...(item.symptoms || []), ...(item.avoidWhen || []), ...item.needs].join(' ').toLocaleLowerCase('tr-TR');
     return intentMatch && (!state.query || text.includes(state.query));
   }
 
@@ -33,6 +51,15 @@
         renderProducts();
       });
       host.appendChild(button);
+    });
+  }
+
+  function appendList(host, items) {
+    host.replaceChildren();
+    (items || []).forEach((text) => {
+      const li = document.createElement('li');
+      li.textContent = text;
+      host.appendChild(li);
     });
   }
 
@@ -59,12 +86,11 @@
       card.querySelector('.nodes').textContent = `${item.needs.length} ihtiyaç bağlantısı`;
       card.querySelector('h3').textContent = item.label;
       card.querySelector('.why').textContent = item.search;
-      const ul = card.querySelector('ul');
-      item.requiredEvidence.forEach((evidence) => {
-        const li = document.createElement('li');
-        li.textContent = evidence;
-        ul.appendChild(li);
-      });
+      appendList(card.querySelector('.evidence ul'), item.requiredEvidence);
+      const symptoms = card.querySelector('.symptoms');
+      if (item.symptoms?.length) appendList(symptoms.querySelector('ul'), item.symptoms); else symptoms.hidden = true;
+      const avoid = card.querySelector('.avoid');
+      if (item.avoidWhen?.length) appendList(avoid.querySelector('ul'), item.avoidWhen); else avoid.hidden = true;
       const guide = card.querySelector('.guide');
       guide.href = item.guide;
       const confirm = card.querySelector('.confirm');
@@ -90,10 +116,15 @@
     });
   }
 
-  async function boot() {
-    const response = await fetch('./catalog.json', { cache: 'no-store' });
+  async function loadJson(path) {
+    const response = await fetch(path, { cache: 'no-store' });
     if (!response.ok) throw new Error(`Katalog yüklenemedi: ${response.status}`);
-    state.catalog = await response.json();
+    return response.json();
+  }
+
+  async function boot() {
+    const [base, extension] = await Promise.all([loadJson('./catalog.json'), loadJson('./catalog-extension-v103.json')]);
+    state.catalog = mergeCatalog(base, extension);
     $('intentCount').textContent = state.catalog.intents.length;
     $('productCount').textContent = state.catalog.productClasses.length;
     $('search').addEventListener('input', (event) => {
