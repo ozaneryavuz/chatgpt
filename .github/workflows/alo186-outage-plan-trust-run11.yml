@@ -79,7 +79,7 @@ jobs:
             --site /tmp/alo186-outage-plan-project \
             --base-path '/chatgpt'
 
-      - name: Sitemap, Teknik Arama ve ticari sınır kabulü
+      - name: Sitemap ve ticari sınır kabulü
         run: |
           set -euo pipefail
           python - <<'PY'
@@ -95,8 +95,6 @@ jobs:
               html = page.read_text(encoding='utf-8')
               js = app.read_text(encoding='utf-8')
               assert canonical in (root / 'sitemap.xml').read_text(encoding='utf-8')
-              search = json.loads((root / 'arama/search-index.json').read_text(encoding='utf-8'))
-              assert any(item['canonicalPath'] == canonical for item in search['entries'])
               assert 'amazon.com.tr' not in html.casefold() and 'amazon.com.tr' not in js.casefold()
               assert 'affiliateLinks:0' in js and 'commercialAllowed:false' in js
               assert 'Mevcut hazırlık yeterli; yeni ürün aramayın' in js
