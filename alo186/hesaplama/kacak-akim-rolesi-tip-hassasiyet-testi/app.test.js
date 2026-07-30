@@ -8,6 +8,7 @@ const general=rcd.buildDecision(base);
 assert.equal(general.requiredType,'A_REVIEW');
 assert.equal(general.state.key,'review');
 assert.equal(general.directAffiliateLinks,false);
+assert.equal(general.commercialCtasAllowed,true);
 assert.equal(general.noBuyOutcomePreserved,true);
 assert(general.selection.some(item=>item.includes('30 mA')));
 assert.equal(general.evidenceScore,90);
@@ -27,10 +28,21 @@ assert.equal(drive.requiredType,'B_REVIEW');
 assert.equal(drive.typeMismatch,true);
 assert(drive.tests.some(item=>item.includes('DC ara devre')));
 
-const ev=rcd.buildDecision({...base,application:'ev_mode3',existingType:'A'});
-assert.equal(ev.requiredType,'A_F_RDC_OR_B');
-assert(ev.selection.some(item=>item.includes('IEC 62955')));
-assert(ev.tests.some(item=>item.includes('6 mA DC')));
+const evWithoutRdc=rcd.buildDecision({...base,application:'ev_mode3',manufacturer:'unknown',existingType:'A'});
+assert.equal(evWithoutRdc.requiredType,'A_F_RDC_OR_B');
+assert.equal(evWithoutRdc.typeMismatch,true);
+assert.equal(evWithoutRdc.state.key,'measure');
+assert(evWithoutRdc.selection.some(item=>item.includes('6 mA RDC-DD')));
+assert(evWithoutRdc.tests.some(item=>item.includes('6 mA DC')));
+
+const evTypeB=rcd.buildDecision({...base,application:'ev_mode3',manufacturer:'unknown',existingType:'B'});
+assert.equal(evTypeB.typeMismatch,false);
+assert.notEqual(evTypeB.state.key,'measure');
+
+const evWithRdc=rcd.buildDecision({...base,application:'ev_mode3',manufacturer:'A_F_RDC',existingType:'A'});
+assert.equal(evWithRdc.requiredType,'A_F_RDC');
+assert.equal(evWithRdc.typeMismatch,false);
+assert(evWithRdc.selection.some(item=>item.includes('kombinasyonu aynen doğrulanmalıdır')));
 
 const manufacturerOverride=rcd.buildDecision({...base,application:'general',manufacturer:'B',existingType:'B'});
 assert.equal(manufacturerOverride.requiredType,'B');
@@ -50,6 +62,7 @@ assert(failed.causes.some(item=>item.includes('Test düğmesinin açtırmaması'
 
 const emergency=rcd.buildDecision({...base,hazard:'smoke'});
 assert.equal(emergency.state.key,'emergency');
+assert.equal(emergency.commercialCtasAllowed,false);
 assert(emergency.summary.includes('ticari yönlendirme kapatıldı'));
 assert(emergency.selection.some(item=>item.includes('Ürün veya tip seçimi durduruldu')));
 
@@ -62,4 +75,4 @@ assert.equal(invalid.hazard,'none');
 assert.equal(invalid.application,'unknown');
 assert.equal(invalid.residual,'unknown');
 
-console.log(JSON.stringify({ok:true,module:'RCD type and sensitivity decision',scenarios:11,directAffiliateLinks:false,noBuyOutcomePreserved:true},null,2));
+console.log(JSON.stringify({ok:true,module:'RCD type and sensitivity decision',scenarios:14,directAffiliateLinks:false,emergencyCommercialCtas:false,noBuyOutcomePreserved:true},null,2));
