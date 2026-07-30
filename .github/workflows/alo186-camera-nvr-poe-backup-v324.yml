@@ -60,13 +60,32 @@ jobs:
           python alo186/deployment/smoke_static_site.py \
             --bundle /tmp/alo186-camera-poe-canonical
 
+      - name: Custom-domain Pages ve teknik arama üretimi
+        run: |
+          set -euo pipefail
+          cp -a /tmp/alo186-camera-poe-canonical /tmp/alo186-camera-poe-pages
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-camera-poe-pages \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-camera-poe-pages \
+            --base-path ''
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-camera-poe-pages \
+            --base-path '' > /tmp/alo186-camera-poe-pages.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-camera-poe-pages \
+            --base-path ''
+
       - name: Rota, sitemap, teknik arama ve gizlilik kabulü
         run: |
           set -euo pipefail
           python - <<'PY'
           import json
           from pathlib import Path
-          root=Path('/tmp/alo186-camera-poe-canonical')
+          root=Path('/tmp/alo186-camera-poe-pages')
           route='hesaplama/kamera-nvr-poe-yedek-guc-uygunluk'
           page=root/route/'index.html'
           app=root/route/'app.js'
@@ -83,14 +102,14 @@ jobs:
           search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
           entry=next(item for item in search['entries'] if item['canonicalPath']=='/hesaplama/kamera-nvr-poe-yedek-guc-uygunluk/')
           assert entry['url']=='/hesaplama/kamera-nvr-poe-yedek-guc-uygunluk/'
-          print(json.dumps({'ok':True,'route':entry['url'],'directStoreLinks':0,'storage':False},ensure_ascii=False))
+          print(json.dumps({'ok':True,'route':entry['url'],'directStoreLinks':0,'storage':False,'searchIndexed':True},ensure_ascii=False))
           PY
 
       - name: Doğrulanmış site artifactı
         uses: actions/upload-artifact@v4
         with:
           name: alo186-camera-nvr-poe-backup-v324
-          path: /tmp/alo186-camera-poe-canonical
+          path: /tmp/alo186-camera-poe-pages
           if-no-files-found: error
           include-hidden-files: true
           retention-days: 30
