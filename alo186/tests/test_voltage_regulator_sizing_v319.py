@@ -70,7 +70,7 @@ def main() -> None:
     for token in ["plug_avr", "no_buy", "root_cause", "spd", "ups", "professional"]:
         assert token in app
     assert "input.phase === 'mono'" in app
-    assert "input.phase === 'three'" in app
+    assert "$('phase').value === 'three'" in app
     assert "input.loadKw <= 1.5" in app
     assert "selectedKva <= 3" in app
     assert "Ticari rota kapalı" in html or "Ticari rota kapalı" in app
