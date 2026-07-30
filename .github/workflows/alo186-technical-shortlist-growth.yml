@@ -98,7 +98,7 @@ jobs:
               assert 'Teknik Ürün Karşılaştırma ve Satın Almama Testi' in html
               assert 'Şimdilik satın alma' in html
               assert 'amazon.com.tr/' not in html.lower()
-              assert f'<loc>https://www.alo186.com/hesaplama/teknik-urun-karsilastirma/</loc>' in (root/'sitemap.xml').read_text(encoding='utf-8')
+              assert '<loc>https://alo186.com/hesaplama/teknik-urun-karsilastirma/</loc>' in (root/'sitemap.xml').read_text(encoding='utf-8')
               release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
               assert any(x['canonicalPath']=='/hesaplama/teknik-urun-karsilastirma/' for x in release['routes'])
               assert release['technicalShortlist']['candidateLimit']==3

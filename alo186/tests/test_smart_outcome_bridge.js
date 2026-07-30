@@ -17,8 +17,9 @@ const solutionCore = read('alo186/hesaplama/cozum-sonucu/core.js');
 const manifest = JSON.parse(read('alo186/deployment/routing-manifest.json'));
 const sitemap = read('alo186/sitemap.xml');
 
-assert(common.includes("new URL('outcome-bridge.js',current.src)"), 'Ortak hesaplama runtimeı outcome bridge yüklemiyor.');
-assert(common.includes("data.alo186OutcomeBridge='true'") || common.includes("dataset.alo186OutcomeBridge='true'"), 'Outcome bridge tekrar yükleme koruması eksik.');
+assert(common.includes("loadRuntime('Alo186OutcomeBridge','data-alo186-outcome-bridge')"), 'Ortak hesaplama runtimeı outcome bridge yüklemiyor.');
+assert(common.includes("'outcome-bridge.js'"), 'Genelleştirilmiş runtime yükleyicide outcome bridge dosyası eksik.');
+assert(common.includes("script.dataset.alo186OutcomeBridge='true'") || common.includes("dataset.alo186OutcomeBridge='true'"), 'Outcome bridge tekrar yükleme koruması eksik.');
 
 assert(bridge.includes("const STORAGE_KEY = 'alo186:pending-solutions:v1'"), 'Bekleyen çözüm depolama anahtarı eksik.');
 assert(bridge.includes('const MAX_PENDING = 6'), 'Bekleyen kayıt üst sınırı eksik.');
@@ -52,4 +53,4 @@ assert(solutionCore.includes("key: 'resolved_no_purchase'"), 'Satın almama kara
 assert(manifest.routes.some((route) => route.canonicalPath === '/hesaplama/cozum-sonucu/'), 'Outcome rotası manifestte eksik.');
 assert(/<loc>https:\/\/(?:www\.)?alo186\.com\/hesaplama\/cozum-sonucu\/<\/loc>/.test(sitemap), 'Outcome rotası sitemapte eksik.');
 
-console.log('ALO186 smart outcome bridge: global runtime, pending handoff, offline cache, checksum, üç yayın modu ve gizlilik sözleşmeleri başarılı.');
+console.log('ALO186 smart outcome bridge: generalized runtime, pending handoff, offline cache, checksum, üç yayın modu ve gizlilik sözleşmeleri başarılı.');
