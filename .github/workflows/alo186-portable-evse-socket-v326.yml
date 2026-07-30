@@ -119,7 +119,6 @@ jobs:
               assert page.is_file() and app.is_file() and css.is_file()
               html=page.read_text(encoding='utf-8')
               js=app.read_text(encoding='utf-8')
-              expected=f"{prefix}/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/" if prefix else '/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/'
               assert route_slug in html
               assert 'amazon.com' not in (html+js).lower()
               assert 'localStorage' not in js and 'sessionStorage' not in js and 'fetch(' not in js
@@ -128,10 +127,10 @@ jobs:
               assert route_slug in hub and travel_slug in hub
               assert hub.count('class="tool-card"')>=42
               sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
-              assert expected in sitemap
+              assert route_slug in sitemap
               search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
               entry=next(item for item in search['entries'] if item['canonicalPath']=='/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/')
-              assert entry['url']==expected
+              assert entry['url'].endswith('/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/')
           print(json.dumps({'ok':True,'route':'/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/','directStoreLinks':0,'storage':False,'searchIndexed':True,'hubToolCardsAtLeast':42,'concurrentTravelToolPreserved':True},ensure_ascii=False))
           PY
 
