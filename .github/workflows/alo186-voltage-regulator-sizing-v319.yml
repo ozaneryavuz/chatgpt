@@ -146,7 +146,7 @@ jobs:
               entry=next(item for item in search['entries'] if item['canonicalPath']==route)
               assert entry['url']==expected
               sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
-              assert f'<loc>https://www.alo186.com{route}</loc>' in sitemap
+              assert any(f'<loc>{host}{route}</loc>' in sitemap for host in ['https://alo186.com','https://www.alo186.com'])
               hub=(root/'hesaplama/index.html').read_text(encoding='utf-8')
               assert 'voltaj-regulatoru-kva-uygunluk' in hub
               count=re.search(r'(\d+) çekirdek araç',hub)

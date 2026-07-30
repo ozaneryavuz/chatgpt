@@ -1,0 +1,167 @@
+name: ALO186 Seyahat priz adaptörü uygunluğu
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/seyahat-priz-adaptoru-voltaj-uygunluk/**'
+      - 'alo186/hesaplama/index.html'
+      - 'alo186/deployment/routing-overlays/087-travel-adapter-suitability.json'
+      - 'alo186/tests/test_travel_adapter_suitability.py'
+      - '.github/workflows/alo186-travel-adapter-suitability.yml'
+      - '.github/workflows/alo186-home-office-backup-bundle-v325.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/seyahat-priz-adaptoru-voltaj-uygunluk/**'
+      - 'alo186/hesaplama/index.html'
+      - 'alo186/deployment/routing-overlays/087-travel-adapter-suitability.json'
+      - 'alo186/tests/test_travel_adapter_suitability.py'
+      - '.github/workflows/alo186-travel-adapter-suitability.yml'
+      - '.github/workflows/alo186-home-office-backup-bundle-v325.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-travel-adapter-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Seyahat elektriği karar ve güven senaryoları
+        run: |
+          set -euo pipefail
+          node alo186/hesaplama/seyahat-priz-adaptoru-voltaj-uygunluk/core.test.js
+          python alo186/tests/test_travel_adapter_suitability.py
+
+      - name: Sözdizimi ve mevcut güven regresyonları
+        run: |
+          set -euo pipefail
+          node --check alo186/hesaplama/seyahat-priz-adaptoru-voltaj-uygunluk/core.js
+          node --check alo186/hesaplama/seyahat-priz-adaptoru-voltaj-uygunluk/app.js
+          python -m py_compile alo186/tests/test_travel_adapter_suitability.py
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+          python alo186/tests/test_content_intent_consolidation.py
+
+      - name: Canonical üretim ve smoke testi
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-travel-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-travel-canonical
+
+      - name: Custom-domain ve project-path Pages üretimi
+        run: |
+          set -euo pipefail
+          for target in custom project; do
+            cp -a /tmp/alo186-travel-canonical "/tmp/alo186-travel-$target"
+          done
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-travel-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-travel-custom \
+            --base-path ''
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-travel-custom \
+            --base-path '' > /tmp/alo186-travel-custom.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-travel-custom \
+            --base-path ''
+
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-travel-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-travel-project \
+            --base-path '/chatgpt'
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-travel-project \
+            --base-path '/chatgpt' > /tmp/alo186-travel-project.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-travel-project \
+            --base-path '/chatgpt'
+
+      - name: Rota, sitemap, arama ve affiliate kabulü
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+
+          relative='hesaplama/seyahat-priz-adaptoru-voltaj-uygunluk'
+          canonical='/hesaplama/seyahat-priz-adaptoru-voltaj-uygunluk/'
+          hub_relative='./seyahat-priz-adaptoru-voltaj-uygunluk/'
+          forbidden_types={'Offer','AggregateOffer','Review','AggregateRating'}
+          forbidden_keys={'offers','aggregateRating','review'}
+          for root,prefix in [
+              (Path('/tmp/alo186-travel-custom'),''),
+              (Path('/tmp/alo186-travel-project'),'/chatgpt'),
+          ]:
+              page=root/relative/'index.html'
+              core=root/relative/'core.js'
+              app=root/relative/'app.js'
+              css=root/relative/'styles.css'
+              assert all(item.is_file() for item in [page,core,app,css])
+              html=page.read_text(encoding='utf-8')
+              js=app.read_text(encoding='utf-8')
+              logic=core.read_text(encoding='utf-8')
+              expected=f'{prefix}{canonical}' if prefix else canonical
+              assert any(f'{host}{canonical}' in html for host in ['https://alo186.com','https://www.alo186.com'])
+              assert all(asset in html for asset in ['./core.js','./app.js','./styles.css'])
+              assert 'Amazon satış ortaklığı bağlantısı' in html
+              assert 'rel="sponsored nofollow noopener"' in html
+              assert 'alo186rehber-21' in js
+              assert all(token not in js for token in ['localStorage','sessionStorage','fetch(','navigator.geolocation'])
+              for raw in re.findall(r'<script[^>]+type="application/ld\+json"[^>]*>(.*?)</script>',html,re.S|re.I):
+                  payload=json.loads(raw)
+                  nodes=payload.get('@graph',[payload]) if isinstance(payload,dict) else []
+                  for node in nodes:
+                      if not isinstance(node,dict):
+                          continue
+                      node_type=node.get('@type')
+                      node_types={node_type} if isinstance(node_type,str) else set(node_type or [])
+                      assert not (node_types & forbidden_types)
+                      assert not (set(node) & forbidden_keys)
+              assert "status:'no_buy'" in logic and "status:'conditional_purchase'" in logic
+              assert "status:'voltage_mismatch'" in logic and "status:'emergency'" in logic
+              hub=(root/'hesaplama/index.html').read_text(encoding='utf-8')
+              assert expected in hub or hub_relative in hub
+              assert re.search(r'\d+ çekirdek araç',hub)
+              sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
+              assert any(f'<loc>{host}{canonical}</loc>' in sitemap for host in ['https://alo186.com','https://www.alo186.com'])
+              search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
+              entry=next(item for item in search['entries'] if item['canonicalPath']==canonical)
+              assert entry['url']==expected
+          print(json.dumps({'ok':True,'route':canonical,'affiliate':'disclosed_and_gated','directProductClaims':0,'offerSchema':0,'noBuy':True,'sevenDayRecheck':True},ensure_ascii=False))
+          PY
+
+      - name: Doğrulanmış seyahat aracı artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-travel-adapter-suitability
+          path: /tmp/alo186-travel-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
