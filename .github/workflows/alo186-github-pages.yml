@@ -90,7 +90,7 @@ jobs:
             python alo186/deployment/smoke_github_pages.py \
               --site "$site" \
               --base-path "$base"
-            python alo186/deployment/inject_live_quality_hardening.py \
+            python alo186/deployment/inject_live_quality_hardening_v2.py \
               --site "$site" \
               --base-path "$base"
           done
@@ -187,7 +187,7 @@ jobs:
           python alo186/deployment/smoke_github_pages.py \
             --site /tmp/alo186-pages-site \
             --base-path "$PAGES_BASE_PATH"
-          python alo186/deployment/inject_live_quality_hardening.py \
+          python alo186/deployment/inject_live_quality_hardening_v2.py \
             --site /tmp/alo186-pages-site \
             --base-path "$PAGES_BASE_PATH" \
             | tee /tmp/alo186-live-quality-hardening.json
