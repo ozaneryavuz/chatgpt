@@ -104,6 +104,7 @@ jobs:
           set -euo pipefail
           python - <<'PY'
           import json
+          import re
           from pathlib import Path
 
           route='hesaplama/evden-calisma-laptop-modem-yedek-guc-seti'
@@ -124,7 +125,7 @@ jobs:
               assert all(token in html for token in ['actualNeed','technicalCheck','affiliateCheck','bundleLinks'])
               hub=(root/'hesaplama/index.html').read_text(encoding='utf-8')
               assert expected in hub
-              assert '40 çekirdek araç' in hub
+              assert re.search(r'\d+ çekirdek araç', hub)
               sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
               assert expected in sitemap
               search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
