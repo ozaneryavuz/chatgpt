@@ -75,7 +75,7 @@ assert not unresolved_root_literals(
     {"assets", "edas-bul", "arama", "acil-numaralar"},
 ), "Site geneli JS project-path dışında kök rota taşımamalı"
 
-with tempfile.TemporaryDirectory(prefix="alo186-ux-v119-") as folder:
+with tempfile.TemporaryDirectory(prefix="alo186-ux-v120-") as folder:
     canonical = Path(folder) / "canonical"
     custom = Path(folder) / "custom"
     project = Path(folder) / "project"
@@ -85,7 +85,7 @@ with tempfile.TemporaryDirectory(prefix="alo186-ux-v119-") as folder:
         "--output",
         str(canonical),
         "--commit",
-        "ux-v119-test",
+        "ux-v120-test",
     ])
 
     results = []
@@ -101,11 +101,35 @@ with tempfile.TemporaryDirectory(prefix="alo186-ux-v119-") as folder:
             "--repository",
             "ozaneryavuz/chatgpt",
             "--commit",
-            "ux-v119-test",
+            "ux-v120-test",
+        ])
+        run([
+            sys.executable,
+            "alo186/deployment/inject_outcome_runtime.py",
+            "--site",
+            str(target),
+            "--base-path",
+            base_path,
+        ])
+        run([
+            sys.executable,
+            "alo186/deployment/inject_shortlist_growth.py",
+            "--site",
+            str(target),
+            "--base-path",
+            base_path,
         ])
         run([
             sys.executable,
             "alo186/deployment/smoke_github_pages.py",
+            "--site",
+            str(target),
+            "--base-path",
+            base_path,
+        ])
+        run([
+            sys.executable,
+            "alo186/deployment/inject_live_quality_hardening_v2.py",
             "--site",
             str(target),
             "--base-path",
@@ -147,7 +171,10 @@ with tempfile.TemporaryDirectory(prefix="alo186-ux-v119-") as folder:
             assert not unresolved_root_literals(generated_js, known_top_levels)
 
         release = json.loads((target / "pages-release.json").read_text(encoding="utf-8"))
-        assert release["sitewideUx"]["injectedPages"] + release["sitewideUx"]["alreadyInjectedPages"] == len(html_files)
+        sitewide = release["sitewideUx"]
+        assert sitewide["finalizedAfterGrowthInjectors"] is True
+        assert sitewide["finalHtmlPages"] == len(html_files)
+        assert sitewide["finalInjectedPages"] + sitewide["finalAlreadyInjectedPages"] == len(html_files)
         results.append({
             "target": "custom" if not base_path else "project",
             "pages": len(html_files),
@@ -155,6 +182,7 @@ with tempfile.TemporaryDirectory(prefix="alo186-ux-v119-") as folder:
             "criticalRoutes": len(CRITICAL_USER_ROUTES),
             "projectPathSmoke": True,
             "uxInjected": True,
+            "uxFinalizedAfterGrowthInjectors": True,
         })
 
 run(["node", "--check", "alo186/assets/alo186-ux.js"])
@@ -179,5 +207,6 @@ print(json.dumps({
     "longPageToc": True,
     "consentDockCollisionGuard": True,
     "backToTop": "request-animation-frame-throttled",
+    "finalizedAfterGrowthInjectors": True,
     "minimumTouchTarget": 44,
 }, ensure_ascii=False))
