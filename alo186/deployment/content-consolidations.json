@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "generatedAt": "2026-07-30",
   "consolidations": [
     {
@@ -50,6 +50,13 @@
       "canonicalPath": "/haberler/ups-backfeed-korumasi-bakim-bypass-interlock-guvenli-izolasyon",
       "label": "UPS bypass, backfeed ve güvenli izolasyon",
       "reason": "Statik bypass, bakım bypassı, backfeed, interlock ve gerilimsizlik doğrulamasını hedefleyen iki rehber; daha kapsamlı güvenli izolasyon rotasında birleştirildi."
+    },
+    {
+      "intentKey": "pv-inverter-afci-dc-arc-alarm",
+      "aliasPath": "/haberler/ges-inverter-afci-dc-ark-hatasi",
+      "canonicalPath": "/haberler/ges-inverter-afci-dc-ark-hatasi-alarmi-kapatilir-mi",
+      "label": "GES inverter AFCI ve DC ark alarmı",
+      "reason": "AFCI alarmının anlamı, DC ark kök nedeni, konnektör ve kablo kontrolü, reset sınırı ve korumayı kapatmama kararı aynı kullanıcı niyetini hedeflediği için güncel ve daha kapsamlı rehber tek canonical kaynak olarak seçildi."
     }
   ]
 }
