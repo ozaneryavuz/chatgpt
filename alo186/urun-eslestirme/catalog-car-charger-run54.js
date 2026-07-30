@@ -27,6 +27,19 @@
   };
   if(!catalog.categories.some((item)=>item.id===category.id))catalog.categories.push(category);
 
+  const portableEvseCategory={
+    id:'portable_evse',
+    name:'Taşınabilir elektrikli araç şarj cihazı (EVSE)',
+    mode:'guide',
+    risk:'safety',
+    affiliatePolicy:'after_tool',
+    nextStepUrl:'https://alo186.com/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/',
+    nextStepLabel:'Önce priz, devre, PE, RCD/DC koruma ve akım uygunluğunu test et',
+    description:'Taşınabilir EVSE etiketi, prizin ve tesisatın aynı akımı güvenle taşıdığını kanıtlamaz. Priz sınıfı, ayrı devre, PE sürekliliği, RCD/DC kaçak koruması, belgelenmiş sürekli akım, araç kabulü, konnektör ve dış ortam koşulları doğrulanmalıdır.',
+    searchQuery:'taşınabilir EV şarj cihazı EVSE Type 2 CEE Schuko ayarlanabilir akım'
+  };
+  if(!catalog.categories.some((item)=>item.id===portableEvseCategory.id))catalog.categories.push(portableEvseCategory);
+
   const need={id:'vehicle-device-charging',name:'Araçta telefon, tablet ve uyumlu dizüstü şarjı'};
   if(Array.isArray(catalog.needs)&&!catalog.needs.some((item)=>item.id===need.id))catalog.needs.push(need);
   if(catalog.categoryNeeds)catalog.categoryNeeds.car_charger=['vehicle-device-charging'];
