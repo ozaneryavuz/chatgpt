@@ -1,0 +1,22 @@
+name: ALO186 powerbank uçak Wh uygunluk v334
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/powerbank-ucak-wh-uygunluk/**'
+      - 'alo186/deployment/routing-overlays/095-powerbank-ucak-wh-uygunluk.json'
+      - 'alo186/tests/test_powerbank_ucak_wh_v334.py'
+      - '.github/workflows/alo186-powerbank-ucak-wh-v334.yml'
+  workflow_dispatch:
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate powerbank flight decision tool
+        run: python alo186/tests/test_powerbank_ucak_wh_v334.py
