@@ -105,11 +105,15 @@ def main() -> None:
         "Buzdolabı bölümü için yaklaşık",
         "foodSafetyWindow",
         "foodSafetyIssues",
+        "chooseCategory(input,metrics)",
     ):
         assert token in app, token
-    assert app.index("if(input.emergency)") < app.index("const evidence=[]")
-    assert app.index("if(input.medicalStorage)") < app.index("const evidence=[]")
-    assert app.index("if(input.scenario==='active')") < app.index("const category=chooseCategory")
+    evidence_index = app.index("const evidence=[]")
+    assert app.index("if(input.emergency)") < evidence_index
+    assert app.index("if(input.medicalStorage)") < evidence_index
+    active_index = app.index("if(input.scenario==='active')")
+    category_index = app.index("const category=chooseCategory")
+    assert active_index < category_index
     assert "amazon." not in app.casefold()
     assert "../../akilli-urun-secimi?kategori=" in app
 
