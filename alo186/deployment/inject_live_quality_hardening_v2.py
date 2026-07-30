@@ -7,6 +7,29 @@ from pathlib import Path
 import inject_live_quality_hardening as core
 
 
+_original_normalize_text = core.normalize_text
+
+
+def normalize_text(text: str) -> str:
+    # En uzun ve kullanıcıyı doğrudan yanlış kanala yönlendiren eski cümleyi
+    # önce düzeltiriz; aksi halde daha kısa 30 gün değişimi ikinci eşleşmeyi bozar.
+    text = text.replace(
+        "zararın ortaya çıktığı tarihten itibaren 30 gün içinde EDAŞ kaydı açın",
+        "zararın ortaya çıktığı tarihten itibaren 10 iş günü içinde ilgili dağıtım şirketinin resmî kanalına başvurun",
+    )
+    text = text.replace(
+        "Zararın ortaya çıktığı tarihten itibaren 30 gün içinde EDAŞ kaydı açın",
+        "Zararın ortaya çıktığı tarihten itibaren 10 iş günü içinde ilgili dağıtım şirketinin resmî kanalına başvurun",
+    )
+    updated = _original_normalize_text(text)
+    # Kısa dönüşüm daha önce çalışmış eski artifactlar için de fail-safe temizlik.
+    updated = updated.replace(
+        "10 iş günü içinde EDAŞ kaydı açın",
+        "10 iş günü içinde ilgili dağıtım şirketinin resmî kanalına başvurun",
+    )
+    return updated
+
+
 def validate(site: Path, base_path: str) -> dict:
     failures: list[str] = []
     html_count = 0
@@ -100,6 +123,7 @@ def validate(site: Path, base_path: str) -> dict:
     }
 
 
+core.normalize_text = normalize_text
 core.validate = validate
 run = core.run
 
