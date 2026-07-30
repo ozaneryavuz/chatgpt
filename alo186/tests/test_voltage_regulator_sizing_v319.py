@@ -77,6 +77,7 @@ def main() -> None:
     assert "112’yi arayın" in app
     assert "amazon.com.tr/s?k=" in app and "alo186rehber-21" in app
     assert "aria-disabled" in app and "setGate" in app
+    assert app.index("if (input.hazard)") < app.index("if (!(input.vmin >= 80")
 
     assert "voltaj-regulatoru-kva-uygunluk" in hub
     assert "34 çekirdek araç" in hub
@@ -96,6 +97,7 @@ def main() -> None:
         "browserStorage": False,
         "affiliateDisclosure": True,
         "emergencyCommerceClosed": True,
+        "hazardBeforeNumericValidation": True,
         "professionalGate": True,
         "noBuyOutcome": True,
     }, ensure_ascii=False, indent=2))
