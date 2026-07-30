@@ -64,7 +64,7 @@ def main() -> None:
         "60 saniyede doğru elektrik rotası",
         "Tehlike varsa ticari yol kapanır",
         "update_primary_shortcut",
-        'result["primaryStartMode"] = "progressive-disclosure"',
+        'release["primaryStartMode"] = "progressive-disclosure"',
     ):
         assert token in pages, token
 
