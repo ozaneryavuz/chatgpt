@@ -32,10 +32,18 @@ assert.equal(metrics.approximateVA,313);
 assert.equal(metrics.pfAssumed,true);
 assert.equal(metrics.startupAssumed,true);
 assert.equal(metrics.dutyAssumed,true);
+assert.equal(metrics.phaseFactor,1);
 
 const currentBased=app.calculations({...base,labelW:'',ratedCurrent:'1',otherLoadW:'0',targetHours:'4'});
 assert.equal(currentBased.runningW,196);
 assert.equal(currentBased.pf,0.85);
+assert.equal(currentBased.powerFromCurrent,true);
+
+const threePhase=app.calculations({...base,labelW:'',phase:'three',voltage:'400',ratedCurrent:'2',otherLoadW:'0',targetHours:'4'});
+assert.equal(threePhase.runningW,1178);
+assert.equal(threePhase.phaseFactor,1.732);
+assert.equal(threePhase.powerFromCurrent,true);
+
 const known=app.calculations({...base,startupW:'900',dutyCyclePct:'60'});
 assert.equal(known.startupW,900);
 assert.equal(known.startupAssumed,false);
@@ -43,6 +51,13 @@ assert.equal(known.dutyPct,60);
 assert.equal(known.dutyAssumed,false);
 
 assert.equal(app.foodSafetyWindow({applianceType:'fridge',doorClosed:'yes'}).hours,4);
+const comboFull=app.foodSafetyWindow({applianceType:'fridge_freezer',doorClosed:'yes',freezerFill:'full'});
+assert.equal(comboFull.hours,4);
+assert.equal(comboFull.refrigeratorHours,4);
+assert.equal(comboFull.freezerHours,48);
+const comboHalf=app.foodSafetyWindow({applianceType:'fridge_freezer',doorClosed:'yes',freezerFill:'half'});
+assert.equal(comboHalf.hours,4);
+assert.equal(comboHalf.freezerHours,24);
 assert.equal(app.foodSafetyWindow({applianceType:'chest_freezer',doorClosed:'yes',freezerFill:'full'}).hours,48);
 assert.equal(app.foodSafetyWindow({applianceType:'upright_freezer',doorClosed:'yes',freezerFill:'half'}).hours,24);
 assert.equal(app.foodSafetyWindow({applianceType:'fridge',doorClosed:'no'}).hours,null);
@@ -58,13 +73,29 @@ assert.equal(run({targetHours:'0'}).status,'evidence_required');
 assert.equal(run({applianceType:'commercial',startupW:''}).status,'evidence_required');
 assert.equal(run({applianceType:'commercial',startupW:'2500',dutyCyclePct:'70'}).status,'professional');
 assert.equal(run({connection:'fixed'}).status,'professional');
-assert.equal(run({phase:'three'}).status,'professional');
+const threePhaseProfessional=run({phase:'three',labelW:'',voltage:'400',ratedCurrent:'2'});
+assert.equal(threePhaseProfessional.status,'professional');
+assert.equal(threePhaseProfessional.metrics.runningW,1178);
 assert.equal(run({labelW:'1800'}).status,'professional');
 
 const active=run({scenario:'active',outageHours:'6'});
 assert.equal(active.status,'active_event');
 assert.equal(active.commerceClosed,true);
-assert.equal(active.foodSafety.hours,24);
+assert.equal(active.foodSafety.hours,4);
+assert.equal(active.foodSafety.freezerHours,24);
+assert(active.issues.some(item=>item.includes('Buzdolabı bölümü')));
+assert(!active.issues.some(item=>item.includes('Dondurucu bölümü')));
+
+const activeUndersized=run({
+  scenario:'active',outageHours:'2',sourceStatus:'existing',sourceType:'power_station',
+  sourceContinuousW:'100',sourceSurgeW:'500',sourceWh:'500',waveform:'pure',outputSpec:'confirmed',startTest:'failed'
+});
+assert.equal(activeUndersized.status,'active_event');
+assert.equal(activeUndersized.commerceClosed,true);
+assert(activeUndersized.issues.some(item=>item.includes('100 W sürekli gücü')));
+assert(activeUndersized.issues.some(item=>item.includes('500 W tepe gücü')));
+assert(activeUndersized.issues.some(item=>item.includes('500 Wh enerjisi')));
+assert(activeUndersized.issues.some(item=>item.includes('başlatma testi başarısız')));
 
 const missingExisting=run({scenario:'existing',sourceStatus:'existing',sourceType:'power_station'});
 assert.equal(missingExisting.status,'evidence_required');
@@ -80,6 +111,10 @@ const generatorNeed=run({labelW:'900',startupW:'4000',targetHours:'24'});
 assert.equal(generatorNeed.status,'conditional_purchase');
 assert.deepEqual(generatorNeed.commerceCategories,['generator']);
 
+const undersizedExisting=run({scenario:'existing',sourceStatus:'existing',sourceType:'power_station',sourceContinuousW:'100',sourceSurgeW:'500',sourceWh:'500',waveform:'pure',outputSpec:'confirmed',startTest:'failed'});
+assert.equal(undersizedExisting.status,'conditional_purchase');
+assert(undersizedExisting.issues.some(item=>item.includes('100 W sürekli gücü')));
+
 const unverifiedCompatibility=run({scenario:'existing',sourceStatus:'existing',sourceType:'power_station',sourceContinuousW:'1000',sourceSurgeW:'2000',sourceWh:'3000',waveform:'unknown',outputSpec:'unknown',startTest:'untested'});
 assert.equal(unverifiedCompatibility.status,'evidence_required');
 assert(unverifiedCompatibility.issues.some(item=>item.includes('Saf sinüs')));
@@ -92,4 +127,4 @@ assert.match(noBuy.title,/yeni ürün almayın/);
 assert.equal(app.gateReady(true,true,true),true);
 assert.equal(app.gateReady(true,true,false),false);
 
-console.log(JSON.stringify({ok:true,scenarios:25,route:app.ROUTE,affiliateGateChecks:3,personalDataFields:0,directStoreLinks:0,foodSafetyWindows:[4,24,48]},null,2));
+console.log(JSON.stringify({ok:true,scenarios:29,route:app.ROUTE,affiliateGateChecks:3,personalDataFields:0,directStoreLinks:0,foodSafetyWindows:[4,24,48],reviewFindingsFixed:3},null,2));
