@@ -38,7 +38,8 @@
 
   const main = doc.querySelector('main');
   if (main && !main.id) main.id = 'main-content';
-  if (main && !doc.querySelector(`a[href="#${CSS.escape(main.id)}"]`)) {
+  const existingSkip = doc.querySelector('a.alo-ux-skip,a.skip-link,a.skip,a[href^="#"][class*="skip"]');
+  if (main && !existingSkip && !doc.querySelector(`a[href="#${CSS.escape(main.id)}"]`)) {
     const skip = doc.createElement('a');
     skip.className = 'alo-ux-skip';
     skip.href = `#${main.id}`;
@@ -270,6 +271,18 @@
     const anchor = h1?.closest('section,article,header') || h1;
     if (anchor?.parentNode) anchor.parentNode.insertBefore(toc, anchor.nextSibling);
     else main.prepend(toc);
+  }
+
+  const consentBanner = doc.getElementById('alo186-consent');
+  if (consentBanner) {
+    if (main?.parentNode) main.parentNode.insertBefore(consentBanner, main);
+    const syncConsentBanner = () => {
+      body.dataset.alo186ConsentBannerVisible = String(!consentBanner.hidden);
+    };
+    syncConsentBanner();
+    if ('MutationObserver' in window) {
+      new MutationObserver(syncConsentBanner).observe(consentBanner, { attributes: true, attributeFilter: ['hidden'] });
+    }
   }
 
   const existingDock = doc.querySelector('.mobile-dock,.bottom-dock,[data-mobile-dock="true"]');

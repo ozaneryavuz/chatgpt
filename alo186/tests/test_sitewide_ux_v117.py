@@ -45,6 +45,11 @@ for token in (
     "const basePath = scriptUrl.pathname.endsWith(assetSuffix)",
     "body.dataset.alo186UxCompact = 'true'",
     "body.dataset.alo186UxNativeDock = 'true'",
+    "const existingSkip = doc.querySelector",
+    "a.skip-link",
+    "const consentBanner = doc.getElementById('alo186-consent')",
+    "main.parentNode.insertBefore(consentBanner, main)",
+    "body.dataset.alo186ConsentBannerVisible",
     "Skip to content",
     "Back to top",
     "alo-ux-toc",
@@ -69,13 +74,18 @@ assert ".alo-ux-toc[open] nav" in ux_css
 assert "grid-template-columns: repeat(2" in ux_css
 assert ".alo-ux-mobilebar a:focus-visible" in ux_css
 assert "alo186-consent-settings" in ux_css
+assert ":where(.item, .field, .form-row, .control, .input-group) > *" in ux_css
+assert ":where(.item, .field, .form-row, .control, .input-group) > select" in ux_css
+assert "body[data-alo186-consent-banner-visible=\"true\"] #alo186-consent" in ux_css
+assert "position: relative !important" in ux_css
+assert "body[data-alo186-consent-banner-visible=\"true\"] :where(.alo-ux-mobilebar, .mobile-dock, .bottom-dock" in ux_css
 assert not re.search(r"outline\s*:\s*(?:0|none)\b", ux_css, re.I), "Klavye odağı bastırılamaz"
 assert not unresolved_root_literals(
     ux_js,
     {"assets", "edas-bul", "arama", "acil-numaralar"},
 ), "Site geneli JS project-path dışında kök rota taşımamalı"
 
-with tempfile.TemporaryDirectory(prefix="alo186-ux-v119-") as folder:
+with tempfile.TemporaryDirectory(prefix="alo186-ux-v120-") as folder:
     canonical = Path(folder) / "canonical"
     custom = Path(folder) / "custom"
     project = Path(folder) / "project"
@@ -85,7 +95,7 @@ with tempfile.TemporaryDirectory(prefix="alo186-ux-v119-") as folder:
         "--output",
         str(canonical),
         "--commit",
-        "ux-v119-test",
+        "ux-v120-test",
     ])
 
     results = []
@@ -101,7 +111,7 @@ with tempfile.TemporaryDirectory(prefix="alo186-ux-v119-") as folder:
             "--repository",
             "ozaneryavuz/chatgpt",
             "--commit",
-            "ux-v119-test",
+            "ux-v120-test",
         ])
         run([
             sys.executable,
@@ -163,10 +173,14 @@ print(json.dumps({
     "targets": results,
     "technicalExceptions": sorted(TECHNICAL_HTML_EXCEPTIONS),
     "criticalRoutes": sorted(CRITICAL_USER_ROUTES),
-    "mobileUtilityBar": "indexable-tr-only-with-native-dock-deduplication",
+    "mobileUtilityBar": "indexable-bilingual-with-native-dock-deduplication",
     "projectPathAware": True,
     "localizedUtilities": True,
     "activePageState": True,
+    "existingSkipLinkDeduplication": True,
+    "narrowGridControlOverflowGuard": True,
+    "consentBannerInlineFlow": True,
+    "consentFirstVisitDockSuppressed": True,
     "tableOverflowGuard": "focus-only-when-overflowing",
     "tableContextLabels": True,
     "formControlFallbackLabels": True,
