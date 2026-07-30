@@ -38,6 +38,7 @@ HUB = Path("hesaplama/index.html")
 PORTAL = Path("elektrik-portali/index.html")
 GATEWAY = Path("index.html")
 PRODUCT = Path("akilli-urun-secimi/index.html")
+COMMERCE_HUB = Path("amazon-elektrik-urunleri/index.html")
 HUB_MARKER = 'data-alo186-shortlist-hub-card="true"'
 PORTAL_MARKER = 'data-alo186-shortlist-entry-card="true"'
 PRODUCT_MARKER = 'data-alo186-shortlist-product-card="true"'
@@ -133,6 +134,34 @@ def raise_count(text: str) -> str:
         return text
     current = int(match.group(1))
     return text[: match.start(1)] + str(max(current, 34)) + text[match.end(1) :]
+
+
+def sync_commerce_hub_inventory(site: Path) -> dict:
+    path = site / COMMERCE_HUB
+    if not path.is_file():
+        return {"updated": False, "guideCount": 0, "reason": "hub_missing"}
+    text = path.read_text(encoding="utf-8")
+    section = re.search(
+        r'<section class="section" aria-labelledby="routesTitle">(.*?)</section>',
+        text,
+        re.S,
+    )
+    if not section:
+        return {"updated": False, "guideCount": 0, "reason": "routes_section_missing"}
+    guide_count = len(re.findall(r'<article class="card route-card">', section.group(1)))
+    if guide_count < 1:
+        return {"updated": False, "guideCount": 0, "reason": "cards_missing"}
+    original = text
+    text = re.sub(r"\d+ özel rehber", f"{guide_count} özel rehber", text, count=1)
+    text = re.sub(
+        r"Aynı ürün listesini çoğaltmak yerine [^<]* ayrı ihtiyacı çözüyoruz\.",
+        "Aynı ürün listesini çoğaltmak yerine kullanıcıya göre ayrılmış ticari ihtiyaçları çözüyoruz.",
+        text,
+        count=1,
+    )
+    if text != original:
+        path.write_text(text, encoding="utf-8")
+    return {"updated": text != original, "guideCount": guide_count, "reason": "synchronized"}
 
 
 def insert_hub(site: Path, base_path: str) -> int:
@@ -267,6 +296,7 @@ def run(site: Path, base_path: str) -> dict:
     growth_run18 = run_growth_run18(site, base_path)
     growth_run19 = run_growth_run19(site, base_path)
     growth_run21 = run_growth_run21(site, base_path)
+    commerce_inventory = sync_commerce_hub_inventory(site)
     sitemap_reconciliation = reconcile_sitemap_with_release(site)
     recompute(site)
     return {
@@ -297,6 +327,7 @@ def run(site: Path, base_path: str) -> dict:
         "growthRun18": growth_run18,
         "growthRun19": growth_run19,
         "growthRun21": growth_run21,
+        "commerceInventory": commerce_inventory,
         "sitemapReconciliation": sitemap_reconciliation,
     }
 
