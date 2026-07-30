@@ -123,6 +123,7 @@ input, select, textarea { max-width: 100%; font-size: 16px; }
   body:not([data-alo186-ux-compact="true"]) {
     padding-bottom: calc(68px + env(safe-area-inset-bottom));
   }
+  body:not([data-alo186-ux-compact="true"]) .alo-ux-toc { display: none; }
   .alo-ux-mobilebar {
     position: fixed;
     z-index: 9998;
