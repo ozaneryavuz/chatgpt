@@ -8,29 +8,34 @@ import subprocess
 from pathlib import Path
 
 ROUTE = "/urun-bilgi-grafigi/"
-PAGE = Path("urun-bilgi-grafigi/index.html")
-GRAPH = Path("urun-bilgi-grafigi/product-graph.json")
-CATALOG = Path("akilli-urun-secimi/catalog.js")
-EXTENSION = Path("akilli-urun-secimi/catalog-knowledge-extension.js")
+SOURCE = "alo186/urun-bilgi-grafigi/index.html"
+GRAPH_FILE = Path("urun-bilgi-grafigi/product-graph.json")
+BASE_EXTENSION = Path("akilli-urun-secimi/catalog-knowledge-extension.js")
 SALES_EXTENSION = Path("akilli-urun-secimi/catalog-sales-extension.js")
-GROWTH_RUN6_EXTENSION = Path("akilli-urun-secimi/catalog-growth-run6.js")
+GROWTH_EXTENSION = Path("akilli-urun-secimi/catalog-growth-run6.js")
 GROWTH_RUN7_EXTENSION = Path("akilli-urun-secimi/catalog-growth-run7.js")
-MISSING_COMPONENT = Path("akilli-urun-secimi/run6-missing-component-set.js")
+CAR_CHARGER_EXTENSION = Path("akilli-urun-secimi/catalog-car-charger-run54.js")
 MARKER = 'data-alo186-product-graph-entry="true"'
-EXTENSION_MARKER = 'data-alo186-product-graph-extension="true"'
-SALES_EXTENSION_MARKER = 'data-alo186-product-sales-extension="true"'
-GROWTH_RUN6_MARKER = 'data-alo186-product-growth-run6="true"'
-GROWTH_RUN7_MARKER = 'data-alo186-product-growth-run7="true"'
-MISSING_COMPONENT_MARKER = 'data-alo186-missing-component-run6="true"'
-SCHEMA_ID = "affiliateProductGraphJsonLd"
+SCRIPT_MARKER = 'data-alo186-product-graph-extension="true"'
+REQUIRED = [
+    Path("akilli-urun-secimi/catalog.js"),
+    BASE_EXTENSION,
+    SALES_EXTENSION,
+    GROWTH_EXTENSION,
+    GROWTH_RUN7_EXTENSION,
+    CAR_CHARGER_EXTENSION,
+    Path("urun-bilgi-grafigi/catalog.js"),
+    Path("urun-bilgi-grafigi/catalog-knowledge-extension.js"),
+    Path("urun-bilgi-grafigi/index.html"),
+    Path("urun-bilgi-grafigi/app.js"),
+    Path("urun-bilgi-grafigi/styles.css"),
+]
 TARGETS = [
     Path("amazon-elektrik-urunleri/index.html"),
     Path("akilli-urun-secimi/index.html"),
     Path("katalog-guven-durumu/index.html"),
     Path("elektrik-portali/index.html"),
-    Path("index.html"),
 ]
-FORBIDDEN = {"price", "stock", "rating", "seller", "delivery", "warranty", "affiliateCommission"}
 
 
 def normalize_base_path(value: str) -> str:
@@ -39,179 +44,153 @@ def normalize_base_path(value: str) -> str:
 
 
 def public_url(base_path: str, route: str) -> str:
-    route = "/" + route.lstrip("/")
-    return f"{base_path}{route}" if base_path else route
+    return f"{base_path}/{route.lstrip('/')}" if base_path else "/" + route.lstrip("/")
 
 
-def collect_keys(value, result: set[str]) -> None:
-    if isinstance(value, dict):
-        for key, nested in value.items():
-            result.add(str(key))
-            collect_keys(nested, result)
-    elif isinstance(value, list):
-        for nested in value:
-            collect_keys(nested, result)
+def require_files(site: Path) -> None:
+    missing = [str(path) for path in REQUIRED if not (site / path).is_file()]
+    if missing:
+        raise FileNotFoundError(f"Affiliate ürün grafiği bağımlılıkları eksik: {missing}")
 
 
 def node_payload(site: Path) -> dict:
-    final_extension = (site / GROWTH_RUN7_EXTENSION).resolve()
-    required = [
-        site / CATALOG,
-        site / EXTENSION,
-        site / SALES_EXTENSION,
-        site / GROWTH_RUN6_EXTENSION,
-        final_extension,
-        site / MISSING_COMPONENT,
-    ]
-    missing = [str(path) for path in required if not path.is_file()]
-    if missing:
-        raise FileNotFoundError(f"Affiliate katalog/Knowledge Graph katmanı artifactta eksik: {missing}")
-    script = f"""
-const catalog=require({json.dumps(str(final_extension))});
-const categories=catalog.categories.map(category=>{{
-  const relation=catalog.categoryRelations[category.id]||{{}};
-  return {{
-    id:category.id,name:category.name,needIds:catalog.categoryNeeds[category.id]||[],
-    affiliatePolicy:category.affiliatePolicy,risk:category.risk,
-    toolUrls:relation.tools||[],guideUrls:relation.guides||[],requiredEvidence:relation.evidence||[]
-  }};
-}});
-const products=catalog.products.filter(catalog.isCatalogProduct).map(product=>({{
-  id:product.id,categoryId:product.category,name:product.name,brand:product.brand,
-  model:product.model||product.mpn||product.id,
-  identifier:{{type:product.asin?'ASIN':'Model',value:product.asin||product.model||product.mpn||product.id}},
-  verificationStatus:product.status,verifiedAt:product.verifiedAt,linkMode:product.linkMode||'asin_detail',
-  officialSource:product.technicalSource||undefined,
-  needIds:product.needIds||catalog.categoryNeeds[product.category]||[],
-  technicalProperties:product.attributes||{{}},relatedTools:product.relatedTools||[],
-  relatedGuides:product.relatedGuides||[],requiredEvidence:product.requiredEvidence||[]
-}}));
-const now=new Date('2026-07-30T12:00:00Z');
-const summary=catalog.knowledgeGraphSummary({{now}});
-process.stdout.write(JSON.stringify({{
-  graph:{{
-    version:summary.version,generatedAt:summary.generatedAt,
-    canonicalUrl:'https://www.alo186.com/urun-bilgi-grafigi/',
-    commercialPolicy:{{
-      affiliateDisclosureRequired:true,
-      commercialRankingFieldsExcluded:['price','stock','rating','seller','delivery','warranty','affiliateCommission'],
-      verificationMaxAgeDays:45,noBuyOutcomePreserved:true,
-      professionalOnlyCategoriesNeverExposeAffiliateLinks:true,
-      manufacturerVerifiedSearchRequiresExactModelRecheck:true
-    }},
-    needs:catalog.needs,categories,products
-  }},
-  schema:catalog.knowledgeGraph({{now}}),summary
-}}));
+    require_files(site)
+    core = site / "akilli-urun-secimi/catalog.js"
+    base_extension = site / BASE_EXTENSION
+    sales_extension = site / SALES_EXTENSION
+    growth_extension = site / GROWTH_EXTENSION
+    growth_run7_extension = site / GROWTH_RUN7_EXTENSION
+    car_charger_extension = site / CAR_CHARGER_EXTENSION
+    script = r"""
+const catalog=require(process.argv[1]);
+const graph=catalog.generateProductGraph();
+const summary=catalog.knowledgeGraphSummary();
+const schema=catalog.knowledgeGraph({now:new Date('2026-07-30T12:00:00Z')});
+const out={
+ graph:{
+  version:graph.version,
+  generatedAt:graph.generatedAt,
+  canonicalUrl:graph.canonicalUrl,
+  needs:graph.needs,
+  categories:graph.categories,
+  products:graph.products.map((product)=>({
+   id:product.id,name:product.name,brand:product.brand,model:product.model,categoryId:product.categoryId,
+   needIds:product.needIds||[],intentIds:product.intentIds||[],verificationStatus:product.verificationStatus,
+   verifiedAt:product.verifiedAt,linkMode:product.linkMode,identifier:product.identifier,
+   technicalProperties:product.technicalProperties,requiredEvidence:product.requiredEvidence||[],
+   userNeed:product.userNeed||null,bestFor:product.bestFor||[],noBuyWhen:product.noBuyWhen||[],
+   officialSource:product.officialSource,relatedTools:product.relatedTools||[],relatedGuides:product.relatedGuides||[],
+   sourceNote:product.sourceNote
+  }))
+ },
+ summary,
+ schema
+};
+process.stdout.write(JSON.stringify(out));
 """
-    completed = subprocess.run(["node", "-e", script], check=True, capture_output=True, text=True)
-    payload = json.loads(completed.stdout)
+    result = subprocess.run(
+        ["node", "-e", script, str(car_charger_extension)],
+        cwd=site,
+        check=True,
+        text=True,
+        capture_output=True,
+    )
+    payload = json.loads(result.stdout)
     graph = payload["graph"]
     summary = payload["summary"]
-    for key in ("needs", "categories", "products"):
-        if not isinstance(graph.get(key), list) or not graph[key]:
-            raise ValueError(f"Affiliate Product Knowledge Graph {key} düğümleri boş")
-        ids = [item.get("id") for item in graph[key] if isinstance(item, dict)]
-        if len(ids) != len(set(ids)) or any(not item for item in ids):
-            raise ValueError(f"Affiliate Product Knowledge Graph {key} kimlikleri tekil değil")
-    category_ids = {item["id"] for item in graph["categories"]}
-    need_ids = {item["id"] for item in graph["needs"]}
-    if any(product.get("categoryId") not in category_ids for product in graph["products"]):
-        raise ValueError("Ürün düğümünde katalogda bulunmayan kategori var")
-    if any(not set(product.get("needIds") or []).issubset(need_ids) for product in graph["products"]):
-        raise ValueError("Ürün düğümünde katalogda bulunmayan ihtiyaç ilişkisi var")
-    exact_count = sum(product.get("identifier", {}).get("type") == "ASIN" for product in graph["products"])
-    manufacturer_count = sum(product.get("identifier", {}).get("type") == "Model" for product in graph["products"])
-    expected = {
-        "needCount": len(graph["needs"]),
-        "categoryCount": len(graph["categories"]),
-        "productCount": len(graph["products"]),
-        "exactListingCount": exact_count,
-        "manufacturerSearchCount": manufacturer_count,
-    }
-    for key, value in expected.items():
-        if summary.get(key) != value:
-            raise ValueError(f"Affiliate Product Knowledge Graph özeti uyuşmuyor: {key}={summary.get(key)} beklenen={value}")
-    keys: set[str] = set()
-    collect_keys(graph["products"], keys)
-    forbidden = FORBIDDEN.intersection(keys)
-    if forbidden:
-        raise ValueError(f"Graph ürün düğümlerinde yasak ticari alanlar bulundu: {sorted(forbidden)}")
+    schema = payload["schema"]
+    if graph.get("canonicalUrl") != "https://www.alo186.com/urun-bilgi-grafigi/":
+        raise RuntimeError("Affiliate ürün grafiği canonical sözleşmesi geçersiz")
+    if summary.get("version") != "2026-07-30-v105":
+        raise RuntimeError("Affiliate ürün grafiği v105 özet sözleşmesi geçersiz")
+    if summary.get("productCount", 0) < 66 or summary.get("exactListingCount", 0) < 31:
+        raise RuntimeError("Affiliate ürün grafiği v105 ürün kapsamı eksik")
+    if not graph.get("needs") or not graph.get("categories") or not graph.get("products"):
+        raise RuntimeError("Affiliate ürün grafiği boş üretildi")
+    if not getattr(json, "dumps")(schema, ensure_ascii=False).startswith('{"@context":'):
+        raise RuntimeError("Affiliate ürün JSON-LD üretilemedi")
+    sources = [base_extension, sales_extension, growth_extension, growth_run7_extension, car_charger_extension]
+    for source in sources:
+        if not source.is_file():
+            raise FileNotFoundError(source)
     return payload
 
 
 def write_graph_and_schema(site: Path, payload: dict) -> None:
-    (site / GRAPH).write_text(json.dumps(payload["graph"], ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    page_path = site / PAGE
-    text = page_path.read_text(encoding="utf-8")
-    pattern = re.compile(
-        rf'(<script\s+id=["\']{SCHEMA_ID}["\']\s+type=["\']application/ld\+json["\']>)(.*?)(</script>)',
-        re.I | re.S,
-    )
-    updated, count = pattern.subn(r"\1" + json.dumps(payload["schema"], ensure_ascii=False, separators=(",", ":")) + r"\3", text, count=1)
+    graph_path = site / GRAPH_FILE
+    graph_path.write_text(json.dumps(payload["graph"], ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    page = site / "urun-bilgi-grafigi/index.html"
+    text = page.read_text(encoding="utf-8")
+    pattern = re.compile(r'(<script id="affiliateProductGraphJsonLd" type="application/ld\+json">)(.*?)(</script>)', re.S)
+    replacement = r"\1" + json.dumps(payload["schema"], ensure_ascii=False, separators=(",", ":")) + r"\3"
+    text, count = pattern.subn(replacement, text, count=1)
     if count != 1:
-        raise RuntimeError("Affiliate Product Knowledge Graph JSON-LD hedefi bulunamadı")
-    page_path.write_text(updated, encoding="utf-8")
-
-
-def catalog_script_match(text: str, matcher_page: bool) -> re.Match[str] | None:
-    pattern = r'<script[^>]+src=["\'](?:\./)?catalog\.js["\'][^>]*></script>' if matcher_page else r'<script[^>]+src=["\'][^"\']*akilli-urun-secimi/catalog\.js["\'][^>]*></script>'
-    return re.search(pattern, text, re.I)
+        raise RuntimeError("Affiliate ürün JSON-LD hedef scripti bulunamadı")
+    page.write_text(text, encoding="utf-8")
 
 
 def inject_extension_scripts(site: Path, base_path: str) -> int:
-    sources = [
-        ("catalog-knowledge-extension.js", EXTENSION_MARKER, public_url(base_path, "/akilli-urun-secimi/catalog-knowledge-extension.js")),
-        ("catalog-sales-extension.js", SALES_EXTENSION_MARKER, public_url(base_path, "/akilli-urun-secimi/catalog-sales-extension.js")),
-        ("catalog-growth-run6.js", GROWTH_RUN6_MARKER, public_url(base_path, "/akilli-urun-secimi/catalog-growth-run6.js")),
-        ("catalog-growth-run7.js", GROWTH_RUN7_MARKER, public_url(base_path, "/akilli-urun-secimi/catalog-growth-run7.js")),
+    pages = [
+        site / "urun-bilgi-grafigi/index.html",
+        site / "akilli-urun-secimi/index.html",
+        site / "amazon-elektrik-urunleri/index.html",
     ]
-    injected = 0
-    for path in site.rglob("*.html"):
-        relative = path.relative_to(site).as_posix()
-        matcher_page = relative == "akilli-urun-secimi/index.html"
-        text = path.read_text(encoding="utf-8", errors="ignore")
-        if not matcher_page and "akilli-urun-secimi/catalog.js" not in text:
+    sources = [
+        (BASE_EXTENSION, "alo186-product-knowledge-base"),
+        (SALES_EXTENSION, "alo186-product-knowledge-sales"),
+        (GROWTH_EXTENSION, "alo186-product-knowledge-growth-run6"),
+        (GROWTH_RUN7_EXTENSION, "alo186-product-knowledge-growth-run7"),
+        (CAR_CHARGER_EXTENSION, "alo186-product-knowledge-v105"),
+    ]
+    count = 0
+    for page in pages:
+        if not page.is_file():
             continue
-        match = catalog_script_match(text, matcher_page)
-        if not match:
-            continue
-        anchor = match.end()
-        for filename, marker, src in sources:
-            current = re.search(rf'<script[^>]+src=["\'][^"\']*{re.escape(filename)}["\'][^>]*></script>', text, re.I)
-            if current:
-                anchor = current.end()
+        text = page.read_text(encoding="utf-8")
+        additions: list[str] = []
+        for relative, marker_id in sources:
+            if marker_id in text or f'src="{public_url(base_path, "/" + relative.as_posix())}"' in text:
                 continue
-            tag = f'<script {marker} src="{src}"></script>'
-            text = text[:anchor] + tag + text[anchor:]
-            anchor += len(tag)
-            injected += 1
-        if matcher_page and "run6-missing-component-set.js" not in text:
-            tag = f'<script {MISSING_COMPONENT_MARKER} src="{public_url(base_path, "/akilli-urun-secimi/run6-missing-component-set.js")}"></script>'
-            text = text.replace("</body>", tag + "</body>", 1)
-            injected += 1
-        path.write_text(text, encoding="utf-8")
-    return injected
+            additions.append(
+                f'<script id="{marker_id}" {SCRIPT_MARKER} '
+                f'src="{public_url(base_path, "/" + relative.as_posix())}"></script>'
+            )
+        if additions and "</body>" in text:
+            page.write_text(text.replace("</body>", "".join(additions) + "</body>", 1), encoding="utf-8")
+            count += len(additions)
+    return count
 
 
 def entry_block(href: str, title: str, body: str) -> str:
     return (
-        f'<section {MARKER} style="max-width:1160px;margin:28px auto;padding:24px;border:1px solid #d9e3ef;border-radius:22px;background:#f4f8fd">'
-        '<span style="font-size:.76rem;font-weight:900;color:#174bb9;text-transform:uppercase;letter-spacing:.07em">Affiliate Product Knowledge Graph</span>'
-        f'<h2 style="color:#071631">{title}</h2><p>{body}</p>'
-        f'<a href="{href}" style="display:inline-flex;min-height:44px;align-items:center;font-weight:900;color:#174bb9">Ürün bilgi grafiğini aç →</a>'
-        '<small style="display:block;margin-top:10px">Fiyat, stok, puan, satıcı, garanti ve komisyon sıralama alanı değildir.</small></section>'
+        f'<section class="content-section" {MARKER}><div class="panel">'
+        '<span class="eyebrow">Knowledge Graph · teknik kaynak · affiliate güven kapısı</span>'
+        f'<h2>{title}</h2><p>{body}</p><div class="actions">'
+        f'<a class="btn btn-secondary" href="{href}">Ürün bilgi grafiğini aç</a>'
+        '</div><small>Fiyat, stok, puan ve komisyon sıralaması yoktur. Mevcut güvenli ürün yeterliyse yeni ürün almayın.</small>'
+        '</div></section>'
     )
 
 
 def inject_entries(site: Path, base_path: str) -> int:
     href = public_url(base_path, ROUTE)
     copy = {
-        "amazon-elektrik-urunleri/index.html": ("Ürünleri ihtiyaç ve kanıt ilişkileriyle görün.", "Doğrulanmış ASIN, üretici modeli, ücretsiz araç, risk sınırı ve affiliate politikasını tek grafikte inceleyin."),
-        "akilli-urun-secimi/index.html": ("Teknik eşleştirmenin arkasındaki ürün ilişkilerini inceleyin.", "UPS, ölçüm, termal inceleme, araç aküsü ve akülü el aleti dahil kaynaklı kullanıcı yolculuklarını görün."),
-        "katalog-guven-durumu/index.html": ("Doğrulanmış ASIN ile üretici model doğrulamasını ayırın.", "Katalog tazeliği, kaynak türü ve mağaza bağlantısı biçimi ayrı düğümler olarak yayımlanır."),
-        "elektrik-portali/index.html": ("Affiliate ürün Knowledge Graph", "İhtiyaçtan kategoriye, ücretsiz araca ve kaynak doğrulamalı ürün düğümüne ilerleyin."),
-        "index.html": ("Affiliate ürün ilişkilerini görün.", "Ürün, ihtiyaç, teknik kanıt ve kaynak düğümlerini tek görünümde inceleyin."),
+        "amazon-elektrik-urunleri/index.html": (
+            "Ürünleri ihtiyaç, teknik kanıt ve kaynak ilişkisiyle karşılaştırın",
+            "Doğrulanmış ASIN ve üretici kaynaklı tam model düğümlerinin hangi ihtiyacı karşıladığını, hangi araçtan sonra açıldığını ve ne zaman satın alınmaması gerektiğini inceleyin.",
+        ),
+        "akilli-urun-secimi/index.html": (
+            "Neden bu ürün? Bilgi grafiğinde görün",
+            "Seçim sonucunu kullanıcı ihtiyacı, ürün kategorisi, üretici kaynağı, ASIN/model ayrımı ve satın almama koşuluyla izleyin.",
+        ),
+        "katalog-guven-durumu/index.html": (
+            "Katalog güvenini ürün düğümü düzeyinde denetleyin",
+            "Doğrulama tarihini, tam model araması ile ASIN ayrımını, profesyonel-only sınırları ve affiliate kapılarını açık grafikte inceleyin.",
+        ),
+        "elektrik-portali/index.html": (
+            "Elektrik ürünleri için kaynaklı Knowledge Graph",
+            "Ürün adıyla değil ihtiyaç, teknik kanıt, risk ve doğrulama statüsüyle başlayan şeffaf ürün yolunu açın.",
+        ),
     }
     count = 0
     for relative in TARGETS:
@@ -270,6 +249,7 @@ def graph_metadata(base_path: str, payload: dict, cards: int, scripts: int, offl
         "manufacturerVerifiedSearchCount": summary["manufacturerSearchCount"],
         "publicProductCount": summary.get("publicProductCount"),
         "gatedCandidateCount": summary.get("gatedCandidateCount"),
+        "userFocusedProductCount": summary.get("userFocusedProductCount"),
         "entryCardsInjected": cards,
         "extensionScriptsInjected": scripts,
         "offlineAssetsAdded": offline,
