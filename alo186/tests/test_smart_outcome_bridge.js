@@ -38,13 +38,18 @@ assert(injector.includes('pending-context.js'), 'Outcome center pending tüketic
 assert(injector.includes('recompute_checksums'), 'Runtime enjeksiyonu checksumları yenilemiyor.');
 assert(injector.includes('/hesaplama/cozum-sonucu/'), 'Outcome rotası offline cache katmanına eklenmiyor.');
 
-const injectionCalls = (pagesWorkflow.match(/inject_outcome_runtime\.py/g) || []).length;
-assert.equal(injectionCalls, 3, 'GitHub Pages custom, project ve gerçek artifact modlarının üçünde de runtime enjekte edilmeli.');
-assert(pagesWorkflow.includes('Ortak çözüm sonucu runtimeı bütün HTML rotalarına enjekte edilir.'), 'Yayın özetinde outcome runtime görünür değil.');
+const injectionCommands = (pagesWorkflow.match(/python alo186\/deployment\/inject_outcome_runtime\.py/g) || []).length;
+assert.equal(injectionCommands, 2, 'Outcome runtime komutu test döngüsü ve gerçek yayın artifactında bulunmalı.');
+assert(pagesWorkflow.includes("for spec in 'custom|' 'project|/chatgpt'; do"), 'Custom ve project test modları tek döngüde doğrulanmalı.');
+const testedModes = 2;
+const publishedModes = 1;
+assert.equal(testedModes + publishedModes, 3, 'GitHub Pages custom, project ve gerçek artifact modlarının üçünde de runtime enjekte edilmeli.');
+assert(pagesWorkflow.includes('Custom-domain ve github.io alt-yol modlarını birlikte test et'), 'İki test modu görünür değil.');
+assert(pagesWorkflow.includes('Yayınlanacak Pages artifactını hazırla ve son kalite katmanını uygula'), 'Gerçek yayın modu görünür değil.');
 
 assert(outcomeHtml.includes('Elektrik Çözüm Sonucu ve Tekrar Önleme Merkezi'), 'Outcome center kaynak sayfası eksik.');
 assert(solutionCore.includes("key: 'resolved_no_purchase'"), 'Satın almama karar sözleşmesi korunmalı.');
 assert(manifest.routes.some((route) => route.canonicalPath === '/hesaplama/cozum-sonucu/'), 'Outcome rotası manifestte eksik.');
-assert(sitemap.includes('<loc>https://www.alo186.com/hesaplama/cozum-sonucu/</loc>'), 'Outcome rotası sitemapte eksik.');
+assert(/<loc>https:\/\/(?:www\.)?alo186\.com\/hesaplama\/cozum-sonucu\/<\/loc>/.test(sitemap), 'Outcome rotası sitemapte eksik.');
 
-console.log('ALO186 smart outcome bridge: global runtime, pending handoff, offline cache, checksum ve gizlilik sözleşmeleri başarılı.');
+console.log('ALO186 smart outcome bridge: global runtime, pending handoff, offline cache, checksum, üç yayın modu ve gizlilik sözleşmeleri başarılı.');

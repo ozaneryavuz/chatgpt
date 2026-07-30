@@ -5,10 +5,14 @@ import re
 from pathlib import Path
 
 import prepare_github_pages_core as _core
-from finalize_live_quality import CANONICAL_HOST, CANONICAL_ORIGIN
+from finalize_live_quality import CANONICAL_HOST, CANONICAL_ORIGIN as LIVE_CANONICAL_ORIGIN
 from prepare_github_pages_core import *  # noqa: F401,F403
 
 
+# prepare_github_pages_core içindeki eski www sabiti wildcard import sırasında bu
+# modülün CANONICAL_ORIGIN adını gölgelememelidir. Canlı site www'den apex'e
+# yönlendiği için hem dışa aktarılan sabit hem de core runtime tek kaynağa bağlanır.
+CANONICAL_ORIGIN = LIVE_CANONICAL_ORIGIN
 DEVICE_DAMAGE_MARKER = 'data-alo186-device-damage-deadline="true"'
 DEVICE_DAMAGE_ROUTE = "/haberler/elektrik-kesintisi-cihaz-hasari-edas-basvurusu/"
 PRIMARY_START_MARKER = 'data-alo186-primary-start="true"'
@@ -19,7 +23,7 @@ _original_prepare = _core.prepare
 # Gateway ve yeni bridge'ler canlı son origin ile doğar. Mevcut kaynak sitemap ve
 # canonical değerlerinin toplu www -> apex normalizasyonu ise bütün growth
 # enjektörleri tamamlandıktan sonra finalize_live_quality katmanında yapılır.
-_core.CANONICAL_ORIGIN = CANONICAL_ORIGIN
+_core.CANONICAL_ORIGIN = LIVE_CANONICAL_ORIGIN
 
 if PRIMARY_START_ROUTE not in _core.CRITICAL_ROUTES:
     _core.CRITICAL_ROUTES = (_core.CRITICAL_ROUTES[0], PRIMARY_START_ROUTE, *_core.CRITICAL_ROUTES[1:])
@@ -141,7 +145,7 @@ def prepare(site: Path, base_path: str, repository: str, commit: str) -> dict:
     release = json.loads(release_path.read_text(encoding="utf-8")) if release_path.is_file() else dict(result)
     # Yalnız metadata canlı hedefi baştan ilan eder. HTML, sitemap ve JSON-LD origin
     # dönüşümü growth enjektörlerinden sonra final kalite katmanında uygulanır.
-    release["canonicalHost"] = CANONICAL_ORIGIN
+    release["canonicalHost"] = LIVE_CANONICAL_ORIGIN
     release["customDomain"] = CANONICAL_HOST
     release["rootDeviceDamageDeadline"] = "10 iş günü"
     release["rootNoApplicationDisclaimer"] = True

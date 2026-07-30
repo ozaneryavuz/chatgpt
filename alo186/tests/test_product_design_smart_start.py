@@ -64,9 +64,12 @@ def main() -> None:
         "60 saniyede doğru elektrik rotası",
         "Tehlike varsa ticari yol kapanır",
         "update_primary_shortcut",
-        'result["primaryStartMode"] = "progressive-disclosure"',
     ):
         assert token in pages, token
+    assert (
+        'release["primaryStartMode"] = "progressive-disclosure"' in pages
+        or 'result["primaryStartMode"] = "progressive-disclosure"' in pages
+    ), "primaryStartMode metadata sözleşmesi eksik"
 
     print("ALO186 akıllı başlangıç ve progresif ürün tasarımı sözleşmeleri başarılı.")
 
