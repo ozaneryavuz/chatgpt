@@ -1,0 +1,21 @@
+{
+  "version": 79,
+  "generatedAt": "2026-07-30",
+  "routes": [
+    {
+      "source": "alo186/haberler/jenerator-yuk-bankasi-testi-nasil-yapilir/index.html",
+      "canonicalPath": "/haberler/jenerator-yuk-bankasi-testi-nasil-yapilir",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ups-epo-rpo-acil-kapatma-nasil-calisir/index.html",
+      "canonicalPath": "/haberler/ups-epo-rpo-acil-kapatma-nasil-calisir",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/k-faktor-trafo-harmonik-yuklerde-nasil-secilir/index.html",
+      "canonicalPath": "/haberler/k-faktor-trafo-harmonik-yuklerde-nasil-secilir",
+      "type": "article"
+    }
+  ]
+}
