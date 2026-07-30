@@ -1,6 +1,6 @@
 'use strict';
 const assert=require('node:assert/strict');
-const {calculate}=require('./app.js');
+const {calculate,POWERBANK_NOMINAL_LIMIT_WH}=require('./app.js');
 
 const base={
   scenario:'planning',computerType:'usb_c_laptop',transferTolerance:'seconds_ok',
@@ -9,6 +9,9 @@ const base={
   networkVoltageVerified:'yes',networkPolarityVerified:'yes',networkJackVerified:'yes',
   sourceStatus:'none',blackoutTest:'untested'
 };
+const shortBase={...base,targetHours:2};
+
+assert.equal(POWERBANK_NOMINAL_LIMIT_WH,100);
 
 let r=calculate({...base,emergency:true});
 assert.equal(r.status,'emergency');assert.equal(r.commercialAllowed,false);
@@ -31,21 +34,30 @@ assert.equal(r.status,'evidence_required');
 r=calculate({...base,chargerAdequate:'unknown'});
 assert.equal(r.status,'evidence_required');
 
-r=calculate({...base,networkVoltageVerified:'unknown'});
+r=calculate({...shortBase,networkVoltageVerified:'unknown'});
 assert.equal(r.status,'evidence_required');
 
 r=calculate(base);
 assert.equal(r.status,'conditional_purchase');
-assert.equal(r.metrics.architecture,'split_dc');
-assert.equal(r.metrics.requiredPdW,75);
+assert.equal(r.metrics.architecture,'power_station');
 assert.equal(r.metrics.requiredPowerbankWh,280);
-assert.equal(r.metrics.requiredMiniUpsW,25);
-assert.equal(r.metrics.requiredMiniUpsWh,115);
+assert.equal(r.metrics.powerbankLimitExceeded,true);
 assert.equal(r.metrics.requiredPowerStationW,110);
 assert.equal(r.metrics.requiredPowerStationWh,410);
+assert.deepEqual(r.categories,['power_station']);
+
+r=calculate(shortBase);
+assert.equal(r.status,'conditional_purchase');
+assert.equal(r.metrics.architecture,'split_dc');
+assert.equal(r.metrics.requiredPdW,75);
+assert.equal(r.metrics.requiredPowerbankWh,100);
+assert.equal(r.metrics.requiredMiniUpsW,25);
+assert.equal(r.metrics.requiredMiniUpsWh,60);
+assert.equal(r.metrics.requiredPowerStationW,110);
+assert.equal(r.metrics.requiredPowerStationWh,160);
 assert.deepEqual(r.categories,['powerbank','mini_ups']);
 
-r=calculate({...base,modemW:0,ontW:0,routerW:0,chargerAdequate:'no',cableAdequate:'no'});
+r=calculate({...shortBase,modemW:0,ontW:0,routerW:0,chargerAdequate:'no',cableAdequate:'no'});
 assert.equal(r.metrics.architecture,'powerbank_only');
 assert.deepEqual(r.categories,['powerbank','usb_c_charger','usb_c_cable']);
 
@@ -54,16 +66,19 @@ assert.equal(r.metrics.architecture,'network_only');
 assert.equal(r.metrics.requiredMiniUpsWh,115);
 assert.deepEqual(r.categories,['mini_ups']);
 
-r=calculate({...base,scenario:'active'});
+r=calculate({...shortBase,scenario:'active'});
 assert.equal(r.status,'active_event');assert.equal(r.commercialAllowed,false);
 
-r=calculate({...base,sourceStatus:'split_existing',existingPowerbankPDW:100,existingPowerbankWh:300,existingMiniUpsW:30,existingMiniUpsWh:150,networkOutputVerified:'yes',blackoutTest:'success'});
+r=calculate({...shortBase,sourceStatus:'split_existing',existingPowerbankPDW:100,existingPowerbankWh:120,existingMiniUpsW:30,existingMiniUpsWh:80,networkOutputVerified:'yes',blackoutTest:'success'});
 assert.equal(r.status,'no_buy');
 
-r=calculate({...base,sourceStatus:'split_existing',existingPowerbankPDW:100,existingPowerbankWh:200,existingMiniUpsW:30,existingMiniUpsWh:150,networkOutputVerified:'yes',blackoutTest:'success'});
+r=calculate({...shortBase,sourceStatus:'split_existing',existingPowerbankPDW:100,existingPowerbankWh:80,existingMiniUpsW:30,existingMiniUpsWh:80,networkOutputVerified:'yes',blackoutTest:'success'});
 assert.equal(r.status,'conditional_purchase');assert.deepEqual(r.categories,['powerbank']);
 
-r=calculate({...base,monitorW:40,sourceStatus:'split_existing'});
+r=calculate({...base,sourceStatus:'split_existing'});
+assert.equal(r.status,'conditional_purchase');assert.deepEqual(r.categories,['power_station']);
+
+r=calculate({...shortBase,monitorW:40,sourceStatus:'split_existing'});
 assert.equal(r.status,'conditional_purchase');assert.deepEqual(r.categories,['power_station']);
 
 const barrel={...base,computerType:'barrel_laptop',laptopW:90,laptopInternalHours:0,laptopPdVerified:'unknown',chargerAdequate:'unknown',cableAdequate:'unknown',monitorW:50};
@@ -88,5 +103,4 @@ assert.equal(r.status,'ups_path');
 r=calculate({...barrel,laptopW:1300,monitorW:300});
 assert.equal(r.status,'professional');
 
-// Post-merge CI tetikleyicisi: hesap ve karar sözleşmesi değişmeden korunur.
-console.log(JSON.stringify({ok:true,scenarios:21},null,2));
+console.log(JSON.stringify({ok:true,scenarios:23},null,2));
