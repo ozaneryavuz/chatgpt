@@ -286,7 +286,10 @@
       const box=text('result',doc);if(!box._aloResult)return;
       download(doc,'alo186-termal-kontrol.ics','text/calendar;charset=utf-8',buildIcs(box._aloResult));
     });
-    text('printResult',doc).addEventListener('click',()=>root.print());
+    text('printResult',doc).addEventListener('click',()=>{
+      const view=doc.defaultView;
+      if(view&&typeof view.print==='function')view.print();
+    });
   }
 
   return {calculate,requiredClass,evidenceGaps,existingMatches,affiliateUrl,buildIcs,mount,AFFILIATE_TAG};
