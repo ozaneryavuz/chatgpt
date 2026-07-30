@@ -1,0 +1,16 @@
+{
+  "version": 121,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/amazon-elektrik-urunleri/kombi-ups-power-station-secimi/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/kombi-ups-power-station-secimi",
+      "type": "commerce-guide"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/buzdolabi-dondurucu-power-station-secimi/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/buzdolabi-dondurucu-power-station-secimi",
+      "type": "commerce-guide"
+    }
+  ]
+}
