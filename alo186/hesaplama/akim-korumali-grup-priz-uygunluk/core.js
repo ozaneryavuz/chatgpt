@@ -9,6 +9,9 @@
   const STANDARD_CURRENTS=[6,10,16];
   const LOW_RISK_LOADS=new Set(['electronics','office','av','router']);
   const HARD_BLOCK_LOADS=new Set(['heater','medical','ev','fixed','major_appliance']);
+  const RECALL_STATES=new Set(['checked_clear','unknown','recalled']);
+  const INDICATOR_STATES=new Set(['verified','unknown','failed']);
+  const TEST_STATES=new Set(['passed','not_done','failed']);
 
   function number(value,name,min,max){
     const parsed=Number(value);
@@ -45,6 +48,9 @@
     const usbNeeded=Boolean(input.usbNeeded);
     const usbPorts=number(input.usbPorts??0,'USB portu',0,10);
     const groundStatus=['verified','unknown','absent'].includes(input.groundStatus)?input.groundStatus:'unknown';
+    const recallStatus=RECALL_STATES.has(input.recallStatus)?input.recallStatus:'unknown';
+    const indicatorState=INDICATOR_STATES.has(input.indicatorState)?input.indicatorState:'unknown';
+    const supervisedTest=TEST_STATES.has(input.supervisedTest)?input.supervisedTest:'not_done';
 
     const labelVerified=Boolean(input.labelVerified);
     const overloadProtection=Boolean(input.overloadProtection);
@@ -79,6 +85,13 @@
       unknowns.push('Yük türü düşük riskli elektronik kategorisinde doğrulanamadı.');
     }
 
+    if(recallStatus==='recalled')blocks.push('Tam marka-model için geri çağırma veya kullanımı durdurma duyurusu bulundu; ürünü kullanmayın ve ticari rotaya ilerlemeyin.');
+    if(recallStatus==='unknown')unknowns.push('Tam marka-model için üretici ve resmî ürün güvenliği / geri çağırma kontrolü tamamlanmadı.');
+    if(indicatorState==='failed')blocks.push('Darbe koruma göstergesi korumanın devre dışı olduğunu veya arızayı gösteriyor; ürünü korumalı kabul etmeyin.');
+    if(indicatorState==='unknown')unknowns.push('Darbe koruma göstergesinin anlamı ve çalışır durumu üretici kılavuzundan doğrulanmadı.');
+    if(ownership==='owned'&&supervisedTest==='failed')blocks.push('Gözetimli gerçek yük testinde ısınma, koku, gevşeklik, kıvılcım veya kesilme oluştu; kullanımı durdurun.');
+    if(ownership==='owned'&&supervisedTest==='not_done')unknowns.push('Mevcut ürün için 30 dakikalık gözetimli gerçek yük ve fiş-priz sıcaklık kontrolü yapılmadı.');
+
     if(!directWall)blocks.push('Grup priz başka bir grup prize, çoklayıcıya veya uzatma kablosuna bağlanmamalıdır.');
     if(!dryIndoor)blocks.push('Ürün yalnız kuru ve üreticinin izin verdiği iç ortamda kullanılmalıdır.');
     if(!damageFree)blocks.push('Kararma, erime, çatlak, gevşeme, koku veya aşırı ısı bulunan ürün kullanılmamalıdır.');
@@ -87,7 +100,7 @@
     if(groundStatus==='unknown')unknowns.push('Duvar prizinin koruma iletkeni ve tesisat durumu doğrulanmadı.');
     if(!labelVerified)unknowns.push('Akım, güç, model ve uygunluk işaretleri ürün etiketinden doğrulanmadı.');
     if(!overloadProtection)unknowns.push('Üründe aşırı akım/termik kesici veya eşdeğer koruma doğrulanmadı.');
-    if(!protectionIndicator)unknowns.push('Darbe korumasının çalışır durumda olduğunu gösteren durum göstergesi doğrulanmadı.');
+    if(!protectionIndicator)unknowns.push('Darbe korumasının işlev durumunu gösteren ayrı gösterge doğrulanmadı.');
     if(joules===null||joules<=0)unknowns.push('Joule değeri bilinmiyor; bu değer yalnız karşılaştırma niteliğindedir, tek başına koruma garantisi değildir.');
     if(usbNeeded&&usbPorts<1)failures.push('USB çıkışı ihtiyacı ürün tarafından karşılanmıyor.');
     if(productOutlets<requiredOutlets)failures.push(`Ürün ${productOutlets} prizli; en az ${requiredOutlets} priz gerekiyor.`);
@@ -103,6 +116,9 @@
     if(productOutlets>=requiredOutlets)positives.push(`${productOutlets} priz, gereken ${requiredOutlets} bağlantıyı karşılıyor.`);
     if(groundStatus==='verified')positives.push('Koruma iletkeni durumu yetkili kontrol veya güvenilir kayıtla doğrulandı.');
     if(overloadProtection)positives.push('Aşırı akım/termik koruma özelliği doğrulandı.');
+    if(recallStatus==='checked_clear')positives.push('Tam marka-model için güncel geri çağırma / ürün güvenliği kontrolünde kullanım durdurma kaydı bulunmadı.');
+    if(indicatorState==='verified')positives.push('Darbe koruma göstergesinin anlamı ve çalışır durumu doğrulandı.');
+    if(ownership==='owned'&&supervisedTest==='passed')positives.push('Mevcut ürün 30 dakikalık gözetimli gerçek yük testini ısınma veya bağlantı sorunu olmadan tamamladı.');
 
     let status='suitable';
     if(blocks.length)status='blocked';
@@ -110,11 +126,11 @@
     else if(unknowns.length)status='conditional';
     else if(ownership==='owned')status='no_purchase';
 
-    const productRouteAllowed=status==='suitable'&&ownership==='candidate'&&LOW_RISK_LOADS.has(loadType);
+    const productRouteAllowed=status==='suitable'&&ownership==='candidate'&&LOW_RISK_LOADS.has(loadType)&&recallStatus==='checked_clear'&&indicatorState==='verified';
     const noPurchase=status==='no_purchase';
     const headline={
       suitable:'Teknik ön koşullar karşılanıyor',
-      conditional:'Eksik teknik bilgi var',
+      conditional:'Eksik teknik veya ürün güvenliği kanıtı var',
       insufficient:'Ürün yükü veya bağlantı ihtiyacını karşılamıyor',
       blocked:'Güvenlik nedeniyle ürün yönlendirmesi kapalı',
       no_purchase:'Mevcut ürün yeterli; yeni satın alma gerekmiyor'
@@ -122,10 +138,13 @@
 
     return {
       status,headline,ownership,loadType,continuousW,peakW,hoursDaily,requiredOutlets,productOutlets,ratedCurrentA,ratedPowerW,joules,usbNeeded,usbPorts,
+      groundStatus,recallStatus,indicatorState,supervisedTest,
       currentA:round(currentA,2),peakA:round(peakA,2),effectiveCapacityW:Math.round(effectiveCapacityW),screeningLimitW:Math.round(screeningLimitW),
       loadPercent:Math.round(loadRatio*100),screeningPercent:Math.round(screeningRatio*100),recommendedCurrentA,recommendedPowerW,
       productRouteAllowed,noPurchase,blocks,failures,unknowns,warnings,positives,
       productRequirements:{minOutlets:requiredOutlets,minJoules:Math.max(250,joules||250),usb:usbNeeded},
+      reviewDays:90,
+      reviewChecks:['Tam marka-model geri çağırma ve ürün güvenliği duyurusu','Darbe koruma göstergesinin çalışır durumu','Fiş, priz, kablo ve gövdede ısınma, kararma veya gevşeklik','Bağlı cihazların toplam W ve tepe yükü','Doğrudan duvar prizi ve topraklama koşulu'],
       productRoute:'/akilli-urun-secimi?kategori=surge_strip&gate=local',
       safetyRoute:'/hesaplama/parafudr-risk-testi/',
       decisionRoute:'/karar-motoru'
