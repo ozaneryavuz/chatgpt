@@ -78,6 +78,15 @@
     return link;
   }
 
+  function boilerBackupCard(isPortal){
+    const link=document.createElement('a');
+    link.className=isPortal?'card':'tool-card';
+    link.href=publicRoute('/hesaplama/kombi-elektrik-kesintisi-yedek-guc-uygunluk/');
+    link.dataset.alo186BoilerBackupCard='true';
+    link.innerHTML=isPortal?'<span class="tag">Kombi · UPS · saf sinüs · 187</span><h2>Kombi Yedek Güç Uygunluk Testi</h2><p>Gaz güvenliği, üretici onayı, etiket W, tepe güç, nötr-toprak koşulu ve hedef süreyi birlikte değerlendirin.</p><b>Kombi hesabını aç →</b>':'<span class="eyebrow">Kombi · elektrik kesintisi · UPS · Wh</span><h2>Kombi Elektrik Kesintisi ve Yedek Güç Testi</h2><p>Üretici uygunluğu, sürekli W, tepe W, saf sinüs ve Wh ihtiyacını hesaplayın; mevcut kaynak yeterliyse yeni ürün almayın.</p><b>Güvenli uygunluğu hesapla →</b>';
+    return link;
+  }
+
   function injectGrowthCards(){
     const normalized=location.pathname.replace(/\/$/,'');
     const isPortal=normalized.endsWith('/elektrik-portali');
@@ -91,6 +100,7 @@
         if(!grid.querySelector('[data-alo186-outcome-runtime-card]')){
           const outcome=document.createElement('a');outcome.className='card';outcome.href=publicRoute('/hesaplama/cozum-sonucu/');outcome.dataset.alo186OutcomeRuntimeCard='true';outcome.innerHTML=isPortal?'<span class="tag">Kapalı döngü · satın almama · tekrar önleme</span><h2>Çözüm Sonucu Merkezi</h2><p>Karar, hesap, ürün, bakım veya resmî kanalın gerçekten işe yarayıp yaramadığını izleyin.</p><b>Sonucu kaydet ve izle →</b>':'<strong>Çözüm gerçekten işe yaradı mı?</strong><p>Öneri, ürün, bakım veya resmî kanal sonucunu kişisel veri vermeden kaydedin.</p><span>Sonucu kaydet ve izle →</span>';grid.prepend(outcome);
         }
+        if(!grid.querySelector('[data-alo186-boiler-backup-card]'))grid.prepend(boilerBackupCard(true));
         if(!grid.querySelector('[data-alo186-fridge-freezer-backup-card]'))grid.prepend(fridgeFreezerBackupCard(true));
         if(!grid.querySelector('[data-alo186-air-conditioner-backup-card]'))grid.prepend(airConditionerBackupCard(true));
         if(!grid.querySelector('[data-alo186-pump-backup-card]'))grid.prepend(pumpBackupCard(true));
@@ -102,12 +112,13 @@
     const isHub=/\/hesaplama\/?$/.test(location.pathname);
     if(isHub){
       const grid=document.querySelector('section.tool-grid');
+      if(grid&&!grid.querySelector('[data-alo186-boiler-backup-card]'))grid.prepend(boilerBackupCard(false));
       if(grid&&!grid.querySelector('[data-alo186-fridge-freezer-backup-card]'))grid.prepend(fridgeFreezerBackupCard(false));
       if(grid&&!grid.querySelector('[data-alo186-air-conditioner-backup-card]'))grid.prepend(airConditionerBackupCard(false));
       if(grid&&!grid.querySelector('[data-alo186-pump-backup-card]'))grid.prepend(pumpBackupCard(false));
       if(grid&&!grid.querySelector('[data-alo186-generator-safety-card]'))grid.prepend(generatorSafetyCard(false));
       if(grid&&!grid.querySelector('[data-alo186-shortlist-runtime-card]'))grid.prepend(shortlistCard(false));
-      document.querySelectorAll('strong').forEach(node=>{if(/\d+ çekirdek araç/.test(node.textContent||''))node.textContent=(node.textContent||'').replace(/\d+ çekirdek araç/,'38 çekirdek araç');});
+      document.querySelectorAll('strong').forEach(node=>{if(/\d+ çekirdek araç/.test(node.textContent||''))node.textContent=(node.textContent||'').replace(/\d+ çekirdek araç/,'39 çekirdek araç');});
     }
 
     const productCenter=/\/(akilli-urun-secimi|amazon-elektrik-urunleri)\/?$/.test(location.pathname);
