@@ -5,7 +5,7 @@ import re
 from pathlib import Path
 
 import prepare_github_pages_core as _core
-from finalize_live_quality import CANONICAL_ORIGIN, run as finalize_live_quality
+from finalize_live_quality import CANONICAL_ORIGIN
 from prepare_github_pages_core import *  # noqa: F401,F403
 
 
@@ -16,9 +16,9 @@ PRIMARY_START_ROUTE = "/elektrik-durum-merkezi/"
 _original_gateway_html = _core.gateway_html
 _original_prepare = _core.prepare
 
-# GitHub Pages canlı katmanı www isteklerini apex alan adına yönlendiriyor. Üretilen
-# gateway, bridge, canonical ve JSON-LD değerleri ilk andan itibaren son URL'yi
-# göstermeli; aksi hâlde her girişte gereksiz www -> apex yönlendirme zinciri oluşur.
+# Gateway ve yeni bridge'ler canlı son origin ile doğar. Mevcut kaynak sitemap ve
+# canonical değerlerinin toplu www -> apex normalizasyonu ise bütün growth
+# enjektörleri tamamlandıktan sonra finalize_live_quality katmanında yapılır.
 _core.CANONICAL_ORIGIN = CANONICAL_ORIGIN
 
 if PRIMARY_START_ROUTE not in _core.CRITICAL_ROUTES:
@@ -136,7 +136,6 @@ def prepare(site: Path, base_path: str, repository: str, commit: str) -> dict:
     validate_root_legal_deadline(site, normalized)
     validate_root_primary_start(site, normalized)
     update_primary_shortcut(site, normalized)
-    quality = finalize_live_quality(site, normalized)
 
     release_path = site / "pages-release.json"
     release = json.loads(release_path.read_text(encoding="utf-8")) if release_path.is_file() else dict(result)
@@ -144,7 +143,7 @@ def prepare(site: Path, base_path: str, repository: str, commit: str) -> dict:
     release["rootNoApplicationDisclaimer"] = True
     release["primaryStartRoute"] = _core.public_url(normalized, PRIMARY_START_ROUTE)
     release["primaryStartMode"] = "progressive-disclosure"
-    release["initialLiveTechnicalQuality"] = quality
+    release["liveOriginNormalizationStage"] = "after-all-growth-injectors"
     if release_path.is_file():
         release_path.write_text(json.dumps(release, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     _core.recompute_checksums(site)
