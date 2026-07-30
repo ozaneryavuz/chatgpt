@@ -1,0 +1,11 @@
+{
+  "version": 114,
+  "generatedAt": "2026-07-30",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/elektrik-faturasi-kwh-anomali-sayac-kontrolu/index.html",
+      "canonicalPath": "/hesaplama/elektrik-faturasi-kwh-anomali-sayac-kontrolu/",
+      "type": "tool"
+    }
+  ]
+}
