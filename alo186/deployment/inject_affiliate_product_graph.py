@@ -13,9 +13,13 @@ GRAPH = Path("urun-bilgi-grafigi/product-graph.json")
 CATALOG = Path("akilli-urun-secimi/catalog.js")
 EXTENSION = Path("akilli-urun-secimi/catalog-knowledge-extension.js")
 SALES_EXTENSION = Path("akilli-urun-secimi/catalog-sales-extension.js")
+GROWTH_EXTENSION = Path("akilli-urun-secimi/catalog-growth-run6.js")
+MISSING_COMPONENT = Path("akilli-urun-secimi/run6-missing-component-set.js")
 MARKER = 'data-alo186-product-graph-entry="true"'
 EXTENSION_MARKER = 'data-alo186-product-graph-extension="true"'
 SALES_EXTENSION_MARKER = 'data-alo186-product-sales-extension="true"'
+GROWTH_EXTENSION_MARKER = 'data-alo186-product-growth-run6="true"'
+MISSING_COMPONENT_MARKER = 'data-alo186-missing-component-run6="true"'
 SCHEMA_ID = "affiliateProductGraphJsonLd"
 TARGETS = [Path("amazon-elektrik-urunleri/index.html"), Path("akilli-urun-secimi/index.html"), Path("katalog-guven-durumu/index.html"), Path("elektrik-portali/index.html"), Path("index.html")]
 FORBIDDEN = {"price", "stock", "rating", "seller", "delivery", "warranty", "affiliateCommission"}
@@ -40,13 +44,13 @@ def collect_keys(value, result: set[str]) -> None:
 
 
 def node_payload(site: Path) -> dict:
-    sales_extension = (site / SALES_EXTENSION).resolve()
-    required = [site / CATALOG, site / EXTENSION, sales_extension]
+    growth_extension = (site / GROWTH_EXTENSION).resolve()
+    required = [site / CATALOG, site / EXTENSION, site / SALES_EXTENSION, growth_extension, site / MISSING_COMPONENT]
     missing = [str(path) for path in required if not path.is_file()]
     if missing:
         raise FileNotFoundError(f"Affiliate katalog/Knowledge Graph katmanı artifactta eksik: {missing}")
     script = f"""
-const catalog=require({json.dumps(str(sales_extension))});
+const catalog=require({json.dumps(str(growth_extension))});
 const categories=catalog.categories.map(category=>{{const relation=catalog.categoryRelations[category.id]||{{}};return {{id:category.id,name:category.name,needIds:catalog.categoryNeeds[category.id]||[],affiliatePolicy:category.affiliatePolicy,risk:category.risk,toolUrls:relation.tools||[],guideUrls:relation.guides||[],requiredEvidence:relation.evidence||[]}};}});
 const products=catalog.products.filter(catalog.isCatalogProduct).map(product=>({{id:product.id,categoryId:product.category,name:product.name,brand:product.brand,model:product.model||product.mpn||product.id,identifier:{{type:product.asin?'ASIN':'Model',value:product.asin||product.model}},verificationStatus:product.status,verifiedAt:product.verifiedAt,linkMode:product.linkMode||'asin_detail',officialSource:product.technicalSource||undefined,needIds:product.needIds||catalog.categoryNeeds[product.category]||[],technicalProperties:product.attributes||{{}},relatedTools:product.relatedTools||[],relatedGuides:product.relatedGuides||[],requiredEvidence:product.requiredEvidence||[]}}));
 const summary=catalog.knowledgeGraphSummary({{now:new Date('2026-07-30T12:00:00Z')}});
@@ -81,22 +85,27 @@ def write_graph_and_schema(site: Path, payload: dict) -> None:
 
 
 def inject_extension_scripts(site: Path, base_path: str) -> int:
-    core_src = public_url(base_path, "/akilli-urun-secimi/catalog-knowledge-extension.js")
-    sales_src = public_url(base_path, "/akilli-urun-secimi/catalog-sales-extension.js")
-    core_tag = f'<script {EXTENSION_MARKER} src="{core_src}"></script>'
-    sales_tag = f'<script {SALES_EXTENSION_MARKER} src="{sales_src}"></script>'
+    sources = [
+        ("catalog-knowledge-extension.js", EXTENSION_MARKER, public_url(base_path, "/akilli-urun-secimi/catalog-knowledge-extension.js")),
+        ("catalog-sales-extension.js", SALES_EXTENSION_MARKER, public_url(base_path, "/akilli-urun-secimi/catalog-sales-extension.js")),
+        ("catalog-growth-run6.js", GROWTH_EXTENSION_MARKER, public_url(base_path, "/akilli-urun-secimi/catalog-growth-run6.js")),
+    ]
     injected = 0
     for path in site.rglob("*.html"):
         text = path.read_text(encoding="utf-8", errors="ignore")
         if "akilli-urun-secimi/catalog.js" not in text: continue
         catalog_match = re.search(r'<script[^>]+src=["\'][^"\']*akilli-urun-secimi/catalog\.js["\'][^>]*></script>', text, re.I)
         if not catalog_match: continue
-        if "catalog-knowledge-extension.js" not in text:
-            text = text[: catalog_match.end()] + core_tag + text[catalog_match.end() :]; injected += 1
-        if "catalog-sales-extension.js" not in text:
-            core_match = re.search(r'<script[^>]+src=["\'][^"\']*catalog-knowledge-extension\.js["\'][^>]*></script>', text, re.I)
-            anchor = core_match.end() if core_match else catalog_match.end()
-            text = text[:anchor] + sales_tag + text[anchor:]; injected += 1
+        anchor = catalog_match.end()
+        for filename, marker, src in sources:
+            current = re.search(rf'<script[^>]+src=["\'][^"\']*{re.escape(filename)}["\'][^>]*></script>', text, re.I)
+            if current:
+                anchor = current.end(); continue
+            tag = f'<script {marker} src="{src}"></script>'
+            text = text[:anchor] + tag + text[anchor:]; anchor += len(tag); injected += 1
+        if path.relative_to(site).as_posix() == "akilli-urun-secimi/index.html" and "run6-missing-component-set.js" not in text:
+            tag = f'<script {MISSING_COMPONENT_MARKER} src="{public_url(base_path, "/akilli-urun-secimi/run6-missing-component-set.js")}"></script>'
+            text = text.replace("</body>", tag + "</body>", 1); injected += 1
         path.write_text(text, encoding="utf-8")
     return injected
 
@@ -126,8 +135,7 @@ def add_offline(site: Path, base_path: str) -> list[str]:
     if not match: return []
     routes = json.loads(match.group(1)); candidates = [public_url(base_path, ROUTE), public_url(base_path, "/urun-bilgi-grafigi/product-graph.json")]
     added = [route for route in candidates if route not in routes]
-    if added:
-        routes.extend(added); path.write_text(text[: match.start(1)] + json.dumps(routes, ensure_ascii=False) + text[match.end(1) :], encoding="utf-8")
+    if added: routes.extend(added); path.write_text(text[:match.start(1)] + json.dumps(routes, ensure_ascii=False) + text[match.end(1):], encoding="utf-8")
     return added
 
 
