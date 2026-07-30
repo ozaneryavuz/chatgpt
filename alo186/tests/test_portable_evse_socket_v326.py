@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import re
 import subprocess
 import sys
 from pathlib import Path
@@ -11,15 +10,15 @@ DEPLOYMENT = REPO_ROOT / "alo186/deployment"
 sys.path.insert(0, str(DEPLOYMENT))
 from build_static_site import load_effective_manifest
 
-ROUTE = "/hesaplama/evden-calisma-laptop-modem-yedek-guc-seti/"
-SOURCE = "alo186/hesaplama/evden-calisma-laptop-modem-yedek-guc-seti/index.html"
-MODULE = REPO_ROOT / "alo186/hesaplama/evden-calisma-laptop-modem-yedek-guc-seti"
+ROUTE = "/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/"
+SOURCE = "alo186/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/index.html"
+MODULE = REPO_ROOT / "alo186/hesaplama/tasinabilir-ev-sarj-priz-uygunluk"
 HUB = REPO_ROOT / "alo186/hesaplama/index.html"
 
 
 def main() -> None:
     manifest = load_effective_manifest(REPO_ROOT)
-    assert manifest["version"] >= 86
+    assert manifest["version"] >= 87
     routes = [item for item in manifest["routes"] if item["canonicalPath"] == ROUTE]
     assert len(routes) == 1
     assert routes[0]["source"] == SOURCE
@@ -36,10 +35,10 @@ def main() -> None:
     for schema_type in ["WebApplication", "DefinedTermSet", "FAQPage", "BreadcrumbList"]:
         assert schema_type in html
     for token in [
-        'id="homeOfficeForm"', 'id="computerType"', 'id="laptopW"',
-        'id="modemW"', 'id="ontW"', 'id="targetHours"',
+        'id="portableEvseForm"', 'id="outletType"', 'id="documentedCurrentA"',
+        'id="dailyKm"', 'id="vehicleAcMaxKw"', 'id="evseMaxA"',
         'id="sourceStatus"', 'id="actualNeed"', 'id="technicalCheck"',
-        'id="affiliateCheck"', 'id="bundleLinks"', 'aria-live="polite"',
+        'id="affiliateCheck"', 'id="productLinks"', 'aria-live="polite"',
         "yeni ürün almayın", "satış ortaklığı", "kullanıcıya ek maliyet yansımaz",
     ]:
         assert token in html or token in app
@@ -47,7 +46,7 @@ def main() -> None:
     combined = html + app
     for token in ["amazon.com", "localStorage", "sessionStorage", "geolocation", "fetch(", "XMLHttpRequest", "WebSocket"]:
         assert token not in combined
-    for personal in ["Adınız", "Telefon", "E-posta", "Adresiniz", "TC kimlik", "İşveren adı"]:
+    for personal in ["Adınız", "Telefon", "E-posta", "Adresiniz", "Araç plakası", "VIN numarası"]:
         assert personal not in html
 
     assert "@media(max-width:820px)" in css
@@ -57,22 +56,18 @@ def main() -> None:
     assert "minmax(0,1fr)" in css
 
     for token in [
-        "requiredPowerbankWh", "requiredMiniUpsWh", "requiredPowerStationWh",
-        "POWERBANK_NOMINAL_LIMIT_WH", "powerbankLimitExceeded",
-        "split_dc", "network_only", "powerbank_only", "power_station",
-        "ups_path", "active_event", "no_buy", "conditional_purchase",
-        "commercialAllowed:true", "../../akilli-urun-secimi?kategori=",
-        "home_office_backup_result", "usb_c_charger", "usb_c_cable",
+        "CHARGING_EFFICIENCY", "SINGLE_PHASE_V", "THREE_PHASE_V", "OUTLETS",
+        "schuko", "cee_blue_16", "cee_blue_32", "cee_red_16", "cee_red_32",
+        "stop_use", "wallbox_path", "active_event", "no_buy", "conditional_purchase",
+        "commercialAllowed:true", "niyet=portable_evse", "portable_evse_socket_result",
+        "portable_evse", "requiredCurrentA", "deliverableKm", "installationCouldMeet",
     ]:
         assert token in app
-    assert "scenarios:23" in test
+    assert "scenarios:22" in test
 
-    tool_count_match = re.search(r"(\d+) çekirdek araç", hub)
-    assert tool_count_match, "Hesaplama Merkezi araç sayacı bulunamadı."
-    hub_tool_count = int(tool_count_match.group(1))
-    assert hub_tool_count >= 40
-    assert './evden-calisma-laptop-modem-yedek-guc-seti/' in hub
-    assert "Evden Çalışma Laptop ve Modem Yedek Güç Seti" in hub
+    assert "41 çekirdek araç" in hub
+    assert './tasinabilir-ev-sarj-priz-uygunluk/' in hub
+    assert "Taşınabilir EV Şarj Cihazı ve Priz Uygunluğu" in hub
 
     result = subprocess.run(
         ["node", str(MODULE / "app.test.js")],
@@ -82,21 +77,21 @@ def main() -> None:
         text=True,
     )
     payload = json.loads(result.stdout)
-    assert payload == {"ok": True, "scenarios": 23}
+    assert payload == {"ok": True, "scenarios": 22}
 
     print(json.dumps({
         "ok": True,
         "routingVersion": manifest["version"],
         "route": ROUTE,
-        "decisionScenarios": 23,
-        "hubToolCount": hub_tool_count,
-        "powerbankNominalLimitWh": 100,
+        "decisionScenarios": 22,
+        "hubToolCount": 41,
+        "householdPlanningLimitA": 10,
         "directStoreLinks": 0,
         "personalDataFields": 0,
         "browserStorage": False,
         "affiliateTripleGate": True,
-        "multiCategoryBundle": True,
         "noBuyOutcomePreserved": True,
+        "extensionLeadFailClosed": True,
     }, ensure_ascii=False, indent=2))
 
 

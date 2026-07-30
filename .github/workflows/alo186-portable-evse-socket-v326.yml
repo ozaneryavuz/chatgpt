@@ -1,28 +1,28 @@
-name: ALO186 Evden çalışma yedek güç seti
+name: ALO186 Taşınabilir EVSE ve priz uygunluğu
 
 on:
   pull_request:
     paths:
-      - 'alo186/hesaplama/evden-calisma-laptop-modem-yedek-guc-seti/**'
+      - 'alo186/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/**'
       - 'alo186/hesaplama/index.html'
-      - 'alo186/deployment/routing-overlays/086-home-office-backup-bundle.json'
-      - 'alo186/tests/test_home_office_backup_bundle_v325.py'
-      - '.github/workflows/alo186-home-office-backup-bundle-v325.yml'
+      - 'alo186/deployment/routing-overlays/087-portable-evse-socket-test.json'
+      - 'alo186/tests/test_portable_evse_socket_v326.py'
+      - '.github/workflows/alo186-portable-evse-socket-v326.yml'
   push:
     branches: [main]
     paths:
-      - 'alo186/hesaplama/evden-calisma-laptop-modem-yedek-guc-seti/**'
+      - 'alo186/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/**'
       - 'alo186/hesaplama/index.html'
-      - 'alo186/deployment/routing-overlays/086-home-office-backup-bundle.json'
-      - 'alo186/tests/test_home_office_backup_bundle_v325.py'
-      - '.github/workflows/alo186-home-office-backup-bundle-v325.yml'
+      - 'alo186/deployment/routing-overlays/087-portable-evse-socket-test.json'
+      - 'alo186/tests/test_portable_evse_socket_v326.py'
+      - '.github/workflows/alo186-portable-evse-socket-v326.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: alo186-home-office-backup-v325-${{ github.ref }}
+  group: alo186-portable-evse-socket-v326-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -41,62 +41,62 @@ jobs:
       - name: Hesap ve karar senaryoları
         run: |
           set -euo pipefail
-          node alo186/hesaplama/evden-calisma-laptop-modem-yedek-guc-seti/app.test.js
-          python alo186/tests/test_home_office_backup_bundle_v325.py
+          node alo186/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/app.test.js
+          python alo186/tests/test_portable_evse_socket_v326.py
 
       - name: Sözdizimi ve mevcut güven regresyonları
         run: |
           set -euo pipefail
-          node --check alo186/hesaplama/evden-calisma-laptop-modem-yedek-guc-seti/app.js
-          python -m py_compile alo186/tests/test_home_office_backup_bundle_v325.py
+          node --check alo186/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/app.js
+          python -m py_compile alo186/tests/test_portable_evse_socket_v326.py
           node alo186/tests/test_release_manifest.js
           node alo186/tests/test_portal_hardening.js
           python alo186/tests/device_damage_deadline_guard.py
-          python alo186/tests/test_cold_chain_growth_run29.py
+          python alo186/tests/test_home_office_backup_bundle_v325.py
 
       - name: Canonical üretim ve smoke testi
         run: |
           set -euo pipefail
           python alo186/deployment/build_static_site.py \
-            --output /tmp/alo186-home-office-canonical \
+            --output /tmp/alo186-portable-evse-canonical \
             --commit "$GITHUB_SHA"
           python alo186/deployment/smoke_static_site.py \
-            --bundle /tmp/alo186-home-office-canonical
+            --bundle /tmp/alo186-portable-evse-canonical
 
       - name: Custom-domain ve project-path Pages üretimi
         run: |
           set -euo pipefail
           for target in custom project; do
-            cp -a /tmp/alo186-home-office-canonical "/tmp/alo186-home-office-$target"
+            cp -a /tmp/alo186-portable-evse-canonical "/tmp/alo186-portable-evse-$target"
           done
           python alo186/deployment/prepare_github_pages.py \
-            --site /tmp/alo186-home-office-custom \
+            --site /tmp/alo186-portable-evse-custom \
             --base-path '' \
             --repository "$GITHUB_REPOSITORY" \
             --commit "$GITHUB_SHA"
           python alo186/deployment/inject_outcome_runtime.py \
-            --site /tmp/alo186-home-office-custom \
+            --site /tmp/alo186-portable-evse-custom \
             --base-path ''
           python alo186/deployment/inject_shortlist_growth.py \
-            --site /tmp/alo186-home-office-custom \
-            --base-path '' > /tmp/alo186-home-office-custom.json
+            --site /tmp/alo186-portable-evse-custom \
+            --base-path '' > /tmp/alo186-portable-evse-custom.json
           python alo186/deployment/smoke_github_pages.py \
-            --site /tmp/alo186-home-office-custom \
+            --site /tmp/alo186-portable-evse-custom \
             --base-path ''
 
           python alo186/deployment/prepare_github_pages.py \
-            --site /tmp/alo186-home-office-project \
+            --site /tmp/alo186-portable-evse-project \
             --base-path '/chatgpt' \
             --repository "$GITHUB_REPOSITORY" \
             --commit "$GITHUB_SHA"
           python alo186/deployment/inject_outcome_runtime.py \
-            --site /tmp/alo186-home-office-project \
+            --site /tmp/alo186-portable-evse-project \
             --base-path '/chatgpt'
           python alo186/deployment/inject_shortlist_growth.py \
-            --site /tmp/alo186-home-office-project \
-            --base-path '/chatgpt' > /tmp/alo186-home-office-project.json
+            --site /tmp/alo186-portable-evse-project \
+            --base-path '/chatgpt' > /tmp/alo186-portable-evse-project.json
           python alo186/deployment/smoke_github_pages.py \
-            --site /tmp/alo186-home-office-project \
+            --site /tmp/alo186-portable-evse-project \
             --base-path '/chatgpt'
 
       - name: Rota, sitemap, teknik arama ve gizlilik kabulü
@@ -104,14 +104,13 @@ jobs:
           set -euo pipefail
           python - <<'PY'
           import json
-          import re
           from pathlib import Path
 
-          route='hesaplama/evden-calisma-laptop-modem-yedek-guc-seti'
-          route_slug='evden-calisma-laptop-modem-yedek-guc-seti/'
+          route='hesaplama/tasinabilir-ev-sarj-priz-uygunluk'
+          route_slug='tasinabilir-ev-sarj-priz-uygunluk/'
           for root,prefix in [
-              (Path('/tmp/alo186-home-office-custom'),'') ,
-              (Path('/tmp/alo186-home-office-project'),'/chatgpt'),
+              (Path('/tmp/alo186-portable-evse-custom'),'') ,
+              (Path('/tmp/alo186-portable-evse-project'),'/chatgpt'),
           ]:
               page=root/route/'index.html'
               app=root/route/'app.js'
@@ -119,28 +118,27 @@ jobs:
               assert page.is_file() and app.is_file() and css.is_file()
               html=page.read_text(encoding='utf-8')
               js=app.read_text(encoding='utf-8')
-              expected=f"{prefix}/hesaplama/evden-calisma-laptop-modem-yedek-guc-seti/" if prefix else '/hesaplama/evden-calisma-laptop-modem-yedek-guc-seti/'
+              expected=f"{prefix}/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/" if prefix else '/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/'
               assert route_slug in html
               assert 'amazon.com' not in (html+js).lower()
               assert 'localStorage' not in js and 'sessionStorage' not in js and 'fetch(' not in js
-              assert all(token in html for token in ['actualNeed','technicalCheck','affiliateCheck','bundleLinks'])
+              assert all(token in html for token in ['actualNeed','technicalCheck','affiliateCheck','productLinks'])
               hub=(root/'hesaplama/index.html').read_text(encoding='utf-8')
               assert route_slug in hub
-              count=re.search(r'(\d+) çekirdek araç',hub)
-              assert count and int(count.group(1))>=40
+              assert '41 çekirdek araç' in hub
               sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
               assert expected in sitemap
               search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
-              entry=next(item for item in search['entries'] if item['canonicalPath']=='/hesaplama/evden-calisma-laptop-modem-yedek-guc-seti/')
+              entry=next(item for item in search['entries'] if item['canonicalPath']=='/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/')
               assert entry['url']==expected
-          print(json.dumps({'ok':True,'route':'/hesaplama/evden-calisma-laptop-modem-yedek-guc-seti/','directStoreLinks':0,'storage':False,'multiCategoryBundle':True,'searchIndexed':True},ensure_ascii=False))
+          print(json.dumps({'ok':True,'route':'/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/','directStoreLinks':0,'storage':False,'searchIndexed':True},ensure_ascii=False))
           PY
 
       - name: Doğrulanmış site artifactı
         uses: actions/upload-artifact@v4
         with:
-          name: alo186-home-office-backup-bundle-v325
-          path: /tmp/alo186-home-office-custom
+          name: alo186-portable-evse-socket-v326
+          path: /tmp/alo186-portable-evse-custom
           if-no-files-found: error
           include-hidden-files: true
           retention-days: 30
