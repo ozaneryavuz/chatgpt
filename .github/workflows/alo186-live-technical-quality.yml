@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'alo186/tests/live_site_technical_audit.py'
+      - 'alo186/tests/live_site_technical_audit_v2.py'
       - 'alo186/tests/test_live_domain_integration_manifest.py'
       - 'alo186/deployment/live-domain-integration.json'
       - 'alo186/deployment/prepare_github_pages_core.py'
@@ -51,7 +52,7 @@ jobs:
         env:
           AXE_CORE_PATH: node_modules/axe-core/axe.min.js
         run: |
-          python alo186/tests/live_site_technical_audit.py \
+          python alo186/tests/live_site_technical_audit_v2.py \
             --output /tmp/alo186-live-technical-audit
 
       - name: Kaynak ve yayın regresyonları
