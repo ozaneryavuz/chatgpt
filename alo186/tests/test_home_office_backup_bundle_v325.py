@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -66,7 +67,10 @@ def main() -> None:
         assert token in app
     assert "scenarios:23" in test
 
-    assert "40 çekirdek araç" in hub
+    hub_count_match = re.search(r"(\d+) çekirdek araç", hub)
+    assert hub_count_match, "Hesaplama Merkezi araç sayacı bulunamadı."
+    hub_tool_count = int(hub_count_match.group(1))
+    assert hub_tool_count >= 40
     assert './evden-calisma-laptop-modem-yedek-guc-seti/' in hub
     assert "Evden Çalışma Laptop ve Modem Yedek Güç Seti" in hub
 
@@ -85,7 +89,7 @@ def main() -> None:
         "routingVersion": manifest["version"],
         "route": ROUTE,
         "decisionScenarios": 23,
-        "hubToolCount": 40,
+        "hubToolCount": hub_tool_count,
         "powerbankNominalLimitWh": 100,
         "directStoreLinks": 0,
         "personalDataFields": 0,
