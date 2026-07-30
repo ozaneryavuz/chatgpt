@@ -16,6 +16,10 @@ assert.ok(result.requiredW>=82);
 result=run({destination:'uk',existingAdapter:'yes',adapterMaxV:250,adapterMaxA:3,adapterMaxW:0,adapterEarth:'unknown',safetyEvidence:'yes',recallChecked:'yes'});
 assert.equal(result.status,'no_buy','Yeterli mevcut Class II adaptör yeni alışverişi kapatmalı.');
 
+result=run({destination:'uk',existingAdapter:'yes',adapterMaxV:250,adapterMaxA:3,adapterMaxW:50,adapterEarth:'unknown',safetyEvidence:'yes',recallChecked:'yes'});
+assert.equal(result.status,'conditional_purchase','Açık 50 W sınırı, 3 A türetilmiş değerden daha kısıtlayıcı olmalı.');
+assert.ok(result.reasons.some((item)=>/güç|akım/.test(item)));
+
 result=run({destination:'us',minV:220,maxV:240});
 assert.equal(result.status,'voltage_mismatch');
 assert.equal(result.commerceAllowed,false);
@@ -23,6 +27,10 @@ assert.match(result.summary,/uyumsuz|çözmez/i);
 
 result=run({destination:'us',minV:100,maxV:240,frequency:'50_60'});
 assert.equal(result.status,'conditional_purchase');
+
+result=run({destination:'us',minV:100,maxV:240,frequency:'50',deviceType:'electronics'});
+assert.equal(result.status,'frequency_mismatch','Tek frekanslı elektronik de uyumsuz şebekede affiliate rotasına açılmamalı.');
+assert.equal(result.commerceAllowed,false);
 
 result=run({destination:'japan',frequency:'50',deviceType:'motor'});
 assert.equal(result.status,'evidence','Japonya 50/60 Hz bölge farkında tek frekanslı motor için hedef bölge kanıtı istenmeli.');
@@ -64,9 +72,10 @@ result=run({frequency:'unknown'});
 assert.equal(result.status,'evidence');
 
 result=run({destination:'us',deviceType:'motor',frequency:'50'});
-assert.equal(result.status,'professional','Motorlu yüksek riskli yük tüketici affiliate rotasına açılmamalı.');
+assert.equal(result.status,'frequency_mismatch','Motorlu yükte frekans uyumsuzluğu önce açıkça raporlanmalı.');
+assert.equal(result.commerceAllowed,false);
 
 result=run({deviceW:0});
 assert.equal(result.status,'invalid');
 
-console.log('Seyahat priz adaptörü uygunluğu: voltaj, frekans, topraklama, no-buy, geri çağırma ve affiliate kapıları başarılı.');
+console.log('Seyahat priz adaptörü uygunluğu: voltaj, frekans, kısıtlayıcı V/A/W, topraklama, no-buy, geri çağırma ve affiliate kapıları başarılı.');
