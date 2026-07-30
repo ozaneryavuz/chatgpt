@@ -1,0 +1,218 @@
+name: ALO186 English core AEO release
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/en/**'
+      - 'alo186/index.html'
+      - 'alo186/turkiye-arama/index.html'
+      - 'alo186/elektrik-kesintisi/**'
+      - 'alo186/acil-numaralar/**'
+      - 'alo186/hakkimizda/**'
+      - 'alo186/yayin-ilkeleri/**'
+      - 'alo186/kaynaklar/**'
+      - 'alo186/gizlilik/**'
+      - 'alo186/iletisim/**'
+      - 'alo186/yasal/amazon-satis-ortakligi/**'
+      - 'alo186/deployment/routing-overlays/english-core-run1.json'
+      - 'alo186/deployment/content-consolidations.json'
+      - 'alo186/tests/test_english_core.py'
+      - '.github/workflows/alo186-english-core.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/en/**'
+      - 'alo186/index.html'
+      - 'alo186/turkiye-arama/index.html'
+      - 'alo186/elektrik-kesintisi/**'
+      - 'alo186/acil-numaralar/**'
+      - 'alo186/hakkimizda/**'
+      - 'alo186/yayin-ilkeleri/**'
+      - 'alo186/kaynaklar/**'
+      - 'alo186/gizlilik/**'
+      - 'alo186/iletisim/**'
+      - 'alo186/yasal/amazon-satis-ortakligi/**'
+      - 'alo186/deployment/routing-overlays/english-core-run1.json'
+      - 'alo186/deployment/content-consolidations.json'
+      - 'alo186/tests/test_english_core.py'
+      - '.github/workflows/alo186-english-core.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-english-core-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Bilingual content, hreflang, privacy and safety contracts
+        run: |
+          set -euo pipefail
+          python alo186/tests/test_english_core.py
+          python -m py_compile alo186/tests/test_english_core.py
+          node --check alo186/en/assets/finder.js
+
+      - name: Existing portal and consolidation regressions
+        run: |
+          set -euo pipefail
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+          python alo186/tests/test_content_intent_consolidation.py
+
+      - name: Build canonical production bundle
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-english-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-english-canonical
+
+      - name: Prepare custom-domain GitHub Pages bundle
+        run: |
+          set -euo pipefail
+          cp -a /tmp/alo186-english-canonical /tmp/alo186-english-custom
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-english-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-english-custom \
+            --base-path ''
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-english-custom \
+            --base-path '' > /tmp/english-shortlist-growth.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-english-custom \
+            --base-path ''
+
+      - name: Bilingual route, hreflang and sitemap acceptance
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+
+          root = Path('/tmp/alo186-english-custom')
+          english_routes = [
+              '/en/',
+              '/en/electricity-outage-turkey/',
+              '/en/electricity-distribution-company-finder/',
+              '/en/emergency-numbers-turkey/',
+              '/en/about/',
+              '/en/editorial-methodology/',
+              '/en/sources/',
+              '/en/privacy/',
+              '/en/contact/',
+              '/en/affiliate-disclosure/',
+          ]
+          turkish_routes = [
+              '/elektrik-kesintisi',
+              '/acil-numaralar',
+              '/hakkimizda',
+              '/yayin-ilkeleri',
+              '/kaynaklar',
+              '/gizlilik',
+              '/iletisim',
+              '/yasal/amazon-satis-ortakligi',
+          ]
+          pairs = {
+              '/en/': '/elektrik-portali',
+              '/en/electricity-outage-turkey/': '/elektrik-kesintisi',
+              '/en/electricity-distribution-company-finder/': '/edas-bul',
+              '/en/emergency-numbers-turkey/': '/acil-numaralar',
+              '/en/about/': '/hakkimizda',
+              '/en/editorial-methodology/': '/yayin-ilkeleri',
+              '/en/sources/': '/kaynaklar',
+              '/en/privacy/': '/gizlilik',
+              '/en/contact/': '/iletisim',
+              '/en/affiliate-disclosure/': '/yasal/amazon-satis-ortakligi',
+          }
+          call_routes = {
+              '/en/',
+              '/en/electricity-outage-turkey/',
+              '/en/electricity-distribution-company-finder/',
+              '/en/emergency-numbers-turkey/',
+              '/elektrik-kesintisi',
+              '/acil-numaralar',
+          }
+
+          sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
+          release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
+          pages_release = json.loads((root / 'pages-release.json').read_text(encoding='utf-8'))
+          live_origin = pages_release['canonicalHost'].rstrip('/')
+          assert release['routingVersion'] >= 106, release['routingVersion']
+          assert live_origin == 'https://alo186.com', live_origin
+
+          def route_file(route: str) -> Path:
+              return root / route.strip('/') / 'index.html'
+
+          def expected_url(route: str) -> str:
+              return f'{live_origin}{route}'
+
+          for route in english_routes + turkish_routes:
+              page = route_file(route)
+              assert page.is_file(), route
+              html = page.read_text(encoding='utf-8')
+              expected_lang = 'en' if route.startswith('/en/') else 'tr-TR'
+              assert f'<html lang="{expected_lang}">' in html, route
+              canonical = re.search(r'<link rel="canonical" href="([^"]+)"', html)
+              assert canonical and canonical.group(1) == expected_url(route), (
+                  route,
+                  canonical.group(1) if canonical else None,
+                  expected_url(route),
+              )
+              assert expected_url(route) in sitemap, route
+              assert 'name="robots" content="index,follow,max-image-preview:large"' in html
+              assert 'PrivacyPolicy' not in html, route
+              if route in call_routes:
+                  assert 'href="tel:112"' in html and 'href="tel:186"' in html, route
+
+          for english_route, turkish_route in pairs.items():
+              english_html = route_file(english_route).read_text(encoding='utf-8')
+              turkish_html = route_file(turkish_route).read_text(encoding='utf-8')
+              english_url = expected_url(english_route)
+              turkish_url = expected_url(turkish_route)
+              for html in (english_html, turkish_html):
+                  assert f'hreflang="tr-TR" href="{turkish_url}"' in html
+                  assert f'hreflang="en" href="{english_url}"' in html
+                  assert f'hreflang="x-default" href="{turkish_url}"' in html
+
+          assert (root / 'en/assets/styles.css').is_file()
+          assert (root / 'en/assets/finder.js').is_file()
+          assert (root / 'edas-bul/companies.js').is_file()
+          print(json.dumps({
+              'routingVersion': release['routingVersion'],
+              'liveOrigin': live_origin,
+              'englishRoutes': english_routes,
+              'turkishSupportRoutes': turkish_routes,
+              'languagePairs': len(pairs),
+          }, ensure_ascii=False))
+          PY
+
+      - name: Upload validated bilingual artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-english-core-site
+          path: /tmp/alo186-english-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30

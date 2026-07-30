@@ -53,10 +53,10 @@
     },
     {
       "intentKey": "pv-inverter-afci-dc-arc-alarm",
-      "aliasPath": "/haberler/ges-inverter-afci-dc-ark-hatasi-alarmi-kapatilir-mi",
-      "canonicalPath": "/haberler/ges-inverter-afci-dc-ark-hatasi",
+      "aliasPath": "/haberler/ges-inverter-afci-dc-ark-hatasi",
+      "canonicalPath": "/haberler/ges-inverter-afci-dc-ark-hatasi-alarmi-kapatilir-mi",
       "label": "GES inverter AFCI ve DC ark alarmı",
-      "reason": "AFCI alarmı, seri DC ark, konnektör/krimp/kablo incelemesi, reset ve korumayı kapatmama kararını hedefleyen iki rehber; önce yayımlanan kullanıcı rotasında tek canonical kaynakta birleştirildi."
+      "reason": "AFCI alarmının anlamı, DC ark kök nedeni, konnektör ve kablo kontrolü, reset sınırı ve korumayı kapatmama kararı aynı kullanıcı niyetini hedeflediği için güncel ve daha kapsamlı rehber tek canonical kaynak olarak seçildi."
     }
   ]
 }

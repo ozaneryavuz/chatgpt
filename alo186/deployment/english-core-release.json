@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 3,
+  "release": "english-core-p0",
+  "generatedAt": "2026-07-30",
+  "englishRouteCount": 10,
+  "turkishSupportRouteCount": 8,
+  "languagePairCount": 10,
+  "provinceCount": 81,
+  "distributionCompanyCount": 21,
+  "emergencyNumbers": [112, 186, 187],
+  "safetyCommerceClosed": true,
+  "personalDataRequired": false,
+  "artifactLanguageAudit": {
+    "englishPrefix": "/en/",
+    "englishPrimaryLanguage": "en",
+    "defaultPrimaryLanguage": "tr",
+    "regionalLanguageTagsAccepted": true,
+    "quickDiscoveryWithoutSite": true,
+    "fullAuditRequiresSite": true
+  },
+  "acceptance": [
+    "self-canonical",
+    "reciprocal-hreflang",
+    "valid-json-ld",
+    "indexable-en-routes",
+    "istanbul-side-resolution",
+    "javascript-free-company-directory",
+    "route-aware-language-audit",
+    "quick-test-discovery",
+    "custom-domain-build",
+    "sitemap-inclusion"
+  ]
+}
