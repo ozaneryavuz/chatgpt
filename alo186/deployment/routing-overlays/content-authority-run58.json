@@ -1,0 +1,21 @@
+{
+  "version": 95,
+  "generatedAt": "2026-07-30",
+  "routes": [
+    {
+      "source": "alo186/haberler/ev-sarj-plug-and-charge-iso-15118-sertifika-hatasi/index.html",
+      "canonicalPath": "/haberler/ev-sarj-plug-and-charge-iso-15118-sertifika-hatasi",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ges-inverter-anti-islanding-ada-calismasi-koruma-testi/index.html",
+      "canonicalPath": "/haberler/ges-inverter-anti-islanding-ada-calismasi-koruma-testi",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/harmonikli-yukte-trafo-k-factor-derating-isinma/index.html",
+      "canonicalPath": "/haberler/harmonikli-yukte-trafo-k-factor-derating-isinma",
+      "type": "article"
+    }
+  ]
+}
