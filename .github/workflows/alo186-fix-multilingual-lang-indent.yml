@@ -1,0 +1,71 @@
+name: ALO186 repair multilingual artifact audit indentation
+
+on:
+  push:
+    branches:
+      - agent/alo186-english-core-rebased
+    paths:
+      - '.github/workflows/alo186-fix-multilingual-lang-indent.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: alo186-fix-multilingual-lang-indent
+  cancel-in-progress: false
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/alo186-english-core-rebased
+          persist-credentials: true
+
+      - name: Repair and validate route-aware language audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('alo186/tests/test_live_technical_quality.py')
+          lines = path.read_text(encoding='utf-8').splitlines()
+          start = next(
+              index for index, line in enumerate(lines)
+              if 'normalized_lang = parser.html_lang.casefold()' in line
+          )
+          end = next(
+              index for index in range(start, min(start + 12, len(lines)))
+              if lines[index].strip() == ')'
+          )
+          replacement = [
+              '        normalized_lang = parser.html_lang.casefold().replace("_", "-").strip()',
+              '        expected_lang = (',
+              '            "en"',
+              '            if relative == "en/index.html" or relative.startswith("en/")',
+              '            else "tr"',
+              '        )',
+              '        actual_primary_lang = (',
+              '            normalized_lang.split("-", 1)[0] if normalized_lang else ""',
+              '        )',
+              '        if actual_primary_lang != expected_lang:',
+              '            failures.append(',
+              '                f"html lang beklenen {expected_lang}, "',
+              '                f"bulunan {parser.html_lang or \'boş\'}: {relative}"',
+              '            )',
+          ]
+          lines[start:end + 1] = replacement
+          path.write_text('\n'.join(lines) + '\n', encoding='utf-8')
+          PY
+
+          python -m py_compile alo186/tests/test_live_technical_quality.py
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm '.github/workflows/alo186-fix-multilingual-lang-indent.yml'
+          git add alo186/tests/test_live_technical_quality.py
+          git commit -m 'test: repair route-aware artifact language audit'
+          git push origin HEAD:agent/alo186-english-core-rebased
