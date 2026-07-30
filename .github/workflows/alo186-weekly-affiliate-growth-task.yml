@@ -66,6 +66,7 @@ jobs:
           const usedForbidden = forbidden.filter((field) => keys.has(field));
           if (summary.productCount < 30) throw new Error(`Ürün/model sayısı 30 altına düştü: ${summary.productCount}`);
           if (summary.exactListingCount < 20) throw new Error(`Doğrulanmış ASIN sayısı 20 altına düştü: ${summary.exactListingCount}`);
+          if (direct.length < 13) throw new Error(`Güncel ve doğrudan yayımlanabilir ürün sayısı 13 altına düştü: ${direct.length}. Ürün doğrulamalarını yenileyin.`);
           if (usedForbidden.length) throw new Error(`Yasak ticari alanlar bulundu: ${usedForbidden.join(', ')}`);
           if (!catalog.affiliateTag || catalog.affiliateTag !== 'alo186rehber-21') throw new Error('Affiliate etiketi korunmadı.');
           if (!summary.gatedCandidateCount) throw new Error('Teknik uygunluk kapılı adaylar kayboldu.');
