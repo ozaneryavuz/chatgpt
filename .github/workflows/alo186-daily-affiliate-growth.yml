@@ -1,0 +1,79 @@
+name: ALO186 günlük satış ve affiliate katalog büyümesi
+
+on:
+  schedule:
+    - cron: '15 6 * * *'
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/urun-eslestirme/catalog.js'
+      - 'alo186/deployment/daily_affiliate_growth_report.js'
+      - 'alo186/tests/test_daily_affiliate_growth_report.js'
+      - '.github/workflows/alo186-daily-affiliate-growth.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/urun-eslestirme/catalog.js'
+      - 'alo186/deployment/daily_affiliate_growth_report.js'
+      - 'alo186/tests/test_daily_affiliate_growth_report.js'
+      - '.github/workflows/alo186-daily-affiliate-growth.yml'
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: alo186-daily-affiliate-growth-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  prioritize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Affiliate katalog ve Knowledge Graph güven testleri
+        run: |
+          set -euo pipefail
+          node alo186/tests/test_daily_affiliate_growth_report.js
+          node alo186/tests/test_affiliate_knowledge_graph.js
+          node alo186/tests/test_product_matcher.js
+          node --check alo186/deployment/daily_affiliate_growth_report.js
+
+      - name: Günlük ilk üç satış fırsatını üret
+        env:
+          TZ: Europe/Istanbul
+        run: |
+          set -euo pipefail
+          node alo186/deployment/daily_affiliate_growth_report.js \
+            --json /tmp/alo186-daily-affiliate-growth.json \
+            --markdown /tmp/alo186-daily-affiliate-growth.md
+
+      - name: Büyüme raporu artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-daily-affiliate-growth-${{ github.run_number }}
+          path: |
+            /tmp/alo186-daily-affiliate-growth.json
+            /tmp/alo186-daily-affiliate-growth.md
+          if-no-files-found: error
+          retention-days: 45
+
+      - name: GitHub issue #301 günlük görev güncellemesi
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'push'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('node:fs');
+            const report = fs.readFileSync('/tmp/alo186-daily-affiliate-growth.md', 'utf8');
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: 301,
+              body: `${report}\n\nÇalıştırma: ${runUrl}`
+            });
