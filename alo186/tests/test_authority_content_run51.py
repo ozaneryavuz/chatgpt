@@ -67,7 +67,7 @@ def main() -> None:
         assert contract["separation"] in html, route
         assert html.count('href="/') >= 8, route
         assert "Son doğrulama: 30 Temmuz 2026" in html, route
-        assert "Teknik devir-kabul paketini aç" in html, route
+        assert 'href="/hesaplama/teknik-devir-kabul-paketi/"' in html, route
 
         lower = html.casefold()
         for token in contract["intent"]:
