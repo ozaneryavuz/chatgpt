@@ -1,0 +1,60 @@
+name: ALO186 USB-C teknik niyet ve güven kapıları
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/urun-eslestirme/matcher-core.js'
+      - 'alo186/urun-eslestirme/catalog.js'
+      - 'alo186/tests/test_product_matcher.js'
+      - 'alo186/tests/test_affiliate_knowledge_graph.js'
+      - 'alo186/tests/test_daily_affiliate_growth_report.js'
+      - '.github/workflows/alo186-usbc-intent-gates.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/urun-eslestirme/matcher-core.js'
+      - 'alo186/urun-eslestirme/catalog.js'
+      - 'alo186/tests/test_product_matcher.js'
+      - '.github/workflows/alo186-usbc-intent-gates.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-usbc-intent-gates-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: JavaScript sözdizimi
+        run: |
+          node --check alo186/urun-eslestirme/catalog.js
+          node --check alo186/urun-eslestirme/matcher-core.js
+          node --check alo186/urun-eslestirme/app.js
+          node --check alo186/tests/test_product_matcher.js
+
+      - name: USB-C niyet, satın almama ve güvenlik senaryoları
+        run: node alo186/tests/test_product_matcher.js
+
+      - name: Affiliate Knowledge Graph ve günlük büyüme regresyonları
+        run: |
+          node alo186/tests/test_affiliate_knowledge_graph.js
+          node alo186/tests/test_daily_affiliate_growth_report.js
+
+      - name: Doğrudan affiliate yayın sözleşmesi
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'rel="sponsored nofollow noopener"' alo186/urun-eslestirme/app.js
+          grep -q 'Mevcut ürünüm güvenli ve ihtiyacı karşılıyor' alo186/urun-eslestirme/matcher-core.js
+          grep -q 'Ticari yol kapanır' alo186/urun-eslestirme/matcher-core.js
+          ! grep -Eqi "price:|stock:|aggregateRating|offers:|warranty:" alo186/urun-eslestirme/catalog.js
