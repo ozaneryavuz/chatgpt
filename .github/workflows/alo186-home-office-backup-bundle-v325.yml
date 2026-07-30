@@ -104,13 +104,12 @@ jobs:
           set -euo pipefail
           python - <<'PY'
           import json
-          import re
           from pathlib import Path
 
           route='hesaplama/evden-calisma-laptop-modem-yedek-guc-seti'
           route_slug='evden-calisma-laptop-modem-yedek-guc-seti/'
           for root,prefix in [
-              (Path('/tmp/alo186-home-office-custom'),'') ,
+              (Path('/tmp/alo186-home-office-custom'),''),
               (Path('/tmp/alo186-home-office-project'),'/chatgpt'),
           ]:
               page=root/route/'index.html'
@@ -126,8 +125,7 @@ jobs:
               assert all(token in html for token in ['actualNeed','technicalCheck','affiliateCheck','bundleLinks'])
               hub=(root/'hesaplama/index.html').read_text(encoding='utf-8')
               assert route_slug in hub
-              count=re.search(r'(\d+) çekirdek araç',hub)
-              assert count and int(count.group(1))>=40
+              assert hub.count('class="tool-card"')>=40
               sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
               assert expected in sitemap
               search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
