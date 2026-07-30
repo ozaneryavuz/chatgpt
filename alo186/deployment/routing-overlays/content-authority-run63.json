@@ -1,0 +1,21 @@
+{
+  "version": 101,
+  "generatedAt": "2026-07-30",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesintisi-tazminati-otomatik-odeme-12-saat/index.html",
+      "canonicalPath": "/haberler/elektrik-kesintisi-tazminati-otomatik-odeme-12-saat",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/parafudr-tip-1-tip-2-tip-3-koordinasyonu/index.html",
+      "canonicalPath": "/haberler/parafudr-tip-1-tip-2-tip-3-koordinasyonu",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ges-panel-hot-spot-bypass-diyot-string-uyumsuzlugu/index.html",
+      "canonicalPath": "/haberler/ges-panel-hot-spot-bypass-diyot-string-uyumsuzlugu",
+      "type": "article"
+    }
+  ]
+}
