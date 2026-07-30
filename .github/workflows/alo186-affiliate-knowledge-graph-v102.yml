@@ -6,6 +6,7 @@ on:
       - 'alo186/affiliate-knowledge-graph/**'
       - 'alo186/deployment/routing-overlays/102-affiliate-knowledge-graph.json'
       - 'alo186/tests/test_affiliate_knowledge_graph_v102.py'
+      - 'alo186/tests/test_affiliate_verified_products_v103.py'
       - '.github/workflows/alo186-affiliate-knowledge-graph-v102.yml'
   push:
     branches: [main]
@@ -13,6 +14,7 @@ on:
       - 'alo186/affiliate-knowledge-graph/**'
       - 'alo186/deployment/routing-overlays/102-affiliate-knowledge-graph.json'
       - 'alo186/tests/test_affiliate_knowledge_graph_v102.py'
+      - 'alo186/tests/test_affiliate_verified_products_v103.py'
       - '.github/workflows/alo186-affiliate-knowledge-graph-v102.yml'
   workflow_dispatch:
 
@@ -40,7 +42,8 @@ jobs:
         run: |
           set -euo pipefail
           python alo186/tests/test_affiliate_knowledge_graph_v102.py
-          python -m py_compile alo186/tests/test_affiliate_knowledge_graph_v102.py
+          python alo186/tests/test_affiliate_verified_products_v103.py
+          python -m py_compile alo186/tests/test_affiliate_knowledge_graph_v102.py alo186/tests/test_affiliate_verified_products_v103.py
           node --check alo186/affiliate-knowledge-graph/app.js
 
       - name: Mevcut yayın ve güven regresyonları
@@ -107,7 +110,7 @@ jobs:
               (Path('/tmp/alo186-affiliate-kg-custom'),''),
               (Path('/tmp/alo186-affiliate-kg-project'),'/chatgpt'),
           ]:
-              for name in ['index.html','app.js','styles.css','catalog.json']:
+              for name in ['index.html','app.js','styles.css','catalog.json','catalog-extension-v103.json','verified-products.json']:
                   assert (root/relative/name).is_file(), (root,name)
               assert canonical in (root/'sitemap.xml').read_text(encoding='utf-8')
               search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
@@ -115,15 +118,19 @@ jobs:
               expected=f'{prefix}{canonical}' if prefix else canonical
               assert entry['url'] in {canonical,expected}
               catalog=json.loads((root/relative/'catalog.json').read_text(encoding='utf-8'))
+              extension=json.loads((root/relative/'catalog-extension-v103.json').read_text(encoding='utf-8'))
+              verified=json.loads((root/relative/'verified-products.json').read_text(encoding='utf-8'))
               assert len(catalog['intents'])>=12
               assert len(catalog['productClasses'])>=23
-          print(json.dumps({'ok':True,'route':canonical,'intents':12,'productClasses':23,'searchIndexed':True}))
+              assert len(extension['productClasses'])>=17
+              assert len(verified['products'])==3
+          print(json.dumps({'ok':True,'route':canonical,'verifiedProducts':3,'searchIndexed':True}))
           PY
 
       - name: Doğrulanmış site artifactı
         uses: actions/upload-artifact@v4
         with:
-          name: alo186-affiliate-knowledge-graph-v102-pages
+          name: alo186-affiliate-knowledge-graph-v103-pages
           path: /tmp/alo186-affiliate-kg-custom
           if-no-files-found: error
           include-hidden-files: true
