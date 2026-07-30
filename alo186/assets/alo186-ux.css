@@ -4,6 +4,8 @@
   --alo-ux-cyan: #15c4d8;
   --alo-ux-focus: #ffbf47;
   --alo-ux-paper: #fff;
+  --alo-ux-ink: #10213a;
+  --alo-ux-muted: #596b82;
   --alo-ux-line: #d7e2ed;
   --alo-ux-shadow: 0 12px 34px rgba(7, 22, 49, .18);
 }
@@ -119,6 +121,92 @@ input, select, textarea { max-width: 100%; font-size: 16px; }
 }
 .alo-ux-toc a:hover, .alo-ux-toc a:focus-visible { background: #eef6ff; }
 
+.alo-ux-next {
+  width: min(100%, 72rem);
+  margin: clamp(2rem, 6vw, 4rem) auto 1.5rem;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  border: 1px solid var(--alo-ux-line);
+  border-radius: 20px;
+  background: linear-gradient(145deg, #eef6ff, #fff 58%, #effff9);
+  color: var(--alo-ux-ink);
+  box-shadow: 0 16px 42px rgba(7, 22, 49, .09);
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 420px;
+}
+.alo-ux-next-head { max-width: 50rem; }
+.alo-ux-next h2 {
+  margin: 0 0 .35rem;
+  color: var(--alo-ux-navy);
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  line-height: 1.16;
+  text-wrap: balance;
+}
+.alo-ux-next-head p {
+  max-width: 68ch;
+  margin: 0;
+  color: var(--alo-ux-muted);
+}
+.alo-ux-next-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 1rem;
+}
+.alo-ux-next-grid a {
+  display: flex;
+  min-width: 0;
+  min-height: 126px;
+  flex-direction: column;
+  padding: 16px;
+  border: 1px solid #c9d9e9;
+  border-radius: 14px;
+  background: #fff;
+  color: var(--alo-ux-ink);
+  text-decoration: none;
+  box-shadow: 0 8px 24px rgba(7, 22, 49, .06);
+}
+.alo-ux-next-grid a:hover { border-color: #7ba4dd; }
+.alo-ux-next-grid strong {
+  color: var(--alo-ux-navy);
+  font-size: 1rem;
+  line-height: 1.3;
+}
+.alo-ux-next-grid span {
+  margin-top: .45rem;
+  color: var(--alo-ux-muted);
+  font-size: .88rem;
+  line-height: 1.5;
+}
+.alo-ux-next > small {
+  display: block;
+  margin-top: 1rem;
+  color: var(--alo-ux-muted);
+  font-size: .78rem;
+}
+
+a[data-alo-affiliate-badge="true"]::after {
+  content: attr(data-alo-affiliate-label);
+  display: inline-flex;
+  min-height: 22px;
+  align-items: center;
+  margin-inline-start: .42rem;
+  padding: 2px 6px;
+  border: 1px solid #e7bd66;
+  border-radius: 999px;
+  background: #fff7df;
+  color: #6a4200;
+  font-size: .64rem;
+  font-weight: 850;
+  line-height: 1.2;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .alo-ux-next-grid { grid-template-columns: 1fr; }
+  .alo-ux-next-grid a { min-height: 96px; }
+}
+
 @media (max-width: 720px) {
   body:not([data-alo186-ux-compact="true"]) {
     padding-bottom: calc(68px + env(safe-area-inset-bottom));
@@ -165,24 +253,25 @@ input, select, textarea { max-width: 100%; font-size: 16px; }
   }
   h1 { hyphens: auto; }
   p, li { overflow-wrap: anywhere; }
-  .alo-ux-toc { border-radius: 13px; }
+  .alo-ux-toc, .alo-ux-next { border-radius: 13px; }
   .alo-ux-toc nav { grid-template-columns: 1fr; }
 }
 
 @media (prefers-contrast: more) {
-  .alo-ux-toc, .alo-ux-backtop, .alo-ux-mobilebar { border-width: 2px; }
-  .alo-ux-toc a, .alo-ux-mobilebar a { font-weight: 800; }
+  .alo-ux-toc, .alo-ux-backtop, .alo-ux-mobilebar, .alo-ux-next, .alo-ux-next-grid a { border-width: 2px; }
+  .alo-ux-toc a, .alo-ux-mobilebar a, .alo-ux-next-grid strong { font-weight: 800; }
 }
 
 @media (forced-colors: active) {
-  .alo-ux-mobilebar, .alo-ux-toc, .alo-ux-backtop, .alo-ux-skip {
+  .alo-ux-mobilebar, .alo-ux-toc, .alo-ux-backtop, .alo-ux-skip, .alo-ux-next, .alo-ux-next-grid a,
+  a[data-alo-affiliate-badge="true"]::after {
     forced-color-adjust: auto;
     border: 2px solid CanvasText;
     background: Canvas;
     color: CanvasText;
     box-shadow: none;
   }
-  .alo-ux-mobilebar a, .alo-ux-toc a { color: LinkText; }
+  .alo-ux-mobilebar a, .alo-ux-toc a, .alo-ux-next-grid a { color: LinkText; }
   .alo-ux-mobilebar a[aria-current="page"] {
     color: HighlightText;
     background: Highlight;
@@ -198,5 +287,5 @@ input, select, textarea { max-width: 100%; font-size: 16px; }
 }
 
 @media print {
-  .alo-ux-mobilebar, .alo-ux-backtop, .alo-ux-skip, .alo-ux-toc { display: none !important; }
+  .alo-ux-mobilebar, .alo-ux-backtop, .alo-ux-skip, .alo-ux-toc, .alo-ux-next { display: none !important; }
 }
