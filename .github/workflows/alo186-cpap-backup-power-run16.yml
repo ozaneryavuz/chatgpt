@@ -1,0 +1,118 @@
+name: ALO186 CPAP APAP BiPAP yedek güç uygunluğu
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/cpap-apap-bipap-yedek-guc-uygunluk/**'
+      - 'alo186/hesaplama/index.html'
+      - 'alo186/tests/test_cpap_backup_power_run16.py'
+      - 'alo186/deployment/routing-overlays/115-cpap-apap-bipap-yedek-guc-uygunluk.json'
+      - '.github/workflows/alo186-cpap-backup-power-run16.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/cpap-apap-bipap-yedek-guc-uygunluk/**'
+      - 'alo186/hesaplama/index.html'
+      - 'alo186/tests/test_cpap_backup_power_run16.py'
+      - 'alo186/deployment/routing-overlays/115-cpap-apap-bipap-yedek-guc-uygunluk.json'
+      - '.github/workflows/alo186-cpap-backup-power-run16.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-cpap-backup-power-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Karar, klinik sınır, satın almama ve affiliate senaryoları
+        run: |
+          set -euo pipefail
+          node alo186/hesaplama/cpap-apap-bipap-yedek-guc-uygunluk/app.test.js
+          python alo186/tests/test_cpap_backup_power_run16.py
+
+      - name: Sözdizimi, gizlilik ve yasak ticari alan kontrolü
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check alo186/hesaplama/cpap-apap-bipap-yedek-guc-uygunluk/app.js
+          python -m py_compile alo186/tests/test_cpap_backup_power_run16.py
+          python - <<'PY'
+          from pathlib import Path
+          root=Path('alo186/hesaplama/cpap-apap-bipap-yedek-guc-uygunluk')
+          for name in ['index.html','app.js','styles.css']:
+              path=root/name
+              text=path.read_text(encoding='utf-8')
+              for token in ['priceCurrency','aggregateRating','availability','"@type":"Offer"','"@type":"Product"','localStorage','sessionStorage','geolocation']:
+                  assert token not in text, (path, token)
+          html=(root/'index.html').read_text(encoding='utf-8')
+          js=(root/'app.js').read_text(encoding='utf-8')
+          assert 'amazon.com.tr' not in html.lower()
+          assert 'amazon.com.tr' not in js.lower()
+          assert '<textarea' not in html.lower()
+          PY
+
+      - name: Canonical üretim ve statik smoke
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-cpap-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-cpap-canonical
+          test -f /tmp/alo186-cpap-canonical/hesaplama/cpap-apap-bipap-yedek-guc-uygunluk/index.html
+          test -f /tmp/alo186-cpap-canonical/hesaplama/cpap-apap-bipap-yedek-guc-uygunluk/app.js
+          grep -q 'CPAP/APAP Yedek Güç Uygunluğu' /tmp/alo186-cpap-canonical/hesaplama/index.html
+          grep -q '45 çekirdek araç' /tmp/alo186-cpap-canonical/hesaplama/index.html
+
+      - name: Custom-domain ve project-path Pages kabulü
+        shell: bash
+        run: |
+          set -euo pipefail
+          for spec in 'custom|' 'project|/chatgpt'; do
+            name="${spec%%|*}"
+            base="${spec#*|}"
+            target="/tmp/alo186-cpap-${name}"
+            cp -a /tmp/alo186-cpap-canonical "$target"
+            python alo186/deployment/prepare_github_pages.py \
+              --site "$target" \
+              --base-path "$base" \
+              --repository "$GITHUB_REPOSITORY" \
+              --commit "$GITHUB_SHA"
+            python alo186/deployment/inject_outcome_runtime.py --site "$target" --base-path "$base"
+            python alo186/deployment/inject_shortlist_growth.py --site "$target" --base-path "$base" > "/tmp/alo186-cpap-${name}.json"
+            python alo186/deployment/smoke_github_pages.py --site "$target" --base-path "$base"
+
+            route="$target/hesaplama/cpap-apap-bipap-yedek-guc-uygunluk"
+            test -f "$route/index.html"
+            test -f "$route/app.js"
+            test -f "$route/styles.css"
+            grep -q 'Amazon satış ortaklığı bağlantısıdır' "$route/index.html"
+            grep -q 'Mevcut üretici uyumlu çözümün hedef süreyi karşılamadığını doğruladım' "$route/index.html"
+            grep -q 'cpap-apap-bipap-yedek-guc-uygunluk' "$target/sitemap.xml"
+            grep -q 'cpap-apap-bipap-yedek-guc-uygunluk' "$target/arama/search-index.json"
+            ! grep -Eqi 'priceCurrency|aggregateRating|availability|"@type":"Offer"' "$route/index.html"
+            ! grep -Eqi 'amazon\.com\.tr|amzn\.to' "$route/index.html" "$route/app.js"
+          done
+
+      - name: Doğrulanmış CPAP üretim artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-cpap-backup-power-production
+          path: /tmp/alo186-cpap-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 45
