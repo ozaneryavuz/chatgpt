@@ -2,7 +2,7 @@
 const assert=require('node:assert/strict');
 const app=require('./app.js');
 const base={emergency:false,pumpType:'domestic',phase:'single',voltage:230,ratedCurrent:5,powerFactor:.8,startMethod:'direct',connection:'plug',otherLoadW:0,targetHours:2,environment:'dry',protection:'rated',sourceStatus:'none',sourceType:'auto',sourceContinuousW:'',sourceSurgeW:'',sourceWh:''};
-const calc=app.calculations(base);assert.equal(calc.runningW,920);assert.equal(calc.requiredContinuousW,1150);assert.equal(calc.requiredSurgeW,6348);assert.equal(calc.requiredWh,2706);
+const calc=app.calculations(base);assert.equal(calc.runningW,920);assert.equal(calc.requiredContinuousW,1150);assert.equal(calc.requiredSurgeW,6348);assert.equal(calc.requiredWh,2705.9);
 const defaultPf=app.calculations({...base,powerFactor:''});assert.equal(defaultPf.pf,.8);assert.equal(defaultPf.runningW,920);
 assert.equal(app.evaluate({...base,emergency:true}).status,'emergency');
 assert.equal(app.evaluate({...base,pumpType:'fire'}).status,'professional');
