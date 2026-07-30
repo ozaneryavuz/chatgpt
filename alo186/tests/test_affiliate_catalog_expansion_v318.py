@@ -109,3 +109,15 @@ def test_catalog_keeps_commercial_claims_conservative() -> None:
         "affiliateCommission:",
     ):
         assert forbidden not in text
+
+
+def main() -> None:
+    test_catalog_has_at_least_24_verified_products()
+    test_six_new_low_risk_products_are_present()
+    test_runtime_health_and_knowledge_graph_counts_match()
+    test_catalog_keeps_commercial_claims_conservative()
+    print("ALO186 affiliate katalog v318: 4/4 test başarılı.")
+
+
+if __name__ == "__main__":
+    main()
