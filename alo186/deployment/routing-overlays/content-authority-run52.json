@@ -1,0 +1,21 @@
+{
+  "version": 88,
+  "generatedAt": "2026-07-30",
+  "routes": [
+    {
+      "source": "alo186/haberler/harmonik-thdi-tdd-thdv-pcc-olcum-farki/index.html",
+      "canonicalPath": "/haberler/harmonik-thdi-tdd-thdv-pcc-olcum-farki",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ups-backfeed-korumasi-bakim-bypass-interlock-guvenli-izolasyon/index.html",
+      "canonicalPath": "/haberler/ups-backfeed-korumasi-bakim-bypass-interlock-guvenli-izolasyon",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ev-sarj-6ma-dc-rdc-dd-tip-a-tip-b-rcd-farki/index.html",
+      "canonicalPath": "/haberler/ev-sarj-6ma-dc-rdc-dd-tip-a-tip-b-rcd-farki",
+      "type": "article"
+    }
+  ]
+}
