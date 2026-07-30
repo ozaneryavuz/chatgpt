@@ -6,6 +6,7 @@ const calc=app.calculations(base);assert.equal(calc.runningW,920);assert.equal(c
 const defaultPf=app.calculations({...base,powerFactor:''});assert.equal(defaultPf.pf,.8);assert.equal(defaultPf.runningW,920);
 assert.equal(app.evaluate({...base,emergency:true}).status,'emergency');
 assert.equal(app.evaluate({...base,pumpType:'fire'}).status,'professional');
+assert.ok(app.evaluate({...base,pumpType:'fire'}).toolKeys.includes('workorder'));
 assert.equal(app.evaluate({...base,phase:'three',voltage:400}).status,'professional');
 assert.equal(app.evaluate({...base,pumpType:'borehole'}).status,'professional');
 assert.equal(app.evaluate({...base,connection:'fixed'}).status,'professional');
@@ -21,5 +22,11 @@ const batteryMissingWh=app.evaluate({...base,sourceStatus:'existing',sourceType:
 const noBuy=app.evaluate({...base,sourceStatus:'existing',sourceType:'generator',sourceContinuousW:1500,sourceSurgeW:7000});assert.equal(noBuy.status,'no_buy');assert.equal(noBuy.commerceClosed,true);assert.match(noBuy.summary,/yakıt/);
 const batteryNoBuy=app.evaluate({...base,sourceStatus:'existing',sourceType:'power_station',sourceContinuousW:1500,sourceSurgeW:7000,sourceWh:3000});assert.equal(batteryNoBuy.status,'no_buy');
 const weak=app.evaluate({...base,sourceStatus:'existing',sourceType:'generator',sourceContinuousW:500,sourceSurgeW:1000});assert.equal(weak.status,'conditional_purchase');
-assert.equal(app.constants.START_MULTIPLIER.direct,6);assert.equal(app.constants.START_MULTIPLIER.soft,3);assert.equal(app.constants.START_MULTIPLIER.vfd,1.5);assert(!Object.values(app.constants.CATEGORY_LINKS).some(x=>x.href.includes('amazon.')));
-console.log(JSON.stringify({ok:true,scenarios:18,route:'/hesaplama/hidrofor-pompa-yedek-guc-uygunluk/'},null,2));
+const now=new Date('2026-07-30T06:00:00Z');
+const record=app.normalizeRecord(base,gen,now);assert.equal(record.createdAt,'2026-07-30T06:00:00.000Z');assert.equal(record.reviewAt,'2026-10-28T06:00:00.000Z');assert.equal(record.expiresAt,'2027-07-30T06:00:00.000Z');assert.equal(record.input.voltage,230);assert.equal(record.result.status,'conditional_purchase');
+const recordText=JSON.stringify(record);assert.doesNotMatch(recordText,/email|phone|address|location|name|amazon\.com|price|stock|rating|seller|warranty/i);
+const expired={...record,id:'expired',expiresAt:'2026-07-29T00:00:00Z'};const many=Array.from({length:10},(_,index)=>({...record,id:`r${index}`,createdAt:new Date(now.getTime()+index*1000).toISOString()}));assert.equal(app.purgeRecords([expired,...many],now).length,8);assert.ok(!app.purgeRecords([expired,...many],now).some(item=>item.id==='expired'));
+const exported=app.exportPayload([record],now);assert.equal(exported.schemaVersion,1);assert.equal(exported.records.length,1);assert.match(exported.privacy,/Kişisel veri içermez/);
+const calendar=app.calendarText(record);assert.match(calendar,/BEGIN:VCALENDAR/);assert.match(calendar,/DTSTART;VALUE=DATE:20261028/);assert.match(calendar,/Mevcut çözüm yeterliyse yeni ürün almayın/);assert.doesNotMatch(calendar,/mailto|email|telefon|adres/i);
+assert.equal(app.constants.START_MULTIPLIER.direct,6);assert.equal(app.constants.START_MULTIPLIER.soft,3);assert.equal(app.constants.START_MULTIPLIER.vfd,1.5);assert.equal(app.constants.MAX_RECORDS,8);assert.equal(app.constants.TTL_DAYS,365);assert.equal(app.constants.REVIEW_DAYS,90);assert(!Object.values(app.constants.CATEGORY_LINKS).some(x=>x.href.includes('amazon.')));
+console.log(JSON.stringify({ok:true,scenarios:22,route:'/hesaplama/hidrofor-pompa-yedek-guc-uygunluk/',records:8,reviewDays:90},null,2));
