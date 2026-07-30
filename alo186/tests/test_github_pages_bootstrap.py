@@ -15,7 +15,13 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "alo186/deployment"))
 
-from bootstrap_github_pages import PagesBootstrapError, ensure_pages, main  # noqa: E402
+from bootstrap_github_pages import (  # noqa: E402
+    DEFAULT_CUSTOM_DOMAIN,
+    LEGACY_CUSTOM_DOMAIN,
+    PagesBootstrapError,
+    ensure_pages,
+    main,
+)
 
 
 class FakePagesHandler(BaseHTTPRequestHandler):
@@ -58,7 +64,7 @@ class FakePagesHandler(BaseHTTPRequestHandler):
                 "build_type": "workflow",
                 "cname": type(self).cname,
                 "status": "built",
-                "html_url": "https://www.alo186.com",
+                "html_url": "https://alo186.com",
                 "https_enforced": False,
                 "protected_domain_state": "pending",
             },
@@ -77,7 +83,7 @@ class FakePagesHandler(BaseHTTPRequestHandler):
     def do_PUT(self) -> None:  # noqa: N802
         payload = self._payload()
         type(self).requests.append(("PUT", payload))
-        self.assert_payload(payload, {"build_type": "workflow", "cname": "www.alo186.com"})
+        self.assert_payload(payload, {"build_type": "workflow", "cname": "alo186.com"})
         type(self).site_exists = True
         type(self).cname = payload["cname"]
         self._json(204)
@@ -103,11 +109,11 @@ def fake_api(*, exists: bool = False, cname: str | None = None):
 
 
 class PagesBootstrapTests(unittest.TestCase):
-    def test_creates_workflow_site_and_sets_custom_domain(self) -> None:
+    def test_creates_workflow_site_and_sets_apex_custom_domain(self) -> None:
         with fake_api() as api_base:
             result = ensure_pages(
                 repository="ozaneryavuz/chatgpt",
-                custom_domain="www.alo186.com.",
+                custom_domain="alo186.com.",
                 token="test-admin-token-never-log",
                 api_base=api_base,
             )
@@ -115,7 +121,7 @@ class PagesBootstrapTests(unittest.TestCase):
         self.assertTrue(result.created)
         self.assertTrue(result.updated)
         self.assertEqual(result.build_type, "workflow")
-        self.assertEqual(result.custom_domain, "www.alo186.com")
+        self.assertEqual(result.custom_domain, "alo186.com")
         self.assertEqual(
             [method for method, _payload in FakePagesHandler.requests],
             ["GET", "POST", "PUT", "GET"],
@@ -123,10 +129,10 @@ class PagesBootstrapTests(unittest.TestCase):
         self.assertEqual(FakePagesHandler.requests[1][1], {"build_type": "workflow"})
         self.assertEqual(
             FakePagesHandler.requests[2][1],
-            {"build_type": "workflow", "cname": "www.alo186.com"},
+            {"build_type": "workflow", "cname": "alo186.com"},
         )
 
-    def test_existing_site_is_reconciled_without_create(self) -> None:
+    def test_legacy_www_input_is_normalized_to_apex(self) -> None:
         with fake_api(exists=True, cname="old.example.com") as api_base:
             result = ensure_pages(
                 repository="ozaneryavuz/chatgpt",
@@ -140,25 +146,26 @@ class PagesBootstrapTests(unittest.TestCase):
             [method for method, _payload in FakePagesHandler.requests],
             ["GET", "PUT", "GET"],
         )
-        self.assertEqual(result.custom_domain, "www.alo186.com")
+        self.assertEqual(result.custom_domain, "alo186.com")
+        self.assertEqual(FakePagesHandler.requests[1][1], {"build_type": "workflow", "cname": "alo186.com"})
 
     def test_rejects_missing_token_and_invalid_targets(self) -> None:
         with self.assertRaises(PagesBootstrapError):
             ensure_pages(
                 repository="ozaneryavuz/chatgpt",
-                custom_domain="www.alo186.com",
+                custom_domain="alo186.com",
                 token="",
             )
         with self.assertRaises(PagesBootstrapError):
             ensure_pages(
                 repository="invalid",
-                custom_domain="www.alo186.com",
+                custom_domain="alo186.com",
                 token="token",
             )
         with self.assertRaises(PagesBootstrapError):
             ensure_pages(
                 repository="ozaneryavuz/chatgpt",
-                custom_domain="https://www.alo186.com/path",
+                custom_domain="https://alo186.com/path",
                 token="token",
             )
 
@@ -181,15 +188,19 @@ class PagesBootstrapTests(unittest.TestCase):
         self.assertNotIn(secret, stdout.getvalue())
         self.assertNotIn(secret, stderr.getvalue())
         payload = json.loads(stdout.getvalue())
-        self.assertEqual(payload["custom_domain"], "www.alo186.com")
+        self.assertEqual(payload["custom_domain"], "alo186.com")
 
     def test_workflow_uses_optional_admin_bootstrap_without_printing_secret(self) -> None:
         workflow = (ROOT / ".github/workflows/alo186-github-pages.yml").read_text(encoding="utf-8")
         self.assertIn("ALO186_PAGES_ADMIN_TOKEN", workflow)
         self.assertIn("bootstrap_github_pages.py", workflow)
-        self.assertIn("custom-domain www.alo186.com", workflow)
+        self.assertIn("custom-domain alo186.com", workflow)
         self.assertNotIn('echo "$PAGES_ADMIN_TOKEN"', workflow)
         self.assertNotIn("set -x", workflow)
+
+    def test_domain_constants_are_apex_first(self) -> None:
+        self.assertEqual(DEFAULT_CUSTOM_DOMAIN, "alo186.com")
+        self.assertEqual(LEGACY_CUSTOM_DOMAIN, "www.alo186.com")
 
 
 if __name__ == "__main__":
