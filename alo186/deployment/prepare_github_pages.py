@@ -55,15 +55,10 @@ def _ensure_html_language(text: str, language: str) -> tuple[str, bool]:
         current = "en" if lang_match.group(2).lower().startswith("en") else "tr"
         if current == language:
             return text, False
-        replaced_tag = (
-            match.group(0)[: lang_match.start(2) + len("<html")]
-            if False else None
-        )
-        full_tag = match.group(0)
         corrected_tag = re.sub(
             r"(\blang\s*=\s*['\"])[^'\"]+(['\"])",
             rf"\g<1>{language}\g<2>",
-            full_tag,
+            match.group(0),
             count=1,
             flags=re.IGNORECASE,
         )
