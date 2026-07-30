@@ -16,7 +16,7 @@ PAGES = {
     },
     "/haberler/ups-aku-kapasite-testi-self-test-desarj-farki": {
         "path": ROOT / "alo186/haberler/ups-aku-kapasite-testi-self-test-desarj-farki/index.html",
-        "intent": ("kapasite testi", "self-test", "iç direnç", "controlled deşarj", "IEEE 1188-2025"),
+        "intent": ("kapasite testi", "self-test", "iç direnç", "kontrollü deşarj", "IEEE 1188-2025"),
         "sources": ("standards.ieee.org", "eaton.com", "vertiv.com"),
         "separation": "UPS self-test, iç direnç/conductance trendi, gerçek runtime ve kontrollü deşarj kapasite testinin hangi kanıtları sağladığını ve nasıl birlikte yorumlanacağını",
     },
