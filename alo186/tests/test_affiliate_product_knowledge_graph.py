@@ -23,13 +23,17 @@ RUN51_MODELS = {
     "ecoflow-delta-3-plus", "bluetti-ac70p", "honda-eu22i",
     "victron-phoenix-vedirect-12-1200", "x-sense-sc07-mr",
 }
+RUN6_MODELS = {
+    "anker-735-a2668-65w", "anker-341-a8346-hub", "ugreen-90871-usbc-100w",
+    "anker-prime-a88e2-240w", "ugreen-50571-usbc-hdmi",
+}
 BASE_MODELS = {"tp-link-tapo-p110", "tp-link-tapo-p110m", "ecoflow-river-2", "x-sense-xs01"}
-ALL_MODELS = BASE_MODELS | RUN50_MODELS | RUN51_MODELS
+ALL_MODELS = BASE_MODELS | RUN50_MODELS | RUN51_MODELS | RUN6_MODELS
 
 
 def node_snapshot() -> dict:
     script = r"""
-const c=require('./alo186/urun-eslestirme/catalog-sales-extension.js');
+const c=require('./alo186/urun-eslestirme/catalog-growth-run6.js');
 const now=new Date('2026-07-30T12:00:00Z');
 process.stdout.write(JSON.stringify({
  tag:c.affiliateTag, summary:c.knowledgeGraphSummary({now}),
@@ -64,6 +68,8 @@ def main() -> None:
     app = (REPO_ROOT / "alo186/urun-bilgi-grafigi/app.js").read_text(encoding="utf-8")
     extension = (REPO_ROOT / "alo186/urun-eslestirme/catalog-knowledge-extension.js").read_text(encoding="utf-8")
     sales = (REPO_ROOT / "alo186/urun-eslestirme/catalog-sales-extension.js").read_text(encoding="utf-8")
+    growth = (REPO_ROOT / "alo186/urun-eslestirme/catalog-growth-run6.js").read_text(encoding="utf-8")
+    journey = (REPO_ROOT / "alo186/urun-eslestirme/run6-missing-component-set.js").read_text(encoding="utf-8")
     bridge = (REPO_ROOT / "alo186/akilli-urun-secimi/catalog-knowledge-extension.js").read_text(encoding="utf-8")
     injector = (REPO_ROOT / "alo186/deployment/inject_affiliate_product_graph.py").read_text(encoding="utf-8")
     pipeline = (REPO_ROOT / "alo186/deployment/inject_growth_run15.py").read_text(encoding="utf-8")
@@ -71,15 +77,15 @@ def main() -> None:
     snapshot = node_snapshot()
 
     expected_summary = {
-        "version": "2026-07-30-run51", "generatedAt": "2026-07-30",
-        "needCount": 18, "categoryCount": 18, "productCount": 40,
-        "exactListingCount": 20, "manufacturerSearchCount": 20,
-        "publicProductCount": 13, "gatedCandidateCount": 27,
+        "version": "2026-07-30-run6-growth", "generatedAt": "2026-07-30",
+        "needCount": 18, "categoryCount": 18, "productCount": 45,
+        "exactListingCount": 20, "manufacturerSearchCount": 25,
+        "publicProductCount": 13, "gatedCandidateCount": 32,
         "affiliatePolicies": ["verified_direct", "after_tool", "professional_only"],
     }
     assert snapshot["tag"] == "alo186rehber-21"
     assert snapshot["summary"] == expected_summary
-    assert len(snapshot["products"]) == 40
+    assert len(snapshot["products"]) == 45
     assert len(snapshot["publicProductIds"]) == 13
     assert NEW_EXACT.issubset(set(snapshot["publicProductIds"]))
 
@@ -96,7 +102,7 @@ def main() -> None:
     assert all("tag=alo186rehber-21" in item["url"] for item in snapshot["products"])
 
     for item in snapshot["products"]:
-        if item["id"] in RUN51_MODELS:
+        if item["id"] in RUN51_MODELS | RUN6_MODELS:
             assert item["asin"] is None
             assert item["linkMode"] == "exact_model_search"
             assert item["source"].startswith("https://")
@@ -109,8 +115,8 @@ def main() -> None:
         if (node.get("inDefinedTermSet") or {}).get("@id", "").endswith("/gated-product-candidates#termset")
     ]
     assert len(product_nodes) == 13
-    assert len(term_nodes) == 63
-    assert len(candidate_nodes) == 27
+    assert len(term_nodes) == 68
+    assert len(candidate_nodes) == 32
     assert not any(node.get("@type") == "Offer" for node in graph_nodes)
     assert not any("offers" in node or "aggregateRating" in node for node in product_nodes)
     assert {node.get("sku") for node in product_nodes} == set(snapshot["publicProductIds"])
@@ -120,7 +126,8 @@ def main() -> None:
     assert 'rel="canonical" href="https://www.alo186.com/urun-bilgi-grafigi/"' in page
     assert "CollectionPage" in page and "FAQPage" in page and "BreadcrumbList" in page
     assert "affiliateProductGraphJsonLd" in page and "catalog-sales-extension.js" in page
-    assert "40 ürün/model düğümü" in page
+    assert "catalog-growth-run6.js" in page
+    assert "45 ürün/model düğümü" in page
     assert "amazon.com.tr" not in page.casefold()
     assert "sponsored nofollow noopener" in app
     assert "localStorage" not in app and "sessionStorage" not in app
@@ -132,6 +139,11 @@ def main() -> None:
         "victron-phoenix-vedirect-12-1200", "x-sense-sc07-mr", "2026-07-30-run51",
     ]:
         assert token in sales
+    for token in RUN6_MODELS | {"2026-07-30-run6-growth"}:
+        assert token in growth
+    for token in ["Mevcut zincir yeterli görünüyor", "90 günlük yeniden kontrol", "data-run6-hazard"]:
+        assert token in journey
+    assert "amazon.com.tr/" not in journey.casefold()
     for token in [
         "usb-c-hub-connectivity", "usb-c-display-output", "usb_c_hub",
         "display_cable", "usb-c-urun-kabul-testi",
@@ -142,7 +154,7 @@ def main() -> None:
     assert placeholder["commercialPolicy"]["noBuyOutcomePreserved"] is True
     for token in [
         "node_payload", "affiliateProductKnowledgeGraph", "commercialRankingFieldsUsed",
-        "graph_metadata", "SALES_EXTENSION",
+        "graph_metadata", "SALES_EXTENSION", "GROWTH_EXTENSION", "MISSING_COMPONENT",
     ]:
         assert token in injector
     assert "run_affiliate_product_graph" in pipeline
@@ -156,12 +168,12 @@ def main() -> None:
         "routingVersion": manifest["version"],
         "needNodes": 18,
         "categoryNodes": 18,
-        "sourceProductRecords": 40,
+        "sourceProductRecords": 45,
         "publicProductNodes": 13,
-        "gatedCandidateNodes": 27,
+        "gatedCandidateNodes": 32,
         "exactAsins": 20,
-        "manufacturerModels": 20,
-        "newProducts": 10,
+        "manufacturerModels": 25,
+        "run6Models": 5,
         "commercialRankingFieldsUsed": [],
         "noBuyOutcomePreserved": True,
     }, ensure_ascii=False, indent=2))
