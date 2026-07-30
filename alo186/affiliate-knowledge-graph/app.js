@@ -1,7 +1,7 @@
 (() => {
   'use strict';
   const TAG = 'alo186rehber-21';
-  const state = { catalog: null, intent: 'all', query: '' };
+  const state = { catalog: null, verified: null, intent: 'all', query: '' };
   const $ = (id) => document.getElementById(id);
   const riskText = { consumer: 'Tüketici', 'consumer-gated': 'Koşullu tüketici', 'professional-gated': 'Profesyonel sınır' };
 
@@ -28,10 +28,39 @@
     return { ...base, version: extension.version, generatedAt: extension.generatedAt, intents, productClasses };
   }
 
+  function verifiedModels(classId) {
+    return (state.verified?.products || []).filter((product) => product.classId === classId);
+  }
+
   function matches(item) {
     const intentMatch = state.intent === 'all' || item.needs.includes(state.intent);
-    const text = [item.label, item.search, ...item.requiredEvidence, ...(item.symptoms || []), ...(item.avoidWhen || []), ...item.needs].join(' ').toLocaleLowerCase('tr-TR');
+    const modelText = verifiedModels(item.id).flatMap((model) => [model.name, model.brand, model.userNeed, ...model.strengths, ...model.limits]).join(' ');
+    const text = [item.label, item.search, ...item.requiredEvidence, ...(item.symptoms || []), ...(item.avoidWhen || []), ...item.needs, modelText].join(' ').toLocaleLowerCase('tr-TR');
     return intentMatch && (!state.query || text.includes(state.query));
+  }
+
+  function injectVerifiedProductGraph() {
+    const products = state.verified.products.map((product) => ({
+      '@type': 'Product',
+      '@id': `https://alo186.com/affiliate-knowledge-graph/#${product.id}`,
+      name: product.name,
+      brand: { '@type': 'Brand', name: product.brand },
+      sku: product.id,
+      identifier: [
+        { '@type': 'PropertyValue', propertyID: 'ASIN', value: product.asin },
+        { '@type': 'PropertyValue', propertyID: 'MPN', value: product.mpn }
+      ],
+      category: product.classId,
+      description: product.userNeed,
+      sameAs: product.url,
+      dateModified: state.verified.verifiedAt,
+      additionalProperty: Object.entries(product.attributes).map(([name, value]) => ({ '@type': 'PropertyValue', name, value }))
+    }));
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.id = 'verified-affiliate-products';
+    script.textContent = JSON.stringify({ '@context': 'https://schema.org', '@graph': products });
+    document.head.appendChild(script);
   }
 
   function renderIntents() {
@@ -63,11 +92,55 @@
     });
   }
 
+  function renderVerifiedModels(card, item, checkbox) {
+    const models = verifiedModels(item.id);
+    if (!models.length) return;
+    const section = document.createElement('section');
+    section.className = 'verified-models';
+    const heading = document.createElement('strong');
+    heading.textContent = `${models.length} doğrulanmış model`;
+    section.appendChild(heading);
+    models.forEach((model) => {
+      const article = document.createElement('article');
+      article.className = 'verified-model';
+      const title = document.createElement('h4');
+      title.textContent = model.name;
+      const need = document.createElement('p');
+      need.textContent = model.userNeed;
+      const strengths = document.createElement('ul');
+      appendList(strengths, model.strengths);
+      const limits = document.createElement('p');
+      limits.className = 'limit';
+      limits.textContent = `Sınırlar: ${model.limits.join(' · ')}`;
+      const noBuy = document.createElement('p');
+      noBuy.className = 'no-buy-note';
+      noBuy.textContent = model.doNotBuyWhen;
+      const link = document.createElement('a');
+      link.className = 'model-link';
+      link.textContent = 'Doğrulanmış modeli Amazon’da incele';
+      link.rel = 'sponsored nofollow noopener';
+      link.target = '_blank';
+      link.setAttribute('aria-disabled', 'true');
+      checkbox.addEventListener('change', () => {
+        if (checkbox.checked) {
+          link.href = model.url;
+          link.setAttribute('aria-disabled', 'false');
+        } else {
+          link.removeAttribute('href');
+          link.setAttribute('aria-disabled', 'true');
+        }
+      });
+      article.append(title, need, strengths, limits, noBuy, link);
+      section.appendChild(article);
+    });
+    card.querySelector('.avoid').after(section);
+  }
+
   function renderProducts() {
     const list = state.catalog.productClasses.filter(matches);
     const host = $('products');
     host.replaceChildren();
-    $('resultCount').textContent = `${list.length} ürün sınıfı`;
+    $('resultCount').textContent = `${list.length} ürün sınıfı · ${state.verified.products.length} doğrulanmış model`;
     const selected = state.catalog.intents.find((item) => item.id === state.intent);
     $('resultTitle').textContent = selected ? selected.label : 'Bütün güvenli ürün sınıfları';
 
@@ -102,6 +175,7 @@
         affiliate.textContent = 'Mağaza yönlendirmesi kapalı';
         affiliate.classList.add('disabled');
       } else {
+        renderVerifiedModels(card, item, checkbox);
         checkbox.addEventListener('change', () => {
           if (checkbox.checked) {
             affiliate.href = url;
@@ -123,14 +197,20 @@
   }
 
   async function boot() {
-    const [base, extension] = await Promise.all([loadJson('./catalog.json'), loadJson('./catalog-extension-v103.json')]);
+    const [base, extension, verified] = await Promise.all([
+      loadJson('./catalog.json'),
+      loadJson('./catalog-extension-v103.json'),
+      loadJson('./verified-products.json')
+    ]);
     state.catalog = mergeCatalog(base, extension);
+    state.verified = verified;
     $('intentCount').textContent = state.catalog.intents.length;
-    $('productCount').textContent = state.catalog.productClasses.length;
+    $('productCount').textContent = `${state.catalog.productClasses.length} sınıf / ${verified.products.length} model`;
     $('search').addEventListener('input', (event) => {
       state.query = event.target.value.trim().toLocaleLowerCase('tr-TR');
       renderProducts();
     });
+    injectVerifiedProductGraph();
     renderIntents();
     renderProducts();
   }
