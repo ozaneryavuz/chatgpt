@@ -4,17 +4,21 @@ on:
   pull_request:
     paths:
       - 'alo186/hesaplama/usb-c-set-kisa-listesi/**'
+      - 'alo186/urun-eslestirme/catalog-qualified-commerce-run53.js'
       - 'alo186/hesaplama/index.html'
       - 'alo186/deployment/routing-overlays/usb-c-shortlist-run28.json'
       - 'alo186/tests/test_usb_c_shortlist_run28.py'
+      - 'alo186/tests/test_qualified_commerce_run53.js'
       - '.github/workflows/alo186-usb-c-shortlist-run28.yml'
   push:
     branches: [main]
     paths:
       - 'alo186/hesaplama/usb-c-set-kisa-listesi/**'
+      - 'alo186/urun-eslestirme/catalog-qualified-commerce-run53.js'
       - 'alo186/hesaplama/index.html'
       - 'alo186/deployment/routing-overlays/usb-c-shortlist-run28.json'
       - 'alo186/tests/test_usb_c_shortlist_run28.py'
+      - 'alo186/tests/test_qualified_commerce_run53.js'
       - '.github/workflows/alo186-usb-c-shortlist-run28.yml'
   workflow_dispatch:
 
@@ -41,8 +45,10 @@ jobs:
       - name: USB-C karar motoru ve kaynak güven sözleşmeleri
         run: |
           node alo186/hesaplama/usb-c-set-kisa-listesi/app.test.js
+          node alo186/tests/test_qualified_commerce_run53.js
           python alo186/tests/test_usb_c_shortlist_run28.py
           node --check alo186/hesaplama/usb-c-set-kisa-listesi/app.js
+          node --check alo186/urun-eslestirme/catalog-qualified-commerce-run53.js
           python -m py_compile alo186/tests/test_usb_c_shortlist_run28.py
 
       - name: Affiliate Knowledge Graph ve ürün regresyonları
@@ -79,11 +85,18 @@ jobs:
           route='/hesaplama/usb-c-set-kisa-listesi/'
           page=root/route.strip('/')/'index.html'
           app=page.with_name('app.js')
+          loader=page.with_name('catalog-loader.js')
           styles=page.with_name('styles.css')
-          assert page.is_file() and app.is_file() and styles.is_file()
+          extension=root/'akilli-urun-secimi/catalog-qualified-commerce-run53.js'
+          assert page.is_file() and app.is_file() and loader.is_file() and styles.is_file() and extension.is_file()
           html=page.read_text(encoding='utf-8')
+          app_text=app.read_text(encoding='utf-8')
+          extension_text=extension.read_text(encoding='utf-8')
           assert 'USB-C Şarj Seti ve Teknik Kısa Liste' in html
           assert 'Amazon satış ortaklığı bağlantılarıdır' in html
+          assert 'needHub10Gbps' in html and 'needMultiPortCharging' in html and 'cableRole' in html
+          assert 'ugreen-nexode-140w-90322' in extension_text and 'B0B127GW4D' in extension_text
+          assert 'rel="sponsored nofollow noopener"' in app_text
           assert 'priceCurrency' not in html and 'aggregateRating' not in html and 'availability' not in html
           sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
           assert '<loc>https://alo186.com/hesaplama/usb-c-set-kisa-listesi/</loc>' in sitemap or '<loc>https://www.alo186.com/hesaplama/usb-c-set-kisa-listesi/</loc>' in sitemap
