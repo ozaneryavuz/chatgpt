@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -65,8 +66,12 @@ def main() -> None:
         assert token in app
     assert "scenarios:22" in test
 
-    assert "41 çekirdek araç" in hub
+    tool_count_match = re.search(r"(\d+) çekirdek araç", hub)
+    assert tool_count_match, "Hesaplama Merkezi araç sayacı bulunamadı."
+    hub_tool_count = int(tool_count_match.group(1))
+    assert hub_tool_count >= 42
     assert './tasinabilir-ev-sarj-priz-uygunluk/' in hub
+    assert './seyahat-priz-adaptoru-voltaj-uygunluk/' in hub
     assert "Taşınabilir EV Şarj Cihazı ve Priz Uygunluğu" in hub
 
     result = subprocess.run(
@@ -84,7 +89,7 @@ def main() -> None:
         "routingVersion": manifest["version"],
         "route": ROUTE,
         "decisionScenarios": 22,
-        "hubToolCount": 41,
+        "hubToolCount": hub_tool_count,
         "householdPlanningLimitA": 10,
         "directStoreLinks": 0,
         "personalDataFields": 0,
@@ -92,6 +97,7 @@ def main() -> None:
         "affiliateTripleGate": True,
         "noBuyOutcomePreserved": True,
         "extensionLeadFailClosed": True,
+        "concurrentTravelToolPreserved": True,
     }, ensure_ascii=False, indent=2))
 
 
