@@ -13,6 +13,10 @@ CSS = (ROUTE / "styles.css").read_text(encoding="utf-8")
 HUB = (ROOT / "hesaplama/index.html").read_text(encoding="utf-8")
 OVERLAY = json.loads((ROOT / "deployment/routing-overlays/116-kombi-ups-yedek-guc-uygunluk.json").read_text(encoding="utf-8"))
 CANONICAL = "https://www.alo186.com/hesaplama/kombi-ups-yedek-guc-uygunluk/"
+HUB_COUNT_MATCH = re.search(r"<strong>(\d+) çekirdek araç</strong>", HUB)
+assert HUB_COUNT_MATCH, "Hesaplama merkezi görünür araç sayısını yayımlamalı."
+HUB_COUNT = int(HUB_COUNT_MATCH.group(1))
+HUB_CARD_COUNT = len(re.findall(r'<a\b[^>]*\bclass="[^"]*\btool-card\b[^"]*"[^>]*>', HUB, re.I))
 
 for name in ["index.html", "app.js", "app.test.js", "styles.css"]:
     assert (ROUTE / name).is_file(), name
@@ -73,7 +77,8 @@ assert OVERLAY == {
 
 assert "Kombi UPS ve Yedek Güç Uygunluğu" in HUB
 assert "./kombi-ups-yedek-guc-uygunluk/" in HUB
-assert "46 çekirdek araç" in HUB
+assert HUB_COUNT >= 46
+assert HUB_COUNT == HUB_CARD_COUNT, {"displayed": HUB_COUNT, "cards": HUB_CARD_COUNT}
 assert "Gaz/CO ve can güvenliğinde 187/112" in HUB
 assert HUB.count("<h1>") == 1
 
@@ -89,7 +94,8 @@ print(json.dumps({
     "ok": True,
     "route": "/hesaplama/kombi-ups-yedek-guc-uygunluk/",
     "canonical": CANONICAL,
-    "hubTools": 46,
+    "hubTools": HUB_COUNT,
+    "hubToolCards": HUB_CARD_COUNT,
     "decisionScenarios": 27,
     "gasEmergencyCommerceClosed": True,
     "professionalSystemsCommerceClosed": True,

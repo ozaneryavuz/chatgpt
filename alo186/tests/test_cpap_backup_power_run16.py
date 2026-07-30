@@ -13,6 +13,10 @@ CSS = (TOOL / "styles.css").read_text(encoding="utf-8")
 HUB = (ROOT / "hesaplama/index.html").read_text(encoding="utf-8")
 OVERLAY = json.loads((ROOT / "deployment/routing-overlays/115-cpap-apap-bipap-yedek-guc-uygunluk.json").read_text(encoding="utf-8"))
 ROUTE = "/hesaplama/cpap-apap-bipap-yedek-guc-uygunluk/"
+HUB_COUNT_MATCH = re.search(r"<strong>(\d+) çekirdek araç</strong>", HUB)
+assert HUB_COUNT_MATCH, "Hesaplama merkezi görünür araç sayısını yayımlamalı."
+HUB_COUNT = int(HUB_COUNT_MATCH.group(1))
+HUB_CARD_COUNT = len(re.findall(r'<a\b[^>]*\bclass="[^"]*\btool-card\b[^"]*"[^>]*>', HUB, re.I))
 
 for path in [TOOL / "index.html", TOOL / "app.js", TOOL / "styles.css", TOOL / "app.test.js"]:
     assert path.is_file(), path
@@ -72,8 +76,8 @@ for token in [":focus-visible", "@media(max-width:620px)", "prefers-reduced-moti
 
 assert 'href="./cpap-apap-bipap-yedek-guc-uygunluk/"' in HUB
 assert "CPAP/APAP Yedek Güç Uygunluğu" in HUB
-assert "45 çekirdek araç" in HUB
-assert "44 çekirdek araç" not in HUB
+assert HUB_COUNT >= 45
+assert HUB_COUNT == HUB_CARD_COUNT, {"displayed": HUB_COUNT, "cards": HUB_CARD_COUNT}
 
 assert OVERLAY == {
     "version": 115,
@@ -94,7 +98,8 @@ subprocess.run(["node", str(TOOL / "app.test.js")], check=True)
 print(json.dumps({
     "ok": True,
     "route": ROUTE,
-    "coreTools": 45,
+    "coreTools": HUB_COUNT,
+    "hubToolCards": HUB_CARD_COUNT,
     "directAmazonLinks": 0,
     "medicalFreeTextFields": 0,
     "activeOutageCommerceClosed": True,
