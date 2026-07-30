@@ -2,12 +2,18 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from pathlib import Path
 
 import inject_live_quality_hardening as core
 
 
 _original_normalize_text = core.normalize_text
+_DAMAGE_CONTEXT = re.compile(r"\b(hasar|zarar)\w*\b", re.IGNORECASE)
+_APPLICATION_CONTEXT = re.compile(
+    r"\b(başvur|basvur|talep|tazmin|dağıtım şirket|dagitim sirket|edaş|edas)\w*",
+    re.IGNORECASE,
+)
 
 
 def normalize_text(text: str) -> str:
@@ -28,6 +34,23 @@ def normalize_text(text: str) -> str:
         "10 iş günü içinde ilgili dağıtım şirketinin resmî kanalına başvurun",
     )
     return updated
+
+
+def wrong_damage_deadline_contexts(text: str) -> list[str]:
+    """Yalnız hasar/zarar başvurusu bağlamındaki 30 gün ifadelerini yakalar.
+
+    Tarayıcıdaki yerel kayıtların 30 gün saklanması gibi gizlilik süreleri bu
+    güvenlik kapısının konusu değildir ve yanlış pozitif üretmemelidir.
+    """
+    normalized = re.sub(r"\s+", " ", text)
+    contexts: list[str] = []
+    for match in core.WRONG_DEADLINE.finditer(normalized):
+        start = max(0, match.start() - 180)
+        end = min(len(normalized), match.end() + 180)
+        context = normalized[start:end]
+        if _DAMAGE_CONTEXT.search(context) and _APPLICATION_CONTEXT.search(context):
+            contexts.append(context[:360])
+    return contexts
 
 
 def validate(site: Path, base_path: str) -> dict:
@@ -52,7 +75,7 @@ def validate(site: Path, base_path: str) -> dict:
             continue
         if core.LEGACY_ORIGIN in text:
             failures.append(f"Eski www origin kaldı: {path.relative_to(site)}")
-        for context in core.wrong_deadline_contexts(text):
+        for context in wrong_damage_deadline_contexts(text):
             failures.append(f"Yanlış cihaz hasarı süresi: {path.relative_to(site)} → {context}")
         if path.suffix.lower() not in {".html", ".htm"}:
             continue
