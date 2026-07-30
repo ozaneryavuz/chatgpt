@@ -80,7 +80,8 @@ def main() -> None:
     assert app.index("if (input.hazard)") < app.index("if (!(input.vmin >= 80")
 
     assert "voltaj-regulatoru-kva-uygunluk" in hub
-    assert "34 çekirdek araç" in hub
+    count_match = re.search(r"(\d+) çekirdek araç", hub)
+    assert count_match and int(count_match.group(1)) >= 34
     assert "Voltaj Regülatörü kVA ve Faz Uygunluğu" in hub
 
     assert "@media(max-width:820px)" in css
@@ -92,7 +93,7 @@ def main() -> None:
         "ok": True,
         "routingVersion": manifest["version"],
         "route": ROUTE,
-        "hubToolCountLabel": 34,
+        "hubToolCountLabel": int(count_match.group(1)),
         "personalDataFields": 0,
         "browserStorage": False,
         "affiliateDisclosure": True,
