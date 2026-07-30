@@ -6,18 +6,18 @@ const now=new Date('2026-07-30T12:00:00Z');
 assert.equal(catalog.affiliateTag,'alo186rehber-21');
 assert.equal(catalog.needs.length,18);
 assert.equal(catalog.categories.length,18);
-assert.equal(catalog.products.length,30);
+assert.equal(catalog.products.length,40);
 assert.deepEqual(catalog.knowledgeGraphSummary({now}),{
-  version:'2026-07-30-run50',generatedAt:'2026-07-30',needCount:18,categoryCount:18,
-  productCount:30,exactListingCount:20,manufacturerSearchCount:10,
-  publicProductCount:13,gatedCandidateCount:17,
+  version:'2026-07-30-run51',generatedAt:'2026-07-30',needCount:18,categoryCount:18,
+  productCount:40,exactListingCount:20,manufacturerSearchCount:20,
+  publicProductCount:13,gatedCandidateCount:27,
   affiliatePolicies:['verified_direct','after_tool','professional_only']
 });
 
 const exact=catalog.products.filter(product=>product.status==='verified_listing');
 const models=catalog.products.filter(product=>product.status==='manufacturer_verified_search');
 assert.equal(exact.length,20);
-assert.equal(models.length,10);
+assert.equal(models.length,20);
 for(const product of exact){
   assert.match(product.asin,/^B[A-Z0-9]{9}$/);
   assert(product.url.includes(`/dp/${product.asin}`));
@@ -50,7 +50,7 @@ assert.equal(a1383.attributes.totalOutputW,87,'87 W yalnız toplam çoklu-port g
 assert.match(a1383.sourceNote,/Anker teknik kaynağıyla/);
 assert.equal(catalog.productLinkLabel(a1383),'Amazon ürün sayfasını aç');
 
-const modelAdditions={
+const modelChecks={
   'tp-link-tapo-p110':{source:'tp-link.com',maxCurrentA:16,maxPowerW:3680},
   'tp-link-tapo-p110m':{source:'tp-link.com',maxCurrentA:16,maxPowerW:3680,matter:true},
   'ecoflow-river-2':{source:'ecoflow.com.tr',capacityWh:256,continuousW:300},
@@ -60,9 +60,20 @@ const modelAdditions={
   'tp-link-tapo-p115m':{source:'tp-link.com',maxCurrentA:16,maxPowerW:3680,matter:true},
   'ecoflow-river-2-max':{source:'ecoflow.com.tr',capacityWh:512,continuousW:500},
   'ecoflow-delta-2-max':{source:'ecoflow.com.tr',capacityWh:2048,continuousW:2400},
-  'x-sense-xc01-r':{source:'x-sense.com.tr',alarmDb:85,sensor:'electrochemical'}
+  'x-sense-xc01-r':{source:'x-sense.com.tr',alarmDb:85,sensor:'electrochemical'},
+  'samsung-eb-p4520-20k-45w':{source:'samsung.com',capacityMah:20000,maxOutputW:45,usbCPorts:3},
+  'ugreen-nexode-x-65w-3port':{source:'ugreen.com',maxOutputW:65,maxSingleDeviceW:65,usbCPorts:2},
+  'ugreen-90440-240w-usb-c':{source:'ugreen.com',maxPowerW:240,maxCurrentA:5,videoSupport:false},
+  'ecoflow-river-3':{source:'ecoflow.com.tr',capacityWh:245,continuousW:300,epsTransferMs:20},
+  'ecoflow-river-3-plus':{source:'ecoflow.com.tr',capacityWh:286,continuousW:600,epsTransferMs:10},
+  'ecoflow-delta-3-plus':{source:'ecoflow.com.tr',capacityWh:1024,continuousW:1800,surgeW:3600},
+  'bluetti-ac70p':{source:'bluettipower.eu',capacityWh:864,continuousW:1000,powerLiftingW:2000},
+  'honda-eu22i':{source:'honda.co.uk',ratedW:1800,maxW:2200,weightKg:21},
+  'victron-phoenix-vedirect-12-1200':{source:'victronenergy.com',continuousW25C:1150,peakW:1600,transferSwitchBuiltIn:false},
+  'x-sense-sc07-mr':{source:'x-sense.com.tr',alarmDb:85,standardSmoke:'EN 14604',standardCo:'EN 50291'}
 };
-for(const[id,checks]of Object.entries(modelAdditions)){
+assert.equal(Object.keys(modelChecks).length,20);
+for(const[id,checks]of Object.entries(modelChecks)){
   const product=catalog.getProduct(id);
   assert(product,id);
   assert.equal(product.asin,null);
@@ -83,16 +94,22 @@ for(const[id,checks]of Object.entries(modelAdditions)){
 
 assert.equal(catalog.productsFor('smart_plug').length,0,'Model arama düğümleri matcher tarafından doğrudan ürün sayılmamalı.');
 assert.equal(catalog.allProductsFor('smart_plug').length,4);
-assert.equal(catalog.allProductsFor('power_station').length,3);
-assert.equal(catalog.graphForCategory('co_alarm').products.length,1);
+assert.equal(catalog.allProductsFor('power_station').length,7);
+assert.equal(catalog.allProductsFor('generator').length,1);
+assert.equal(catalog.allProductsFor('inverter').length,1);
+assert.equal(catalog.allProductsFor('smoke_alarm').length,2);
 for(const category of ['usb_c_charger','usb_c_cable','usb_c_hub','display_cable']){
   assert.equal(catalog.graphForCategory(category).needs.length,1,`${category} ihtiyaç düğümüne bağlanmalı`);
 }
+const combined=catalog.getProduct('x-sense-sc07-mr');
+assert.deepEqual(combined.needIds,['fire-early-warning','carbon-monoxide-warning']);
+assert(combined.relatedTools.length);
+assert(combined.requiredEvidence.length>=4);
 
 const publicProducts=catalog.products.filter(product=>catalog.publicAffiliateEligible(product,{now}));
 const gatedProducts=catalog.products.filter(product=>catalog.isCatalogProduct(product)&&!catalog.publicAffiliateEligible(product,{now,freshOnly:false}));
 assert.equal(publicProducts.length,13);
-assert.equal(gatedProducts.length,17);
+assert.equal(gatedProducts.length,27);
 assert(publicProducts.includes(a1289));
 assert(publicProducts.includes(a1383));
 assert(!publicProducts.some(product=>product.status==='manufacturer_verified_search'));
@@ -102,8 +119,8 @@ const productNodes=graph.filter(node=>node['@type']==='Product');
 const termNodes=graph.filter(node=>node['@type']==='DefinedTerm');
 const candidateNodes=termNodes.filter(node=>node.inDefinedTermSet&&node.inDefinedTermSet['@id'].endsWith('/gated-product-candidates#termset'));
 assert.equal(productNodes.length,13);
-assert.equal(termNodes.length,53);
-assert.equal(candidateNodes.length,17);
+assert.equal(termNodes.length,63);
+assert.equal(candidateNodes.length,27);
 assert.equal(graph.filter(node=>node['@type']==='Offer').length,0);
 for(const node of productNodes){
   assert(!('offers'in node));
@@ -115,7 +132,7 @@ for(const product of gatedProducts){
   assert(!productNodes.some(node=>node.sku===product.id),`Kapılı ürün Product schema'ya sızdı: ${product.id}`);
   assert(candidateNodes.some(node=>node.termCode===product.id),`Kapılı aday eksik: ${product.id}`);
 }
-for(const id of Object.keys(modelAdditions)){
+for(const id of Object.keys(modelChecks)){
   const node=candidateNodes.find(item=>item.termCode===id);
   assert(node&&node.sameAs,`${id} üretici kaynağı schema'da eksik`);
 }
@@ -127,4 +144,8 @@ const stale=catalog.knowledgeGraph({now:new Date('2027-01-01T12:00:00Z')})['@gra
 assert.equal(stale.filter(node=>node['@type']==='Product').length,0);
 assert.equal(stale.filter(node=>node['@type']==='DefinedTerm'&&node.inDefinedTermSet&&node.inDefinedTermSet['@id'].endsWith('/gated-product-candidates#termset')).length,0);
 
-console.log(JSON.stringify({ok:true,affiliateTag:catalog.affiliateTag,needs:18,categories:18,totalProducts:30,publicProducts:13,gatedCandidates:17,exactAsins:20,manufacturerModels:10,newManufacturerModels:6,existingExactProductsEnriched:2},null,2));
+console.log(JSON.stringify({
+  ok:true,affiliateTag:catalog.affiliateTag,needs:18,categories:18,totalProducts:40,
+  publicProducts:13,gatedCandidates:27,exactAsins:20,manufacturerModels:20,
+  newManufacturerModels:10
+},null,2));
