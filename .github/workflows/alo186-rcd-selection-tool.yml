@@ -140,7 +140,7 @@ jobs:
               assert f'<loc>https://www.alo186.com{route}</loc>' in sitemap
               hub=(root/'hesaplama/index.html').read_text(encoding='utf-8')
               assert relative in hub or expected in hub
-              assert '32 çekirdek araç' in hub
+              assert 'Kaçak Akım Rölesi Tip ve Hassasiyet Testi' in hub
           PY
 
       - name: Doğrulanmış RCD modül artifactı
