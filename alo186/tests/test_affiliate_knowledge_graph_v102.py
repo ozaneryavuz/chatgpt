@@ -13,26 +13,28 @@ BASE = json.loads((PAGE / "catalog.json").read_text(encoding="utf-8"))
 V103 = json.loads((PAGE / "catalog-extension-v103.json").read_text(encoding="utf-8"))
 V104 = json.loads((PAGE / "catalog-v104-extension.json").read_text(encoding="utf-8"))
 SUPPLEMENT = json.loads((PAGE / "catalog-v104-supplement.json").read_text(encoding="utf-8"))
+V105 = json.loads((PAGE / "catalog-v105-extension.json").read_text(encoding="utf-8"))
 OVERLAY = json.loads((ROOT / "deployment/routing-overlays/102-affiliate-knowledge-graph.json").read_text(encoding="utf-8"))
 ROUTE = "/affiliate-knowledge-graph/"
 
 assert BASE["version"] == 102
 assert V103["version"] == 103
 assert V104["version"] == SUPPLEMENT["version"] == 104
-assert BASE["generatedAt"] == V103["generatedAt"] == V104["generatedAt"] == SUPPLEMENT["generatedAt"] == "2026-07-30"
+assert V105["version"] == 105
+assert BASE["generatedAt"] == V103["generatedAt"] == V104["generatedAt"] == SUPPLEMENT["generatedAt"] == V105["generatedAt"] == "2026-07-30"
 assert BASE["affiliateTag"] == "alo186rehber-21"
 
 intent_map = {}
 product_map = {}
-for layer in [BASE, V103, V104, SUPPLEMENT]:
+for layer in [BASE, V103, V104, SUPPLEMENT, V105]:
     for item in layer["intents"]:
         intent_map[item["id"]] = item
     for item in layer["productClasses"]:
         product_map[item["id"]] = item
 intents = list(intent_map.values())
 products = list(product_map.values())
-assert len(intents) >= 28
-assert len(products) >= 63
+assert len(intents) >= 33
+assert len(products) >= 75
 assert len({item["id"] for item in intents}) == len(intents)
 assert len({item["id"] for item in products}) == len(products)
 intent_ids = {item["id"] for item in intents}
@@ -49,6 +51,10 @@ for item in V103["productClasses"]:
 for item in V104["productClasses"] + SUPPLEMENT["productClasses"]:
     assert item["signals"] and len(item["signals"]) >= 1
     assert item["avoidWhen"] and len(item["avoidWhen"]) >= 1
+for item in V105["productClasses"]:
+    assert item["symptoms"] and item["avoidWhen"]
+    assert item["profiles"] and item["environments"]
+    assert len(item["requiredEvidence"]) >= 4
 
 professional = [item for item in products if item["risk"] == "professional-gated"]
 assert professional
@@ -76,7 +82,7 @@ for forbidden in ['"@type":"Product"', '"@type":"Offer"', "aggregateRating", "pr
 for token in [
     "Amazon satış ortaklığı açıklaması", "Daha fazla ürünü",
     "Mevcut cihaz gerçek görevi", "Kullanıcı ve ortam bağlamı",
-    'rel="sponsored nofollow noopener"', "63 ürün sınıfı", "28"
+    'rel="sponsored nofollow noopener"', "75 ürün sınıfı", "33"
 ]:
     assert token in HTML, token
 
@@ -87,6 +93,7 @@ assert "aria-disabled" in JS
 assert "catalog-extension-v103.json" in JS
 assert "catalog-v104-extension.json" in JS
 assert "catalog-v104-supplement.json" in JS
+assert "catalog-v105-extension.json" in JS
 assert "mergeCatalog" in JS
 assert "signals" in JS and "avoidWhen" in JS and "profiles" in JS and "environments" in JS
 assert all(token not in JS for token in ["localStorage", "sessionStorage", "geolocation"])
