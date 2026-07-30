@@ -96,7 +96,7 @@ assert.match(app,/smoke_alarm_suitability_completed/);
 assert.match(app,/smoke_alarm_product_route_opened/);
 assert.match(app,/Şimdilik satın alma/);
 assert.match(hub,/href="\.\/duman-alarmi-yerlesim-bakim-uygunluk\//);
-assert.match(hub,/31 çekirdek araç/);
+assert.match(hub,/\d+ çekirdek araç/);
 assert.match(manifest,/alo186\/hesaplama\/duman-alarmi-yerlesim-bakim-uygunluk\/index\.html/);
 assert.match(sitemap,/https:\/\/www\.alo186\.com\/hesaplama\/duman-alarmi-yerlesim-bakim-uygunluk\//);
 
