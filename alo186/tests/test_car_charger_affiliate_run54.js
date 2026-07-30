@@ -8,6 +8,7 @@ const catalog=require('../urun-eslestirme/catalog-car-charger-run54.js');
 const root=path.resolve(__dirname,'..');
 const indexHtml=fs.readFileSync(path.join(root,'urun-eslestirme','index.html'),'utf8');
 const appJs=fs.readFileSync(path.join(root,'urun-eslestirme','app.js'),'utf8');
+const extensionJs=fs.readFileSync(path.join(root,'urun-eslestirme','catalog-car-charger-run54.js'),'utf8');
 
 assert.equal(catalog.affiliateTag,'alo186rehber-21');
 assert.equal(catalog.verificationMaxAgeDays,45);
@@ -30,6 +31,9 @@ assert.equal(portableEvse.affiliatePolicy,'after_tool');
 assert.equal(portableEvse.nextStepUrl,'https://alo186.com/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/');
 assert.match(portableEvse.nextStepLabel,/priz.*PE.*RCD\/DC.*akım/i);
 assert.match(portableEvse.description,/etiketi.*kanıtlamaz/i);
+assert.match(extensionJs,/searchParams\.get\('niyet'\)==='portable_evse'/);
+assert.match(extensionJs,/searchParams\.set\('kategori','portable_evse'\)/);
+assert.match(extensionJs,/history\.replaceState/);
 
 const expected=[
   ['belkin-ccb001-24w-dual-usba','B08558MGST','CCB001btBK'],
@@ -107,6 +111,7 @@ console.log(JSON.stringify({
   ok:true,
   category:category.id,
   portableEvseCategory:portableEvse.id,
+  portableEvseIntentMapped:true,
   products:expected.map(([,asin])=>asin),
   affiliateTag:catalog.affiliateTag,
   publicNodes:selectedNodes.length,
