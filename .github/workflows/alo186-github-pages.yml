@@ -174,7 +174,7 @@ jobs:
         shell: bash
         env:
           PAGES_BASE_PATH: ${{ steps.pages_mode.outputs.base_path }}
-          ALO186_GA4_MEASUREMENT_ID: ${{ vars.ALO186_GA4_MEASUREMENT_ID }}
+          ALO186_GA4_MEASUREMENT_ID: ${{ vars.ALO186_GA4_MEASUREMENT_ID || 'G-639TVHL0LC' }}
         run: |
           set -euo pipefail
           rm -rf /tmp/alo186-pages-site
@@ -227,7 +227,7 @@ jobs:
           PAGES_READY: ${{ steps.pages_mode.outputs.pages_ready }}
           BASE_PATH: ${{ steps.pages_mode.outputs.base_path }}
           ADMIN_TOKEN_PRESENT: ${{ steps.pages_admin.outputs.token_present }}
-          GA4_MEASUREMENT_ID: ${{ vars.ALO186_GA4_MEASUREMENT_ID }}
+          GA4_MEASUREMENT_ID: ${{ vars.ALO186_GA4_MEASUREMENT_ID || 'G-639TVHL0LC' }}
         run: |
           {
             echo '## ALO186 GitHub Pages'
