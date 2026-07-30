@@ -1,0 +1,93 @@
+name: ALO186 soğuk zincir güveni ve hazırlık dönüşümü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/buzdolabi-dondurucu-kesinti-guvenligi/**'
+      - 'alo186/hesaplama/index.html'
+      - 'alo186/deployment/routing-overlays/cold-chain-growth-run29.json'
+      - 'alo186/deployment/repair_live_html_defects.py'
+      - 'alo186/tests/test_cold_chain_growth_run29*.py'
+      - 'alo186/tests/test_release_manifest.js'
+      - '.github/workflows/alo186-cold-chain-growth-run29.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/buzdolabi-dondurucu-kesinti-guvenligi/**'
+      - 'alo186/hesaplama/index.html'
+      - 'alo186/deployment/routing-overlays/cold-chain-growth-run29.json'
+      - 'alo186/deployment/repair_live_html_defects.py'
+      - 'alo186/tests/test_cold_chain_growth_run29*.py'
+      - 'alo186/tests/test_release_manifest.js'
+      - '.github/workflows/alo186-cold-chain-growth-run29.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-cold-chain-run29-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Soğuk zincir kararları ve güven sözleşmeleri
+        run: |
+          set -euo pipefail
+          node alo186/hesaplama/buzdolabi-dondurucu-kesinti-guvenligi/app.test.js
+          python alo186/tests/test_cold_chain_growth_run29.py
+          node --check alo186/hesaplama/buzdolabi-dondurucu-kesinti-guvenligi/app.js
+          python -m py_compile alo186/tests/test_cold_chain_growth_run29.py alo186/tests/test_cold_chain_growth_run29_artifact.py
+
+      - name: Mevcut affiliate, güven ve routing regresyonları
+        run: |
+          set -euo pipefail
+          node alo186/tests/test_affiliate_knowledge_graph.js
+          node alo186/tests/test_product_matcher.js
+          node alo186/tests/test_trust_revenue_conversion.js
+          node alo186/tests/test_release_manifest.js
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Canonical üretim paketi
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py --output /tmp/cold-chain-canonical --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/cold-chain-canonical
+
+      - name: Custom-domain ve project-path kabulü
+        shell: bash
+        run: |
+          set -euo pipefail
+          for spec in 'custom|' 'project|/chatgpt'; do
+            name="${spec%%|*}"
+            base="${spec#*|}"
+            target="/tmp/cold-chain-${name}"
+            cp -a /tmp/cold-chain-canonical "$target"
+            python alo186/deployment/prepare_github_pages.py --site "$target" --base-path "$base" --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
+            python alo186/deployment/inject_outcome_runtime.py --site "$target" --base-path "$base"
+            python alo186/deployment/inject_shortlist_growth.py --site "$target" --base-path "$base"
+            python alo186/deployment/repair_live_html_defects.py --site "$target" --base-path "$base"
+            python alo186/deployment/finalize_live_quality.py --site "$target" --base-path "$base"
+            python alo186/deployment/smoke_github_pages.py --site "$target" --base-path "$base"
+            python alo186/tests/test_cold_chain_growth_run29_artifact.py --site "$target" --base-path "$base"
+          done
+
+      - name: Doğrulanmış soğuk zincir artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-cold-chain-safety-run29
+          path: /tmp/cold-chain-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
