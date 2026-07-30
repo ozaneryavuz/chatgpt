@@ -1,0 +1,18 @@
+{
+  "version": 104,
+  "generatedAt": "2026-07-30",
+  "intents": [],
+  "productClasses": [
+    {
+      "id":"akilli-su-kacagi-alarmi",
+      "label":"Yerel sirenli akıllı su kaçağı alarmı",
+      "risk":"consumer-gated",
+      "search":"yerel sirenli akıllı su kaçağı sensörü düşük pil uyarılı",
+      "needs":["nem-su-erken-uyari","kiraci-guvenligi"],
+      "requiredEvidence":["internet olmasa da yerel siren","düşük pil uyarısı","sensör konumu","uygulama gizliliği"],
+      "signals":["evde yokken su kaçağı bildirimi isteniyor","kombi veya çamaşır makinesi altında erken uyarı gerekiyor"],
+      "avoidWhen":["aktif su elektrikli ekipmana ulaşmış","yalnız bulut bildirimi var ve yerel alarm yok"],
+      "guide":"/elektrik-portali"
+    }
+  ]
+}
