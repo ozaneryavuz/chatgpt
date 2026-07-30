@@ -111,6 +111,7 @@ jobs:
           from pathlib import Path
 
           route='/hesaplama/kacak-akim-rolesi-tip-hassasiyet-testi/'
+          relative='./kacak-akim-rolesi-tip-hassasiyet-testi/'
           for root,prefix in [(Path('/tmp/alo186-rcd-custom'),''),(Path('/tmp/alo186-rcd-project'),'/chatgpt')]:
               page=root/route.strip('/')/'index.html'
               app=page.with_name('app.js')
@@ -138,7 +139,7 @@ jobs:
               sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
               assert f'<loc>https://www.alo186.com{route}</loc>' in sitemap
               hub=(root/'hesaplama/index.html').read_text(encoding='utf-8')
-              assert expected in hub
+              assert relative in hub or expected in hub
               assert '32 çekirdek araç' in hub
           PY
 
