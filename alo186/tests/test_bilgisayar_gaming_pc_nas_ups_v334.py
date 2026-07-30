@@ -10,8 +10,8 @@ PAGE = ROOT / "alo186/hesaplama/bilgisayar-gaming-pc-nas-ups-uygunluk/index.html
 APP = PAGE.with_name("app.js")
 CSS = PAGE.with_name("styles.css")
 TEST = PAGE.with_name("app.test.js")
-OVERLAY = ROOT / "alo186/deployment/routing-overlays/095-bilgisayar-gaming-pc-nas-ups-uygunluk.json"
-WORKFLOW = ROOT / ".github/workflows/alo186-bilgisayar-gaming-pc-nas-ups-v334.yml"
+OVERLAY = ROOT / "alo186/deployment/routing-overlays/096-bilgisayar-gaming-pc-nas-ups-uygunluk.json"
+WORKFLOW = ROOT / ".github/workflows/alo186-bilgisayar-gaming-pc-nas-ups-v335.yml"
 CANONICAL = "/hesaplama/bilgisayar-gaming-pc-nas-ups-uygunluk/"
 
 for path in (PAGE, APP, CSS, TEST, OVERLAY, WORKFLOW):
@@ -40,7 +40,7 @@ assert "Power station UPS değildir" in js
 assert "IEC 62040-1" in js and "IEC 62040-3" in js
 assert "@media(max-width:820px)" in css and "@media(max-width:560px)" in css
 assert "prefers-reduced-motion" in css and ":focus-visible" in css
-assert overlay["version"] == 95
+assert overlay["version"] == 96
 assert overlay["routes"] == [{
     "source": "alo186/hesaplama/bilgisayar-gaming-pc-nas-ups-uygunluk/index.html",
     "canonicalPath": CANONICAL,
