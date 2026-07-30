@@ -64,6 +64,8 @@ assert "body:not([data-alo186-ux-compact=\"true\"])" in ux_css
 assert "body{padding-bottom" not in ux_css.replace(" ", "")
 assert ".alo-table-scroll[data-overflow=\"true\"]" in ux_css
 assert ".alo-ux-toc" in ux_css
+assert ".alo-ux-toc:not([open]) nav { display: none; }" in ux_css
+assert ".alo-ux-toc[open] nav" in ux_css
 assert "grid-template-columns: repeat(2" in ux_css
 assert ".alo-ux-mobilebar a:focus-visible" in ux_css
 assert "alo186-consent-settings" in ux_css
@@ -170,6 +172,7 @@ print(json.dumps({
     "formControlFallbackLabels": True,
     "dynamicLinkFallbackNames": True,
     "keyboardFocusVisible": True,
+    "collapsedTocLinksHidden": True,
     "externalLinkHardening": True,
     "criticalImagesProtected": True,
     "imageAltFallback": True,
