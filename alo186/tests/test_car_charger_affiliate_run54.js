@@ -22,6 +22,15 @@ assert.ok(catalog.categoryRelations.car_charger.tools.length>0);
 assert.ok(catalog.categoryRelations.car_charger.guides.length>0);
 assert.ok(catalog.categoryRelations.car_charger.evidence.length>=4);
 
+const portableEvse=catalog.getCategory('portable_evse');
+assert.ok(portableEvse,'Taşınabilir EVSE kategorisi ürün merkezine kaydedilmedi.');
+assert.equal(portableEvse.mode,'guide');
+assert.equal(portableEvse.risk,'safety');
+assert.equal(portableEvse.affiliatePolicy,'after_tool');
+assert.equal(portableEvse.nextStepUrl,'https://alo186.com/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/');
+assert.match(portableEvse.nextStepLabel,/priz.*PE.*RCD\/DC.*akım/i);
+assert.match(portableEvse.description,/etiketi.*kanıtlamaz/i);
+
 const expected=[
   ['belkin-ccb001-24w-dual-usba','B08558MGST','CCB001btBK'],
   ['belkin-cca004-30w-usbc','B0BTP9GF27','CCA004btBK'],
@@ -76,6 +85,9 @@ for(const node of selectedNodes){
   assert.ok(node.additionalProperty.some((item)=>item.name==='Ticari ilişki'));
   for(const field of forbidden)assert.ok(!(field in node),`Yasak KG alanı ${field}: ${node.sku}`);
 }
+const portableEvseNode=graph.find((node)=>node['@type']==='DefinedTerm'&&node.termCode==='portable_evse');
+assert.ok(portableEvseNode,'Taşınabilir EVSE kategori düğümü Knowledge Graph içinde eksik.');
+assert.match(portableEvseNode.description,/Priz sınıfı/);
 const directList=graph.find((node)=>node['@type']==='ItemList'&&String(node['@id']).endsWith('/urun-bilgi-grafigi/#public-products'));
 assert.ok(directList,'Doğrudan affiliate ItemList düğümü eksik.');
 const directIds=new Set(directList.itemListElement.map((item)=>item.item['@id']));
@@ -94,6 +106,7 @@ assert.ok(!/amazon\.com\.tr\/s\?k=/.test(appJs),'Genel Amazon araması doğrudan
 console.log(JSON.stringify({
   ok:true,
   category:category.id,
+  portableEvseCategory:portableEvse.id,
   products:expected.map(([,asin])=>asin),
   affiliateTag:catalog.affiliateTag,
   publicNodes:selectedNodes.length,
