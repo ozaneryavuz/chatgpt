@@ -13,6 +13,7 @@ on:
       - 'alo186/tests/test_portal_inventory_claims.js'
       - 'alo186/tests/test_sitewide_ux_v117.py'
       - 'alo186/tests/test_sitewide_user_experience_v120.py'
+      - 'alo186/tests/test_contextual_journeys_v120.py'
       - '.github/workflows/alo186-sitewide-ux-v117.yml'
   push:
     branches: [main]
@@ -27,6 +28,7 @@ on:
       - 'alo186/tests/test_portal_inventory_claims.js'
       - 'alo186/tests/test_sitewide_ux_v117.py'
       - 'alo186/tests/test_sitewide_user_experience_v120.py'
+      - 'alo186/tests/test_contextual_journeys_v120.py'
       - '.github/workflows/alo186-sitewide-ux-v117.yml'
   workflow_dispatch:
 
@@ -40,7 +42,7 @@ concurrency:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 55
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -55,6 +57,9 @@ jobs:
 
       - name: Tüm HTML sayfaları, rota bütünlüğü ve kullanıcı öncelikli portal
         run: python alo186/tests/test_sitewide_user_experience_v120.py
+
+      - name: İki dilli devam rotaları ve dinamik affiliate şeffaflığı
+        run: python alo186/tests/test_contextual_journeys_v120.py
 
       - name: Mevcut yayın ve güven regresyonları
         run: |
