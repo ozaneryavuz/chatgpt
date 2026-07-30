@@ -1,0 +1,21 @@
+{
+  "version": 81,
+  "generatedAt": "2026-07-30",
+  "routes": [
+    {
+      "source": "alo186/haberler/ges-rapid-shutdown-dc-izolator-afci-farki/index.html",
+      "canonicalPath": "/haberler/ges-rapid-shutdown-dc-izolator-afci-farki",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/bess-soc-soh-kullanilabilir-enerji-kapasite-testi/index.html",
+      "canonicalPath": "/haberler/bess-soc-soh-kullanilabilir-enerji-kapasite-testi",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/vpp-temel-tuketim-degeri-baseline-telemetri-uzlastirma/index.html",
+      "canonicalPath": "/haberler/vpp-temel-tuketim-degeri-baseline-telemetri-uzlastirma",
+      "type": "article"
+    }
+  ]
+}
