@@ -51,6 +51,15 @@
     return link;
   }
 
+  function pumpBackupCard(isPortal){
+    const link=document.createElement('a');
+    link.className=isPortal?'card':'tool-card';
+    link.href=publicRoute('/hesaplama/hidrofor-pompa-yedek-guc-uygunluk/');
+    link.dataset.alo186PumpBackupCard='true';
+    link.innerHTML=isPortal?'<span class="tag">Hidrofor · kalkış W · Wh · faz</span><h2>Pompa Yedek Güç Uygunluk Testi</h2><p>Hidrofor ve su pompasında etiket akımı, kalkış yöntemi, jeneratör/inverter gücü ve hedef süreyi birlikte değerlendirin.</p><b>Pompa hesabını aç →</b>':'<span class="eyebrow">Pompa · kalkış · jeneratör · inverter</span><h2>Hidrofor ve Pompa Yedek Güç Testi</h2><p>Motorun sürekli W, kalkış W ve batarya Wh ihtiyacını hesaplayın; mevcut kaynak yeterliyse yeni ürün almayın.</p><b>Yedek güç uygunluğunu hesapla →</b>';
+    return link;
+  }
+
   function injectGrowthCards(){
     const normalized=location.pathname.replace(/\/$/,'');
     const isPortal=normalized.endsWith('/elektrik-portali');
@@ -64,6 +73,7 @@
         if(!grid.querySelector('[data-alo186-outcome-runtime-card]')){
           const outcome=document.createElement('a');outcome.className='card';outcome.href=publicRoute('/hesaplama/cozum-sonucu/');outcome.dataset.alo186OutcomeRuntimeCard='true';outcome.innerHTML=isPortal?'<span class="tag">Kapalı döngü · satın almama · tekrar önleme</span><h2>Çözüm Sonucu Merkezi</h2><p>Karar, hesap, ürün, bakım veya resmî kanalın gerçekten işe yarayıp yaramadığını izleyin.</p><b>Sonucu kaydet ve izle →</b>':'<strong>Çözüm gerçekten işe yaradı mı?</strong><p>Öneri, ürün, bakım veya resmî kanal sonucunu kişisel veri vermeden kaydedin.</p><span>Sonucu kaydet ve izle →</span>';grid.prepend(outcome);
         }
+        if(!grid.querySelector('[data-alo186-pump-backup-card]'))grid.prepend(pumpBackupCard(true));
         if(!grid.querySelector('[data-alo186-generator-safety-card]'))grid.prepend(generatorSafetyCard(true));
         if(!grid.querySelector('[data-alo186-shortlist-runtime-card]'))grid.prepend(shortlistCard(true));
       }
@@ -72,6 +82,7 @@
     const isHub=/\/hesaplama\/?$/.test(location.pathname);
     if(isHub){
       const grid=document.querySelector('section.tool-grid');
+      if(grid&&!grid.querySelector('[data-alo186-pump-backup-card]'))grid.prepend(pumpBackupCard(false));
       if(grid&&!grid.querySelector('[data-alo186-generator-safety-card]'))grid.prepend(generatorSafetyCard(false));
       if(grid&&!grid.querySelector('[data-alo186-shortlist-runtime-card]'))grid.prepend(shortlistCard(false));
       document.querySelectorAll('strong').forEach(node=>{if(/\d+ çekirdek araç/.test(node.textContent||''))node.textContent=(node.textContent||'').replace(/\d+ çekirdek araç/,'36 çekirdek araç');});
