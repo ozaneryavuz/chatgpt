@@ -112,6 +112,9 @@ jobs:
             for route in routes: assert (root/route.strip('/')/'index.html').is_file(),route
             release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
             pages=json.loads((root/'pages-release.json').read_text(encoding='utf-8'))
+            canonical_origin=str(release.get('canonicalHost') or '').rstrip('/')
+            assert canonical_origin in {'https://alo186.com','https://www.alo186.com'},canonical_origin
+            assert str(pages.get('canonicalHost') or '').rstrip('/')==canonical_origin
             meta=release['growthRun18']
             assert meta['rawPersonalDataCollected'] is False
             assert meta['directAffiliateLinksAdded']==0
@@ -134,7 +137,7 @@ jobs:
             entries={item['canonicalPath']:item for item in search['entries']}
             for route,url in zip(routes,expected): assert entries[route]['url']==url
             sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
-            for route in routes: assert f'<loc>https://www.alo186.com{route}</loc>' in sitemap
+            for route in routes: assert f'<loc>{canonical_origin}{route}</loc>' in sitemap
             sw=(root/'sw.js').read_text(encoding='utf-8')
             for url in expected: assert url in sw
             manifest=json.loads((root/'manifest.webmanifest').read_text(encoding='utf-8'))
