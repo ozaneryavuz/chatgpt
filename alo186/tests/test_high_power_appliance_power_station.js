@@ -135,7 +135,6 @@ for (const token of [
   'rel="canonical"',
   'FAQPage',
   'BreadcrumbList',
-  'sponsored nofollow noopener',
 ]) assert(html.includes(token), token);
 
 for (const forbidden of [
@@ -151,6 +150,7 @@ for (const forbidden of [
 ]) assert(!html.includes(forbidden), forbidden);
 
 for (const forbidden of ['localStorage', 'sessionStorage', 'geolocation', 'fetch(']) assert(!js.includes(forbidden), forbidden);
+for (const token of ['sponsored nofollow noopener', 'affiliate_category_gate_open']) assert(js.includes(token), token);
 for (const token of ['@media(max-width:820px)', '@media(max-width:560px)', 'min-height:48px', 'prefers-reduced-motion', 'forced-colors']) assert(css.includes(token), token);
 
 assert.strictEqual(overlay.version, 122);
