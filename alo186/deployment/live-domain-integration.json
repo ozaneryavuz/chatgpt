@@ -1,22 +1,44 @@
 {
-  "version": 1,
+  "version": 2,
   "integratedAt": "2026-07-30",
-  "productionOrigin": "https://www.alo186.com",
+  "productionOrigin": "https://alo186.com",
+  "canonicalOrigin": "https://www.alo186.com",
   "apexOrigin": "https://alo186.com",
+  "wwwOrigin": "https://www.alo186.com",
+  "minimumReleaseRouteCount": 275,
   "requiredRoutes": [
     "/",
+    "/pages-release.json",
+    "/elektrik-durum-merkezi/",
+    "/elektrik-portali/",
+    "/edas-bul/",
+    "/karar-motoru/",
+    "/hesaplama/",
     "/hesaplama/aydinlatma-ihtiyac-ve-ampul-uygunluk/",
     "/hesaplama/kesinti-hazirlik-envanteri/",
+    "/hesaplama/home-office-internet-sureklilik-plani/",
     "/akilli-urun-secimi/",
     "/amazon-elektrik-urunleri/",
-    "/sitemap.xml"
+    "/urun-bilgi-grafigi/",
+    "/haberler/ups-eco-modu-online-cift-cevrim-farki",
+    "/sitemap.xml",
+    "/robots.txt"
+  ],
+  "requiredReleaseSignals": [
+    "routeCount>=275",
+    "deviceDamageDeadline=10 iş günü",
+    "rootDeviceDamageDeadline=10 iş günü",
+    "canonicalHost matches canonicalOrigin"
   ],
   "requiredTrustSignals": [
     "independent_information_platform",
     "not_official_institution",
+    "no_personal_data_on_public_decision_pages",
     "amazon_affiliate_disclosure",
     "no_unverified_price_stock_rating_warranty",
     "no_buy_outcome_preserved"
   ],
-  "acceptanceWorkflow": ".github/workflows/alo186-live-domain-acceptance.yml"
+  "knownBlockingCondition": "productionOrigin and canonicalOrigin are split until DNS and GitHub Pages custom domain are unified",
+  "acceptanceWorkflow": ".github/workflows/alo186-live-domain-acceptance.yml",
+  "identityGuard": "alo186/tests/live_release_identity_guard.py"
 }
