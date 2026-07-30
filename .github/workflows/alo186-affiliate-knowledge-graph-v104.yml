@@ -1,0 +1,138 @@
+name: ALO186 affiliate Knowledge Graph v104 ürün üretimi
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/affiliate-knowledge-graph/**'
+      - 'alo186/urun-eslestirme/catalog-car-charger-run54.js'
+      - 'alo186/urun-bilgi-grafigi/**'
+      - 'alo186/tests/test_affiliate_knowledge_graph_v102.py'
+      - 'alo186/tests/test_affiliate_product_expansion_v104.js'
+      - 'alo186/deployment/routing-overlays/102-affiliate-knowledge-graph.json'
+      - '.github/workflows/alo186-affiliate-knowledge-graph-v104.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/affiliate-knowledge-graph/**'
+      - 'alo186/urun-eslestirme/catalog-car-charger-run54.js'
+      - 'alo186/urun-bilgi-grafigi/**'
+      - 'alo186/tests/test_affiliate_knowledge_graph_v102.py'
+      - 'alo186/tests/test_affiliate_product_expansion_v104.js'
+      - 'alo186/deployment/routing-overlays/102-affiliate-knowledge-graph.json'
+      - '.github/workflows/alo186-affiliate-knowledge-graph-v104.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-affiliate-knowledge-graph-v104-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: V104 ürün, kullanıcı niyeti ve Knowledge Graph sözleşmeleri
+        run: |
+          set -euo pipefail
+          node alo186/tests/test_affiliate_product_expansion_v104.js
+          python alo186/tests/test_affiliate_knowledge_graph_v102.py
+          node alo186/tests/test_affiliate_knowledge_graph.js
+
+      - name: JavaScript, JSON ve yasak ticari alan kontrolü
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check alo186/affiliate-knowledge-graph/app.js
+          node --check alo186/urun-eslestirme/catalog-car-charger-run54.js
+          node --check alo186/urun-bilgi-grafigi/app.js
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('alo186')
+          for path in [
+              root/'affiliate-knowledge-graph/catalog.json',
+              root/'affiliate-knowledge-graph/catalog-extension-v103.json',
+              root/'affiliate-knowledge-graph/catalog-extension-v104.json',
+              root/'deployment/routing-overlays/102-affiliate-knowledge-graph.json',
+          ]:
+              json.loads(path.read_text(encoding='utf-8'))
+          for path in [
+              root/'affiliate-knowledge-graph/index.html',
+              root/'affiliate-knowledge-graph/app.js',
+              root/'affiliate-knowledge-graph/catalog-extension-v104.json',
+              root/'urun-eslestirme/catalog-car-charger-run54.js',
+              root/'urun-bilgi-grafigi/index.html',
+              root/'urun-bilgi-grafigi/app.js',
+          ]:
+              text=path.read_text(encoding='utf-8')
+              for token in ['priceCurrency','aggregateRating','availability','"offers"']:
+                  assert token not in text, (path, token)
+          PY
+
+      - name: Canonical üretim paketi
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-affiliate-kg-v104-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-affiliate-kg-v104-canonical
+
+      - name: Custom-domain ve project-path Pages kabulü
+        shell: bash
+        run: |
+          set -euo pipefail
+          for spec in 'custom|' 'project|/chatgpt'; do
+            name="${spec%%|*}"
+            base="${spec#*|}"
+            target="/tmp/alo186-affiliate-kg-v104-${name}"
+            cp -a /tmp/alo186-affiliate-kg-v104-canonical "$target"
+            python alo186/deployment/prepare_github_pages.py \
+              --site "$target" \
+              --base-path "$base" \
+              --repository "$GITHUB_REPOSITORY" \
+              --commit "$GITHUB_SHA"
+            python alo186/deployment/inject_outcome_runtime.py \
+              --site "$target" \
+              --base-path "$base"
+            python alo186/deployment/inject_shortlist_growth.py \
+              --site "$target" \
+              --base-path "$base" \
+              > "/tmp/alo186-affiliate-kg-v104-${name}.json"
+            python alo186/deployment/smoke_github_pages.py \
+              --site "$target" \
+              --base-path "$base"
+
+            test -f "$target/affiliate-knowledge-graph/index.html"
+            test -f "$target/affiliate-knowledge-graph/catalog-extension-v104.json"
+            test -f "$target/urun-bilgi-grafigi/index.html"
+            test -f "$target/akilli-urun-secimi/catalog-car-charger-run54.js"
+            grep -q '50 ürün sınıfı' "$target/affiliate-knowledge-graph/index.html"
+            grep -q 'exactProductTemplate' "$target/affiliate-knowledge-graph/index.html"
+            grep -q 'catalog-extension-v104.json' "$target/affiliate-knowledge-graph/app.js"
+            grep -q 'catalog-car-charger-run54.js' "$target/urun-bilgi-grafigi/index.html"
+            grep -q 'Mevcut güvenli ürünüm bu ihtiyacı karşılamıyor' "$target/affiliate-knowledge-graph/index.html"
+            ! grep -Eqi 'priceCurrency|aggregateRating|availability|"offers"' "$target/affiliate-knowledge-graph/index.html"
+          done
+
+      - name: Doğrulanmış v104 üretim artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-affiliate-knowledge-graph-v104-production
+          path: /tmp/alo186-affiliate-kg-v104-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 45
