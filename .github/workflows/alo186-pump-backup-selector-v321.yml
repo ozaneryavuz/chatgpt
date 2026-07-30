@@ -72,16 +72,36 @@ jobs:
           set -euo pipefail
           cp -a /tmp/alo186-pump-backup-canonical /tmp/alo186-pump-backup-custom
           cp -a /tmp/alo186-pump-backup-canonical /tmp/alo186-pump-backup-project
+
           python alo186/deployment/prepare_github_pages.py \
             --site /tmp/alo186-pump-backup-custom \
             --base-path '' \
             --repository "$GITHUB_REPOSITORY" \
             --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-pump-backup-custom \
+            --base-path ''
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-pump-backup-custom \
+            --base-path '' > /tmp/alo186-pump-backup-custom.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-pump-backup-custom \
+            --base-path ''
+
           python alo186/deployment/prepare_github_pages.py \
             --site /tmp/alo186-pump-backup-project \
             --base-path '/chatgpt' \
             --repository "$GITHUB_REPOSITORY" \
             --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-pump-backup-project \
+            --base-path '/chatgpt'
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-pump-backup-project \
+            --base-path '/chatgpt' > /tmp/alo186-pump-backup-project.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-pump-backup-project \
+            --base-path '/chatgpt'
 
       - name: Affiliate, gizlilik ve yayın kabulü
         run: |
@@ -107,9 +127,11 @@ jobs:
               assert 'amazon.' not in app.casefold()
               assert 'localStorage' not in app and 'sessionStorage' not in app and 'fetch(' not in app
               assert 'actualNeed' in app and 'technicalCheck' in app and 'affiliateCheck' in app
+              assert "input.environment==='wet'" in app
+              assert 'Mevcut kaynağın sınıfını doğrulayın' in app
               expected = f'{prefix}{canonical_path}' if prefix else canonical_path
               sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
-              assert expected in sitemap
+              assert f'<loc>https://alo186.com{canonical_path}</loc>' in sitemap
               search_file = root / 'arama/search-index.json'
               assert search_file.is_file()
               search = json.loads(search_file.read_text(encoding='utf-8'))
