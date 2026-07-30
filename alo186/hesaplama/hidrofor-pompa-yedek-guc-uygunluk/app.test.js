@@ -10,11 +10,16 @@ assert.equal(app.evaluate({...base,phase:'three',voltage:400}).status,'professio
 assert.equal(app.evaluate({...base,pumpType:'borehole'}).status,'professional');
 assert.equal(app.evaluate({...base,connection:'fixed'}).status,'professional');
 assert.equal(app.evaluate({...base,environment:'wet',protection:'not_rated'}).status,'stop');
+assert.equal(app.evaluate({...base,environment:'wet',protection:'unknown',connection:'fixed',phase:'three',voltage:400}).status,'stop','Islak ortam durdurma kapısı profesyonel sınıflandırmadan önce çalışmalı.');
 assert.equal(app.evaluate({...base,ratedCurrent:''}).status,'evidence_required');
 const gen=app.evaluate(base);assert.equal(gen.status,'conditional_purchase');assert.deepEqual(gen.commerceCategories,['generator']);
 const ps=app.evaluate({...base,ratedCurrent:2,startMethod:'vfd',sourceType:'auto'});assert.equal(ps.status,'conditional_purchase');assert.deepEqual(ps.commerceCategories,['power_station']);
 const inv=app.evaluate({...base,ratedCurrent:2,startMethod:'soft',sourceType:'inverter'});assert.deepEqual(inv.commerceCategories,['inverter']);
-const noBuy=app.evaluate({...base,sourceStatus:'existing',sourceType:'generator',sourceContinuousW:1500,sourceSurgeW:7000});assert.equal(noBuy.status,'no_buy');assert.equal(noBuy.commerceClosed,true);
+const missingClass=app.evaluate({...base,sourceStatus:'existing',sourceType:'auto',sourceContinuousW:1500,sourceSurgeW:7000,sourceWh:5000});assert.equal(missingClass.status,'evidence_required','Mevcut kaynak sınıfı seçilmeden no-buy sonucu üretilemez.');
+const blankExisting=app.evaluate({...base,sourceStatus:'existing',sourceType:'generator',sourceContinuousW:'',sourceSurgeW:' '});assert.equal(blankExisting.status,'evidence_required','Boş sayısal alanlar sıfır kabul edilmemeli.');
+const batteryMissingWh=app.evaluate({...base,sourceStatus:'existing',sourceType:'power_station',sourceContinuousW:7000,sourceSurgeW:7000,sourceWh:''});assert.equal(batteryMissingWh.status,'evidence_required','Bataryalı kaynakta Wh zorunlu olmalı.');
+const noBuy=app.evaluate({...base,sourceStatus:'existing',sourceType:'generator',sourceContinuousW:1500,sourceSurgeW:7000});assert.equal(noBuy.status,'no_buy');assert.equal(noBuy.commerceClosed,true);assert.match(noBuy.summary,/yakıt/);
+const batteryNoBuy=app.evaluate({...base,sourceStatus:'existing',sourceType:'power_station',sourceContinuousW:1500,sourceSurgeW:7000,sourceWh:3000});assert.equal(batteryNoBuy.status,'no_buy');
 const weak=app.evaluate({...base,sourceStatus:'existing',sourceType:'generator',sourceContinuousW:500,sourceSurgeW:1000});assert.equal(weak.status,'conditional_purchase');
 assert.equal(app.constants.START_MULTIPLIER.direct,6);assert.equal(app.constants.START_MULTIPLIER.soft,3);assert.equal(app.constants.START_MULTIPLIER.vfd,1.5);assert(!Object.values(app.constants.CATEGORY_LINKS).some(x=>x.href.includes('amazon.')));
-console.log(JSON.stringify({ok:true,scenarios:13,route:'/hesaplama/hidrofor-pompa-yedek-guc-uygunluk/'},null,2));
+console.log(JSON.stringify({ok:true,scenarios:18,route:'/hesaplama/hidrofor-pompa-yedek-guc-uygunluk/'},null,2));
