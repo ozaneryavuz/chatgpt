@@ -30,19 +30,15 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Eksik Parça Planlayıcıyı sabit ve incelenmiş PR commitinden al
+      - name: Ana daldaki Eksik Parça Planlayıcıyı doğrula
         shell: bash
         run: |
           set -euo pipefail
-          git fetch origin pull/420/head:refs/remotes/origin/alo186-pr420
-          expected='4c6435505038314e9a9e15eb8cb74194b8149282'
-          test "$(git rev-parse refs/remotes/origin/alo186-pr420)" = "$expected"
-          git checkout "$expected" -- \
-            .github/workflows/alo186-sales-missing-parts-planner.yml \
-            alo186/tests/test_affiliate_product_knowledge_graph_sales_planner.py \
-            alo186/urun-bilgi-grafigi/index.html \
-            alo186/urun-bilgi-grafigi/sales-missions.css \
-            alo186/urun-bilgi-grafigi/sales-missions.js
+          test -f .github/workflows/alo186-sales-missing-parts-planner.yml
+          test -f alo186/tests/test_affiliate_product_knowledge_graph_sales_planner.py
+          test -f alo186/urun-bilgi-grafigi/index.html
+          test -f alo186/urun-bilgi-grafigi/sales-missions.css
+          test -f alo186/urun-bilgi-grafigi/sales-missions.js
 
       - name: Bütün büyüme katmanlarından sonra aktif release rotalarını sitemap ile uzlaştır
         shell: bash
@@ -133,14 +129,15 @@ jobs:
           root=Path('/tmp/alo186-run9-final-pages')
           release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
           result=json.loads(Path('/tmp/alo186-run9-final-result.json').read_text(encoding='utf-8'))
+          config=json.loads(Path('alo186/deployment/content-consolidations.json').read_text(encoding='utf-8'))
           paths={(urlsplit(node.text or '').path.rstrip('/') or '/') for node in ET.parse(root/'sitemap.xml').getroot().iter() if node.tag.endswith('loc')}
           active={(urlsplit(str(item.get('canonicalPath') or '')).path.rstrip('/') or '/') for item in release['routes']}
           planner=(root/'urun-bilgi-grafigi'/'index.html').read_text(encoding='utf-8')
           assert active<=paths,sorted(active-paths)
-          assert release['contentConsolidation']['aliasCount']==7
+          assert release['contentConsolidation']['aliasCount']==len(config['consolidations'])
           assert result['sitemapReconciliation']['activeRouteCount']==len(release['routes'])
           assert 'sales-missing-parts' in planner or 'Eksik Parça Planlayıcı' in planner
-          print({'ok':True,'routes':len(active),'sitemapAdded':result['sitemapReconciliation']['addedCount'],'planner':True})
+          print({'ok':True,'routes':len(active),'aliases':len(config['consolidations']),'sitemapAdded':result['sitemapReconciliation']['addedCount'],'planner':True})
           PY
 
       - name: Geçici görevleri kaldır ve ana dala kaydet
