@@ -55,6 +55,7 @@ jobs:
           python alo186/tests/test_github_pages_bootstrap.py
           python alo186/tests/test_live_quality_hardening.py
           python alo186/tests/test_live_domain_integration_manifest.py
+          python alo186/tests/test_ga4_consent_integration.py
 
       - name: Canonical statik siteyi oluştur
         shell: bash
@@ -93,6 +94,10 @@ jobs:
             python alo186/deployment/inject_live_quality_hardening_v2.py \
               --site "$site" \
               --base-path "$base"
+            python alo186/deployment/inject_ga4_consent.py \
+              --site "$site" \
+              --base-path "$base" \
+              --measurement-id ""
           done
 
       - name: Pages yönetici tokenı durumunu belirle
@@ -169,6 +174,7 @@ jobs:
         shell: bash
         env:
           PAGES_BASE_PATH: ${{ steps.pages_mode.outputs.base_path }}
+          ALO186_GA4_MEASUREMENT_ID: ${{ vars.ALO186_GA4_MEASUREMENT_ID }}
         run: |
           set -euo pipefail
           rm -rf /tmp/alo186-pages-site
@@ -191,6 +197,11 @@ jobs:
             --site /tmp/alo186-pages-site \
             --base-path "$PAGES_BASE_PATH" \
             | tee /tmp/alo186-live-quality-hardening.json
+          python alo186/deployment/inject_ga4_consent.py \
+            --site /tmp/alo186-pages-site \
+            --base-path "$PAGES_BASE_PATH" \
+            --measurement-id "${ALO186_GA4_MEASUREMENT_ID:-}" \
+            | tee /tmp/alo186-ga4-release.json
 
       - name: Pages önizleme artifactını sakla
         uses: actions/upload-artifact@v4
@@ -199,6 +210,7 @@ jobs:
           path: |
             /tmp/alo186-pages-site
             /tmp/alo186-live-quality-hardening.json
+            /tmp/alo186-ga4-release.json
           if-no-files-found: error
           include-hidden-files: true
           retention-days: 30
@@ -215,6 +227,7 @@ jobs:
           PAGES_READY: ${{ steps.pages_mode.outputs.pages_ready }}
           BASE_PATH: ${{ steps.pages_mode.outputs.base_path }}
           ADMIN_TOKEN_PRESENT: ${{ steps.pages_admin.outputs.token_present }}
+          GA4_MEASUREMENT_ID: ${{ vars.ALO186_GA4_MEASUREMENT_ID }}
         run: |
           {
             echo '## ALO186 GitHub Pages'
@@ -226,6 +239,11 @@ jobs:
             echo '- Canonical, sitemap, robots ve release kimliği apex origin üzerinde birleştirildi.'
             echo '- 44 px dokunma hedefi, görünür odak, taşma ve bilinen kontrast seçicileri son artifact katmanında sertleştirildi.'
             echo '- Cihaz hasarı başvurusu için 10 iş günü fail-closed koruması uygulandı.'
+            if [ -n "$GA4_MEASUREMENT_ID" ]; then
+              echo '- GA4 açık onay katmanı: **etkin**; etiket yalnız kullanıcı izninden sonra yüklenir.'
+            else
+              echo '- GA4 açık onay katmanı: **hazır fakat ALO186_GA4_MEASUREMENT_ID bekliyor**; canlı etikete ağ isteği gönderilmez.'
+            fi
           } >> "$GITHUB_STEP_SUMMARY"
 
   deploy:

@@ -1,0 +1,16 @@
+{
+  "version": 107,
+  "generatedAt": "2026-07-30",
+  "routes": [
+    {
+      "source": "alo186/yasal/cerez/index.html",
+      "canonicalPath": "/yasal/cerez",
+      "type": "legal"
+    },
+    {
+      "source": "alo186/yasal/kvkk-aydinlatma/index.html",
+      "canonicalPath": "/yasal/kvkk-aydinlatma",
+      "type": "legal"
+    }
+  ]
+}
