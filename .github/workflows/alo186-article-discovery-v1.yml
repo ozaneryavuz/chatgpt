@@ -122,15 +122,16 @@ jobs:
           ]:
               release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
               pages=json.loads((root/'pages-release.json').read_text(encoding='utf-8'))
-              articles=[item for item in release['routes'] if item['type']=='article']
+              canonical_article_count=int(release['articleCount'])
               discovery=pages['articleDiscoveryV1']
-              assert discovery['articleCount'] == len(articles)
-              assert discovery['articleBacklinksInjected'] == len(articles)
+              assert canonical_article_count >= 50
+              assert discovery['articleCount'] == canonical_article_count
+              assert discovery['articleBacklinksInjected'] == canonical_article_count
               assert discovery['portalCardInjected'] is True
               assert discovery['rawQueryStored'] is False
               assert discovery['commercialRankingUsed'] is False
               hub=(root/'haberler/index.html').read_text(encoding='utf-8')
-              assert hub.count('data-article-card') == len(articles)
+              assert hub.count('data-article-card') == canonical_article_count
               assert 'amazon.com.tr' not in hub.lower()
               portal=(root/'elektrik-portali/index.html').read_text(encoding='utf-8')
               assert portal.count('data-alo186-article-hub-card="true"') == 1
