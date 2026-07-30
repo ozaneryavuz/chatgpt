@@ -40,6 +40,7 @@ def main() -> None:
     assert "yaklaşık 4 saat" in html
     assert "yaklaşık 48 saat" in html
     assert "yaklaşık 24 saat" in html
+    assert "4 °C" in html
     assert "Satış ortaklığı açıklaması" in html
     assert "doğrudan mağaza bağlantısı açmaz" in html
     assert "Mevcut kaynak yeterliyse satın alma önerilmez" in html
@@ -82,6 +83,10 @@ def main() -> None:
         "SURGE_RESERVE=1.15",
         "BATTERY_EFF=0.85",
         "USABLE=0.8",
+        "Math.sqrt(3)",
+        "refrigeratorHours",
+        "freezerHours",
+        "capacityIssues",
         "requiredContinuousW",
         "requiredSurgeW",
         "requiredWh",
@@ -97,12 +102,14 @@ def main() -> None:
         "Saf sinüs çıkış doğrulanmadı",
         "230 V / 50 Hz",
         "Kontrollü kompresör başlatma testi",
+        "Buzdolabı bölümü için yaklaşık",
         "foodSafetyWindow",
+        "foodSafetyIssues",
     ):
         assert token in app, token
     assert app.index("if(input.emergency)") < app.index("const evidence=[]")
     assert app.index("if(input.medicalStorage)") < app.index("const evidence=[]")
-    assert app.index("if(input.scenario==='active')") < app.index("let category='generator'")
+    assert app.index("if(input.scenario==='active')") < app.index("const category=chooseCategory")
     assert "amazon." not in app.casefold()
     assert "../../akilli-urun-secimi?kategori=" in app
 
@@ -122,12 +129,13 @@ def main() -> None:
     )
     payload = json.loads(result.stdout)
     assert payload["ok"] is True
-    assert payload["scenarios"] == 25
+    assert payload["scenarios"] == 29
     assert payload["route"] == ROUTE
     assert payload["affiliateGateChecks"] == 3
     assert payload["personalDataFields"] == 0
     assert payload["directStoreLinks"] == 0
     assert payload["foodSafetyWindows"] == [4, 24, 48]
+    assert payload["reviewFindingsFixed"] == 3
 
     print(json.dumps({
         "ok": True,
@@ -135,6 +143,7 @@ def main() -> None:
         "route": ROUTE,
         "decisionScenarios": payload["scenarios"],
         "foodSafetyWindows": payload["foodSafetyWindows"],
+        "reviewFindingsFixed": payload["reviewFindingsFixed"],
         "personalDataFields": 0,
         "directStoreLinks": 0,
         "affiliateGateChecks": 3,
