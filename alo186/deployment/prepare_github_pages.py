@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 
@@ -9,15 +10,20 @@ from prepare_github_pages_core import *  # noqa: F401,F403
 
 DEVICE_DAMAGE_MARKER = 'data-alo186-device-damage-deadline="true"'
 DEVICE_DAMAGE_ROUTE = "/haberler/elektrik-kesintisi-cihaz-hasari-edas-basvurusu/"
+PRIMARY_START_MARKER = 'data-alo186-primary-start="true"'
+PRIMARY_START_ROUTE = "/elektrik-durum-merkezi/"
 _original_gateway_html = _core.gateway_html
 _original_prepare = _core.prepare
 
+if PRIMARY_START_ROUTE not in _core.CRITICAL_ROUTES:
+    _core.CRITICAL_ROUTES = (_core.CRITICAL_ROUTES[0], PRIMARY_START_ROUTE, *_core.CRITICAL_ROUTES[1:])
+
 
 def gateway_html(base_path: str, noindex: bool) -> str:
-    """Pages kök gateway'inde güncel cihaz hasarı süresini görünür ve kaynaklı tutar."""
+    """Pages kökünü güvenli, kullanıcı niyetli ve devam edilebilir başlangıca dönüştürür."""
 
     html = _original_gateway_html(base_path, noindex)
-    if DEVICE_DAMAGE_MARKER in html:
+    if DEVICE_DAMAGE_MARKER in html or PRIMARY_START_MARKER in html:
         return html
 
     style = (
@@ -27,10 +33,23 @@ def gateway_html(base_path: str, noindex: bool) -> str:
         ".legal-deadline p{margin:.55rem 0;color:#263a59}"
         ".legal-deadline a{display:inline-flex;align-items:center;min-height:44px;"
         "color:#174bb9;font-weight:900}"
+        ".primary-start{grid-column:1/-1;min-height:220px;border:2px solid #28b9d8;"
+        "background:linear-gradient(135deg,#071631,#12386a);color:#fff}"
+        ".primary-start strong{color:#fff;font-size:clamp(1.55rem,4vw,2.35rem)}"
+        ".primary-start p{color:#d7e7ff;max-width:720px}"
+        ".primary-start span{color:#7fe6ff;font-size:1.05rem}"
+        ".primary-start small{display:block;margin-bottom:8px;color:#7fe6ff;font-weight:900;"
+        "text-transform:uppercase;letter-spacing:.08em}"
     )
     if "</style>" not in html:
         raise RuntimeError("Pages gateway inline stil kapanışı bulunamadı.")
     html = html.replace("</style>", style + "</style>", 1)
+
+    html = html.replace(
+        "<h1>Elektrik sorununda doğru sonraki adım.</h1><p class=\"lead\">Kesinti, cihaz hasarı, yedek güç veya elektrik güvenliği konusunda önce riski ayırın; sonra resmî kanal, ücretsiz hesaplayıcı veya teknik rehbere ilerleyin.</p>",
+        "<h1>60 saniyede doğru elektrik rotası.</h1><p class=\"lead\">Belirtiyi seçin; ALO186 önce can güvenliğini, sonra 112, 186, EDAŞ, elektrikçi, kanıt ve yedek güç seçeneklerini ayırsın. Kişisel veri istemez, resmî kayıt oluşturmaz.</p>",
+        1,
+    )
 
     guide_url = _core.public_url(base_path, DEVICE_DAMAGE_ROUTE)
     notice = (
@@ -43,10 +62,21 @@ def gateway_html(base_path: str, noindex: bool) -> str:
         f'<a href="{guide_url}">Belge ve başvuru rehberini aç →</a>'
         '</section>'
     )
+    status_url = _core.public_url(base_path, PRIMARY_START_ROUTE)
+    primary = (
+        f'<a class="card primary-start" {PRIMARY_START_MARKER} href="{status_url}">'
+        '<small>Önerilen başlangıç</small>'
+        '<strong>Elektrik Durum Merkezi</strong>'
+        '<p>Kesinti, gerilim, sayaç, pano, cihaz hasarı veya UPS–jeneratör olayını dört kısa adımda sınıflandırın. '
+        'Tehlike varsa ticari yol kapanır; son kaydınıza daha sonra aynı cihazdan devam edebilirsiniz.</p>'
+        '<span>60 saniyelik yönlendirmeyi başlat →</span>'
+        '</a>'
+    )
     anchor = '<section class="grid" aria-label="ALO186 hızlı başlangıç">'
     if anchor not in html:
         raise RuntimeError("Pages gateway hızlı başlangıç alanı bulunamadı.")
-    return html.replace(anchor, notice + "\n" + anchor, 1)
+    html = html.replace(anchor, notice + "\n" + anchor + "\n" + primary, 1)
+    return html
 
 
 def validate_root_legal_deadline(site: Path, base_path: str) -> None:
@@ -68,19 +98,50 @@ def validate_root_legal_deadline(site: Path, base_path: str) -> None:
         raise RuntimeError("Pages kökünde cihaz hasarı bağlamında 30 gün ifadesi kalamaz.")
 
 
+def validate_root_primary_start(site: Path, base_path: str) -> None:
+    root = site / "index.html"
+    html = root.read_text(encoding="utf-8")
+    required = (
+        PRIMARY_START_MARKER,
+        "60 saniyede doğru elektrik rotası",
+        "Elektrik Durum Merkezi",
+        "Tehlike varsa ticari yol kapanır",
+        f'href="{_core.public_url(base_path, PRIMARY_START_ROUTE)}"',
+    )
+    missing = [item for item in required if item not in html]
+    if missing:
+        raise RuntimeError("Pages kök akıllı başlangıç tasarımı eksik: " + ", ".join(missing))
+
+
+def update_primary_shortcut(site: Path, base_path: str) -> None:
+    manifest_path = site / "manifest.webmanifest"
+    if not manifest_path.is_file():
+        return
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    shortcuts = manifest.setdefault("shortcuts", [])
+    url = _core.public_url(base_path, PRIMARY_START_ROUTE)
+    if not any(item.get("url") == url for item in shortcuts if isinstance(item, dict)):
+        shortcuts.insert(0, {"name": "Elektrik Durum Merkezi", "short_name": "Doğru rota", "url": url})
+    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
 def prepare(site: Path, base_path: str, repository: str, commit: str) -> dict:
     result = _original_prepare(site, base_path, repository, commit)
     normalized = _core.normalize_base_path(base_path)
     validate_root_legal_deadline(site, normalized)
+    validate_root_primary_start(site, normalized)
+    update_primary_shortcut(site, normalized)
     result["rootDeviceDamageDeadline"] = "10 iş günü"
     result["rootNoApplicationDisclaimer"] = True
+    result["primaryStartRoute"] = _core.public_url(normalized, PRIMARY_START_ROUTE)
+    result["primaryStartMode"] = "progressive-disclosure"
     release_path = site / "pages-release.json"
     if release_path.is_file():
-        import json
-
         release = json.loads(release_path.read_text(encoding="utf-8"))
         release["rootDeviceDamageDeadline"] = "10 iş günü"
         release["rootNoApplicationDisclaimer"] = True
+        release["primaryStartRoute"] = _core.public_url(normalized, PRIMARY_START_ROUTE)
+        release["primaryStartMode"] = "progressive-disclosure"
         release_path.write_text(json.dumps(release, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         result = release
     _core.recompute_checksums(site)

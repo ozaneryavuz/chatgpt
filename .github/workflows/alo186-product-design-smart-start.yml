@@ -1,0 +1,80 @@
+name: ALO186 akıllı başlangıç ürün tasarımı kalite kontrolü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/elektrik-durum-merkezi/**'
+      - 'alo186/deployment/prepare_github_pages.py'
+      - 'alo186/tests/test_product_design_smart_start.py'
+      - '.github/workflows/alo186-product-design-smart-start.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/elektrik-durum-merkezi/**'
+      - 'alo186/deployment/prepare_github_pages.py'
+      - 'alo186/tests/test_product_design_smart_start.py'
+      - '.github/workflows/alo186-product-design-smart-start.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Kaynak ürün tasarımı ve güven sözleşmeleri
+        run: |
+          python alo186/tests/test_product_design_smart_start.py
+          python alo186/tests/test_electric_status_center.py
+      - name: Etkileşim JavaScript sözdizimi
+        run: node --check alo186/elektrik-durum-merkezi/app.js
+      - name: Canonical üretim paketi
+        run: |
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-smart-start-canonical --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-smart-start-canonical
+      - name: Custom-domain ürün tasarımı kabulü
+        run: |
+          cp -a /tmp/alo186-smart-start-canonical /tmp/alo186-smart-start-custom
+          python alo186/deployment/prepare_github_pages.py --site /tmp/alo186-smart-start-custom --base-path '' --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_github_pages.py --site /tmp/alo186-smart-start-custom --base-path ''
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('/tmp/alo186-smart-start-custom')
+          gateway=(root/'index.html').read_text(encoding='utf-8')
+          assert 'data-alo186-primary-start="true"' in gateway
+          assert 'href="/elektrik-durum-merkezi/"' in gateway
+          assert '60 saniyede doğru elektrik rotası' in gateway
+          assert (root/'elektrik-durum-merkezi/index.html').is_file()
+          assert '/elektrik-durum-merkezi/' in (root/'sw.js').read_text(encoding='utf-8')
+          manifest=json.loads((root/'manifest.webmanifest').read_text(encoding='utf-8'))
+          assert any(item.get('url')=='/elektrik-durum-merkezi/' for item in manifest.get('shortcuts',[]))
+          release=json.loads((root/'pages-release.json').read_text(encoding='utf-8'))
+          assert release['primaryStartRoute']=='/elektrik-durum-merkezi/'
+          assert release['primaryStartMode']=='progressive-disclosure'
+          PY
+      - name: Project-path ürün tasarımı kabulü
+        run: |
+          cp -a /tmp/alo186-smart-start-canonical /tmp/alo186-smart-start-project
+          python alo186/deployment/prepare_github_pages.py --site /tmp/alo186-smart-start-project --base-path '/chatgpt' --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_github_pages.py --site /tmp/alo186-smart-start-project --base-path '/chatgpt'
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('/tmp/alo186-smart-start-project')
+          gateway=(root/'index.html').read_text(encoding='utf-8')
+          assert 'href="/chatgpt/elektrik-durum-merkezi/"' in gateway
+          manifest=json.loads((root/'manifest.webmanifest').read_text(encoding='utf-8'))
+          assert any(item.get('url')=='/chatgpt/elektrik-durum-merkezi/' for item in manifest.get('shortcuts',[]))
+          release=json.loads((root/'pages-release.json').read_text(encoding='utf-8'))
+          assert release['primaryStartRoute']=='/chatgpt/elektrik-durum-merkezi/'
+          PY
