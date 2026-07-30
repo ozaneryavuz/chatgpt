@@ -1,0 +1,67 @@
+name: ALO186 satış kataloğu ve satın almaya hazır setler kalite kontrolü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/urun-eslestirme/generator-guide-extension.js'
+      - 'alo186/urun-eslestirme/matcher-core.js'
+      - 'alo186/urun-eslestirme/styles.css'
+      - 'alo186/urun-eslestirme/sales-merchandising.css'
+      - 'alo186/tests/test_sales_catalog_expansion.js'
+      - '.github/workflows/alo186-sales-catalog-expansion.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/urun-eslestirme/generator-guide-extension.js'
+      - 'alo186/urun-eslestirme/matcher-core.js'
+      - 'alo186/urun-eslestirme/styles.css'
+      - 'alo186/urun-eslestirme/sales-merchandising.css'
+      - 'alo186/tests/test_sales_catalog_expansion.js'
+      - '.github/workflows/alo186-sales-catalog-expansion.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Yeni katalog, set ve Knowledge Graph sözleşmeleri
+        run: |
+          node --check alo186/urun-eslestirme/matcher-core.js
+          node --check alo186/urun-eslestirme/generator-guide-extension.js
+          node alo186/tests/test_sales_catalog_expansion.js
+          node alo186/tests/test_affiliate_knowledge_graph.js
+      - name: Mevcut affiliate ve ticari güven regresyonları
+        run: |
+          node alo186/tests/test_product_matcher.js
+          python alo186/tests/test_commerce_governance_v2.py
+          python alo186/tests/test_product_shortlist.py
+      - name: Canonical üretim paketi
+        run: |
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-sales-catalog --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-sales-catalog
+      - name: Ürün merkezi artifact kabulü
+        run: |
+          test -f /tmp/alo186-sales-catalog/akilli-urun-secimi/index.html
+          test -f /tmp/alo186-sales-catalog/akilli-urun-secimi/generator-guide-extension.js
+          test -f /tmp/alo186-sales-catalog/akilli-urun-secimi/sales-merchandising.css
+          grep -q 'sales-merchandising.css' /tmp/alo186-sales-catalog/akilli-urun-secimi/styles.css
+          grep -q 'B09DDDLZQW' /tmp/alo186-sales-catalog/akilli-urun-secimi/generator-guide-extension.js
+          grep -q 'B0CFF9T3PS' /tmp/alo186-sales-catalog/akilli-urun-secimi/generator-guide-extension.js
+          grep -q 'Bir Amazon Gelir Ortağı olarak nitelikli satın alımlar üzerinden kazanç elde ediyorum.' /tmp/alo186-sales-catalog/akilli-urun-secimi/generator-guide-extension.js
+          ! grep -Eqi 'stokta son|hemen satın al|kaçırma|fiyat düştü' /tmp/alo186-sales-catalog/akilli-urun-secimi/generator-guide-extension.js
+      - name: Custom-domain Pages kabulü
+        run: |
+          cp -a /tmp/alo186-sales-catalog /tmp/alo186-sales-catalog-pages
+          python alo186/deployment/prepare_github_pages.py --site /tmp/alo186-sales-catalog-pages --base-path '' --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_github_pages.py --site /tmp/alo186-sales-catalog-pages --base-path ''
