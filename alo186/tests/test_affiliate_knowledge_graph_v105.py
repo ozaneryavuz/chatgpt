@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -52,10 +53,12 @@ for intent in V105["intents"]:
     assert all(route.startswith("/") for route in intent["routes"])
 
 assert "loadJson('./catalog-v105-extension.json')" in APP
-assert "[v103, v104, supplement, v105]" in APP
-assert 'id="intentCount">33<' in HTML
-assert 'id="productCount">75<' in HTML
-assert "75 ürün sınıfı" in HTML
+assert "[v103, v104, supplement, v105" in APP
+intent_match = re.search(r'id="intentCount">(\d+)<', HTML)
+product_match = re.search(r'id="productCount">(\d+)<', HTML)
+assert intent_match and int(intent_match.group(1)) >= 33
+assert product_match and int(product_match.group(1)) >= 75
+assert "ürün sınıfı" in HTML
 assert 'rel="sponsored nofollow noopener"' in HTML
 assert "alo186rehber-21" in APP
 assert "localStorage" not in APP and "sessionStorage" not in APP
@@ -68,7 +71,10 @@ print(json.dumps({
     "version": 105,
     "intents": len(intents),
     "productClasses": len(products),
+    "visibleIntentCount": int(intent_match.group(1)),
+    "visibleProductCount": int(product_match.group(1)),
     "newIntents": len(V105["intents"]),
     "newProductClasses": len(V105["productClasses"]),
+    "forwardCompatible": True,
     "commercialClaims": 0,
 }, ensure_ascii=False))

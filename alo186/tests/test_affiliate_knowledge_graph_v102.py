@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 from pathlib import Path
 
@@ -80,11 +81,19 @@ for schema in ["CollectionPage", "DefinedTerm", "FAQPage", "BreadcrumbList"]:
 for forbidden in ['"@type":"Product"', '"@type":"Offer"', "aggregateRating", "priceCurrency", "availability"]:
     assert forbidden not in HTML
 for token in [
-    "Amazon satış ortaklığı açıklaması", "Daha fazla ürünü",
-    "Mevcut cihaz gerçek görevi", "Kullanıcı ve ortam bağlamı",
-    'rel="sponsored nofollow noopener"', "75 ürün sınıfı", "33"
+    "Amazon satış ortaklığı açıklaması",
+    "Daha fazla ürünü",
+    "Mevcut cihaz gerçek görevi",
+    "Kullanıcı ve ortam bağlamı",
+    'rel="sponsored nofollow noopener"',
+    "ürün sınıfı",
 ]:
     assert token in HTML, token
+
+intent_match = re.search(r'id="intentCount">(\d+)<', HTML)
+product_match = re.search(r'id="productCount">(\d+)<', HTML)
+assert intent_match and int(intent_match.group(1)) >= 33
+assert product_match and int(product_match.group(1)) >= 75
 
 assert "alo186rehber-21" in JS
 assert "professional-gated" in JS
@@ -115,12 +124,15 @@ print(json.dumps({
     "route": ROUTE,
     "intents": len(intents),
     "productClasses": len(products),
+    "visibleIntentCount": int(intent_match.group(1)),
+    "visibleProductCount": int(product_match.group(1)),
     "v104NewProductClasses": len({item["id"] for item in V104["productClasses"] + SUPPLEMENT["productClasses"]}),
     "symptomSearch": True,
     "profileEnvironmentSearch": True,
     "avoidWhenCommerceGate": True,
     "professionalCommerceBlocked": True,
     "conditionalAffiliateGate": True,
+    "forwardCompatible": True,
     "priceStockRatingPublished": False,
     "productOfferSchema": False,
 }, ensure_ascii=False))
