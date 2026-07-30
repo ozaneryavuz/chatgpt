@@ -1,0 +1,57 @@
+name: ALO186 affiliate katalog büyümesi kalite kontrolü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/urun-eslestirme/catalog.js'
+      - 'alo186/tests/test_affiliate_catalog_expansion_v318.py'
+      - 'alo186/tests/test_commerce_governance_v2.py'
+      - '.github/workflows/alo186-affiliate-catalog-v318.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/urun-eslestirme/catalog.js'
+      - 'alo186/tests/test_affiliate_catalog_expansion_v318.py'
+      - 'alo186/tests/test_commerce_governance_v2.py'
+      - '.github/workflows/alo186-affiliate-catalog-v318.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Katalog, güven ve tekillik sözleşmeleri
+        run: |
+          node --check alo186/urun-eslestirme/catalog.js
+          python -m pytest -q alo186/tests/test_affiliate_catalog_expansion_v318.py
+          python alo186/tests/test_commerce_governance_v2.py
+      - name: Katalog sağlık ve Knowledge Graph kabulü
+        run: |
+          node - <<'NODE'
+          const catalog=require('./alo186/urun-eslestirme/catalog.js');
+          const now=new Date('2026-07-30T12:00:00Z');
+          const health=catalog.catalogHealth({now});
+          const graph=catalog.knowledgeGraph({now})['@graph'];
+          const all=graph.find(item=>item['@id']==='https://www.alo186.com/akilli-urun-secimi#verified-products');
+          const direct=graph.find(item=>item['@id']==='https://www.alo186.com/akilli-urun-secimi#direct-affiliate-products');
+          if(health.totalVerified<24) throw new Error(`Doğrulanmış ürün sayısı yetersiz: ${health.totalVerified}`);
+          if(health.publicDirect<17) throw new Error(`Doğrudan affiliate ürün sayısı yetersiz: ${health.publicDirect}`);
+          if(all.numberOfItems!==health.totalVerified||direct.numberOfItems!==health.publicDirect) throw new Error('Knowledge Graph sayımları katalogla eşleşmiyor.');
+          if(!catalog.products.every(product=>product.url.includes('tag=alo186rehber-21'))) throw new Error('Affiliate etiketi eksik ürün var.');
+          console.log(JSON.stringify(health,null,2));
+          NODE
+      - name: Üretim paketi smoke testi
+        run: |
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-affiliate-v318 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-affiliate-v318
