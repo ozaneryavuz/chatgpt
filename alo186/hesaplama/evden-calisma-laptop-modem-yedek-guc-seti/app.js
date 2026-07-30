@@ -5,6 +5,7 @@
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
   'use strict';
 
+  const POWERBANK_NOMINAL_LIMIT_WH=100;
   const n=value=>{
     if(value===null||value===undefined||value==='')return null;
     const parsed=Number(String(value).replace(',','.'));
@@ -78,7 +79,12 @@
     const totalActiveW=activeLaptopW+networkW+acAccessoryW;
 
     if(totalActiveW<=0){
-      const metrics={targetHours,laptopExternalHours:0,networkW:0,acAccessoryW:0,totalActiveW:0,requiredPdW:0,requiredPowerbankWh:0,requiredMiniUpsW:0,requiredMiniUpsWh:0,requiredPowerStationW:0,requiredPowerStationWh:0,architecture:'no_external',architectureLabel:architectureLabel('no_external')};
+      const metrics={
+        targetHours,laptopExternalHours:0,networkW:0,acAccessoryW:0,totalActiveW:0,
+        requiredPdW:0,requiredPowerbankWh:0,requiredMiniUpsW:0,requiredMiniUpsWh:0,
+        requiredPowerStationW:0,requiredPowerStationWh:0,powerbankNominalLimitWh:POWERBANK_NOMINAL_LIMIT_WH,
+        powerbankLimitExceeded:false,architecture:'no_external',architectureLabel:architectureLabel('no_external')
+      };
       return makeResult('no_buy','Haricî enerji kaynağı gerekmiyor — yeni ürün almayın','Dizüstü bilgisayarın mevcut bataryası hedef süreyi karşılıyor ve kesintide çalışacak başka cihaz seçilmedi. Batarya sağlığını ve gerçek süreyi kontrollü olarak yeniden test edin.',{metrics});
     }
 
@@ -86,10 +92,23 @@
       return makeResult('professional','Yüksek güçlü çalışma alanı için profesyonel tasarım gerekli','Toplam aktif yük 1,5 kW sınırını veya yardımcı AC yükler 1,2 kW sınırını aşıyor. Devre, UPS, akü, soğutma, kablo ve seçicilik birlikte değerlendirilmelidir.');
     }
 
+    const rawPowerStationEnergy=(activeLaptopW*externalLaptopHours)+(networkW+acAccessoryW)*targetHours;
+    const requiredPdW=computerType==='usb_c_laptop'&&activeLaptopW>0?roundUp(activeLaptopW*1.15,5):0;
+    const requiredPowerbankWh=computerType==='usb_c_laptop'&&externalLaptopHours>0?roundUp((activeLaptopW*externalLaptopHours)/(0.90*0.80),10):0;
+    const requiredMiniUpsW=networkW>0?roundUp(networkW*1.25,1):0;
+    const requiredMiniUpsWh=networkW>0?roundUp((networkW*targetHours)/(0.90*0.80),5):0;
+    const requiredPowerStationW=roundUp(totalActiveW*1.25,10);
+    const requiredPowerStationWh=roundUp(rawPowerStationEnergy/(0.85*0.80),10);
+    const powerbankLimitExceeded=requiredPowerbankWh>POWERBANK_NOMINAL_LIMIT_WH;
+
     const requiresZeroTransfer=transferTolerance==='zero';
     if(computerType==='desktop'||requiresZeroTransfer){
-      const rawEnergyWh=(activeLaptopW*externalLaptopHours)+(networkW+acAccessoryW)*targetHours;
-      const metrics={targetHours,laptopExternalHours:externalLaptopHours,networkW,acAccessoryW,totalActiveW,requiredPdW:0,requiredPowerbankWh:0,requiredMiniUpsW:0,requiredMiniUpsWh:0,requiredPowerStationW:roundUp(totalActiveW*1.25,10),requiredPowerStationWh:roundUp(rawEnergyWh/(0.85*0.80),10),architecture:'ups_path',architectureLabel:architectureLabel('ups_path')};
+      const metrics={
+        targetHours,laptopExternalHours:externalLaptopHours,networkW,acAccessoryW,totalActiveW,
+        requiredPdW:0,requiredPowerbankWh:0,requiredMiniUpsW:0,requiredMiniUpsWh:0,
+        requiredPowerStationW,requiredPowerStationWh,powerbankNominalLimitWh:POWERBANK_NOMINAL_LIMIT_WH,
+        powerbankLimitExceeded:false,architecture:'ups_path',architectureLabel:architectureLabel('ups_path')
+      };
       return makeResult('ups_path','UPS VA ve topoloji testiyle devam edin','Masaüstü bilgisayar veya sıfıra yakın transfer süresi isteyen kullanım, yalnız power station watt değeriyle doğrulanamaz. Gerçek W, VA, güç faktörü, transfer süresi ve batarya süresini UPS uygunluk aracında değerlendirin.',{metrics,nextTool:'/hesaplama/ups-va-topoloji-uygunluk/'});
     }
 
@@ -102,7 +121,7 @@
       }
     }
 
-    const splitEligible=computerType==='usb_c_laptop'&&activeLaptopW>0&&activeLaptopW<=140&&acAccessoryW===0;
+    const splitEligible=computerType==='usb_c_laptop'&&activeLaptopW>0&&activeLaptopW<=140&&acAccessoryW===0&&!powerbankLimitExceeded;
     const networkOnly=activeLaptopW===0&&networkW>0&&acAccessoryW===0;
     if((splitEligible||networkOnly)&&networkW>0){
       if(input.networkVoltageVerified!=='yes'||input.networkPolarityVerified!=='yes'||input.networkJackVerified!=='yes'){
@@ -114,15 +133,6 @@
     if(networkOnly)architecture='network_only';
     else if(splitEligible&&networkW===0)architecture='powerbank_only';
     else if(splitEligible&&networkW>0)architecture='split_dc';
-
-    const requiredPdW=computerType==='usb_c_laptop'&&activeLaptopW>0?roundUp(activeLaptopW*1.15,5):0;
-    const requiredPowerbankWh=computerType==='usb_c_laptop'&&externalLaptopHours>0?roundUp((activeLaptopW*externalLaptopHours)/(0.90*0.80),10):0;
-    const requiredMiniUpsW=networkW>0?roundUp(networkW*1.25,1):0;
-    const requiredMiniUpsWh=networkW>0?roundUp((networkW*targetHours)/(0.90*0.80),5):0;
-    const requiredPowerStationW=roundUp(totalActiveW*1.25,10);
-    const rawPowerStationEnergy=(activeLaptopW*externalLaptopHours)+(networkW+acAccessoryW)*targetHours;
-    const requiredPowerStationWh=roundUp(rawPowerStationEnergy/(0.85*0.80),10);
-    const splitNominalWh=requiredPowerbankWh+requiredMiniUpsWh;
 
     const metrics={
       targetHours,
@@ -136,7 +146,9 @@
       requiredMiniUpsWh,
       requiredPowerStationW,
       requiredPowerStationWh,
-      splitNominalWh,
+      splitNominalWh:requiredPowerbankWh+requiredMiniUpsWh,
+      powerbankNominalLimitWh:POWERBANK_NOMINAL_LIMIT_WH,
+      powerbankLimitExceeded,
       architecture,
       architectureLabel:architectureLabel(architecture)
     };
@@ -159,7 +171,10 @@
     const sourceStatus=input.sourceStatus||'none';
     if(sourceStatus==='split_existing'){
       if(!['network_only','powerbank_only','split_dc'].includes(architecture)){
-        return makeResult('conditional_purchase','Ayrık DC set AC yükleri karşılamıyor','Monitör, klasik adaptörlü dizüstü veya diğer AC yükleri nedeniyle tek powerbank + mini UPS seti yeterli değildir. Yalnız hesaplanan power station sınıfına ilerleyin.',{metrics,categories:['power_station'],commercialAllowed:true});
+        const reason=powerbankLimitExceeded
+          ? `Laptop için hesaplanan ${requiredPowerbankWh} Wh nominal enerji, tek powerbank ön seçim sınırı olan ${POWERBANK_NOMINAL_LIMIT_WH} Wh değerini aşıyor.`
+          : 'Monitör, klasik adaptörlü dizüstü veya diğer AC yükleri ayrık DC set kapsamının dışında.';
+        return makeResult('conditional_purchase','Ayrık DC set bu senaryoya uygun değil',`${reason} Yalnız hesaplanan power station sınıfına ilerleyin.`,{metrics,categories:['power_station'],commercialAllowed:true});
       }
       const gaps=[];
       const categories=[];
@@ -204,13 +219,18 @@
       return makeResult('conditional_purchase','Mevcut power station kapasitesi yetersiz',`${gaps.join(' ve ')} açığı var. Yalnız bu eşikleri karşılayan power station sınıfına ilerleyin.`,{metrics,categories:['power_station'],commercialAllowed:true});
     }
 
-    const summary=architecture==='split_dc'
-      ? `Dizüstü için yaklaşık ${requiredPdW} W PD ve ${requiredPowerbankWh} Wh powerbank; modem/ONT için ${requiredMiniUpsW} W ve ${requiredMiniUpsWh} Wh mini UPS gerekir. Ayrık DC set, monitör veya klasik AC adaptör yükü bulunmadığı için uygun başlangıç yönüdür.`
-      : architecture==='powerbank_only'
-        ? `Dizüstü için yaklaşık ${requiredPdW} W tek cihaz USB-C çıkışı ve ${requiredPowerbankWh} Wh nominal powerbank kapasitesi gerekir.`
-        : architecture==='network_only'
-          ? `Modem/ONT ağı için yaklaşık ${requiredMiniUpsW} W çıkış ve ${requiredMiniUpsWh} Wh nominal mini UPS kapasitesi gerekir.`
-          : `Tek AC kaynak için yaklaşık ${requiredPowerStationW} W sürekli çıkış ve ${requiredPowerStationWh} Wh nominal enerji gerekir.`;
+    let summary;
+    if(architecture==='split_dc'){
+      summary=`Dizüstü için yaklaşık ${requiredPdW} W PD ve ${requiredPowerbankWh} Wh powerbank; modem/ONT için ${requiredMiniUpsW} W ve ${requiredMiniUpsWh} Wh mini UPS gerekir. Ayrık DC set yalnız gerçek eksik bileşenlerle kurulmalıdır.`;
+    }else if(architecture==='powerbank_only'){
+      summary=`Dizüstü için yaklaşık ${requiredPdW} W tek cihaz USB-C çıkışı ve ${requiredPowerbankWh} Wh nominal powerbank kapasitesi gerekir.`;
+    }else if(architecture==='network_only'){
+      summary=`Modem/ONT ağı için yaklaşık ${requiredMiniUpsW} W çıkış ve ${requiredMiniUpsWh} Wh nominal mini UPS kapasitesi gerekir.`;
+    }else if(powerbankLimitExceeded&&computerType==='usb_c_laptop'&&acAccessoryW===0){
+      summary=`Laptop için hesaplanan ${requiredPowerbankWh} Wh nominal enerji, tek powerbank ön seçim sınırı olan ${POWERBANK_NOMINAL_LIMIT_WH} Wh değerini aşıyor. Bu nedenle yaklaşık ${requiredPowerStationW} W / ${requiredPowerStationWh} Wh power station sınıfına ilerleyin.`;
+    }else{
+      summary=`Tek AC kaynak için yaklaşık ${requiredPowerStationW} W sürekli çıkış ve ${requiredPowerStationWh} Wh nominal enerji gerekir.`;
+    }
     return makeResult('conditional_purchase','Yedek çalışma seti hesaplandı',summary,{metrics,categories:baseCategories,commercialAllowed:baseCategories.length>0});
   }
 
@@ -308,5 +328,5 @@
     ['actualNeed','technicalCheck','affiliateCheck'].forEach(id=>$(id)?.addEventListener('change',refreshGate));
   }
 
-  return{calculate,mount,architectureLabel,CATEGORY_LABELS};
+  return{calculate,mount,architectureLabel,CATEGORY_LABELS,POWERBANK_NOMINAL_LIMIT_WH};
 });
