@@ -6,11 +6,23 @@ import re
 from pathlib import Path
 
 ROUTE = "/hesaplama/aydinlatma-ihtiyac-ve-ampul-uygunluk/"
+SOURCE_PAGE = Path(__file__).resolve().parents[1] / "hesaplama/aydinlatma-ihtiyac-ve-ampul-uygunluk/index.html"
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--site", type=Path, required=True)
+parser.add_argument("--site", type=Path)
 parser.add_argument("--base-path", default="")
 args = parser.parse_args()
+
+if args.site is None:
+    assert SOURCE_PAGE.is_file()
+    source_html = SOURCE_PAGE.read_text(encoding="utf-8")
+    assert "affiliateAccepted" in source_html
+    assert "Satın alma gerekmez" in source_html
+    assert "Ticari yol kapalı" in source_html
+    assert "amazon.com.tr" not in source_html.lower()
+    print(json.dumps({"ok": True, "mode": "source", "route": ROUTE}, ensure_ascii=False))
+    raise SystemExit(0)
+
 site = args.site.resolve()
 base = "" if not args.base_path or args.base_path == "/" else "/" + args.base_path.strip("/")
 public = f"{base}{ROUTE}" if base else ROUTE
@@ -45,4 +57,4 @@ assert meta["recordLimit"] == 8 and meta["recordTtlDays"] == 365 and meta["revie
 assert meta["directAffiliateLinksAdded"] == 0 and meta["noBuyOutcomePreserved"] is True and meta["hazardCommerceClosed"] is True
 pages = json.loads((site / "pages-release.json").read_text(encoding="utf-8"))
 assert pages["lightingSuitabilityCenter"]["route"] == public
-print(json.dumps({"ok": True, "route": public, "basePath": base, "canonicalOrigin": canonical_origin}, ensure_ascii=False))
+print(json.dumps({"ok": True, "mode": "artifact", "route": public, "basePath": base, "canonicalOrigin": canonical_origin}, ensure_ascii=False))
