@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - 'alo186/hesaplama/kombi-kesinti-yedek-guc-uygunluk/**'
-      - 'alo186/hesaplama/index.html'
+      - 'alo186/hesaplama/common.js'
       - 'alo186/deployment/routing-overlays/boiler-continuity-growth-run30.json'
       - 'alo186/tests/test_boiler_continuity_growth_run30*.py'
       - '.github/workflows/alo186-boiler-continuity-growth-run30.yml'
@@ -12,7 +12,7 @@ on:
     branches: [main]
     paths:
       - 'alo186/hesaplama/kombi-kesinti-yedek-guc-uygunluk/**'
-      - 'alo186/hesaplama/index.html'
+      - 'alo186/hesaplama/common.js'
       - 'alo186/deployment/routing-overlays/boiler-continuity-growth-run30.json'
       - 'alo186/tests/test_boiler_continuity_growth_run30*.py'
       - '.github/workflows/alo186-boiler-continuity-growth-run30.yml'
@@ -44,6 +44,7 @@ jobs:
           node alo186/hesaplama/kombi-kesinti-yedek-guc-uygunluk/app.test.js
           python alo186/tests/test_boiler_continuity_growth_run30.py
           node --check alo186/hesaplama/kombi-kesinti-yedek-guc-uygunluk/app.js
+          node --check alo186/hesaplama/common.js
           python -m py_compile alo186/tests/test_boiler_continuity_growth_run30.py alo186/tests/test_boiler_continuity_growth_run30_artifact.py
 
       - name: Mevcut affiliate, güven ve routing regresyonları
