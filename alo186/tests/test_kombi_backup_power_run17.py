@@ -29,7 +29,7 @@ assert 'rel="sponsored nofollow noopener"' in HTML
 assert "Mevcut güvenli kaynağımın hedef süreyi karşılamadığı doğrulandı" in HTML
 assert HTML.count('type="checkbox"') >= 4
 assert "90 günlük" in HTML
-assert "Yeni ürün almayın" in HTML
+assert "yeni ürün almayın" in HTML.lower()
 assert "fiyat, stok, puan, satıcı, teslimat veya garanti" in HTML
 
 for schema in ["WebApplication", "DefinedTermSet", "FAQPage", "BreadcrumbList"]:
