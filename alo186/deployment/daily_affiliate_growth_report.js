@@ -2,7 +2,7 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
-const catalog = require(path.resolve(__dirname, '../urun-eslestirme/catalog.js'));
+const catalog = require(path.resolve(__dirname, '../urun-eslestirme/catalog-trust-growth-run54.js'));
 
 const nowInput = process.env.ALO186_REPORT_NOW || new Date().toISOString();
 const now = new Date(nowInput);
@@ -55,15 +55,17 @@ function gateDescription(category) {
 
 const categories = catalog.categories.map((category) => {
   const products = catalog.products.filter((product) => product.category === category.id && product.status === 'verified_listing');
+  const candidates = catalog.products.filter((product) => product.category === category.id && product.status === 'manufacturer_verified_search');
   const freshProducts = products.filter((product) => verificationStatus(product).fresh);
   const staleProducts = products.filter((product) => !verificationStatus(product).fresh);
+  const freshCandidates = candidates.filter((product) => verificationStatus(product).fresh);
   const publicProducts = freshProducts.filter(publicAffiliateEligible);
   const target = Object.prototype.hasOwnProperty.call(categoryTargets, category.id)
     ? categoryTargets[category.id]
     : category.affiliatePolicy === 'verified_direct' ? 8 : category.affiliatePolicy === 'after_tool' ? 4 : 0;
   const deficit = Math.max(0, target - freshProducts.length);
   const score = (category.affiliatePolicy === 'verified_direct' ? 45 : category.affiliatePolicy === 'after_tool' ? 24 : -80)
-    + (demandBoost[category.id] || 0) + staleProducts.length * 28 + deficit * 12;
+    + (demandBoost[category.id] || 0) + staleProducts.length * 28 + deficit * 12 + freshCandidates.length * 6;
   return {
     id: category.id,
     name: category.name,
@@ -72,6 +74,8 @@ const categories = catalog.categories.map((category) => {
     verifiedCount: products.length,
     freshCount: freshProducts.length,
     staleCount: staleProducts.length,
+    marketplaceVerificationQueue: freshCandidates.length,
+    candidateModels: freshCandidates.slice(0, 5).map((product) => product.model || product.mpn || product.name),
     publicDirectCount: publicProducts.length,
     toolGatedCount: freshProducts.length - publicProducts.length,
     target,
@@ -79,7 +83,13 @@ const categories = catalog.categories.map((category) => {
     score,
     preferredBatch: preferredBatch(category),
     safetyGate: gateDescription(category),
-    actionType: staleProducts.length > 0 ? 'reverify_stale' : deficit > 0 ? 'grow_catalog' : 'optimize_conversion'
+    actionType: staleProducts.length > 0
+      ? 'reverify_stale'
+      : freshCandidates.length > 0 && deficit > 0
+        ? 'verify_marketplace_identity'
+        : deficit > 0
+          ? 'grow_catalog'
+          : 'optimize_conversion'
   };
 });
 
@@ -96,19 +106,23 @@ const topActions = categories
     targetProducts: category.target,
     minimumNeeded: category.deficit,
     staleProducts: category.staleCount,
+    marketplaceVerificationQueue: category.marketplaceVerificationQueue,
+    candidateModels: category.candidateModels,
     preferredBatch: category.preferredBatch,
     safetyGate: category.safetyGate,
     implementation: category.affiliatePolicy === 'verified_direct'
-      ? 'ASIN, marka, model/MPN, doğrulama tarihi, teknik alanlar ve sınırlar doğrulandıktan sonra Product, Brand, DefinedTerm, ItemList ve uygun olduğunda ProductGroup/isVariantOf ilişkileri ekle. Offer, fiyat, stok, puan ve garanti yayımlama.'
+      ? `${category.marketplaceVerificationQueue ? 'Önce üretici kaynağı doğrulanmış adayların Amazon Türkiye tam ASIN/model eşleşmesini kanıtla; eşleşme yoksa doğrudan ürün bağlantısı açma. ' : ''}ASIN, marka, model/MPN, doğrulama tarihi, teknik alanlar ve sınırlar doğrulandıktan sonra Product, Brand, DefinedTerm, ItemList ve uygun olduğunda ProductGroup/isVariantOf ilişkileri ekle. Offer, fiyat, stok, puan ve garanti yayımlama.`
       : 'Ürün kayıtlarını teknik uygunluk aracına bağla; public Product düğümünde doğrudan mağaza URL’sini ancak nitelikli geçiş sözleşmesi izin veriyorsa kullan. Mevcut ürün yeterliyse satın almama sonucunu koru.'
   }));
 
 const freshProducts = catalog.products.filter((product) => product.status === 'verified_listing' && verificationStatus(product).fresh);
 const publicProducts = freshProducts.filter(publicAffiliateEligible);
 const staleProducts = catalog.products.filter((product) => product.status === 'verified_listing' && !verificationStatus(product).fresh);
+const freshCandidates = catalog.products.filter((product) => product.status === 'manufacturer_verified_search' && verificationStatus(product).fresh);
+const canonicalAudit = typeof catalog.canonicalAudit === 'function' ? catalog.canonicalAudit({ now }) : null;
 
 const report = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   generatedAt: now.toISOString(),
   timezone: 'Europe/Istanbul',
   schedule: 'Her gün 09:15',
@@ -122,8 +136,10 @@ const report = {
     staleProducts: staleProducts.length,
     publicDirectProducts: publicProducts.length,
     toolGatedProducts: freshProducts.length - publicProducts.length,
+    manufacturerVerifiedCandidates: freshCandidates.length,
     professionalOnlyCategories: catalog.categories.filter((category) => category.affiliatePolicy === 'professional_only').length
   },
+  canonicalAudit,
   topActions,
   categories,
   guardrails: {
@@ -134,6 +150,7 @@ const report = {
     officialAffiliationClaimed: false,
     offerSchemaAllowed: false,
     unverifiedCommercialFieldsAllowed: false,
+    exactAsinRequiredForDirectProduct: true,
     excludedCommercialFields: ['price', 'stock', 'rating', 'review', 'seller', 'delivery', 'warranty', 'availability']
   }
 };
@@ -149,7 +166,9 @@ function renderMarkdown(payload) {
     `- Taze doğrulanmış ürün: **${payload.summary.freshProducts}**`,
     `- Doğrudan yayımlanabilir ürün: **${payload.summary.publicDirectProducts}**`,
     `- Teknik uygunluk kapılı ürün: **${payload.summary.toolGatedProducts}**`,
+    `- Amazon Türkiye kimliği doğrulanacak üretici adayları: **${payload.summary.manufacturerVerifiedCandidates}**`,
     `- Yeniden doğrulanması gereken ürün: **${payload.summary.staleProducts}**`,
+    `- Affiliate grafik canonical kaynağı: **${payload.canonicalAudit && !payload.canonicalAudit.legacyOriginFound ? payload.canonicalAudit.canonicalOrigin : 'kontrol gerekli'}**`,
     '',
     '### En yüksek potansiyelli 3 aksiyon'
   ];
@@ -159,6 +178,7 @@ function renderMarkdown(payload) {
       : 'Ürün ekleme yerine profesyonel hizmet dönüşümü';
     lines.push('', `${action.priority}. **${action.categoryName}**`,
       `   - Mevcut taze ürün: ${action.currentFreshProducts} · hedef: ${action.targetProducts} · asgari açık: ${action.minimumNeeded} · eski kayıt: ${action.staleProducts}`,
+      `   - Amazon Türkiye kimliği doğrulanacak üretici adayı: ${action.marketplaceVerificationQueue}${action.candidateModels.length ? ` (${action.candidateModels.join(', ')})` : ''}`,
       `   - Tercih edilen doğrulama partisi: ${batch}`,
       `   - Güven kapısı: ${action.safetyGate}`,
       `   - Uygulama: ${action.implementation}`);
@@ -166,9 +186,10 @@ function renderMarkdown(payload) {
   lines.push('', '### Zorunlu yayın sınırları',
     '- Amazon satış ortaklığı ilişkisi görünür olmalı ve dış bağlantılar `rel="sponsored nofollow noopener"` taşımalı.',
     '- Fiyat, stok, puan, yorum, satıcı, teslimat, garanti veya `Offer` schema yayımlanmamalı.',
+    '- Tam Amazon Türkiye ASIN/model eşleşmesi doğrulanmayan ürün doğrudan ürün bağlantısı olarak yayımlanmamalı.',
     '- Tehlike, sabit tesisat belirsizliği ve uyumsuz teknik etiketlerde ticari yol kapanmalı.',
     '- Mevcut ürün güvenli ve yeterliyse satın almama sonucu korunmalı.', '',
-    '_Bu rapor ürün eklemez; doğrulanacak ilk üç satış işini ve güven kapılarını issue #301 için önceliklendirir._');
+    '_Bu rapor otomatik ürün eklemez; doğrulanacak ilk üç satış işini, mevcut üretici adaylarını ve güven kapılarını issue #301 için önceliklendirir._');
   return `${lines.join('\n')}\n`;
 }
 
