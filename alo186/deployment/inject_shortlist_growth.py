@@ -4,7 +4,9 @@ import argparse
 import hashlib
 import json
 import re
+import xml.etree.ElementTree as ET
 from pathlib import Path
+from urllib.parse import urlsplit
 
 from apply_content_consolidation import apply as apply_content_consolidation
 from inject_article_growth import run as run_article_growth
@@ -181,6 +183,44 @@ def insert_product(site: Path, base_path: str) -> int:
     return 1
 
 
+def reconcile_sitemap_with_release(site: Path) -> dict:
+    sitemap_path=site / "sitemap.xml"
+    release_path=site / "alo186-release.json"
+    if not sitemap_path.is_file() or not release_path.is_file():
+        raise FileNotFoundError("Sitemap veya release envanteri bulunamadı")
+    tree=ET.parse(sitemap_path)
+    root=tree.getroot()
+    namespace=root.tag.split("}")[0].strip("{") if "}" in root.tag else ""
+    ns=f"{{{namespace}}}" if namespace else ""
+    release=json.loads(release_path.read_text(encoding="utf-8"))
+    def normalized_path(value: str) -> str:
+        parsed=urlsplit(str(value or "")).path or "/"
+        return parsed.rstrip("/") or "/"
+    present=set()
+    for node in root.findall(f"{ns}url"):
+        loc=node.find(f"{ns}loc")
+        if loc is not None and loc.text:
+            present.add(normalized_path(loc.text))
+    added=[]
+    canonical_host=str(release.get("canonicalHost") or "https://www.alo186.com").rstrip("/")
+    for route in release.get("routes",[]):
+        canonical_path=str(route.get("canonicalPath") or "").strip()
+        if not canonical_path:
+            continue
+        route_path=normalized_path(canonical_path)
+        if route_path in present:
+            continue
+        url=ET.SubElement(root,f"{ns}url")
+        loc=ET.SubElement(url,f"{ns}loc")
+        loc.text=f"{canonical_host}{canonical_path}"
+        present.add(route_path)
+        added.append(canonical_path)
+    ET.register_namespace("",namespace)
+    ET.indent(tree,space="  ")
+    tree.write(sitemap_path,encoding="utf-8",xml_declaration=True)
+    return {"activeRouteCount":len(release.get("routes",[])),"addedCount":len(added),"added":added,"policy":"active-release-routes-must-exist-in-sitemap"}
+
+
 def recompute(site: Path) -> None:
     path = site / "checksums.sha256"
     if path.exists():
@@ -227,6 +267,8 @@ def run(site: Path, base_path: str) -> dict:
     growth_run18 = run_growth_run18(site, base_path)
     growth_run19 = run_growth_run19(site, base_path)
     growth_run21 = run_growth_run21(site, base_path)
+    sitemap_reconciliation = reconcile_sitemap_with_release(site)
+    recompute(site)
     return {
         "ok": True,
         "basePath": base_path,
@@ -255,6 +297,7 @@ def run(site: Path, base_path: str) -> dict:
         "growthRun18": growth_run18,
         "growthRun19": growth_run19,
         "growthRun21": growth_run21,
+        "sitemapReconciliation": sitemap_reconciliation,
     }
 
 
