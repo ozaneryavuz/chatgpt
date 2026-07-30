@@ -5,13 +5,14 @@
   if (!body || body.dataset.alo186Ux === 'ready') return;
   body.dataset.alo186Ux = 'ready';
 
+  const isEnglish = (doc.documentElement.lang || 'tr').toLowerCase().startsWith('en');
   const main = doc.querySelector('main');
   if (main && !main.id) main.id = 'main-content';
   if (main && !doc.querySelector(`a[href="#${CSS.escape(main.id)}"]`)) {
     const skip = doc.createElement('a');
     skip.className = 'alo-ux-skip';
     skip.href = `#${main.id}`;
-    skip.textContent = doc.documentElement.lang.toLowerCase().startsWith('en') ? 'Skip to content' : 'İçeriğe geç';
+    skip.textContent = isEnglish ? 'Skip to content' : 'İçeriğe geç';
     body.prepend(skip);
   }
 
@@ -19,15 +20,37 @@
     if (table.parentElement?.classList.contains('alo-table-scroll')) return;
     const wrapper = doc.createElement('div');
     wrapper.className = 'alo-table-scroll';
-    wrapper.tabIndex = 0;
-    wrapper.setAttribute('role', 'region');
-    wrapper.setAttribute('aria-label', table.querySelector('caption')?.textContent?.trim() || (doc.documentElement.lang.toLowerCase().startsWith('en') ? 'Scrollable table' : 'Kaydırılabilir tablo'));
     table.parentNode.insertBefore(wrapper, table);
     wrapper.appendChild(table);
+
+    const syncOverflow = () => {
+      const overflowing = table.scrollWidth > wrapper.clientWidth + 1;
+      wrapper.tabIndex = overflowing ? 0 : -1;
+      wrapper.dataset.overflow = String(overflowing);
+      if (overflowing) {
+        wrapper.setAttribute('role', 'region');
+        wrapper.setAttribute('aria-label', table.querySelector('caption')?.textContent?.trim() || (isEnglish ? 'Horizontally scrollable table' : 'Yatay kaydırılabilir tablo'));
+      } else {
+        wrapper.removeAttribute('role');
+        wrapper.removeAttribute('aria-label');
+      }
+    };
+    requestAnimationFrame(syncOverflow);
+    if ('ResizeObserver' in window) {
+      const observer = new ResizeObserver(syncOverflow);
+      observer.observe(wrapper);
+      observer.observe(table);
+    } else {
+      addEventListener('resize', syncOverflow, { passive: true });
+    }
   });
 
   doc.querySelectorAll('img').forEach((image, index) => {
-    if (index > 0 && !image.hasAttribute('loading')) image.loading = 'lazy';
+    const critical = index === 0
+      || image.loading === 'eager'
+      || image.fetchPriority === 'high'
+      || Boolean(image.closest('header,.hero,[data-critical-media]'));
+    if (!critical && !image.hasAttribute('loading')) image.loading = 'lazy';
     if (!image.hasAttribute('decoding')) image.decoding = 'async';
     if (!image.hasAttribute('alt')) {
       const caption = image.closest('figure')?.querySelector('figcaption')?.textContent?.trim();
@@ -60,7 +83,7 @@
 
   const robots = doc.querySelector('meta[name="robots"]')?.content?.toLowerCase() || '';
   const isIndexable = !robots.includes('noindex');
-  const isTurkish = (doc.documentElement.lang || 'tr').toLowerCase().startsWith('tr');
+  const isTurkish = !isEnglish;
   const headings = main ? [...main.querySelectorAll('h2')].filter((heading) => heading.textContent.trim()) : [];
   if (main && isIndexable && headings.length >= 4 && main.textContent.trim().length > 2600 && !main.querySelector('.alo-ux-toc')) {
     const slugCounts = new Map();
