@@ -1,0 +1,81 @@
+name: ALO186 araç footer bağlantıları tek seferlik düzeltme
+
+on:
+  push:
+    branches: [fix/alo186-tool-footer-canonical-links]
+    paths:
+      - '.github/alo186-fix-tool-footer-links.trigger'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/alo186-tool-footer-canonical-links
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Kırık parent-relative yasal bağlantıları canonical rotalara taşı
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          replacements = {
+              Path('alo186/hesaplama/akulu-el-aleti-batarya-sarj-uygunluk/index.html'): {
+                  'href="../../gizlilik/"': 'href="/yasal/gizlilik"',
+                  'href="../../iletisim/"': 'href="/iletisim"',
+              },
+              Path('alo186/hesaplama/multimetre-pensampermetre-cat-uygunluk/index.html'): {
+                  'href="../../gizlilik/"': 'href="/yasal/gizlilik"',
+                  'href="../../iletisim/"': 'href="/iletisim"',
+              },
+              Path('alo186/hesaplama/sarjli-pil-sarj-cihazi-uygunluk/index.html'): {
+                  'href="../../yasal/amazon-satis-ortakligi/"': 'href="/yasal/amazon-satis-ortakligi"',
+                  'href="../../gizlilik/"': 'href="/yasal/gizlilik"',
+              },
+          }
+
+          for path, mapping in replacements.items():
+              text = path.read_text(encoding='utf-8')
+              for old, new in mapping.items():
+                  count = text.count(old)
+                  if count != 1:
+                      raise SystemExit(f'{path}: beklenen bağlantı tam bir kez bulunmalı: {old!r}; görülen={count}')
+                  text = text.replace(old, new)
+              path.write_text(text, encoding='utf-8')
+
+          test = Path('alo186/tests/test_tool_footer_canonical_links.py')
+          test.write_text('''from __future__ import annotations\n\nfrom pathlib import Path\n\n\nROOT = Path(__file__).resolve().parents[2]\n\nPAGES = {\n    "akulu-el-aleti-batarya-sarj-uygunluk": {\n        "required": {"/yasal/gizlilik", "/iletisim"},\n        "forbidden": {"../../gizlilik/", "../../iletisim/"},\n    },\n    "multimetre-pensampermetre-cat-uygunluk": {\n        "required": {"/yasal/gizlilik", "/iletisim"},\n        "forbidden": {"../../gizlilik/", "../../iletisim/"},\n    },\n    "sarjli-pil-sarj-cihazi-uygunluk": {\n        "required": {"/yasal/gizlilik", "/yasal/amazon-satis-ortakligi"},\n        "forbidden": {"../../gizlilik/", "../../yasal/amazon-satis-ortakligi/"},\n    },\n}\n\n\ndef main() -> None:\n    for slug, contract in PAGES.items():\n        path = ROOT / "alo186" / "hesaplama" / slug / "index.html"\n        html = path.read_text(encoding="utf-8")\n        for href in contract["required"]:\n            assert f\'href="{href}"\' in html, (slug, href)\n        for href in contract["forbidden"]:\n            assert href not in html, (slug, href)\n    print({"ok": True, "pages": len(PAGES), "policy": "root-relative canonical legal routes"})\n\n\nif __name__ == "__main__":\n    main()\n''', encoding='utf-8')
+          PY
+
+      - name: Regresyon ve genel HTML doğrulaması
+        shell: bash
+        run: |
+          set -euo pipefail
+          python alo186/tests/test_tool_footer_canonical_links.py
+          python .github/scripts/validate_alo186.py
+
+      - name: Geçici workflow'u kaldır ve dala kaydet
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/alo186-fix-tool-footer-links-once.yml .github/alo186-fix-tool-footer-links.trigger
+          git add \
+            alo186/hesaplama/akulu-el-aleti-batarya-sarj-uygunluk/index.html \
+            alo186/hesaplama/multimetre-pensampermetre-cat-uygunluk/index.html \
+            alo186/hesaplama/sarjli-pil-sarj-cihazi-uygunluk/index.html \
+            alo186/tests/test_tool_footer_canonical_links.py
+          git commit -m 'fix(alo186): araç footer yasal rotalarını canonical bağlantılara taşı'
+          git push origin HEAD:fix/alo186-tool-footer-canonical-links
