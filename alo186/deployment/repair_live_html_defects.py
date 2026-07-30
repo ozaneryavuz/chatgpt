@@ -29,6 +29,14 @@ SPLIT_FOOTER_PATTERN = re.compile(
     r'(?P<suffix>ooter|oter|ter|er|r)>',
     re.I | re.S,
 )
+SEARCH_INPUT_ID_PATTERN = re.compile(r'<input\b[^>]*\bid=(?P<quote>["\'])searchInput(?P=quote)', re.I)
+SEARCH_RESULTS_ID_PATTERN = re.compile(r'<div\b[^>]*\bid=(?P<quote>["\'])searchResults(?P=quote)', re.I)
+SEARCH_INPUT_ROLE_PATTERN = re.compile(
+    r'<input\b[^>]*\bid=(?P<quote>["\'])searchInput(?P=quote)[^>]*\brole=["\']combobox["\']', re.I
+)
+SEARCH_RESULTS_LABEL_PATTERN = re.compile(
+    r'<div\b[^>]*\bid=(?P<quote>["\'])searchResults(?P=quote)[^>]*\baria-(?:label|labelledby)=', re.I
+)
 
 
 def normalize_base_path(value: str) -> str:
@@ -69,22 +77,10 @@ def harden_edas_search(site: Path) -> int:
     html = path.read_text(encoding="utf-8", errors="ignore")
     updated = html
 
-    if 'id="searchInput"' in updated and not re.search(r'<input\b[^>]*id=["\']searchInput["\'][^>]*\brole=["\']combobox["\']', updated, re.I):
-        updated = re.sub(
-            r'(<input\b[^>]*id=["\']searchInput["\'])',
-            r'\1 role="combobox"',
-            updated,
-            count=1,
-            flags=re.I,
-        )
-    if 'id="searchResults"' in updated and not re.search(r'<div\b[^>]*id=["\']searchResults["\'][^>]*\baria-(?:label|labelledby)=', updated, re.I):
-        updated = re.sub(
-            r'(<div\b[^>]*id=["\']searchResults["\'])',
-            r'\1 aria-label="Arama sonuçları"',
-            updated,
-            count=1,
-            flags=re.I,
-        )
+    if SEARCH_INPUT_ID_PATTERN.search(updated) and not SEARCH_INPUT_ROLE_PATTERN.search(updated):
+        updated = SEARCH_INPUT_ID_PATTERN.sub(lambda match: match.group(0) + ' role="combobox"', updated, count=1)
+    if SEARCH_RESULTS_ID_PATTERN.search(updated) and not SEARCH_RESULTS_LABEL_PATTERN.search(updated):
+        updated = SEARCH_RESULTS_ID_PATTERN.sub(lambda match: match.group(0) + ' aria-label="Arama sonuçları"', updated, count=1)
     if EDAS_STYLE_MARKER not in updated:
         if "</head>" not in updated:
             raise RuntimeError("EDAŞ Bul sayfasında head kapanışı bulunamadı")
@@ -106,9 +102,13 @@ def validate(site: Path) -> None:
     edas = site / "edas-bul/index.html"
     if edas.is_file():
         html = edas.read_text(encoding="utf-8", errors="ignore")
-        if not re.search(r'<input\b[^>]*id=["\']searchInput["\'][^>]*\brole=["\']combobox["\']', html, re.I):
+        if not SEARCH_INPUT_ROLE_PATTERN.search(html):
             failures.append("EDAŞ arama alanında combobox rolü eksik")
-        if not re.search(r'<div\b[^>]*id=["\']searchResults["\'][^>]*\baria-label=["\']Arama sonuçları["\']', html, re.I):
+        if not re.search(
+            r'<div\b[^>]*\bid=(?P<quote>["\'])searchResults(?P=quote)[^>]*\baria-label=["\']Arama sonuçları["\']',
+            html,
+            re.I,
+        ):
             failures.append("EDAŞ sonuç listesinde erişilebilir ad eksik")
         if EDAS_STYLE_MARKER not in html:
             failures.append("EDAŞ mobil min-width koruması eksik")
