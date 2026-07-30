@@ -71,7 +71,7 @@ def main() -> None:
     assert "innerHTML" not in app
     assert len(styles) > 1800
 
-    assert ROUTE in hub
+    assert './kacak-akim-rolesi-tip-hassasiyet-testi/' in hub
     assert "32 çekirdek araç" in hub
     assert "Kaçak Akım Rölesi Tip ve Hassasiyet Testi" in hub
 
