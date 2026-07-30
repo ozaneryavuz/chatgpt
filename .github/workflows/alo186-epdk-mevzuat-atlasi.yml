@@ -1,0 +1,185 @@
+name: ALO186 EPDK Elektrik Mevzuat Atlası ve günlük radar
+
+on:
+  schedule:
+    - cron: '15 4 * * *'
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/mevzuat/**'
+      - 'alo186/deployment/sync_epdk_electricity_legislation.py'
+      - 'alo186/deployment/routing-overlays/102-epdk-elektrik-mevzuat-atlasi.json'
+      - 'alo186/tests/test_epdk_mevzuat_atlasi.py'
+      - '.github/workflows/alo186-epdk-mevzuat-atlasi.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/mevzuat/**'
+      - 'alo186/deployment/sync_epdk_electricity_legislation.py'
+      - 'alo186/deployment/routing-overlays/102-epdk-elektrik-mevzuat-atlasi.json'
+      - 'alo186/tests/test_epdk_mevzuat_atlasi.py'
+      - '.github/workflows/alo186-epdk-mevzuat-atlasi.yml'
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: alo186-epdk-mevzuat-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Kaynak katalog, bağımsızlık ve gizlilik sözleşmeleri
+        run: |
+          set -euo pipefail
+          python alo186/tests/test_epdk_mevzuat_atlasi.py
+          node --check alo186/mevzuat/app.js
+          python -m py_compile alo186/deployment/sync_epdk_electricity_legislation.py
+
+      - name: Mevcut yayın ve güven regresyonları
+        run: |
+          set -euo pipefail
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Canonical üretim ve statik smoke
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-mevzuat-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-mevzuat-canonical
+
+      - name: Custom-domain ve project-path Pages kabulü
+        run: |
+          set -euo pipefail
+          for spec in 'custom|' 'project|/chatgpt'; do
+            name="${spec%%|*}"
+            base="${spec#*|}"
+            target="/tmp/alo186-mevzuat-${name}"
+            cp -a /tmp/alo186-mevzuat-canonical "$target"
+            python alo186/deployment/prepare_github_pages.py \
+              --site "$target" \
+              --base-path "$base" \
+              --repository "$GITHUB_REPOSITORY" \
+              --commit "$GITHUB_SHA"
+            python alo186/deployment/inject_outcome_runtime.py \
+              --site "$target" \
+              --base-path "$base"
+            python alo186/deployment/inject_shortlist_growth.py \
+              --site "$target" \
+              --base-path "$base" > "/tmp/alo186-mevzuat-${name}.json"
+            python alo186/deployment/smoke_github_pages.py \
+              --site "$target" \
+              --base-path "$base"
+            python alo186/tests/test_epdk_mevzuat_atlasi.py \
+              --site "$target" \
+              --base-path "$base"
+          done
+
+      - name: Doğrulanmış mevzuat atlası artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-epdk-elektrik-mevzuat-atlasi
+          path: /tmp/alo186-mevzuat-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
+
+  sync-official-source:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: EPDK resmî listeyi fail-closed senkronize et
+        run: |
+          set -euo pipefail
+          python alo186/deployment/sync_epdk_electricity_legislation.py \
+            --output alo186/mevzuat/catalog.json \
+            --report /tmp/epdk-mevzuat-report.json
+          python alo186/tests/test_epdk_mevzuat_atlasi.py
+
+      - name: Günlük radar raporunu issue 401'e yaz
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          report=json.loads(Path('/tmp/epdk-mevzuat-report.json').read_text(encoding='utf-8'))
+          lines=[
+            '<!-- alo186-epdk-mevzuat-radar -->',
+            f"## EPDK Elektrik Mevzuat Radarı — {report['checkedAt']}",
+            '',
+            f"- Resmî kaynak doğrulandı: **{report['ok']}**",
+            f"- Tekilleştirilmiş başlık: **{report['entryCount']}**",
+            f"- Eklenen: **{report['addedCount']}** · kaldırılan: **{report['removedCount']}** · adı değişen: **{report['renamedCount']}** · durum değişen: **{report['changedCount']}**",
+            f"- Katalog parmak izi: `{report['sourceFingerprint']}`",
+            '',
+            '### Kategori dağılımı',
+          ]
+          lines.extend(f"- {name}: {count}" for name,count in report['categoryCounts'].items())
+          lines.extend(['',f"Çalıştırma: {os.environ['GITHUB_SERVER_URL']}/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{os.environ['GITHUB_RUN_ID']}"])
+          Path('/tmp/epdk-mevzuat-comment.md').write_text('\n'.join(lines)+'\n',encoding='utf-8')
+          PY
+          gh issue comment 401 --repo "$GITHUB_REPOSITORY" --body-file /tmp/epdk-mevzuat-comment.md
+
+      - name: Gerçek fark varsa güncelleme PR'ı aç
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- alo186/mevzuat/catalog*.json; then
+            echo 'EPDK başlık kataloğunda değişiklik yok.'
+            exit 0
+          fi
+          branch="automation/epdk-elektrik-mevzuat-${GITHUB_RUN_ID}"
+          git config user.name 'alo186-mevzuat-radar[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git switch -c "$branch"
+          git add alo186/mevzuat/catalog*.json
+          git commit -m 'ALO186: EPDK elektrik mevzuatı resmî başlık senkronu'
+          git push --set-upstream origin "$branch"
+          cat > /tmp/epdk-mevzuat-pr.md <<EOF
+          ## Resmî kaynak senkronu
+
+          EPDK Elektrik Piyasası Mevzuat Listesi günlük radar tarafından yeniden ayrıştırıldı. Değişiklik raporu issue #401 altındadır.
+
+          - Tam mevzuat metni kopyalanmadı.
+          - Yalnız başlık/kategori/durum indeksi güncellendi.
+          - EPDK ve Resmî Gazete kaynağı önceliği korunur.
+          - İnsan incelemesi olmadan hukuki yorum yayımlanmaz.
+          EOF
+          gh pr create \
+            --repo "$GITHUB_REPOSITORY" \
+            --base main \
+            --head "$branch" \
+            --title 'ALO186: EPDK elektrik mevzuatı günlük resmî senkronu' \
+            --body-file /tmp/epdk-mevzuat-pr.md
