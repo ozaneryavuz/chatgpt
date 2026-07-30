@@ -45,6 +45,7 @@ r = api.evaluate(base({ airPumpW: 5, filterW: 0, returnPumpW: 0, heaterW: 0, hea
 assert.equal(r.state, 'commerce');
 assert.equal(r.product, 'battery_air_pump');
 assert.equal(r.lifeSupportW, 5);
+assert.equal(r.lifeSupportPeakW, 5);
 assert.equal(r.requiredContinuousW, 10);
 assert.equal(r.requiredNominalWh, 60);
 
@@ -52,17 +53,42 @@ r = api.evaluate(base());
 assert.equal(r.state, 'commerce');
 assert.equal(r.heaterAverageW, 30);
 assert.equal(r.lifeSupportW, 53);
+assert.equal(r.lifeSupportPeakW, 123);
 assert.equal(r.fullSystemW, 88);
-assert.equal(r.requiredContinuousW, 70);
+assert.equal(r.requiredContinuousW, 160);
 assert.equal(r.requiredNominalWh, 630);
 assert.equal(r.fullSystemWh, 1040);
 assert.equal(r.product, 'power_station');
 
 r = api.evaluate(base({ outageHours: 4, heaterW: 50, heaterDutyPct: 20, filterW: 15, airPumpW: 5, lightingW: 25 }));
 assert.equal(r.lifeSupportW, 30);
-assert.equal(r.requiredContinuousW, 40);
+assert.equal(r.lifeSupportPeakW, 70);
+assert.equal(r.requiredContinuousW, 90);
 assert.equal(r.requiredNominalWh, 180);
 assert.equal(r.product, 'small_power_station');
+
+r = api.evaluate(base({
+  outageHours: 2,
+  heaterW: 300,
+  heaterDutyPct: 10,
+  filterW: 0,
+  airPumpW: 5,
+  returnPumpW: 0,
+  otherW: 0,
+  lightingW: 0,
+  hasExistingSource: true,
+  existingContinuousW: 100,
+  existingWh: 500,
+  existingPureSine: true,
+  realOutageTestPassed: true
+}));
+assert.equal(r.lifeSupportW, 35);
+assert.equal(r.lifeSupportPeakW, 305);
+assert.equal(r.requiredContinuousW, 390);
+assert.equal(r.requiredNominalWh, 110);
+assert.equal(r.existingEnough, false);
+assert.equal(r.state, 'commerce');
+assert(r.existingGaps.some((item) => item.includes('sürekli güç 290 W eksik')));
 
 r = api.evaluate(base({ outageHours: 4, heaterW: 50, heaterDutyPct: 20, filterW: 15, airPumpW: 5, lightingW: 25, hasExistingSource: true, existingContinuousW: 100, existingWh: 300, existingPureSine: true, realOutageTestPassed: true }));
 assert.equal(r.state, 'no_buy');
@@ -89,8 +115,9 @@ assert(ics.includes('ALO186 akvaryum yedek güç yeniden testi'));
 
 console.log(JSON.stringify({
   ok: true,
-  scenarios: 18,
+  scenarios: 19,
   states: ['hazard', 'active_event', 'professional', 'evidence', 'no_buy', 'commerce'],
+  heaterPeakSizing: true,
   affiliateTripleGate: true,
   noPersonalData: true
 }, null, 2));
