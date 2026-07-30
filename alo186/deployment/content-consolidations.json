@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "generatedAt": "2026-07-30",
   "consolidations": [
     {
@@ -29,6 +29,27 @@
       "canonicalPath": "/haberler/ges-pv-string-sigortasi-ters-akim-nasil-secilir",
       "label": "GES gPV string sigortası ve ters akım seçimi",
       "reason": "Isc, ters akım, maksimum seri sigorta değeri, inverter topolojisi ve gPV seçimini hedefleyen iki rehber tek canonical kaynakta birleştirildi."
+    },
+    {
+      "intentKey": "generator-low-load-wet-stacking-load-bank",
+      "aliasPath": "/haberler/jenerator-dusuk-yuk-wet-stacking-nedir",
+      "canonicalPath": "/haberler/jenerator-dusuk-yuk-wet-stacking-kurum-load-bank",
+      "label": "Jeneratör düşük yük, wet stacking ve load bank teşhisi",
+      "reason": "Düşük yük yüzdesi, egzoz slobber, kurum, bakım ve load bank kabulünü hedefleyen iki rehber; daha güncel ölçüm, yağ analizi ve kademeli yük testi içeren canonical kaynakta birleştirildi."
+    },
+    {
+      "intentKey": "electricity-outage-compensation-automatic-payment-12-hours",
+      "aliasPath": "/haberler/elektrik-kesintisi-tazminati-nasil-alinir",
+      "canonicalPath": "/haberler/elektrik-kesintisi-tazminati-otomatik-odeme-12-saat",
+      "label": "Elektrik kesintisi tazminatı, otomatik ödeme ve 12 saat kuralı",
+      "reason": "Yıllık süre-sayı tazminatı, otomatik ödeme, 12 saati aşan kesinti ve cihaz hasarı ayrımını hedefleyen iki rehber; güncel eşikleri ve kanıt zincirini taşıyan canonical kaynakta birleştirildi."
+    },
+    {
+      "intentKey": "ups-static-maintenance-bypass-backfeed-safe-isolation",
+      "aliasPath": "/haberler/ups-backfeed-korumasi-bakim-bypass-interlock-guvenli-izolasyon",
+      "canonicalPath": "/haberler/ups-statik-bypass-bakim-bypassi-backfeed-korumasi",
+      "label": "UPS statik bypass, bakım bypassı ve backfeed güvenliği",
+      "reason": "Statik bypass, bakım bypassı, backfeed, interlock ve güvenli izolasyon aynı kullanıcı niyetinde tek kanoniğe taşındı; geniş çalışma yolu matrisi ve saha kabul kanıtlarını içeren rehber canonical olarak korundu."
     }
   ]
 }
