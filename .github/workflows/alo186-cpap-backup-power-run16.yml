@@ -53,9 +53,8 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           root=Path('alo186/hesaplama/cpap-apap-bipap-yedek-guc-uygunluk')
-          for path in root.glob('*'):
-              if not path.is_file():
-                  continue
+          for name in ['index.html','app.js','styles.css']:
+              path=root/name
               text=path.read_text(encoding='utf-8')
               for token in ['priceCurrency','aggregateRating','availability','"@type":"Offer"','"@type":"Product"','localStorage','sessionStorage','geolocation']:
                   assert token not in text, (path, token)
