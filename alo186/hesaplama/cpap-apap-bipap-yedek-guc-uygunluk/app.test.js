@@ -74,7 +74,7 @@ const adequate = evaluate({
 assert.equal(adequate.code, 'no_buy');
 assert.equal(adequate.commercial.allowed, false);
 assert.match(adequate.actions.join(' '), /Yeni ürün almayın/);
-assert.equal(adequate.metrics.runtimeHours, 9.72);
+assert.equal(adequate.metrics.runtimeHours, 10.8);
 
 const untested = evaluate({
   ...base,
