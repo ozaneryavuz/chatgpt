@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -38,6 +39,7 @@ def main() -> None:
     assert "Satış ortaklığı açıklaması" in html
     assert "doğrudan mağaza bağlantısı açmaz" in html
     assert "ürün satıcısı veya resmî kurum değildir" in html
+    assert "Mevcut kaynak yeterliyse satın alma önerilmez" in html
     assert "amazon.com" not in html.casefold()
 
     for token in (
@@ -45,11 +47,11 @@ def main() -> None:
         "@media(max-width:560px)",
         "prefers-reduced-motion",
         "min-inline-size:0",
+        ".record",
     ):
         assert token in css
 
     for forbidden in (
-        "localStorage",
         "sessionStorage",
         "fetch(",
         "XMLHttpRequest",
@@ -85,15 +87,39 @@ def main() -> None:
         "inverter",
         "Mevcut kaynağın sınıfını doğrulayın",
         "String(v??'').trim()",
+        "STORAGE_KEY='alo186-pump-backup-records-v1'",
+        "MAX_RECORDS=8",
+        "TTL_DAYS=365",
+        "REVIEW_DAYS=90",
+        "normalizeRecord",
+        "purgeRecords",
+        "exportPayload",
+        "text/calendar",
+        "elektrikci-is-emri-ozeti",
     ):
         assert token in app
     assert app.index("input.environment==='wet'") < app.index("const fixed=input.connection==='fixed'")
     assert "amazon." not in app.casefold()
     assert "../../akilli-urun-secimi?kategori=" in app
 
+    for token in (
+        'id="saveResult"',
+        'id="calendarResult"',
+        'id="exportResults"',
+        'id="clearRecords"',
+        'id="recordList"',
+        "90 günlük kontrol",
+        "365 gün",
+        "En fazla 8 kayıt",
+    ):
+        assert token in html
+
     assert ROUTE in common
     assert "data-alo186-pump-backup-card" in common
-    assert "36 çekirdek araç" in common
+    count_match = re.search(r"(\d+) çekirdek araç", common)
+    assert count_match, "Hesaplama Merkezi araç sayısı etiketi bulunamadı"
+    tool_count = int(count_match.group(1))
+    assert tool_count >= 36
 
     result = subprocess.run(
         ["node", str(MODULE / "app.test.js")],
@@ -104,8 +130,10 @@ def main() -> None:
     )
     payload = json.loads(result.stdout)
     assert payload["ok"] is True
-    assert payload["scenarios"] == 18
+    assert payload["scenarios"] == 22
     assert payload["route"] == ROUTE
+    assert payload["records"] == 8
+    assert payload["reviewDays"] == 90
 
     print(json.dumps({
         "ok": True,
@@ -115,7 +143,10 @@ def main() -> None:
         "personalDataFields": 0,
         "directStoreLinks": 0,
         "affiliateGateChecks": 3,
-        "toolCountLabel": 36,
+        "recordLimit": payload["records"],
+        "recordTtlDays": 365,
+        "reviewDays": payload["reviewDays"],
+        "toolCountLabel": tool_count,
     }, ensure_ascii=False, indent=2))
 
 
