@@ -285,7 +285,7 @@
     form.addEventListener('submit',event=>{event.preventDefault();render(doc,evaluate(readForm(doc)));});
     doc.getElementById('resetBtn').addEventListener('click',()=>{form.reset();syncExisting();doc.getElementById('result').hidden=true;});
     ['confirmGap','confirmSpecs','confirmAffiliate'].forEach(id=>doc.getElementById(id)?.addEventListener('change',()=>updateCommerce(doc)));
-    doc.getElementById('printBtn').addEventListener('click',()=>root.print());
+    doc.getElementById('printBtn').addEventListener('click',()=>{if(typeof globalThis.print==='function')globalThis.print();});
     doc.getElementById('jsonBtn').addEventListener('click',()=>downloadJson(doc));
   }
 
