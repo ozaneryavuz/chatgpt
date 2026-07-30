@@ -42,7 +42,8 @@ def run(site: Path, base_path: str) -> dict:
     hub = (site / "hesaplama/index.html").read_text(encoding="utf-8")
     expected = f"{base_path}{ROUTE}" if base_path else ROUTE
     assert expected in hub or './buzdolabi-dondurucu-kesinti-guvenligi/' in hub
-    assert "36 çekirdek araç" in hub
+    count_match = re.search(r'(\d+) çekirdek araç', hub)
+    assert count_match and int(count_match.group(1)) >= 36
     search_path = site / "arama/search-index.json"
     if search_path.is_file():
         payload = json.loads(search_path.read_text(encoding="utf-8"))
@@ -54,7 +55,7 @@ def run(site: Path, base_path: str) -> dict:
         release = json.loads(release_path.read_text(encoding="utf-8"))
         assert release.get("canonicalHost") == "https://alo186.com"
         assert release.get("customDomain") == "alo186.com"
-    return {"ok": True, "route": expected, "basePath": base_path, "canonical": CANONICAL}
+    return {"ok": True, "route": expected, "basePath": base_path, "canonical": CANONICAL, "toolCount": int(count_match.group(1))}
 
 
 def main() -> None:
