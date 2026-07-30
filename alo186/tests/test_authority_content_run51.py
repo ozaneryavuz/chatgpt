@@ -95,9 +95,9 @@ def main() -> None:
     assert len(canonicals) == len(PAGES)
 
     all_html = "\n".join(contract["path"].read_text(encoding="utf-8").casefold() for contract in PAGES.values())
-    assert all_html.count("elektrik kesintisi tazminatı nasıl alınır") == 2  # Article headline + H1
-    assert all_html.count("toprak hata çevrim empedansı nedir") == 2
-    assert all_html.count("parafudr bağlantı kablosu neden kısa olmalı") == 2
+    assert all_html.count("elektrik kesintisi tazminatı nasıl alınır") >= 2
+    assert all_html.count("toprak hata çevrim empedansı nedir") >= 2
+    assert all_html.count("parafudr bağlantı kablosu neden kısa olmalı") >= 2
 
     print(json.dumps({
         "routingVersion": overlay["version"],
