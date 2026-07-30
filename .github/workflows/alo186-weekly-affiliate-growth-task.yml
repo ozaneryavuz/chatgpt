@@ -1,0 +1,121 @@
+name: ALO186 haftalık affiliate büyüme görevi
+
+on:
+  schedule:
+    - cron: '15 6 * * 1'
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/alo186-weekly-affiliate-growth-task.yml'
+      - 'alo186/akilli-urun-secimi/**'
+      - 'alo186/urun-eslestirme/**'
+      - 'alo186/urun-bilgi-grafigi/**'
+      - 'alo186/deployment/inject_affiliate_product_graph.py'
+      - 'alo186/tests/test_affiliate_product_knowledge_graph.py'
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: alo186-weekly-affiliate-growth-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  affiliate-growth-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Katalog, eşleştirme ve Knowledge Graph sözleşmeleri
+        run: |
+          set -euo pipefail
+          node alo186/tests/test_affiliate_knowledge_graph.js
+          node alo186/tests/test_product_matcher.js
+          node alo186/akilli-urun-secimi/catalog-knowledge-extension.test.js
+          python alo186/tests/test_affiliate_product_knowledge_graph.py
+
+      - name: Satış kataloğu alt sınırı ve güven politikası
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const catalog = require('./alo186/urun-eslestirme/catalog-sales-extension.js');
+          const now = new Date();
+          const summary = catalog.knowledgeGraphSummary({ now });
+          const direct = catalog.products.filter((product) => catalog.publicAffiliateEligible(product, { now }));
+          const forbidden = ['price', 'stock', 'rating', 'seller', 'delivery', 'warranty', 'affiliateCommission'];
+          const keys = new Set();
+          const walk = (value) => {
+            if (Array.isArray(value)) return value.forEach(walk);
+            if (!value || typeof value !== 'object') return;
+            for (const [key, nested] of Object.entries(value)) {
+              keys.add(key);
+              walk(nested);
+            }
+          };
+          walk(catalog.products);
+          const usedForbidden = forbidden.filter((field) => keys.has(field));
+          if (summary.productCount < 30) throw new Error(`Ürün/model sayısı 30 altına düştü: ${summary.productCount}`);
+          if (summary.exactListingCount < 20) throw new Error(`Doğrulanmış ASIN sayısı 20 altına düştü: ${summary.exactListingCount}`);
+          if (usedForbidden.length) throw new Error(`Yasak ticari alanlar bulundu: ${usedForbidden.join(', ')}`);
+          if (!catalog.affiliateTag || catalog.affiliateTag !== 'alo186rehber-21') throw new Error('Affiliate etiketi korunmadı.');
+          if (!summary.gatedCandidateCount) throw new Error('Teknik uygunluk kapılı adaylar kayboldu.');
+          console.log(JSON.stringify({
+            productCount: summary.productCount,
+            exactAsinCount: summary.exactListingCount,
+            manufacturerModelCount: summary.manufacturerSearchCount,
+            directAffiliateCount: direct.length,
+            gatedCandidateCount: summary.gatedCandidateCount,
+            affiliateTag: catalog.affiliateTag,
+            commercialRankingFieldsUsed: usedForbidden
+          }, null, 2));
+          NODE
+
+      - name: Canonical üretim ve yayın smoke testi
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-weekly-affiliate-growth \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-weekly-affiliate-growth
+
+      - name: Görev kaydını güncelle
+        if: ${{ always() && github.event_name != 'pull_request' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const status = '${{ job.status }}';
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const marker = status === 'success' ? '✅' : '❌';
+            const body = [
+              `## ${marker} Haftalık affiliate büyüme denetimi`,
+              '',
+              `Durum: **${status}**`,
+              `Çalıştırma: ${runUrl}`,
+              '',
+              'Sonraki büyüme çalıştırmasında:',
+              '- en az 5 benzersiz ve yüksek niyetli ürün/model adayı değerlendirilmeli;',
+              '- doğrulanmış ASIN yoksa yalnız tam model araması açılmalı;',
+              '- en az 1 satın almaya hazır tamamlayıcı set veya çapraz satış yolu eklenmeli;',
+              '- ürünler ilgili hesaplayıcı, teknik kanıt ve güvenlik kapısıyla bağlanmalı;',
+              '- fiyat, stok, puan, satıcı, teslimat, garanti veya sahte kıtlık ifadesi yayımlanmamalı;',
+              '- mevcut ürün yeterliyse “satın alma gerekmiyor” sonucu korunmalı.',
+              '',
+              'Hedef: katalogdaki bir sonraki doğrulanmış eşik **35 ürün/model düğümü**.'
+            ].join('\n');
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: 314,
+              body
+            });
