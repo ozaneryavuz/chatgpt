@@ -8,11 +8,11 @@ ROOT = Path(__file__).resolve().parents[2]
 OVERLAY = ROOT / "alo186/deployment/routing-overlays/content-authority-run47.json"
 
 PAGES = {
-    "/haberler/jenerator-ats-3-kutup-4-kutup-notr-anahtarlama": {
-        "path": ROOT / "alo186/haberler/jenerator-ats-3-kutup-4-kutup-notr-anahtarlama/index.html",
-        "intent": ("3 kutuplu", "4 kutuplu", "solid neutral", "switched neutral", "IEC 60947-6-1"),
-        "sources": ("iec.ch", "se.com"),
-        "separation": "transfer şalteri seçimini nötr-toprak referansı, kaynak topraklama mimarisi ve RCD davranışı üzerinden 3/4 kutup görevine nasıl bağlayacağını",
+    "/haberler/kacak-akim-rolesi-ramp-testi-acma-akimi-suresi": {
+        "path": ROOT / "alo186/haberler/kacak-akim-rolesi-ramp-testi-acma-akimi-suresi/index.html",
+        "intent": ("ramp testi", "açma akımı", "açma süresi", "0,5×", "IEC 61557-6"),
+        "sources": ("iec.ch", "fluke.com", "se.com"),
+        "separation": "RCD ramp testindeki açma akımı ile açma süresi, non-trip testi, test dalga şekli ve tesisat koruma kanıtlarının nasıl birlikte yorumlanacağını",
     },
     "/haberler/gerilim-kalitesi-sikayeti-class-a-olcum-edas-basvuru": {
         "path": ROOT / "alo186/haberler/gerilim-kalitesi-sikayeti-class-a-olcum-edas-basvuru/index.html",
