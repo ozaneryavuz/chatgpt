@@ -26,6 +26,7 @@ def run(command: list[str]) -> None:
 ux_js = (ROOT / "alo186/assets/alo186-ux.js").read_text(encoding="utf-8")
 ux_css = (ROOT / "alo186/assets/alo186-ux.css").read_text(encoding="utf-8")
 for token in (
+    "const ROOT_PATH = String.fromCharCode(47)",
     "const isIndexable = !robots.includes('noindex')",
     "const isTurkish",
     "markCurrent(nav)",
@@ -41,8 +42,10 @@ for token in (
     "wrapper.tabIndex = overflowing ? 0 : -1",
     "wrapper.dataset.overflow = String(overflowing)",
     "header,.hero,[data-critical-media]",
+    "publicPath(ROOT_PATH)",
 ):
     assert token in ux_js, token
+assert not re.search(r"(['\"])/\1", ux_js), "Project-path paketinde tek başına kök URL sabiti kalamaz"
 assert "body:not([data-alo186-ux-compact=true])" in ux_css
 assert "body{padding-bottom" not in ux_css
 assert ".alo-ux-toc" in ux_css
@@ -120,6 +123,7 @@ print(json.dumps({
     "criticalRoutes": sorted(CRITICAL_USER_ROUTES),
     "mobileUtilityBar": "indexable-tr-only",
     "projectPathAware": True,
+    "projectRootReferenceFree": True,
     "localizedUtilities": True,
     "activePageState": True,
     "tableOverflowGuard": "focus-only-when-overflowing",
