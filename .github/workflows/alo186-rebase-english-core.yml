@@ -1,0 +1,78 @@
+name: ALO186 rebuild English core from current main
+
+on:
+  pull_request:
+    types: [synchronize]
+    paths:
+      - '.github/workflows/alo186-rebase-english-core.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: alo186-rebuild-english-core
+  cancel-in-progress: false
+
+jobs:
+  rebuild:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.ref == 'agent/alo186-english-core'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out the source branch with complete history
+        uses: actions/checkout@v4
+        with:
+          ref: agent/alo186-english-core
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Rebuild a clean branch on the latest main
+        shell: bash
+        env:
+          SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          TARGET_BRANCH: agent/alo186-english-core-rebased
+        run: |
+          set -euo pipefail
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git fetch origin main --prune
+          git checkout -B "$TARGET_BRANCH" origin/main
+
+          paths=(
+            '.github/workflows/alo186-english-core.yml'
+            'alo186/acil-numaralar/index.html'
+            'alo186/deployment/content-consolidations.json'
+            'alo186/deployment/routing-overlays/english-core-run1.json'
+            'alo186/elektrik-kesintisi/index.html'
+            'alo186/en'
+            'alo186/gizlilik/index.html'
+            'alo186/hakkimizda/index.html'
+            'alo186/iletisim/index.html'
+            'alo186/index.html'
+            'alo186/kaynaklar/index.html'
+            'alo186/tests/test_english_core.py'
+            'alo186/turkiye-arama/index.html'
+            'alo186/yasal/amazon-satis-ortakligi/index.html'
+            'alo186/yayin-ilkeleri/index.html'
+          )
+
+          for path in "${paths[@]}"; do
+            git checkout "$SOURCE_SHA" -- "$path"
+          done
+
+          # The temporary rebuild workflow belongs only to the superseded branch.
+          git rm --ignore-unmatch '.github/workflows/alo186-rebase-english-core.yml'
+
+          git add --all
+          if git diff --cached --quiet; then
+            echo 'No English-core changes remain after rebuilding from main.'
+            exit 1
+          fi
+
+          git commit -m 'ALO186: rebase English AEO core onto current main'
+          git push --force-with-lease origin "$TARGET_BRANCH"
+
+          echo 'Created clean branch:' "$TARGET_BRANCH"
+          git diff --stat origin/main...HEAD
