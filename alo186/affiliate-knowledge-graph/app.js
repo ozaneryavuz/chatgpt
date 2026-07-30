@@ -127,13 +127,14 @@
   }
 
   async function boot() {
-    const [base, v103, v104, supplement] = await Promise.all([
+    const [base, v103, v104, supplement, v105] = await Promise.all([
       loadJson('./catalog.json'),
       loadJson('./catalog-extension-v103.json'),
       loadJson('./catalog-v104-extension.json'),
-      loadJson('./catalog-v104-supplement.json')
+      loadJson('./catalog-v104-supplement.json'),
+      loadJson('./catalog-v105-extension.json')
     ]);
-    state.catalog = [v103, v104, supplement].reduce((catalog, extension) => mergeCatalog(catalog, extension), base);
+    state.catalog = [v103, v104, supplement, v105].reduce((catalog, extension) => mergeCatalog(catalog, extension), base);
     $('intentCount').textContent = state.catalog.intents.length;
     $('productCount').textContent = state.catalog.productClasses.length;
     $('search').addEventListener('input', (event) => {
