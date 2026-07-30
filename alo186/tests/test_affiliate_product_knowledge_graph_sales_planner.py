@@ -11,6 +11,15 @@ SOURCE_STYLE = ROOT / "alo186/urun-bilgi-grafigi/sales-missions.css"
 SALES_EXTENSION = ROOT / "alo186/urun-eslestirme/generator-guide-extension.js"
 
 
+FUNNEL_EVENTS = (
+    "sales_missing_parts_collection_rendered",
+    "sales_missing_parts_started",
+    "sales_missing_parts_validation_blocked",
+    "sales_missing_parts_planned",
+    "sales_missing_part_opened",
+)
+
+
 def source_contracts() -> None:
     page = SOURCE_PAGE.read_text(encoding="utf-8")
     app = SOURCE_APP.read_text(encoding="utf-8")
@@ -38,16 +47,36 @@ def source_contracts() -> None:
         "catalog.verificationStatus",
         "data-owned-product",
         "data-compatibility-confirm",
+        "data-mission-plan",
         "Mevcut setiniz tamam görünüyor.",
         "Satın almama sonucu oluşturuldu.",
         "sponsored nofollow noopener",
         "sales_missing_parts_collection_rendered",
+        "sales_missing_parts_started",
+        "sales_missing_parts_validation_blocked",
         "sales_missing_parts_planned",
         "sales_missing_part_opened",
+        "compatibility_confirmation_missing",
+        "lastPlanSignature",
+        "ga4Pending",
+        "window.alo186Analytics",
+        "analytics.track(name, payload)",
+        "window.Alo186Track(name, safe)",
+        "Yalnız ${missing.length} eksik parçayı göster",
+        "Satın almama sonucunu göster",
+        "output.focus({ preventScroll: true })",
         "URLSearchParams",
         "bundle",
     ):
         assert token in app, token
+
+    for event in FUNNEL_EVENTS:
+        assert len(event) <= 40, event
+        assert re.fullmatch(r"[a-z][a-z0-9_]{0,39}", event), event
+
+    assert "ga4Pending.size < 20" in app
+    assert 'data-alo186-consent-choice="granted"' in app
+    assert "action_type" in app and "content_group" in app and "route_group" in app
 
     for forbidden in (
         "localstorage",
@@ -112,6 +141,9 @@ def artifact_contracts(site: Path, base_path: str) -> None:
         assert {"sponsored", "nofollow", "noopener"}.issubset(rel_tokens), anchor
 
     assert "sponsored nofollow noopener" in app
+    assert "sales_missing_parts_started" in app
+    assert "sales_missing_parts_validation_blocked" in app
+    assert "window.alo186Analytics" in app
     assert "localStorage" not in app and "sessionStorage" not in app
 
 
@@ -123,7 +155,7 @@ def main() -> None:
     source_contracts()
     if args.site:
         artifact_contracts(args.site.resolve(), args.base_path.rstrip("/"))
-    print("ALO186 eksik parça planlayıcı satış ve güven sözleşmeleri başarılı.")
+    print("ALO186 eksik parça planlayıcı GA4 hunisi, satış ve güven sözleşmeleri başarılı.")
 
 
 if __name__ == "__main__":
