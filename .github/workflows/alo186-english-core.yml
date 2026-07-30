@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'alo186/en/**'
+      - 'alo186/index.html'
       - 'alo186/turkiye-arama/index.html'
       - 'alo186/deployment/routing-overlays/english-core-run1.json'
       - 'alo186/tests/test_english_core.py'
@@ -12,6 +13,7 @@ on:
     branches: [main]
     paths:
       - 'alo186/en/**'
+      - 'alo186/index.html'
       - 'alo186/turkiye-arama/index.html'
       - 'alo186/deployment/routing-overlays/english-core-run1.json'
       - 'alo186/tests/test_english_core.py'
@@ -99,20 +101,32 @@ jobs:
           ]
           sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
           release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
+          pages_release = json.loads((root / 'pages-release.json').read_text(encoding='utf-8'))
+          live_origin = pages_release['canonicalHost'].rstrip('/')
           assert release['routingVersion'] >= 102, release['routingVersion']
+          assert live_origin == 'https://alo186.com', live_origin
           for route in routes:
               page = root / route.strip('/') / 'index.html'
               assert page.is_file(), route
               html = page.read_text(encoding='utf-8')
               assert '<html lang="en">' in html, route
               canonical = re.search(r'<link rel="canonical" href="([^"]+)"', html)
-              assert canonical and canonical.group(1) == f'https://www.alo186.com{route}', route
-              assert f'https://www.alo186.com{route}' in sitemap, route
+              expected_url = f'{live_origin}{route}'
+              assert canonical and canonical.group(1) == expected_url, (
+                  route,
+                  canonical.group(1) if canonical else None,
+                  expected_url,
+              )
+              assert expected_url in sitemap, route
               assert 'href="tel:112"' in html and 'href="tel:186"' in html, route
           assert (root / 'en/assets/styles.css').is_file()
           assert (root / 'en/assets/finder.js').is_file()
           assert (root / 'edas-bul/companies.js').is_file()
-          print(json.dumps({'routingVersion': release['routingVersion'], 'routes': routes}, ensure_ascii=False))
+          print(json.dumps({
+              'routingVersion': release['routingVersion'],
+              'liveOrigin': live_origin,
+              'routes': routes,
+          }, ensure_ascii=False))
           PY
 
       - name: Upload validated English artifact
