@@ -76,8 +76,8 @@ for(const node of selectedNodes){
   assert.ok(node.additionalProperty.some((item)=>item.name==='Ticari ilişki'));
   for(const field of forbidden)assert.ok(!(field in node),`Yasak KG alanı ${field}: ${node.sku}`);
 }
-const directList=graph.find((node)=>node['@type']==='ItemList'&&String(node['@id']).endsWith('#direct-affiliate-products'));
-assert.ok(directList);
+const directList=graph.find((node)=>node['@type']==='ItemList'&&String(node['@id']).endsWith('/urun-bilgi-grafigi/#public-products'));
+assert.ok(directList,'Doğrudan affiliate ItemList düğümü eksik.');
 const directIds=new Set(directList.itemListElement.map((item)=>item.item['@id']));
 for(const [id] of expected)assert.ok([...directIds].some((value)=>value.includes(`/urun/${id}#product`)),`Direct ItemList ürünü eksik: ${id}`);
 
