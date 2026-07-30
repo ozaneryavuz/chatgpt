@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "release": "english-core-p0",
   "generatedAt": "2026-07-30",
   "englishRouteCount": 10,
@@ -18,6 +18,19 @@
     "quickDiscoveryWithoutSite": true,
     "fullAuditRequiresSite": true
   },
+  "livePublicationSmoke": {
+    "workflow": "ALO186 English live publication smoke",
+    "trigger": "ALO186 GitHub Pages — sunucusuz canlı yayın completed on main push",
+    "origin": "https://alo186.com",
+    "routeCount": 10,
+    "releaseMarker": "/pages-release.json",
+    "sitemap": "/sitemap.xml",
+    "issue": 400,
+    "singleUpdatableStatusComment": true,
+    "acceptNewerDescendantDeployment": true,
+    "cacheBusting": true,
+    "maximumPollingMinutes": 9
+  },
   "acceptance": [
     "self-canonical",
     "reciprocal-hreflang",
@@ -28,6 +41,8 @@
     "route-aware-language-audit",
     "quick-test-discovery",
     "custom-domain-build",
-    "sitemap-inclusion"
+    "sitemap-inclusion",
+    "post-deploy-live-smoke",
+    "issue-status-observability"
   ]
 }
