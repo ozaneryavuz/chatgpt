@@ -62,7 +62,22 @@ jobs:
           grep -Fq 'rel="canonical" href="https://www.alo186.com/akilli-urun-secimi"' /tmp/alo186-car-charger-run54/akilli-urun-secimi/index.html
           grep -Fq 'Reklam / satış ortaklığı:' /tmp/alo186-car-charger-run54/akilli-urun-secimi/index.html
           grep -Fq 'rel="sponsored nofollow noopener"' /tmp/alo186-car-charger-run54/akilli-urun-secimi/app.js
-          node /tmp/alo186-car-charger-run54/tests/test_car_charger_affiliate_run54.js
+          node - <<'NODE'
+          const catalog=require('/tmp/alo186-car-charger-run54/akilli-urun-secimi/catalog-car-charger-run54.js');
+          const expected=new Map([
+            ['B08558MGST','CCB001btBK'],
+            ['B0BTP9GF27','CCA004btBK'],
+            ['B0BT4GWMS3','BXAC65C']
+          ]);
+          for(const [asin,mpn] of expected){
+            const product=catalog.products.find((item)=>item.asin===asin);
+            if(!product||product.mpn!==mpn||product.category!=='car_charger')throw new Error(`Bundle ürünü eksik: ${asin}`);
+            if(!product.url.endsWith(`?tag=${catalog.affiliateTag}`))throw new Error(`Affiliate etiketi eksik: ${asin}`);
+          }
+          const graph=catalog.knowledgeGraph({now:new Date('2026-07-30T12:00:00Z')})['@graph'];
+          const count=graph.filter((node)=>node['@type']==='Product'&&expected.has(node.identifier.find((item)=>item.propertyID==='ASIN')?.value)).length;
+          if(count!==3)throw new Error(`Bundle Product düğümü beklenen 3, bulunan ${count}`);
+          NODE
 
       - name: Custom-domain Pages paketini doğrula
         run: |
