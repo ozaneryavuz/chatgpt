@@ -81,13 +81,14 @@ jobs:
           grep -Fq 'jenerator-dusuk-yuk-wet-stacking-kurum-load-bank' /tmp/alo186-consolidation-apache/.htaccess
           grep -Fq 'elektrik-kesintisi-tazminati-otomatik-odeme-12-saat' /tmp/alo186-consolidation-apache/.htaccess
           grep -Fq 'ups-statik-bypass-bakim-bypassi-backfeed-korumasi' /tmp/alo186-consolidation-apache/.htaccess
+          grep -Fq 'ges-inverter-afci-dc-ark-hatasi-alarmi-kapatilir-mi' /tmp/alo186-consolidation-apache/.htaccess
           python - <<'PY'
           import json
           from pathlib import Path
           result=json.loads(Path('/tmp/alo186-consolidation-apache.json').read_text(encoding='utf-8'))
           assert result['ok'] is True
           assert result['apacheRedirects'] is True
-          assert result['aliasCount']==7
+          assert result['aliasCount']==8
           PY
 
       - name: GitHub Pages custom-domain artifactını birleştir
@@ -142,6 +143,7 @@ jobs:
               ('jenerator-dusuk-yuk-wet-stacking-kurum-load-bank', 'jenerator-dusuk-yuk-wet-stacking-nedir'),
               ('elektrik-kesintisi-tazminati-otomatik-odeme-12-saat', 'elektrik-kesintisi-tazminati-nasil-alinir'),
               ('ups-statik-bypass-bakim-bypassi-backfeed-korumasi', 'ups-backfeed-korumasi-bakim-bypass-interlock-guvenli-izolasyon'),
+              ('ges-inverter-afci-dc-ark-hatasi-alarmi-kapatilir-mi', 'ges-inverter-afci-dc-ark-hatasi'),
           ]
           for root, prefix in [
               (Path('/tmp/alo186-consolidation-custom'), ''),
@@ -150,7 +152,7 @@ jobs:
               sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
               release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
               pages=json.loads((root/'pages-release.json').read_text(encoding='utf-8'))
-              assert release['contentConsolidation']['aliasCount']==7
+              assert release['contentConsolidation']['aliasCount']==8
               assert pages['contentConsolidation']['aliasesExcludedFromSitemap'] is True
               assert release['routeCount']==len(release['routes'])
               for alias, canonical in pairs:
