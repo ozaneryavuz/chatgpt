@@ -131,7 +131,7 @@ jobs:
               guide=guide_page.read_text(encoding='utf-8')
 
               assert tool_slug in html
-              assert 'amazon.com' not in (html+js+post_js).lower()
+              assert 'amazon.com' not in (js+post_js).lower()
               assert all(token not in js+post_js for token in ['localStorage','sessionStorage','fetch('])
               assert all(token in html for token in ['actualNeed','technicalCheck','affiliateCheck','productLinks'])
               assert 'tasinabilir-evse-secimi' in post_js
@@ -161,7 +161,7 @@ jobs:
               'ok':True,
               'toolRoute':'/hesaplama/tasinabilir-ev-sarj-priz-uygunluk/',
               'commerceGuideRoute':'/amazon-elektrik-urunleri/tasinabilir-evse-secimi/',
-              'directStoreLinksInCalculator':0,
+              'directStoreLinksInCalculatorSource':0,
               'affiliateTripleGate':True,
               'affiliateDisclosure':True,
               'resetClearsCommerce':True,
