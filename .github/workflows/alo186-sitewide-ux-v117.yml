@@ -1,0 +1,46 @@
+name: ALO186 site geneli kullanıcı deneyimi v117
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/assets/alo186-ux.css'
+      - 'alo186/assets/alo186-ux.js'
+      - 'alo186/deployment/prepare_github_pages.py'
+      - 'alo186/tests/test_sitewide_ux_v117.py'
+      - '.github/workflows/alo186-sitewide-ux-v117.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/assets/alo186-ux.css'
+      - 'alo186/assets/alo186-ux.js'
+      - 'alo186/deployment/prepare_github_pages.py'
+      - 'alo186/tests/test_sitewide_ux_v117.py'
+      - '.github/workflows/alo186-sitewide-ux-v117.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-sitewide-ux-v117-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Tüm canonical ve Pages rotalarında UX sözleşmesi
+        run: python alo186/tests/test_sitewide_ux_v117.py
+      - name: Mevcut yayın ve güven regresyonları
+        run: |
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
