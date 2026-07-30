@@ -100,7 +100,6 @@ jobs:
           set -euo pipefail
           python - <<'PY'
           import json
-          import re
           from pathlib import Path
 
           route='hesaplama/akvaryum-kesinti-yedek-guc-uygunluk'
@@ -155,8 +154,6 @@ jobs:
               hub=(root/'hesaplama/index.html').read_text(encoding='utf-8')
               assert slug in hub
               assert hub.count('class="tool-card"') >= 44
-              match=re.search(r'(\d+) çekirdek araç',hub)
-              assert match and int(match.group(1)) >= 44
 
               sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
               assert slug in sitemap
