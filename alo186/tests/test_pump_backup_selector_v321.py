@@ -67,6 +67,7 @@ def main() -> None:
 
     for token in (
         "START_MULTIPLIER={direct:6,soft:3,vfd:1.5}",
+        "PF_DEFAULT=0.8",
         "RESERVE=1.25",
         "BATTERY_EFF=0.85",
         "USABLE=0.8",
@@ -100,7 +101,7 @@ def main() -> None:
     )
     payload = json.loads(result.stdout)
     assert payload["ok"] is True
-    assert payload["scenarios"] == 12
+    assert payload["scenarios"] == 13
     assert payload["route"] == ROUTE
 
     print(json.dumps({
