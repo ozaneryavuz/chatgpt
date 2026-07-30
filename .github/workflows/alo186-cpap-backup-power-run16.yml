@@ -76,7 +76,13 @@ jobs:
           test -f /tmp/alo186-cpap-canonical/hesaplama/cpap-apap-bipap-yedek-guc-uygunluk/index.html
           test -f /tmp/alo186-cpap-canonical/hesaplama/cpap-apap-bipap-yedek-guc-uygunluk/app.js
           grep -q 'CPAP/APAP Yedek Güç Uygunluğu' /tmp/alo186-cpap-canonical/hesaplama/index.html
-          grep -q '45 çekirdek araç' /tmp/alo186-cpap-canonical/hesaplama/index.html
+          python - <<'PY'
+          import re
+          from pathlib import Path
+          hub=Path('/tmp/alo186-cpap-canonical/hesaplama/index.html').read_text(encoding='utf-8')
+          match=re.search(r'(\d+) çekirdek araç',hub)
+          assert match and int(match.group(1)) >= 45
+          PY
 
       - name: Custom-domain ve project-path Pages kabulü
         shell: bash

@@ -44,6 +44,7 @@ jobs:
         run: |
           set -euo pipefail
           python - <<'PY'
+          import re
           from pathlib import Path
           page=Path('alo186/hesaplama/modem-internet-yedekleme/index.html').read_text(encoding='utf-8')
           app=Path('alo186/hesaplama/modem-internet-yedekleme/app.js').read_text(encoding='utf-8')
@@ -75,8 +76,9 @@ jobs:
           assert "state='hazard'" in app
           assert 'commerceAllowed=false' in app
           assert './modem-internet-yedekleme/' in hub
-          assert '44 çekirdek araç' in hub
-          print({'ok':True,'tripleGate':True,'noBuy':True,'activeOutageCommerce':False,'unverifiedCommercialFields':False,'personalStorage':False,'revisitDays':90})
+          match=re.search(r'(\d+) çekirdek araç',hub)
+          assert match and int(match.group(1)) >= 44
+          print({'ok':True,'tripleGate':True,'noBuy':True,'activeOutageCommerce':False,'unverifiedCommercialFields':False,'personalStorage':False,'revisitDays':90,'toolCount':int(match.group(1))})
           PY
 
       - name: Mevcut yayın regresyonları

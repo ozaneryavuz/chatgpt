@@ -154,7 +154,6 @@ jobs:
               hub=(root/'hesaplama/index.html').read_text(encoding='utf-8')
               assert slug in hub
               assert hub.count('class="tool-card"') >= 44
-              assert '44 çekirdek araç' in hub
 
               sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
               assert slug in sitemap
