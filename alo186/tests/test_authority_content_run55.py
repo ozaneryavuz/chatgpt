@@ -42,6 +42,7 @@ def main() -> None:
 
     for route, contract in PAGES.items():
         html = contract["path"].read_text(encoding="utf-8")
+        folded_html = html.casefold()
         assert routes[route]["type"] == "article"
         assert routes[route]["source"].endswith("/index.html")
 
@@ -71,9 +72,9 @@ def main() -> None:
         assert "/kurumsal-elektrik-surekliligi-on-degerlendirme" in html, route
 
         for token in contract["intent"]:
-            assert token in html, (route, token)
+            assert token.casefold() in folded_html, (route, token)
         for domain in contract["sources"]:
-            assert domain in html, (route, domain)
+            assert domain.casefold() in folded_html, (route, domain)
 
         forbidden = (
             "garanti sonuç",
@@ -83,9 +84,8 @@ def main() -> None:
             "stok tükeniyor",
             "ALO186 yetkili servisidir",
         )
-        lower = html.lower()
         for token in forbidden:
-            assert token.lower() not in lower, (route, token)
+            assert token.casefold() not in folded_html, (route, token)
         assert 'target="_blank" rel="noopener"' in html, route
 
     assert len(titles) == len(PAGES)
