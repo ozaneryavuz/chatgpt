@@ -33,6 +33,11 @@ result=tool.classify(input({stage:'active',appliance:'freezer_half',hours:30}));
 assert.equal(result.freezerStatus,'evidence_needed');
 assert.equal(result.severity,'warn');
 
+result=tool.classify(input({stage:'active',appliance:'both',hours:30}));
+assert.equal(result.fridgeStatus,'evidence_needed');
+assert.equal(result.freezerStatus,'evidence_needed');
+assert.equal(result.severity,'warn');
+
 result=tool.classify(input({stage:'restored',appliance:'freezer_full',hours:20,freezerTemp:3.5}));
 assert.equal(result.freezerStatus,'cold_evidence_present');
 
@@ -63,4 +68,4 @@ assert.equal(tool.prune([{createdAt:now-tool.TTL-1}],now).length,0);
 assert.equal(tool.LIMIT,8);
 assert.equal(tool.TTL,365*86400000);
 
-console.log(JSON.stringify({ok:true,scenarios:10,affiliateTag:tool.AFFILIATE_TAG,recordLimit:tool.LIMIT,ttlDays:365},null,2));
+console.log(JSON.stringify({ok:true,scenarios:11,affiliateTag:tool.AFFILIATE_TAG,recordLimit:tool.LIMIT,ttlDays:365,combinedFreezerThresholdHours:24},null,2));
