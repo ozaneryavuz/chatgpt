@@ -40,7 +40,6 @@
   };
   const uniq=values=>[...new Set(values.filter(Boolean))];
   const round=(value,digits=1)=>Number(value.toFixed(digits));
-  const iso=value=>new Date(value).toISOString();
   const safeText=(value,max=180)=>String(value??'').replace(/[<>]/g,'').trim().slice(0,max);
 
   function base(status,title,summary){
@@ -107,7 +106,7 @@
     if(!START_MULTIPLIER[input.startMethod])evidence.push('Kalkış yöntemi bilinmiyor.');
     if(!n(input.targetHours)||n(input.targetHours)<=0||n(input.targetHours)>48)evidence.push('Hedef çalışma süresi 0–48 saat aralığında doğrulanmadı.');
     if(input.connection==='unknown')evidence.push('Pompanın fişli mi sabit bağlı mı olduğu bilinmiyor.');
-    if(input.sourceStatus==='existing'&&input.sourceType==='auto')evidence.push('Mevcut kaynağın jeneratör, power station veya inverter sınıfı seçilmedi.');
+    if(input.sourceStatus==='existing'&&input.sourceType==='auto')evidence.push('Mevcut kaynağın sınıfını doğrulayın: jeneratör, power station veya inverter seçin.');
     if(evidence.length){
       const result=base('evidence_required','Önce motor etiketini ve bağlantıyı doğrulayın','Faz, volt, amper, kalkış yöntemi ve süre bilinmeden jeneratör veya inverter seçilmez.');
       result.issues=evidence;
@@ -213,6 +212,19 @@
       .slice(0,MAX_RECORDS);
   }
 
+  function loadStoredRecords(storage,now=new Date()){
+    if(!storage||typeof storage.getItem!=='function')return [];
+    let parsed=[];
+    try{parsed=JSON.parse(storage.getItem(STORAGE_KEY)||'[]');}
+    catch(error){parsed=[];}
+    const records=purgeRecords(parsed,now);
+    try{
+      if(records.length)storage.setItem(STORAGE_KEY,JSON.stringify(records));
+      else storage.removeItem(STORAGE_KEY);
+    }catch(error){}
+    return records;
+  }
+
   function exportPayload(records,now=new Date()){
     return {
       schemaVersion:1,
@@ -266,11 +278,11 @@
     });
 
     function loadRecords(){
-      try{records=purgeRecords(JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'));}
+      try{records=loadStoredRecords(globalThis.localStorage);}
       catch(error){records=[];}
     }
     function writeRecords(){
-      try{localStorage.setItem(STORAGE_KEY,JSON.stringify(records));return true;}
+      try{globalThis.localStorage.setItem(STORAGE_KEY,JSON.stringify(records));return true;}
       catch(error){return false;}
     }
     function download(content,type,filename){
@@ -338,7 +350,7 @@
     get('exportResults').addEventListener('click',()=>download(JSON.stringify(exportPayload(records),null,2),'application/json;charset=utf-8','alo186-pompa-yedek-guc-kayitlari.json'));
     get('clearRecords').addEventListener('click',()=>{
       records=[];
-      try{localStorage.removeItem(STORAGE_KEY);}catch(error){}
+      try{globalThis.localStorage.removeItem(STORAGE_KEY);}catch(error){}
       renderRecords('Bu cihazdaki pompa kayıtları silindi.');
     });
 
@@ -346,7 +358,7 @@
   }
 
   return {
-    evaluate,calculations,normalizeRecord,purgeRecords,exportPayload,createRecord,toIcs,init,
+    evaluate,calculations,normalizeRecord,purgeRecords,loadStoredRecords,exportPayload,createRecord,toIcs,init,
     constants:{START_MULTIPLIER,PF_DEFAULT,RESERVE,BATTERY_EFF,USABLE,STORAGE_KEY,MAX_RECORDS,TTL_DAYS,REVIEW_DAYS,CATEGORY_LINKS}
   };
 });
