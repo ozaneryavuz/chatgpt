@@ -43,7 +43,7 @@ jobs:
         run: |
           python alo186/deployment/prepare_github_pages.py --site /tmp/alo186-status-center --base-path '' --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
           python alo186/deployment/smoke_github_pages.py --site /tmp/alo186-status-center --base-path ''
-      - name: Rota ve arama kabulü
+      - name: Canonical rota kabulü
         run: |
           python - <<'PY'
           import json
@@ -53,8 +53,9 @@ jobs:
           assert (root/route.strip('/')/'index.html').is_file()
           sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
           assert f'https://www.alo186.com{route}' in sitemap
-          search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
-          active={item.get('canonicalPath','').rstrip('/') for item in search['entries']}
-          assert route in active, (route, sorted(x for x in active if 'durum' in x))
-          print({'route':route,'searchEntries':len(active)})
+          release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
+          active={item.get('canonicalPath','').rstrip('/') for item in release['routes']}
+          assert route in active
+          assert release['routingVersion'] >= 75
+          print({'route':route,'routingVersion':release['routingVersion'],'routeCount':len(active)})
           PY
