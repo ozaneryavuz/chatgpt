@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "release": "english-core-p0",
   "generatedAt": "2026-07-30",
   "englishRouteCount": 10,
@@ -14,7 +14,9 @@
     "englishPrefix": "/en/",
     "englishPrimaryLanguage": "en",
     "defaultPrimaryLanguage": "tr",
-    "regionalLanguageTagsAccepted": true
+    "regionalLanguageTagsAccepted": true,
+    "quickDiscoveryWithoutSite": true,
+    "fullAuditRequiresSite": true
   },
   "acceptance": [
     "self-canonical",
@@ -24,6 +26,7 @@
     "istanbul-side-resolution",
     "javascript-free-company-directory",
     "route-aware-language-audit",
+    "quick-test-discovery",
     "custom-domain-build",
     "sitemap-inclusion"
   ]
