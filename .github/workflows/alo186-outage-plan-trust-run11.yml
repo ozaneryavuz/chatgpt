@@ -1,0 +1,116 @@
+name: ALO186 kesinti hazırlık güvenli büyüme
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/kesinti-hazirlik-plani/**'
+      - 'alo186/tests/test_outage_plan_trust_run11.py'
+      - '.github/workflows/alo186-outage-plan-trust-run11.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/kesinti-hazirlik-plani/**'
+      - 'alo186/tests/test_outage_plan_trust_run11.py'
+      - '.github/workflows/alo186-outage-plan-trust-run11.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-outage-plan-trust-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Karar motoru, satın almama ve gizlilik
+        run: |
+          set -euo pipefail
+          node --check alo186/hesaplama/kesinti-hazirlik-plani/app.js
+          node alo186/hesaplama/kesinti-hazirlik-plani/app.test.js
+          python alo186/tests/test_outage_plan_trust_run11.py
+
+      - name: Mevcut yayın ve portal regresyonları
+        run: |
+          set -euo pipefail
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+
+      - name: Canonical üretim ve statik smoke
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-outage-plan-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-outage-plan-canonical
+
+      - name: Custom-domain ve project-path Pages kabulü
+        run: |
+          set -euo pipefail
+          for target in custom project; do
+            cp -a /tmp/alo186-outage-plan-canonical "/tmp/alo186-outage-plan-$target"
+          done
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-outage-plan-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-outage-plan-custom \
+            --base-path ''
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-outage-plan-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-outage-plan-project \
+            --base-path '/chatgpt'
+
+      - name: Sitemap, Teknik Arama ve ticari sınır kabulü
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          canonical = '/hesaplama/kesinti-hazirlik-plani/'
+          relative = 'hesaplama/kesinti-hazirlik-plani'
+          for root in [Path('/tmp/alo186-outage-plan-custom'), Path('/tmp/alo186-outage-plan-project')]:
+              page = root / relative / 'index.html'
+              app = root / relative / 'app.js'
+              assert page.is_file() and app.is_file()
+              html = page.read_text(encoding='utf-8')
+              js = app.read_text(encoding='utf-8')
+              assert canonical in (root / 'sitemap.xml').read_text(encoding='utf-8')
+              search = json.loads((root / 'arama/search-index.json').read_text(encoding='utf-8'))
+              assert any(item['canonicalPath'] == canonical for item in search['entries'])
+              assert 'amazon.com.tr' not in html.casefold() and 'amazon.com.tr' not in js.casefold()
+              assert 'affiliateLinks:0' in js and 'commercialAllowed:false' in js
+              assert 'Mevcut hazırlık yeterli; yeni ürün aramayın' in html
+              assert '180 gün sonra' in html and 'expiresAt' in js
+              assert 'cpap-bipap-yedek-guc-sure-uygunluk' in js
+              assert 'kombi-elektrik-kesintisi-yedek-guc-uygunluk' in js
+          print(json.dumps({'ok': True, 'route': canonical, 'directAffiliateLinks': 0, 'revisitExpiryDays': 180}, ensure_ascii=False))
+          PY
+
+      - name: Doğrulanmış site artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-outage-plan-trust-run11-pages
+          path: /tmp/alo186-outage-plan-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
