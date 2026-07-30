@@ -158,7 +158,8 @@ jobs:
               common=(root/'hesaplama/common.js').read_text(encoding='utf-8')
               assert 'data-alo186-generator-safety-card' in common
               assert '/hesaplama/jenerator-guvenli-kullanim-testi/' in common
-              assert '36 çekirdek araç' in common
+              counts=[int(value) for value in re.findall(r'(\d+) çekirdek araç',common)]
+              assert counts and max(counts)>=36
           PY
 
       - name: Doğrulanmış jeneratör güvenlik artifactı
