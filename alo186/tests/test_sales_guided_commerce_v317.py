@@ -1,19 +1,27 @@
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = ROOT.parent
+DEPLOYMENT = ROOT / "deployment"
+sys.path.insert(0, str(DEPLOYMENT))
+
+from build_static_site import load_effective_manifest  # noqa: E402
+
 PAGE = ROOT / "kesinti-hazirlik-atolyesi" / "index.html"
 APP = ROOT / "kesinti-hazirlik-atolyesi" / "app.js"
 STYLE = ROOT / "kesinti-hazirlik-atolyesi" / "styles.css"
-ROUTING = ROOT / "deployment" / "routing-manifest.json"
 
 
 def test_sales_workshop_route_exists():
     assert PAGE.exists()
     assert APP.exists()
     assert STYLE.exists()
-    routing = ROUTING.read_text(encoding="utf-8")
-    assert '"canonicalPath": "/kesintiye-hazirlik-atolyesi"' in routing
-    assert '"source": "alo186/kesinti-hazirlik-atolyesi/index.html"' in routing
+    manifest = load_effective_manifest(REPO_ROOT)
+    routes = {item["canonicalPath"]: item for item in manifest["routes"]}
+    route = routes.get("/kesintiye-hazirlik-atolyesi")
+    assert route, sorted(path for path in routes if "hazirlik-atolyesi" in path)
+    assert route["source"] == "alo186/kesinti-hazirlik-atolyesi/index.html"
 
 
 def test_single_canonical_contract():
@@ -65,8 +73,8 @@ def test_sales_ctas_and_tracking_are_explicit():
     app = APP.read_text(encoding="utf-8")
     css = STYLE.read_text(encoding="utf-8")
     assert "Satış ortaklığı ürünlerini teknik minimumla karşılaştır" in app
-    assert 'commercial: \'affiliate\'' in app
-    assert 'commercial: \'paid-service\'' in app
+    assert "commercial: 'affiliate'" in app
+    assert "commercial: 'paid-service'" in app
     assert "sales_funnel_rendered" in app
     assert "sales_route_opened" in app
     assert ".button.affiliate" in css
