@@ -88,4 +88,5 @@ assert.equal(r.status,'ups_path');
 r=calculate({...barrel,laptopW:1300,monitorW:300});
 assert.equal(r.status,'professional');
 
+// Post-merge CI tetikleyicisi: hesap ve karar sözleşmesi değişmeden korunur.
 console.log(JSON.stringify({ok:true,scenarios:21},null,2));
