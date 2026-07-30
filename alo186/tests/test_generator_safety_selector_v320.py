@@ -73,7 +73,7 @@ def main() -> None:
     for token in [
         "DISTANCE_MIN_M=6.1", "placement==='garage_shed'", "connection==='backfeed'",
         "weather==='wet'", "cord==='damaged'", "refuel==='hot_running'",
-        "status:'no_buy'", "status:'conditional_purchase'", "commerceClosed",
+        "baseResult('no_buy'", "baseResult('conditional_purchase'", "commerceClosed",
         "co_alarm", "extension_cord", "generator", "112’yi arayın",
     ]:
         assert token in app
