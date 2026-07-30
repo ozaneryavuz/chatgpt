@@ -19,11 +19,11 @@ PAGES = {
         "sources": ("iec.ch", "nrel.gov", "staubli.com"),
         "separation": ("PV kablo konnektörü", "AFCI"),
     },
-    "/haberler/ups-aku-kapasite-testi-empedans-ic-direnc-farki": {
-        "path": ROOT / "alo186/haberler/ups-aku-kapasite-testi-empedans-ic-direnc-farki/index.html",
-        "intent": ("kapasite testi", "empedans", "baseline", "deşarj testi", "IEEE 1188-2025"),
-        "sources": ("ieee.org", "megger.com", "fluke.com"),
-        "separation": ("ohmik trend", "gerçek kapasite"),
+    "/haberler/jenerator-yuk-bankasi-testi-bosta-test-yuk-altinda-kabul": {
+        "path": ROOT / "alo186/haberler/jenerator-yuk-bankasi-testi-bosta-test-yuk-altinda-kabul/index.html",
+        "intent": ("yük bankası", "boşta", "resistif", "reaktif", "ISO 8528-5"),
+        "sources": ("cummins.com", "cat.com", "nfpa.org"),
+        "separation": ("gerçek tesis kabul", "görev ayrımı"),
     },
 }
 
