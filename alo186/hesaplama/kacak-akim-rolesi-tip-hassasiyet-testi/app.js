@@ -40,7 +40,8 @@
     if(!['AC','A','F','B'].includes(a.existingType))return false;
     const target={A:1,F:2,B:3,A_REVIEW:1,F_REVIEW:2,B_REVIEW:3}[required];
     if(Number.isInteger(target))return TYPE_RANK[a.existingType]<target;
-    if(required==='A_F_RDC_OR_B')return a.existingType==='AC';
+    if(required==='A_F_RDC')return!['A','F'].includes(a.existingType);
+    if(required==='A_F_RDC_OR_B')return a.existingType!=='B';
     return false;
   }
   function classify(a,context){
@@ -68,7 +69,8 @@
       else if(required==='A_REVIEW')selection.push('Elektronik yüklerin bulunduğu genel devrede Tip A başlangıç incelemesidir; yerel proje ve üretici şartı doğrulanmalıdır.');
       else selection.push('Yük topolojisi ve üretici talimatı bilinmeden Tip AC/A/F/B seçimi yapılmamalıdır.');
 
-      if(mismatch)selection.push(`Mevcut Tip ${a.existingType}, seçilen yük/üretici şartının algılama kapsamının altında kalabilir; ölçüm ve tam model dokümanıyla doğrulayın.`);
+      if(mismatch)selection.push(`Mevcut Tip ${a.existingType}, seçilen yük/üretici şartının algılama kapsamının altında veya gerekli 6 mA DC kanıtından yoksun olabilir; ölçüm ve tam model dokümanıyla doğrulayın.`);
+      if(a.application==='ev_mode3'&&required==='A_F_RDC_OR_B'&&a.existingType!=='B')selection.push('Mevcut Tip A/F tek başına yeterli kanıt değildir; EVSE içinde IEC 62955 kapsamındaki 6 mA RDC-DD açıkça doğrulanana kadar uygun kabul etmeyin.');
       if(a.existingType==='AC'&&(a.application==='electronic'||a.application==='single_inverter'))selection.push('Tip AC, elektronik doğrultucu ve inverterli yüklerde otomatik uygun kabul edilmemelidir.');
       if(a.residual==='30')selection.push('30 mA hassasiyet seçilmiş; istenmeyen açmayı azaltmak için değeri büyütmek yerine kök nedeni ölçün.');
       else if(a.residual==='100'||a.residual==='300')selection.push(`${a.residual} mA değer, gerekli olduğu yerlerde aşağı devredeki 30 mA ek korumanın yerine otomatik olarak geçmez; seçicilik ve koruma amacı projeyle doğrulanmalıdır.`);
@@ -103,7 +105,7 @@
     warnings.push('RCD, uygun topraklama, aşırı akım koruması, SPD, ark ve yangın algılama katmanlarının yerine geçmez.');
     const context={score,mismatch};const state=classify(a,context);
     const summary=state.key==='emergency'?'Can/yangın riski seçildiği için ürün ve ticari yönlendirme kapatıldı.':state.key==='urgent'?'RCD test davranışı başarısız; gecikmeden yetkili ölçüm gerekir.':state.key==='measure'?'Tip, hassasiyet veya açma örüntüsü ölçüm ve tam model doğrulaması gerektiriyor.':state.key==='evidence'?'Karar için kritik etiket ve üretici bilgileri eksik.':'Belirgin arıza sinyali yok; mevcut tasarımın kayıtla doğrulanması yeterli olabilir.';
-    return{schema:'alo186.rcdDecision.v1',personalData:false,createdAt:new Date().toISOString(),answers:a,evidenceScore:score,requiredType:required,typeMismatch:mismatch,state,summary,selection:dedupe(selection),causes:dedupe(causes),tests:dedupe(tests),architecture:dedupe(architecture),warnings:dedupe(warnings),directAffiliateLinks:false,noBuyOutcomePreserved:true,officialApproval:false};
+    return{schema:'alo186.rcdDecision.v1',personalData:false,createdAt:new Date().toISOString(),answers:a,evidenceScore:score,requiredType:required,typeMismatch:mismatch,state,summary,selection:dedupe(selection),causes:dedupe(causes),tests:dedupe(tests),architecture:dedupe(architecture),warnings:dedupe(warnings),directAffiliateLinks:false,commercialCtasAllowed:state.key!=='emergency',noBuyOutcomePreserved:true,officialApproval:false};
   }
 
   function readForm(form){return Object.fromEntries(new FormData(form).entries());}
@@ -111,11 +113,11 @@
   function renderList(target,items){clear(target);for(const item of items){const li=document.createElement('li');li.textContent=item;target.appendChild(li);}}
   function download(name,text){const url=URL.createObjectURL(new Blob([text],{type:'application/json'}));const link=document.createElement('a');link.href=url;link.download=name;link.click();setTimeout(()=>URL.revokeObjectURL(url),500);}
   function init(){
-    const form=document.getElementById('rcdForm');if(!form)return;const results=document.getElementById('results');const reset=document.getElementById('resetBtn');const downloadBtn=document.getElementById('downloadBtn');const printBtn=document.getElementById('printBtn');let receipt=null;
-    form.addEventListener('submit',(event)=>{event.preventDefault();receipt=buildDecision(readForm(form));document.getElementById('evidenceScore').textContent=`${receipt.evidenceScore}/100`;const state=document.getElementById('resultState');state.textContent=receipt.state.label;state.className=`status ${receipt.state.css}`;document.getElementById('evidenceBar').style.width=`${receipt.evidenceScore}%`;document.getElementById('resultSummary').textContent=receipt.summary;renderList(document.getElementById('selection'),receipt.selection);renderList(document.getElementById('causes'),receipt.causes);renderList(document.getElementById('tests'),receipt.tests);renderList(document.getElementById('architecture'),receipt.architecture);const emergency=document.getElementById('emergencyPanel');emergency.classList.toggle('hidden',receipt.state.key!=='emergency');document.getElementById('emergencyText').textContent=receipt.state.key==='emergency'?receipt.summary:'';results.classList.remove('hidden');results.focus();results.scrollIntoView({behavior:'smooth',block:'start'});});
-    reset.addEventListener('click',()=>{form.reset();receipt=null;results.classList.add('hidden');document.getElementById('arac').scrollIntoView({behavior:'smooth',block:'start'});});
-    downloadBtn.addEventListener('click',()=>{if(receipt)download('alo186-kacak-akim-rolesi-karar-fisi.json',JSON.stringify(receipt,null,2));});
-    printBtn.addEventListener('click',()=>window.print());
+    const form=document.getElementById('rcdForm');if(!form)return;const results=document.getElementById('results');const reset=document.getElementById('resetBtn');const downloadBtn=document.getElementById('downloadBtn');const printBtn=document.getElementById('printBtn');const commercial=document.querySelector('.commercial-panel');let receipt=null;
+    form.addEventListener('submit',(event)=>{event.preventDefault();receipt=buildDecision(readForm(form));document.getElementById('evidenceScore').textContent=`${receipt.evidenceScore}/100`;const state=document.getElementById('resultState');state.textContent=receipt.state.label;state.className=`status ${receipt.state.css}`;document.getElementById('evidenceBar').style.width=`${receipt.evidenceScore}%`;document.getElementById('resultSummary').textContent=receipt.summary;renderList(document.getElementById('selection'),receipt.selection);renderList(document.getElementById('causes'),receipt.causes);renderList(document.getElementById('tests'),receipt.tests);renderList(document.getElementById('architecture'),receipt.architecture);const emergency=document.getElementById('emergencyPanel');emergency.classList.toggle('hidden',receipt.state.key!=='emergency');if(commercial)commercial.classList.toggle('hidden',!receipt.commercialCtasAllowed);document.getElementById('downloadBtn').disabled=!receipt.commercialCtasAllowed;document.getElementById('printBtn').disabled=!receipt.commercialCtasAllowed;document.getElementById('emergencyText').textContent=receipt.state.key==='emergency'?receipt.summary:'';results.classList.remove('hidden');results.focus();results.scrollIntoView({behavior:'smooth',block:'start'});});
+    reset.addEventListener('click',()=>{form.reset();receipt=null;results.classList.add('hidden');if(commercial)commercial.classList.remove('hidden');downloadBtn.disabled=false;printBtn.disabled=false;document.getElementById('arac').scrollIntoView({behavior:'smooth',block:'start'});});
+    downloadBtn.addEventListener('click',()=>{if(receipt&&receipt.commercialCtasAllowed)download('alo186-kacak-akim-rolesi-karar-fisi.json',JSON.stringify(receipt,null,2));});
+    printBtn.addEventListener('click',()=>{if(!receipt||receipt.commercialCtasAllowed)window.print();});
   }
   if(typeof document!=='undefined'){if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();}
   return{OPTIONS,normalize,evidenceScore,requiredType,typeMismatch,classify,buildDecision};
