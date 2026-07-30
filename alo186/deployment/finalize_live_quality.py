@@ -75,7 +75,6 @@ def canonical_links(html: str) -> list[str]:
 
 def repair_and_validate_json_ld(site: Path) -> int:
     """Bilinen eksik Question kapanışını düzeltir; diğer JSON-LD hatalarında yayını durdurur."""
-
     repairs = 0
     failures: list[str] = []
     for path in sorted(site.rglob("*.html")):
@@ -138,7 +137,6 @@ def normalize_live_origin(site: Path) -> int:
 
 def make_scrollable_regions_accessible(site: Path) -> int:
     """CSS ile kaydırılabilen tablo sarmalayıcılarını klavyeyle odaklanabilir yapar."""
-
     changed_files = 0
 
     def replace(match: re.Match[str]) -> str:
@@ -163,14 +161,7 @@ def make_scrollable_regions_accessible(site: Path) -> int:
 
 
 def defer_optional_runtimes(site: Path) -> tuple[int, int]:
-    """Salt bağlantı sunan iki giriş sayfasında ağır zenginleştirmeleri ilk etkileşime erteler.
-
-    Bağlantılar ve güvenlik metinleri JavaScript olmadan çalışır. Ertelenen modüller
-    yalnız yardımcı kayıt/kişiselleştirme katmanlarıdır; ilk görünümde içerik ekleyip
-    CLS veya uzun görev üretmeleri önlenir. Kullanıcının ilk pointer/klavye/dokunma
-    hareketi sonrasında özgün sırayla yüklenirler.
-    """
-
+    """Salt bağlantı sunan iki giriş sayfasında ağır zenginleştirmeleri ilk etkileşime erteler."""
     changed_files = 0
     deferred_scripts = 0
     for relative in INTERACTION_RUNTIME_TARGETS:
@@ -232,6 +223,17 @@ def inject_responsive_hardening(site: Path) -> int:
     return changed
 
 
+def has_optional_runtime(html: str) -> bool:
+    """Sayfada ertelenecek kaynak veya dönüştürülmüş lazy placeholder var mı?"""
+    if 'type="application/x-alo186-interaction-runtime"' in html:
+        return True
+    for match in SCRIPT_SRC_PATTERN.finditer(html):
+        source_path = match.group("src").split("?", 1)[0].split("#", 1)[0]
+        if any(source_path.endswith(suffix) for suffix in OPTIONAL_RUNTIME_SUFFIXES):
+            return True
+    return False
+
+
 def validate(site: Path, base_path: str) -> dict:
     failures: list[str] = []
     base_path = normalize_base_path(base_path)
@@ -272,7 +274,10 @@ def validate(site: Path, base_path: str) -> dict:
 
     for relative in INTERACTION_RUNTIME_TARGETS:
         target = site / relative
-        if target.is_file() and LAZY_RUNTIME_MARKER not in target.read_text(encoding="utf-8", errors="ignore"):
+        if not target.is_file():
+            continue
+        html = target.read_text(encoding="utf-8", errors="ignore")
+        if has_optional_runtime(html) and LAZY_RUNTIME_MARKER not in html:
             failures.append(f"Etkileşim runtime kapısı eksik: {relative}")
 
     robots_path = site / "robots.txt"
@@ -336,8 +341,8 @@ def run(site: Path, base_path: str = "") -> dict:
     normalized = normalize_base_path(base_path)
     json_ld_repairs = repair_and_validate_json_ld(site)
     origin_files_changed = normalize_live_origin(site)
-    accessible_scroll_files = make_scrollable_regions_accessible(site)
-    deferred_runtime_files, deferred_runtime_scripts = defer_optional_runtimes(site)
+    table_regions_hardened = make_scrollable_regions_accessible(site)
+    deferred_runtime_pages, deferred_runtime_scripts = defer_optional_runtimes(site)
     responsive_html_hardened = inject_responsive_hardening(site)
 
     release_path = site / "pages-release.json"
@@ -351,9 +356,9 @@ def run(site: Path, base_path: str = "") -> dict:
             "redirectChainRemoved": "www-to-apex",
             "originFilesChanged": origin_files_changed,
             "responsiveHtmlHardened": responsive_html_hardened,
-            "accessibleScrollableRegionFiles": accessible_scroll_files,
-            "interactionDeferredRuntimeFiles": deferred_runtime_files,
-            "interactionDeferredRuntimeScripts": deferred_runtime_scripts,
+            "tableRegionsHardened": table_regions_hardened,
+            "deferredRuntimePages": deferred_runtime_pages,
+            "deferredRuntimeScripts": deferred_runtime_scripts,
             "jsonLdRepairs": json_ld_repairs,
             "personalDataFieldsAdded": 0,
             "officialAffiliationClaimed": False,
@@ -367,16 +372,16 @@ def run(site: Path, base_path: str = "") -> dict:
         "basePath": normalized,
         "jsonLdRepairs": json_ld_repairs,
         "originFilesChanged": origin_files_changed,
-        "accessibleScrollableRegionFiles": accessible_scroll_files,
-        "interactionDeferredRuntimeFiles": deferred_runtime_files,
-        "interactionDeferredRuntimeScripts": deferred_runtime_scripts,
         "responsiveHtmlHardened": responsive_html_hardened,
+        "tableRegionsHardened": table_regions_hardened,
+        "deferredRuntimePages": deferred_runtime_pages,
+        "deferredRuntimeScripts": deferred_runtime_scripts,
         **validation,
     }
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="ALO186 final Pages artifactında canonical, JSON-LD, erişilebilirlik ve responsive kalite sözleşmesini uygular.")
+    parser = argparse.ArgumentParser(description="ALO186 final Pages artifactında canonical, JSON-LD, responsive ve klavye erişimi kalite sözleşmesini uygular.")
     parser.add_argument("--site", type=Path, required=True)
     parser.add_argument("--base-path", default="")
     args = parser.parse_args()
