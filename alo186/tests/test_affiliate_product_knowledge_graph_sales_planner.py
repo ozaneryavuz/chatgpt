@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -49,8 +50,8 @@ def source_contracts() -> None:
         assert token in app, token
 
     for forbidden in (
-        "localStorage",
-        "sessionStorage",
+        "localstorage",
+        "sessionstorage",
         "stokta son",
         "hemen satın al",
         "kaçırma",
@@ -98,7 +99,21 @@ def artifact_contracts(site: Path, base_path: str) -> None:
     assert 'src="./sales-missions.js"' in page
     assert 'href="./sales-missions.css"' in page
     assert "Elinizdekini işaretleyin; yalnız eksik parçayı açın." in page
-    assert "amazon.com.tr" not in page.casefold()
+
+    # Artifact enjeksiyonu taze Product düğümlerinin sameAs alanlarında Amazon URL'si
+    # taşıyabilir. Güven sözleşmesi statik mağaza CTA'sının kaynak HTML'de bulunmaması
+    # ve artifactta oluşabilecek her Amazon anchorının sponsored/nofollow/noopener olmasıdır.
+    amazon_anchors = re.findall(
+        r'<a\b(?=[^>]*\bhref=["\']https://(?:www\.)?amazon\.com\.tr/)[^>]*>',
+        page,
+        re.I,
+    )
+    for anchor in amazon_anchors:
+        rel_match = re.search(r'\brel=["\']([^"\']+)["\']', anchor, re.I)
+        assert rel_match, anchor
+        rel_tokens = set(rel_match.group(1).casefold().split())
+        assert {"sponsored", "nofollow", "noopener"}.issubset(rel_tokens), anchor
+
     assert "sponsored nofollow noopener" in app
     assert "localStorage" not in app and "sessionStorage" not in app
 
