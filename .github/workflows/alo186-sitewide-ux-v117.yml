@@ -1,10 +1,11 @@
-name: ALO186 site geneli kullanıcı deneyimi v117
+name: ALO186 site geneli kullanıcı deneyimi v119
 
 on:
   pull_request:
     paths:
       - 'alo186/assets/alo186-ux.css'
       - 'alo186/assets/alo186-ux.js'
+      - 'alo186/deployment/finalize_user_experience.py'
       - 'alo186/deployment/prepare_github_pages.py'
       - 'alo186/tests/test_sitewide_ux_v117.py'
       - '.github/workflows/alo186-sitewide-ux-v117.yml'
@@ -13,6 +14,7 @@ on:
     paths:
       - 'alo186/assets/alo186-ux.css'
       - 'alo186/assets/alo186-ux.js'
+      - 'alo186/deployment/finalize_user_experience.py'
       - 'alo186/deployment/prepare_github_pages.py'
       - 'alo186/tests/test_sitewide_ux_v117.py'
       - '.github/workflows/alo186-sitewide-ux-v117.yml'
@@ -22,7 +24,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: alo186-sitewide-ux-v117-${{ github.ref }}
+  group: alo186-sitewide-ux-v119-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -37,7 +39,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Tüm canonical ve Pages rotalarında UX sözleşmesi
+      - name: Tüm canonical ve Pages rotalarında UX ve link bütünlüğü
         run: python alo186/tests/test_sitewide_ux_v117.py
       - name: Mevcut yayın ve güven regresyonları
         run: |
