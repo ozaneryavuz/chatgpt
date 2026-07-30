@@ -1,25 +1,17 @@
-name: ALO186 canlı mobil ve masaüstü teknik kalite
+name: ALO186 canlı teknik kalite ve Core Web Vitals
 
 on:
   pull_request:
     paths:
-      - 'alo186/tests/live_site_technical_audit.py'
-      - 'alo186/tests/live_site_technical_audit_v2.py'
-      - 'alo186/tests/test_live_domain_integration_manifest.py'
-      - 'alo186/tests/test_live_quality_hardening.py'
-      - 'alo186/deployment/live-domain-integration.json'
-      - 'alo186/deployment/inject_live_quality_hardening.py'
-      - 'alo186/deployment/prepare_github_pages_core.py'
-      - 'alo186/deployment/routing-manifest.json'
-      - '.github/workflows/alo186-live-domain-acceptance.yml'
+      - 'alo186/**'
       - '.github/workflows/alo186-live-technical-quality.yml'
-      - '.github/workflows/alo186-github-pages.yml'
   push:
     branches: [main]
     paths:
       - 'alo186/**'
       - '.github/workflows/alo186-live-technical-quality.yml'
-      - '.github/workflows/alo186-github-pages.yml'
+  schedule:
+    - cron: '17 2 * * *'
   workflow_dispatch:
 
 permissions:
@@ -30,83 +22,195 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  audit:
+  artifact-quality:
     runs-on: ubuntu-latest
-    timeout-minutes: 65
+    timeout-minutes: 55
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
 
-      - name: Denetim bağımlılıkları
+      - name: Python ve JavaScript sözdizimi
+        run: |
+          python -m py_compile \
+            alo186/deployment/prepare_github_pages.py \
+            alo186/deployment/finalize_live_quality.py \
+            alo186/deployment/inject_growth_run24.py \
+            alo186/tests/test_live_technical_quality.py \
+            alo186/tests/live_http_audit.py \
+            alo186/tests/audit_lighthouse_reports.py
+          node --check alo186/tests/visual_quality_audit.mjs
+
+      - name: Mevcut yayın, canonical ve güven regresyonları
+        run: |
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/test_content_intent_consolidation.py
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Canonical üretim paketini oluştur
+        run: |
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-quality-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-quality-canonical
+
+      - name: Custom-domain final artifactını hazırla
+        run: |
+          cp -a /tmp/alo186-quality-canonical /tmp/alo186-quality-custom
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-quality-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-quality-custom \
+            --base-path ''
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-quality-custom \
+            --base-path '' \
+            > /tmp/alo186-quality-custom-growth.json
+          python alo186/deployment/finalize_live_quality.py \
+            --site /tmp/alo186-quality-custom \
+            --base-path '' \
+            > /tmp/alo186-quality-custom-finalize.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-quality-custom \
+            --base-path ''
+          python alo186/tests/test_live_technical_quality.py \
+            --site /tmp/alo186-quality-custom \
+            --base-path '' \
+            > /tmp/alo186-quality-static-custom.json
+
+      - name: Project-path noindex artifactını hazırla
+        run: |
+          cp -a /tmp/alo186-quality-canonical /tmp/alo186-quality-project
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-quality-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-quality-project \
+            --base-path '/chatgpt'
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-quality-project \
+            --base-path '/chatgpt' \
+            > /tmp/alo186-quality-project-growth.json
+          python alo186/deployment/finalize_live_quality.py \
+            --site /tmp/alo186-quality-project \
+            --base-path '/chatgpt' \
+            > /tmp/alo186-quality-project-finalize.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-quality-project \
+            --base-path '/chatgpt'
+          python alo186/tests/test_live_technical_quality.py \
+            --site /tmp/alo186-quality-project \
+            --base-path '/chatgpt' \
+            > /tmp/alo186-quality-static-project.json
+
+      - name: Playwright, axe-core ve Lighthouse kur
+        run: |
+          npm install --no-save playwright axe-core lighthouse
+          npx playwright install --with-deps chromium
+
+      - name: Custom artifactı yerel HTTP üzerinde sun
+        run: |
+          python -m http.server 4173 --directory /tmp/alo186-quality-custom > /tmp/alo186-quality-server.log 2>&1 &
+          echo $! > /tmp/alo186-quality-server.pid
+          for i in {1..30}; do
+            curl -fsS http://127.0.0.1:4173/ >/dev/null && exit 0
+            sleep 1
+          done
+          cat /tmp/alo186-quality-server.log
+          exit 1
+
+      - name: Mobil ve masaüstü görsel/erişilebilirlik regresyonu
+        run: |
+          node alo186/tests/visual_quality_audit.mjs \
+            http://127.0.0.1:4173 \
+            /tmp/alo186-visual-quality
+
+      - name: Lighthouse mobil ve masaüstü raporları
+        run: |
+          mkdir -p /tmp/alo186-lighthouse
+          for slug in home portal products; do
+            case "$slug" in
+              home) url='http://127.0.0.1:4173/' ;;
+              portal) url='http://127.0.0.1:4173/elektrik-portali' ;;
+              products) url='http://127.0.0.1:4173/amazon-elektrik-urunleri' ;;
+            esac
+            npx lighthouse "$url" \
+              --quiet \
+              --chrome-flags='--headless --no-sandbox --disable-dev-shm-usage' \
+              --only-categories=performance,accessibility,best-practices,seo \
+              --output=json \
+              --output-path="/tmp/alo186-lighthouse/mobile-${slug}.json"
+            npx lighthouse "$url" \
+              --quiet \
+              --preset=desktop \
+              --chrome-flags='--headless --no-sandbox --disable-dev-shm-usage' \
+              --only-categories=performance,accessibility,best-practices,seo \
+              --output=json \
+              --output-path="/tmp/alo186-lighthouse/desktop-${slug}.json"
+          done
+          python alo186/tests/audit_lighthouse_reports.py \
+            --directory /tmp/alo186-lighthouse \
+            > /tmp/alo186-lighthouse-summary.json
+
+      - name: Teknik kalite raporlarını yükle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-artifact-technical-quality-${{ github.run_id }}
+          path: |
+            /tmp/alo186-quality-static-custom.json
+            /tmp/alo186-quality-static-project.json
+            /tmp/alo186-quality-custom-finalize.json
+            /tmp/alo186-quality-project-finalize.json
+            /tmp/alo186-quality-custom-growth.json
+            /tmp/alo186-quality-project-growth.json
+            /tmp/alo186-visual-quality
+            /tmp/alo186-lighthouse
+            /tmp/alo186-lighthouse-summary.json
+            /tmp/alo186-quality-server.log
+          if-no-files-found: warn
+          include-hidden-files: true
+          retention-days: 30
+
+  live-audit:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Canlı denetim bağımlılıkları
         run: |
           python -m pip install --disable-pip-version-check requests beautifulsoup4 lxml playwright
           python -m playwright install --with-deps chromium
           npm install --no-save axe-core@4.10.3
 
-      - name: Push sonrası güncel Pages release kimliğini bekle
-        if: github.event_name != 'pull_request'
-        shell: bash
-        run: |
-          set -euo pipefail
-          for attempt in $(seq 1 45); do
-            code=$(curl --silent --show-error --location --max-time 20 --output /tmp/alo186-pages-release.json --write-out '%{http_code}' https://alo186.com/pages-release.json || true)
-            if [[ "$code" == "200" ]]; then
-              if python - "$GITHUB_SHA" <<'PY'
-          import json
-          import sys
-          from pathlib import Path
-          expected=sys.argv[1]
-          try:
-              payload=json.loads(Path('/tmp/alo186-pages-release.json').read_text(encoding='utf-8'))
-          except Exception:
-              raise SystemExit(1)
-          if payload.get('commit') != expected:
-              raise SystemExit(1)
-          if payload.get('canonicalHost') != 'https://alo186.com':
-              raise SystemExit(1)
-          if int(payload.get('routeCount') or 0) < 275:
-              raise SystemExit(1)
-          quality=payload.get('liveTechnicalQuality') or {}
-          if quality.get('minimumTouchTargetCssPx') != 44:
-              raise SystemExit(1)
-          PY
-              then
-                echo "Güncel release görünür: deneme=$attempt commit=$GITHUB_SHA"
-                break
-              fi
-            fi
-            if [[ "$attempt" == "45" ]]; then
-              echo 'Canlı apex alan adı güncel GitHub Pages release kimliğini 15 dakika içinde sunmadı.' >&2
-              echo 'DNS/custom-host hâlâ eski yayın yüzeyine gidiyor olabilir.' >&2
-              exit 1
-            fi
-            sleep 20
-          done
-
       - name: Canlı mobil ve masaüstü denetimi
-        id: live_audit
-        continue-on-error: true
         env:
           AXE_CORE_PATH: node_modules/axe-core/axe.min.js
         run: |
           python alo186/tests/live_site_technical_audit_v2.py \
             --output /tmp/alo186-live-technical-audit
-
-      - name: Kaynak ve yayın regresyonları
-        run: |
-          python alo186/tests/test_live_domain_integration_manifest.py
-          python alo186/tests/test_live_quality_hardening.py
-          python alo186/tests/test_content_intent_consolidation.py
-          python alo186/tests/device_damage_deadline_guard.py
-          node alo186/tests/test_release_manifest.js
-          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/live_http_audit.py \
+            --base https://alo186.com \
+            > /tmp/alo186-live-technical-audit/http-audit.json
 
       - name: Denetim raporunu iş özetine ekle
         if: always()
@@ -117,34 +221,12 @@ jobs:
             echo 'Canlı teknik denetim raporu üretilemedi.' >> "$GITHUB_STEP_SUMMARY"
           fi
 
-      - name: Denetim artifactını yükle
+      - name: Canlı denetim artifactını yükle
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: alo186-live-technical-quality-report
+          name: alo186-live-technical-quality-report-${{ github.run_id }}
           path: /tmp/alo186-live-technical-audit
           if-no-files-found: warn
           include-hidden-files: true
           retention-days: 30
-
-      - name: Pull request canlı bulgularını bilgilendirme olarak tut
-        if: always() && github.event_name == 'pull_request'
-        run: |
-          echo 'Pull request sırasında canlı alan adı önceki release’i gösterebilir; P0/P1 bulguları artifactta raporlanır fakat merge kapısı yalnız kaynak regresyonlarıdır.' >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Push sonrası P0/P1 kalite kapısı
-        if: always() && github.event_name != 'pull_request'
-        run: |
-          if [[ ! -f /tmp/alo186-live-technical-audit/audit.json ]]; then
-            echo 'Denetim JSON raporu yok.' >&2
-            exit 1
-          fi
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          report=json.loads(Path('/tmp/alo186-live-technical-audit/audit.json').read_text(encoding='utf-8'))
-          summary=report.get('summary',{})
-          print(json.dumps({'preferredOrigin':report.get('preferredOrigin'),'summary':summary},ensure_ascii=False,indent=2))
-          if int(summary.get('P0',0)) or int(summary.get('P1',0)):
-              raise SystemExit('Güncel canlı release teknik kalite denetiminde P0/P1 bulguları var.')
-          PY

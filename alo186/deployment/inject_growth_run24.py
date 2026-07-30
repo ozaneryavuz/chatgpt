@@ -5,6 +5,8 @@ import json
 import re
 from pathlib import Path
 
+from finalize_live_quality import run as finalize_live_quality
+
 ROUTE = "/hesaplama/home-office-internet-sureklilik-plani/"
 CANONICAL = "https://www.alo186.com" + ROUTE
 SOURCE = "alo186/hesaplama/home-office-internet-sureklilik-plani/index.html"
@@ -158,4 +160,11 @@ def run(site: Path, base_path: str) -> dict:
     update_manifest(site, base_path)
     update_release(site, base_path, entries, offline)
     recompute(site)
-    return {"ok": True, "route": public_url(base_path, ROUTE), "entries": entries, "offline": True}
+    technical_quality = finalize_live_quality(site, base_path)
+    return {
+        "ok": True,
+        "route": public_url(base_path, ROUTE),
+        "entries": entries,
+        "offline": True,
+        "technicalQuality": technical_quality,
+    }
