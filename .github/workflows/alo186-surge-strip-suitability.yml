@@ -113,14 +113,19 @@ jobs:
           test -f "/tmp/alo186-surge-strip-pages/$route/index.html"
           test -f "/tmp/alo186-surge-strip-pages/$route/core.js"
           test -f "/tmp/alo186-surge-strip-pages/$route/app.js"
-          grep -q 'Akım Korumalı Grup Priz Yük ve Uygunluk Testi' "/tmp/alo186-surge-strip-pages/$route/index.html"
+          grep -q 'Akım Korumalı Grup Priz Yük, Joule ve Güvenlik Testi' "/tmp/alo186-surge-strip-pages/$route/index.html"
           grep -q 'Satış ortaklığı açıklaması' "/tmp/alo186-surge-strip-pages/$route/index.html"
+          grep -q 'Tam model geri çağırma kontrolü' "/tmp/alo186-surge-strip-pages/$route/index.html"
+          grep -q 'JSON teknik fişi indir' "/tmp/alo186-surge-strip-pages/$route/index.html"
+          grep -q 'data-confirm-technical' "/tmp/alo186-surge-strip-pages/$route/app.js"
+          grep -q 'sponsored nofollow noopener' "/tmp/alo186-surge-strip-pages/$route/app.js"
           grep -Eq '[3-9][0-9]* çekirdek araç' /tmp/alo186-surge-strip-pages/hesaplama/index.html
           grep -q 'akim-korumali-grup-priz-uygunluk' /tmp/alo186-surge-strip-pages/sitemap.xml
           grep -q 'affiliatePolicy.*after_tool' /tmp/alo186-surge-strip-pages/akilli-urun-secimi/catalog.js
           grep -q 'akim-korumali-grup-priz-uygunluk' /tmp/alo186-surge-strip-pages/akilli-urun-secimi/journey-retention-core.js
           ! grep -Eqi 'amazon\.(com|com\.tr)/' "/tmp/alo186-surge-strip-pages/$route/index.html"
           ! grep -Eqi 'type="(email|tel|text)"' "/tmp/alo186-surge-strip-pages/$route/index.html"
+          ! grep -Eqi '"offers"[[:space:]]*:' "/tmp/alo186-surge-strip-pages/$route/index.html"
 
       - name: Doğrulanmış modül artifactı
         uses: actions/upload-artifact@v4
