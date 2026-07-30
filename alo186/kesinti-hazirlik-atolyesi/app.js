@@ -99,6 +99,9 @@
     }
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({ event: name, ...clean });
+    if (name === 'sales_funnel_rendered') {
+      window.dataLayer.push({ event: 'fast_revenue_plan_rendered', ...clean });
+    }
   }
 
   function stepMarkup(items) {
