@@ -1,0 +1,48 @@
+name: ALO186 kaçak akım rölesi uygunluk testi v136
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/kacak-akim-rolesi-tipi-uygunluk/**'
+      - 'alo186/deployment/routing-overlays/136-kacak-akim-rolesi-uygunluk.json'
+      - 'alo186/tests/test_rcd_selector_v136.js'
+      - '.github/workflows/alo186-rcd-selector-v136.yml'
+      - 'alo186/audits/growth-rcd-selector-v136.md'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/kacak-akim-rolesi-tipi-uygunluk/**'
+      - 'alo186/deployment/routing-overlays/136-kacak-akim-rolesi-uygunluk.json'
+      - 'alo186/tests/test_rcd_selector_v136.js'
+      - '.github/workflows/alo186-rcd-selector-v136.yml'
+      - 'alo186/audits/growth-rcd-selector-v136.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-rcd-selector-v136-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: RCD tipi, RCCB/RCBO, güven, gizlilik ve dual Pages kabulü
+        run: node alo186/tests/test_rcd_selector_v136.js
+
+      - name: Mevcut yayın ve kullanıcı güveni regresyonları
+        run: |
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
