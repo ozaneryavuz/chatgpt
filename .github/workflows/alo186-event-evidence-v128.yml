@@ -1,0 +1,48 @@
+name: ALO186 elektrik olay kanıt ve tekrar test v128
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/elektrik-kesintisi-sure-siklik-gunlugu/**'
+      - 'alo186/hesaplama/gerilim-dalgalanmasi-cihaz-reset-kanit-gunlugu/**'
+      - 'alo186/sektor-rehberi/elektrik-olay-kanit-ve-tekrar-test-merkezi/**'
+      - 'alo186/deployment/routing-overlays/128-event-evidence-repeat-test.json'
+      - 'alo186/tests/test_event_evidence_repeat_test_v128.js'
+      - '.github/workflows/alo186-event-evidence-v128.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/elektrik-kesintisi-sure-siklik-gunlugu/**'
+      - 'alo186/hesaplama/gerilim-dalgalanmasi-cihaz-reset-kanit-gunlugu/**'
+      - 'alo186/sektor-rehberi/elektrik-olay-kanit-ve-tekrar-test-merkezi/**'
+      - 'alo186/deployment/routing-overlays/128-event-evidence-repeat-test.json'
+      - 'alo186/tests/test_event_evidence_repeat_test_v128.js'
+      - '.github/workflows/alo186-event-evidence-v128.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-event-evidence-v128-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Kesinti, gerilim ve tekrar test karar sözleşmesi
+        run: node alo186/tests/test_event_evidence_repeat_test_v128.js
+      - name: Mevcut yayın ve güven regresyonları
+        run: |
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py

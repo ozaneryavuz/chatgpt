@@ -1,0 +1,21 @@
+{
+  "version": 128,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/elektrik-kesintisi-sure-siklik-gunlugu/index.html",
+      "canonicalPath": "/hesaplama/elektrik-kesintisi-sure-siklik-gunlugu/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/gerilim-dalgalanmasi-cihaz-reset-kanit-gunlugu/index.html",
+      "canonicalPath": "/hesaplama/gerilim-dalgalanmasi-cihaz-reset-kanit-gunlugu/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/sektor-rehberi/elektrik-olay-kanit-ve-tekrar-test-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/elektrik-olay-kanit-ve-tekrar-test-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
