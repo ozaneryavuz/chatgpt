@@ -12,7 +12,12 @@ const overlay = JSON.parse(fs.readFileSync(path.join(ROOT, 'alo186', 'deployment
 
 assert(center.includes('./yuksek-guclu-ev-aleti-power-station-uygunluk/'));
 assert(center.includes('Yüksek Güçlü Ev Aleti Power Station Uygunluğu'));
-assert(center.includes('47 çekirdek araç'));
+const countMatch = center.match(/<strong>(\d+) çekirdek araç<\/strong>/);
+assert(countMatch);
+const visibleToolCount = Number(countMatch[1]);
+const cardCount = (center.match(/<a\b[^>]*class="[^"]*\btool-card\b[^"]*"/g) || []).length;
+assert(visibleToolCount >= 47);
+assert.strictEqual(cardCount, visibleToolCount);
 assert.strictEqual((center.match(/yuksek-guclu-ev-aleti-power-station-uygunluk/g) || []).length, 1);
 assert(moduleHtml.includes(`https://alo186.com${route}`));
 assert.strictEqual(overlay.routes[0].canonicalPath, route);
@@ -21,6 +26,7 @@ assert.strictEqual(overlay.routes[0].source, 'alo186/hesaplama/yuksek-guclu-ev-a
 console.log(JSON.stringify({
   ok: true,
   calculationCenter: true,
-  visibleToolCount: 47,
+  visibleToolCount,
+  cardCount,
   canonicalRoute: route,
 }));
