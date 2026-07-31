@@ -7,7 +7,9 @@ from pathlib import Path
 
 import prepare_github_pages_core as _core
 from finalize_article_discovery import run as finalize_article_discovery
+from finalize_editorial_trust import run as finalize_editorial_trust
 from finalize_live_quality import CANONICAL_HOST, CANONICAL_ORIGIN as LIVE_CANONICAL_ORIGIN
+from finalize_release_transparency import run as finalize_release_transparency
 from finalize_user_experience import run as finalize_user_experience
 from prepare_github_pages_core import *  # noqa: F401,F403
 
@@ -181,6 +183,14 @@ def prepare(site: Path, base_path: str, repository: str, commit: str) -> dict:
     result = _original_prepare(site, base_path, repository, commit)
     normalized = _core.normalize_base_path(base_path)
     article_discovery = finalize_article_discovery(site, normalized, canonical_release)
+    editorial_trust = finalize_editorial_trust(site, normalized, canonical_release)
+    release_transparency = finalize_release_transparency(
+        site,
+        normalized,
+        canonical_release,
+        repository,
+        commit,
+    )
     audit = finalize_user_experience(site, normalized)
     ux = install_sitewide_ux(site, normalized)
     validate_root_legal_deadline(site, normalized)
@@ -198,6 +208,8 @@ def prepare(site: Path, base_path: str, repository: str, commit: str) -> dict:
     release["sitewideUx"] = ux
     release["sitewideUserExperienceAudit"] = audit
     release["articleDiscoveryV1"] = article_discovery
+    release["editorialTrustV1"] = editorial_trust
+    release["releaseTransparencyV1"] = release_transparency
     release["liveOriginNormalizationStage"] = "after-all-growth-injectors"
     if release_path.is_file():
         release_path.write_text(json.dumps(release, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
