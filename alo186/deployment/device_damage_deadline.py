@@ -31,6 +31,10 @@ RESPONSE_TERMS = re.compile(
     re.IGNORECASE,
 )
 TEXT_SUFFIXES = {".html", ".htm", ".js", ".mjs", ".json", ".txt", ".xml"}
+BLOCK_BOUNDARY = re.compile(
+    r"</(?:p|li|td|th|div|section|article|summary|h[1-6])\s*>|<br\s*/?>",
+    re.IGNORECASE,
+)
 
 # Only publication routes known to carry the obsolete FAQ wording are migrated.
 # Replacements are exact and idempotent: if source files are corrected later,
@@ -161,12 +165,35 @@ def normalize_published_site(root: Path) -> list[str]:
     return changed
 
 
+def _normalize_for_scan(text: str) -> str:
+    # HTML block endings and line breaks are legal-statement boundaries. Turning
+    # them into sentence separators prevents a response deadline in the next
+    # element from masking an obsolete application deadline in the previous one.
+    text = BLOCK_BOUNDARY.sub(". ", text)
+    return re.sub(r"\s+", " ", text)
+
+
+def _statement_for_match(normalized: str, match: re.Match[str]) -> str:
+    left = max(
+        normalized.rfind(".", 0, match.start()),
+        normalized.rfind("!", 0, match.start()),
+        normalized.rfind("?", 0, match.start()),
+    )
+    right_candidates = [
+        position
+        for marker in (".", "!", "?")
+        if (position := normalized.find(marker, match.end())) >= 0
+    ]
+    right = min(right_candidates) if right_candidates else len(normalized)
+    return normalized[left + 1 : right + 1]
+
+
 def _contexts(text: str, pattern: re.Pattern[str], radius: int = 320):
-    normalized = re.sub(r"\s+", " ", text)
+    normalized = _normalize_for_scan(text)
     for match in pattern.finditer(normalized):
         start = max(0, match.start() - radius)
         end = min(len(normalized), match.end() + radius)
-        yield match, normalized[start:end]
+        yield match, normalized[start:end], _statement_for_match(normalized, match)
 
 
 def find_stale_application_deadlines(root: Path) -> list[str]:
@@ -178,11 +205,11 @@ def find_stale_application_deadlines(root: Path) -> list[str]:
             text = path.read_text(encoding="utf-8")
         except UnicodeDecodeError:
             continue
-        for match, context in _contexts(text, STALE_DEADLINE):
+        for match, context, statement in _contexts(text, STALE_DEADLINE):
             if (
                 DAMAGE_TERMS.search(context)
                 and APPLICATION_TERMS.search(context)
-                and not RESPONSE_TERMS.search(context)
+                and not RESPONSE_TERMS.search(statement)
             ):
                 violations.append(
                     f"{path.relative_to(root)}:{match.start()} -> {context[:640]}"
@@ -199,7 +226,7 @@ def find_current_application_deadlines(root: Path) -> list[str]:
             text = path.read_text(encoding="utf-8")
         except UnicodeDecodeError:
             continue
-        for match, context in _contexts(text, CURRENT_DEADLINE_PATTERN):
+        for match, context, _statement in _contexts(text, CURRENT_DEADLINE_PATTERN):
             if DAMAGE_TERMS.search(context) and APPLICATION_TERMS.search(context):
                 locations.append(f"{path.relative_to(root)}:{match.start()}")
     return locations
