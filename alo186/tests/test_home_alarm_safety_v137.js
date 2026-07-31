@@ -10,13 +10,14 @@ const ROOT = path.resolve(__dirname, '..', '..');
 const SMOKE_DIR = path.join(ROOT, 'alo186/hesaplama/duman-alarmi-isi-alarmi-uygunluk');
 const CO_DIR = path.join(ROOT, 'alo186/hesaplama/karbonmonoksit-alarmi-uygunluk');
 const HUB_DIR = path.join(ROOT, 'alo186/sektor-rehberi/ev-duman-karbonmonoksit-alarm-test-merkezi');
-const CSS = fs.readFileSync(path.join(ROOT, 'alo186/assets/home-alarm-safety-v137.css'), 'utf8');
+const dirs = [SMOKE_DIR, CO_DIR, HUB_DIR];
 const smokeHtml = fs.readFileSync(path.join(SMOKE_DIR, 'index.html'), 'utf8');
 const smokeJs = fs.readFileSync(path.join(SMOKE_DIR, 'app.js'), 'utf8');
 const coHtml = fs.readFileSync(path.join(CO_DIR, 'index.html'), 'utf8');
 const coJs = fs.readFileSync(path.join(CO_DIR, 'app.js'), 'utf8');
 const hubHtml = fs.readFileSync(path.join(HUB_DIR, 'index.html'), 'utf8');
 const hubJs = fs.readFileSync(path.join(HUB_DIR, 'app.js'), 'utf8');
+const cssFiles = dirs.map((dir) => fs.readFileSync(path.join(dir, 'styles.css'), 'utf8'));
 const smokeApi = require(path.join(SMOKE_DIR, 'app.js'));
 const coApi = require(path.join(CO_DIR, 'app.js'));
 const hubApi = require(path.join(HUB_DIR, 'app.js'));
@@ -57,7 +58,10 @@ assert.equal(coApi.evaluate({ ...coBase, source: 'none' }).affiliateAllowed, fal
 assert.equal(coApi.evaluate({ ...coBase, useCase: 'mobile' }).status, 'professional');
 assert.equal(coApi.evaluate({ ...coBase, existing: 'co', coverage: 'full', battery: 'sealed' }).status, 'no-buy');
 
-const plan = hubApi.buildPlan({ reason: 'heating', alarms: 'both', fuel: 'yes', interval: '30', manufacturer: true, noCommerce: true, emergency: false });
+const plan = hubApi.buildPlan({
+  reason: 'heating', alarms: 'both', fuel: 'yes', interval: '30',
+  manufacturer: true, noCommerce: true, emergency: false
+});
 assert.equal(plan.status, 'plan');
 assert.equal(plan.directAffiliate, false);
 assert(plan.p1.some((item) => item.includes('baca')));
@@ -68,7 +72,8 @@ const combined = smokeHtml + smokeJs + coHtml + coJs + hubHtml + hubJs;
 for (const token of [
   'Duman alarmı mı', 'Karbonmonoksit alarmı', 'Satın almama sonucu',
   'Şeffaf satış ortaklığı', '112', '187', 'EN 14604', 'EN 50291',
-  'rel="sponsored nofollow noopener"', 'doğrudan affiliate bağlantısı göstermez'
+  'rel="sponsored nofollow noopener"', 'doğrudan affiliate bağlantısı göstermez',
+  'href="./styles.css"'
 ]) assert(combined.includes(token), token);
 
 for (const forbidden of [
@@ -78,11 +83,13 @@ for (const forbidden of [
   'name="address"', 'name="location"', 'name="serial"', 'name="health"'
 ]) assert(!combined.includes(forbidden), forbidden);
 
-for (const token of [
-  '@media(max-width:900px)', '@media(max-width:620px)', 'min-height:48px',
-  ':focus-visible', '@media(prefers-reduced-motion:reduce)',
-  '@media(forced-colors:active)', '@media print'
-]) assert(CSS.includes(token), token);
+for (const css of cssFiles) {
+  for (const token of [
+    '@media(max-width:900px)', '@media(max-width:620px)', 'min-height:48px',
+    ':focus-visible', '@media(prefers-reduced-motion:reduce)',
+    '@media(forced-colors:active)', '@media print'
+  ]) assert(css.includes(token), token);
+}
 
 const overlay = JSON.parse(fs.readFileSync(
   path.join(ROOT, 'alo186/deployment/routing-overlays/137-home-alarm-safety.json'), 'utf8'
@@ -101,11 +108,7 @@ function run(command, args) {
   return result.stdout;
 }
 
-for (const file of [
-  path.join(SMOKE_DIR, 'app.js'),
-  path.join(CO_DIR, 'app.js'),
-  path.join(HUB_DIR, 'app.js')
-]) run(process.execPath, ['--check', file]);
+for (const file of dirs.map((dir) => path.join(dir, 'app.js'))) run(process.execPath, ['--check', file]);
 run(process.execPath, [path.join(SMOKE_DIR, 'test.js')]);
 run(process.execPath, [path.join(CO_DIR, 'test.js')]);
 
@@ -126,14 +129,15 @@ for (const [name, basePath] of [['custom', ''], ['project', '/chatgpt']]) {
   const sitemap = fs.readFileSync(path.join(target, 'sitemap.xml'), 'utf8');
   const searchIndex = fs.readFileSync(path.join(target, 'arama/search-index.json'), 'utf8');
   for (const route of ROUTES) {
-    const page = path.join(target, route.replace(/^\/|\/$/g, ''), 'index.html');
+    const routeDir = path.join(target, route.replace(/^\/|\/$/g, ''));
+    const page = path.join(routeDir, 'index.html');
     assert(fs.existsSync(page), `${name} rota yok: ${route}`);
+    assert(fs.existsSync(path.join(routeDir, 'styles.css')), `${name} rota stili yok: ${route}`);
     const published = fs.readFileSync(page, 'utf8');
     assert(published.includes('data-alo186-sitewide-ux="true"'));
     assert(sitemap.includes(`https://alo186.com${route}`) || sitemap.includes(`https://www.alo186.com${route}`));
     assert(searchIndex.includes(route));
   }
-  assert(fs.existsSync(path.join(target, 'assets/home-alarm-safety-v137.css')));
 }
 
 console.log(JSON.stringify({
@@ -148,6 +152,7 @@ console.log(JSON.stringify({
   affiliateGate: 3,
   directAffiliateOnHub: false,
   repeatVisitDays: [30, 90],
+  routeLocalAssets: true,
   privacy: true,
   privateSearch: true,
   dualPages: true
