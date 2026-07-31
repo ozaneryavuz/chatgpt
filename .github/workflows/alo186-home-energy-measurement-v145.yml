@@ -1,0 +1,27 @@
+name: ALO186 home energy measurement v145
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/priz-tipi-enerji-olcer-akilli-priz-uygunluk/**'
+      - 'alo186/hesaplama/cihaz-bekleme-tuketimi-yedi-gun-olcum-plani/**'
+      - 'alo186/sektor-rehberi/ev-cihazlari-enerji-olcum-ve-tasarruf-merkezi/**'
+      - 'alo186/deployment/routing-overlays/145-home-energy-measurement.json'
+      - 'alo186/audits/home-energy-measurement-growth-v145-2026-07-31.md'
+      - 'alo186/tests/test_home_energy_measurement_growth_v145.py'
+      - '.github/workflows/alo186-home-energy-measurement-v145.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  release-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate growth release
+        run: python alo186/tests/test_home_energy_measurement_growth_v145.py
