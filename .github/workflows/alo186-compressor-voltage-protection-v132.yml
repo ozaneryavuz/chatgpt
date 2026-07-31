@@ -1,0 +1,46 @@
+name: ALO186 kompresörlü cihaz voltaj koruma uygunluğu v132
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/buzdolabi-klima-voltaj-koruma-gecikmeli-priz-uygunluk/**'
+      - 'alo186/deployment/routing-overlays/132-compressor-voltage-protection.json'
+      - 'alo186/tests/test_compressor_voltage_protection_v132.js'
+      - '.github/workflows/alo186-compressor-voltage-protection-v132.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/buzdolabi-klima-voltaj-koruma-gecikmeli-priz-uygunluk/**'
+      - 'alo186/deployment/routing-overlays/132-compressor-voltage-protection.json'
+      - 'alo186/tests/test_compressor_voltage_protection_v132.js'
+      - '.github/workflows/alo186-compressor-voltage-protection-v132.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-compressor-voltage-v132-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Hesap, güvenlik, satın almama ve dual Pages kabulü
+        run: node alo186/tests/test_compressor_voltage_protection_v132.js
+
+      - name: Mevcut yayın ve kullanıcı güveni regresyonları
+        run: |
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
