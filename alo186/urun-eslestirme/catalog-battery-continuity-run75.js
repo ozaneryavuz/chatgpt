@@ -135,6 +135,33 @@
     if(!catalog.products.some((current)=>current.id===product.id||current.asin===product.asin))catalog.products.push(product);
   }
 
+  const previousKnowledgeGraph=catalog.knowledgeGraph.bind(catalog);
+  catalog.knowledgeGraph=(options={})=>{
+    const payload=previousKnowledgeGraph(options);
+    const graph=Array.isArray(payload&&payload['@graph'])?payload['@graph']:[];
+    const listBase='https://www.alo186.com/urun-bilgi-grafigi/';
+    const itemLists=categories.map((category)=>{
+      const eligible=products.filter((product)=>product.category===category.id&&catalog.publicAffiliateEligible(product,options));
+      const itemListElement=eligible.map((product,index)=>{
+        const node=graph.find((candidate)=>candidate&&candidate['@type']==='Product'&&candidate.sku===product.id);
+        return node?{'@type':'ListItem',position:index+1,item:{'@id':node['@id']}}:null;
+      }).filter(Boolean);
+      if(!itemListElement.length)return null;
+      return {
+        '@id':`${listBase}#itemlist-${category.id}`,
+        '@type':'ItemList',
+        name:`${category.name} — doğrulanmış ürünler`,
+        description:'Fiyat, stok, satıcı, puan, yorum, garanti veya Offer yayımlamadan teknik tazelik ve güven kapılarından geçen Amazon satış ortaklığı ürünleri.',
+        numberOfItems:itemListElement.length,
+        itemListOrder:'https://schema.org/ItemListOrderAscending',
+        itemListElement
+      };
+    }).filter(Boolean);
+    const listIds=new Set(itemLists.map((item)=>item['@id']));
+    payload['@graph']=[...graph.filter((node)=>!listIds.has(node&&node['@id'])),...itemLists];
+    return payload;
+  };
+
   if(typeof catalog.knowledgeGraphSummary==='function'){
     const previousSummary=catalog.knowledgeGraphSummary.bind(catalog);
     catalog.knowledgeGraphSummary=(options={})=>({...previousSummary(options),version:'2026-07-31-run75',generatedAt:verifiedAt});
