@@ -17,6 +17,6 @@ assert.equal(tool.decide({...base,condensateSafe:false}).code,'condensate');
 assert.equal(tool.decide({...base,existingUnit:true,realCoolingTest:true}).code,'no_buy');
 assert.equal(tool.decide(base).code,'confirm');
 assert.equal(tool.decide({...base,confirmNeed:true,confirmManual:true,confirmAffiliate:true}).code,'eligible_portable_ac');
-const accessory=tool.decide({...base,existingUnit:true,windowSealVerified:false,confirmNeed:true,confirmManual:true,confirmAffiliate:true});assert.equal(accessory.code,'seal');
+const accessory=tool.decide({...base,existingUnit:true,windowSealVerified:false,confirmNeed:true,confirmManual:true,confirmAffiliate:true});assert.equal(accessory.code,'eligible_accessory');assert.equal(accessory.category,'window_kit');assert.equal(accessory.commerce,true);
 const calc=tool.calculate(base);assert.equal(calc.currentFromW,5);assert.equal(calc.workingA,5.5);assert.equal(calc.plannedA,6.88);assert.equal(calc.kwh,276);
-console.log(JSON.stringify({ok:true,route:tool.ROUTE,noBuy:true,exhaustRequired:true,directOutlet:true,kwhWithoutTariff:true}));
+console.log(JSON.stringify({ok:true,route:tool.ROUTE,noBuy:true,exhaustRequired:true,directOutlet:true,accessoryOnly:true,kwhWithoutTariff:true}));
