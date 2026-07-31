@@ -1,0 +1,35 @@
+name: ALO186 display connectivity growth v151
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/hdmi-displayport-cozunurluk-yenileme-uygunluk/**'
+      - 'alo186/hesaplama/hdmi-displayport-sinyal-sorunu-kok-neden/**'
+      - 'alo186/sektor-rehberi/goruntu-baglanti-kablo-test-merkezi/**'
+      - 'alo186/deployment/routing-overlays/151-display-connectivity-growth.json'
+      - 'alo186/audits/display-connectivity-growth-v151-2026-07-31.md'
+      - 'alo186/tests/test_display_connectivity_growth_v151.py'
+      - '.github/workflows/alo186-display-connectivity-growth-v151.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-display-connectivity-growth-v151-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  trust-and-release-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate display chain, root cause, affiliate gates and routes
+        run: python alo186/tests/test_display_connectivity_growth_v151.py
