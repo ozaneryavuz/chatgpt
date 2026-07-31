@@ -1,0 +1,21 @@
+{
+  "version": 143,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/katlanabilir-gunes-paneli-power-station-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/katlanabilir-gunes-paneli-power-station-uygunluk/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/usb-c-hub-goruntu-pd-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/usb-c-hub-goruntu-pd-uygunluk/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/sektor-rehberi/tasinabilir-enerji-ve-dijital-cihaz-uyumluluk-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/tasinabilir-enerji-ve-dijital-cihaz-uyumluluk-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
