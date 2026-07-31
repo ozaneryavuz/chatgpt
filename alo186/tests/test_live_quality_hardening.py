@@ -12,10 +12,12 @@ from inject_live_quality_hardening import (  # noqa: E402
     CANONICAL_ORIGIN,
     CSS_FILE,
     CSS_MARKER,
-    normalize_text,
-    wrong_deadline_contexts,
 )
-from inject_live_quality_hardening_v2 import run  # noqa: E402
+from inject_live_quality_hardening_v2 import (  # noqa: E402
+    normalize_text,
+    run,
+    wrong_damage_deadline_contexts,
+)
 
 
 def seed(site: Path, base_path: str) -> None:
@@ -63,14 +65,39 @@ def test_deadline_normalization_is_one_way() -> None:
     current = "Cihaz hasarı için zararın ortaya çıktığı tarihten itibaren 30 gün içinde dağıtım şirketine başvurun."
     stale = "Cihaz hasarı için zararın ortaya çıktığı tarihten itibaren 10 iş günü içinde EDAŞ kaydı açın."
     response = "Cihaz hasarı başvurusu reddedilirse dağıtım şirketi teknik raporu 10 iş günü içinde bildirir."
+    post_injector_variants = (
+        "Cihaz Hasarı Takibi: 10 iş günlük süreç, kanıt ve resmî başvuru durumunu izleyin.",
+        "ALO186 başvuru almaz. Ücretsiz paket, 10 iş günlük başvuru süresini ve dağıtım şirketine götürülecek kanıt kontrolünü düzenler.",
+        "Cihaz hasarı belgesini gecikmeden hazırlayın. 10 iş günlük resmî başvuru süresini kontrol edin.",
+        "Cihaz hasarı başvuru takibi — 10 iş günü · kanıt · resmî kanal",
+        "Cihaz hasarı EDAŞ başvuru paketi: 10 iş günlük süreyi, kanıtı ve resmî takip adımlarını düzenleyin.",
+    )
 
     assert normalize_text(current) == current
     normalized_stale = normalize_text(stale)
     assert "zararın ortaya çıktığı tarihten itibaren 30 gün içinde" in normalized_stale
     assert "10 iş günü içinde EDAŞ kaydı açın" not in normalized_stale
     assert normalize_text(response) == response
-    assert wrong_deadline_contexts(stale)
-    assert not wrong_deadline_contexts(response)
+    assert wrong_damage_deadline_contexts(stale)
+    assert not wrong_damage_deadline_contexts(response)
+
+    for variant in post_injector_variants:
+        normalized = normalize_text(variant)
+        assert "10 iş gün" not in normalized, variant
+        assert "30 gün" in normalized, variant
+        assert not wrong_damage_deadline_contexts(normalized), normalized
+
+    masked_by_next_paragraph = (
+        "<p>Cihaz hasarı için 10 iş günü içinde dağıtım şirketine başvurun.</p>"
+        "<p>Başvuru reddedilirse şirket teknik raporu bildirir.</p>"
+    )
+    assert wrong_damage_deadline_contexts(masked_by_next_paragraph)
+
+    masked_by_next_sentence = (
+        "Cihaz hasarı için 10 iş günü içinde dağıtım şirketine başvurun. "
+        "Başvuru reddedilirse şirket teknik raporu bildirir."
+    )
+    assert wrong_damage_deadline_contexts(masked_by_next_sentence)
 
 
 def test_custom_domain() -> None:
@@ -134,6 +161,8 @@ if __name__ == "__main__":
         "canonicalOrigin": CANONICAL_ORIGIN,
         "deviceDamageDeadline": "30 gün",
         "obsoleteApplicationDeadlineRejected": True,
+        "postInjectorDeadlineVariantsNormalized": 5,
+        "crossStatementMaskingBlocked": True,
         "validResponseDeadlinePreserved": True,
         "minimumTouchTargetCssPx": 44,
         "knownContrastSelectors": 4,
