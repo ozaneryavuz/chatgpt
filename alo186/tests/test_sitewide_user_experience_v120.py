@@ -25,7 +25,8 @@ def run(command: list[str]) -> None:
 
 
 # Kaynak portal, kullanıcı görevi → hak bilgisi → ücretsiz kaynak → ticari seçenek
-# sırasını korumalıdır.
+# sırasını korumalıdır. Hukukî süre, canonical yayın paketi üzerinde ayrıca
+# yürürlükteki 30 günlük sözleşmeyle doğrulanır.
 for token in (
     'data-alo186-user-first="true"',
     'data-alo186-toc-disabled="true"',
@@ -35,7 +36,7 @@ for token in (
     'data-alo186-primary-task="decision"',
     'data-alo186-primary-task="tools"',
     '<details class="resource-library"',
-    'Cihaz hasarında başvuru süresi 10 iş günüdür',
+    'class="legal-alert"',
     'Satış ortaklığı',
     'Ücretli profesyonel hizmet',
     'Sponsorlu iş birliği',
@@ -45,7 +46,7 @@ for token in (
 assert PORTAL.index('class="task-start"') < PORTAL.index('class="legal-alert"')
 assert PORTAL.index('class="legal-alert"') < PORTAL.index('class="resource-library"')
 assert PORTAL.index('class="resource-library"') < PORTAL.index('class="revenue-sprint"')
-for forbidden in ("gelire dönüştüren", "ASIN kartı", "local-first", "30 gün içinde EDAŞ kaydı"):
+for forbidden in ("gelire dönüştüren", "ASIN kartı", "local-first"):
     assert forbidden not in PORTAL, forbidden
 for token in (".task-start", ".task-grid", ".task-card.emergency", ".resource-library"):
     assert token in PORTAL_CSS, token
@@ -129,8 +130,10 @@ with tempfile.TemporaryDirectory(prefix="alo186-sitewide-v120-") as folder:
         assert 'data-alo186-user-first="true"' in portal
         assert 'data-alo186-primary-task="emergency"' in portal
         assert '<details class="resource-library"' in portal
-        assert "10 iş günü" in portal
-        assert "30 gün içinde EDAŞ kaydı" not in portal
+        assert "Cihaz hasarında başvuru süresi 30 gündür" in portal
+        assert "zararın ortaya çıktığı tarihten itibaren <strong>30 gün içinde</strong>" in portal
+        assert "Cihaz hasarında başvuru süresi 10 iş günüdür" not in portal
+        assert "10 iş günü içinde EDAŞ kaydı" not in portal
         assert "gerçek ihtiyacı gelire dönüştüren" not in portal
 
         results.append({
@@ -142,6 +145,7 @@ with tempfile.TemporaryDirectory(prefix="alo186-sitewide-v120-") as folder:
             "unsafeBlankTargets": 0,
             "metaDescriptions": len(html_files),
             "userFirstPortal": True,
+            "deviceDamageDeadline": "30 gün",
         })
 
 run([sys.executable, "-m", "py_compile", "alo186/deployment/finalize_user_experience.py"])
@@ -155,4 +159,5 @@ print(json.dumps({
     "progressiveResourceLibrary": True,
     "knownAliases": len(ALIASES),
     "personalDataFieldsAdded": 0,
+    "deviceDamageDeadline": "30 gün",
 }, ensure_ascii=False))
