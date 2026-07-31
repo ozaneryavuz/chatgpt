@@ -1,0 +1,46 @@
+name: ALO186 jeneratör yakıt ve çalışma süresi v130
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/jenerator-yakit-tuketimi-calisma-suresi/**'
+      - 'alo186/deployment/routing-overlays/130-generator-fuel-runtime.json'
+      - 'alo186/tests/test_generator_fuel_runtime_v130.js'
+      - '.github/workflows/alo186-generator-fuel-runtime-v130.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/jenerator-yakit-tuketimi-calisma-suresi/**'
+      - 'alo186/deployment/routing-overlays/130-generator-fuel-runtime.json'
+      - 'alo186/tests/test_generator_fuel_runtime_v130.js'
+      - '.github/workflows/alo186-generator-fuel-runtime-v130.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-generator-fuel-runtime-v130-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Hesap, güvenlik, satın almama ve dual Pages kabulü
+        run: node alo186/tests/test_generator_fuel_runtime_v130.js
+
+      - name: Mevcut yayın ve kullanıcı güveni regresyonları
+        run: |
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
