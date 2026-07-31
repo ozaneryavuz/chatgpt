@@ -143,19 +143,22 @@ def run(
         raise RuntimeError(f"Yayın durumu için cihaz hasarı süresi yanlış: {deadline!r}")
 
     route_results = []
+    missing_routes: list[str] = []
     for route, label in CRITICAL_ROUTES:
         target = route_target(site, route)
+        present = target.is_file()
+        if not present:
+            missing_routes.append(route)
         route_results.append(
             {
-                "path": route,
+                "path": route.lstrip("/"),
                 "label": label,
-                "present": target.is_file(),
-                "artifactFile": target.relative_to(site).as_posix() if target.is_file() else None,
+                "present": present,
+                "artifactFile": target.relative_to(site).as_posix() if present else None,
             }
         )
-    missing = [item["path"] for item in route_results if not item["present"]]
-    if missing:
-        raise RuntimeError("Yayın durumu kritik rota eksik: " + ", ".join(missing))
+    if missing_routes:
+        raise RuntimeError("Yayın durumu kritik rota eksik: " + ", ".join(missing_routes))
 
     source_commit_url = f"https://github.com/{repository}/commit/{commit}"
     status_json_url = f"{canonical_host}{STATUS_JSON_ROUTE}"
