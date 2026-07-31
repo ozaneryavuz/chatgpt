@@ -1,0 +1,21 @@
+{
+  "version": 149,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/elektrik-kesintisi-acil-aydinlatma-guvenligi/index.html",
+      "canonicalPath": "/hesaplama/elektrik-kesintisi-acil-aydinlatma-guvenligi/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/tasinabilir-fener-lamba-batarya-sure-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/tasinabilir-fener-lamba-batarya-sure-uygunluk/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/sektor-rehberi/elektrik-kesintisi-gece-guvenligi-aydinlatma-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/elektrik-kesintisi-gece-guvenligi-aydinlatma-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
