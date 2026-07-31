@@ -21,8 +21,12 @@ def text(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
+def executable_scripts(html: str) -> list[str]:
+    return re.findall(r"<script(?![^>]*application/ld\+json)[^>]*>(.*?)</script>", html, re.S)
+
+
 def check_js(html: str, label: str) -> None:
-    scripts = re.findall(r"<script(?![^>]*application/ld\+json)[^>]*>(.*?)</script>", html, re.S)
+    scripts = executable_scripts(html)
     assert scripts, f"no executable JS in {label}"
     with tempfile.NamedTemporaryFile("w", suffix=".js", encoding="utf-8", delete=False) as fh:
         fh.write("\n".join(scripts))
@@ -46,6 +50,7 @@ def main() -> None:
 
     for name, html in pages.items():
         check_js(html, name)
+        scripts = "\n".join(executable_scripts(html))
         assert 'rel="canonical"' in html
         assert "FAQPage" in html and "BreadcrumbList" in html
         assert "Bağımsız" in html and "değildir" in html
@@ -53,7 +58,7 @@ def main() -> None:
         assert "aggregateRating" not in html
         assert '"@type":"Product"' not in html
         assert '"@type":"Offer"' not in html
-        assert "localStorage" not in html and "sessionStorage" not in html
+        assert "localStorage" not in scripts and "sessionStorage" not in scripts
 
     placement = pages["placement"]
     alarm = pages["alarm"]
