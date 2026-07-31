@@ -1,0 +1,125 @@
+name: ALO186 NiMH pil affiliate kalite kontrolü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/urun-eslestirme/catalog-battery-continuity-run75.js'
+      - 'alo186/urun-eslestirme/index.html'
+      - 'alo186/tests/test_battery_continuity_affiliate_run75.js'
+      - '.github/workflows/alo186-battery-continuity-affiliate-run75.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/urun-eslestirme/catalog-battery-continuity-run75.js'
+      - 'alo186/urun-eslestirme/index.html'
+      - 'alo186/tests/test_battery_continuity_affiliate_run75.js'
+      - '.github/workflows/alo186-battery-continuity-affiliate-run75.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-battery-continuity-affiliate-run75-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: JavaScript ve affiliate Knowledge Graph sözleşmesi
+        run: |
+          node --check alo186/urun-eslestirme/catalog-battery-continuity-run75.js
+          node alo186/tests/test_battery_continuity_affiliate_run75.js
+          node alo186/tests/test_affiliate_knowledge_graph.js
+          node alo186/tests/test_matcher.js
+
+      - name: Canonical production paketini oluştur
+        run: |
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-battery-run75 \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-battery-run75
+
+      - name: Ürün yükleme ve ticari güven kabulü
+        shell: bash
+        run: |
+          set -euo pipefail
+          product_dir=/tmp/alo186-battery-run75/akilli-urun-secimi
+          test -f "$product_dir/catalog-battery-continuity-run75.js"
+          grep -Fq 'catalog-battery-continuity-run75.js' "$product_dir/index.html"
+          grep -Fq 'rel="canonical" href="https://www.alo186.com/akilli-urun-secimi"' "$product_dir/index.html"
+          grep -Fq 'Reklam / satış ortaklığı:' "$product_dir/index.html"
+          grep -Fq 'rel="sponsored nofollow noopener"' "$product_dir/app.js"
+          ! grep -Eq '"(price|stock|seller|rating|aggregateRating|review|reviews|warranty|offers|availability|priceCurrency)"[[:space:]]*:' "$product_dir/catalog-battery-continuity-run75.js"
+          node - <<'NODE'
+          const catalog=require('/tmp/alo186-battery-run75/akilli-urun-secimi/catalog-battery-continuity-run75.js');
+          const expected=new Map([
+            ['B07BFDVNSJ','CEF14'],
+            ['B09DPKNDBX','E411-270AAHCCS-2CR1'],
+            ['B00DDEVU36','5000394107939']
+          ]);
+          for(const [asin,mpn] of expected){
+            const product=catalog.products.find((item)=>item.asin===asin);
+            if(!product||product.mpn!==mpn)throw new Error(`Bundle ürünü eksik: ${asin}`);
+            if(product.url!==`https://www.amazon.com.tr/dp/${asin}?tag=alo186rehber-21`)throw new Error(`Affiliate etiketi eksik: ${asin}`);
+            if(!catalog.publicAffiliateEligible(product,{now:new Date('2026-07-31T09:00:00Z')}))throw new Error(`Güncel ürün kapalı: ${asin}`);
+            if(catalog.publicAffiliateEligible(product,{now:new Date('2026-09-20T09:00:00Z')}))throw new Error(`Eski ürün fail-closed değil: ${asin}`);
+          }
+          const allAsins=catalog.products.map((item)=>item.asin).filter(Boolean);
+          if(new Set(allAsins).size!==allAsins.length)throw new Error('Katalogda duplicate ASIN var.');
+          const graph=catalog.knowledgeGraph({now:new Date('2026-07-31T09:00:00Z')})['@graph'];
+          const products=graph.filter((node)=>node['@type']==='Product'&&node.identifier&&node.identifier.some((item)=>item.propertyID==='ASIN'&&expected.has(item.value)));
+          if(products.length!==3)throw new Error(`Product düğümü beklenen 3, bulunan ${products.length}`);
+          if(!products.every((node)=>node.brand&&node.identifier.some((item)=>item.propertyID==='MPN')&&Array.isArray(node.additionalProperty)&&!node.offers))throw new Error('Knowledge Graph ürün sözleşmesi eksik.');
+          if(!graph.some((node)=>node['@type']==='ItemList'))throw new Error('ItemList düğümü eksik.');
+          NODE
+
+      - name: Custom-domain Pages paketini doğrula
+        run: |
+          cp -a /tmp/alo186-battery-run75 /tmp/alo186-battery-run75-custom
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-battery-run75-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-battery-run75-custom \
+            --base-path ''
+
+      - name: Project-path Pages paketini doğrula
+        run: |
+          cp -a /tmp/alo186-battery-run75 /tmp/alo186-battery-run75-project
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-battery-run75-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-battery-run75-project \
+            --base-path '/chatgpt'
+
+      - name: Kalite özeti
+        if: always()
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ## ALO186 NiMH pil affiliate run75
+
+          - 3 yeni doğrulanmış Amazon Türkiye ASIN kaydı
+          - Product, Brand, ItemList, ASIN/MPN ve additionalProperty sözleşmesi
+          - Fiyat, stok, satıcı, puan, yorum, garanti ve Product Offer alanları yok
+          - `verified_direct` yalnız düşük riskli tüketici ürünlerinde
+          - `after_tool` ve `professional_only` kapıları değişmedi
+          - 45 günlük stale fail-closed, duplicate ASIN, canonical ve sponsored/nofollow kontrolleri
+          EOF
