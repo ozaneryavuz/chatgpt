@@ -80,12 +80,12 @@ for(const js of [billJs,meterJs,centerJs])for(const forbidden of ['fetch(','navi
 for(const token of ['@media(max-width:820px)','@media(max-width:560px)','min-height:48px','prefers-reduced-motion','forced-colors','focus-visible'])assert.ok(css.includes(token),token);
 assert.ok(!/outline\s*:\s*(?:0|none)\b/i.test(css));
 
-assert.equal(overlay.version,129);
+assert.equal(overlay.version,131);
 assert.deepEqual(overlay.routes.map(r=>r.canonicalPath),[bill.ROUTE,meter.ROUTE,center.ROUTE]);
 
-const temp=fs.mkdtempSync(path.join(os.tmpdir(),'alo186-home-energy-v129-'));
+const temp=fs.mkdtempSync(path.join(os.tmpdir(),'alo186-home-energy-v131-'));
 const canonical=path.join(temp,'canonical');
-execFileSync('python',[path.join(ROOT,'alo186','deployment','build_static_site.py'),'--output',canonical,'--commit','home-energy-v129-test'],{cwd:ROOT,stdio:'pipe'});
+execFileSync('python',[path.join(ROOT,'alo186','deployment','build_static_site.py'),'--output',canonical,'--commit','home-energy-v131-test'],{cwd:ROOT,stdio:'pipe'});
 const sitemap=fs.readFileSync(path.join(canonical,'sitemap.xml'),'utf8');
 for(const route of [bill.ROUTE,meter.ROUTE,center.ROUTE])assert.ok(sitemap.includes(route),route);
 for(const file of [
@@ -98,7 +98,7 @@ for(const file of [
 for(const basePath of ['','/chatgpt']){
   const target=path.join(temp,basePath?'project':'custom');
   fs.cpSync(canonical,target,{recursive:true});
-  execFileSync('python',[path.join(ROOT,'alo186','deployment','prepare_github_pages.py'),'--site',target,'--base-path',basePath,'--repository','ozaneryavuz/chatgpt','--commit','home-energy-v129-test'],{cwd:ROOT,stdio:'pipe'});
+  execFileSync('python',[path.join(ROOT,'alo186','deployment','prepare_github_pages.py'),'--site',target,'--base-path',basePath,'--repository','ozaneryavuz/chatgpt','--commit','home-energy-v131-test'],{cwd:ROOT,stdio:'pipe'});
   execFileSync('python',[path.join(ROOT,'alo186','deployment','smoke_github_pages.py'),'--site',target,'--base-path',basePath],{cwd:ROOT,stdio:'pipe'});
   const expected=`${basePath}/assets/alo186-ux.js`||'/assets/alo186-ux.js';
   for(const file of [
@@ -108,4 +108,4 @@ for(const basePath of ['','/chatgpt']){
   ])assert.ok(fs.readFileSync(file,'utf8').includes(expected),`${basePath}:${file}`);
 }
 fs.rmSync(temp,{recursive:true,force:true});
-console.log(JSON.stringify({ok:true,version:129,routes:[bill.ROUTE,meter.ROUTE,center.ROUTE],billKwhPerDay:true,standbyMeasurement:true,repeatVisitPlan:true,noBuyOutcome:true,affiliateTransparent:true,activeRiskCommerceClosed:true,unverifiedCommercialFields:false,personalData:false,customDomain:true,projectPath:true}));
+console.log(JSON.stringify({ok:true,version:131,routes:[bill.ROUTE,meter.ROUTE,center.ROUTE],billKwhPerDay:true,standbyMeasurement:true,repeatVisitPlan:true,noBuyOutcome:true,affiliateTransparent:true,activeRiskCommerceClosed:true,unverifiedCommercialFields:false,personalData:false,customDomain:true,projectPath:true}));
