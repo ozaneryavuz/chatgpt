@@ -1,0 +1,21 @@
+{
+  "version": 141,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/haberler/ups-aku-odasi-havalandirma-hidrojen-vrla-guvenligi/index.html",
+      "canonicalPath": "/haberler/ups-aku-odasi-havalandirma-hidrojen-vrla-guvenligi",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/vpp-toplayici-sozlesmesi-baseline-telemetri-gelir-paylasimi/index.html",
+      "canonicalPath": "/haberler/vpp-toplayici-sozlesmesi-baseline-telemetri-gelir-paylasimi",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ges-panel-pid-lid-letid-guc-kaybi-teshisi/index.html",
+      "canonicalPath": "/haberler/ges-panel-pid-lid-letid-guc-kaybi-teshisi",
+      "type": "article"
+    }
+  ]
+}
