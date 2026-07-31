@@ -1,0 +1,52 @@
+name: ALO186 araç aküsü ve acil enerji v134
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/aku-takviye-cihazi-jump-starter-uygunluk/**'
+      - 'alo186/hesaplama/arac-12v-priz-inverter-yuk-uygunluk/**'
+      - 'alo186/sektor-rehberi/arac-aku-ve-acil-enerji-test-merkezi/**'
+      - 'alo186/deployment/routing-overlays/134-vehicle-emergency-power.json'
+      - 'alo186/tests/test_vehicle_emergency_power_v134.js'
+      - 'alo186/audits/growth-vehicle-emergency-power-v134.md'
+      - '.github/workflows/alo186-vehicle-emergency-power-v134.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/aku-takviye-cihazi-jump-starter-uygunluk/**'
+      - 'alo186/hesaplama/arac-12v-priz-inverter-yuk-uygunluk/**'
+      - 'alo186/sektor-rehberi/arac-aku-ve-acil-enerji-test-merkezi/**'
+      - 'alo186/deployment/routing-overlays/134-vehicle-emergency-power.json'
+      - 'alo186/tests/test_vehicle_emergency_power_v134.js'
+      - 'alo186/audits/growth-vehicle-emergency-power-v134.md'
+      - '.github/workflows/alo186-vehicle-emergency-power-v134.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-vehicle-emergency-power-v134-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Karar, güven, affiliate ve dual Pages kabulü
+        run: node alo186/tests/test_vehicle_emergency_power_v134.js
+
+      - name: Mevcut yayın ve kullanıcı güveni regresyonları
+        run: |
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
