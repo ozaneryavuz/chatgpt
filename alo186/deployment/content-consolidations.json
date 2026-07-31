@@ -1,6 +1,6 @@
 {
-  "version": 4,
-  "generatedAt": "2026-07-30",
+  "version": 5,
+  "generatedAt": "2026-07-31",
   "consolidations": [
     {
       "intentKey": "lifepo4-low-temperature-charging",
@@ -57,6 +57,20 @@
       "canonicalPath": "/haberler/ges-inverter-afci-dc-ark-hatasi-alarmi-kapatilir-mi",
       "label": "GES inverter AFCI ve DC ark alarmı",
       "reason": "AFCI alarmının anlamı, DC ark kök nedeni, konnektör ve kablo kontrolü, reset sınırı ve korumayı kapatmama kararı aynı kullanıcı niyetini hedeflediği için güncel ve daha kapsamlı rehber tek canonical kaynak olarak seçildi."
+    },
+    {
+      "intentKey": "bess-grid-forming-black-start",
+      "aliasPath": "/haberler/bess-grid-forming-grid-following-black-start-mikrogrid",
+      "canonicalPath": "/haberler/enerji-depolama-grid-forming-grid-following-black-start-mikrosebeke",
+      "label": "BESS grid-forming, grid-following ve black start",
+      "reason": "İki rehber aynı grid-forming/grid-following, ada işletmesi ve black-start kabul niyetini hedefliyor. Arama sinyallerini bölmemek için önce yayımlanan kapsamlı rota canonical tutuldu."
+    },
+    {
+      "intentKey": "construction-temporary-electricity-connection",
+      "aliasPath": "/haberler/santiye-elektrigi-gecici-baglanti-edas-basvuru-belgeleri",
+      "canonicalPath": "/haberler/santiye-elektrigi-gecici-baglanti-edas-basvurusu",
+      "label": "Şantiye elektriği geçici bağlantı ve EDAŞ başvurusu",
+      "reason": "İki rehber aynı geçici bağlantı izin, proje, başvuru, kabul ve sayaç zincirini hedefliyor. Mevcut kullanıcı ve arama rotasını korumak için önce yayımlanan URL canonical tutuldu."
     }
   ]
 }
