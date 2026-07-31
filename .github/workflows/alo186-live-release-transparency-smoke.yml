@@ -17,7 +17,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: alo186-live-release-transparency-${{ github.event.workflow_run.head_sha || inputs.expected_commit || github.run_id }}
+  group: alo186-live-release-transparency-main
   cancel-in-progress: true
 
 jobs:
