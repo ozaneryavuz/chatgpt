@@ -1,0 +1,50 @@
+name: ALO186 ev elektrik tüketimi kanıt ve tasarruf v129
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/elektrik-faturasi-kwh-gun-karsilastirma/**'
+      - 'alo186/hesaplama/priz-tipi-enerji-olcer-standby-deneyi/**'
+      - 'alo186/sektor-rehberi/ev-elektrik-tuketimi-kanit-ve-tasarruf-merkezi/**'
+      - 'alo186/deployment/routing-overlays/129-home-energy-evidence.json'
+      - 'alo186/tests/test_home_energy_evidence_v129.js'
+      - '.github/workflows/alo186-home-energy-evidence-v129.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/elektrik-faturasi-kwh-gun-karsilastirma/**'
+      - 'alo186/hesaplama/priz-tipi-enerji-olcer-standby-deneyi/**'
+      - 'alo186/sektor-rehberi/ev-elektrik-tuketimi-kanit-ve-tasarruf-merkezi/**'
+      - 'alo186/deployment/routing-overlays/129-home-energy-evidence.json'
+      - 'alo186/tests/test_home_energy_evidence_v129.js'
+      - '.github/workflows/alo186-home-energy-evidence-v129.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-home-energy-evidence-v129-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: kWh/gün, standby ve 30 günlük plan kalite kapısı
+        run: node alo186/tests/test_home_energy_evidence_v129.js
+
+      - name: Mevcut yayın ve güven regresyonları
+        run: |
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
