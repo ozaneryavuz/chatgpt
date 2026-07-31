@@ -9,30 +9,42 @@ text = WORKFLOW.read_text(encoding="utf-8")
 required = (
     "LIVE_ORIGIN: https://alo186.com",
     "LIVE_ALIAS_ORIGIN: https://www.alo186.com",
-    "--location",
-    "--fail-with-body",
-    "%{content_type}",
-    "%{url_effective}",
-    "application/json",
-    "alo186-live-release.meta",
-    "alo186-live-alias.meta",
-    "assert pages['canonicalHost'] == release['canonicalHost']",
-    "canonical_host=release['canonicalHost'].rstrip('/')",
+    "alo186/deployment/verify_live_origin.py",
+    "alo186/tests/test_live_origin_verifier.py",
+    "--expected-commit",
+    "github.event.workflow_run.head_sha",
+    "--origin \"$LIVE_ORIGIN\"",
+    "--alias-origin \"$LIVE_ALIAS_ORIGIN\"",
+    "--repository \"$GITHUB_REPOSITORY\"",
+    "--receipt /tmp/alo186-live-origin-receipt.json",
+    "--diagnostics /tmp/alo186-live-origin-diagnostics",
+    "alo186-live-origin-receipt",
 )
 for token in required:
-    assert token in text, f"Canlı tazelik sözleşmesi eksik: {token}"
+    assert token in text, f"Canlı origin sözleşmesi eksik: {token}"
 
 for forbidden in (
     '"https://www.alo186.com/pages-release.json?deploy=',
     '"https://www.alo186.com${route}?commerce_check=',
-    'assert data.get(\'canonicalHost\') == \'https://www.alo186.com\'',
-    "assert f'https://www.alo186.com{route}' in sitemap",
+    "assert data.get('canonicalHost') == 'https://www.alo186.com'",
+    "Canlı apex alan adı beklenen deploy commitini sunmuyor",
 ):
-    assert forbidden not in text, f"Eski www canlı doğrulama varsayımı kaldı: {forbidden}"
+    assert forbidden not in text, f"Eski tek-modlu canlı doğrulama varsayımı kaldı: {forbidden}"
 
-assert "redirect_url" in text and "308" in text
-assert "Path('/tmp/alo186-live-release.json').stat().st_size > 0" in text
-assert "urlparse(effective_url).hostname == 'alo186.com'" in text
-assert "content_type.lower().startswith('application/json')" in text
+verifier = (ROOT / "alo186/deployment/verify_live_origin.py").read_text(encoding="utf-8")
+for token in (
+    'PAGES_MODE = "github-pages"',
+    'SITES_MODE = "chatgpt-sites"',
+    "classify_release_response",
+    "verify_pages_mode",
+    "verify_sites_mode",
+    "exactCommitReceiptAvailable",
+    "liveContentContractVerified",
+    "unavailable-on-chatgpt-sites",
+    "wwwAlias",
+    "application/json",
+    "text/html",
+):
+    assert token in verifier, f"İki-modlu canlı verifier sözleşmesi eksik: {token}"
 
-print("ALO186 canlı tazelik workflow apex, yönlendirme ve MIME sözleşmeleri başarılı.")
+print("ALO186 canlı origin workflow Pages ve ChatGPT Sites modlarıyla doğrulandı.")
