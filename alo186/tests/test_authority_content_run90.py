@@ -7,20 +7,20 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 OVERLAY = ROOT / "alo186/deployment/routing-overlays/content-authority-run90.json"
 PAGES = {
-    "/haberler/jenerator-ats-3-kutup-4-kutup-notr-anahtarlama-topraklama": {
-        "path": ROOT / "alo186/haberler/jenerator-ats-3-kutup-4-kutup-notr-anahtarlama-topraklama/index.html",
-        "intent": ("3 kutuplu ATS", "4 kutuplu ATS", "anahtarlanan nötr", "Nötr-toprak bağlarını", "ayrı türetilmiş kaynak"),
-        "sources": ("iec.ch", "eaton.com"),
-        "separation": ("jeneratör transferinde nötrün ortak bırakılması veya anahtarlanması", "ATS zamanlama rehberi", "ortak nötr rehberi"),
-        "boundary": "Tek hat ve nötr-toprak bağı doğrulanmadan 3 kutuplu veya 4 kutuplu ATS satın almayın",
+    "/haberler/inverter-motor-kablosu-dvdt-filtre-sinus-filtre-secimi": {
+        "path": ROOT / "alo186/haberler/inverter-motor-kablosu-dvdt-filtre-sinus-filtre-secimi/index.html",
+        "intent": ("uzun motor kablosu", "dV/dt filtre", "sinüs filtre", "motor terminal tepe gerilimi", "anahtarlama frekansı"),
+        "sources": ("iec.ch", "se.com", "danfoss.com"),
+        "separation": ("inverter çıkışındaki hızlı PWM geriliminin uzun motor kablosu", "harmonik rezonans rehberi", "toplam sızıntı rehberi"),
+        "boundary": "Kablo uzunluğu ve motor izolasyonu doğrulanmadan dV/dt filtre veya sinüs filtre satın almayın",
         "cta": "/hizmetler/elektrik-surekliligi/",
     },
-    "/haberler/ups-backfeed-geri-besleme-korumasi-bakim-bypass-interlock": {
-        "path": ROOT / "alo186/haberler/ups-backfeed-geri-besleme-korumasi-bakim-bypass-interlock/index.html",
-        "intent": ("UPS backfeed", "geri besleme", "haricî ayırıcı", "MBB interlock", "gerilim yokluğunu"),
-        "sources": ("iec.ch", "productinfo.se.com"),
-        "separation": ("UPS'nin girişe geri beslemeyi önleme", "UPS ECO rehberi", "paralel UPS rehberi"),
-        "boundary": "Üretici backfeed şeması ve MBB interlocku doğrulanmadan kontaktör veya bypass panosu satın almayın",
+    "/haberler/bess-precharge-kontaktor-dc-link-on-sarj-arizasi": {
+        "path": ROOT / "alo186/haberler/bess-precharge-kontaktor-dc-link-on-sarj-arizasi/index.html",
+        "intent": ("BESS precharge", "DC-link kondansatörü", "precharge timeout", "kontaktör geri bildirimi", "kaynak kilidi"),
+        "sources": ("iec.ch", "ti.com"),
+        "separation": ("BESS başlangıcında DC-link kondansatörünün ön şarjı", "BESS izolasyon rehberi", "kapasite/SoH rehberi"),
+        "boundary": "DC-link rampası ve kontaktör geri bildirimi doğrulanmadan direnç, kontaktör veya PCS satın almayın",
         "cta": "/hizmetler/elektrik-surekliligi/",
     },
     "/haberler/trafo-k-faktoru-harmonik-derating-nonlineer-yuk-secimi": {
