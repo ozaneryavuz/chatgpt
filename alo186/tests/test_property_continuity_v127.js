@@ -61,6 +61,13 @@ assert.ok(!html.service.includes('rel="sponsored'),'service must not expose affi
 for(const token of ['@media(max-width:820px)','@media(max-width:560px)','min-height:48px','prefers-reduced-motion','forced-colors','focus-visible'])assert.ok(css.includes(token),token);
 assert.ok(!/outline\s*:\s*(?:0|none)\b/i.test(css));
 
+// Bu iki relative bağlantı canlıdaki kararlı /sektor-rehberi koleksiyonuna gider.
+// Genel validator yalnız exact public aliası kabul etmeli ve diğer kırık relative
+// hedeflerde fail-closed kalmalıdır.
+assert.ok(html.center.includes('<a href="../">Sektör rehberi</a>'),'center:stable-sector-hub');
+assert.ok(html.service.includes('<a href="../sektor-rehberi/">Sektör rehberi</a>'),'service:stable-sector-hub');
+execFileSync('python',[path.join(ROOT,'.github','scripts','validate_alo186.py')],{cwd:ROOT,stdio:'pipe'});
+
 assert.deepEqual(overlay,{
   version:127,
   generatedAt:'2026-07-31',
@@ -102,5 +109,6 @@ console.log(JSON.stringify({
   noBuyOutcome:true,activeEventCommerceClosed:true,lifeSafetyCommerceClosed:true,
   affiliateTransparent:true,directAmazon:false,priceStockRatingWarranty:false,
   professionalLeadPath:true,repeatVisitCalendar:true,personalData:false,
-  officialAffiliation:false,customDomain:true,projectPath:true
+  officialAffiliation:false,customDomain:true,projectPath:true,
+  stableSectorHubValidated:true
 }));
