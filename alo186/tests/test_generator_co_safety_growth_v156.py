@@ -48,7 +48,7 @@ def main() -> None:
         check_js(html, name)
         assert 'rel="canonical"' in html
         assert "FAQPage" in html and "BreadcrumbList" in html
-        assert "Bağımsız" in html and "resmî" in html
+        assert "Bağımsız" in html and "değildir" in html
         assert "fiyat" in html.lower() and "stok" in html.lower()
         assert "aggregateRating" not in html
         assert '"@type":"Product"' not in html
