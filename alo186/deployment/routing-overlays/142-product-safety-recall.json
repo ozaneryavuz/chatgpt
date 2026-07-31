@@ -1,0 +1,21 @@
+{
+  "version": 142,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/amazon-elektrik-urunleri/elektrikli-urun-satin-alma-guvenlik-kapisi/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/elektrikli-urun-satin-alma-guvenlik-kapisi/",
+      "type": "commercial-guide"
+    },
+    {
+      "source": "alo186/hesaplama/elektrikli-urun-geri-cagirma-model-kontrolu/index.html",
+      "canonicalPath": "/hesaplama/elektrikli-urun-geri-cagirma-model-kontrolu/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/sektor-rehberi/elektrikli-urun-guvenlik-ve-geri-cagirma-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/elektrikli-urun-guvenlik-ve-geri-cagirma-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
