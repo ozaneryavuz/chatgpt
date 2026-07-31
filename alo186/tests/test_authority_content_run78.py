@@ -15,13 +15,13 @@ PAGES = {
         "boundary": "Hızlı ödeme veya parça değiştirme sınırı",
         "cta": "/hizmetler/elektrik-surekliligi/",
     },
-    "/haberler/ev-sarj-tip-a-tip-b-rcd-6ma-dc-rdcdd-secimi": {
-        "path": ROOT / "alo186/haberler/ev-sarj-tip-a-tip-b-rcd-6ma-dc-rdcdd-secimi/index.html",
-        "intent": ("RCD Tip A", "RCD Tip B", "RDC-DD 6 mA DC", "DC körleşme", "Gerçek araçla şarj edin"),
-        "sources": ("iec.ch", "se.com"),
-        "separation": ("EV şarj devresindeki AC/DC artık akım koruma mimarisini", "open-PEN ve topraklama rehberi", "RCD ramp testi rehberi"),
-        "boundary": "Gereksiz Tip B satın almama sınırı",
-        "cta": "/hizmetler/ges-batarya-ev-sarj-fizibilitesi/",
+    "/haberler/jenerator-dusuk-yuk-wet-stacking-yuk-bankasi-testi": {
+        "path": ROOT / "alo186/haberler/jenerator-dusuk-yuk-wet-stacking-yuk-bankasi-testi/index.html",
+        "intent": ("Wet stacking", "Düşük yük işletmesi", "egzoz slobber", "Yük bankası", "Kademeli yük uygulayın"),
+        "sources": ("cat.com", "cummins.com"),
+        "separation": ("dizel jeneratörün uzun düşük yük işletmesi, wet stacking teşhisi ve kontrollü yük bankası planını", "jeneratör çalışıyor ama elektrik vermiyor rehberi", "jeneratör nötrü ve ATS rehberi"),
+        "boundary": "Yük bankası satın almama ve jeneratörü hemen küçültmeme sınırı",
+        "cta": "/hizmetler/elektrik-surekliligi/",
     },
     "/haberler/ges-dc-ac-orani-inverter-clipping-oversizing-kabul": {
         "path": ROOT / "alo186/haberler/ges-dc-ac-orani-inverter-clipping-oversizing-kabul/index.html",
