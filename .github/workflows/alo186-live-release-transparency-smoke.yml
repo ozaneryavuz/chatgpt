@@ -1,0 +1,66 @@
+name: ALO186 canlı yayın kimliği ve kritik rota smoke
+
+on:
+  workflow_run:
+    workflows:
+      - ALO186 GitHub Pages — sunucusuz canlı yayın
+    types:
+      - completed
+  workflow_dispatch:
+    inputs:
+      expected_commit:
+        description: Beklenen canlı commit SHA
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-live-release-transparency-${{ github.event.workflow_run.head_sha || inputs.expected_commit || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  live-release-smoke:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Beklenen yayın commitini belirle
+        id: expected
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.expected_commit }}" ]; then
+            echo "sha=${{ inputs.expected_commit }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event_name }}" = "workflow_run" ]; then
+            echo "sha=${{ github.event.workflow_run.head_sha }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "sha=" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Canlı yayın kimliği, 30 gün güvenlik kapısı ve kritik rotalar
+        run: >-
+          python alo186/deployment/live_release_smoke.py
+          --origin https://alo186.com
+          --expected-commit "${{ steps.expected.outputs.sha }}"
+          --repository "${{ github.repository }}"
+          --attempts 36
+          --interval 10
+          --report alo186-live-release-smoke.json
+      - name: Canlı doğrulama raporu
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-live-release-smoke-${{ github.run_id }}
+          path: alo186-live-release-smoke.json
+          if-no-files-found: error
+          retention-days: 45
