@@ -63,8 +63,9 @@ for(const [name,html] of [['outage',outageHtml],['voltage',voltageHtml],['center
   for(const forbidden of ['amazon.com','amazon.com.tr','"@type":"Product"','"@type":"Offer"','priceCurrency','aggregateRating','availability'])assert.ok(!html.includes(forbidden),`${name}:${forbidden}`);
   assert.ok(html.includes('ALO186')&&html.includes('bağımsız'),`${name}:independence`);
 }
+for(const html of [outageHtml,voltageHtml])assert.ok(html.includes('rel="sponsored nofollow noopener"'),'affiliate rel');
 for(const js of [outageJs,voltageJs]){
-  for(const token of ['sponsored nofollow noopener','localStorage','MAX_RECORDS','TTL_DAYS','text/calendar'])assert.ok(js.includes(token),token);
+  for(const token of ['localStorage','MAX_RECORDS','TTL_DAYS','text/calendar'])assert.ok(js.includes(token),token);
   for(const forbidden of ['navigator.geolocation','fetch('])assert.ok(!js.includes(forbidden),forbidden);
 }
 for(const token of ['text/calendar','commerce:false','P0','P1','P2'])assert.ok(centerJs.includes(token),token);
