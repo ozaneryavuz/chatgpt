@@ -1,0 +1,21 @@
+{
+  "version": 125,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/guvenlik-kamerasi-nvr-poe-ups-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/guvenlik-kamerasi-nvr-poe-ups-uygunluk/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/akvaryum-elektrik-kesintisi-hava-pompasi-yedek-guc/index.html",
+      "canonicalPath": "/hesaplama/akvaryum-elektrik-kesintisi-hava-pompasi-yedek-guc/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/hidrofor-su-pompasi-jenerator-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/hidrofor-su-pompasi-jenerator-uygunluk/",
+      "type": "calculator"
+    }
+  ]
+}
