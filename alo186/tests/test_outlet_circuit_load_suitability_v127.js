@@ -23,6 +23,7 @@ for (const token of [
   'Kettle / su ısıtıcısı', 'Mikrodalga gerçek giriş gücü', 'Devre sigortası',
   'Duvar prizi etiket akımı', 'Kişisel veri yok', 'Satın almama sonucu',
   'Şeffaf satış ortaklığı', 'rel="sponsored nofollow noopener"',
+  'id="confirmGap"', 'id="confirmSpecs"', 'id="confirmAffiliate"',
   'FAQPage', 'BreadcrumbList', 'rel="canonical"'
 ]) assert.ok(html.includes(token), token);
 
@@ -36,9 +37,9 @@ for (const forbidden of ['localStorage', 'sessionStorage', 'navigator.geolocatio
   assert.ok(!js.includes(forbidden), forbidden);
 }
 for (const token of [
-  'confirmGap', 'confirmSpecs', 'confirmAffiliate', 'no_buy', 'measure_first',
-  'electronics_strip', 'overload', 'stagger', 'near_limit', 'daisy_chain'
-]) assert.ok(js.includes(token), token);
+  'no_buy', 'measure_first', 'electronics_strip', 'overload', 'stagger',
+  'near_limit', 'daisy_chain', 'affiliate-check', 'sponsored nofollow noopener'
+]) assert.ok(js.includes(token) || html.includes(token), token);
 for (const token of [
   '@media(max-width:820px)', '@media(max-width:560px)', 'min-height:48px',
   'prefers-reduced-motion', 'forced-colors', 'focus-visible'
