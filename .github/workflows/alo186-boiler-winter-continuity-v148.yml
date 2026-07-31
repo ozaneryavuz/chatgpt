@@ -1,0 +1,35 @@
+name: ALO186 boiler winter continuity growth v148
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/kombi-elektrik-kesintisi-donma-guvenligi/**'
+      - 'alo186/hesaplama/kombi-ups-guc-sure-uygunluk/**'
+      - 'alo186/sektor-rehberi/kombi-elektrik-kesintisi-kis-sureklilik-merkezi/**'
+      - 'alo186/deployment/routing-overlays/148-boiler-winter-continuity-growth.json'
+      - 'alo186/audits/boiler-winter-continuity-growth-v148-2026-07-31.md'
+      - 'alo186/tests/test_boiler_winter_continuity_growth_v148.py'
+      - '.github/workflows/alo186-boiler-winter-continuity-v148.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-boiler-winter-continuity-v148-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  trust-and-release-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate boiler safety, affiliate gates and routes
+        run: python alo186/tests/test_boiler_winter_continuity_growth_v148.py
