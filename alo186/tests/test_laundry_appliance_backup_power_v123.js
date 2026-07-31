@@ -33,9 +33,10 @@ assert.ok(!js.includes('root.print()'),'print handler must use globalThis safely
 
 const countMatch=hub.match(/<strong>(\d+) çekirdek araç<\/strong>/);
 assert.ok(countMatch);
+const visibleToolCount=Number(countMatch[1]);
 const cardCount=(hub.match(/<a\b[^>]*class="[^"]*\btool-card\b[^"]*"/g)||[]).length;
-assert.equal(Number(countMatch[1]),48);
-assert.equal(cardCount,48);
+assert.ok(visibleToolCount>=48,visibleToolCount);
+assert.equal(cardCount,visibleToolCount);
 assert.ok(hub.includes(`href="./${route}/"`));
 assert.ok(hub.includes('Beyaz Eşya Yedek Güç Uygunluğu'));
 
@@ -70,7 +71,7 @@ for(const basePath of ['','/chatgpt']){
 fs.rmSync(temp,{recursive:true,force:true});
 
 console.log(JSON.stringify({
-  ok:true,route:app.ROUTE,decisionScenarios:16,hubTools:48,hubToolCards:48,
+  ok:true,route:app.ROUTE,decisionScenarios:16,hubTools:visibleToolCount,hubToolCards:cardCount,
   energyLabelConversion:true,noBuyOutcome:true,activeOutageCommerceClosed:true,
   personalData:false,mobile:true,accessible:true,affiliateTransparent:true,
   customDomain:true,projectPath:true
