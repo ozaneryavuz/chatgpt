@@ -66,14 +66,14 @@ def main() -> None:
 
     for phrase in [
         "yaklaşık 6,1 m",
-        "tamamen açık dış alan",
+        "Tamamen açık dış alan",
         "Egzoz yönü",
         "temiz havaya çıkın ve 112’yi arayın",
         "ev prizine",
         "CPSC",
         "CDC",
     ]:
-        assert phrase in placement
+        assert phrase in placement, f"placement phrase missing: {phrase}"
     assert "Amazon satış ortaklığı" not in placement
     assert "tag=alo186rehber-21" not in placement
 
@@ -89,7 +89,7 @@ def main() -> None:
         "adConfirm",
         "tag=alo186rehber-21",
     ]:
-        assert phrase in alarm
+        assert phrase in alarm, f"alarm phrase missing: {phrase}"
     assert "Aktif CO alarmı veya zehirlenme belirtisinde alışveriş yapılmaz" in alarm
 
     for phrase in [
@@ -102,7 +102,7 @@ def main() -> None:
         "text/calendar",
         "Kişisel verisiz görev planı",
     ]:
-        assert phrase in center
+        assert phrase in center, f"center phrase missing: {phrase}"
 
     for phrase in [
         "Arama niyeti",
@@ -116,7 +116,7 @@ def main() -> None:
         "CDC",
         "20 feet",
     ]:
-        assert phrase in audit
+        assert phrase in audit, f"audit phrase missing: {phrase}"
 
     print("ALO186 generator CO safety growth v156 contract: PASS")
 
