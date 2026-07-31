@@ -1,0 +1,21 @@
+{
+  "version": 144,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-gerilim-kalitesi-sikayeti-edas-bir-haftalik-olcum/index.html",
+      "canonicalPath": "/haberler/elektrik-gerilim-kalitesi-sikayeti-edas-bir-haftalik-olcum",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/jenerator-kisa-devre-akimi-sigorta-koruma-koordinasyonu/index.html",
+      "canonicalPath": "/haberler/jenerator-kisa-devre-akimi-sigorta-koruma-koordinasyonu",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ev-sarj-plug-charge-iso-15118-sertifika-ocpp/index.html",
+      "canonicalPath": "/haberler/ev-sarj-plug-charge-iso-15118-sertifika-ocpp",
+      "type": "article"
+    }
+  ]
+}
