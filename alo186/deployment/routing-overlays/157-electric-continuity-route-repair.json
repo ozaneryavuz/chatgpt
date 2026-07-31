@@ -1,0 +1,11 @@
+{
+  "version": 157,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/hizmetler/elektrik-surekliligi/index.html",
+      "canonicalPath": "/hizmetler/elektrik-surekliligi/",
+      "type": "legacy-route-bridge"
+    }
+  ]
+}
