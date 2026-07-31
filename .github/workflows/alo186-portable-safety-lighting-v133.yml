@@ -1,0 +1,52 @@
+name: ALO186 taşınabilir elektrik güvenliği ve kesinti aydınlatması v133
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/uzatma-kablosu-kablo-makarasi-yuk-uygunluk/**'
+      - 'alo186/hesaplama/elektrik-kesintisi-sarjli-ampul-isildak-uygunluk/**'
+      - 'alo186/sektor-rehberi/elektrik-kesintisi-aydinlatma-ve-guvenli-uzatma-merkezi/**'
+      - 'alo186/deployment/routing-overlays/133-portable-safety-lighting.json'
+      - 'alo186/tests/test_portable_safety_lighting_v133.js'
+      - '.github/workflows/alo186-portable-safety-lighting-v133.yml'
+      - 'alo186/audits/growth-portable-safety-lighting-v133.md'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/uzatma-kablosu-kablo-makarasi-yuk-uygunluk/**'
+      - 'alo186/hesaplama/elektrik-kesintisi-sarjli-ampul-isildak-uygunluk/**'
+      - 'alo186/sektor-rehberi/elektrik-kesintisi-aydinlatma-ve-guvenli-uzatma-merkezi/**'
+      - 'alo186/deployment/routing-overlays/133-portable-safety-lighting.json'
+      - 'alo186/tests/test_portable_safety_lighting_v133.js'
+      - '.github/workflows/alo186-portable-safety-lighting-v133.yml'
+      - 'alo186/audits/growth-portable-safety-lighting-v133.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-portable-safety-lighting-v133-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Arama niyeti, karar, güven, affiliate ve dual Pages kabulü
+        run: node alo186/tests/test_portable_safety_lighting_v133.js
+
+      - name: Mevcut yayın ve kullanıcı güveni regresyonları
+        run: |
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
