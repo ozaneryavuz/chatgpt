@@ -15,12 +15,12 @@ PAGES = {
         "boundary": "Alarmı yalnız sıfırlayıp üretime dönmeme sınırı",
         "cta": "/hizmetler/elektrik-surekliligi/",
     },
-    "/haberler/parafudr-yedek-sigorta-max-ocpd-kisa-devre-koordinasyonu": {
-        "path": ROOT / "alo186/haberler/parafudr-yedek-sigorta-max-ocpd-kisa-devre-koordinasyonu/index.html",
-        "intent": ("Parafudr", "Max OCPD", "kısa devre akımı", "branch", "V bağlantı"),
-        "sources": ("iec.ch", "se.com", "phoenixcontact.com"),
-        "separation": ("parafudrun yedek koruma ve kısa devre koordinasyonunu", "parafudr bakım rehberi", "Parafudr Risk Testi"),
-        "boundary": "Üretici koordinasyon tablosu olmadan sigorta büyütmeme sınırı",
+    "/haberler/topraklama-elektrodu-korozyon-bakir-galvaniz-malzeme-uyumu": {
+        "path": ROOT / "alo186/haberler/topraklama-elektrodu-korozyon-bakir-galvaniz-malzeme-uyumu/index.html",
+        "intent": ("Galvanik korozyon", "topraklama elektrodu", "bakır kaplı çelik", "galvanizli çelik", "doğrudan gömülü bağlantı"),
+        "sources": ("iec.ch", "nvent.com"),
+        "separation": ("topraklama elektrodu, iletkeni ve bağlantısında malzeme uyumu ile korozyon ömrünü", "3 kazık–selektif–pens rehberi", "Wenner rehberi"),
+        "boundary": "Yalnız düşük ohm değeri nedeniyle malzeme uyumunu kabul etmeme sınırı",
         "cta": "/hizmetler/elektrik-surekliligi/",
     },
     "/haberler/harmonik-rezonans-kompanzasyon-detuned-reaktor-secimi": {
