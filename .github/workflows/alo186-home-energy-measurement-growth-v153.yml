@@ -1,0 +1,35 @@
+name: ALO186 home energy measurement growth v153
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/elektrik-faturasi-kwh-gunluk-tuketim-karsilastirma/**'
+      - 'alo186/hesaplama/priz-tipi-enerji-olcer-akilli-priz-uygunluk/**'
+      - 'alo186/sektor-rehberi/ev-enerji-tuketimi-olcum-takip-merkezi/**'
+      - 'alo186/deployment/routing-overlays/153-home-energy-measurement-growth.json'
+      - 'alo186/audits/home-energy-measurement-growth-v153-2026-07-31.md'
+      - 'alo186/tests/test_home_energy_measurement_growth_v153.py'
+      - '.github/workflows/alo186-home-energy-measurement-growth-v153.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-home-energy-measurement-growth-v153-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  trust-and-release-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate bill comparison, meter gates, affiliate disclosure and routes
+        run: python alo186/tests/test_home_energy_measurement_growth_v153.py
