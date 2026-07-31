@@ -10,6 +10,7 @@ on:
       - 'alo186/deployment/guard_commerce_routes_v2.py'
       - 'alo186/deployment/inject_shortlist_growth.py'
       - 'alo186/tests/test_commerce_governance_v2.py'
+      - 'alo186/tests/test_live_freshness_workflow.py'
       - '.github/workflows/alo186-commerce-governance-v2.yml'
   push:
     branches: [main]
@@ -21,6 +22,7 @@ on:
       - 'alo186/deployment/guard_commerce_routes_v2.py'
       - 'alo186/deployment/inject_shortlist_growth.py'
       - 'alo186/tests/test_commerce_governance_v2.py'
+      - 'alo186/tests/test_live_freshness_workflow.py'
       - '.github/workflows/alo186-commerce-governance-v2.yml'
   workflow_run:
     workflows: ['ALO186 GitHub Pages — sunucusuz canlı yayın']
@@ -52,6 +54,7 @@ jobs:
         run: |
           set -euo pipefail
           python alo186/tests/test_commerce_governance_v2.py
+          python alo186/tests/test_live_freshness_workflow.py
           python -m py_compile alo186/deployment/guard_commerce_routes_v2.py
           node --check alo186/amazon-elektrik-urunleri/commercial.js
           node --check alo186/urun-eslestirme/catalog.js
@@ -151,13 +154,15 @@ jobs:
               search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
               sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
               entries={item['canonicalPath']: item for item in search['entries']}
+              canonical_host=release['canonicalHost'].rstrip('/')
+              assert pages['canonicalHost'] == release['canonicalHost']
               assert release['routeCount'] == len(release['routes'])
               assert pages['routeCount'] == release['routeCount']
               assert release['routingVersion'] >= 41
               for route in commercial + services:
                   path=root/route.strip('/')/'index.html'
                   assert path.is_file(), path
-                  assert f'https://www.alo186.com{route}' in sitemap
+                  assert f'<loc>{canonical_host}{route}</loc>' in sitemap
                   assert route in entries, route
                   expected=(prefix+route) if prefix else route
                   assert entries[route]['url'] == expected, (entries[route]['url'], expected)
@@ -192,32 +197,81 @@ jobs:
       github.event.workflow_run.head_branch == 'main'
     runs-on: ubuntu-latest
     timeout-minutes: 12
+    env:
+      LIVE_ORIGIN: https://alo186.com
+      LIVE_ALIAS_ORIGIN: https://www.alo186.com
     steps:
+      - name: www aliasının apex canonical alana yönlendiğini doğrula
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f /tmp/alo186-live-alias.headers /tmp/alo186-live-alias.meta
+          curl --silent --show-error --head \
+            --connect-timeout 10 --max-time 25 \
+            -H 'Cache-Control: no-cache, no-store, max-age=0' \
+            -D /tmp/alo186-live-alias.headers \
+            --output /dev/null \
+            --write-out '%{http_code}\t%{redirect_url}\t%{url_effective}\n' \
+            "${LIVE_ALIAS_ORIGIN}/pages-release.json?alias_check=$(date +%s)" \
+            > /tmp/alo186-live-alias.meta
+          python - "$LIVE_ORIGIN" <<'PY'
+          import sys
+          from pathlib import Path
+          from urllib.parse import urlparse
+
+          live_origin=sys.argv[1]
+          status,redirect_url,effective_url=Path('/tmp/alo186-live-alias.meta').read_text(encoding='utf-8').strip().split('\t')
+          assert int(status) in {301,302,307,308}, (status,redirect_url,effective_url)
+          target=urlparse(redirect_url)
+          live=urlparse(live_origin)
+          assert target.scheme == 'https'
+          assert target.hostname == live.hostname == 'alo186.com'
+          assert target.path == '/pages-release.json'
+          PY
+
       - name: Canlı release makbuzunun deploy edilen commit ile eşleşmesini bekle
         shell: bash
         env:
           EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
           set -euo pipefail
-          rm -f /tmp/alo186-live-release.json /tmp/alo186-live-release.headers
+          rm -f /tmp/alo186-live-release.json /tmp/alo186-live-release.headers /tmp/alo186-live-release.meta
           ok=false
           for attempt in $(seq 1 24); do
             cache_bust="${EXPECTED_SHA}-${attempt}-$(date +%s)"
-            if curl --silent --show-error --fail \
+            if curl --silent --show-error --fail-with-body --location \
+              --retry 2 --retry-all-errors --retry-delay 1 \
               --connect-timeout 10 --max-time 25 \
+              -H 'Accept: application/json' \
               -H 'Cache-Control: no-cache, no-store, max-age=0' \
               -H 'Pragma: no-cache' \
               -D /tmp/alo186-live-release.headers \
-              "https://www.alo186.com/pages-release.json?deploy=${cache_bust}" \
-              -o /tmp/alo186-live-release.json; then
-              if python - "$EXPECTED_SHA" <<'PY'
+              --write-out '%{http_code}\t%{content_type}\t%{url_effective}\t%{num_redirects}\n' \
+              "${LIVE_ORIGIN}/pages-release.json?deploy=${cache_bust}" \
+              -o /tmp/alo186-live-release.json \
+              > /tmp/alo186-live-release.meta; then
+              if python - "$EXPECTED_SHA" "$LIVE_ORIGIN" <<'PY'
           import json,sys
           from pathlib import Path
+          from urllib.parse import urlparse
+
           expected=sys.argv[1]
-          data=json.loads(Path('/tmp/alo186-live-release.json').read_text(encoding='utf-8'))
-          assert data.get('commit') == expected, (data.get('commit'), expected)
-          assert data.get('hostingMode') == 'github-pages'
-          assert data.get('canonicalHost') == 'https://www.alo186.com'
+          live_origin=sys.argv[2]
+          body=Path('/tmp/alo186-live-release.json')
+          try:
+              http_code,content_type,effective_url,num_redirects=Path('/tmp/alo186-live-release.meta').read_text(encoding='utf-8').strip().split('\t')
+              assert int(http_code) == 200, http_code
+              assert content_type.lower().startswith('application/json'), content_type
+              assert urlparse(effective_url).hostname == 'alo186.com', effective_url
+              assert urlparse(effective_url).path == '/pages-release.json', effective_url
+              assert Path('/tmp/alo186-live-release.json').stat().st_size > 0
+              data=json.loads(body.read_text(encoding='utf-8'))
+              assert data.get('commit') == expected, (data.get('commit'), expected)
+              assert data.get('hostingMode') == 'github-pages'
+              assert data.get('canonicalHost') == live_origin
+          except Exception as exc:
+              print(f'Canlı makbuz doğrulaması henüz hazır değil: {exc}', file=sys.stderr)
+              raise SystemExit(1)
           PY
               then
                 ok=true
@@ -227,8 +281,14 @@ jobs:
             sleep 10
           done
           if [ "$ok" != true ]; then
-            echo "Canlı alan adı beklenen deploy commitini sunmuyor: $EXPECTED_SHA" >&2
-            test -f /tmp/alo186-live-release.json && cat /tmp/alo186-live-release.json >&2 || true
+            echo "Canlı apex alan adı beklenen deploy commitini sunmuyor: $EXPECTED_SHA" >&2
+            test -f /tmp/alo186-live-release.meta && cat /tmp/alo186-live-release.meta >&2 || true
+            test -f /tmp/alo186-live-release.headers && tail -n 40 /tmp/alo186-live-release.headers >&2 || true
+            test -f /tmp/alo186-live-release.json && {
+              wc -c /tmp/alo186-live-release.json >&2
+              head -c 800 /tmp/alo186-live-release.json >&2
+              echo >&2
+            } || true
             exit 1
           fi
 
@@ -236,6 +296,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          canonical_host=$(python - <<'PY'
+          import json
+          from pathlib import Path
+          print(json.loads(Path('/tmp/alo186-live-release.json').read_text(encoding='utf-8'))['canonicalHost'].rstrip('/'))
+          PY
+          )
+          test "$canonical_host" = "$LIVE_ORIGIN"
           routes=(
             '/'
             '/durum/'
@@ -252,21 +319,55 @@ jobs:
           )
           for route in "${routes[@]}"; do
             file="/tmp/alo186-live-${route//\//_}.html"
-            code=$(curl --silent --show-error --output "$file" \
-              --write-out '%{http_code}' --connect-timeout 10 --max-time 25 \
+            meta="${file}.meta"
+            curl --silent --show-error --fail-with-body --location \
+              --retry 2 --retry-all-errors --retry-delay 1 \
+              --output "$file" \
+              --write-out '%{http_code}\t%{content_type}\t%{url_effective}\n' \
+              --connect-timeout 10 --max-time 25 \
               -H 'Cache-Control: no-cache, no-store, max-age=0' \
-              "https://www.alo186.com${route}?commerce_check=$(date +%s)")
-            test "$code" = 200
+              "${LIVE_ORIGIN}${route}?commerce_check=$(date +%s)" \
+              > "$meta"
+            python - "$file" "$meta" <<'PY'
+          import sys
+          from pathlib import Path
+          from urllib.parse import urlparse
+
+          file=Path(sys.argv[1])
+          meta=Path(sys.argv[2])
+          status,content_type,effective_url=meta.read_text(encoding='utf-8').strip().split('\t')
+          assert int(status) == 200, (status,effective_url)
+          assert content_type.lower().startswith('text/html'), content_type
+          assert urlparse(effective_url).hostname == 'alo186.com', effective_url
+          assert file.stat().st_size > 0
+          PY
           done
           hub=/tmp/alo186-live-_amazon-elektrik-urunleri.html
-          grep -Fq 'rel="canonical" href="https://www.alo186.com/amazon-elektrik-urunleri"' "$hub"
+          grep -Fq "rel=\"canonical\" href=\"${canonical_host}/amazon-elektrik-urunleri\"" "$hub"
           grep -Eqi 'satış ortaklığı|affiliate' "$hub"
           ! grep -Eqi 'href="https?://(www\.)?(amazon\.com\.tr|amzn\.to)' "$hub"
           grep -Fq 'data-fresh-products' /tmp/alo186-live-_amazon-elektrik-urunleri_powerbank-usb-c-secimi.html
-          curl --silent --show-error --fail \
+          curl --silent --show-error --fail-with-body --location \
+            --retry 2 --retry-all-errors --retry-delay 1 \
+            -H 'Accept: application/json' \
             -H 'Cache-Control: no-cache, no-store, max-age=0' \
-            "https://www.alo186.com/arama/search-index.json?commerce_check=$(date +%s)" \
-            -o /tmp/alo186-live-search-index.json
+            -D /tmp/alo186-live-search-index.headers \
+            --write-out '%{http_code}\t%{content_type}\t%{url_effective}\n' \
+            "${LIVE_ORIGIN}/arama/search-index.json?commerce_check=$(date +%s)" \
+            -o /tmp/alo186-live-search-index.json \
+            > /tmp/alo186-live-search-index.meta
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from urllib.parse import urlparse
+
+          status,content_type,effective_url=Path('/tmp/alo186-live-search-index.meta').read_text(encoding='utf-8').strip().split('\t')
+          assert int(status) == 200, (status,effective_url)
+          assert content_type.lower().startswith('application/json'), content_type
+          assert urlparse(effective_url).hostname == 'alo186.com', effective_url
+          data=json.loads(Path('/tmp/alo186-live-search-index.json').read_text(encoding='utf-8'))
+          assert isinstance(data.get('entries'), list)
+          PY
 
       - name: Canlı ticari yayın makbuzu
         shell: bash
@@ -280,6 +381,9 @@ jobs:
 
           release=json.loads(Path('/tmp/alo186-live-release.json').read_text(encoding='utf-8'))
           search=json.loads(Path('/tmp/alo186-live-search-index.json').read_text(encoding='utf-8'))
+          release_status,release_type,release_url,release_redirects=Path('/tmp/alo186-live-release.meta').read_text(encoding='utf-8').strip().split('\t')
+          alias_status,alias_redirect,alias_url=Path('/tmp/alo186-live-alias.meta').read_text(encoding='utf-8').strip().split('\t')
+          search_status,search_type,search_url=Path('/tmp/alo186-live-search-index.meta').read_text(encoding='utf-8').strip().split('\t')
           expected_routes={
               '/amazon-elektrik-urunleri',
               '/amazon-elektrik-urunleri/powerbank-usb-c-secimi',
@@ -300,6 +404,15 @@ jobs:
               'servedCommit': release.get('commit'),
               'canonicalHost': release.get('canonicalHost'),
               'hostingMode': release.get('hostingMode'),
+              'releaseHttpStatus': int(release_status),
+              'releaseContentType': release_type,
+              'releaseEffectiveUrl': release_url,
+              'releaseRedirectCount': int(release_redirects),
+              'wwwAliasStatus': int(alias_status),
+              'wwwAliasRedirect': alias_redirect,
+              'searchIndexHttpStatus': int(search_status),
+              'searchIndexContentType': search_type,
+              'searchIndexEffectiveUrl': search_url,
               'commercialRoutes': 5,
               'paidServiceRoutes': 3,
               'searchIndexEntryCount': search.get('entryCount'),
@@ -319,10 +432,16 @@ jobs:
         with:
           name: alo186-live-commerce-freshness-receipt
           path: |
+            /tmp/alo186-live-alias.headers
+            /tmp/alo186-live-alias.meta
             /tmp/alo186-live-release.json
             /tmp/alo186-live-release.headers
+            /tmp/alo186-live-release.meta
             /tmp/alo186-live-search-index.json
+            /tmp/alo186-live-search-index.headers
+            /tmp/alo186-live-search-index.meta
             /tmp/alo186-live-commerce-freshness.json
             /tmp/alo186-live-*.html
+            /tmp/alo186-live-*.html.meta
           if-no-files-found: warn
           retention-days: 30

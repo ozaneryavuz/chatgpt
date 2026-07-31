@@ -52,6 +52,9 @@ ATTR_PATTERN = re.compile(
     r"(?P<name>[a-zA-Z_:][-a-zA-Z0-9_:.]*)\s*=\s*(?P<quote>['\"])(?P<value>.*?)(?P=quote)",
     re.S,
 )
+DIRECT_CATEGORY_PATTERN = re.compile(
+    r"\{id:'([^']+)',name:'[^']+',mode:'direct',risk:'([^']+)',affiliatePolicy:'([^']+)'"
+)
 CANONICAL_ORIGIN = "https://alo186.com"
 
 COMMERCIAL_ROUTES = {
@@ -69,7 +72,34 @@ SERVICE_ROUTES = {
     "/hizmetler/elektrik-teklif-teknik-inceleme/",
     "/hizmetler/ges-batarya-ev-sarj-fizibilitesi/",
 }
-DIRECT_CATEGORY_ID = "powerbank"
+PRIMARY_DIRECT_CATEGORY_ID = "powerbank"
+REQUIRED_LOW_RISK_DIRECT_CATEGORY_IDS = {
+    "powerbank",
+    "usb_c_charger",
+    "usb_c_cable",
+    "usb_c_hub",
+    "display_cable",
+}
+FORBIDDEN_DIRECT_CATEGORY_IDS = {
+    "surge_strip",
+    "mini_ups",
+    "emergency_light",
+    "smoke_alarm",
+    "co_alarm",
+    "power_station",
+    "generator",
+    "inverter",
+    "outlet_tester",
+    "smart_plug",
+    "ev_cable",
+    "ups_battery",
+    "extension_cord",
+    "rccb",
+    "rcbo",
+    "mcb",
+    "spd",
+    "wallbox",
+}
 
 
 def attributes(raw: str) -> dict[str, str]:
@@ -230,10 +260,10 @@ def validate_runtime(site: Path) -> tuple[list[str], dict]:
         catalog_path = site / "urun-eslestirme" / "catalog.js"
     if not runtime_path.is_file():
         errors.append("amazon-elektrik-urunleri/commercial.js: ticari runtime eksik")
-        return errors, {"directCategoryCount": 0}
+        return errors, {"directCategoryCount": 0, "directCategoryIds": []}
     if not catalog_path.is_file():
         errors.append("catalog.js: ürün katalog runtimeı eksik")
-        return errors, {"directCategoryCount": 0}
+        return errors, {"directCategoryCount": 0, "directCategoryIds": []}
 
     runtime = runtime_path.read_text(encoding="utf-8", errors="ignore")
     catalog = catalog_path.read_text(encoding="utf-8", errors="ignore")
@@ -257,12 +287,36 @@ def validate_runtime(site: Path) -> tuple[list[str], dict]:
         if forbidden in runtime:
             errors.append(f"commercial.js: ticari sıralama veya doğrulanmamış alan kullanılıyor: {forbidden}")
 
-    direct_ids = re.findall(r"\{id:'([^']+)'[^{}]*?mode:'direct'", catalog)
-    if direct_ids != [DIRECT_CATEGORY_ID]:
-        errors.append(f"catalog.js: yalnız powerbank doğrudan kategori olmalı; bulunan={direct_ids}")
+    direct_categories = DIRECT_CATEGORY_PATTERN.findall(catalog)
+    direct_ids = [category_id for category_id, _, _ in direct_categories]
+    direct_id_set = set(direct_ids)
+    if not direct_categories:
+        errors.append("catalog.js: en az bir doğrulanmış düşük riskli doğrudan kategori bulunmalı")
+    if len(direct_ids) != len(direct_id_set):
+        errors.append(f"catalog.js: yinelenen doğrudan kategori kimliği var: {direct_ids}")
+    missing_required = sorted(REQUIRED_LOW_RISK_DIRECT_CATEGORY_IDS - direct_id_set)
+    if missing_required:
+        errors.append(f"catalog.js: beklenen düşük riskli doğrudan kategoriler eksik: {missing_required}")
+    blocked = sorted(direct_id_set & FORBIDDEN_DIRECT_CATEGORY_IDS)
+    if blocked:
+        errors.append(f"catalog.js: yüksek riskli/uyumluluk gerektiren kategori doğrudan olamaz: {blocked}")
+    for category_id, risk, policy in direct_categories:
+        if risk != "consumer":
+            errors.append(f"catalog.js: doğrudan kategori yalnız consumer riskinde olabilir: {category_id}={risk}")
+        if policy != "verified_direct":
+            errors.append(f"catalog.js: doğrudan kategori verified_direct olmalı: {category_id}={policy}")
+        if f"category:'{category_id}'" not in catalog:
+            errors.append(f"catalog.js: doğrudan kategori için doğrulanabilir ürün kaydı yok: {category_id}")
     if "verificationMaxAgeDays=45" not in catalog:
         errors.append("catalog.js: 45 günlük katalog tazelik sınırı eksik")
-    return errors, {"directCategoryCount": len(direct_ids), "directCategoryIds": direct_ids}
+    if "affiliateTag='alo186rehber-21'" not in catalog:
+        errors.append("catalog.js: doğrulanmış Amazon satış ortaklığı etiketi eksik")
+    return errors, {
+        "directCategoryCount": len(direct_ids),
+        "directCategoryIds": direct_ids,
+        "directCategoryRisk": "consumer",
+        "directCategoryPolicy": "verified_direct",
+    }
 
 
 def validate_site(site: Path) -> dict:
@@ -287,7 +341,10 @@ def validate_site(site: Path) -> dict:
         "commercialPolicy": {
             "unverifiedPriceStockRatingWarranty": False,
             "staticAffiliateLinksInSourcePages": False,
-            "directCategory": DIRECT_CATEGORY_ID,
+            "primaryDirectCategory": PRIMARY_DIRECT_CATEGORY_ID,
+            "directCategoryIds": runtime.get("directCategoryIds", []),
+            "directCategoryRisk": "consumer",
+            "directCategoryPolicy": "verified_direct",
             "freshnessDays": 45,
             "highRiskDirectAffiliate": False,
             "professionalOnlyDirectAffiliate": False,
