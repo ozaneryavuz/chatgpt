@@ -1,0 +1,26 @@
+{
+  "version": 127,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/hidrofor-su-pompasi-yedek-guc-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/hidrofor-su-pompasi-yedek-guc-uygunluk/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/otomatik-kapi-kepenk-bariyer-yedek-guc-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/otomatik-kapi-kepenk-bariyer-yedek-guc-uygunluk/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/sektor-rehberi/apartman-site-ortak-alan-elektrik-surekliligi-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/apartman-site-ortak-alan-elektrik-surekliligi-merkezi/",
+      "type": "guide"
+    },
+    {
+      "source": "alo186/tesis-elektrik-risk-on-degerlendirme/index.html",
+      "canonicalPath": "/tesis-elektrik-risk-on-degerlendirme/",
+      "type": "service"
+    }
+  ]
+}
