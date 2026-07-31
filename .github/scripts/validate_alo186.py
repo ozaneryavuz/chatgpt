@@ -10,6 +10,12 @@ from urllib.parse import urlparse
 ROOT = Path(__file__).resolve().parents[2] / "alo186"
 REPO_ROOT = ROOT.parent
 
+# Bu koleksiyon merkezi mevcut canlı navigasyonun kararlı bir public rotasıdır.
+# Kaynak ağacında aynı isimli index dosyası bulunmaz ve release manifesti yalnız
+# içerik rotalarını taşır. Yalnız bu exact rota beyaz listeye alınır; keyfî parent
+# dizinleri veya bulunmayan relative hedefler kabul edilmez.
+STABLE_PUBLIC_ROUTE_ALIASES = {"/sektor-rehberi"}
+
 
 class PageParser(HTMLParser):
     def __init__(self) -> None:
@@ -62,7 +68,7 @@ def load_canonical_routes() -> set[str]:
     Source HTML may use a relative link that resolves to a canonical public path even
     when the source directory intentionally has a different name. Keep filesystem
     validation fail-closed, but accept those links when the exact public route is
-    declared by the routing manifest or an overlay.
+    declared by the routing manifest, an overlay or the narrow stable-alias list.
     """
 
     paths = [ROOT / "deployment/routing-manifest.json"]
@@ -70,7 +76,7 @@ def load_canonical_routes() -> set[str]:
     if overlay_dir.is_dir():
         paths.extend(sorted(overlay_dir.glob("*.json")))
 
-    routes: set[str] = set()
+    routes: set[str] = set(STABLE_PUBLIC_ROUTE_ALIASES)
     for path in paths:
         if not path.is_file():
             continue
