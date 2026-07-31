@@ -4,11 +4,18 @@ import argparse
 import fnmatch
 import hashlib
 import json
-import re
 import shutil
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
+from alo186.deployment.device_damage_deadline import (
+    CURRENT_DEADLINE,
+    AMENDMENT_URL as DEVICE_DAMAGE_AMENDMENT_URL,
+    REGULATION_URL as DEVICE_DAMAGE_REGULATION_URL,
+    find_stale_application_deadlines,
+    normalize_published_site,
+    validate_published_site,
+)
 
 CANONICAL_HOST = "https://www.alo186.com"
 LEGACY_HOST = "https://alo186.com"
@@ -43,9 +50,7 @@ REQUIRED_SECURITY_HEADERS = (
 )
 REQUIRED_APACHE_TOKENS = (
     "RewriteRule ^ https://www.alo186.com%{REQUEST_URI}",
-    "AddOutputFilterByType SUBSTITUTE text/html application/xhtml+xml",
-    "zararın ortaya çıktığı tarihten itibaren 10 iş günü içinde",
-    "10 iş günü içinde ilgili dağıtım şirketinin resmî kanalına başvurun",
+    "Cihaz hasarı başvuru süresi HTML yanıt katmanında değiştirilmez",
 )
 
 # Public artifact yalnız tarayıcıda çalışan üretim dosyalarını taşımalıdır. Kaynak
@@ -92,13 +97,6 @@ FORBIDDEN_PUBLIC_FILE_PATTERNS = (
     "*.map",
     ".DS_Store",
 )
-
-DAMAGE_TERMS = re.compile(r"\b(cihaz|teçhizat|techizat|hasar|zarar)\w*\b", re.IGNORECASE)
-APPLICATION_TERMS = re.compile(
-    r"\b(başvur|basvur|talep|tazmin|dağıtım şirket|dagitim sirket|edaş|edas)\w*",
-    re.IGNORECASE,
-)
-WRONG_DEADLINE = re.compile(r"\b30\s*gün\b", re.IGNORECASE)
 
 
 def is_forbidden_public_name(name: str) -> bool:
@@ -258,28 +256,7 @@ def find_forbidden_public_files(output: Path) -> list[str]:
     ]
 
 
-def find_wrong_damage_deadlines(output: Path) -> list[str]:
-    violations: list[str] = []
-    for path in iter_text_files(output):
-        # .htaccess intentionally contains legacy phrases as fixed-string
-        # mod_substitute search patterns. It is an output-safety rule, not user-facing
-        # legal content, so it must not be classified as a deadline violation.
-        if path.name == ".htaccess":
-            continue
-        try:
-            text = re.sub(r"\s+", " ", path.read_text(encoding="utf-8"))
-        except UnicodeDecodeError:
-            continue
-        for match in WRONG_DEADLINE.finditer(text):
-            start = max(0, match.start() - 260)
-            end = min(len(text), match.end() + 260)
-            context = text[start:end]
-            if DAMAGE_TERMS.search(context) and APPLICATION_TERMS.search(context):
-                violations.append(f"{path.relative_to(output)}:{match.start()} -> {context[:520]}")
-    return violations
-
-
-def validate_bundle(output: Path, manifest: dict) -> None:
+def validate_bundle(output: Path, manifest: dict) -> dict[str, object]:
     failures: list[str] = []
 
     if manifest.get("canonicalHost") != CANONICAL_HOST:
@@ -313,9 +290,18 @@ def validate_bundle(output: Path, manifest: dict) -> None:
     if legacy_locations:
         failures.append(f"Eski apex origin artifact'ta kaldı: {', '.join(legacy_locations[:20])}")
 
-    wrong_deadlines = find_wrong_damage_deadlines(output)
-    if wrong_deadlines:
-        failures.append("Cihaz hasarı başvurusu bağlamında yanlış 30 gün ifadesi:\n" + "\n".join(wrong_deadlines))
+    stale_deadlines = find_stale_application_deadlines(output)
+    if stale_deadlines:
+        failures.append(
+            "Cihaz hasarı başvurusu bağlamında yürürlükteki 30 gün yerine eski 10 iş günü ifadesi:\n"
+            + "\n".join(stale_deadlines)
+        )
+
+    deadline_report: dict[str, object] = {}
+    try:
+        deadline_report = validate_published_site(output)
+    except RuntimeError as exc:
+        failures.append(str(exc))
 
     htaccess_path = output / ".htaccess"
     if htaccess_path.is_file():
@@ -326,6 +312,8 @@ def validate_bundle(output: Path, manifest: dict) -> None:
         for token in REQUIRED_APACHE_TOKENS:
             if token not in htaccess:
                 failures.append(f"Aktif production .htaccess sözleşmesi eksik: {token}")
+        if "mod_substitute" in htaccess.lower() or "Substitute \"s|" in htaccess:
+            failures.append("Aktif production .htaccess hukukî içeriği yanıt katmanında değiştiremez")
     else:
         failures.append("Aktif production .htaccess artifact'ta yok")
 
@@ -349,6 +337,7 @@ def validate_bundle(output: Path, manifest: dict) -> None:
 
     if failures:
         raise RuntimeError("ALO186 production bundle doğrulaması başarısız:\n- " + "\n- ".join(failures))
+    return deadline_report
 
 
 def sha256(path: Path) -> str:
@@ -389,10 +378,11 @@ def build(repo_root: Path, output: Path, commit_sha: str = "local") -> dict:
     write_effective_sitemap(output, manifest)
     (output / ".nojekyll").touch()
     normalize_canonical_host(output)
-    validate_bundle(output, manifest)
+    normalized_deadline_files = normalize_published_site(output)
+    deadline_report = validate_bundle(output, manifest)
 
     release = {
-        "schemaVersion": 4,
+        "schemaVersion": 5,
         "commit": commit_sha,
         "canonicalHost": manifest["canonicalHost"],
         "routingVersion": manifest["version"],
@@ -404,7 +394,11 @@ def build(repo_root: Path, output: Path, commit_sha: str = "local") -> dict:
         "sharedStaticAssets": [target for _, target in SHARED_STATIC_ASSETS],
         "rootStaticFiles": [target for _, target in ROOT_STATIC_FILES],
         "securityHeaders": list(REQUIRED_SECURITY_HEADERS),
-        "deviceDamageDeadline": "10 iş günü",
+        "deviceDamageDeadline": CURRENT_DEADLINE,
+        "deviceDamageRegulationUrl": DEVICE_DAMAGE_REGULATION_URL,
+        "deviceDamageAmendmentUrl": DEVICE_DAMAGE_AMENDMENT_URL,
+        "deviceDamageNormalizedFiles": normalized_deadline_files,
+        "deviceDamageVerifiedLocations": deadline_report.get("verifiedLocations", 0),
         "publicArtifactPolicy": {
             "sourceDocsExcluded": True,
             "testsExcluded": True,
