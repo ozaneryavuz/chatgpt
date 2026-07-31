@@ -3,18 +3,18 @@ name: ALO186 içerik otoritesi run75 kalite kontrolü
 on:
   pull_request:
     paths:
-      - 'alo186/haberler/ev-sarj-dinamik-yuk-dengeleme-ct-faz-oncelik/**'
-      - 'alo186/haberler/bess-grid-forming-grid-following-black-start-farki/**'
-      - 'alo186/haberler/motor-surucu-dvdt-sinus-filtre-rulman-akimi-kablo/**'
+      - 'alo186/haberler/ev-sarj-faturasi-kwh-farki-arac-istasyon-sayaci/**'
+      - 'alo186/haberler/bess-dc-izolasyon-hatasi-imd-toprak-ariza-yeri/**'
+      - 'alo186/haberler/isik-titremesi-flicker-pst-plt-gerilim-dalgalanmasi/**'
       - 'alo186/deployment/routing-overlays/content-authority-run75.json'
       - 'alo186/tests/test_authority_content_run75.py'
       - '.github/workflows/alo186-content-authority-run75.yml'
   push:
     branches: [main]
     paths:
-      - 'alo186/haberler/ev-sarj-dinamik-yuk-dengeleme-ct-faz-oncelik/**'
-      - 'alo186/haberler/bess-grid-forming-grid-following-black-start-farki/**'
-      - 'alo186/haberler/motor-surucu-dvdt-sinus-filtre-rulman-akimi-kablo/**'
+      - 'alo186/haberler/ev-sarj-faturasi-kwh-farki-arac-istasyon-sayaci/**'
+      - 'alo186/haberler/bess-dc-izolasyon-hatasi-imd-toprak-ariza-yeri/**'
+      - 'alo186/haberler/isik-titremesi-flicker-pst-plt-gerilim-dalgalanmasi/**'
       - 'alo186/deployment/routing-overlays/content-authority-run75.json'
       - 'alo186/tests/test_authority_content_run75.py'
       - '.github/workflows/alo186-content-authority-run75.yml'
@@ -82,9 +82,9 @@ jobs:
           import json
           from pathlib import Path
           routes = [
-              '/haberler/ev-sarj-dinamik-yuk-dengeleme-ct-faz-oncelik',
-              '/haberler/bess-grid-forming-grid-following-black-start-farki',
-              '/haberler/motor-surucu-dvdt-sinus-filtre-rulman-akimi-kablo',
+              '/haberler/ev-sarj-faturasi-kwh-farki-arac-istasyon-sayaci',
+              '/haberler/bess-dc-izolasyon-hatasi-imd-toprak-ariza-yeri',
+              '/haberler/isik-titremesi-flicker-pst-plt-gerilim-dalgalanmasi',
           ]
           for root, prefix in [(Path('/tmp/alo186-authority-run75-custom'), ''), (Path('/tmp/alo186-authority-run75-project'), '/chatgpt')]:
               sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
