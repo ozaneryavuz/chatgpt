@@ -24,10 +24,14 @@ SITES_SIGNATURES = (
     "vinext",
 )
 
+# ChatGPT Sites canlı navigasyonunda gerçekten yayımlanan, kullanıcıya dönük
+# görev rotaları. GitHub Pages artifactına özgü /durum ve /arama köprüleri burada
+# kullanılmaz; iki hosting modu aynı URL yüzeyini sunmak zorunda değildir.
 CRITICAL_SITES_ROUTES = (
     "/",
-    "/durum/",
-    "/arama/",
+    "/karar-motoru",
+    "/elektrik-kesintisi",
+    "/dagitim-sirketleri",
     "/amazon-elektrik-urunleri",
     "/sektor-rehberi/planli-elektrik-kesintisi-sorgulama",
 )
