@@ -10,6 +10,7 @@ const DIR = path.join(ROOT, 'alo186/hesaplama/jenerator-yakit-tuketimi-calisma-s
 const HTML = fs.readFileSync(path.join(DIR, 'index.html'), 'utf8');
 const CSS = fs.readFileSync(path.join(DIR, 'styles.css'), 'utf8');
 const JS = fs.readFileSync(path.join(DIR, 'app.js'), 'utf8');
+const HUB = fs.readFileSync(path.join(ROOT, 'alo186/hesaplama/index.html'), 'utf8');
 const ROUTE = '/hesaplama/jenerator-yakit-tuketimi-calisma-suresi/';
 
 const sandbox = { console, globalThis: {}, setTimeout, clearTimeout };
@@ -98,6 +99,9 @@ for (const token of [
 
 assert(/yeni ürün almayın/i.test(HTML + JS));
 assert(/çalışan veya sıcak jeneratöre yakıt eklemeyin/i.test(HTML + JS));
+assert(HUB.includes('./jenerator-yakit-tuketimi-calisma-suresi/'));
+assert(HUB.includes('49 çekirdek araç'));
+assert.strictEqual((HUB.match(/class="tool-card"/g) || []).length, 49);
 
 for (const forbidden of [
   'localStorage',
@@ -153,6 +157,11 @@ for (const [name, basePath] of [['custom', ''], ['project', '/chatgpt']]) {
     '--repository', 'ozaneryavuz/chatgpt',
     '--commit', 'generator-v130-test'
   ]);
+  run('python', [
+    'alo186/deployment/inject_private_search.py',
+    '--site', target,
+    '--base-path', basePath
+  ]);
   run('python', ['alo186/deployment/smoke_github_pages.py', '--site', target, '--base-path', basePath]);
 
   const page = path.join(target, ROUTE.replace(/^\/|\/$/g, ''), 'index.html');
@@ -175,5 +184,7 @@ console.log(JSON.stringify({
   affiliateGate: true,
   privacy: true,
   responsive: true,
+  catalogTools: 49,
+  privateSearch: true,
   dualPages: true
 }, null, 2));
