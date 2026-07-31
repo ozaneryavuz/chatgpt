@@ -1,0 +1,21 @@
+{
+  "version": 156,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/jenerator-karbonmonoksit-konum-guvenligi/index.html",
+      "canonicalPath": "/hesaplama/jenerator-karbonmonoksit-konum-guvenligi/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/karbonmonoksit-alarmi-ihtiyac-yerlesim-test/index.html",
+      "canonicalPath": "/hesaplama/karbonmonoksit-alarmi-ihtiyac-yerlesim-test/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/sektor-rehberi/jenerator-karbonmonoksit-guvenlik-test-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/jenerator-karbonmonoksit-guvenlik-test-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
