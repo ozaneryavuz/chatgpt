@@ -1,0 +1,33 @@
+name: ALO186 cold chain continuity growth v155
+
+on:
+  pull_request:
+    paths:
+      - "alo186/hesaplama/elektrik-kesintisi-buzdolabi-dondurucu-gida-guvenligi/**"
+      - "alo186/hesaplama/buzdolabi-dondurucu-guc-istasyonu-w-wh-kalkis-uygunluk/**"
+      - "alo186/sektor-rehberi/buzdolabi-dondurucu-soguk-zincir-kesinti-merkezi/**"
+      - "alo186/deployment/routing-overlays/155-cold-chain-continuity-growth.json"
+      - "alo186/audits/cold-chain-continuity-growth-v155-2026-07-31.md"
+      - "alo186/tests/test_cold_chain_continuity_growth_v155.py"
+      - ".github/workflows/alo186-cold-chain-continuity-growth-v155.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alo186/hesaplama/elektrik-kesintisi-buzdolabi-dondurucu-gida-guvenligi/**"
+      - "alo186/hesaplama/buzdolabi-dondurucu-guc-istasyonu-w-wh-kalkis-uygunluk/**"
+      - "alo186/sektor-rehberi/buzdolabi-dondurucu-soguk-zincir-kesinti-merkezi/**"
+      - "alo186/deployment/routing-overlays/155-cold-chain-continuity-growth.json"
+      - "alo186/tests/test_cold_chain_continuity_growth_v155.py"
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python alo186/tests/test_cold_chain_continuity_growth_v155.py

@@ -1,0 +1,21 @@
+{
+  "version": 155,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/elektrik-kesintisi-buzdolabi-dondurucu-gida-guvenligi/index.html",
+      "canonicalPath": "/hesaplama/elektrik-kesintisi-buzdolabi-dondurucu-gida-guvenligi/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/buzdolabi-dondurucu-guc-istasyonu-w-wh-kalkis-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/buzdolabi-dondurucu-guc-istasyonu-w-wh-kalkis-uygunluk/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/sektor-rehberi/buzdolabi-dondurucu-soguk-zincir-kesinti-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/buzdolabi-dondurucu-soguk-zincir-kesinti-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
