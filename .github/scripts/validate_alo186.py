@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import re
 import sys
 from html.parser import HTMLParser
@@ -7,6 +8,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[2] / "alo186"
+REPO_ROOT = ROOT.parent
 
 
 class PageParser(HTMLParser):
@@ -54,6 +56,44 @@ def resolve_local(page: Path, value: str) -> Path:
     return target
 
 
+def load_canonical_routes() -> set[str]:
+    """Return canonical paths that are materialized only during the release build.
+
+    Source HTML may use a relative link that resolves to a canonical public path even
+    when the source directory intentionally has a different name. Keep filesystem
+    validation fail-closed, but accept those links when the exact public route is
+    declared by the routing manifest or an overlay.
+    """
+
+    paths = [ROOT / "deployment/routing-manifest.json"]
+    overlay_dir = ROOT / "deployment/routing-overlays"
+    if overlay_dir.is_dir():
+        paths.extend(sorted(overlay_dir.glob("*.json")))
+
+    routes: set[str] = set()
+    for path in paths:
+        if not path.is_file():
+            continue
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        for item in payload.get("routes", []):
+            canonical = "/" + str(item.get("canonicalPath", "")).strip().strip("/")
+            if canonical != "/":
+                canonical = canonical.rstrip("/")
+            routes.add(canonical)
+    return routes
+
+
+def target_canonical_path(target: Path) -> str | None:
+    try:
+        relative = target.relative_to(ROOT)
+    except ValueError:
+        return None
+    if relative.name in {"index.html", "index.htm"}:
+        relative = relative.parent
+    route = "/" + relative.as_posix().strip("/")
+    return route.rstrip("/") or "/"
+
+
 def referenced_ids(js_text: str) -> set[str]:
     patterns = [
         r"getElementById\(\s*['\"]([^'\"]+)['\"]\s*\)",
@@ -85,6 +125,7 @@ def dynamically_declared_ids(js_text: str) -> set[str]:
 def main() -> int:
     errors: list[str] = []
     pages = sorted(ROOT.rglob("index.html"))
+    canonical_routes = load_canonical_routes()
     if not pages:
         errors.append("ALO186 içinde index.html bulunamadı")
 
@@ -105,8 +146,12 @@ def main() -> int:
             if not is_local_ref(ref):
                 continue
             target = resolve_local(page, ref)
-            if not target.exists():
-                errors.append(f"{relative}: {attr} hedefi bulunamadı: {ref}")
+            if target.exists():
+                continue
+            canonical = target_canonical_path(target)
+            if canonical and canonical in canonical_routes:
+                continue
+            errors.append(f"{relative}: {attr} hedefi bulunamadı: {ref}")
 
         app = page.parent / "app.js"
         if app.exists():
