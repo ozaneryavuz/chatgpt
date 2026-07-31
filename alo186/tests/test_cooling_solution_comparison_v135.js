@@ -91,11 +91,13 @@ for (const [name, basePath] of [['custom', ''], ['project', '/chatgpt']]) {
   run('python', ['alo186/deployment/inject_private_search.py', '--site', target, '--base-path', basePath]);
   run('python', ['alo186/deployment/smoke_github_pages.py', '--site', target, '--base-path', basePath]);
 
-  const page = path.join(target, ROUTE.replace(/^\/|\/$/g, ''), 'index.html');
+  const routeDir = path.join(target, ROUTE.replace(/^\/|\/$/g, ''));
+  const page = path.join(routeDir, 'index.html');
   assert(fs.existsSync(page), `${name} rota yok`);
   const published = fs.readFileSync(page, 'utf8');
+  const publishedJs = fs.readFileSync(path.join(routeDir, 'app.js'), 'utf8');
   assert(published.includes('Vantilatör, Hava Soğutucu'));
-  assert(published.includes('rel="sponsored nofollow noopener"'));
+  assert(publishedJs.includes('rel="sponsored nofollow noopener"'));
   assert(published.includes('data-alo186-sitewide-ux="true"'));
   const sitemap = fs.readFileSync(path.join(target, 'sitemap.xml'), 'utf8');
   assert(sitemap.includes(`https://alo186.com${ROUTE}`) || sitemap.includes(`https://www.alo186.com${ROUTE}`));
