@@ -1,0 +1,21 @@
+{
+  "version": 151,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/hdmi-displayport-cozunurluk-yenileme-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/hdmi-displayport-cozunurluk-yenileme-uygunluk/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/hdmi-displayport-sinyal-sorunu-kok-neden/index.html",
+      "canonicalPath": "/hesaplama/hdmi-displayport-sinyal-sorunu-kok-neden/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/sektor-rehberi/goruntu-baglanti-kablo-test-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/goruntu-baglanti-kablo-test-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
