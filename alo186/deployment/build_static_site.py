@@ -23,6 +23,9 @@ SHARED_STATIC_ASSETS = (
     # Teknik makaleler canonical alt dizinlere taşınırken ortak responsive CSS
     # /haberler kökünde tek kopya olarak yayınlanır.
     ("alo186/haberler/alo186-article.css", "haberler/alo186-article.css"),
+    # Kritik sistem hesaplayıcıları aynı erişilebilir ve mobil stil sözleşmesini
+    # canonical ile project-path paketlerinde tek public asset olarak kullanır.
+    ("alo186/assets/critical-continuity-v126.css", "assets/critical-continuity-v126.css"),
 )
 
 ROOT_STATIC_FILES = (
