@@ -1,0 +1,21 @@
+{
+  "version": 127,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/haberler/bess-garanti-soh-throughput-cevrim-verim-kabul-kriterleri/index.html",
+      "canonicalPath": "/haberler/bess-garanti-soh-throughput-cevrim-verim-kabul-kriterleri",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/harmonik-giris-reaktoru-dc-choke-pasif-aktif-filtre-farki/index.html",
+      "canonicalPath": "/haberler/harmonik-giris-reaktoru-dc-choke-pasif-aktif-filtre-farki",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ocpp-16-201-21-ev-sarj-yazilimi-secimi/index.html",
+      "canonicalPath": "/haberler/ocpp-16-201-21-ev-sarj-yazilimi-secimi",
+      "type": "article"
+    }
+  ]
+}

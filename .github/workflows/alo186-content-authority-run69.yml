@@ -1,0 +1,129 @@
+name: ALO186 içerik otoritesi run69 kalite kontrolü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/haberler/bess-garanti-soh-throughput-cevrim-verim-kabul-kriterleri/**'
+      - 'alo186/haberler/harmonik-giris-reaktoru-dc-choke-pasif-aktif-filtre-farki/**'
+      - 'alo186/haberler/ocpp-16-201-21-ev-sarj-yazilimi-secimi/**'
+      - 'alo186/deployment/routing-overlays/content-authority-run69.json'
+      - 'alo186/tests/test_authority_content_run69.py'
+      - '.github/workflows/alo186-content-authority-run69.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/bess-garanti-soh-throughput-cevrim-verim-kabul-kriterleri/**'
+      - 'alo186/haberler/harmonik-giris-reaktoru-dc-choke-pasif-aktif-filtre-farki/**'
+      - 'alo186/haberler/ocpp-16-201-21-ev-sarj-yazilimi-secimi/**'
+      - 'alo186/deployment/routing-overlays/content-authority-run69.json'
+      - 'alo186/tests/test_authority_content_run69.py'
+      - '.github/workflows/alo186-content-authority-run69.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-authority-run69-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Yeni rehberlerin AEO SEO kaynak ve güven sözleşmeleri
+        run: |
+          set -euo pipefail
+          python alo186/tests/test_authority_content_run69.py
+          python -m py_compile alo186/tests/test_authority_content_run69.py
+
+      - name: Mevcut yayın güven ve kanibalizasyon regresyonları
+        run: |
+          set -euo pipefail
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+          python alo186/tests/test_content_intent_consolidation.py
+
+      - name: Canonical üretim paketini oluştur
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-authority-run69-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-authority-run69-canonical
+
+      - name: Custom-domain ve project-path Pages kabulü
+        shell: bash
+        run: |
+          set -euo pipefail
+          for spec in 'custom|' 'project|/chatgpt'; do
+            name="${spec%%|*}"
+            base="${spec#*|}"
+            target="/tmp/alo186-authority-run69-${name}"
+            cp -a /tmp/alo186-authority-run69-canonical "$target"
+            python alo186/deployment/prepare_github_pages.py \
+              --site "$target" \
+              --base-path "$base" \
+              --repository "$GITHUB_REPOSITORY" \
+              --commit "$GITHUB_SHA"
+            python alo186/deployment/inject_outcome_runtime.py --site "$target" --base-path "$base"
+            python alo186/deployment/inject_shortlist_growth.py --site "$target" --base-path "$base" > "/tmp/authority-run69-${name}.json"
+            python alo186/deployment/smoke_github_pages.py --site "$target" --base-path "$base"
+          done
+
+      - name: Sitemap Teknik Arama canonical ve yayın kabulü
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          routes = [
+              '/haberler/bess-garanti-soh-throughput-cevrim-verim-kabul-kriterleri',
+              '/haberler/harmonik-giris-reaktoru-dc-choke-pasif-aktif-filtre-farki',
+              '/haberler/ocpp-16-201-21-ev-sarj-yazilimi-secimi',
+          ]
+          for root, prefix in [
+              (Path('/tmp/alo186-authority-run69-custom'), ''),
+              (Path('/tmp/alo186-authority-run69-project'), '/chatgpt'),
+          ]:
+              sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
+              search = json.loads((root / 'arama/search-index.json').read_text(encoding='utf-8'))
+              release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
+              active = {item.get('canonicalPath', '').rstrip('/') for item in search['entries']}
+              assert release['routingVersion'] >= 127, release['routingVersion']
+              for route in routes:
+                  page = root / route.strip('/') / 'index.html'
+                  assert page.is_file(), (prefix, route)
+                  html = page.read_text(encoding='utf-8')
+                  assert route in sitemap, ('sitemap', prefix, route)
+                  assert route in active, ('search-index', prefix, route)
+                  assert (
+                      f'https://www.alo186.com{route}' in html
+                      or f'https://alo186.com{route}' in html
+                  ), ('canonical', prefix, route)
+                  assert 'Doğrudan cevap' in html
+                  assert 'Satın almama sınırı' in html
+                  assert 'priceCurrency' not in html and '"@type":"Offer"' not in html
+          print(json.dumps({'ok': True, 'routingVersion': 127, 'routes': routes}, ensure_ascii=False))
+          PY
+
+      - name: Doğrulanmış içerik artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-authority-run69-pages
+          path: /tmp/alo186-authority-run69-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
