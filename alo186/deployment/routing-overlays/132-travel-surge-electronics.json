@@ -1,0 +1,21 @@
+{
+  "version": 132,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/powerbank-ucak-wh-kabin-bagaji-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/powerbank-ucak-wh-kabin-bagaji-uygunluk/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/akim-korumali-priz-koruma-gostergesi-omur-testi/index.html",
+      "canonicalPath": "/hesaplama/akim-korumali-priz-koruma-gostergesi-omur-testi/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/sektor-rehberi/elektronik-cihaz-guc-seyahat-koruma-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/elektronik-cihaz-guc-seyahat-koruma-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
