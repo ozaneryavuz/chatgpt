@@ -1,0 +1,35 @@
+name: ALO186 security camera continuity growth v150
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/guvenlik-kamerasi-elektrik-kesintisi-kayit-erisimi/**'
+      - 'alo186/hesaplama/poe-kamera-nvr-ups-guc-sure-uygunluk/**'
+      - 'alo186/sektor-rehberi/guvenlik-kamerasi-kayit-sureklilik-merkezi/**'
+      - 'alo186/deployment/routing-overlays/150-security-camera-continuity-growth.json'
+      - 'alo186/audits/security-camera-continuity-growth-v150-2026-07-31.md'
+      - 'alo186/tests/test_security_camera_continuity_growth_v150.py'
+      - '.github/workflows/alo186-security-camera-continuity-growth-v150.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-security-camera-continuity-growth-v150-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  trust-and-release-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate camera recording, PoE, affiliate gates and routes
+        run: python alo186/tests/test_security_camera_continuity_growth_v150.py
