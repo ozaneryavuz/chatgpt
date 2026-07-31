@@ -53,8 +53,7 @@ def route_target(site: Path, route: str) -> Path:
         return candidate
     if (candidate / "index.html").is_file():
         return candidate / "index.html"
-    html_candidate = Path(str(candidate) + ".html")
-    return html_candidate
+    return Path(str(candidate) + ".html")
 
 
 def replace_element_text(source: str, marker: str, value: str) -> str:
@@ -63,7 +62,11 @@ def replace_element_text(source: str, marker: str, value: str) -> str:
         re.IGNORECASE | re.DOTALL,
     )
     escaped = html.escape(str(value))
-    source, count = pattern.subn(rf"\1{escaped}\3", source, count=1)
+    source, count = pattern.subn(
+        lambda match: match.group(1) + escaped + match.group(3),
+        source,
+        count=1,
+    )
     if count != 1:
         raise RuntimeError(f"Yayın durumu alanı bulunamadı: {marker}")
     return source
