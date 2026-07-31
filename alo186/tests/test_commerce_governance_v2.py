@@ -12,10 +12,12 @@ sys.path.insert(0, str(DEPLOYMENT))
 
 from guard_commerce_routes_v2 import (  # noqa: E402
     COMMERCIAL_ROUTES,
+    DIRECT_CATEGORY_POLICIES,
     SERVICE_ROUTES,
     has_independence,
     has_no_buy,
     scan_affiliate_anchors,
+    validate_runtime,
 )
 
 
@@ -26,6 +28,22 @@ def write_and_scan(html: str) -> list[str]:
         page.parent.mkdir(parents=True)
         page.write_text(html, encoding="utf-8")
         return scan_affiliate_anchors(page, root)
+
+
+def runtime_errors_for_catalog(catalog: str) -> list[str]:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        runtime_path = root / "amazon-elektrik-urunleri" / "commercial.js"
+        catalog_path = root / "urun-eslestirme" / "catalog.js"
+        runtime_path.parent.mkdir(parents=True)
+        catalog_path.parent.mkdir(parents=True)
+        runtime_path.write_text(
+            (REPO_ROOT / "alo186/amazon-elektrik-urunleri/commercial.js").read_text(encoding="utf-8"),
+            encoding="utf-8",
+        )
+        catalog_path.write_text(catalog, encoding="utf-8")
+        errors, _ = validate_runtime(root)
+        return errors
 
 
 def test_affiliate_anchor_policy() -> None:
@@ -72,6 +90,28 @@ def direct_catalog_categories(catalog: str) -> list[tuple[str, str, str]]:
         r"\{id:'([^']+)',name:'[^']+',mode:'direct',risk:'([^']+)',affiliatePolicy:'([^']+)'",
         catalog,
     )
+
+
+def test_direct_category_allowlist_is_fail_closed() -> None:
+    catalog = (REPO_ROOT / "alo186/urun-eslestirme/catalog.js").read_text(encoding="utf-8")
+    assert runtime_errors_for_catalog(catalog) == []
+
+    unexpected = catalog + "\n{id:'unsafe_fixture',name:'Unsafe',mode:'direct',risk:'consumer',affiliatePolicy:'verified_direct'}\n"
+    errors = runtime_errors_for_catalog(unexpected)
+    assert any("allowlistiyle uyuşmuyor" in item and "unsafe_fixture" in item for item in errors)
+
+    duplicate = catalog + "\n{id:'powerbank',name:'Duplicate',mode:'direct',risk:'consumer',affiliatePolicy:'verified_direct'}\n"
+    errors = runtime_errors_for_catalog(duplicate)
+    assert any("yinelenen doğrudan kategori" in item and "powerbank" in item for item in errors)
+
+    wrong_risk = catalog.replace(
+        "{id:'usb_c_hub',name:'USB-C hub',mode:'direct',risk:'consumer',affiliatePolicy:'verified_direct'",
+        "{id:'usb_c_hub',name:'USB-C hub',mode:'direct',risk:'professional',affiliatePolicy:'verified_direct'",
+        1,
+    )
+    assert wrong_risk != catalog, "USB-C hub fixture güncel katalog biçimiyle eşleşmeli"
+    errors = runtime_errors_for_catalog(wrong_risk)
+    assert any("usb_c_hub doğrudan kategori güven metadatası yanlış" in item for item in errors)
 
 
 def test_actual_source_contracts() -> None:
@@ -121,11 +161,14 @@ def test_actual_source_contracts() -> None:
 
     direct_categories = direct_catalog_categories(catalog)
     assert direct_categories, "En az bir doğrulanmış düşük riskli doğrudan kategori bulunmalı."
-    assert all(risk == "consumer" for _, risk, _ in direct_categories)
-    assert all(policy == "verified_direct" for _, _, policy in direct_categories)
-    direct_ids = {category_id for category_id, _, _ in direct_categories}
-    assert {"powerbank", "usb_c_charger", "usb_c_cable", "usb_c_hub", "display_cable"}.issubset(direct_ids)
-    assert direct_ids.isdisjoint({"surge_strip", "generator", "inverter", "outlet_tester", "ev_cable", "ups_battery"})
+    direct_metadata = {
+        category_id: {"risk": risk, "affiliate_policy": affiliate_policy}
+        for category_id, risk, affiliate_policy in direct_categories
+    }
+    assert direct_metadata == DIRECT_CATEGORY_POLICIES
+    assert set(direct_metadata).isdisjoint(
+        {"surge_strip", "generator", "inverter", "outlet_tester", "ev_cable", "ups_battery"}
+    )
     assert "verificationMaxAgeDays=45" in catalog
     assert "affiliateTag='alo186rehber-21'" in catalog
 
@@ -136,19 +179,20 @@ def test_actual_source_contracts() -> None:
 def main() -> None:
     test_affiliate_anchor_policy()
     test_disclosure_equivalence()
+    test_direct_category_allowlist_is_fail_closed()
     test_actual_source_contracts()
-    catalog = (REPO_ROOT / "alo186/urun-eslestirme/catalog.js").read_text(encoding="utf-8")
-    direct_count = len(direct_catalog_categories(catalog))
     print(json.dumps({
         "ok": True,
         "commercialPages": len(COMMERCIAL_ROUTES),
         "affiliateCommercialPages": 7,
         "professionalOnlyPages": 1,
         "servicePages": len(SERVICE_ROUTES),
-        "directAffiliateCategories": direct_count,
+        "directAffiliateCategories": len(DIRECT_CATEGORY_POLICIES),
+        "directAffiliateCategoryIds": list(DIRECT_CATEGORY_POLICIES),
         "highRiskDirectAffiliate": False,
         "professionalOnlyDirectAffiliate": False,
         "unverifiedCommercialClaims": False,
+        "directCategoryAllowlistFailClosed": True,
     }, ensure_ascii=False, indent=2))
 
 
