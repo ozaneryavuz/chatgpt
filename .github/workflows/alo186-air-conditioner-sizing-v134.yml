@@ -1,0 +1,48 @@
+name: ALO186 klima BTU ve elektrik altyapısı v134
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/klima-btu-elektrik-altyapi-uygunluk/**'
+      - 'alo186/deployment/routing-overlays/134-klima-btu-elektrik-altyapi.json'
+      - 'alo186/tests/test_air_conditioner_sizing_v134.js'
+      - '.github/workflows/alo186-air-conditioner-sizing-v134.yml'
+      - 'alo186/audits/growth-air-conditioner-sizing-v134.md'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/klima-btu-elektrik-altyapi-uygunluk/**'
+      - 'alo186/deployment/routing-overlays/134-klima-btu-elektrik-altyapi.json'
+      - 'alo186/tests/test_air_conditioner_sizing_v134.js'
+      - '.github/workflows/alo186-air-conditioner-sizing-v134.yml'
+      - 'alo186/audits/growth-air-conditioner-sizing-v134.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-air-conditioner-sizing-v134-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Klima kapasitesi, elektrik altyapısı, güven ve dual Pages kabulü
+        run: node alo186/tests/test_air_conditioner_sizing_v134.js
+
+      - name: Mevcut yayın ve kullanıcı güveni regresyonları
+        run: |
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
