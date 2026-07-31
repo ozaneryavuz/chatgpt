@@ -1,0 +1,21 @@
+{
+  "version": 147,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/haberler/santiye-elektrigi-gecici-baglanti-edas-basvuru-belgeleri/index.html",
+      "canonicalPath": "/haberler/santiye-elektrigi-gecici-baglanti-edas-basvuru-belgeleri",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ups-paralel-n-plus-1-yuk-paylasimi-redundancy-kabul/index.html",
+      "canonicalPath": "/haberler/ups-paralel-n-plus-1-yuk-paylasimi-redundancy-kabul",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/bess-grid-forming-grid-following-black-start-mikrogrid/index.html",
+      "canonicalPath": "/haberler/bess-grid-forming-grid-following-black-start-mikrogrid",
+      "type": "article"
+    }
+  ]
+}
