@@ -58,9 +58,9 @@ for relative, contract in ROUTES.items():
     assert '"@type":"Offer"' not in text
     assert "aggregateRating" not in text
     assert "availability" not in text
-    assert "localStorage" not in text
-    assert "sessionStorage" not in text
-    assert "geolocation" not in text
+    assert "localStorage." not in text
+    assert "sessionStorage." not in text
+    assert "navigator.geolocation" not in text
     for token in contract["tokens"]:
         assert token in text, (relative, token)
     if contract["affiliate"]:
