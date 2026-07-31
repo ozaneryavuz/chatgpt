@@ -1,0 +1,21 @@
+{
+  "version": 129,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/elektrik-faturasi-kwh-gun-karsilastirma/index.html",
+      "canonicalPath": "/hesaplama/elektrik-faturasi-kwh-gun-karsilastirma/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/priz-tipi-enerji-olcer-standby-deneyi/index.html",
+      "canonicalPath": "/hesaplama/priz-tipi-enerji-olcer-standby-deneyi/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/sektor-rehberi/ev-elektrik-tuketimi-kanit-ve-tasarruf-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/ev-elektrik-tuketimi-kanit-ve-tasarruf-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
