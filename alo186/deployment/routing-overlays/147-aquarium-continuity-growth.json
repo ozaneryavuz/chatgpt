@@ -1,0 +1,21 @@
+{
+  "version": 147,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/akvaryum-elektrik-kesintisi-oksijen-sicaklik-guvenligi/index.html",
+      "canonicalPath": "/hesaplama/akvaryum-elektrik-kesintisi-oksijen-sicaklik-guvenligi/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/akvaryum-hava-motoru-yedek-guc-sure-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/akvaryum-hava-motoru-yedek-guc-sure-uygunluk/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/sektor-rehberi/akvaryum-elektrik-kesintisi-sureklilik-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/akvaryum-elektrik-kesintisi-sureklilik-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
