@@ -1,0 +1,21 @@
+{
+  "version": 141,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/seyahat-priz-adaptoru-voltaj-donusturucu-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/seyahat-priz-adaptoru-voltaj-donusturucu-uygunluk/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/sac-kurutma-kettle-seyahat-gerilim-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/sac-kurutma-kettle-seyahat-gerilim-uygunluk/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/sektor-rehberi/yurt-disi-seyahat-priz-sarj-tekrar-test-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/yurt-disi-seyahat-priz-sarj-tekrar-test-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
