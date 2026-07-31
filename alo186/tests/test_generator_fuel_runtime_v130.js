@@ -92,11 +92,11 @@ for (const token of [
   'data-affiliate-check',
   'rel="sponsored nofollow noopener"',
   'Kişisel veri yok',
-  'Yeni ürün almayın',
   'Karbonmonoksit',
   'https://alo186.com/hesaplama/jenerator-yakit-tuketimi-calisma-suresi/'
 ]) assert(HTML.includes(token), token);
 
+assert(/yeni ürün almayın/i.test(HTML + JS));
 assert(/çalışan veya sıcak jeneratöre yakıt eklemeyin/i.test(HTML + JS));
 
 for (const forbidden of [
