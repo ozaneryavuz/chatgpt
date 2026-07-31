@@ -1,0 +1,21 @@
+{
+  "version": 139,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/nem-olcer-nem-alma-cihazi-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/nem-olcer-nem-alma-cihazi-uygunluk/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/nem-alma-cihazi-kwh-drenaj-plani/index.html",
+      "canonicalPath": "/hesaplama/nem-alma-cihazi-kwh-drenaj-plani/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/sektor-rehberi/ev-rutubet-yogusma-tekrar-test-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/ev-rutubet-yogusma-tekrar-test-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
