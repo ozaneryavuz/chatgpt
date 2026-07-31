@@ -1,0 +1,21 @@
+{
+  "version": 155,
+  "generatedAt": "2026-08-01",
+  "routes": [
+    {
+      "source": "alo186/haberler/jenerator-ats-3-kutup-4-kutup-notr-anahtarlama-topraklama/index.html",
+      "canonicalPath": "/haberler/jenerator-ats-3-kutup-4-kutup-notr-anahtarlama-topraklama",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ups-backfeed-geri-besleme-korumasi-bakim-bypass-interlock/index.html",
+      "canonicalPath": "/haberler/ups-backfeed-geri-besleme-korumasi-bakim-bypass-interlock",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/trafo-k-faktoru-harmonik-derating-nonlineer-yuk-secimi/index.html",
+      "canonicalPath": "/haberler/trafo-k-faktoru-harmonik-derating-nonlineer-yuk-secimi",
+      "type": "article"
+    }
+  ]
+}
