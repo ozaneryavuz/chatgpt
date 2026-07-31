@@ -1,0 +1,99 @@
+from __future__ import annotations
+
+import json
+import re
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+OVERLAY = ROOT / "alo186/deployment/routing-overlays/content-authority-run68.json"
+PAGES = {
+    "/haberler/ups-statik-bypass-bakim-bypass-farki-gecis-proseduru": {
+        "path": ROOT / "alo186/haberler/ups-statik-bypass-bakim-bypass-farki-gecis-proseduru/index.html",
+        "intent": ("statik bypass", "bakım bypass", "senkronizasyon", "kesici sırası", "IEC 62040-3"),
+        "sources": ("se.com", "eaton.com", "iec.ch"),
+        "separation": ("ürün sınıfı", "bakım kabul"),
+    },
+    "/haberler/parafudr-yedek-sigorta-secimi-up-uc-isccr-koordinasyonu": {
+        "path": ROOT / "alo186/haberler/parafudr-yedek-sigorta-secimi-up-uc-isccr-koordinasyonu/index.html",
+        "intent": ("yedek sigorta", "Uc", "Up", "Isccr", "koordinasyon"),
+        "sources": ("iec.ch", "se.com", "dehn-international.com"),
+        "separation": ("darbe ile sürekli gerilim", "kısa devre"),
+    },
+    "/haberler/bess-yangin-acil-durum-plani-ul-9540a-nfpa-855-termal-kacak": {
+        "path": ROOT / "alo186/haberler/bess-yangin-acil-durum-plani-ul-9540a-nfpa-855-termal-kacak/index.html",
+        "intent": ("termal kaçak", "UL 9540A", "NFPA 855", "acil durum planı", "yeniden giriş"),
+        "sources": ("ul.com", "nfpa.org", "sandia.gov"),
+        "separation": ("şebeke kabul", "yangın/gaz"),
+    },
+}
+
+
+def text_between(pattern: str, html: str) -> str:
+    match = re.search(pattern, html, re.S | re.I)
+    assert match, pattern
+    return re.sub(r"<[^>]+>", "", match.group(1)).strip()
+
+
+def main() -> None:
+    overlay = json.loads(OVERLAY.read_text(encoding="utf-8"))
+    assert overlay["version"] == 125
+    assert overlay["generatedAt"] == "2026-07-31"
+    routes = {item["canonicalPath"]: item for item in overlay["routes"]}
+    assert set(routes) == set(PAGES)
+
+    titles: set[str] = set()
+    descriptions: set[str] = set()
+    h1s: set[str] = set()
+    for route, contract in PAGES.items():
+        html = contract["path"].read_text(encoding="utf-8")
+        folded = html.casefold()
+        title = text_between(r"<title>(.*?)</title>", html)
+        h1 = text_between(r"<h1>(.*?)</h1>", html)
+        description = re.search(r'<meta name="description" content="([^"]+)"', html)
+        canonical = re.search(r'<link rel="canonical" href="([^"]+)"', html)
+        assert description and canonical
+        assert route in canonical.group(1)
+        assert html.count("<h1") == 1
+        titles.add(title)
+        h1s.add(h1)
+        descriptions.add(description.group(1))
+        for schema in ('"@type":"Article"', '"@type":"FAQPage"', '"@type":"BreadcrumbList"'):
+            assert schema in html, (route, schema)
+        assert html.count('"@type":"DefinedTerm"') >= 8
+        assert html.count('"@type":"Question"') >= 5
+        assert "Doğrudan cevap" in html
+        assert "Satın almama sınırı" in html
+        assert html.count('href="/') >= 8
+        assert "Son doğrulama: 31 Temmuz 2026" in html
+        assert "/kurumsal-elektrik-surekliligi-on-degerlendirme" in html
+        assert "Mevcut rehberlerden görev ayrımı" in html
+        for token in contract["intent"] + contract["separation"]:
+            assert token.casefold() in folded, (route, token)
+        for domain in contract["sources"]:
+            assert domain in folded, (route, domain)
+        for forbidden in (
+            '"@type":"Product"', '"@type":"Offer"', "priceCurrency", "aggregateRating",
+            "garanti sonuç", "kesin sonuç", "hemen satın al", "stok tükeniyor",
+        ):
+            assert forbidden.casefold() not in folded, (route, forbidden)
+        assert routes[route]["type"] == "article"
+        assert routes[route]["source"].endswith("/index.html")
+
+    assert len(titles) == len(PAGES)
+    assert len(descriptions) == len(PAGES)
+    assert len(h1s) == len(PAGES)
+    print(json.dumps({
+        "ok": True,
+        "routingVersion": 125,
+        "pages": list(PAGES),
+        "verifiedAt": "2026-07-31",
+        "faqPerPage": 5,
+        "definedTermsMinimum": 8,
+        "canonicalCollision": False,
+        "purchaseBoundary": True,
+        "intentSeparation": True,
+    }, ensure_ascii=False))
+
+
+if __name__ == "__main__":
+    main()
