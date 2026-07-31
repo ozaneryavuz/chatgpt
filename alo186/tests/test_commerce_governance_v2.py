@@ -104,12 +104,13 @@ def test_direct_category_allowlist_is_fail_closed() -> None:
     errors = runtime_errors_for_catalog(duplicate)
     assert any("yinelenen doğrudan kategori" in item and "powerbank" in item for item in errors)
 
-    wrong_risk = catalog.replace(
-        "{id:'usb_c_hub',name:'USB-C hub',mode:'direct',risk:'consumer',affiliatePolicy:'verified_direct'",
-        "{id:'usb_c_hub',name:'USB-C hub',mode:'direct',risk:'professional',affiliatePolicy:'verified_direct'",
-        1,
+    wrong_risk, replacement_count = re.subn(
+        r"(\{id:'usb_c_hub',name:'[^']+',mode:'direct',risk:')consumer(',affiliatePolicy:'verified_direct')",
+        r"\1professional\2",
+        catalog,
+        count=1,
     )
-    assert wrong_risk != catalog, "USB-C hub fixture güncel katalog biçimiyle eşleşmeli"
+    assert replacement_count == 1, "USB-C hub fixture güncel katalog biçimiyle eşleşmeli"
     errors = runtime_errors_for_catalog(wrong_risk)
     assert any("usb_c_hub doğrudan kategori güven metadatası yanlış" in item for item in errors)
 
