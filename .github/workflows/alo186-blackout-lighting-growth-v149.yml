@@ -1,0 +1,35 @@
+name: ALO186 blackout lighting growth v149
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/elektrik-kesintisi-acil-aydinlatma-guvenligi/**'
+      - 'alo186/hesaplama/tasinabilir-fener-lamba-batarya-sure-uygunluk/**'
+      - 'alo186/sektor-rehberi/elektrik-kesintisi-gece-guvenligi-aydinlatma-merkezi/**'
+      - 'alo186/deployment/routing-overlays/149-blackout-lighting-growth.json'
+      - 'alo186/audits/blackout-lighting-growth-v149-2026-07-31.md'
+      - 'alo186/tests/test_blackout_lighting_growth_v149.py'
+      - '.github/workflows/alo186-blackout-lighting-growth-v149.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-blackout-lighting-growth-v149-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  trust-and-release-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate lighting safety, affiliate gates and routes
+        run: python alo186/tests/test_blackout_lighting_growth_v149.py
