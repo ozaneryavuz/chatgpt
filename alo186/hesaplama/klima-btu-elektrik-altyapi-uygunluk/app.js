@@ -241,7 +241,7 @@
         render(doc, latest.decision);
       }
     });
-    doc.getElementById('printResult')?.addEventListener('click', () => root.print());
+    doc.getElementById('printResult')?.addEventListener('click', () => doc.defaultView?.print());
     doc.getElementById('exportResult')?.addEventListener('click', () => {
       if (!latest) form.requestSubmit();
       if (latest) exportJson(doc, latest.data, latest.decision);
