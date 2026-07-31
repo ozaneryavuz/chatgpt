@@ -7,26 +7,26 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 OVERLAY = ROOT / "alo186/deployment/routing-overlays/content-authority-run75.json"
 PAGES = {
-    "/haberler/ev-sarj-dinamik-yuk-dengeleme-ct-faz-oncelik": {
-        "path": ROOT / "alo186/haberler/ev-sarj-dinamik-yuk-dengeleme-ct-faz-oncelik/index.html",
-        "intent": ("dinamik yük dengeleme", "CT konumu", "faz eşleştirme", "Smart Charging", "fail-safe"),
-        "sources": ("iec.ch", "openchargealliance.org", "tesla.com"),
-        "separation": ("EV şarjında dinamik yük dengeleme, CT konumu ve faz önceliğini", "OCPP sürüm rehberi"),
-        "boundary": "Güç artışı yapmama sınırı",
+    "/haberler/ev-sarj-faturasi-kwh-farki-arac-istasyon-sayaci": {
+        "path": ROOT / "alo186/haberler/ev-sarj-faturasi-kwh-farki-arac-istasyon-sayaci/index.html",
+        "intent": ("istasyon sayacı", "araç batarya yüzdesi", "TL/kWh", "OCPP oturum kaydı", "başlangıç-bitiş sayaç"),
+        "sources": ("epdk.gov.tr", "openchargealliance.org", "energy.gov"),
+        "separation": ("şarj oturumundaki sayaç, araç ekranı ve fatura kWh farkını", "elektrik faturası itirazı"),
+        "boundary": "Yeni şarj cihazı almama sınırı",
     },
-    "/haberler/bess-grid-forming-grid-following-black-start-farki": {
-        "path": ROOT / "alo186/haberler/bess-grid-forming-grid-following-black-start-farki/index.html",
-        "intent": ("grid-forming", "grid-following", "black start", "trafo inrush", "yeniden senkronizasyon"),
-        "sources": ("energy.gov", "standards.ieee.org", "research-hub.nrel.gov", "entsoe.eu"),
-        "separation": ("BESS grid-forming, grid-following ve black-start kabulünü", "BESS garanti rehberi"),
-        "boundary": "GFM satın almama sınırı",
+    "/haberler/bess-dc-izolasyon-hatasi-imd-toprak-ariza-yeri": {
+        "path": ROOT / "alo186/haberler/bess-dc-izolasyon-hatasi-imd-toprak-ariza-yeri/index.html",
+        "intent": ("IMD", "izolasyon direnci", "sistem kaçak kapasitesi", "kutup-toprak gerilimleri", "arıza yeri tespit"),
+        "sources": ("iec.ch", "bender.de", "schneider-electric.com"),
+        "separation": ("BESS DC izolasyon direnci, IMD alarmı ve arıza yeri tespitine", "BESS yangın planı"),
+        "boundary": "IMD değiştirmeme sınırı",
     },
-    "/haberler/motor-surucu-dvdt-sinus-filtre-rulman-akimi-kablo": {
-        "path": ROOT / "alo186/haberler/motor-surucu-dvdt-sinus-filtre-rulman-akimi-kablo/index.html",
-        "intent": ("dV/dt filtresi", "sinüs filtre", "ortak mod", "şaft gerilimi", "rulman akımı"),
-        "sources": ("iec.ch", "danfoss.com", "abb.com"),
-        "separation": ("motor tarafındaki dV/dt, sinüs filtre, ortak mod ve rulman akımı problemini", "harmonik filtre rehberi"),
-        "boundary": "Filtre satın almama sınırı",
+    "/haberler/isik-titremesi-flicker-pst-plt-gerilim-dalgalanmasi": {
+        "path": ROOT / "alo186/haberler/isik-titremesi-flicker-pst-plt-gerilim-dalgalanmasi/index.html",
+        "intent": ("Flicker", "Pst", "Plt", "hızlı gerilim değişimi", "Class A"),
+        "sources": ("iec.ch", "epdk.gov.tr", "fluke.com"),
+        "separation": ("görsel ışık titremesi, flicker, Pst ve Plt kanıtına", "gerilim çukuru rehberi"),
+        "boundary": "Regülatör satın almama sınırı",
     },
 }
 
