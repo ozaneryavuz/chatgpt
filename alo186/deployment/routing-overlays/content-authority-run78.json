@@ -1,0 +1,21 @@
+{
+  "version": 142,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/haberler/kacak-usulsuz-elektrik-tespit-tutanagi-itiraz-sureci/index.html",
+      "canonicalPath": "/haberler/kacak-usulsuz-elektrik-tespit-tutanagi-itiraz-sureci",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ev-sarj-tip-a-tip-b-rcd-6ma-dc-rdcdd-secimi/index.html",
+      "canonicalPath": "/haberler/ev-sarj-tip-a-tip-b-rcd-6ma-dc-rdcdd-secimi",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ges-dc-ac-orani-inverter-clipping-oversizing-kabul/index.html",
+      "canonicalPath": "/haberler/ges-dc-ac-orani-inverter-clipping-oversizing-kabul",
+      "type": "article"
+    }
+  ]
+}
