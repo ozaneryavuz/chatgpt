@@ -35,7 +35,7 @@ def check_inline_scripts(source: Path) -> None:
     text = source.read_text(encoding="utf-8")
     scripts = re.findall(r"<script(?:\s[^>]*)?>(.*?)</script>", text, flags=re.S | re.I)
     for script in scripts:
-        if "application/ld+json" in script[:160]:
+        if '"@context"' in script[:240] and 'schema.org' in script[:320]:
             continue
         with tempfile.NamedTemporaryFile("w", suffix=".js", encoding="utf-8", delete=False) as handle:
             handle.write(script)
