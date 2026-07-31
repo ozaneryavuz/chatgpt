@@ -58,7 +58,8 @@ assert.equal(center.makePlan({eventType:'outage',system:'internet',frequency:1,e
 assert.ok(center.calendar(center.makePlan({eventType:'outage',system:'internet',frequency:1,evidence:'single',active:false,emergency:false,existingPlan:'none'})).includes('BEGIN:VCALENDAR'));
 
 for(const [name,html] of [['outage',outageHtml],['voltage',voltageHtml],['center',centerHtml]]){
-  for(const token of ['rel="canonical"','FAQPage','BreadcrumbList','Kişisel veri'])assert.ok(html.includes(token),`${name}:${token}`);
+  for(const token of ['rel="canonical"','FAQPage','BreadcrumbList'])assert.ok(html.includes(token),`${name}:${token}`);
+  assert.ok(html.toLocaleLowerCase('tr-TR').includes('kişisel veri'),`${name}:kişisel veri`);
   for(const forbidden of ['amazon.com','amazon.com.tr','"@type":"Product"','"@type":"Offer"','priceCurrency','aggregateRating','availability'])assert.ok(!html.includes(forbidden),`${name}:${forbidden}`);
   assert.ok(html.includes('ALO186')&&html.includes('bağımsız'),`${name}:independence`);
 }
