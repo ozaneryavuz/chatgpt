@@ -1,0 +1,17 @@
+'use strict';
+const assert=require('node:assert/strict');
+const tool=require('./app.js');
+const base={heatEmergency:false,unconscious:false,confusion:false,electricalDanger:false,activeOutage:false,vulnerablePerson:false,indoorTempC:31,humidityPct:45,outdoorAir:'good',strategy:'personal',crossVentilation:true,waterSafe:true,existingSolution:false,realComfortTest:false,noDamage:true,fanW:50,coolerW:100,portableAcW:1200,splitAcW:900,hoursPerDay:8,days:30,confirmNeed:false,confirmLabel:false,confirmAffiliate:false};
+assert.equal(tool.decide({...base,heatEmergency:true}).code,'medical_emergency');
+assert.equal(tool.decide({...base,electricalDanger:true}).code,'electrical_danger');
+assert.equal(tool.decide({...base,activeOutage:true}).code,'active_outage');
+assert.equal(tool.decide({...base,indoorTempC:40}).code,'extreme_heat');
+assert.equal(tool.decide({...base,vulnerablePerson:true,indoorTempC:33}).code,'vulnerable');
+assert.equal(tool.decide({...base,strategy:'evaporative',humidityPct:70}).code,'evaporative_unsuitable');
+assert.equal(tool.decide({...base,existingSolution:true,realComfortTest:true}).code,'no_buy');
+assert.equal(tool.decide({...base,strategy:'whole_room'}).code,'ac_assessment');
+assert.equal(tool.decide(base).code,'confirm');
+assert.equal(tool.decide({...base,confirmNeed:true,confirmLabel:true,confirmAffiliate:true}).code,'eligible_fan');
+assert.equal(tool.decide({...base,strategy:'evaporative',humidityPct:35,confirmNeed:true,confirmLabel:true,confirmAffiliate:true}).code,'eligible_cooler');
+const calc=tool.calculate(base);assert.equal(calc.fanKwh,12);assert.equal(calc.coolerKwh,24);assert.equal(calc.portableAcKwh,288);assert.equal(calc.splitAcKwh,216);
+console.log(JSON.stringify({ok:true,route:tool.ROUTE,noBuy:true,medicalGate:true,fanAndCoolerSeparated:true,kwhWithoutTariff:true}));
