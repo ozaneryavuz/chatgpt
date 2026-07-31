@@ -1,0 +1,64 @@
+name: ALO186 tatil, su kaçağı ve soğuk zincir güvenli büyüme v138
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/su-kacagi-sensoru-otomatik-vana-uygunluk/**'
+      - 'alo186/hesaplama/buzdolabi-dondurucu-sicaklik-alarmi-uygunluk/**'
+      - 'alo186/sektor-rehberi/tatil-yazlik-ev-elektrik-su-guvenlik-merkezi/**'
+      - 'alo186/deployment/routing-overlays/138-away-home-water-coldchain.json'
+      - 'alo186/tests/test_away_home_water_coldchain_v138.js'
+      - 'alo186/audits/growth-away-home-water-coldchain-v138.md'
+      - '.github/workflows/alo186-away-home-water-coldchain-v138.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/su-kacagi-sensoru-otomatik-vana-uygunluk/**'
+      - 'alo186/hesaplama/buzdolabi-dondurucu-sicaklik-alarmi-uygunluk/**'
+      - 'alo186/sektor-rehberi/tatil-yazlik-ev-elektrik-su-guvenlik-merkezi/**'
+      - 'alo186/deployment/routing-overlays/138-away-home-water-coldchain.json'
+      - 'alo186/tests/test_away_home_water_coldchain_v138.js'
+      - 'alo186/audits/growth-away-home-water-coldchain-v138.md'
+      - '.github/workflows/alo186-away-home-water-coldchain-v138.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-away-home-water-coldchain-v138-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Su kaçağı, sıcaklık alarmı ve tatil evi karar/yayın kabulü
+        run: node alo186/tests/test_away_home_water_coldchain_v138.js
+
+      - name: Mevcut kullanıcı güveni ve yayın regresyonları
+        run: |
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Denetim özeti
+        run: |
+          printf '%s\n' \
+            '3 canonical rota' \
+            'su-elektrik tehlikesinde 112 kapanışı' \
+            'aktif kesintide ticari yol kapalı' \
+            'buzdolabı 4°C ve dondurucu -18°C kanıtı' \
+            'mevcut ekipman yeterliyse satın almama' \
+            'üçlü affiliate onayı' \
+            '7/30/90 günlük tekrar test' \
+            'fiyat, stok, puan ve garanti yok'

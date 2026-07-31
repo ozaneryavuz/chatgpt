@@ -1,0 +1,21 @@
+{
+  "version": 138,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/su-kacagi-sensoru-otomatik-vana-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/su-kacagi-sensoru-otomatik-vana-uygunluk/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/buzdolabi-dondurucu-sicaklik-alarmi-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/buzdolabi-dondurucu-sicaklik-alarmi-uygunluk/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/sektor-rehberi/tatil-yazlik-ev-elektrik-su-guvenlik-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/tatil-yazlik-ev-elektrik-su-guvenlik-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
