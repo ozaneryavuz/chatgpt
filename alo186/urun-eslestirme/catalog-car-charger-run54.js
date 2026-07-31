@@ -16,6 +16,7 @@
   }
 
   const verifiedAt='2026-07-30';
+  const growthVerifiedAt='2026-07-31';
   const category={
     id:'car_charger',
     name:'Araç içi USB telefon ve dizüstü şarj cihazı',
@@ -98,6 +99,42 @@
       technicalSource:'https://bix.com.tr/65w-cift-portlu-pd-arac-sarji-beyaz/',
       needIds:['vehicle-device-charging'],relatedTools:[...relation.tools],relatedGuides:[...relation.guides],requiredEvidence:[...relation.evidence],
       url:catalog.amazonProductUrl('B0BT4GWMS3')
+    },
+    {
+      id:'anker-323-a2735-52w',category:'car_charger',asin:'B0BPGSRYFH',mpn:'A2735',
+      name:'Anker 323 A2735 52,5 W USB-C ve USB-A Araç Şarj Cihazı',brand:'Anker',
+      status:'verified_listing',verifiedAt:growthVerifiedAt,
+      attributes:{inputMinV:12,inputMaxV:24,maxOutputW:52.5,maxSingleDeviceW:30,totalOutputW:52.5,usbCPorts:1,usbAPorts:1,usbCMaxW:30,usbAMaxW:22.5,powerIq3:true,activeShield2:true},
+      strengths:['Kullanıcı ihtiyacı: araçta bir USB-C telefon/tablet ile ikinci USB-A cihazı aynı anda şarj etme','USB-C portta 30 W, USB-A portta 22,5 W sınıfı','Toplam 52,5 W üretici değeri','12–24 V araç girişi ve ActiveShield 2.0 sıcaklık izleme yaklaşımı'],
+      limits:['Satın almama koşulu: aracın mevcut USB çıkışları iki cihazın güç ihtiyacını karşılıyorsa yeni ürün almayın','USB-C port tek başına en fazla 30 W sınıfındadır; daha yüksek güç isteyen dizüstüler için uygun kabul edilmemelidir','Hızlı şarj cihaz ve kablo protokol uyumuna bağlıdır','Araç prizinde gevşeklik, oksitlenme veya ısınma varsa ürünü kullanmadan prizi kontrol ettirin'],
+      sourceNote:'Amazon Türkiye ASIN B0BPGSRYFH ile Anker A2735 model eşleşmesi; 12–24 V giriş, toplam 52,5 W, USB-C 30 W ve USB-A 22,5 W alanları Anker resmî teknik kaynağıyla 31 Temmuz 2026 tarihinde doğrulandı. Fiyat, stok, satıcı, puan, yorum ve garanti yayımlanmaz.',
+      technicalSource:'https://www.anker.com/products/a2735',
+      needIds:['vehicle-device-charging'],relatedTools:[...relation.tools],relatedGuides:[...relation.guides],requiredEvidence:[...relation.evidence],
+      url:catalog.amazonProductUrl('B0BPGSRYFH')
+    },
+    {
+      id:'ugreen-60980-52w',category:'car_charger',asin:'B082WZ139M',mpn:'60980',
+      name:'UGREEN 60980 52,5 W USB-C PD ve USB-A QC Araç Şarj Cihazı',brand:'UGREEN',
+      status:'verified_listing',verifiedAt:growthVerifiedAt,
+      attributes:{maxOutputW:52.5,maxSingleDeviceW:30,totalOutputW:52.5,usbCPorts:1,usbAPorts:1,usbCMaxW:30,usbAMaxW:22.5,pd:true,qc:true,aluminumBody:true,totalUsbPorts:2},
+      strengths:['Kullanıcı ihtiyacı: USB-C PD ve USB-A hızlı şarj kullanan iki mobil cihazı araçta birlikte besleme','Toplam 52,5 W ürün sınıfı','Bir USB-C ve bir USB-A çıkış','Alüminyum gövde ve kısa devre, aşırı ısınma, aşırı akım koruma açıklaması'],
+      limits:['Satın almama koşulu: mevcut araç adaptörü ve USB çıkışları cihazlarınızı gereken hızda şarj ediyorsa yeni ürün almayın','İki portun güç dağılımı cihaz protokolüne göre değişebilir; 30 W ve 22,5 W kabulü cihaz/kablo ile doğrulanmalıdır','Üretici Türkiye sayfasındaki giriş voltajı alanı tutarsız göründüğünden araç uyumluluğu satın alma öncesi Amazon ürün sayfasında tekrar kontrol edilmelidir','Hasarlı veya ısınan çakmaklık prizinde kullanılmamalıdır'],
+      sourceNote:'Amazon Türkiye ASIN B082WZ139M ile UGREEN 60980 SKU eşleşmesi; 52,5 W ürün sınıfı, USB-C PD, USB-A hızlı şarj, iki port ve koruma özellikleri UGREEN resmî teknik kaynağıyla 31 Temmuz 2026 tarihinde doğrulandı. Kaynaktaki tutarsız giriş voltajı değeri kataloğa aktarılmadı. Fiyat, stok, satıcı, puan, yorum ve garanti yayımlanmaz.',
+      technicalSource:'https://www.ugreen.com/tr-tr/products/tr-60980',
+      needIds:['vehicle-device-charging'],relatedTools:[...relation.tools],relatedGuides:[...relation.guides],requiredEvidence:[...relation.evidence],
+      url:catalog.amazonProductUrl('B082WZ139M')
+    },
+    {
+      id:'ugreen-70594-dual-usbc-40w',category:'car_charger',asin:'B07Z1NPFWC',mpn:'70594',
+      name:'UGREEN 70594 Çift USB-C PD 40 W Araç Şarj Cihazı',brand:'UGREEN',
+      status:'verified_listing',verifiedAt:growthVerifiedAt,
+      attributes:{inputMinV:12,inputMaxV:24,maxOutputW:40,maxSingleDeviceW:20,totalOutputW:40,usbCPorts:2,usbAPorts:0,usbC1MaxW:20,usbC2MaxW:20,pd3:true,aluminumBody:true},
+      strengths:['Kullanıcı ihtiyacı: araçta iki USB-C telefonu veya düşük güçlü tableti aynı anda şarj etme','İki USB-C port','Port başına 20 W ve toplam 40 W üretici sınıfı','12–24 V araç girişi, alüminyum gövde ve akıllı güç koruma açıklaması'],
+      limits:['Satın almama koşulu: aracınızda iki yeterli USB-C çıkışı varsa veya tek cihaz kullanıyorsanız yeni ürün almayın','Tek port en fazla 20 W sınıfındadır; 25–30 W üzeri isteyen cihazlarda beklenen hızı sağlamaz','Amazon Türkiye ürün başlığında güç değeri farklı görünebildiğinden model numarası 70594 satın alma öncesi tekrar doğrulanmalıdır','Kablolar kutu içeriğine dahil kabul edilmemeli; uygun USB-C kablo ayrıca doğrulanmalıdır'],
+      sourceNote:'Amazon Türkiye’de UGREEN 70594 modelinin aktif ürün kaydı ile ASIN B07Z1NPFWC eşleşmesi; 12–24 V giriş, iki USB-C, port başına 20 W ve toplam 40 W alanları güvenilir UGREEN bölgesel teknik kaynağıyla 31 Temmuz 2026 tarihinde doğrulandı. Fiyat, stok, satıcı, puan, yorum ve garanti yayımlanmaz.',
+      technicalSource:'https://ugreen.com.ru/70594',
+      needIds:['vehicle-device-charging'],relatedTools:[...relation.tools],relatedGuides:[...relation.guides],requiredEvidence:[...relation.evidence],
+      url:catalog.amazonProductUrl('B07Z1NPFWC')
     }
   ];
 
@@ -107,7 +144,7 @@
 
   if(typeof catalog.knowledgeGraphSummary==='function'){
     const previousSummary=catalog.knowledgeGraphSummary.bind(catalog);
-    catalog.knowledgeGraphSummary=(options={})=>({...previousSummary(options),version:'2026-07-30-run54',generatedAt:'2026-07-30'});
+    catalog.knowledgeGraphSummary=(options={})=>({...previousSummary(options),version:'2026-07-31-run76',generatedAt:'2026-07-31'});
   }
   catalog.__carChargerAffiliateRun54=true;
 
@@ -118,7 +155,7 @@
     const script=root.document.createElement('script');
     script.id=id;
     script.type='application/ld+json';
-    script.dataset.generated='alo186-affiliate-knowledge-graph-run54';
+    script.dataset.generated='alo186-affiliate-knowledge-graph-run76';
     script.textContent=JSON.stringify(catalog.knowledgeGraph());
     root.document.head.appendChild(script);
   }
