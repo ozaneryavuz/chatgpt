@@ -1,0 +1,21 @@
+{
+  "version": 152,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/priz-uzatma-kablosu-yuk-guvenlik/index.html",
+      "canonicalPath": "/hesaplama/priz-uzatma-kablosu-yuk-guvenlik/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/akim-korumali-priz-spd-koruma-zinciri/index.html",
+      "canonicalPath": "/hesaplama/akim-korumali-priz-spd-koruma-zinciri/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/sektor-rehberi/priz-uzatma-kablosu-koruma-test-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/priz-uzatma-kablosu-koruma-test-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
