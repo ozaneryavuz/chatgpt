@@ -30,6 +30,34 @@ def self_test() -> None:
     assert CURRENT_DEADLINE_PATTERN.search(current)
     assert STALE_DEADLINE.search(response)
 
+    with tempfile.TemporaryDirectory(prefix="alo186-deadline-sentence-scope-") as folder:
+        root = Path(folder)
+        page = root / "index.html"
+
+        page.write_text(stale, encoding="utf-8")
+        assert find_stale_application_deadlines(root), "Eski başvuru süresi yakalanmalı"
+
+        page.write_text(
+            "Cihaz hasarı başvurusu reddedilirse dağıtım şirketi 10 iş günü içinde teknik raporu bildirir.",
+            encoding="utf-8",
+        )
+        assert not find_stale_application_deadlines(root), "Yanıt/bildirim süresi başvuru süresi sanılmamalı"
+
+        page.write_text(
+            "<p>Cihaz hasarı için 10 iş günü içinde dağıtım şirketine başvurun.</p>"
+            "<p>Başvuru reddedilirse şirket teknik raporu bildirir.</p>",
+            encoding="utf-8",
+        )
+        violations = find_stale_application_deadlines(root)
+        assert violations, "Sonraki yanıt cümlesi eski başvuru süresini maskeleyememeli"
+
+        page.write_text(
+            "Cihaz hasarı için 10 iş günü içinde dağıtım şirketine başvurun. "
+            "Başvuru reddedilirse şirket teknik raporu bildirir.",
+            encoding="utf-8",
+        )
+        assert find_stale_application_deadlines(root), "Ayrı yanıt cümlesi eski süreyi istisna yapmamalı"
+
 
 def build_and_validate() -> dict[str, object]:
     with tempfile.TemporaryDirectory(prefix="alo186-device-damage-deadline-") as folder:
