@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[2]
 ROUTES = {
     "hesaplama/aa-aaa-sarjli-pil-sarj-cihazi-uygunluk/index.html": {
         "canonical": "https://alo186.com/hesaplama/aa-aaa-sarjli-pil-sarj-cihazi-uygunluk/",
-        "tokens": ["1,2 V NiMH", "yeni ürün almayın", "Amazon satış ortaklığı", "sponsored nofollow noopener"],
+        "tokens": ["1,2 V NiMH", "yeni ürün almayın", "Amazon satış ortaklığı"],
     },
     "hesaplama/sarjli-pil-seti-dongu-planlayici/index.html": {
         "canonical": "https://alo186.com/hesaplama/sarjli-pil-seti-dongu-planlayici/",
@@ -21,6 +21,10 @@ ROUTES = {
         "tokens": ["7/30/90", "Doğrudan satış yok", "JSON görev planı", ".ics"],
     },
 }
+AFFILIATE_APPS = (
+    "alo186/hesaplama/aa-aaa-sarjli-pil-sarj-cihazi-uygunluk/app.js",
+    "alo186/hesaplama/sarjli-pil-seti-dongu-planlayici/app.js",
+)
 
 
 def run(command: list[str]) -> None:
@@ -45,11 +49,20 @@ for relative, contract in ROUTES.items():
         assert token in text, (relative, token)
 
 for app in (
-    "alo186/hesaplama/aa-aaa-sarjli-pil-sarj-cihazi-uygunluk/app.js",
-    "alo186/hesaplama/sarjli-pil-seti-dongu-planlayici/app.js",
+    *AFFILIATE_APPS,
     "alo186/sektor-rehberi/aa-aaa-pil-sureklilik-test-merkezi/app.js",
 ):
     run(["node", "--check", app])
+
+for app in AFFILIATE_APPS:
+    script = (ROOT / app).read_text(encoding="utf-8")
+    assert 'rel="sponsored nofollow noopener"' in script, app
+    assert "confirmNeed" in script and "confirmSpecs" in script and "confirmAffiliate" in script, app
+    assert "amazon.com.tr" not in script.lower(), app
+
+hub_script = (ROOT / "alo186/sektor-rehberi/aa-aaa-pil-sureklilik-test-merkezi/app.js").read_text(encoding="utf-8")
+assert "sponsored nofollow noopener" not in hub_script
+assert "amazon.com.tr" not in hub_script.lower()
 
 run(["node", "alo186/hesaplama/aa-aaa-sarjli-pil-sarj-cihazi-uygunluk/test.js"])
 run(["node", "alo186/hesaplama/sarjli-pil-seti-dongu-planlayici/test.js"])
@@ -94,6 +107,7 @@ print(json.dumps({
     "directAmazonLinks": 0,
     "productOfferSchema": False,
     "tripleAffiliateConfirmation": True,
+    "affiliateRel": "sponsored nofollow noopener",
     "noBuyOutcome": True,
     "repeatVisitCadence": [7, 30, 90],
     "personalDataFields": 0,
