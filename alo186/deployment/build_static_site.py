@@ -8,14 +8,24 @@ import shutil
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-from alo186.deployment.device_damage_deadline import (
-    CURRENT_DEADLINE,
-    AMENDMENT_URL as DEVICE_DAMAGE_AMENDMENT_URL,
-    REGULATION_URL as DEVICE_DAMAGE_REGULATION_URL,
-    find_stale_application_deadlines,
-    normalize_published_site,
-    validate_published_site,
-)
+try:
+    from .device_damage_deadline import (
+        CURRENT_DEADLINE,
+        AMENDMENT_URL as DEVICE_DAMAGE_AMENDMENT_URL,
+        REGULATION_URL as DEVICE_DAMAGE_REGULATION_URL,
+        find_stale_application_deadlines,
+        normalize_published_site,
+        validate_published_site,
+    )
+except ImportError:
+    from device_damage_deadline import (
+        CURRENT_DEADLINE,
+        AMENDMENT_URL as DEVICE_DAMAGE_AMENDMENT_URL,
+        REGULATION_URL as DEVICE_DAMAGE_REGULATION_URL,
+        find_stale_application_deadlines,
+        normalize_published_site,
+        validate_published_site,
+    )
 
 CANONICAL_HOST = "https://www.alo186.com"
 LEGACY_HOST = "https://alo186.com"
