@@ -6,14 +6,13 @@ const root = path.resolve(__dirname, '..');
 const portal = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'styles.css'), 'utf8');
 const htaccess = fs.readFileSync(path.join(root, 'deployment', 'apache-production.htaccess'), 'utf8');
-const oldDuration = ['3', '0', ' gün'].join('');
-const oldLivePhrase = ['3', '0 gün içinde EDAŞ kaydı açın'].join('');
+const deadlinePolicy = fs.readFileSync(path.join(root, 'deployment', 'device_damage_deadline.py'), 'utf8');
 
-assert(portal.includes('Cihaz hasarında başvuru süresi 10 iş günüdür'), 'Portal 10 iş günü başlığını göstermeli.');
-assert(portal.includes('zararın ortaya çıktığı tarihten itibaren <strong>10 iş günü içinde</strong>'), 'Görünür metinde 10 iş günü bulunmalı.');
+assert(portal.includes('class="legal-alert"'), 'Portal cihaz hasarı hukukî uyarı alanını taşımalı.');
 assert(portal.includes('ALO186 başvuru veya hasar kaydı almaz'), 'ALO186 başvuru almadığını açıkça söylemeli.');
-assert(portal.includes('https://www.epdk.gov.tr/Detay/Icerik/12-3/elektrik-piyasasi'), 'Doğru EPDK elektrik piyasası SSS kaynağına görünür bağlantı olmalı.');
-assert(!new RegExp(`zararın ortaya çıktığı tarihten itibaren\s*${oldDuration}`, 'i').test(portal), 'Cihaz hasarı bağlamında eski süre kaynak portalda bulunmamalı.');
+assert(deadlinePolicy.includes('CURRENT_DEADLINE = "30 gün"'), 'Canonical yayın politikası Madde 26/1 kapsamındaki 30 günü kullanmalı.');
+assert(deadlinePolicy.includes('elektrik-portali/index.html'), 'Portal hukukî metni production normalizasyon kapsamına alınmalı.');
+assert(deadlinePolicy.includes('20201229M1-1.htm'), 'Bağlayıcı Kalite Yönetmeliği kaynağı production politikasında bulunmalı.');
 
 assert(portal.includes('rel="canonical" href="https://www.alo186.com/elektrik-portali"'), 'Portal www canonical kullanmalı.');
 assert(portal.includes('class="skip-link" href="#main-content"'), 'Skip link eksik.');
@@ -126,8 +125,8 @@ for (const header of [
 ]) {
   assert(htaccess.includes(header), `Production güvenlik başlığı eksik: ${header}`);
 }
-assert(htaccess.includes('AddOutputFilterByType SUBSTITUTE text/html application/xhtml+xml'), 'Aktif live-copy substitute filtresi eksik.');
-assert(htaccess.includes(oldLivePhrase), 'Bilinen yanlış canlı cümle fail-safe eşleşmesinde bulunmalı.');
-assert(htaccess.includes('10 iş günü içinde ilgili dağıtım şirketinin resmî kanalına başvurun'), 'Fail-safe doğru 10 iş günü metnini üretmeli.');
+assert(htaccess.includes('Cihaz hasarı başvuru süresi HTML yanıt katmanında değiştirilmez'), 'Hukukî metin response katmanında değiştirilemez sözleşmesi eksik.');
+assert(!htaccess.includes('AddOutputFilterByType SUBSTITUTE text/html application/xhtml+xml'), 'Response katmanı hukukî içeriği dönüştürmemeli.');
+assert(!htaccess.includes('Substitute "s|'), 'Apache hukukî metin substitution kuralı taşımamalı.');
 
-console.log('ALO186 portal hardening: kullanıcı öncelikli görev sırası, progresif kaynak kataloğu, şeffaf ticari katman, canonical rotalar, 10 iş günü ve erişilebilirlik sözleşmeleri geçti.');
+console.log('ALO186 portal hardening: kullanıcı öncelikli görev sırası, progresif kaynak kataloğu, şeffaf ticari katman, canonical rotalar, Madde 26/1 yayın politikası ve erişilebilirlik sözleşmeleri geçti.');
