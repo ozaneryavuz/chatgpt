@@ -1,0 +1,21 @@
+{
+  "version": 144,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/isletme-pos-okc-modem-yedek-guc-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/isletme-pos-okc-modem-yedek-guc-uygunluk/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/kucuk-isletme-kritik-yuk-oncelik-ve-kesinti-suresi/index.html",
+      "canonicalPath": "/hesaplama/kucuk-isletme-kritik-yuk-oncelik-ve-kesinti-suresi/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/sektor-rehberi/kucuk-isletme-elektrik-kesintisi-sureklilik-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/kucuk-isletme-elektrik-kesintisi-sureklilik-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
