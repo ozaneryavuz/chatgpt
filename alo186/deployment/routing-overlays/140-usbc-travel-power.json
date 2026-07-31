@@ -1,0 +1,21 @@
+{
+  "version": 140,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/usb-c-sarj-cihazi-kablo-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/usb-c-sarj-cihazi-kablo-uygunluk/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/power-bank-wh-ucus-ve-sure-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/power-bank-wh-ucus-ve-sure-uygunluk/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/sektor-rehberi/usb-c-seyahat-sarj-ve-power-bank-test-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/usb-c-seyahat-sarj-ve-power-bank-test-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
