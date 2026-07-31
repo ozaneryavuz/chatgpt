@@ -73,7 +73,7 @@
     multi_closet:'Her kabinetin PoE yükü, uplink cihazları, kayıt yolu ve batarya süresi ayrı hesaplanmalıdır.',
     daisy_chain:'Art arda çoklayıcılar temas, ısınma ve koruma belirsizliği oluşturur.',
     missing_load:'NVR, PoE switch, kameralar ve ağ cihazları birlikte hesaba katılmalıdır.',
-    evidence:'Port sayısı güç bütçesi değildir. Switch'in kendi tüketimi ile kameraların gerçek veya azami PoE yükü ayrılmalıdır.',
+    evidence:"Port sayısı güç bütçesi değildir. Switch'in kendi tüketimi ile kameraların gerçek veya azami PoE yükü ayrılmalıdır.",
     active_outage:'Yeni satın alma devam eden kesintide kaydı geri getirmez; mevcut kaynak ve güvenli kapatma planı önceliklidir.',
     professional:'Yüksek güç, uzun süre veya dağıtık kabinet yapısı proje, seçicilik, batarya kabini ve bakım planı gerektirir.',
     no_buy:'W, VA, Wh, transfer, gerçek süre ve kayıt kanıtları birlikte yeterli.',
