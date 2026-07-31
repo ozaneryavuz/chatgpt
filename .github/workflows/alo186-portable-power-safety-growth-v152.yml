@@ -1,0 +1,35 @@
+name: ALO186 portable power safety growth v152
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/priz-uzatma-kablosu-yuk-guvenlik/**'
+      - 'alo186/hesaplama/akim-korumali-priz-spd-koruma-zinciri/**'
+      - 'alo186/sektor-rehberi/priz-uzatma-kablosu-koruma-test-merkezi/**'
+      - 'alo186/deployment/routing-overlays/152-portable-power-safety-growth.json'
+      - 'alo186/audits/portable-power-safety-growth-v152-2026-07-31.md'
+      - 'alo186/tests/test_portable_power_safety_growth_v152.py'
+      - '.github/workflows/alo186-portable-power-safety-growth-v152.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-portable-power-safety-growth-v152-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  trust-and-release-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate load, protection chain, affiliate gates and routes
+        run: python alo186/tests/test_portable_power_safety_growth_v152.py
