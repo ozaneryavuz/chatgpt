@@ -1,0 +1,21 @@
+{
+  "version": 139,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/haberler/ev-sarj-dinamik-yuk-yonetimi-load-balancing/index.html",
+      "canonicalPath": "/haberler/ev-sarj-dinamik-yuk-yonetimi-load-balancing",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ges-batarya-ac-coupled-dc-coupled-retrofit-farki/index.html",
+      "canonicalPath": "/haberler/ges-batarya-ac-coupled-dc-coupled-retrofit-farki",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/jenerator-calisiyor-elektrik-vermiyor-avr-ats-kontrol/index.html",
+      "canonicalPath": "/haberler/jenerator-calisiyor-elektrik-vermiyor-avr-ats-kontrol",
+      "type": "article"
+    }
+  ]
+}
