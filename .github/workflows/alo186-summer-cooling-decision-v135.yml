@@ -1,0 +1,52 @@
+name: ALO186 yaz serinleme karar merkezi v135
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/vantilator-hava-sogutucu-klima-karar/**'
+      - 'alo186/hesaplama/portatif-klima-egzoz-pencere-priz-uygunluk/**'
+      - 'alo186/sektor-rehberi/yaz-serinleme-elektrik-ve-tekrar-test-merkezi/**'
+      - 'alo186/deployment/routing-overlays/135-summer-cooling-decision.json'
+      - 'alo186/tests/test_summer_cooling_decision_v135.js'
+      - 'alo186/audits/growth-summer-cooling-decision-v135.md'
+      - '.github/workflows/alo186-summer-cooling-decision-v135.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/vantilator-hava-sogutucu-klima-karar/**'
+      - 'alo186/hesaplama/portatif-klima-egzoz-pencere-priz-uygunluk/**'
+      - 'alo186/sektor-rehberi/yaz-serinleme-elektrik-ve-tekrar-test-merkezi/**'
+      - 'alo186/deployment/routing-overlays/135-summer-cooling-decision.json'
+      - 'alo186/tests/test_summer_cooling_decision_v135.js'
+      - 'alo186/audits/growth-summer-cooling-decision-v135.md'
+      - '.github/workflows/alo186-summer-cooling-decision-v135.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-summer-cooling-v135-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Sağlık, karar, satın almama, affiliate ve dual Pages kabulü
+        run: node alo186/tests/test_summer_cooling_decision_v135.js
+
+      - name: Mevcut yayın ve kullanıcı güveni regresyonları
+        run: |
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
