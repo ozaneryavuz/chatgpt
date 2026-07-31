@@ -1,0 +1,46 @@
+name: ALO186 priz ve aynı devre yük uygunluğu v127
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/priz-kac-watt-ayni-devre-yuk-uygunluk/**'
+      - 'alo186/deployment/routing-overlays/127-outlet-circuit-load-suitability.json'
+      - 'alo186/tests/test_outlet_circuit_load_suitability_v127.js'
+      - '.github/workflows/alo186-outlet-circuit-load-v127.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/priz-kac-watt-ayni-devre-yuk-uygunluk/**'
+      - 'alo186/deployment/routing-overlays/127-outlet-circuit-load-suitability.json'
+      - 'alo186/tests/test_outlet_circuit_load_suitability_v127.js'
+      - '.github/workflows/alo186-outlet-circuit-load-v127.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-outlet-circuit-load-v127-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Karar motoru, güvenlik, affiliate ve dual Pages kabulü
+        run: node alo186/tests/test_outlet_circuit_load_suitability_v127.js
+
+      - name: Mevcut yayın ve kullanıcı güveni regresyonları
+        run: |
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
