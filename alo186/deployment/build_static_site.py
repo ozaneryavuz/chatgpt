@@ -4,6 +4,7 @@ import argparse
 import fnmatch
 import hashlib
 import json
+import re
 import shutil
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -40,6 +41,9 @@ SHARED_STATIC_ASSETS = (
     # Teknik makaleler canonical alt dizinlere taşınırken ortak responsive CSS
     # /haberler kökünde tek kopya olarak yayınlanır.
     ("alo186/haberler/alo186-article.css", "haberler/alo186-article.css"),
+    # Kritik sistem hesaplayıcıları aynı erişilebilir ve mobil stil sözleşmesini
+    # canonical ile project-path paketlerinde tek public asset olarak kullanır.
+    ("alo186/assets/critical-continuity-v126.css", "assets/critical-continuity-v126.css"),
 )
 
 ROOT_STATIC_FILES = (
@@ -63,9 +67,6 @@ REQUIRED_APACHE_TOKENS = (
     "Cihaz hasarı başvuru süresi HTML yanıt katmanında değiştirilmez",
 )
 
-# Public artifact yalnız tarayıcıda çalışan üretim dosyalarını taşımalıdır. Kaynak
-# açıklamaları, testler, fixture'lar, deployment/infra dosyaları ve paket metadata'sı
-# web kökünde yayımlanmaz.
 FORBIDDEN_PUBLIC_DIRECTORIES = {
     ".git",
     ".github",
@@ -201,7 +202,6 @@ def copy_route(repo_root: Path, output: Path, route: dict) -> None:
     target = output / target_path
     target.mkdir(parents=True, exist_ok=True)
 
-    # Ana ALO186 merkezi, kaynak kökündeki diğer modülleri portalın altına kopyalamaz.
     if source.parent == repo_root / "alo186":
         shutil.copy2(source, target / "index.html")
         for asset_name in ("styles.css",):
@@ -370,8 +370,6 @@ def build(repo_root: Path, output: Path, commit_sha: str = "local") -> dict:
     for source_name, target_name in SHARED_STATIC_ASSETS:
         copy_file(repo_root, output, source_name, target_name)
 
-    # Canonical HTML üretmeyen ancak mevcut relatif CSS/JS bağımlılıklarını sağlayan
-    # uyumluluk klasörleri de aynı public-only kuralıyla kopyalanır.
     for directory in LEGACY_ASSET_DIRECTORIES:
         source = repo_root / "alo186" / directory
         if source.is_dir():
