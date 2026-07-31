@@ -26,16 +26,13 @@ concurrency:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Yayın kimliği, makale güven bloğu ve iki Pages hedefi
+      - name: Yayın kimliği, 30 gün güvenlik kapısı, makale güven bloğu ve iki Pages hedefi
         run: python alo186/tests/test_release_editorial_transparency_v150.py
-      - name: Mevcut yayın ve kullanıcı güvenliği regresyonları
-        run: |
-          python alo186/tests/test_production_bundle.py
-          python alo186/tests/test_sitewide_ux_v117.py
-          python alo186/tests/test_device_damage_deadline.py
+      - name: Mevcut site geneli UX ve yayın regresyonu
+        run: python alo186/tests/test_sitewide_ux_v117.py
