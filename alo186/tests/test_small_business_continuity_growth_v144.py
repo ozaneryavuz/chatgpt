@@ -7,6 +7,7 @@ import re
 import shutil
 import subprocess
 import tempfile
+import unicodedata
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -22,6 +23,14 @@ EXPECTED = {
     "/hesaplama/kucuk-isletme-kritik-yuk-oncelik-ve-kesinti-suresi/": CALCULATORS[1],
     "/sektor-rehberi/kucuk-isletme-elektrik-kesintisi-sureklilik-merkezi/": HUB,
 }
+
+
+def fold(text: str) -> str:
+    """Normalize Turkish dotted-I and other combining marks for stable checks."""
+    return "".join(
+        char for char in unicodedata.normalize("NFKD", text.casefold())
+        if not unicodedata.combining(char)
+    )
 
 
 def require(condition: bool, message: str) -> None:
@@ -66,13 +75,13 @@ def check_javascript(path: Path, html: str) -> None:
 def check_common(path: Path, canonical: str) -> str:
     require(path.is_file(), f"Missing published file: {path}")
     html = path.read_text(encoding="utf-8")
-    lower = html.lower()
+    lower = fold(html)
     require(
         f'href="https://alo186.com{canonical}"' in html,
         f"Canonical mismatch: {path}",
     )
-    require("bağımsız" in lower, f"Independent-platform disclosure missing: {path}")
-    require("resmî kurum" in lower or "edaş" in lower, f"Official-impression guard missing: {path}")
+    require("bagımsız" in lower, f"Independent-platform disclosure missing: {path}")
+    require("resmi kurum" in lower or "edas" in lower, f"Official-impression guard missing: {path}")
     require("fiyat" in lower and "stok" in lower and "puan" in lower, f"Commercial-data guard missing: {path}")
     require("localstorage" not in lower and "sessionstorage" not in lower, f"Persistent browser storage found: {path}")
     for forbidden in ('"@type":"product"', '"@type":"offer"', "aggregaterating", '"availability"'):
@@ -91,29 +100,27 @@ def main() -> None:
     for canonical, path in EXPECTED.items():
         require(routes[canonical]["source"] == str(path.relative_to(ROOT)), f"Source mismatch for {canonical}")
 
-    calculator_html = []
     for canonical, path in list(EXPECTED.items())[:2]:
         html = check_common(path, canonical)
-        calculator_html.append(html)
-        lower = html.lower()
-        require("yeni ürün almayın" in lower, f"Buy-nothing success result missing: {path}")
-        require("amazon satış ortaklığı" in lower, f"Visible affiliate disclosure missing: {path}")
+        lower = fold(html)
+        require("yeni urun almayın" in lower, f"Buy-nothing success result missing: {path}")
+        require("amazon satıs ortaklıgı" in lower, f"Visible affiliate disclosure missing: {path}")
         require('rel="sponsored nofollow noopener"' in html, f"Affiliate rel contract missing: {path}")
         require("amazon.com.tr/s?k=" in lower, f"Only category/search affiliate destination expected: {path}")
         require('id="need"' in html and 'id="spec"' in html and 'id="ad"' in html, f"Three affiliate confirmations missing: {path}")
         require("hazard" in lower and "scope" in lower, f"Fail-closed safety inputs missing: {path}")
 
     hub_html = check_common(HUB, "/sektor-rehberi/kucuk-isletme-elektrik-kesintisi-sureklilik-merkezi/")
-    hub_lower = hub_html.lower()
+    hub_lower = fold(hub_html)
     require("amazon.com.tr" not in hub_lower, "Hub must not include a direct Amazon destination")
     require('rel="sponsored nofollow noopener"' not in hub_html, "Hub must not include affiliate links")
-    require("kişisel veri" in hub_lower, "Hub personal-data statement missing")
+    require("kisisel veri" in hub_lower, "Hub personal-data statement missing")
     require("json" in hub_lower and ".ics" in hub_lower, "Hub JSON/ICS repeat-test exports missing")
     require("7" in hub_html and "30" in hub_html and "90" in hub_html, "Hub repeat-test intervals missing")
-    require("doğrudan affiliate bağlantısı" in hub_lower, "Hub no-direct-affiliate disclosure missing")
+    require("dogrudan affiliate baglantısı" in hub_lower, "Hub no-direct-affiliate disclosure missing")
 
-    audit = AUDIT.read_text(encoding="utf-8").lower()
-    for phrase in ("arama niyeti", "içerik boşluğu", "kullanıcı yolculuğu", "affiliate ürün kategorileri", "tekrar ziyaret nedenleri", "beklenen gelir etkisi"):
+    audit = fold(AUDIT.read_text(encoding="utf-8"))
+    for phrase in ("arama niyeti", "icerik boslugu", "kullanıcı yolculugu", "affiliate urun kategorileri", "tekrar ziyaret nedenleri", "beklenen gelir etkisi"):
         require(phrase in audit, f"Audit section missing: {phrase}")
 
     print("ALO186 small-business continuity growth v144 contract: PASS")
