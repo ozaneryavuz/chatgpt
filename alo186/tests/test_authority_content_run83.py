@@ -9,7 +9,7 @@ OVERLAY = ROOT / "alo186/deployment/routing-overlays/content-authority-run83.jso
 PAGES = {
     "/haberler/elektrik-faturasi-reaktif-enerji-enduktif-kapasitif-bedel": {
         "path": ROOT / "alo186/haberler/elektrik-faturasi-reaktif-enerji-enduktif-kapasitif-bedel/index.html",
-        "intent": ("Reaktif enerji bedeli", "endüktif oran", "kapasitif oran", "3.8.0", "4.8.0"),
+        "intent": ("Reaktif enerji bedeli", "endüktif ve kapasitif oran", "3.8.0", "4.8.0", "kompanzasyon"),
         "sources": ("epdk.gov.tr", "enerjisa.com.tr"),
         "separation": ("reaktif enerji bedelini sayaç endeksi, oran, fatura ve kompanzasyon kanıtıyla", "kompanzasyon arızası rehberi", "fatura itirazı rehberi"),
         "boundary": "Ölçüm yapılmadan kompanzasyon ekipmanı satın almama sınırı",
