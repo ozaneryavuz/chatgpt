@@ -1,0 +1,41 @@
+name: ALO186 yayın ve editoryal şeffaflık v150
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/yayin-durumu/**'
+      - 'alo186/assets/alo186-editorial-trust.css'
+      - 'alo186/deployment/finalize_release_transparency.py'
+      - 'alo186/deployment/finalize_editorial_trust.py'
+      - 'alo186/deployment/live_release_smoke.py'
+      - 'alo186/deployment/prepare_github_pages.py'
+      - 'alo186/deployment/routing-overlays/150-release-editorial-transparency.json'
+      - 'alo186/tests/test_release_editorial_transparency_v150.py'
+      - 'alo186/audits/release-editorial-transparency-v150-2026-07-31.md'
+      - '.github/workflows/alo186-release-editorial-transparency-v150.yml'
+      - '.github/workflows/alo186-live-release-transparency-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-release-editorial-transparency-v150-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Yayın kimliği, makale güven bloğu ve iki Pages hedefi
+        run: python alo186/tests/test_release_editorial_transparency_v150.py
+      - name: Mevcut yayın ve kullanıcı güvenliği regresyonları
+        run: |
+          python alo186/tests/test_production_bundle.py
+          python alo186/tests/test_sitewide_ux_v117.py
+          python alo186/tests/test_device_damage_deadline.py
