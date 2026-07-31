@@ -1,0 +1,21 @@
+{
+  "version": 135,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/vantilator-hava-sogutucu-klima-karar/index.html",
+      "canonicalPath": "/hesaplama/vantilator-hava-sogutucu-klima-karar/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/portatif-klima-egzoz-pencere-priz-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/portatif-klima-egzoz-pencere-priz-uygunluk/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/sektor-rehberi/yaz-serinleme-elektrik-ve-tekrar-test-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/yaz-serinleme-elektrik-ve-tekrar-test-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
