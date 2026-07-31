@@ -7,6 +7,7 @@ from pathlib import Path
 
 import finalize_user_entrypoints as entrypoints
 import inject_live_quality_hardening as core
+from device_damage_deadline import BLOCK_BOUNDARY, REPLACEMENTS as DEVICE_DAMAGE_REPLACEMENTS
 from prepare_github_pages import UX_MARKER, install_sitewide_ux
 
 
@@ -21,11 +22,47 @@ _RESPONSE_CONTEXT = re.compile(
     re.IGNORECASE,
 )
 
+# Growth injectors run after the canonical source normalization and can add their
+# own explanatory cards. These are the exact obsolete application-deadline
+# phrases previously observed in final artifacts. The list is intentionally
+# narrow so the valid 10-business-day response/report period remains untouched.
+_FINAL_ARTIFACT_DEADLINE_REPLACEMENTS: tuple[tuple[str, str], ...] = (
+    (
+        "10 iş günlük süreç, kanıt ve resmî başvuru durumunu izleyin.",
+        "30 günlük süreç, kanıt ve resmî başvuru durumunu izleyin.",
+    ),
+    (
+        "10 iş günlük başvuru süresini ve dağıtım şirketine götürülecek kanıt kontrolünü düzenler.",
+        "30 günlük başvuru süresini ve dağıtım şirketine götürülecek kanıt kontrolünü düzenler.",
+    ),
+    (
+        "10 iş günlük resmî başvuru süresini kontrol edin.",
+        "30 günlük resmî başvuru süresini kontrol edin.",
+    ),
+    ("10 iş günü · kanıt · resmî kanal", "30 gün · kanıt · resmî kanal"),
+    (
+        "10 iş günlük süreyi, kanıtı ve resmî takip adımlarını düzenleyin.",
+        "30 günlük süreyi, kanıtı ve resmî takip adımlarını düzenleyin.",
+    ),
+)
+
+
+def _apply_deadline_replacements(text: str) -> str:
+    # Reuse the canonical publication migration map so generated copies cannot
+    # diverge from the same legal policy. Exact replacements are idempotent.
+    for replacements in DEVICE_DAMAGE_REPLACEMENTS.values():
+        for old, new in replacements:
+            text = text.replace(old, new)
+    for old, new in _FINAL_ARTIFACT_DEADLINE_REPLACEMENTS:
+        text = text.replace(old, new)
+    return text
+
 
 def normalize_text(text: str) -> str:
-    # A previously generated artifact may still contain the obsolete application
-    # sentence. Migrate only that known wording; a valid 10-business-day response
-    # period after rejection must not be rewritten.
+    # A previously generated artifact may still contain obsolete application
+    # wording. Normalize both canonical source phrases and exact post-injector
+    # variants, while preserving a valid 10-business-day response period.
+    text = _apply_deadline_replacements(text)
     text = text.replace(
         "zararın ortaya çıktığı tarihten itibaren 10 iş günü içinde EDAŞ kaydı açın",
         "zararın ortaya çıktığı tarihten itibaren 30 gün içinde ilgili dağıtım şirketinin resmî kanalına başvurun",
@@ -39,25 +76,50 @@ def normalize_text(text: str) -> str:
         "10 iş günü içinde EDAŞ kaydı açın",
         "30 gün içinde ilgili dağıtım şirketinin resmî kanalına başvurun",
     )
-    return updated
+    return _apply_deadline_replacements(updated)
+
+
+def _normalize_for_scan(text: str) -> str:
+    # HTML block endings are legal-statement boundaries. Without this step, a
+    # valid response deadline in the next element could mask an obsolete
+    # application deadline in the preceding card or paragraph.
+    return re.sub(r"\s+", " ", BLOCK_BOUNDARY.sub(". ", text))
+
+
+def _statement_for_match(normalized: str, match: re.Match[str]) -> str:
+    left = max(
+        normalized.rfind(".", 0, match.start()),
+        normalized.rfind("!", 0, match.start()),
+        normalized.rfind("?", 0, match.start()),
+    )
+    right_candidates = [
+        position
+        for marker in (".", "!", "?")
+        if (position := normalized.find(marker, match.end())) >= 0
+    ]
+    right = min(right_candidates) if right_candidates else len(normalized)
+    return normalized[left + 1 : right + 1]
 
 
 def wrong_damage_deadline_contexts(text: str) -> list[str]:
     """Yalnız hasar/zarar başvurusu bağlamındaki eski 10 iş günü ifadelerini yakalar.
 
     Başvurunun reddedilmesinden sonra dağıtım şirketinin teknik raporu veya cevabı
-    için geçerli olan 10 iş günlük bildirim süresi yanlış pozitif sayılmaz.
+    için geçerli olan 10 iş günlük bildirim süresi yanlış pozitif sayılmaz. Yanıt
+    istisnası yalnız aynı cümleye uygulanır; sonraki paragraf eski başvuru süresini
+    maskeleyemez.
     """
-    normalized = re.sub(r"\s+", " ", text)
+    normalized = _normalize_for_scan(text)
     contexts: list[str] = []
     for match in core.STALE_DEADLINE.finditer(normalized):
         start = max(0, match.start() - 180)
         end = min(len(normalized), match.end() + 180)
         context = normalized[start:end]
+        statement = _statement_for_match(normalized, match)
         if (
             _DAMAGE_CONTEXT.search(context)
             and _APPLICATION_CONTEXT.search(context)
-            and not _RESPONSE_CONTEXT.search(context)
+            and not _RESPONSE_CONTEXT.search(statement)
         ):
             contexts.append(context[:360])
     return contexts
