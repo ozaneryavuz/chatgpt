@@ -18,7 +18,20 @@ APPLICATION_TERMS = re.compile(
     r"\b(başvur|basvur|talep|tazmin|dağıtım şirket|dagitim sirket|edaş|edas)\w*",
     re.IGNORECASE,
 )
-WRONG_DEADLINE = re.compile(r"\b30\s*(?:takvim\s*)?gün\b", re.IGNORECASE)
+RESPONSE_TERMS = re.compile(
+    r"\b(cevap|yanıt|bildir|haklı bulun|ret|redd|teknik rapor)\w*",
+    re.IGNORECASE,
+)
+STALE_DEADLINE = re.compile(
+    r"\b(?:10\s*iş\s*gün|on\s*iş\s*gün)(?:ü|lük|de|den|içinde|icerisinde|içerisinde)?\b",
+    re.IGNORECASE,
+)
+CURRENT_DEADLINE = re.compile(
+    r"\b30\s*(?:takvim\s*)?gün(?:lük|ü|ün|de|den|içinde)?\b",
+    re.IGNORECASE,
+)
+# Compatibility for v2 and any external callers that still import the old name.
+WRONG_DEADLINE = STALE_DEADLINE
 CANONICAL_RE = re.compile(
     r'<link\b[^>]*\brel=["\']canonical["\'][^>]*\bhref=["\']([^"\']+)["\'][^>]*>',
     re.IGNORECASE,
@@ -91,13 +104,19 @@ def route_exists(site: Path, route: str) -> bool:
 
 def normalize_text(text: str) -> str:
     text = text.replace(LEGACY_ORIGIN, CANONICAL_ORIGIN)
+    # Only known obsolete application wording is migrated. The valid 10-business-day
+    # response period after a rejected claim must remain untouched.
     text = text.replace(
-        "zararın ortaya çıktığı tarihten itibaren 30 gün içinde",
         "zararın ortaya çıktığı tarihten itibaren 10 iş günü içinde",
+        "zararın ortaya çıktığı tarihten itibaren 30 gün içinde",
     )
     text = text.replace(
-        "30 gün içinde EDAŞ kaydı açın",
-        "10 iş günü içinde ilgili dağıtım şirketinin resmî kanalına başvurun",
+        "Zararın ortaya çıktığı tarihten itibaren 10 iş günü içinde",
+        "Zararın ortaya çıktığı tarihten itibaren 30 gün içinde",
+    )
+    text = text.replace(
+        "10 iş günü içinde EDAŞ kaydı açın",
+        "30 gün içinde ilgili dağıtım şirketinin resmî kanalına başvurun",
     )
     text = text.replace(
         "ilgili dağıtım şirketine kayıtlı başvuru yapmalı",
@@ -122,7 +141,23 @@ def inject_stylesheet(html: str, href: str) -> tuple[str, bool]:
 def wrong_deadline_contexts(text: str) -> list[str]:
     normalized = re.sub(r"\s+", " ", text)
     contexts: list[str] = []
-    for match in WRONG_DEADLINE.finditer(normalized):
+    for match in STALE_DEADLINE.finditer(normalized):
+        start = max(0, match.start() - 280)
+        end = min(len(normalized), match.end() + 280)
+        context = normalized[start:end]
+        if (
+            DAMAGE_TERMS.search(context)
+            and APPLICATION_TERMS.search(context)
+            and not RESPONSE_TERMS.search(context)
+        ):
+            contexts.append(context[:560])
+    return contexts
+
+
+def current_deadline_contexts(text: str) -> list[str]:
+    normalized = re.sub(r"\s+", " ", text)
+    contexts: list[str] = []
+    for match in CURRENT_DEADLINE.finditer(normalized):
         start = max(0, match.start() - 280)
         end = min(len(normalized), match.end() + 280)
         context = normalized[start:end]
@@ -149,7 +184,7 @@ def update_release(path: Path, base_path: str) -> None:
             "[class*=taskTop]>span",
             "[class*=taskCard] small",
         ],
-        "deviceDamageDeadline": "10 iş günü",
+        "deviceDamageDeadline": "30 gün",
         "officialInstitutionClaimed": False,
         "personalDataCollectionAdded": False,
         "stylesheet": public_url(base_path, f"/{CSS_FILE}"),
@@ -173,6 +208,7 @@ def validate(site: Path, base_path: str) -> dict:
     html_count = 0
     canonical_count = 0
     reference_count = 0
+    current_deadline_count = 0
     css_href = public_url(base_path, f"/{CSS_FILE}")
 
     if not (site / CSS_FILE).is_file():
@@ -187,6 +223,7 @@ def validate(site: Path, base_path: str) -> dict:
             failures.append(f"Eski www origin kaldı: {path.relative_to(site)}")
         for context in wrong_deadline_contexts(text):
             failures.append(f"Yanlış cihaz hasarı süresi: {path.relative_to(site)} → {context}")
+        current_deadline_count += len(current_deadline_contexts(text))
         if path.suffix.lower() not in {".html", ".htm"}:
             continue
         html_count += 1
@@ -213,6 +250,9 @@ def validate(site: Path, base_path: str) -> dict:
                 if internal and not target.is_file():
                     failures.append(f"Asset hedefi eksik: {path.relative_to(site)} → {reference}")
 
+    if current_deadline_count == 0:
+        failures.append("Cihaz hasarı başvurusunu yürürlükteki 30 güne bağlayan yayın metni bulunamadı")
+
     for release_name in ("alo186-release.json", "pages-release.json"):
         release_path = site / release_name
         if release_path.is_file():
@@ -222,6 +262,8 @@ def validate(site: Path, base_path: str) -> dict:
             quality = release.get("liveTechnicalQuality") or {}
             if quality.get("minimumTouchTargetCssPx") != 44:
                 failures.append(f"{release_name} canlı kalite sözleşmesi eksik")
+            if quality.get("deviceDamageDeadline") != "30 gün":
+                failures.append(f"{release_name} cihaz hasarı süre sözleşmesi yanlış")
 
     core_release = site / "alo186-release.json"
     route_count = 0
@@ -253,7 +295,8 @@ def validate(site: Path, base_path: str) -> dict:
         "canonicalCount": canonical_count,
         "checkedReferences": reference_count,
         "releaseRouteCount": route_count,
-        "deviceDamageDeadline": "10 iş günü",
+        "deviceDamageDeadline": "30 gün",
+        "deviceDamageDeadlineContexts": current_deadline_count,
         "minimumTouchTargetCssPx": 44,
         "personalDataCollectionAdded": False,
         "officialInstitutionClaimed": False,
