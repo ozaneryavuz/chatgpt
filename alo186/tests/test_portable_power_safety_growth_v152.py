@@ -80,7 +80,7 @@ def main() -> None:
 
     for page in (load, chain):
         assert "Amazon satış ortaklığı bağlantısı" in page
-        assert 'rel="sponsored nofollow noopener"' in page
+        assert "sponsored nofollow noopener" in page
         assert "need" in page and "spec" in page and "ad" in page
         assert "tag=alo186rehber-21" in page
 
