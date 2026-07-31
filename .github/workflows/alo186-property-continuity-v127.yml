@@ -1,0 +1,50 @@
+name: ALO186 ortak alan su ve erişim sürekliliği v127
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/hidrofor-su-pompasi-yedek-guc-uygunluk/**'
+      - 'alo186/hesaplama/otomatik-kapi-kepenk-bariyer-yedek-guc-uygunluk/**'
+      - 'alo186/sektor-rehberi/apartman-site-ortak-alan-elektrik-surekliligi-merkezi/**'
+      - 'alo186/deployment/routing-overlays/127-property-continuity.json'
+      - 'alo186/tests/test_property_continuity_v127.js'
+      - '.github/workflows/alo186-property-continuity-v127.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/hidrofor-su-pompasi-yedek-guc-uygunluk/**'
+      - 'alo186/hesaplama/otomatik-kapi-kepenk-bariyer-yedek-guc-uygunluk/**'
+      - 'alo186/sektor-rehberi/apartman-site-ortak-alan-elektrik-surekliligi-merkezi/**'
+      - 'alo186/deployment/routing-overlays/127-property-continuity.json'
+      - 'alo186/tests/test_property_continuity_v127.js'
+      - '.github/workflows/alo186-property-continuity-v127.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-property-continuity-v127-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Arama niyeti, karar, güven, affiliate ve dual Pages kabulü
+        run: node alo186/tests/test_property_continuity_v127.js
+
+      - name: Mevcut yayın ve kullanıcı güveni regresyonları
+        run: |
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
