@@ -73,7 +73,7 @@ ForceType text/css
 
 # Cihaz hasarı başvuru süresi HTML yanıt katmanında değiştirilmez. Yayın paketi,
 # yürürlükteki Kalite Yönetmeliği Madde 26/1 uyarınca 30 günlük süreyi build
-# aşamasında doğrular. Böylece mod_substitute eski veya doğru hukukî metni sessizce
+# aşamasında doğrular. Sunucu filtresi eski veya doğru hukukî metni sessizce
 # dönüştüremez; görünür içerik ile JSON-LD aynı canonical kaynaktan gelir.
 
 <IfModule mod_expires.c>
