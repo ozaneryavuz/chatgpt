@@ -1,0 +1,21 @@
+{
+  "version": 148,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/kombi-elektrik-kesintisi-donma-guvenligi/index.html",
+      "canonicalPath": "/hesaplama/kombi-elektrik-kesintisi-donma-guvenligi/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/kombi-ups-guc-sure-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/kombi-ups-guc-sure-uygunluk/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/sektor-rehberi/kombi-elektrik-kesintisi-kis-sureklilik-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/kombi-elektrik-kesintisi-kis-sureklilik-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
