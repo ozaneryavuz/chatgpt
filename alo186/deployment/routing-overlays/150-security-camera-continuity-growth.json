@@ -1,0 +1,21 @@
+{
+  "version": 150,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/guvenlik-kamerasi-elektrik-kesintisi-kayit-erisimi/index.html",
+      "canonicalPath": "/hesaplama/guvenlik-kamerasi-elektrik-kesintisi-kayit-erisimi/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/poe-kamera-nvr-ups-guc-sure-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/poe-kamera-nvr-ups-guc-sure-uygunluk/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/sektor-rehberi/guvenlik-kamerasi-kayit-sureklilik-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/guvenlik-kamerasi-kayit-sureklilik-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
