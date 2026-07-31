@@ -1,0 +1,21 @@
+{
+  "version": 145,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/priz-tipi-enerji-olcer-akilli-priz-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/priz-tipi-enerji-olcer-akilli-priz-uygunluk/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/cihaz-bekleme-tuketimi-yedi-gun-olcum-plani/index.html",
+      "canonicalPath": "/hesaplama/cihaz-bekleme-tuketimi-yedi-gun-olcum-plani/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/sektor-rehberi/ev-cihazlari-enerji-olcum-ve-tasarruf-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/ev-cihazlari-enerji-olcum-ve-tasarruf-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
