@@ -1,0 +1,21 @@
+{
+  "version": 134,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/aku-takviye-cihazi-jump-starter-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/aku-takviye-cihazi-jump-starter-uygunluk/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/arac-12v-priz-inverter-yuk-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/arac-12v-priz-inverter-yuk-uygunluk/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/sektor-rehberi/arac-aku-ve-acil-enerji-test-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/arac-aku-ve-acil-enerji-test-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
