@@ -1,0 +1,35 @@
+name: ALO186 small business continuity growth v144
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/isletme-pos-okc-modem-yedek-guc-uygunluk/**'
+      - 'alo186/hesaplama/kucuk-isletme-kritik-yuk-oncelik-ve-kesinti-suresi/**'
+      - 'alo186/sektor-rehberi/kucuk-isletme-elektrik-kesintisi-sureklilik-merkezi/**'
+      - 'alo186/deployment/routing-overlays/144-small-business-continuity.json'
+      - 'alo186/audits/small-business-continuity-growth-v144-2026-07-31.md'
+      - 'alo186/tests/test_small_business_continuity_growth_v144.py'
+      - '.github/workflows/alo186-small-business-continuity-v144.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-small-business-continuity-v144-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  trust-and-release-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate business continuity decisions, affiliate gates and published routes
+        run: python alo186/tests/test_small_business_continuity_growth_v144.py
