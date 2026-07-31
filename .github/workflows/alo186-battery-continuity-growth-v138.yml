@@ -1,0 +1,55 @@
+name: ALO186 AA AAA pil süreklilik büyümesi v138
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/aa-aaa-sarjli-pil-sarj-cihazi-uygunluk/**'
+      - 'alo186/hesaplama/sarjli-pil-seti-dongu-planlayici/**'
+      - 'alo186/sektor-rehberi/aa-aaa-pil-sureklilik-test-merkezi/**'
+      - 'alo186/deployment/routing-overlays/138-battery-continuity.json'
+      - 'alo186/tests/test_battery_continuity_growth_v138.py'
+      - 'alo186/audits/growth-battery-continuity-v138.md'
+      - '.github/workflows/alo186-battery-continuity-growth-v138.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/aa-aaa-sarjli-pil-sarj-cihazi-uygunluk/**'
+      - 'alo186/hesaplama/sarjli-pil-seti-dongu-planlayici/**'
+      - 'alo186/sektor-rehberi/aa-aaa-pil-sureklilik-test-merkezi/**'
+      - 'alo186/deployment/routing-overlays/138-battery-continuity.json'
+      - 'alo186/tests/test_battery_continuity_growth_v138.py'
+      - 'alo186/audits/growth-battery-continuity-v138.md'
+      - '.github/workflows/alo186-battery-continuity-growth-v138.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-battery-continuity-v138-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Pil uyumluluk, döngü, güven ve yayın kabulü
+        run: python alo186/tests/test_battery_continuity_growth_v138.py
+
+      - name: Mevcut NiMH affiliate Knowledge Graph regresyonu
+        run: node alo186/tests/test_battery_continuity_affiliate_run75.js
+
+      - name: Mevcut yayın ve kullanıcı güveni regresyonları
+        run: |
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
