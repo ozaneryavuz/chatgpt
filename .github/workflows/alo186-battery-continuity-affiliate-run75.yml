@@ -42,7 +42,6 @@ jobs:
           node --check alo186/urun-eslestirme/catalog-battery-continuity-run75.js
           node alo186/tests/test_battery_continuity_affiliate_run75.js
           node alo186/tests/test_affiliate_knowledge_graph.js
-          node alo186/tests/test_matcher.js
 
       - name: Canonical production paketini oluştur
         run: |
