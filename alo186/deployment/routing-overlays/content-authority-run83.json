@@ -1,0 +1,21 @@
+{
+  "version": 148,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-faturasi-reaktif-enerji-enduktif-kapasitif-bedel/index.html",
+      "canonicalPath": "/haberler/elektrik-faturasi-reaktif-enerji-enduktif-kapasitif-bedel",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/jenerator-ats-transfer-gecikmesi-retransfer-cooldown-ayari/index.html",
+      "canonicalPath": "/haberler/jenerator-ats-transfer-gecikmesi-retransfer-cooldown-ayari",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/jenerator-dizel-yakit-kirliligi-su-mikrop-fuel-polishing/index.html",
+      "canonicalPath": "/haberler/jenerator-dizel-yakit-kirliligi-su-mikrop-fuel-polishing",
+      "type": "article"
+    }
+  ]
+}
