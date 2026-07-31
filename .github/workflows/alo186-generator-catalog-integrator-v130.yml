@@ -1,0 +1,40 @@
+name: ALO186 jeneratör katalog entegratörü v130
+
+on:
+  push:
+    branches:
+      - 'growth/alo186-generator-fuel-runtime-v130-20260731'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: alo186-generator-catalog-integrator-v130
+  cancel-in-progress: true
+
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: growth/alo186-generator-fuel-runtime-v130-20260731
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Hesaplama merkezi kartını ve araç sayacını güncelle
+        run: python alo186/deployment/integrate_generator_fuel_catalog_v130.py
+      - name: Değişikliği dalda kaydet
+        run: |
+          if git diff --quiet -- alo186/hesaplama/index.html; then
+            echo 'Katalog zaten güncel.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add alo186/hesaplama/index.html
+          git commit -m 'ALO186: jeneratör yakıt aracını hesaplama merkezine bağla'
+          git push origin HEAD:growth/alo186-generator-fuel-runtime-v130-20260731
