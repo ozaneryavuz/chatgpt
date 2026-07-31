@@ -1,0 +1,21 @@
+{
+  "version": 143,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesintisi-tazminati-12-saat-yillik-sureklilik/index.html",
+      "canonicalPath": "/haberler/elektrik-kesintisi-tazminati-12-saat-yillik-sureklilik",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ges-inverter-dusuk-izolasyon-riso-toprak-arizasi/index.html",
+      "canonicalPath": "/haberler/ges-inverter-dusuk-izolasyon-riso-toprak-arizasi",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ev-sarj-kwh-farki-sayac-ocpp-fatura-itirazi/index.html",
+      "canonicalPath": "/haberler/ev-sarj-kwh-farki-sayac-ocpp-fatura-itirazi",
+      "type": "article"
+    }
+  ]
+}
