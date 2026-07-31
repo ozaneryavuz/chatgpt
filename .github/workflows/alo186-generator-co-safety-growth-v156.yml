@@ -1,0 +1,33 @@
+name: ALO186 generator CO safety growth v156
+
+on:
+  pull_request:
+    paths:
+      - "alo186/hesaplama/jenerator-karbonmonoksit-konum-guvenligi/**"
+      - "alo186/hesaplama/karbonmonoksit-alarmi-ihtiyac-yerlesim-test/**"
+      - "alo186/sektor-rehberi/jenerator-karbonmonoksit-guvenlik-test-merkezi/**"
+      - "alo186/deployment/routing-overlays/156-generator-co-safety-growth.json"
+      - "alo186/audits/generator-co-safety-growth-v156-2026-07-31.md"
+      - "alo186/tests/test_generator_co_safety_growth_v156.py"
+      - ".github/workflows/alo186-generator-co-safety-growth-v156.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alo186/hesaplama/jenerator-karbonmonoksit-konum-guvenligi/**"
+      - "alo186/hesaplama/karbonmonoksit-alarmi-ihtiyac-yerlesim-test/**"
+      - "alo186/sektor-rehberi/jenerator-karbonmonoksit-guvenlik-test-merkezi/**"
+      - "alo186/deployment/routing-overlays/156-generator-co-safety-growth.json"
+      - "alo186/tests/test_generator_co_safety_growth_v156.py"
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python alo186/tests/test_generator_co_safety_growth_v156.py
