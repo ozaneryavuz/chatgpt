@@ -3,9 +3,9 @@ const api = require('./app.js');
 
 const base = {
   emergency: '', mode: 'planning', symptom: 'none', scope: 'single_room', useCase: 'home_room',
-  physicalCondition: 'good', areaM2: 20, ceilingM: 2.7, sun: 'normal', climate: 'hot',
+  physicalCondition: 'good', areaM2: 25, ceilingM: 2.7, sun: 'normal', climate: 'hot',
   insulation: 'average', people: 2, kitchen: 'no', electronicsW: 0,
-  unitType: 'split', existingUnit: 'no', candidateBtu: 12000, candidateInputW: 950,
+  unitType: 'split', existingUnit: 'no', candidateBtu: 9000, candidateInputW: 950,
   candidateRatedA: 4.5, voltage: 230, manualEvidence: 'verified', requiredBreakerA: 16,
   circuitBreakerA: 16, dedicatedCircuit: 'yes', earthStatus: 'verified', rcdStatus: 'tested',
   connection: 'fixed', realPerformanceTest: 'not_tested', comfortResult: 'unknown',
