@@ -25,8 +25,15 @@ APPLICATION_TERMS = re.compile(
     r"\b(başvur|basvur|talep|tazmin|dağıtım şirket|dagitim sirket|edaş|edas)\w*",
     re.IGNORECASE,
 )
-WRONG_DEADLINE = re.compile(r"\b30\s*gün\b", re.IGNORECASE)
-CORRECT_DEADLINE = re.compile(r"\b10\s*iş\s*gün(?:ü|de|den|i|içinde|içerisinde)?\b", re.IGNORECASE)
+RESPONSE_TERMS = re.compile(
+    r"\b(cevap|yanıt|bildir|haklı bulun|ret|redd|teknik rapor)\w*",
+    re.IGNORECASE,
+)
+STALE_DEADLINE = re.compile(
+    r"\b(?:10\s*iş\s*gün|on\s*iş\s*gün)(?:ü|lük|de|den|içinde|icerisinde|içerisinde)?\b",
+    re.IGNORECASE,
+)
+CURRENT_DEADLINE = re.compile(r"\b30\s*(?:takvim\s*)?gün(?:lük|ü|ün|de|den|içinde)?\b", re.IGNORECASE)
 
 ROUTES = [
     ("/", "Elektrik kesintisi", "https://www.alo186.com/"),
@@ -78,7 +85,7 @@ def fetch(url: str, timeout: int = 20) -> tuple[int, str, bytes, dict[str, str],
     request = Request(
         url,
         headers={
-            "User-Agent": "ALO186-Production-Smoke/2.0",
+            "User-Agent": "ALO186-Production-Smoke/2.1",
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
             "Accept-Encoding": "identity",
         },
@@ -95,10 +102,26 @@ def normalize_url(value: str) -> str:
     return value.rstrip("/")
 
 
-def wrong_deadline_contexts(text: str) -> list[str]:
+def stale_deadline_contexts(text: str) -> list[str]:
     normalized = re.sub(r"\s+", " ", text)
     contexts: list[str] = []
-    for match in WRONG_DEADLINE.finditer(normalized):
+    for match in STALE_DEADLINE.finditer(normalized):
+        start = max(0, match.start() - 260)
+        end = min(len(normalized), match.end() + 260)
+        context = normalized[start:end]
+        if (
+            DAMAGE_TERMS.search(context)
+            and APPLICATION_TERMS.search(context)
+            and not RESPONSE_TERMS.search(context)
+        ):
+            contexts.append(context[:520])
+    return contexts
+
+
+def current_deadline_contexts(text: str) -> list[str]:
+    normalized = re.sub(r"\s+", " ", text)
+    contexts: list[str] = []
+    for match in CURRENT_DEADLINE.finditer(normalized):
         start = max(0, match.start() - 260)
         end = min(len(normalized), match.end() + 260)
         context = normalized[start:end]
@@ -174,15 +197,16 @@ def run(base_url: str, check_assets: bool = True) -> dict:
                     failures.append(f"{path}: güvenlik başlığı eksik: {header_name}")
 
             if path in LEGAL_PATHS:
-                contexts = wrong_deadline_contexts(text)
-                for context in contexts:
-                    failures.append(f"{path}: cihaz hasarı bağlamında yanlış 30 gün ifadesi → {context}")
-                if not CORRECT_DEADLINE.search(text):
-                    failures.append(f"{path}: cihaz hasarı için görünür 10 iş günü ifadesi yok")
+                stale_contexts = stale_deadline_contexts(text)
+                current_contexts = current_deadline_contexts(text)
+                for context in stale_contexts:
+                    failures.append(f"{path}: cihaz hasarı başvurusunda eski 10 iş günü ifadesi → {context}")
+                if not current_contexts:
+                    failures.append(f"{path}: cihaz hasarı için görünür 30 gün ifadesi yok")
                 if not has_independent_platform_notice(text):
                     failures.append(f"{path}: ALO186 bağımsızlık/başvuru almama açıklaması yok")
-                row["deviceDamageDeadline"] = "10 iş günü" if CORRECT_DEADLINE.search(text) else None
-                row["wrongDeviceDamageDeadlineContexts"] = contexts
+                row["deviceDamageDeadline"] = "30 gün" if current_contexts else None
+                row["staleDeviceDamageDeadlineContexts"] = stale_contexts
 
             if check_assets:
                 asset_rows = []
@@ -242,6 +266,7 @@ def run(base_url: str, check_assets: bool = True) -> dict:
         "baseUrl": base_url,
         "canonicalHost": CANONICAL_HOST,
         "requiredSecurityHeaders": list(REQUIRED_SECURITY_HEADERS),
+        "deviceDamageDeadline": "30 gün",
         "results": results,
         "failures": failures,
     }
