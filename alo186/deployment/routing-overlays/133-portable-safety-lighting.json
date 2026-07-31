@@ -1,0 +1,21 @@
+{
+  "version": 133,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/uzatma-kablosu-kablo-makarasi-yuk-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/uzatma-kablosu-kablo-makarasi-yuk-uygunluk/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/elektrik-kesintisi-sarjli-ampul-isildak-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/elektrik-kesintisi-sarjli-ampul-isildak-uygunluk/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/sektor-rehberi/elektrik-kesintisi-aydinlatma-ve-guvenli-uzatma-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/elektrik-kesintisi-aydinlatma-ve-guvenli-uzatma-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
