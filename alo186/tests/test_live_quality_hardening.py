@@ -66,7 +66,7 @@ def test_deadline_normalization_is_one_way() -> None:
 
     assert normalize_text(current) == current
     normalized_stale = normalize_text(stale)
-    assert "30 gün içinde ilgili dağıtım şirketinin resmî kanalına başvurun" in normalized_stale
+    assert "zararın ortaya çıktığı tarihten itibaren 30 gün içinde" in normalized_stale
     assert "10 iş günü içinde EDAŞ kaydı açın" not in normalized_stale
     assert normalize_text(response) == response
     assert wrong_deadline_contexts(stale)
