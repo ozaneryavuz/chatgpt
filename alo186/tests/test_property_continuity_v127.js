@@ -11,22 +11,22 @@ const routes={
   gate:'/hesaplama/otomatik-kapi-kepenk-bariyer-yedek-guc-uygunluk/',
   center:'/sektor-rehberi/apartman-site-ortak-alan-elektrik-surekliligi-merkezi/'
 };
-const files={
+const sourceFiles={
   pump:path.join(ROOT,'alo186','hesaplama','hidrofor-su-pompasi-yedek-guc-uygunluk','index.html'),
   gate:path.join(ROOT,'alo186','hesaplama','otomatik-kapi-kepenk-bariyer-yedek-guc-uygunluk','index.html'),
   center:path.join(ROOT,'alo186','sektor-rehberi','apartman-site-ortak-alan-elektrik-surekliligi-merkezi','index.html')
 };
-const html=Object.fromEntries(Object.entries(files).map(([key,file])=>[key,fs.readFileSync(file,'utf8')]));
-const overlay=JSON.parse(fs.readFileSync(path.join(ROOT,'alo186','deployment','routing-overlays','127-property-continuity.json'),'utf8'));
+const html=Object.fromEntries(Object.entries(sourceFiles).map(([key,file])=>[key,fs.readFileSync(file,'utf8')]));
 const css=fs.readFileSync(path.join(ROOT,'alo186','assets','critical-continuity-v126.css'),'utf8');
+const overlay=JSON.parse(fs.readFileSync(path.join(ROOT,'alo186','deployment','routing-overlays','127-property-continuity.json'),'utf8'));
 
-const inlineScript=(text)=>{
-  const matches=[...text.matchAll(/<script(?![^>]*type=["']application\/ld\+json["'])[^>]*>([\s\S]*?)<\/script>/gi)];
-  assert.ok(matches.length,'inline script missing');
-  return matches.at(-1)[1];
-};
+function inlineScript(text){
+  const scripts=[...text.matchAll(/<script(?![^>]*type=["']application\/ld\+json["'])[^>]*>([\s\S]*?)<\/script>/gi)];
+  assert.ok(scripts.length,'inline script missing');
+  return scripts.at(-1)[1];
+}
 const scripts=Object.fromEntries(Object.entries(html).map(([key,text])=>[key,inlineScript(text)]));
-const syntaxDir=fs.mkdtempSync(path.join(os.tmpdir(),'alo186-v127-syntax-'));
+const syntaxDir=fs.mkdtempSync(path.join(os.tmpdir(),'alo186-property-v127-syntax-'));
 for(const [name,script] of Object.entries(scripts)){
   const file=path.join(syntaxDir,`${name}.js`);
   fs.writeFileSync(file,script);
@@ -35,25 +35,42 @@ for(const [name,script] of Object.entries(scripts)){
 fs.rmSync(syntaxDir,{recursive:true,force:true});
 
 for(const [name,text] of Object.entries(html)){
-  for(const token of ['rel="canonical"','FAQPage','BreadcrumbList','Kişisel veri'])assert.ok(text.includes(token),`${name}:${token}`);
-  for(const forbidden of ['amazon.com','amazon.com.tr','"@type":"Product"','"@type":"Offer"','priceCurrency','aggregateRating','availability'])assert.ok(!text.includes(forbidden),`${name}:${forbidden}`);
+  for(const token of ['rel="canonical"','FAQPage','BreadcrumbList','Kişisel veri','ALO186 bağımsız']){
+    assert.ok(text.includes(token),`${name}:${token}`);
+  }
+  for(const forbidden of ['amazon.com','amazon.com.tr','"@type":"Product"','"@type":"Offer"','priceCurrency','aggregateRating','availability']){
+    assert.ok(!text.includes(forbidden),`${name}:${forbidden}`);
+  }
 }
 for(const [name,script] of Object.entries(scripts)){
-  for(const forbidden of ['localStorage','sessionStorage','navigator.geolocation','fetch('])assert.ok(!script.includes(forbidden),`${name}:${forbidden}`);
+  for(const forbidden of ['localStorage','sessionStorage','navigator.geolocation','fetch(']){
+    assert.ok(!script.includes(forbidden),`${name}:${forbidden}`);
+  }
   assert.ok(script.includes('application/json'),`${name}:json`);
   assert.ok(script.includes('text/calendar'),`${name}:calendar`);
 }
+
 for(const name of ['pump','gate']){
-  const text=html[name];
-  const script=scripts[name];
-  for(const token of ['rel="sponsored nofollow noopener"','Satış ortaklığı','Mevcut kaynak yeterli — yeni ürün almayın','commerce-consent'])assert.ok(text.includes(token)||script.includes(token),`${name}:${token}`);
-  for(const token of ["scenario === 'active'",'commerce = false','evidenceMissing','existingEnough'])assert.ok(script.includes(token),`${name}:${token}`);
+  const combined=html[name]+scripts[name];
+  for(const token of ['rel="sponsored nofollow noopener"','Satış ortaklığı','yeni ürün almayın','commerce-consent','existingEnough','evidenceMissing']){
+    assert.ok(combined.includes(token),`${name}:${token}`);
+  }
+  assert.ok(/scenario\s*===\s*'active'/.test(scripts[name]),`${name}:active-event-close`);
+  assert.ok(scripts[name].includes('commerce = false'),`${name}:commerce-default-closed`);
 }
-for(const token of ['Yangın pompası','trifaze','Sabit veya yüksek riskli pompa için profesyonel rota','unsafeGenerator'])assert.ok(html.pump.includes(token)||scripts.pump.includes(token),`pump:${token}`);
-for(const token of ['Yangın ve tahliye sistemi tüketici ürünüyle seçilemez','manualRelease','safetyDevices','approvalMissing'])assert.ok(html.gate.includes(token)||scripts.gate.includes(token),`gate:${token}`);
-for(const token of ['commercialPath: false','Bu merkez doğrudan ürün bağlantısı göstermez','P0','P1','P2','professionalSystemCount'])assert.ok(html.center.includes(token)||scripts.center.includes(token),`center:${token}`);
-assert.ok(!html.center.includes('rel="sponsored'), 'center must not expose commerce link');
-for(const token of ['@media(max-width:820px)','@media(max-width:560px)','min-height:48px','prefers-reduced-motion','forced-colors','focus-visible'])assert.ok(css.includes(token),token);
+for(const token of ['Yangın pompası','trifaze','Sabit veya yüksek riskli pompa için profesyonel rota','unsafeGenerator']){
+  assert.ok((html.pump+scripts.pump).includes(token),`pump:${token}`);
+}
+for(const token of ['Yangın ve tahliye sistemi tüketici ürünüyle seçilemez','manualRelease','safetyDevices','approvalMissing']){
+  assert.ok((html.gate+scripts.gate).includes(token),`gate:${token}`);
+}
+for(const token of ['commercialPath: false','Bu merkez doğrudan ürün bağlantısı göstermez','P0','P1','P2','professionalSystemCount']){
+  assert.ok((html.center+scripts.center).includes(token),`center:${token}`);
+}
+assert.ok(!html.center.includes('rel="sponsored'),'center must not expose commerce link');
+for(const token of ['@media(max-width:820px)','@media(max-width:560px)','min-height:48px','prefers-reduced-motion','forced-colors','focus-visible']){
+  assert.ok(css.includes(token),token);
+}
 assert.ok(!/outline\s*:\s*(?:0|none)\b/i.test(css));
 
 assert.deepEqual(overlay,{
@@ -70,8 +87,10 @@ const temp=fs.mkdtempSync(path.join(os.tmpdir(),'alo186-property-continuity-v127
 const canonical=path.join(temp,'canonical');
 execFileSync('python',[path.join(ROOT,'alo186','deployment','build_static_site.py'),'--output',canonical,'--commit','property-continuity-v127-test'],{cwd:ROOT,stdio:'pipe'});
 const sitemap=fs.readFileSync(path.join(canonical,'sitemap.xml'),'utf8');
-for(const route of Object.values(routes))assert.ok(sitemap.includes(route),route);
-for(const route of Object.values(routes))assert.ok(fs.existsSync(path.join(canonical,route,'index.html')),route);
+for(const route of Object.values(routes)){
+  assert.ok(sitemap.includes(route),route);
+  assert.ok(fs.existsSync(path.join(canonical,route,'index.html')),route);
+}
 assert.ok(fs.existsSync(path.join(canonical,'assets','critical-continuity-v126.css')));
 
 for(const basePath of ['','/chatgpt']){
@@ -91,8 +110,8 @@ fs.rmSync(temp,{recursive:true,force:true});
 console.log(JSON.stringify({
   ok:true,version:127,routes:Object.values(routes),
   searchIntent:['hidrofor jeneratör kVA','otomatik kapı kesintide açma','apartman site ortak alan sürekliliği'],
-  userBenefit:true,professionalLeadPath:true,repeatVisitCalendar:true,
-  noBuyOutcome:true,activeOutageCommerceClosed:true,lifeSafetyCommerceClosed:true,
+  noBuyOutcome:true,activeEventCommerceClosed:true,lifeSafetyCommerceClosed:true,
   affiliateTransparent:true,directAmazon:false,priceStockRatingWarranty:false,
-  personalData:false,officialAffiliation:false,customDomain:true,projectPath:true
+  professionalLeadPath:true,repeatVisitCalendar:true,personalData:false,
+  officialAffiliation:false,customDomain:true,projectPath:true
 }));
