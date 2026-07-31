@@ -1,101 +1,107 @@
 #!/usr/bin/env python3
-"""Prevent user-facing ALO186 content from publishing an incorrect device-damage deadline."""
+"""Fail closed when the published ALO186 bundle uses an obsolete device-damage deadline."""
 
 from __future__ import annotations
 
-import re
+import json
+import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-ALLOWED_SUFFIXES = {".html", ".htm", ".js", ".mjs", ".json", ".md", ".txt", ".xml"}
-EXCLUDED_PARTS = {"audits", "reports", "artifacts", "node_modules", ".git"}
+ROOT = Path(__file__).resolve().parents[2]
+DEPLOYMENT = ROOT / "alo186/deployment"
+sys.path.insert(0, str(DEPLOYMENT))
 
-DAMAGE_TERMS = re.compile(r"\b(cihaz|teçhizat|techizat|hasar|zarar)\w*\b", re.IGNORECASE)
-APPLICATION_TERMS = re.compile(r"\b(başvur|basvur|talep|tazmin|dağıtım şirket|dagitim sirket|edaş|edas)\w*", re.IGNORECASE)
-WRONG_DEADLINE = re.compile(r"\b30\s*gün\b", re.IGNORECASE)
-CORRECT_DEADLINE = re.compile(r"\b10\s*iş\s*gün(?:ü|lük|de|den|içinde|icerisinde|içerisinde)?\b", re.IGNORECASE)
-
-
-def normalize(text: str) -> str:
-    return re.sub(r"\s+", " ", text.replace("&nbsp;", " ")).strip()
-
-
-def windows(text: str, pattern: re.Pattern[str], radius: int = 260):
-    for match in pattern.finditer(text):
-        start = max(0, match.start() - radius)
-        end = min(len(text), match.end() + radius)
-        yield match, text[start:end]
-
-
-def is_user_facing(path: Path) -> bool:
-    if path.suffix.lower() not in ALLOWED_SUFFIXES:
-        return False
-    relative_parts = set(path.relative_to(ROOT).parts)
-    return not (relative_parts & EXCLUDED_PARTS)
-
-
-def scan() -> tuple[list[str], list[str]]:
-    violations: list[str] = []
-    correct_locations: list[str] = []
-
-    for path in sorted(ROOT.rglob("*")):
-        if not path.is_file() or not is_user_facing(path):
-            continue
-        try:
-            raw = path.read_text(encoding="utf-8")
-        except UnicodeDecodeError:
-            continue
-        text = normalize(raw)
-
-        for match, context in windows(text, WRONG_DEADLINE):
-            if DAMAGE_TERMS.search(context) and APPLICATION_TERMS.search(context):
-                rel = path.relative_to(ROOT)
-                excerpt = normalize(context)[:520]
-                violations.append(f"{rel}:{match.start()} -> {excerpt}")
-
-        for match, context in windows(text, CORRECT_DEADLINE):
-            if DAMAGE_TERMS.search(context) and APPLICATION_TERMS.search(context):
-                rel = path.relative_to(ROOT)
-                correct_locations.append(f"{rel}:{match.start()}")
-
-    return violations, correct_locations
+from device_damage_deadline import (  # noqa: E402
+    CURRENT_DEADLINE,
+    CURRENT_DEADLINE_PATTERN,
+    STALE_DEADLINE,
+    find_current_application_deadlines,
+    find_stale_application_deadlines,
+)
 
 
 def self_test() -> None:
-    bad = "Cihaz hasarı için zararın doğduğu tarihten itibaren 30 gün içinde EDAŞ kaydı açın."
-    good = "Cihaz hasarı için zararın doğduğu tarihten itibaren 10 iş günü içinde ilgili dağıtım şirketine başvurun."
-    unrelated = "Bakım planınızı 30 gün içinde yeniden kontrol edin."
+    stale = "Cihaz hasarı için zararın doğduğu tarihten itibaren 10 iş günü içinde EDAŞ'a başvurun."
+    current = "Cihaz hasarı için zararın ortaya çıktığı tarihten itibaren 30 gün içinde dağıtım şirketine talepte bulunun."
+    response = "Başvurunun haklı bulunmadığı durumda dağıtım şirketi 10 iş günü içinde teknik raporu bildirir."
+    assert STALE_DEADLINE.search(stale)
+    assert CURRENT_DEADLINE_PATTERN.search(current)
+    assert STALE_DEADLINE.search(response)
 
-    assert WRONG_DEADLINE.search(bad)
-    assert DAMAGE_TERMS.search(bad) and APPLICATION_TERMS.search(bad)
-    assert CORRECT_DEADLINE.search(good)
-    assert not (DAMAGE_TERMS.search(unrelated) and APPLICATION_TERMS.search(unrelated))
+    with tempfile.TemporaryDirectory(prefix="alo186-deadline-sentence-scope-") as folder:
+        root = Path(folder)
+        page = root / "index.html"
+
+        page.write_text(stale, encoding="utf-8")
+        assert find_stale_application_deadlines(root), "Eski başvuru süresi yakalanmalı"
+
+        page.write_text(
+            "Cihaz hasarı başvurusu reddedilirse dağıtım şirketi 10 iş günü içinde teknik raporu bildirir.",
+            encoding="utf-8",
+        )
+        assert not find_stale_application_deadlines(root), "Yanıt/bildirim süresi başvuru süresi sanılmamalı"
+
+        page.write_text(
+            "<p>Cihaz hasarı için 10 iş günü içinde dağıtım şirketine başvurun.</p>"
+            "<p>Başvuru reddedilirse şirket teknik raporu bildirir.</p>",
+            encoding="utf-8",
+        )
+        violations = find_stale_application_deadlines(root)
+        assert violations, "Sonraki yanıt cümlesi eski başvuru süresini maskeleyememeli"
+
+        page.write_text(
+            "Cihaz hasarı için 10 iş günü içinde dağıtım şirketine başvurun. "
+            "Başvuru reddedilirse şirket teknik raporu bildirir.",
+            encoding="utf-8",
+        )
+        assert find_stale_application_deadlines(root), "Ayrı yanıt cümlesi eski süreyi istisna yapmamalı"
+
+
+def build_and_validate() -> dict[str, object]:
+    with tempfile.TemporaryDirectory(prefix="alo186-device-damage-deadline-") as folder:
+        output = Path(folder) / "site"
+        subprocess.run(
+            [
+                sys.executable,
+                "alo186/deployment/build_static_site.py",
+                "--output",
+                str(output),
+                "--commit",
+                "deadline-guard",
+            ],
+            cwd=ROOT,
+            check=True,
+        )
+        stale = find_stale_application_deadlines(output)
+        current = find_current_application_deadlines(output)
+        if stale:
+            raise AssertionError(
+                "Yayın paketinde cihaz hasarı başvurusu için eski 10 iş günü ifadesi bulundu:\n- "
+                + "\n- ".join(stale)
+            )
+        if not current:
+            raise AssertionError("Yayın paketinde cihaz hasarı başvurusunu 30 güne bağlayan metin yok.")
+        release = json.loads((output / "alo186-release.json").read_text(encoding="utf-8"))
+        assert release["deviceDamageDeadline"] == CURRENT_DEADLINE
+        assert int(release["deviceDamageVerifiedLocations"]) > 0
+        htaccess = (output / ".htaccess").read_text(encoding="utf-8")
+        assert "mod_substitute" not in htaccess.lower()
+        assert "Substitute \"s|" not in htaccess
+        return {
+            "deadline": release["deviceDamageDeadline"],
+            "verifiedLocations": release["deviceDamageVerifiedLocations"],
+            "normalizedFiles": release["deviceDamageNormalizedFiles"],
+        }
 
 
 def main() -> int:
     self_test()
-    violations, correct_locations = scan()
-
-    print(f"ALO186 source root: {ROOT}")
-    print(f"Verified correct device-damage deadline references: {len(correct_locations)}")
-    for location in correct_locations[:20]:
-        print(f"  OK  {location}")
-
-    if violations:
-        print("\nERROR: Device/equipment damage application context contains '30 gün'.")
-        print("EPDK consumer guidance requires application to the distribution company within 10 business days from the date the damage arose.")
-        for violation in violations:
-            print(f"  BAD {violation}")
-        return 1
-
-    if not correct_locations:
-        print("\nERROR: No source reference linking device damage application to '10 iş günü' was found.")
-        return 1
-
-    print("\nPASS: No incorrect 30-day device-damage application deadline was found in user-facing source files.")
+    report = build_and_validate()
+    print(json.dumps({"ok": True, **report}, ensure_ascii=False))
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(main())

@@ -71,18 +71,10 @@ AddType application/manifest+json .webmanifest
 ForceType text/css
 </Files>
 
-# P0 geçici hukukî içerik koruması: canlı ana sayfa/portalın haricî veya eski
-# şablonu tamamen yenilenene kadar kullanıcı hakkını yanlış gösteren iki metni
-# HTML ve gömülü JSON-LD içinde düzeltir. Kalıcı kaynak düzeltmesi sonrasında da
-# zararsız bir savunma katmanı olarak bırakılabilir.
-<IfModule mod_filter.c>
-<IfModule mod_substitute.c>
-AddOutputFilterByType SUBSTITUTE text/html application/xhtml+xml
-Substitute "s|zararın ortaya çıktığı tarihten itibaren 30 gün içinde|zararın ortaya çıktığı tarihten itibaren 10 iş günü içinde|n"
-Substitute "s|30 gün içinde EDAŞ kaydı açın|10 iş günü içinde ilgili dağıtım şirketinin resmî kanalına başvurun|n"
-Substitute "s|ilgili dağıtım şirketine kayıtlı başvuru yapmalı|ilgili dağıtım şirketinin resmî kanalına başvurmalı|n"
-</IfModule>
-</IfModule>
+# Cihaz hasarı başvuru süresi HTML yanıt katmanında değiştirilmez. Yayın paketi,
+# yürürlükteki Kalite Yönetmeliği Madde 26/1 uyarınca 30 günlük süreyi build
+# aşamasında doğrular. Sunucu filtresi eski veya doğru hukukî metni sessizce
+# dönüştüremez; görünür içerik ile JSON-LD aynı canonical kaynaktan gelir.
 
 <IfModule mod_expires.c>
 ExpiresActive On

@@ -21,6 +21,7 @@ def main() -> None:
     apache = read("alo186/deployment/apache-production.htaccess")
     static_smoke = read("alo186/deployment/smoke_static_site.py")
     live_smoke = read("alo186/deployment/smoke_live_routes.py")
+    deadline_guard = read("alo186/tests/device_damage_deadline_guard.py")
 
     # The production workflow must use the Python builder and the active Apache file.
     assert "python alo186/deployment/build_static_site.py" in workflow
@@ -64,17 +65,19 @@ def main() -> None:
         assert header in builder, f"Builder header validation missing: {header}"
         assert header.lower() in live_smoke, f"Live smoke header validation missing: {header}"
 
-    # The live root still comes from an older/external template. The active Apache
-    # output filter protects visible HTML and embedded JSON-LD until that source is
-    # replaced, while source/artifact guards prevent new regressions.
-    assert "AddOutputFilterByType SUBSTITUTE text/html application/xhtml+xml" in apache
-    assert "zararın ortaya çıktığı tarihten itibaren 30 gün içinde" in apache
-    assert "zararın ortaya çıktığı tarihten itibaren 10 iş günü içinde" in apache
-    assert "30 gün içinde EDAŞ kaydı açın" in apache
-    assert "10 iş günü içinde ilgili dağıtım şirketinin resmî kanalına başvurun" in apache
-    assert "wrong_damage_deadline_contexts" in static_smoke
-    assert "wrong_deadline_contexts" in live_smoke
-    assert "10 iş günü" in live_smoke
+    # Binding Kalite Yönetmeliği Madde 26/1 uses a 30-day application period.
+    # The response layer must not rewrite visible HTML or JSON-LD; builder and
+    # smoke guards validate the canonical artifact and live pages instead.
+    assert "Cihaz hasarı başvuru süresi HTML yanıt katmanında değiştirilmez" in apache
+    assert "AddOutputFilterByType SUBSTITUTE text/html application/xhtml+xml" not in apache
+    assert "<IfModule mod_substitute.c>" not in apache
+    assert "Substitute \"s|" not in apache
+    assert "deviceDamageDeadline\": CURRENT_DEADLINE" in builder
+    assert "30 gün" in deadline_guard
+    assert "stale_damage_application_contexts" in static_smoke
+    assert "stale_deadline_contexts" in live_smoke
+    assert "CURRENT_DEADLINE" in live_smoke
+    assert "30 gün" in live_smoke
 
     # The active builder must include root operational files. Otherwise 404 and the
     # Tailwind compatibility response silently disappear from the real artifact.
@@ -111,8 +114,8 @@ def main() -> None:
     assert "https://alo186.com" in builder
 
     print(
-        "PASS: active ALO186 production builder, public artifact hygiene, Apache config, "
-        "deploy request/block/failure gates and smoke tests are aligned."
+        "PASS: active ALO186 production builder, 30-day legal deadline, public artifact "
+        "hygiene, Apache config, deploy gates and smoke tests are aligned."
     )
 
 

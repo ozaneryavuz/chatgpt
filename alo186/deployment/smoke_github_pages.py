@@ -240,8 +240,10 @@ def smoke(site: Path, manifest_path: Path, base_path: str) -> dict:
         failures.append(f"pages-release basePath yanlış: {pages_release.get('basePath')!r}")
     if pages_release.get("canonicalHost") != CANONICAL_ORIGIN:
         failures.append("pages-release canonicalHost yanlış")
-    if core_release.get("deviceDamageDeadline") != "10 iş günü":
+    if core_release.get("deviceDamageDeadline") != "30 gün":
         failures.append("core release cihaz hasarı süresi yanlış")
+    if pages_release.get("rootDeviceDamageDeadline") != "30 gün":
+        failures.append("Pages kök cihaz hasarı süresi yanlış")
 
     for route in manifest["routes"]:
         if not route_exists(site, route["canonicalPath"]):

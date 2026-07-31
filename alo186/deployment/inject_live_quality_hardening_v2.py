@@ -7,6 +7,7 @@ from pathlib import Path
 
 import finalize_user_entrypoints as entrypoints
 import inject_live_quality_hardening as core
+from device_damage_deadline import BLOCK_BOUNDARY, REPLACEMENTS as DEVICE_DAMAGE_REPLACEMENTS
 from prepare_github_pages import UX_MARKER, install_sitewide_ux
 
 
@@ -16,41 +17,110 @@ _APPLICATION_CONTEXT = re.compile(
     r"\b(başvur|basvur|talep|tazmin|dağıtım şirket|dagitim sirket|edaş|edas)\w*",
     re.IGNORECASE,
 )
+_RESPONSE_CONTEXT = re.compile(
+    r"\b(cevap|yanıt|bildir|haklı bulun|ret|redd|teknik rapor)\w*",
+    re.IGNORECASE,
+)
+
+# Growth injectors run after the canonical source normalization and can add their
+# own explanatory cards. These are the exact obsolete application-deadline
+# phrases previously observed in final artifacts. The list is intentionally
+# narrow so the valid 10-business-day response/report period remains untouched.
+_FINAL_ARTIFACT_DEADLINE_REPLACEMENTS: tuple[tuple[str, str], ...] = (
+    (
+        "10 iş günlük süreç, kanıt ve resmî başvuru durumunu izleyin.",
+        "30 günlük süreç, kanıt ve resmî başvuru durumunu izleyin.",
+    ),
+    (
+        "10 iş günlük başvuru süresini ve dağıtım şirketine götürülecek kanıt kontrolünü düzenler.",
+        "30 günlük başvuru süresini ve dağıtım şirketine götürülecek kanıt kontrolünü düzenler.",
+    ),
+    (
+        "10 iş günlük resmî başvuru süresini kontrol edin.",
+        "30 günlük resmî başvuru süresini kontrol edin.",
+    ),
+    ("10 iş günü · kanıt · resmî kanal", "30 gün · kanıt · resmî kanal"),
+    (
+        "10 iş günlük süreyi, kanıtı ve resmî takip adımlarını düzenleyin.",
+        "30 günlük süreyi, kanıtı ve resmî takip adımlarını düzenleyin.",
+    ),
+)
+
+
+def _apply_deadline_replacements(text: str) -> str:
+    # Reuse the canonical publication migration map so generated copies cannot
+    # diverge from the same legal policy. Exact replacements are idempotent.
+    for replacements in DEVICE_DAMAGE_REPLACEMENTS.values():
+        for old, new in replacements:
+            text = text.replace(old, new)
+    for old, new in _FINAL_ARTIFACT_DEADLINE_REPLACEMENTS:
+        text = text.replace(old, new)
+    return text
 
 
 def normalize_text(text: str) -> str:
-    # En uzun ve kullanıcıyı doğrudan yanlış kanala yönlendiren eski cümleyi
-    # önce düzeltiriz; aksi halde daha kısa 30 gün değişimi ikinci eşleşmeyi bozar.
+    # A previously generated artifact may still contain obsolete application
+    # wording. Normalize both canonical source phrases and exact post-injector
+    # variants, while preserving a valid 10-business-day response period.
+    text = _apply_deadline_replacements(text)
     text = text.replace(
-        "zararın ortaya çıktığı tarihten itibaren 30 gün içinde EDAŞ kaydı açın",
-        "zararın ortaya çıktığı tarihten itibaren 10 iş günü içinde ilgili dağıtım şirketinin resmî kanalına başvurun",
+        "zararın ortaya çıktığı tarihten itibaren 10 iş günü içinde EDAŞ kaydı açın",
+        "zararın ortaya çıktığı tarihten itibaren 30 gün içinde ilgili dağıtım şirketinin resmî kanalına başvurun",
     )
     text = text.replace(
-        "Zararın ortaya çıktığı tarihten itibaren 30 gün içinde EDAŞ kaydı açın",
-        "Zararın ortaya çıktığı tarihten itibaren 10 iş günü içinde ilgili dağıtım şirketinin resmî kanalına başvurun",
+        "Zararın ortaya çıktığı tarihten itibaren 10 iş günü içinde EDAŞ kaydı açın",
+        "Zararın ortaya çıktığı tarihten itibaren 30 gün içinde ilgili dağıtım şirketinin resmî kanalına başvurun",
     )
     updated = _original_normalize_text(text)
-    # Kısa dönüşüm daha önce çalışmış eski artifactlar için de fail-safe temizlik.
     updated = updated.replace(
         "10 iş günü içinde EDAŞ kaydı açın",
-        "10 iş günü içinde ilgili dağıtım şirketinin resmî kanalına başvurun",
+        "30 gün içinde ilgili dağıtım şirketinin resmî kanalına başvurun",
     )
-    return updated
+    return _apply_deadline_replacements(updated)
+
+
+def _normalize_for_scan(text: str) -> str:
+    # HTML block endings are legal-statement boundaries. Without this step, a
+    # valid response deadline in the next element could mask an obsolete
+    # application deadline in the preceding card or paragraph.
+    return re.sub(r"\s+", " ", BLOCK_BOUNDARY.sub(". ", text))
+
+
+def _statement_for_match(normalized: str, match: re.Match[str]) -> str:
+    left = max(
+        normalized.rfind(".", 0, match.start()),
+        normalized.rfind("!", 0, match.start()),
+        normalized.rfind("?", 0, match.start()),
+    )
+    right_candidates = [
+        position
+        for marker in (".", "!", "?")
+        if (position := normalized.find(marker, match.end())) >= 0
+    ]
+    right = min(right_candidates) if right_candidates else len(normalized)
+    return normalized[left + 1 : right + 1]
 
 
 def wrong_damage_deadline_contexts(text: str) -> list[str]:
-    """Yalnız hasar/zarar başvurusu bağlamındaki 30 gün ifadelerini yakalar.
+    """Yalnız hasar/zarar başvurusu bağlamındaki eski 10 iş günü ifadelerini yakalar.
 
-    Tarayıcıdaki yerel kayıtların 30 gün saklanması gibi gizlilik süreleri bu
-    güvenlik kapısının konusu değildir ve yanlış pozitif üretmemelidir.
+    Başvurunun reddedilmesinden sonra dağıtım şirketinin teknik raporu veya cevabı
+    için geçerli olan 10 iş günlük bildirim süresi yanlış pozitif sayılmaz. Yanıt
+    istisnası yalnız aynı cümleye uygulanır; sonraki paragraf eski başvuru süresini
+    maskeleyemez.
     """
-    normalized = re.sub(r"\s+", " ", text)
+    normalized = _normalize_for_scan(text)
     contexts: list[str] = []
-    for match in core.WRONG_DEADLINE.finditer(normalized):
+    for match in core.STALE_DEADLINE.finditer(normalized):
         start = max(0, match.start() - 180)
         end = min(len(normalized), match.end() + 180)
         context = normalized[start:end]
-        if _DAMAGE_CONTEXT.search(context) and _APPLICATION_CONTEXT.search(context):
+        statement = _statement_for_match(normalized, match)
+        if (
+            _DAMAGE_CONTEXT.search(context)
+            and _APPLICATION_CONTEXT.search(context)
+            and not _RESPONSE_CONTEXT.search(statement)
+        ):
             contexts.append(context[:360])
     return contexts
 
@@ -85,6 +155,7 @@ def validate(site: Path, base_path: str) -> dict:
     failures: list[str] = []
     html_count = 0
     canonical_count = 0
+    current_deadline_count = 0
     css_href = core.public_url(base_path, f"/{core.CSS_FILE}")
     ux_css_href = core.public_url(base_path, "/assets/alo186-ux.css")
     ux_js_src = core.public_url(base_path, "/assets/alo186-ux.js")
@@ -112,6 +183,7 @@ def validate(site: Path, base_path: str) -> dict:
             failures.append(f"Eski www origin kaldı: {path.relative_to(site)}")
         for context in wrong_damage_deadline_contexts(text):
             failures.append(f"Yanlış cihaz hasarı süresi: {path.relative_to(site)} → {context}")
+        current_deadline_count += len(core.current_deadline_contexts(text))
         if path.suffix.lower() not in {".html", ".htm"}:
             continue
         html_count += 1
@@ -127,6 +199,9 @@ def validate(site: Path, base_path: str) -> dict:
             if canonical != core.CANONICAL_ORIGIN and not canonical.startswith(core.CANONICAL_ORIGIN + "/"):
                 failures.append(f"Canonical origin yanlış: {relative} → {canonical}")
 
+    if current_deadline_count == 0:
+        failures.append("Cihaz hasarı başvurusunu yürürlükteki 30 güne bağlayan yayın metni bulunamadı")
+
     for release_name in ("alo186-release.json", "pages-release.json"):
         release_path = site / release_name
         if not release_path.is_file():
@@ -137,6 +212,8 @@ def validate(site: Path, base_path: str) -> dict:
         quality = release.get("liveTechnicalQuality") or {}
         if quality.get("minimumTouchTargetCssPx") != 44:
             failures.append(f"{release_name} canlı kalite sözleşmesi eksik")
+        if quality.get("deviceDamageDeadline") != "30 gün":
+            failures.append(f"{release_name} cihaz hasarı süre sözleşmesi yanlış")
         if quality.get("personalDataCollectionAdded") is not False:
             failures.append(f"{release_name} kişisel veri güven sözleşmesi eksik")
         if quality.get("officialInstitutionClaimed") is not False:
@@ -185,7 +262,8 @@ def validate(site: Path, base_path: str) -> dict:
         "releaseRouteCount": route_count,
         "sitewideUxHtmlCount": html_count,
         "sitewideUxFinalizedAfterGrowthInjectors": True,
-        "deviceDamageDeadline": "10 iş günü",
+        "deviceDamageDeadline": "30 gün",
+        "deviceDamageDeadlineContexts": current_deadline_count,
         "minimumTouchTargetCssPx": 44,
         "personalDataCollectionAdded": False,
         "officialInstitutionClaimed": False,

@@ -32,12 +32,15 @@ REQUIRED_API_HEADERS = (
     "referrer-policy",
 )
 
-# EPDK'nın güncel tüketici açıklaması ve Hizmet Kalitesi Yönetmeliği madde 26
-# bağlamında cihaz/teçhizat hasarı talebi zararın ortaya çıktığı tarihten itibaren
-# 10 iş günü içinde ilgili dağıtım şirketine yapılabilir.
+# Elektrik Piyasasında Dağıtım ve Perakende Satış Faaliyetlerine İlişkin
+# Kalite Yönetmeliği Madde 26/1, cihaz/teçhizat hasarı tazmin talebini zararın
+# ortaya çıktığı tarihten itibaren 30 gün içinde dağıtım şirketine bağlar.
+# 23.10.2025 değişikliği ikinci fıkrayı değiştirmiş, bu süreyi kaldırmamıştır.
 EPDK_DEVICE_DAMAGE_SOURCE = (
-    "https://www.epdk.gov.tr/Detay/Icerik/12-3/"
-    "12-faturayi-zamaninda-odemezsem-gecikme-zammi-od"
+    "https://www.resmigazete.gov.tr/eskiler/2020/12/20201229M1-1.htm"
+)
+EPDK_DEVICE_DAMAGE_AMENDMENT_SOURCE = (
+    "https://www.resmigazete.gov.tr/eskiler/2025/10/20251023-5.htm"
 )
 DEVICE_DAMAGE_STRICT_PATHS = ("/", "/elektrik-portali")
 DEVICE_DAMAGE_CANDIDATE_PATHS = (
@@ -50,6 +53,7 @@ DEVICE_DAMAGE_CANDIDATE_PATHS = (
 )
 DAMAGE_TERMS = ("cihaz", "techizat", "hasar", "zarar")
 CLAIM_TERMS = ("basvur", "tazmin", "talep", "dagitim", "edas")
+RESPONSE_TERMS = ("cevap", "yanit", "bildir", "hakli bulun", "ret", "redd", "teknik rapor")
 STATEMENT_BOUNDARIES = "|.!?;"
 
 
@@ -84,7 +88,7 @@ def fetch(
     started = time.perf_counter()
     request = Request(
         url,
-        headers={"User-Agent": "ALO186-Synthetic/2.2", "Accept": "application/json,text/html,*/*"},
+        headers={"User-Agent": "ALO186-Synthetic/2.3", "Accept": "application/json,text/html,*/*"},
     )
     try:
         with urlopen(request, timeout=timeout) as response:
@@ -149,7 +153,7 @@ def _fold_content(value: str) -> str:
     """HTML, görünür metin ve JSON-LD içeriğini arama için sadeleştirir.
 
     Etiketler `|` sınırına çevrilir. Böylece birbirinden bağımsız kart veya paragraf
-    metinleri geniş bir karakter penceresinde yanlışlıkla aynı hukuki bağlama girmez.
+    metinleri geniş bir karakter penceresinde yanlışlıkla aynı hukukî bağlama girmez.
     Script içindeki JSON-LD metni korunur.
     """
 
@@ -194,13 +198,7 @@ def _previous_statement(value: str, start: int, radius: int = 260) -> str:
 
 
 def _claim_context(value: str, start: int, end: int) -> str:
-    """Süre ifadesinin ait olduğu cümle/kart bağlamını döndürür.
-
-    Sürenin bulunduğu ifade başvuru terimi taşıyor fakat cihaz/hasar başlığı bir
-    önceki HTML öğesindeyse yalnız önceki ifadeyi ekler. Sonraki ifadeyi eklemez;
-    bu, başka bir sürece ait `30 gün` cümlesinin ardından gelen doğru cihaz hasarı
-    cümlesi nedeniyle yanlış pozitif oluşmasını engeller.
-    """
+    """Süre ifadesinin ait olduğu cümle/kart bağlamını döndürür."""
 
     current = _statement_context(value, start, end)
     if _has_terms(current, DAMAGE_TERMS):
@@ -213,26 +211,30 @@ def _claim_context(value: str, start: int, end: int) -> str:
 
 
 def analyze_device_damage_text(raw_html: str) -> dict[str, object]:
-    """Cihaz hasarı başvuru süresindeki hukuki açıdan kritik ifadeleri tarar.
+    """Madde 26/1 kapsamındaki 30 günlük talep süresini ve eski FAQ metnini tarar.
 
-    Arama görünür HTML metnini ve JSON-LD script içeriğini birlikte kapsar. Böylece
-    sayfada doğru metin gösterilirken yapılandırılmış veride eski sürenin kalması da
-    yayın hatası sayılır.
+    Görünür HTML ile JSON-LD birlikte değerlendirilir. Başvurunun reddedilmesi
+    hâlindeki 10 iş günlük bildirim süresi, kullanıcının talep süresi değildir ve
+    eski başvuru süresi olarak sınıflandırılmaz.
     """
 
     text = _fold_content(raw_html)
-    bad_contexts: list[str] = []
-    good_contexts: list[str] = []
+    stale_contexts: list[str] = []
+    current_contexts: list[str] = []
+
+    for match in re.finditer(r"\b10\s*is\s*gun(?:u|luk|unde|unden)?\b", text):
+        nearby = _claim_context(text, match.start(), match.end())
+        if (
+            _has_terms(nearby, DAMAGE_TERMS)
+            and _has_terms(nearby, CLAIM_TERMS)
+            and not _has_terms(nearby, RESPONSE_TERMS)
+        ):
+            stale_contexts.append(nearby[:720])
 
     for match in re.finditer(r"\b30\s*(?:takvim\s*)?gun(?:luk|u|un|de|den)?\b", text):
         nearby = _claim_context(text, match.start(), match.end())
         if _has_terms(nearby, DAMAGE_TERMS) and _has_terms(nearby, CLAIM_TERMS):
-            bad_contexts.append(nearby[:720])
-
-    for match in re.finditer(r"\b10\s*is\s*gun(?:u|luk|unde|unden)?\b", text):
-        nearby = _claim_context(text, match.start(), match.end())
-        if _has_terms(nearby, DAMAGE_TERMS) and _has_terms(nearby, CLAIM_TERMS):
-            good_contexts.append(nearby[:720])
+            current_contexts.append(nearby[:720])
 
     disclaimer_patterns = (
         r"alo186.{0,320}(?:basvuru|ihbar|ariza|hasar|kayit).{0,180}(?:almaz|toplamaz|degildir|yapmaz)",
@@ -241,11 +243,11 @@ def analyze_device_damage_text(raw_html: str) -> dict[str, object]:
     has_disclaimer = any(re.search(pattern, text) for pattern in disclaimer_patterns)
 
     return {
-        "has30DayDamageClaim": bool(bad_contexts),
-        "has10BusinessDayDamageClaim": bool(good_contexts),
+        "has30DayDamageClaim": bool(current_contexts),
+        "has10BusinessDayDamageClaim": bool(stale_contexts),
         "hasAlo186NoApplicationDisclaimer": has_disclaimer,
-        "badContexts": bad_contexts[:5],
-        "goodContexts": good_contexts[:3],
+        "badContexts": stale_contexts[:5],
+        "goodContexts": current_contexts[:3],
     }
 
 
@@ -261,7 +263,7 @@ def device_damage_deadline_check(
     request = Request(
         url,
         headers={
-            "User-Agent": "ALO186-Legal-Accuracy-Monitor/1.0",
+            "User-Agent": "ALO186-Legal-Accuracy-Monitor/2.0",
             "Accept": "text/html,application/xhtml+xml",
         },
     )
@@ -274,11 +276,11 @@ def device_damage_deadline_check(
             ok = (
                 response.status == 200
                 and "text/html" in content_type.lower()
-                and not analysis["has30DayDamageClaim"]
+                and not analysis["has10BusinessDayDamageClaim"]
                 and (
                     not strict
                     or (
-                        analysis["has10BusinessDayDamageClaim"]
+                        analysis["has30DayDamageClaim"]
                         and analysis["hasAlo186NoApplicationDisclaimer"]
                     )
                 )
@@ -294,6 +296,7 @@ def device_damage_deadline_check(
                 "contentType": content_type,
                 "strict": strict,
                 "sourceUrl": EPDK_DEVICE_DAMAGE_SOURCE,
+                "amendmentUrl": EPDK_DEVICE_DAMAGE_AMENDMENT_SOURCE,
                 "durationMs": round((time.perf_counter() - started) * 1000, 1),
                 **analysis,
             }
@@ -303,10 +306,10 @@ def device_damage_deadline_check(
                     reasons.append(f"HTTP {response.status}")
                 if "text/html" not in content_type.lower():
                     reasons.append("HTML yanıtı değil")
-                if analysis["has30DayDamageClaim"]:
-                    reasons.append("cihaz/teçhizat hasarı bağlamında 30 gün bulundu")
-                if strict and not analysis["has10BusinessDayDamageClaim"]:
-                    reasons.append("10 iş günü ifadesi bulunamadı")
+                if analysis["has10BusinessDayDamageClaim"]:
+                    reasons.append("cihaz/teçhizat hasarı talebinde eski 10 iş günü ifadesi bulundu")
+                if strict and not analysis["has30DayDamageClaim"]:
+                    reasons.append("Madde 26/1 kapsamındaki 30 gün ifadesi bulunamadı")
                 if strict and not analysis["hasAlo186NoApplicationDisclaimer"]:
                     reasons.append("ALO186'in başvuru/ihbar almadığı açıklanmıyor")
                 result["error"] = "; ".join(reasons)
@@ -320,6 +323,7 @@ def device_damage_deadline_check(
             "requestedUrl": url,
             "strict": strict,
             "sourceUrl": EPDK_DEVICE_DAMAGE_SOURCE,
+            "amendmentUrl": EPDK_DEVICE_DAMAGE_AMENDMENT_SOURCE,
             "error": str(exc),
             "durationMs": round((time.perf_counter() - started) * 1000, 1),
         }
@@ -329,7 +333,7 @@ def device_damage_deadline_checks(web_base: str, timeout: float) -> list[dict[st
     checks: list[dict[str, object]] = []
     seen: set[str] = set()
 
-    # Hukuki açıdan en kritik ana sayfa ve portal hem apex hem www üzerinde ayrı
+    # Hukukî açıdan en kritik ana sayfa ve portal hem apex hem www üzerinde ayrı
     # doğrulanır; canonical/host geçişlerinde eski cache'in kalması böyle yakalanır.
     for base in ("https://alo186.com", "https://www.alo186.com"):
         for path in DEVICE_DAMAGE_STRICT_PATHS:
@@ -338,9 +342,9 @@ def device_damage_deadline_checks(web_base: str, timeout: float) -> list[dict[st
                 checks.append(device_damage_deadline_check(base, path, timeout, strict=True))
                 seen.add(url)
 
-    # Diğer aday sayfalar canonical web base üzerinde bağlam içinde taranır. Bu
-    # sayfalardaki başka bir sürece ait 30 günlük süre, hasar+başvuru bağlamı yoksa
-    # yanlışlıkla hata sayılmaz.
+    # Diğer aday sayfalar canonical web base üzerinde bağlam içinde taranır. Başvuru
+    # reddi sonrasında dağıtım şirketinin 10 iş günlük bildirim süresi yanlış pozitif
+    # sayılmaz; kullanıcının talep süresi 30 gün olarak aranır.
     for path in DEVICE_DAMAGE_CANDIDATE_PATHS:
         url = f"{web_base.rstrip('/')}{path}"
         if url not in seen:

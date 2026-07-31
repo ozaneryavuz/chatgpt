@@ -30,9 +30,7 @@ REQUIRED_SECURITY_HEADERS = (
 )
 REQUIRED_APACHE_TOKENS = (
     "RewriteRule ^ https://www.alo186.com%{REQUEST_URI}",
-    "AddOutputFilterByType SUBSTITUTE text/html application/xhtml+xml",
-    "zararın ortaya çıktığı tarihten itibaren 10 iş günü içinde",
-    "10 iş günü içinde ilgili dağıtım şirketinin resmî kanalına başvurun",
+    "Cihaz hasarı başvuru süresi HTML yanıt katmanında değiştirilmez",
     "ForceType text/css",
 )
 FORBIDDEN_PUBLIC_DIRECTORIES = {
@@ -81,7 +79,14 @@ APPLICATION_TERMS = re.compile(
     r"\b(başvur|basvur|talep|tazmin|dağıtım şirket|dagitim sirket|edaş|edas)\w*",
     re.IGNORECASE,
 )
-WRONG_DEADLINE = re.compile(r"\b30\s*gün\b", re.IGNORECASE)
+RESPONSE_TERMS = re.compile(
+    r"\b(cevap|yanıt|bildir|haklı bulun|ret|redd|teknik rapor)\w*",
+    re.IGNORECASE,
+)
+STALE_DEADLINE = re.compile(
+    r"\b(?:10\s*iş\s*gün|on\s*iş\s*gün)(?:ü|lük|de|den|içinde|icerisinde|içerisinde)?\b",
+    re.IGNORECASE,
+)
 
 
 class AssetParser(HTMLParser):
@@ -123,14 +128,18 @@ def is_forbidden_public_file(path: Path, bundle: Path) -> bool:
     return any(fnmatch.fnmatch(path.name, pattern) for pattern in FORBIDDEN_PUBLIC_FILE_PATTERNS)
 
 
-def wrong_damage_deadline_contexts(text: str) -> list[str]:
+def stale_damage_application_contexts(text: str) -> list[str]:
     normalized = re.sub(r"\s+", " ", text)
     contexts: list[str] = []
-    for match in WRONG_DEADLINE.finditer(normalized):
+    for match in STALE_DEADLINE.finditer(normalized):
         start = max(0, match.start() - 260)
         end = min(len(normalized), match.end() + 260)
         context = normalized[start:end]
-        if DAMAGE_TERMS.search(context) and APPLICATION_TERMS.search(context):
+        if (
+            DAMAGE_TERMS.search(context)
+            and APPLICATION_TERMS.search(context)
+            and not RESPONSE_TERMS.search(context)
+        ):
             contexts.append(context[:520])
     return contexts
 
@@ -156,8 +165,8 @@ def smoke(bundle: Path, repo_root: Path) -> dict:
             failures.append(f"Canonical eşleşmiyor: {route['canonicalPath']} → {parser.canonical!r}")
         if LEGACY_HOST in html:
             failures.append(f"Eski apex origin route HTML içinde kaldı: {route['canonicalPath']}")
-        for context in wrong_damage_deadline_contexts(html):
-            failures.append(f"{route['canonicalPath']}: yanlış cihaz hasarı süresi → {context}")
+        for context in stale_damage_application_contexts(html):
+            failures.append(f"{route['canonicalPath']}: eski cihaz hasarı başvuru süresi → {context}")
         for reference in parser.assets:
             asset = resolve_asset(bundle, target, reference)
             if asset is None:
@@ -192,6 +201,8 @@ def smoke(bundle: Path, repo_root: Path) -> dict:
         for token in REQUIRED_APACHE_TOKENS:
             if token not in htaccess:
                 failures.append(f"Aktif .htaccess sözleşmesi eksik: {token}")
+        if "<IfModule mod_substitute.c>" in htaccess or "Substitute \"s|" in htaccess:
+            failures.append("Aktif .htaccess hukukî içeriği yanıt katmanında değiştiremez")
     else:
         failures.append("Aktif .htaccess okunamadı")
 
@@ -200,8 +211,12 @@ def smoke(bundle: Path, repo_root: Path) -> dict:
         release = json.loads(release_path.read_text(encoding="utf-8"))
         if release.get("canonicalHost") != CANONICAL_HOST:
             failures.append(f"Release canonicalHost yanlış: {release.get('canonicalHost')!r}")
-        if release.get("deviceDamageDeadline") != "10 iş günü":
+        if release.get("deviceDamageDeadline") != "30 gün":
             failures.append("Release cihaz hasarı süresi sözleşmesi eksik")
+        if not release.get("deviceDamageRegulationUrl"):
+            failures.append("Release cihaz hasarı mevzuat kaynağı eksik")
+        if int(release.get("deviceDamageVerifiedLocations", 0)) <= 0:
+            failures.append("Release cihaz hasarı 30 gün doğrulaması eksik")
         for header in REQUIRED_SECURITY_HEADERS:
             if header not in release.get("securityHeaders", []):
                 failures.append(f"Release güvenlik başlığı envanteri eksik: {header}")
@@ -237,6 +252,7 @@ def smoke(bundle: Path, repo_root: Path) -> dict:
         "requiredRootFiles": list(REQUIRED_ROOT_FILES),
         "requiredSecurityHeaders": list(REQUIRED_SECURITY_HEADERS),
         "forbiddenPublicFileCount": len(forbidden_files),
+        "deviceDamageDeadline": "30 gün",
         "failures": failures,
     }
     if failures:

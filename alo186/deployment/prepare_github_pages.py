@@ -103,9 +103,9 @@ def gateway_html(base_path: str, noindex: bool) -> str:
     notice = (
         f'<section class="legal-deadline" {DEVICE_DAMAGE_MARKER} '
         'aria-labelledby="device-damage-deadline">'
-        '<strong id="device-damage-deadline">Cihaz hasarında başvuru süresi 10 iş günüdür</strong>'
+        '<strong id="device-damage-deadline">Cihaz hasarında başvuru süresi 30 gündür</strong>'
         '<p>Dağıtım şebekesinden kaynaklandığını düşündüğünüz cihaz veya teçhizat hasarı için '
-        'zararın ortaya çıktığı tarihten itibaren <strong>10 iş günü içinde</strong> ilgili dağıtım '
+        'zararın ortaya çıktığı tarihten itibaren <strong>30 gün içinde</strong> ilgili dağıtım '
         'şirketinin resmî kanalına başvurun. ALO186 başvuru, ihbar veya hasar kaydı almaz.</p>'
         f'<a href="{guide_url}">Belge ve başvuru rehberini aç →</a>'
         '</section>'
@@ -133,16 +133,16 @@ def validate_root_legal_deadline(site: Path, base_path: str) -> None:
     html = root.read_text(encoding="utf-8")
     required = (
         DEVICE_DAMAGE_MARKER,
-        "Cihaz hasarında başvuru süresi 10 iş günüdür",
-        "zararın ortaya çıktığı tarihten itibaren <strong>10 iş günü içinde</strong>",
+        "Cihaz hasarında başvuru süresi 30 gündür",
+        "zararın ortaya çıktığı tarihten itibaren <strong>30 gün içinde</strong>",
         "ALO186 başvuru, ihbar veya hasar kaydı almaz",
         f'href="{_core.public_url(base_path, DEVICE_DAMAGE_ROUTE)}"',
     )
     missing = [item for item in required if item not in html]
     if missing:
         raise RuntimeError("Pages kök hukuki süre koruması eksik: " + ", ".join(missing))
-    if re.search(r"\b30\s*(?:takvim\s*)?gün\b", html, re.IGNORECASE):
-        raise RuntimeError("Pages kökünde cihaz hasarı bağlamında 30 gün ifadesi kalamaz.")
+    if re.search(r"\b(?:10\s*iş\s*gün|on\s*iş\s*gün)\b", html, re.IGNORECASE):
+        raise RuntimeError("Pages kökünde cihaz hasarı başvurusu için eski 10 iş günü ifadesi kalamaz.")
 
 
 def validate_root_primary_start(site: Path, base_path: str) -> None:
@@ -191,7 +191,7 @@ def prepare(site: Path, base_path: str, repository: str, commit: str) -> dict:
     release = json.loads(release_path.read_text(encoding="utf-8")) if release_path.is_file() else dict(result)
     release["canonicalHost"] = LIVE_CANONICAL_ORIGIN
     release["customDomain"] = CANONICAL_HOST
-    release["rootDeviceDamageDeadline"] = "10 iş günü"
+    release["rootDeviceDamageDeadline"] = "30 gün"
     release["rootNoApplicationDisclaimer"] = True
     release["primaryStartRoute"] = _core.public_url(normalized, PRIMARY_START_ROUTE)
     release["primaryStartMode"] = "progressive-disclosure"
