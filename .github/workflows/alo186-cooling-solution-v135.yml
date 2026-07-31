@@ -1,0 +1,48 @@
+name: ALO186 serinletme çözümü karşılaştırması v135
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/vantilator-hava-sogutucu-portatif-klima-karsilastirma/**'
+      - 'alo186/deployment/routing-overlays/135-serinletme-cozumu-karsilastirma.json'
+      - 'alo186/tests/test_cooling_solution_comparison_v135.js'
+      - '.github/workflows/alo186-cooling-solution-v135.yml'
+      - 'alo186/audits/growth-cooling-choice-v135.md'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/vantilator-hava-sogutucu-portatif-klima-karsilastirma/**'
+      - 'alo186/deployment/routing-overlays/135-serinletme-cozumu-karsilastirma.json'
+      - 'alo186/tests/test_cooling_solution_comparison_v135.js'
+      - '.github/workflows/alo186-cooling-solution-v135.yml'
+      - 'alo186/audits/growth-cooling-choice-v135.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-cooling-solution-v135-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Serinletme karşılaştırması, güven, gizlilik ve dual Pages kabulü
+        run: node alo186/tests/test_cooling_solution_comparison_v135.js
+
+      - name: Mevcut yayın ve kullanıcı güveni regresyonları
+        run: |
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
