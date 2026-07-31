@@ -1,0 +1,21 @@
+{
+  "version": 154,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/modem-ont-router-mini-ups-guc-sure-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/modem-ont-router-mini-ups-guc-sure-uygunluk/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/telefon-powerbank-acil-sarj-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/telefon-powerbank-acil-sarj-uygunluk/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/sektor-rehberi/elektrik-kesintisi-iletisim-sureklilik-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/elektrik-kesintisi-iletisim-sureklilik-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
