@@ -69,7 +69,13 @@ SERVICE_ROUTES = {
     "/hizmetler/elektrik-teklif-teknik-inceleme/",
     "/hizmetler/ges-batarya-ev-sarj-fizibilitesi/",
 }
-DIRECT_CATEGORY_ID = "powerbank"
+DIRECT_CATEGORY_POLICIES = {
+    "powerbank": {"risk": "consumer", "affiliate_policy": "verified_direct"},
+    "usb_c_charger": {"risk": "consumer", "affiliate_policy": "verified_direct"},
+    "usb_c_cable": {"risk": "consumer", "affiliate_policy": "verified_direct"},
+    "usb_c_hub": {"risk": "consumer", "affiliate_policy": "verified_direct"},
+    "display_cable": {"risk": "consumer", "affiliate_policy": "verified_direct"},
+}
 
 
 def attributes(raw: str) -> dict[str, str]:
@@ -258,11 +264,39 @@ def validate_runtime(site: Path) -> tuple[list[str], dict]:
             errors.append(f"commercial.js: ticari sıralama veya doğrulanmamış alan kullanılıyor: {forbidden}")
 
     direct_ids = re.findall(r"\{id:'([^']+)'[^{}]*?mode:'direct'", catalog)
-    if direct_ids != [DIRECT_CATEGORY_ID]:
-        errors.append(f"catalog.js: yalnız powerbank doğrudan kategori olmalı; bulunan={direct_ids}")
+    direct_rows = re.findall(
+        r"\{id:'([^']+)',name:'[^']+',mode:'direct',risk:'([^']+)',affiliatePolicy:'([^']+)'",
+        catalog,
+    )
+    expected_ids = set(DIRECT_CATEGORY_POLICIES)
+    found_ids = set(direct_ids)
+    duplicate_ids = sorted({category_id for category_id in direct_ids if direct_ids.count(category_id) > 1})
+    if duplicate_ids:
+        errors.append(f"catalog.js: yinelenen doğrudan kategori kimliği bulundu: {duplicate_ids}")
+    if found_ids != expected_ids:
+        errors.append(
+            "catalog.js: doğrulanmış düşük riskli doğrudan kategori allowlistiyle uyuşmuyor; "
+            f"eksik={sorted(expected_ids - found_ids)}, beklenmeyen={sorted(found_ids - expected_ids)}"
+        )
+    metadata = {category_id: (risk, affiliate_policy) for category_id, risk, affiliate_policy in direct_rows}
+    for category_id, policy in DIRECT_CATEGORY_POLICIES.items():
+        actual = metadata.get(category_id)
+        expected = (policy["risk"], policy["affiliate_policy"])
+        if actual != expected:
+            errors.append(
+                f"catalog.js: {category_id} doğrudan kategori güven metadatası yanlış veya eksik; "
+                f"beklenen={expected}, bulunan={actual}"
+            )
+    unexpected_metadata = sorted(set(metadata) - expected_ids)
+    if unexpected_metadata:
+        errors.append(f"catalog.js: allowlist dışı doğrudan kategori metadatası bulundu: {unexpected_metadata}")
     if "verificationMaxAgeDays=45" not in catalog:
         errors.append("catalog.js: 45 günlük katalog tazelik sınırı eksik")
-    return errors, {"directCategoryCount": len(direct_ids), "directCategoryIds": direct_ids}
+    return errors, {
+        "directCategoryCount": len(direct_ids),
+        "directCategoryIds": direct_ids,
+        "directCategoryPolicies": DIRECT_CATEGORY_POLICIES,
+    }
 
 
 def validate_site(site: Path) -> dict:
@@ -287,7 +321,7 @@ def validate_site(site: Path) -> dict:
         "commercialPolicy": {
             "unverifiedPriceStockRatingWarranty": False,
             "staticAffiliateLinksInSourcePages": False,
-            "directCategory": DIRECT_CATEGORY_ID,
+            "directCategories": list(DIRECT_CATEGORY_POLICIES),
             "freshnessDays": 45,
             "highRiskDirectAffiliate": False,
             "professionalOnlyDirectAffiliate": False,
