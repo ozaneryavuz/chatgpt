@@ -1,0 +1,21 @@
+{
+  "version": 138,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/aa-aaa-sarjli-pil-sarj-cihazi-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/aa-aaa-sarjli-pil-sarj-cihazi-uygunluk/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/sarjli-pil-seti-dongu-planlayici/index.html",
+      "canonicalPath": "/hesaplama/sarjli-pil-seti-dongu-planlayici/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/sektor-rehberi/aa-aaa-pil-sureklilik-test-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/aa-aaa-pil-sureklilik-test-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
