@@ -1,0 +1,52 @@
+name: ALO186 ev nem ve rutubet güvenli büyüme v139
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/nem-olcer-nem-alma-cihazi-uygunluk/**'
+      - 'alo186/hesaplama/nem-alma-cihazi-kwh-drenaj-plani/**'
+      - 'alo186/sektor-rehberi/ev-rutubet-yogusma-tekrar-test-merkezi/**'
+      - 'alo186/deployment/routing-overlays/139-humidity-control.json'
+      - 'alo186/tests/test_humidity_control_growth_v139.py'
+      - 'alo186/audits/growth-humidity-control-v139.md'
+      - '.github/workflows/alo186-humidity-control-growth-v139.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/nem-olcer-nem-alma-cihazi-uygunluk/**'
+      - 'alo186/hesaplama/nem-alma-cihazi-kwh-drenaj-plani/**'
+      - 'alo186/sektor-rehberi/ev-rutubet-yogusma-tekrar-test-merkezi/**'
+      - 'alo186/deployment/routing-overlays/139-humidity-control.json'
+      - 'alo186/tests/test_humidity_control_growth_v139.py'
+      - 'alo186/audits/growth-humidity-control-v139.md'
+      - '.github/workflows/alo186-humidity-control-growth-v139.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-humidity-control-v139-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Nem uygunluğu, kWh, drenaj, tekrar test ve yayın kabulü
+        run: python alo186/tests/test_humidity_control_growth_v139.py
+
+      - name: Mevcut yayın ve kullanıcı güveni regresyonları
+        run: |
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
