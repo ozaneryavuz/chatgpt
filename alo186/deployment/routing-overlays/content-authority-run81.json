@@ -1,0 +1,21 @@
+{
+  "version": 145,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/haberler/jenerator-mars-akusu-sarj-cihazi-bosaliyor-start-arizasi/index.html",
+      "canonicalPath": "/haberler/jenerator-mars-akusu-sarj-cihazi-bosaliyor-start-arizasi",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/asansor-elektrik-kesintisi-ard-ups-jenerator-kurtarma/index.html",
+      "canonicalPath": "/haberler/asansor-elektrik-kesintisi-ard-ups-jenerator-kurtarma",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ups-eco-modu-double-conversion-yuksek-verimlilik-kabul/index.html",
+      "canonicalPath": "/haberler/ups-eco-modu-double-conversion-yuksek-verimlilik-kabul",
+      "type": "article"
+    }
+  ]
+}
