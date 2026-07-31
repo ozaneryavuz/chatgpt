@@ -1,0 +1,21 @@
+{
+  "version": 137,
+  "generatedAt": "2026-07-31",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/duman-alarmi-isi-alarmi-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/duman-alarmi-isi-alarmi-uygunluk/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/karbonmonoksit-alarmi-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/karbonmonoksit-alarmi-uygunluk/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/sektor-rehberi/ev-duman-karbonmonoksit-alarm-test-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/ev-duman-karbonmonoksit-alarm-test-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
