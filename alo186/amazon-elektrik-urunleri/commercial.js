@@ -6,6 +6,7 @@
   const categoryId = body ? body.dataset.category : '';
   const professionalOnly = Boolean(body && body.dataset.commercialScope === 'professional-only');
   const revenueHubRoute = '/amazon-elektrik-urunleri/dogrulanmis-tak-calistir-urunler/';
+  const measuredShortlistRoute = '/amazon-elektrik-urunleri/olculmus-ihtiyac-listem/';
   const escapeHtml = (value) => String(value ?? '').replace(/[&<>"]/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char]));
   const escapeAttr = (value) => escapeHtml(value).replace(/'/g, '&#39;');
   const disclosureSuffix = ' Nitelikli satın alımlardan komisyon kazanılabilir; kullanıcıya ek maliyet yansımaz. Fiyat, stok, satıcı, teslimat, puan ve garanti yalnız Amazon’un güncel sayfasında doğrulanır.';
@@ -37,6 +38,21 @@
     section.innerHTML = `<div class="section-head"><div><span class="eyebrow">Güncel doğrulanmış tak-çalıştır katalog</span><h2 id="affiliateRevenueV177Title">Powerbank, USB-C, ağ, görüntü, araç ve şarjlı pil ürünlerini tek görev merkezinde açın.</h2><p class="lead">Güncel doğrulanmış model havuzunu, 25+ uzun kuyruk ürün sınıfını ve yedi kullanım paketini aynı teknik filtrede görün. Mevcut güvenli ürün yeterliyse satın alma bağlantısı açılmaz.</p><div class="chips"><span class="chip">45 günlük doğrulama sınırı</span><span class="chip">ASIN tekilleştirme</span><span class="chip">Üçlü teknik ve ticari kapı</span><span class="chip">Yüksek riskli ürünlerde doğrudan satış yok</span></div><div class="button-row"><a class="button primary" data-commercial-route="verified-hub-v177" href="${revenueHubRoute}">Doğrulanmış ürün merkezini aç</a><a class="button secondary" href="/hesaplama/usb-c-hub-goruntu-pd-uygunluk/">Önce bağlantı uygunluğunu kontrol et</a></div></div></div>`;
     anchor.insertAdjacentElement('afterend', section);
     track('affiliate_revenue_v177_entry_view', { placement: 'amazon_product_center' });
+  }
+
+  function injectMeasuredShortlistEntry() {
+    const currentPath = window.location.pathname.replace(/\/+$/, '') || '/';
+    if (categoryId || !currentPath.endsWith('/amazon-elektrik-urunleri')) return;
+    if (document.querySelector('[data-measured-shortlist-entry-v178]')) return;
+    const anchor = document.querySelector('[data-affiliate-revenue-entry-v177]') || document.querySelector('.affiliate-disclosure') || document.querySelector('.hero');
+    if (!anchor) return;
+    const section = document.createElement('section');
+    section.className = 'section';
+    section.dataset.measuredShortlistEntryV178 = 'true';
+    section.setAttribute('aria-labelledby', 'measuredShortlistV178Title');
+    section.innerHTML = `<div class="section-head"><div><span class="eyebrow">Ölçülmüş ihtiyaç · en fazla üç ürün</span><h2 id="measuredShortlistV178Title">Mevcut ekipmanınızı ve gerçek testinizi işaretleyin; yalnız kanıtlanmış ihtiyaç açıklarını görün.</h2><p class="lead">Testi geçen ürünleri otomatik eleyin. Enerji ölçümü, soğuk zincir, modem, telefon, aydınlatma, su alarmı ve bağlantı görevlerinde en fazla üç düşük riskli ürün sınıfı oluşturun.</p><div class="chips"><span class="chip">Fiyat veya komisyon sıralaması yok</span><span class="chip">Mevcut ürün yeterliyse satın alma yok</span><span class="chip">JSON ve 30 günlük tekrar kontrolü</span><span class="chip">Sabit tesisat affiliate dışında</span></div><div class="button-row"><a class="button primary" data-commercial-route="measured-shortlist-v178" href="${measuredShortlistRoute}">Ölçülmüş ihtiyaç listemi oluştur</a><a class="button secondary" href="/hesaplama/ev-cihaz-kwh-aylik-maliyet-olcum-plani/">Önce cihaz tüketimini ölç</a></div></div></div>`;
+    anchor.insertAdjacentElement('afterend', section);
+    track('measured_shortlist_v178_entry_view', { placement: 'amazon_product_center' });
   }
 
   function renderFreshProducts(container, category) {
@@ -95,6 +111,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     normalizeDisclosures();
     injectRevenueHubEntry();
+    injectMeasuredShortlistEntry();
     renderCategoryState();
     document.querySelectorAll('[data-commercial-route]').forEach((link) => link.addEventListener('click', () => {
       track('commercial_route_opened', {
