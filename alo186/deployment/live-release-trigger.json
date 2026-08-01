@@ -1,18 +1,24 @@
 {
-  "schemaVersion": 2,
-  "release": "alo186-v176-live-receipt-2026-08-01T23:25+03:00",
-  "requestedAt": "2026-08-01T20:25:22Z",
+  "schemaVersion": 3,
+  "release": "alo186-v177-hosting-aware-live-2026-08-01T23:58+03:00",
+  "requestedAt": "2026-08-01T20:58:00Z",
   "requestedTimeZone": "Europe/Istanbul",
-  "includesMainThrough": "7594da0a1348d330750031e3bb384241854d8f93",
-  "purpose": "Birleştirilmiş ALO186 içerik, UX, affiliate, routing, kalite ve yayın çalışmalarını canlıya dağıt; konuya göre ürün haritasını gerçek production origin üzerinde doğrula ve PR #606 üzerinde kalıcı makbuz oluştur.",
-  "deploymentWorkflow": ".github/workflows/alo186-github-pages.yml",
-  "verificationWorkflow": ".github/workflows/alo186-contextual-affiliate-v176.yml",
-  "receiptTarget": "pull/606",
+  "includesMainThrough": "42debceca33d41e6cc0d62da3c9ca3e3cc036dbf",
+  "purpose": "Birleştirilmiş ALO186 içerik, UX, affiliate, routing ve kalite çalışmalarını gerçek canlı hosting modunda doğrula; Pages hazırsa tam deploy yap, hazır değilse ChatGPT Sites v177 yüzeyini fail-closed denetle.",
+  "deploymentWorkflow": ".github/workflows/alo186-pages-autobootstrap-live.yml",
+  "verificationWorkflow": ".github/workflows/alo186-v177-hosting-aware-live.yml",
+  "receiptTargets": [
+    "pull/606",
+    "issues/21"
+  ],
   "liveDomain": "https://alo186.com",
   "requiredLiveRoute": "/amazon-elektrik-urunleri/konuya-gore-urun-haritasi/",
   "requiredMarkers": [
-    "data-alo186-product-map-v176=\"true\"",
+    "data-alo186-contextual-affiliate-v177",
     "alo186rehber-21"
   ],
+  "expectedPlacementCount": 3,
+  "expectedGateCount": 3,
+  "staticStoreLinksAllowed": 0,
   "status": "requested"
 }
