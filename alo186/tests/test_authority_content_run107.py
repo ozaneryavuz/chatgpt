@@ -5,7 +5,7 @@ import re
 ROOT = Path(__file__).resolve().parents[2]
 SLUGS = (
     'ev-sarj-rcd-tip-a-tip-b-6ma-dc-rdc-dd-secimi',
-    'jenerator-wet-stacking-dusuk-yuk-egzoz-islanmasi-load-bank-teshis',
+    'ges-inverter-string-current-mismatch-dusuk-akim-mppt-teshis',
     'bess-soh-dusuk-kullanilabilir-enerji-kapasite-testi-garanti-vpp',
 )
 OVERLAY = ROOT / "alo186/deployment/routing-overlays/content-authority-run107.json"
@@ -63,12 +63,12 @@ def test_authority_content_run107() -> None:
 
     assert len(titles) == len(descriptions) == len(h1s) == 3
     ev = (ROOT / f"alo186/haberler/{SLUGS[0]}/index.html").read_text(encoding="utf-8")
-    generator = (ROOT / f"alo186/haberler/{SLUGS[1]}/index.html").read_text(encoding="utf-8")
+    ges = (ROOT / f"alo186/haberler/{SLUGS[1]}/index.html").read_text(encoding="utf-8")
     bess = (ROOT / f"alo186/haberler/{SLUGS[2]}/index.html").read_text(encoding="utf-8")
     for phrase in ("Tip A", "Tip B", "6 mA DC", "RDC-DD", "IEC 62955", "IEC 60364-7-722"):
         assert phrase.casefold() in ev.casefold()
-    for phrase in ("wet stacking", "yüzde 30", "load bank", "egzoz", "Cummins", "ISO 8528-13"):
-        assert phrase.casefold() in generator.casefold()
+    for phrase in ("String Current Mismatch", "MPPT", "I-V", "string fuse", "IEC 61829", "IEC 62548-1"):
+        assert phrase.casefold() in ges.casefold()
     for phrase in ("SOH", "kullanılabilir enerji", "C-rate", "yardımcı tüketim", "IEC 62933-3-1", "VPP"):
         assert phrase.casefold() in bess.casefold()
     print("ALO186 içerik otoritesi run107: PASS")
