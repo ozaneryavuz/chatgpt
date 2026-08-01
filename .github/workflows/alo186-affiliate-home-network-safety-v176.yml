@@ -97,6 +97,7 @@ jobs:
 
           canonical='/amazon-elektrik-urunleri/ev-ofis-ag-surekliligi-guvenlik-urunleri/'
           relative='amazon-elektrik-urunleri/ev-ofis-ag-surekliligi-guvenlik-urunleri'
+          overlay='176-affiliate-home-network-safety-products.json'
           for root in [
               Path('/tmp/alo186-affiliate-home-network-v176-custom'),
               Path('/tmp/alo186-affiliate-home-network-v176-project'),
@@ -118,11 +119,8 @@ jobs:
               assert '"@type":"Product"' not in html and '"@type":"Offer"' not in html
 
               release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
-              routes={
-                  item.get('canonicalPath') if isinstance(item,dict) else item
-                  for item in release.get('routes',[])
-              }
-              assert canonical in routes, canonical
+              overlays=set(release.get('routingOverlays',[]))
+              assert overlay in overlays, (overlay, sorted(overlays)[-5:])
 
               sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
               canonical_host=(
