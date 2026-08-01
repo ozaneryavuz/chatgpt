@@ -23,6 +23,12 @@ SITES_SIGNATURES = (
     "vite-rsc",
     "vinext",
 )
+STATIC_SNAPSHOT_HEADER = "x-alo186-render-mode: static-snapshot"
+STATIC_SNAPSHOT_BODY_SIGNATURES = (
+    "data-home-critical-styles",
+    "/brand/alo186-logo-",
+    'fetchpriority="high"',
+)
 
 # ChatGPT Sites canlı navigasyonunda gerçekten yayımlanan, kullanıcıya dönük
 # görev rotaları. GitHub Pages artifactına özgü /durum ve /arama köprüleri burada
@@ -55,12 +61,34 @@ def normalize_origin(value: str) -> str:
     return f"https://{parsed.hostname}"
 
 
+def read_header_value(headers: str, name: str) -> str:
+    matches = re.findall(
+        rf"^{re.escape(name)}:\s*(.*?)\s*$",
+        headers,
+        flags=re.I | re.M,
+    )
+    return matches[-1].strip() if matches else ""
+
+
+def detect_sites_render_signature(body: str, headers: str = "") -> str:
+    folded_body = body.casefold()
+    folded_headers = headers.casefold()
+    combined = f"{folded_headers}\n{folded_body}"
+    if any(token in combined for token in SITES_SIGNATURES):
+        return "vinext/cloudflare"
+    if (
+        STATIC_SNAPSHOT_HEADER in folded_headers
+        and all(token in folded_body for token in STATIC_SNAPSHOT_BODY_SIGNATURES)
+    ):
+        return "static-snapshot/cloudflare"
+    return ""
+
+
 def classify_release_response(http_code: int, content_type: str, body: str, headers: str = "") -> str:
     media_type = content_type.split(";", 1)[0].strip().casefold()
     if http_code == 200 and media_type in {"application/json", "application/manifest+json"}:
         return PAGES_MODE
-    combined = f"{headers}\n{body}".casefold()
-    if http_code in {200, 404} and media_type == "text/html" and any(token in combined for token in SITES_SIGNATURES):
+    if http_code in {200, 404} and media_type == "text/html" and detect_sites_render_signature(body, headers):
         return SITES_MODE
     return UNKNOWN_MODE
 
@@ -249,6 +277,7 @@ def verify_sites_mode(live_origin: str, diagnostics: Path) -> dict:
     host = urlparse(live_origin).hostname or ""
     route_results: list[dict] = []
     homepage = ""
+    homepage_headers = ""
     commerce = ""
     for index, route in enumerate(CRITICAL_SITES_ROUTES):
         result = run_curl(
@@ -260,6 +289,7 @@ def verify_sites_mode(live_origin: str, diagnostics: Path) -> dict:
             fail_http=True,
         )
         body = assert_html_result(result, host, route)
+        headers = result.headers_path.read_text(encoding="utf-8", errors="ignore")
         route_results.append({
             "route": route,
             "status": result.http_code,
@@ -267,17 +297,22 @@ def verify_sites_mode(live_origin: str, diagnostics: Path) -> dict:
             "effectiveUrl": result.effective_url,
             "sha256": sha256(result.body_path),
             "bytes": result.body_path.stat().st_size,
+            "renderMode": read_header_value(headers, "x-alo186-render-mode") or None,
         })
         if route == "/":
             homepage = body
+            homepage_headers = headers
         if route == "/amazon-elektrik-urunleri":
             commerce = body
 
     folded_home = homepage.casefold()
     if "alo186" not in folded_home or "bağımsız" not in folded_home:
         raise AssertionError("Canlı ana sayfa ALO186 bağımsızlık kimliğini taşımıyor")
-    if not any(signature in folded_home for signature in SITES_SIGNATURES):
-        raise AssertionError("Canlı ana sayfa ChatGPT Sites/Vinext imzasını taşımıyor")
+    platform_signature = detect_sites_render_signature(homepage, homepage_headers)
+    if not platform_signature:
+        raise AssertionError(
+            "Canlı ana sayfa doğrulanmış Vinext veya ALO186 static-snapshot imzasını taşımıyor"
+        )
     folded_commerce = commerce.casefold()
     if "satış ortaklığı" not in folded_commerce and "affiliate" not in folded_commerce:
         raise AssertionError("Canlı ticari merkez satış ortaklığı açıklaması taşımıyor")
@@ -324,7 +359,7 @@ def verify_sites_mode(live_origin: str, diagnostics: Path) -> dict:
         "criticalRoutes": route_results,
         "auxiliaryFiles": auxiliary,
         "visibleAffiliateLinkCount": affiliate_count,
-        "platformSignature": "vinext/cloudflare",
+        "platformSignature": platform_signature,
     }
 
 
