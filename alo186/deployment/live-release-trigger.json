@@ -1,11 +1,18 @@
 {
-  "schemaVersion": 1,
-  "release": "alo186-live-integration-2026-08-01",
-  "requestedAt": "2026-08-01T20:16:07Z",
+  "schemaVersion": 2,
+  "release": "alo186-v176-live-receipt-2026-08-01T23:25+03:00",
+  "requestedAt": "2026-08-01T20:25:22Z",
   "requestedTimeZone": "Europe/Istanbul",
-  "includesMainThrough": "6242ac16b6d72fda41d831c584f4f913c7fdfe11",
-  "purpose": "Tüm birleştirilmiş ALO186 içerik, UX, affiliate, routing, kalite ve yayın çalışmalarını tek GitHub Pages dağıtımında canlıya entegre etmek.",
+  "includesMainThrough": "7594da0a1348d330750031e3bb384241854d8f93",
+  "purpose": "Birleştirilmiş ALO186 içerik, UX, affiliate, routing, kalite ve yayın çalışmalarını canlıya dağıt; konuya göre ürün haritasını gerçek production origin üzerinde doğrula ve PR #606 üzerinde kalıcı makbuz oluştur.",
   "deploymentWorkflow": ".github/workflows/alo186-github-pages.yml",
+  "verificationWorkflow": ".github/workflows/alo186-contextual-affiliate-v176.yml",
+  "receiptTarget": "pull/606",
   "liveDomain": "https://alo186.com",
+  "requiredLiveRoute": "/amazon-elektrik-urunleri/konuya-gore-urun-haritasi/",
+  "requiredMarkers": [
+    "data-alo186-product-map-v176=\"true\"",
+    "alo186rehber-21"
+  ],
   "status": "requested"
 }
