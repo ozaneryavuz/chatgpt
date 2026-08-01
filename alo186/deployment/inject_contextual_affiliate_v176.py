@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import hashlib
 import json
 import re
 import zlib
@@ -142,6 +143,31 @@ def scope_materialized_catalog_tool_routes(target: Path, base_path: str) -> int:
     return changed
 
 
+def refresh_materialized_catalog_checksum(site: Path, target: Path) -> bool:
+    """Final katalog değişikliğini GitHub Pages bütünlük manifestine işler."""
+    checksum_path = Path(site) / "checksums.sha256"
+    if not checksum_path.is_file():
+        raise FileNotFoundError("ALO186 v176 checksums.sha256 eksik")
+    relative = target.relative_to(site).as_posix()
+    digest = hashlib.sha256(target.read_bytes()).hexdigest()
+    lines: list[str] = []
+    found = False
+    for line in checksum_path.read_text(encoding="utf-8").splitlines():
+        parts = line.split("  ", 1)
+        if len(parts) == 2 and parts[1] == relative:
+            lines.append(f"{digest}  {relative}")
+            found = True
+        elif line:
+            lines.append(line)
+    if not found:
+        lines.append(f"{digest}  {relative}")
+    rendered = "\n".join(lines) + "\n"
+    changed = checksum_path.read_text(encoding="utf-8") != rendered
+    if changed:
+        checksum_path.write_text(rendered, encoding="utf-8")
+    return changed
+
+
 def _normalize_explanatory_value(value: object) -> object:
     if isinstance(value, str):
         updated = value
@@ -200,11 +226,13 @@ def run(site: Path, base_path: str = "") -> dict:
     target, fallbacks, explanation_changes = materialize_catalog(Path(site))
     result = _impl_run(Path(site), base_path)
     scoped_tool_route_count = scope_materialized_catalog_tool_routes(target, base_path)
+    checksum_updated = refresh_materialized_catalog_checksum(Path(site), target)
     result["toolRouteFallbacks"] = fallbacks
     result["toolRouteFallbackCount"] = len(fallbacks)
     result["explanatoryCopyNormalizations"] = explanation_changes
     result["explanatoryCopyNormalizationCount"] = len(explanation_changes)
     result["basePathScopedToolRouteCount"] = scoped_tool_route_count
+    result["catalogChecksumUpdated"] = checksum_updated
     return result
 
 
