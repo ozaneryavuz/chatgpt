@@ -5,7 +5,7 @@ import json
 import re
 from html import unescape
 from pathlib import Path
-from urllib.parse import urlsplit
+from urllib.parse import unquote_plus, urlsplit
 
 AFFILIATE_HOSTS = {
     "amazon.com.tr",
@@ -52,6 +52,19 @@ ATTR_PATTERN = re.compile(
     r"(?P<name>[a-zA-Z_:][-a-zA-Z0-9_:.]*)\s*=\s*(?P<quote>['\"])(?P<value>.*?)(?P=quote)",
     re.S,
 )
+HEADING_PATTERN = re.compile(r"<h[1-6]\b[^>]*>(?P<body>.*?)</h[1-6]>", re.I | re.S)
+SEMANTIC_CONTAINER_TAGS = ("article", "li", "section")
+IDENTITY_ATTRIBUTES = {
+    "title",
+    "aria-label",
+    "data-category",
+    "data-item-name",
+    "data-product",
+    "data-product-name",
+    "data-product-title",
+    "data-product-category",
+    "data-affiliate-category",
+}
 DIRECT_CATEGORY_PATTERN = re.compile(
     r"\{id:'([^']+)',name:'[^']+',mode:'direct',risk:'([^']+)',affiliatePolicy:'([^']+)'"
 )
@@ -138,6 +151,55 @@ def canonical_expected(route: str) -> str:
     return f"{CANONICAL_ORIGIN}{route}"
 
 
+def _last_tag_position(html: str, tag: str, end: int, *, closing: bool) -> int:
+    slash = r"/\s*" if closing else ""
+    matches = list(re.finditer(rf"<\s*{slash}{tag}\b[^>]*>", html[:end], re.I | re.S))
+    return matches[-1].start() if matches else -1
+
+
+def nearest_semantic_heading(html: str, anchor_start: int) -> str:
+    """Affiliate bağlantısının ait olduğu kart/öğe başlığını bulur.
+
+    Güvenlik açıklamalarındaki teknik kelimeleri ürün kimliği saymamak için
+    paragraf gövdesi taranmaz. Öncelik, bağlantıyı gerçekten çevreleyen
+    ``article``, ``li`` veya ``section`` başlığıdır. Böyle bir kapsayıcı yoksa
+    yalnız yakın başlık kullanılır.
+    """
+
+    active_starts: list[int] = []
+    for tag in SEMANTIC_CONTAINER_TAGS:
+        opened = _last_tag_position(html, tag, anchor_start, closing=False)
+        closed = _last_tag_position(html, tag, anchor_start, closing=True)
+        if opened > closed:
+            active_starts.append(opened)
+    fragment_start = max(active_starts) if active_starts else max(0, anchor_start - 1600)
+    headings = list(HEADING_PATTERN.finditer(html[fragment_start:anchor_start]))
+    return text_only(headings[-1].group("body")) if headings else ""
+
+
+def affiliate_target_surface(html: str, match: re.Match[str], attrs: dict[str, str]) -> str:
+    """Doğrudan mağaza hedefinin ürün kimliğini oluşturur.
+
+    Risk kararı URL/arama sorgusu, bağlantı etiketi, makine tarafından okunabilir
+    ürün alanları ve aynı kartın başlığından verilir. Komşu açıklama veya
+    güvenlik uyarıları hedef ürün değildir; aksi hâlde "SPD doğrulandıktan sonra"
+    ya da "topraklama kayboluyorsa" gibi doğru uyarılar düşük riskli bağlantıları
+    yanlışlıkla kapatır.
+    """
+
+    values = [
+        unquote_plus(attrs.get("href", "")),
+        text_only(match.group("body")),
+        nearest_semantic_heading(html, match.start()),
+    ]
+    values.extend(
+        unquote_plus(value)
+        for name, value in attrs.items()
+        if name in IDENTITY_ATTRIBUTES or name.startswith("data-product-")
+    )
+    return " ".join(value for value in values if value).strip()
+
+
 def scan_affiliate_anchors(path: Path, site: Path) -> list[str]:
     html = path.read_text(encoding="utf-8", errors="ignore")
     relative = path.relative_to(site).as_posix()
@@ -154,11 +216,11 @@ def scan_affiliate_anchors(path: Path, site: Path) -> list[str]:
             errors.append(f"{relative}: affiliate bağlantısında eksik rel tokenları: {', '.join(sorted(missing))}")
         if not has_disclosure:
             errors.append(f"{relative}: affiliate bağlantısı var fakat görünür satış ortaklığı açıklaması yok")
-        context = text_only(html[max(0, match.start() - 900): min(len(html), match.end() + 900)])
-        risky = HIGH_RISK_PATTERN.search(context)
+        target_surface = affiliate_target_surface(html, match, attrs)
+        risky = HIGH_RISK_PATTERN.search(target_surface)
         if risky:
             errors.append(
-                f"{relative}: yüksek riskli/sabit tesisat bağlamında doğrudan mağaza bağlantısı yasak: {risky.group(0)}"
+                f"{relative}: yüksek riskli/sabit tesisat hedefinde doğrudan mağaza bağlantısı yasak: {risky.group(0)}"
             )
     return errors
 

@@ -29,8 +29,12 @@ def write_and_scan(html: str) -> list[str]:
 
 
 def test_affiliate_anchor_policy() -> None:
+    disclosure = (
+        '<p>Reklam / satış ortaklığı: '
+        'nitelikli satın alımlardan komisyon kazanılabilir.</p>'
+    )
     safe = (
-        '<html><body><p>Reklam / satış ortaklığı: nitelikli satın alımlardan komisyon kazanılabilir.</p>'
+        f'<html><body>{disclosure}'
         '<p>USB-C powerbank teknik eşleşmesi.</p>'
         '<a href="https://www.amazon.com.tr/dp/B000000000?tag=alo186rehber-21" '
         'rel="sponsored nofollow noopener">Amazon ürün sayfasını aç</a></body></html>'
@@ -42,15 +46,62 @@ def test_affiliate_anchor_policy() -> None:
     assert any("eksik rel tokenları" in item for item in errors)
 
     missing_disclosure = safe.replace(
-        '<p>Reklam / satış ortaklığı: nitelikli satın alımlardan komisyon kazanılabilir.</p>',
+        disclosure,
         '<p>Bağımsız teknik liste.</p>',
     )
     errors = write_and_scan(missing_disclosure)
     assert any("görünür satış ortaklığı açıklaması yok" in item for item in errors)
 
-    high_risk = safe.replace("USB-C powerbank teknik eşleşmesi", "RCCB ve pano tipi SPD seçimi")
-    errors = write_and_scan(high_risk)
-    assert any("yüksek riskli/sabit tesisat" in item for item in errors)
+    # Güvenlik ön koşulundaki SPD/topraklama sözcükleri, düşük riskli fiş tipi
+    # hedefi yüksek riskli ürüne dönüştürmemelidir.
+    qualified_low_risk = (
+        f'<html><body>{disclosure}<article class="card">'
+        '<h2>Priz tipi darbe koruyucu</h2>'
+        '<p>Pano tipi SPD ve topraklama doğrulandıktan sonra hassas elektroniğe '
+        'tamamlayıcı koruma için.</p>'
+        '<a href="https://www.amazon.com.tr/s?k=ak%C4%B1m+korumal%C4%B1+priz&tag=alo186rehber-21" '
+        'rel="sponsored nofollow noopener">Amazon seçeneklerini incele</a>'
+        '</article></body></html>'
+    )
+    assert write_and_scan(qualified_low_risk) == []
+
+    travel_adapter = (
+        f'<html><body>{disclosure}<article class="card">'
+        '<h2>Topraklı seyahat adaptörü</h2>'
+        '<p>Voltaj uyumlu olmalı; topraklama kayboluyorsa satın almayın.</p>'
+        '<a href="https://www.amazon.com.tr/s?k=toprakl%C4%B1+seyahat+adapt%C3%B6r%C3%BC&tag=alo186rehber-21" '
+        'rel="sponsored nofollow noopener">Amazon seçeneklerini incele</a>'
+        '</article></body></html>'
+    )
+    assert write_and_scan(travel_adapter) == []
+
+    # Gerçek yüksek riskli hedef; URL kısa/generic olsa bile aynı kartın ürün
+    # başlığından yakalanmalıdır.
+    high_risk_heading = (
+        f'<html><body>{disclosure}<article class="card">'
+        '<h2>Pano tipi SPD seçimi</h2>'
+        '<p>Yetkili mühendislik gerektirir.</p>'
+        '<a href="https://amzn.to/example" rel="sponsored nofollow noopener">'
+        'Amazon ürün sayfasını aç</a></article></body></html>'
+    )
+    errors = write_and_scan(high_risk_heading)
+    assert any("yüksek riskli/sabit tesisat" in item and "SPD" in item for item in errors)
+
+    # Ürün adı bağlantı etiketinde görünmese bile çözülen Amazon arama sorgusu
+    # yüksek riskli hedefi açıkça gösteriyorsa bağlantı reddedilir.
+    high_risk_url = safe.replace(
+        "https://www.amazon.com.tr/dp/B000000000?tag=alo186rehber-21",
+        "https://www.amazon.com.tr/s?k=topraklama+olcum+cihazi&tag=alo186rehber-21",
+    )
+    errors = write_and_scan(high_risk_url)
+    assert any("yüksek riskli/sabit tesisat" in item and "topraklama" in item for item in errors)
+
+    high_risk_metadata = safe.replace(
+        '<a href=',
+        '<a data-product-name="RCCB 30 mA" href=',
+    )
+    errors = write_and_scan(high_risk_metadata)
+    assert any("yüksek riskli/sabit tesisat" in item and "RCCB" in item for item in errors)
 
 
 def test_disclosure_equivalence() -> None:
@@ -149,6 +200,8 @@ def main() -> None:
         "highRiskDirectAffiliate": False,
         "professionalOnlyDirectAffiliate": False,
         "unverifiedCommercialClaims": False,
+        "affiliateRiskScope": "url-anchor-metadata-card-heading",
+        "safetyWarningFalsePositives": False,
     }, ensure_ascii=False, indent=2))
 
 
