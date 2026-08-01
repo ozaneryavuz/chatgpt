@@ -1,0 +1,21 @@
+{
+  "version": 190,
+  "generatedAt": "2026-08-02",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/tasinabilir-gunes-paneli-guc-istasyonu-uyumluluk/index.html",
+      "canonicalPath": "/hesaplama/tasinabilir-gunes-paneli-guc-istasyonu-uyumluluk/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/12v-kamp-buzdolabi-guc-istasyonu-calisma-suresi/index.html",
+      "canonicalPath": "/hesaplama/12v-kamp-buzdolabi-guc-istasyonu-calisma-suresi/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/kamp-arac-enerji-urun-secici/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/kamp-arac-enerji-urun-secici/",
+      "type": "commerce-guide"
+    }
+  ]
+}
