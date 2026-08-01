@@ -64,9 +64,12 @@ def main() -> None:
     if "Satın almama koşulu" not in html or "Reklam / satış ortaklığı açıklaması" not in html:
         fail("Görünür güven metinleri eksik")
 
-    static_amazon = re.findall(r'href="https://www\.amazon\.com\.tr/dp/', html)
+    initial_markup = re.sub(r"<script\b[^>]*>.*?</script>", "", html, flags=re.S | re.I)
+    static_amazon = re.findall(r'<a\b[^>]*href="https://www\.amazon\.com\.tr/dp/', initial_markup, re.I)
     if static_amazon:
-        fail("Amazon bağlantısı statik HTML içinde kapısız yayımlanamaz")
+        fail("Amazon bağlantısı ilk HTML DOM içinde kapısız yayımlanamaz")
+    if "allowed?`<a class=\"shop\"" not in html:
+        fail("Amazon bağlantısı yalnız açık güven kapısında üretilmeli")
 
     verified = re.search(r"1 Ağustos 2026 tarihinde doğrulandı", html)
     if not verified:
