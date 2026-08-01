@@ -1,0 +1,21 @@
+{
+  "version": 171,
+  "generatedAt": "2026-08-01",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/elektrik-kesintisinde-gunes-paneli-neden-calismiyor-guvenlik/index.html",
+      "canonicalPath": "/hesaplama/elektrik-kesintisinde-gunes-paneli-neden-calismiyor-guvenlik/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/ev-ges-eps-backup-kritik-yuk-w-wh-uygunlugu/index.html",
+      "canonicalPath": "/hesaplama/ev-ges-eps-backup-kritik-yuk-w-wh-uygunlugu/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/sektor-rehberi/ev-ges-batarya-yedek-guc-kabul-test-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/ev-ges-batarya-yedek-guc-kabul-test-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
