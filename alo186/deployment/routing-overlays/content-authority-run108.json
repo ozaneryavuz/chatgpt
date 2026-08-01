@@ -1,0 +1,21 @@
+{
+  "version": 178,
+  "generatedAt": "2026-08-01",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-dusuk-yuksek-gerilim-teknik-kalite-olcumu-edas-basvuru/index.html",
+      "canonicalPath": "/haberler/elektrik-dusuk-yuksek-gerilim-teknik-kalite-olcumu-edas-basvuru",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/jenerator-battery-charger-fail-dusuk-mars-akusu-gerilimi-teshis/index.html",
+      "canonicalPath": "/haberler/jenerator-battery-charger-fail-dusuk-mars-akusu-gerilimi-teshis",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ges-inverter-dc-injection-dcinj-fault-ac-akim-dc-bilesen-teshis/index.html",
+      "canonicalPath": "/haberler/ges-inverter-dc-injection-dcinj-fault-ac-akim-dc-bilesen-teshis",
+      "type": "article"
+    }
+  ]
+}
