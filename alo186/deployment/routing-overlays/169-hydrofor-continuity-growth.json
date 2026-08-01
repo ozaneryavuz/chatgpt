@@ -1,0 +1,21 @@
+{
+  "version": 169,
+  "generatedAt": "2026-08-01",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/elektrik-kesintisi-hidrofor-su-yok-guvenlik-teshis/index.html",
+      "canonicalPath": "/hesaplama/elektrik-kesintisi-hidrofor-su-yok-guvenlik-teshis/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/hidrofor-jenerator-ups-kalkis-w-kva-uygunlugu/index.html",
+      "canonicalPath": "/hesaplama/hidrofor-jenerator-ups-kalkis-w-kva-uygunlugu/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/sektor-rehberi/apartman-otel-hidrofor-elektrik-surekliligi-test-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/apartman-otel-hidrofor-elektrik-surekliligi-test-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
