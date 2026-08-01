@@ -1,0 +1,33 @@
+name: ALO186 refrigerator cold-chain growth v166
+
+on:
+  pull_request:
+    paths:
+      - "alo186/hesaplama/elektrik-kesintisi-buzdolabi-dondurucu-gida-guvenligi/**"
+      - "alo186/hesaplama/buzdolabi-dondurucu-yedek-guc-w-wh-kalkis-uygunlugu/**"
+      - "alo186/sektor-rehberi/buzdolabi-dondurucu-kesinti-gida-sicaklik-test-merkezi/**"
+      - "alo186/deployment/routing-overlays/166-refrigerator-cold-chain-growth.json"
+      - "alo186/audits/refrigerator-cold-chain-growth-v166-2026-08-01.md"
+      - "alo186/tests/test_refrigerator_cold_chain_growth_v166.py"
+      - ".github/workflows/alo186-refrigerator-cold-chain-growth-v166.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alo186/hesaplama/elektrik-kesintisi-buzdolabi-dondurucu-gida-guvenligi/**"
+      - "alo186/hesaplama/buzdolabi-dondurucu-yedek-guc-w-wh-kalkis-uygunlugu/**"
+      - "alo186/sektor-rehberi/buzdolabi-dondurucu-kesinti-gida-sicaklik-test-merkezi/**"
+      - "alo186/deployment/routing-overlays/166-refrigerator-cold-chain-growth.json"
+      - "alo186/tests/test_refrigerator_cold_chain_growth_v166.py"
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python alo186/tests/test_refrigerator_cold_chain_growth_v166.py
