@@ -1,0 +1,126 @@
+name: ALO186 ölçülmüş ihtiyaç ve affiliate büyüme v178
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/ev-cihaz-kwh-aylik-maliyet-olcum-plani/**'
+      - 'alo186/hesaplama/buzdolabi-dondurucu-kesinti-soguk-zincir-plani/**'
+      - 'alo186/amazon-elektrik-urunleri/olculmus-ihtiyac-listem/**'
+      - 'alo186/amazon-elektrik-urunleri/commercial.js'
+      - 'alo186/deployment/routing-overlays/178-measured-growth.json'
+      - 'alo186/audits/measured-growth-v178-2026-08-01.md'
+      - 'alo186/tests/test_measured_growth_v178.py'
+      - '.github/workflows/alo186-measured-growth-v178.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/ev-cihaz-kwh-aylik-maliyet-olcum-plani/**'
+      - 'alo186/hesaplama/buzdolabi-dondurucu-kesinti-soguk-zincir-plani/**'
+      - 'alo186/amazon-elektrik-urunleri/olculmus-ihtiyac-listem/**'
+      - 'alo186/amazon-elektrik-urunleri/commercial.js'
+      - 'alo186/deployment/routing-overlays/178-measured-growth.json'
+      - 'alo186/tests/test_measured_growth_v178.py'
+      - '.github/workflows/alo186-measured-growth-v178.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-measured-growth-v178-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Kaynak güven ve JavaScript sözleşmesi
+        shell: bash
+        run: |
+          set -euo pipefail
+          python alo186/tests/test_measured_growth_v178.py
+          node --check alo186/amazon-elektrik-urunleri/commercial.js
+          node alo186/tests/test_affiliate_discovery_v177.js
+          node alo186/tests/test_affiliate_revenue_v177.js
+          python alo186/tests/test_contextual_affiliate_growth_v177.py
+
+      - name: Canonical ve final Pages artifactı
+        shell: bash
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-v178-canonical --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-v178-canonical
+          cp -a /tmp/alo186-v178-canonical /tmp/alo186-v178-pages
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-v178-pages \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-v178-pages \
+            --base-path ''
+          python alo186/deployment/inject_contextual_affiliate_growth_v177.py \
+            --site /tmp/alo186-v178-pages \
+            --base-path '' \
+            > /tmp/alo186-v178-contextual.json
+          python alo186/deployment/inject_live_quality_hardening_v2.py \
+            --site /tmp/alo186-v178-pages \
+            --base-path '' \
+            > /tmp/alo186-v178-quality.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-v178-pages \
+            --base-path ''
+
+      - name: Final rota, sitemap ve ticari güven kabulü
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('/tmp/alo186-v178-pages')
+          routes={
+            '/hesaplama/ev-cihaz-kwh-aylik-maliyet-olcum-plani/',
+            '/hesaplama/buzdolabi-dondurucu-kesinti-soguk-zincir-plani/',
+            '/amazon-elektrik-urunleri/olculmus-ihtiyac-listem/',
+          }
+          release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
+          search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
+          assert release['canonicalHost']=='https://alo186.com'
+          released={item.get('canonicalPath') for item in release['routes']}
+          indexed={item.get('canonicalPath') for item in search['entries']}
+          assert routes <= released
+          assert routes <= indexed
+          commercial=(root/'amazon-elektrik-urunleri/commercial.js').read_text(encoding='utf-8')
+          assert '/amazon-elektrik-urunleri/olculmus-ihtiyac-listem/' in commercial
+          assert 'measured_shortlist_v178_entry_view' in commercial
+          for route in routes:
+              page=root/route.strip('/')/'index.html'
+              text=page.read_text(encoding='utf-8')
+              assert f'https://alo186.com{route}' in text
+              assert 'href="https://www.amazon.com.tr' not in text
+              assert 'sponsored nofollow noopener' in text
+              assert 'Product' not in text and '"Offer"' not in text
+          print({'ok':True,'routes':sorted(routes),'canonicalHost':release['canonicalHost'],'staticAmazonLinks':0})
+          PY
+
+      - name: Doğrulanmış Pages artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-measured-growth-v178-pages
+          path: |
+            /tmp/alo186-v178-pages
+            /tmp/alo186-v178-contextual.json
+            /tmp/alo186-v178-quality.json
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
