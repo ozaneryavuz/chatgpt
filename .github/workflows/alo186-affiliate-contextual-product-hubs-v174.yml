@@ -1,0 +1,29 @@
+name: ALO186 affiliate contextual product hubs v174
+
+on:
+  pull_request:
+    paths:
+      - "alo186/amazon-elektrik-urunleri/elektrik-kesintisi-hazirlik-urunleri/**"
+      - "alo186/amazon-elektrik-urunleri/ev-elektrik-olcum-koruma-urunleri/**"
+      - "alo186/amazon-elektrik-urunleri/tasinabilir-enerji-sarj-urunleri/**"
+      - "alo186/deployment/routing-overlays/174-affiliate-contextual-product-hubs.json"
+      - "alo186/tests/test_affiliate_contextual_product_hubs_v174.py"
+      - ".github/workflows/alo186-affiliate-contextual-product-hubs-v174.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alo186/amazon-elektrik-urunleri/elektrik-kesintisi-hazirlik-urunleri/**"
+      - "alo186/amazon-elektrik-urunleri/ev-elektrik-olcum-koruma-urunleri/**"
+      - "alo186/amazon-elektrik-urunleri/tasinabilir-enerji-sarj-urunleri/**"
+      - "alo186/deployment/routing-overlays/174-affiliate-contextual-product-hubs.json"
+      - "alo186/tests/test_affiliate_contextual_product_hubs_v174.py"
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python alo186/tests/test_affiliate_contextual_product_hubs_v174.py
