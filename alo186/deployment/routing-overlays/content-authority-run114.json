@@ -1,0 +1,22 @@
+{
+  "version": 188,
+  "generatedAt": "2026-08-02",
+  "purpose": "ALO186 content authority run114: generator synchronisation, EVSE contactor welding and SPD end-of-life maintenance.",
+  "routes": [
+    {
+      "canonicalPath": "/haberler/jenerator-fail-to-synchronize-ansi-25-senkron-kontrol-faz-acisi-teshis",
+      "source": "alo186/haberler/jenerator-fail-to-synchronize-ansi-25-senkron-kontrol-faz-acisi-teshis/index.html",
+      "type": "article"
+    },
+    {
+      "canonicalPath": "/haberler/ev-sarj-contactor-welded-relay-stuck-kontaktor-yapisma-teshis",
+      "source": "alo186/haberler/ev-sarj-contactor-welded-relay-stuck-kontaktor-yapisma-teshis/index.html",
+      "type": "article"
+    },
+    {
+      "canonicalPath": "/haberler/parafudr-kirmizi-gosterge-spd-omru-uzak-kontak-bakim",
+      "source": "alo186/haberler/parafudr-kirmizi-gosterge-spd-omru-uzak-kontak-bakim/index.html",
+      "type": "article"
+    }
+  ]
+}
