@@ -84,9 +84,13 @@ def validate_workflow_contract() -> None:
         "already_live_on_sites",
         "alo186-v177-live-blocker",
         "alo186-v177-live-receipt",
-        "Fail-closed Pages yayın sonucu",
+        "dispatch_pages:",
+        "workflow_id: 'alo186-github-pages.yml'",
+        "actions: write",
+        "group: alo186-pages-production",
     ):
         assert token in workflow, token
+    assert "actions/deploy-pages@" not in workflow
     assert "if (!adminTokenPresent)" in workflow
     assert "if (error.status !== 404) throw error" not in workflow
     assert "schedule:" in workflow and "*/30 * * * *" in workflow
