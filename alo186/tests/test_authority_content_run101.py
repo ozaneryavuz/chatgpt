@@ -9,6 +9,9 @@ SLUGS = (
     "ups-inverter-inoperable-output-short-circuit-overload-teshis",
 )
 OVERLAY = ROOT / "alo186/deployment/routing-overlays/content-authority-run101.json"
+CONSOLIDATIONS = ROOT / "alo186/deployment/content-consolidations.json"
+OLD_DAMAGE_ROUTE = "/haberler/elektrik-dalgalanmasi-cihaz-hasari-edas-basvurusu-10-is-gunu-kanit"
+NEW_DAMAGE_ROUTE = "/haberler/elektrik-dalgalanmasi-cihaz-hasari-edas-basvurusu-30-gun-kanit"
 OLD_DAMAGE_PATH = ROOT / "alo186/haberler/elektrik-dalgalanmasi-cihaz-hasari-edas-basvurusu-10-is-gunu-kanit/index.html"
 
 
@@ -25,6 +28,14 @@ def test_authority_content_run101() -> None:
     assert len(overlay["routes"]) == 3
     assert "edas-basvurusu-10-is-gunu-kanit" not in json.dumps(overlay, ensure_ascii=False)
     assert not OLD_DAMAGE_PATH.exists()
+
+    consolidation_data = json.loads(CONSOLIDATIONS.read_text(encoding="utf-8"))
+    aliases = {
+        item["aliasPath"]: item["canonicalPath"]
+        for item in consolidation_data["consolidations"]
+    }
+    assert aliases[OLD_DAMAGE_ROUTE] == NEW_DAMAGE_ROUTE
+
     routes = {item["canonicalPath"]: item for item in overlay["routes"]}
     titles, descriptions, h1s = set(), set(), set()
 
