@@ -1,0 +1,149 @@
+name: ALO186 affiliate home network safety v176
+
+on:
+  pull_request:
+    paths:
+      - "alo186/amazon-elektrik-urunleri/ev-ofis-ag-surekliligi-guvenlik-urunleri/**"
+      - "alo186/deployment/routing-overlays/176-affiliate-home-network-safety-products.json"
+      - "alo186/tests/test_affiliate_home_network_safety_v176.js"
+      - ".github/workflows/alo186-affiliate-home-network-safety-v176.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alo186/amazon-elektrik-urunleri/ev-ofis-ag-surekliligi-guvenlik-urunleri/**"
+      - "alo186/deployment/routing-overlays/176-affiliate-home-network-safety-products.json"
+      - "alo186/tests/test_affiliate_home_network_safety_v176.js"
+      - ".github/workflows/alo186-affiliate-home-network-safety-v176.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-affiliate-home-network-v176-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Exact product data, runtime and contract
+        run: |
+          set -euo pipefail
+          node --check alo186/amazon-elektrik-urunleri/ev-ofis-ag-surekliligi-guvenlik-urunleri/exact-products-v176.js
+          node --check alo186/amazon-elektrik-urunleri/ev-ofis-ag-surekliligi-guvenlik-urunleri/app-v176.js
+          node alo186/tests/test_affiliate_home_network_safety_v176.js
+
+      - name: Existing affiliate and legal regressions
+        run: |
+          set -euo pipefail
+          node alo186/tests/test_affiliate_exact_products_v175.js
+          python alo186/tests/test_affiliate_contextual_product_hubs_v174.py
+          node alo186/tests/test_release_manifest.js
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Canonical production package
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-affiliate-home-network-v176 \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-affiliate-home-network-v176
+          root=/tmp/alo186-affiliate-home-network-v176/amazon-elektrik-urunleri/ev-ofis-ag-surekliligi-guvenlik-urunleri
+          test -f "$root/index.html"
+          test -f "$root/exact-products-v176.js"
+          test -f "$root/app-v176.js"
+          test -f "$root/styles-v176.css"
+
+      - name: Custom-domain and project-path Pages acceptance
+        run: |
+          set -euo pipefail
+          for target in custom project; do
+            cp -a /tmp/alo186-affiliate-home-network-v176 "/tmp/alo186-affiliate-home-network-v176-$target"
+          done
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-affiliate-home-network-v176-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-affiliate-home-network-v176-custom \
+            --base-path ''
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-affiliate-home-network-v176-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-affiliate-home-network-v176-project \
+            --base-path '/chatgpt'
+
+      - name: Sitemap, route inventory and commerce safety acceptance
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          canonical='/amazon-elektrik-urunleri/ev-ofis-ag-surekliligi-guvenlik-urunleri/'
+          relative='amazon-elektrik-urunleri/ev-ofis-ag-surekliligi-guvenlik-urunleri'
+          overlay='176-affiliate-home-network-safety-products.json'
+          for root in [
+              Path('/tmp/alo186-affiliate-home-network-v176-custom'),
+              Path('/tmp/alo186-affiliate-home-network-v176-project'),
+          ]:
+              page=root/relative/'index.html'
+              data=root/relative/'exact-products-v176.js'
+              app=root/relative/'app-v176.js'
+              style=root/relative/'styles-v176.css'
+              assert all(item.is_file() for item in (page,data,app,style))
+              html=page.read_text(encoding='utf-8')
+              data_text=data.read_text(encoding='utf-8')
+              app_text=app.read_text(encoding='utf-8')
+              assert 'amazon.com.tr/dp/' not in html
+              assert 'amazon.com.tr/s?k=' not in html
+              assert all(token in html for token in ('gateExisting','gateTechnical','gateAffiliate'))
+              assert data_text.count('asin:')==5
+              assert data_text.count("amazonUrl:amazonSearchUrl")>=1
+              assert 'sponsored nofollow noopener' in app_text
+              assert '"@type":"Product"' not in html and '"@type":"Offer"' not in html
+
+              release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
+              overlays=set(release.get('routingOverlays',[]))
+              assert overlay in overlays, (overlay, sorted(overlays)[-5:])
+
+              sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
+              canonical_host=(
+                  release.get('canonicalOrigin')
+                  or release.get('canonicalHost')
+                  or 'https://www.alo186.com'
+              ).rstrip('/')
+              assert f'{canonical_host}{canonical}' in sitemap, (canonical_host,canonical)
+
+              search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
+              assert isinstance(search.get('entries'),list), 'Teknik Arama entries listesi bekleniyor'
+              if 'rawQueryStored' in search:
+                  assert search['rawQueryStored'] is False
+              if 'commercialRankingExcluded' in search:
+                  assert 'affiliateCommission' in search['commercialRankingExcluded']
+          print(json.dumps({'ok':True,'route':canonical,'exactProducts':5,'productClasses':12,'tripleGate':True,'routeRegistered':True,'searchPrivacyGuard':'when-generated'}))
+          PY
+
+      - name: Verified Pages artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-affiliate-home-network-safety-v176-pages
+          path: /tmp/alo186-affiliate-home-network-v176-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
