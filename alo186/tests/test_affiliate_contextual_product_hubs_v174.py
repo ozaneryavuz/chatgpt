@@ -13,9 +13,9 @@ PORTABLE = ROUTES[-1]
 def test_pages_exist_and_have_enough_contextual_products():
     assert all(path.exists() for path in ROUTES)
     texts = [path.read_text(encoding="utf-8") for path in ROUTES]
-    # İlk iki merkez statik ürün sınıflarını korur. Taşınabilir merkez v175 ile
-    # mağaza URL'sini ancak üçlü kullanıcı onayından sonra JavaScript ile üretir.
-    assert sum(text.count('class="card"') for text in texts[:2]) >= 20
+    # İlk iki merkez statik ürün sınıflarını korur. Kartlar ek semantik class
+    # taşıyabileceği için class değerinin card ile başlaması yeterlidir.
+    assert sum(text.count('class="card') for text in texts[:2]) >= 20
     assert all('satış ortaklığı' in text.lower() for text in texts)
     assert all('Bir Amazon Gelir Ortağı olarak' in text or 'Amazon satış ortaklığı' in text for text in texts)
     portable = texts[-1]
