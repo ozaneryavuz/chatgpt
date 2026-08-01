@@ -1,0 +1,21 @@
+{
+  "version": 175,
+  "generatedAt": "2026-08-01",
+  "routes": [
+    {
+      "source": "alo186/haberler/ups-battery-test-failed-replace-battery-runtime-dusuk-teshis/index.html",
+      "canonicalPath": "/haberler/ups-battery-test-failed-replace-battery-runtime-dusuk-teshis",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ges-inverter-dc-overvoltage-yuksek-string-gerilimi-voc-soguk-hava/index.html",
+      "canonicalPath": "/haberler/ges-inverter-dc-overvoltage-yuksek-string-gerilimi-voc-soguk-hava",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/hibrit-inverter-batt-comm-fail-can-bms-batarya-iletisim-teshis/index.html",
+      "canonicalPath": "/haberler/hibrit-inverter-batt-comm-fail-can-bms-batarya-iletisim-teshis",
+      "type": "article"
+    }
+  ]
+}
