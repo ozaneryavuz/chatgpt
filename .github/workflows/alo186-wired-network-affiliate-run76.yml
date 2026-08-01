@@ -1,0 +1,124 @@
+name: ALO186 kablolu ağ affiliate kalite kontrolü
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/urun-eslestirme/catalog-battery-continuity-run75.js'
+      - 'alo186/tests/test_wired_network_affiliate_run76.js'
+      - '.github/workflows/alo186-wired-network-affiliate-run76.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/urun-eslestirme/catalog-battery-continuity-run75.js'
+      - 'alo186/tests/test_wired_network_affiliate_run76.js'
+      - '.github/workflows/alo186-wired-network-affiliate-run76.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-wired-network-affiliate-run76-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: JavaScript ve affiliate Knowledge Graph sözleşmesi
+        run: |
+          node --check alo186/urun-eslestirme/catalog-battery-continuity-run75.js
+          node alo186/tests/test_battery_continuity_affiliate_run75.js
+          node alo186/tests/test_wired_network_affiliate_run76.js
+          node alo186/tests/test_affiliate_knowledge_graph.js
+
+      - name: Canonical production paketini oluştur
+        run: |
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-network-run76 \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-network-run76
+
+      - name: Ürün yükleme ve ticari güven kabulü
+        shell: bash
+        run: |
+          set -euo pipefail
+          product_dir=/tmp/alo186-network-run76/akilli-urun-secimi
+          test -f "$product_dir/catalog-battery-continuity-run75.js"
+          grep -Fq 'catalog-battery-continuity-run75.js' "$product_dir/index.html"
+          grep -Fq 'rel="canonical" href="https://www.alo186.com/akilli-urun-secimi"' "$product_dir/index.html"
+          grep -Fq 'Reklam / satış ortaklığı:' "$product_dir/index.html"
+          grep -Fq 'rel="sponsored nofollow noopener"' "$product_dir/app.js"
+          ! grep -Eq '"(price|stock|seller|rating|aggregateRating|review|reviews|warranty|offers|availability|priceCurrency)"[[:space:]]*:' "$product_dir/catalog-battery-continuity-run75.js"
+          node - <<'NODE'
+          const catalog=require('/tmp/alo186-network-run76/akilli-urun-secimi/catalog-battery-continuity-run75.js');
+          const expected=new Map([
+            ['B00V4BGDKU','UE300'],
+            ['B08FYB5HHK','UE300C'],
+            ['B01M6C9DPK','UE330']
+          ]);
+          for(const [asin,mpn] of expected){
+            const product=catalog.products.find((item)=>item.asin===asin);
+            if(!product||product.mpn!==mpn)throw new Error(`Bundle ürünü eksik: ${asin}`);
+            if(product.url!==`https://www.amazon.com.tr/dp/${asin}?tag=alo186rehber-21`)throw new Error(`Affiliate etiketi eksik: ${asin}`);
+            if(!catalog.publicAffiliateEligible(product,{now:new Date('2026-08-01T06:30:00Z')}))throw new Error(`Güncel ürün kapalı: ${asin}`);
+            if(catalog.publicAffiliateEligible(product,{now:new Date('2026-09-20T06:30:00Z')}))throw new Error(`Eski ürün fail-closed değil: ${asin}`);
+          }
+          const allAsins=catalog.products.map((item)=>item.asin).filter(Boolean);
+          if(new Set(allAsins).size!==allAsins.length)throw new Error('Katalogda duplicate ASIN var.');
+          const graph=catalog.knowledgeGraph({now:new Date('2026-08-01T06:30:00Z')})['@graph'];
+          const products=graph.filter((node)=>node['@type']==='Product'&&node.identifier&&node.identifier.some((item)=>item.propertyID==='ASIN'&&expected.has(item.value)));
+          if(products.length!==3)throw new Error(`Product düğümü beklenen 3, bulunan ${products.length}`);
+          if(!products.every((node)=>node.brand&&node.identifier.some((item)=>item.propertyID==='MPN')&&Array.isArray(node.additionalProperty)&&!node.offers))throw new Error('Knowledge Graph ürün sözleşmesi eksik.');
+          const itemList=graph.find((node)=>node['@type']==='ItemList'&&node['@id'].endsWith('#itemlist-usb_gigabit_ethernet_adapter'));
+          if(!itemList||itemList.numberOfItems!==3)throw new Error('Kablolu ağ ItemList düğümü eksik.');
+          NODE
+
+      - name: Custom-domain Pages paketini doğrula
+        run: |
+          cp -a /tmp/alo186-network-run76 /tmp/alo186-network-run76-custom
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-network-run76-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-network-run76-custom \
+            --base-path ''
+
+      - name: Project-path Pages paketini doğrula
+        run: |
+          cp -a /tmp/alo186-network-run76 /tmp/alo186-network-run76-project
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-network-run76-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-network-run76-project \
+            --base-path '/chatgpt'
+
+      - name: Kalite özeti
+        if: always()
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ## ALO186 kablolu ağ affiliate run76
+
+          - 3 yeni doğrulanmış Amazon Türkiye ASIN kaydı: UE300, UE300C ve UE330
+          - Product, Brand, ItemList, ASIN/MPN ve additionalProperty sözleşmesi
+          - Fiyat, stok, satıcı, puan, yorum, garanti ve Product Offer alanları yok
+          - Yalnız düşük riskli tak-çalıştır tüketici kategorisinde `verified_direct`
+          - `after_tool` ve `professional_only` kapıları değişmedi
+          - 45 günlük stale fail-closed, duplicate ASIN, canonical ve sponsored/nofollow kontrolleri
+          EOF
