@@ -6,7 +6,7 @@
   const engine=window.Alo186AffiliateRevenueV177;
   const state={data:null,activeCategories:null,query:''};
 
-  function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));}
+  function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));}
   function emit(name,params={}){if(typeof window.Alo186Track==='function')window.Alo186Track(name,params);}
   function gateOpen(){return Boolean($('gateExisting')?.checked&&$('gateTechnical')?.checked&&$('gateAffiliate')?.checked);}
   function normalized(value){return String(value||'').toLocaleLowerCase('tr-TR').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/ı/g,'i');}
