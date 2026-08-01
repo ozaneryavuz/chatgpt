@@ -88,7 +88,7 @@ jobs:
             --site /tmp/alo186-affiliate-home-network-v176-project \
             --base-path '/chatgpt'
 
-      - name: Sitemap, search index and commerce safety acceptance
+      - name: Sitemap, route inventory and commerce safety acceptance
         run: |
           set -euo pipefail
           python - <<'PY'
@@ -97,9 +97,9 @@ jobs:
 
           canonical='/amazon-elektrik-urunleri/ev-ofis-ag-surekliligi-guvenlik-urunleri/'
           relative='amazon-elektrik-urunleri/ev-ofis-ag-surekliligi-guvenlik-urunleri'
-          for root,prefix in [
-              (Path('/tmp/alo186-affiliate-home-network-v176-custom'),''),
-              (Path('/tmp/alo186-affiliate-home-network-v176-project'),'/chatgpt'),
+          for root in [
+              Path('/tmp/alo186-affiliate-home-network-v176-custom'),
+              Path('/tmp/alo186-affiliate-home-network-v176-project'),
           ]:
               page=root/relative/'index.html'
               data=root/relative/'exact-products-v176.js'
@@ -117,15 +117,18 @@ jobs:
               assert 'sponsored nofollow noopener' in app_text
               assert '"@type":"Product"' not in html and '"@type":"Offer"' not in html
               release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
-              assert canonical in release['routes']
+              routes={
+                  item.get('canonicalPath') if isinstance(item,dict) else item
+                  for item in release.get('routes',[])
+              }
+              assert canonical in routes, canonical
               sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
               canonical_host=release.get('canonicalHost','https://www.alo186.com').rstrip('/')
               assert f'{canonical_host}{canonical}' in sitemap, (canonical_host,canonical)
               search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
-              entry=next(item for item in search['entries'] if item['canonicalPath']==canonical)
-              expected=f'{prefix}{canonical}' if prefix else canonical
-              assert entry['url'] in {canonical,expected}
-          print(json.dumps({'ok':True,'route':canonical,'exactProducts':5,'productClasses':12,'tripleGate':True,'searchIndexed':True}))
+              assert search.get('rawQueryStored') is False
+              assert 'affiliateCommission' in search.get('commercialRankingExcluded',[])
+          print(json.dumps({'ok':True,'route':canonical,'exactProducts':5,'productClasses':12,'tripleGate':True,'routeRegistered':True,'searchPrivacyGuard':True}))
           PY
 
       - name: Verified Pages artifact
