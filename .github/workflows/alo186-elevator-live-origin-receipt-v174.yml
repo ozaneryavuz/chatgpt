@@ -1,0 +1,80 @@
+name: ALO186 asansör canlı origin makbuzu v174
+
+on:
+  pull_request:
+    paths:
+      - "alo186/hesaplama/asansorde-elektrik-kesintisi-mahsur-kalma-guvenligi/**"
+      - "alo186/hesaplama/asansor-otomatik-kurtarma-alarm-aku-jenerator-uygunluk-kontrolu/**"
+      - "alo186/sektor-rehberi/apartman-otel-asansor-elektrik-kesintisi-test-merkezi/**"
+      - "alo186/deployment/routing-overlays/173-elevator-continuity-growth.json"
+      - "alo186/deployment/verify_elevator_live_origin.py"
+      - "alo186/tests/test_elevator_live_origin_verifier.py"
+      - ".github/workflows/alo186-elevator-live-origin-receipt-v174.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alo186/hesaplama/asansorde-elektrik-kesintisi-mahsur-kalma-guvenligi/**"
+      - "alo186/hesaplama/asansor-otomatik-kurtarma-alarm-aku-jenerator-uygunluk-kontrolu/**"
+      - "alo186/sektor-rehberi/apartman-otel-asansor-elektrik-kesintisi-test-merkezi/**"
+      - "alo186/deployment/routing-overlays/173-elevator-continuity-growth.json"
+      - "alo186/deployment/verify_elevator_live_origin.py"
+      - "alo186/tests/test_elevator_live_origin_verifier.py"
+      - ".github/workflows/alo186-elevator-live-origin-receipt-v174.yml"
+  schedule:
+    - cron: "19 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-elevator-live-origin-receipt-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  contract:
+    name: contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Sözdizimi
+        run: python -m py_compile alo186/deployment/verify_elevator_live_origin.py
+      - name: Canlı origin sözleşmesi
+        run: python alo186/tests/test_elevator_live_origin_verifier.py
+
+  live-origin:
+    name: live-origin
+    if: github.event_name != 'pull_request'
+    needs: contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Üç rota, robots ve sitemap için üretim makbuzu
+        run: >-
+          python alo186/deployment/verify_elevator_live_origin.py
+          --origin https://alo186.com
+          --attempts 10
+          --sleep-seconds 30
+          --timeout 30
+          --output build/elevator-live-origin-receipt.json
+          --strict
+      - name: Makbuzu sakla
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-elevator-live-origin-receipt-${{ github.run_id }}
+          path: build/elevator-live-origin-receipt.json
+          if-no-files-found: warn
+          retention-days: 14
