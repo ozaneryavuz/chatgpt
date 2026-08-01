@@ -1,0 +1,39 @@
+name: ALO186 security camera continuity growth v165
+
+on:
+  pull_request:
+    paths:
+      - "alo186/hesaplama/guvenlik-kamerasi-elektrik-internet-kesintisi-kayit-guvenligi/**"
+      - "alo186/hesaplama/guvenlik-kamerasi-nvr-poe-router-ups-w-va-wh-sure-uygunlugu/**"
+      - "alo186/sektor-rehberi/ev-guvenlik-kamerasi-elektrik-internet-kesintisi-test-merkezi/**"
+      - "alo186/deployment/routing-overlays/165-security-camera-continuity-growth.json"
+      - "alo186/audits/security-camera-continuity-growth-v165-2026-08-01.md"
+      - "alo186/tests/test_security_camera_continuity_growth_v165.py"
+      - ".github/workflows/alo186-security-camera-continuity-growth-v165.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alo186/hesaplama/guvenlik-kamerasi-elektrik-internet-kesintisi-kayit-guvenligi/**"
+      - "alo186/hesaplama/guvenlik-kamerasi-nvr-poe-router-ups-w-va-wh-sure-uygunlugu/**"
+      - "alo186/sektor-rehberi/ev-guvenlik-kamerasi-elektrik-internet-kesintisi-test-merkezi/**"
+      - "alo186/deployment/routing-overlays/165-security-camera-continuity-growth.json"
+      - "alo186/tests/test_security_camera_continuity_growth_v165.py"
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Güven, canonical, JavaScript ve affiliate sözleşmesi
+        run: python alo186/tests/test_security_camera_continuity_growth_v165.py
