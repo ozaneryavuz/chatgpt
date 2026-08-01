@@ -74,7 +74,9 @@ def expect_js_failure(javascript: str, token: str) -> None:
 
 
 def validate_workflow_contract() -> None:
-    workflow = (ROOT / ".github/workflows/alo186-pages-autobootstrap-live.yml").read_text(encoding="utf-8")
+    bootstrap = (ROOT / ".github/workflows/alo186-pages-autobootstrap-live.yml").read_text(encoding="utf-8")
+    publisher = (ROOT / ".github/workflows/alo186-github-pages.yml").read_text(encoding="utf-8")
+
     for token in (
         "ALO186_PAGES_ADMIN_TOKEN",
         "ADMIN_TOKEN_PRESENT",
@@ -84,12 +86,25 @@ def validate_workflow_contract() -> None:
         "already_live_on_sites",
         "alo186-v177-live-blocker",
         "alo186-v177-live-receipt",
-        "Fail-closed Pages yayın sonucu",
+        "dispatch_pages",
+        "alo186-github-pages.yml",
     ):
-        assert token in workflow, token
-    assert "if (!adminTokenPresent)" in workflow
-    assert "if (error.status !== 404) throw error" not in workflow
-    assert "schedule:" in workflow and "*/30 * * * *" in workflow
+        assert token in bootstrap, token
+
+    for token in (
+        "actions/deploy-pages@v4",
+        "Fail-closed Pages yayın sonucu",
+        "verify_live_origin.py",
+        "verify_contextual_affiliate_live_v177.py",
+        "alo186-full-live-receipt",
+    ):
+        assert token in publisher, token
+
+    assert "if (!adminTokenPresent)" in bootstrap
+    assert "if (error.status !== 404) throw error" not in bootstrap
+    assert "schedule:" in bootstrap and "*/30 * * * *" in bootstrap
+    assert "actions/deploy-pages@" not in bootstrap
+    assert publisher.count("actions/deploy-pages@") == 1
 
 
 def main() -> None:
@@ -158,6 +173,7 @@ def main() -> None:
         "gateCount": page["gateCount"],
         "failClosedCases": 9,
         "hostingAwareScheduledWorkflow": True,
+        "singlePublisherFailClosedReceipt": True,
     }, ensure_ascii=False))
 
 
