@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "release": "alo186-live-integration-2026-08-01",
+  "requestedAt": "2026-08-01T20:16:07Z",
+  "requestedTimeZone": "Europe/Istanbul",
+  "includesMainThrough": "6242ac16b6d72fda41d831c584f4f913c7fdfe11",
+  "purpose": "Tüm birleştirilmiş ALO186 içerik, UX, affiliate, routing, kalite ve yayın çalışmalarını tek GitHub Pages dağıtımında canlıya entegre etmek.",
+  "deploymentWorkflow": ".github/workflows/alo186-github-pages.yml",
+  "liveDomain": "https://alo186.com",
+  "status": "requested"
+}
