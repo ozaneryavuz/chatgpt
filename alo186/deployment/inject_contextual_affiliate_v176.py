@@ -100,6 +100,38 @@ def normalize_catalog_tool_routes(site: Path, catalog: dict) -> list[dict[str, s
     return fallbacks
 
 
+def _route_with_base_path(route: str, base_path: str) -> str:
+    """İç rotayı custom-domain ve GitHub Pages proje yolu için tekilleştirir."""
+    cleaned = "/" + str(route or "").strip("/")
+    prefix = "/" + str(base_path or "").strip("/") if str(base_path or "").strip("/") else ""
+    if not prefix:
+        return cleaned
+    if cleaned == prefix or cleaned.startswith(prefix + "/"):
+        return cleaned
+    return prefix + cleaned
+
+
+def scope_catalog_tool_routes(catalog: dict, base_path: str) -> int:
+    """Sonradan üretilen katalogdaki araç yollarına yayın taban yolunu uygular.
+
+    ``prepare_github_pages.py`` katalog henüz oluşmadan çalıştığı için bu JSON
+    dosyasındaki kök bağlantıları dönüştüremez. Katalog yazılmadan hemen önce
+    uygulanan bu adım, custom domainde kök yolları korur; proje yayınında ise
+    örneğin ``/hesaplama/...`` yolunu ``/chatgpt/hesaplama/...`` yapar.
+    """
+    changed = 0
+    for group in catalog.get("groups", []):
+        for product in group.get("products", []):
+            route = str(product.get("tool") or "")
+            if not route:
+                raise ValueError(f"ALO186 v176 ürün aracı boş: {product.get('id')}")
+            scoped = _route_with_base_path(route, base_path)
+            if scoped != route:
+                product["tool"] = scoped
+                changed += 1
+    return changed
+
+
 def _normalize_explanatory_value(value: object) -> object:
     if isinstance(value, str):
         updated = value
@@ -142,25 +174,30 @@ def normalize_catalog_explanations(catalog: dict) -> list[dict[str, str]]:
 
 def materialize_catalog(
     site: Path,
-) -> tuple[Path, list[dict[str, str]], list[dict[str, str]]]:
+    base_path: str = "",
+) -> tuple[Path, list[dict[str, str]], list[dict[str, str]], int]:
     target = Path(site) / "amazon-elektrik-urunleri/konuya-gore-urun-haritasi/catalog-v176.json"
     target.parent.mkdir(parents=True, exist_ok=True)
     catalog = embedded_catalog()
     explanation_changes = normalize_catalog_explanations(catalog)
     fallbacks = normalize_catalog_tool_routes(Path(site), catalog)
+    scoped_tool_route_count = scope_catalog_tool_routes(catalog, base_path)
     rendered = json.dumps(catalog, ensure_ascii=False, indent=2) + "\n"
     if not target.is_file() or target.read_text(encoding="utf-8") != rendered:
         target.write_text(rendered, encoding="utf-8")
-    return target, fallbacks, explanation_changes
+    return target, fallbacks, explanation_changes, scoped_tool_route_count
 
 
 def run(site: Path, base_path: str = "") -> dict:
-    _target, fallbacks, explanation_changes = materialize_catalog(Path(site))
+    _target, fallbacks, explanation_changes, scoped_tool_route_count = materialize_catalog(
+        Path(site), base_path
+    )
     result = _impl_run(Path(site), base_path)
     result["toolRouteFallbacks"] = fallbacks
     result["toolRouteFallbackCount"] = len(fallbacks)
     result["explanatoryCopyNormalizations"] = explanation_changes
     result["explanatoryCopyNormalizationCount"] = len(explanation_changes)
+    result["basePathScopedToolRouteCount"] = scoped_tool_route_count
     return result
 
 
