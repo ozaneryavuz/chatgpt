@@ -1,5 +1,5 @@
 name: ALO186 electrical project design content v165
-# Updated against the current publication routing base.
+# Validates the project guides against the current complete publication base.
 
 on:
   pull_request:
