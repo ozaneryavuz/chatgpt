@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import re
-from html.parser import HTMLParser
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -16,16 +15,6 @@ PAGES = {
 }
 OVERLAY = ROOT / "alo186/deployment/routing-overlays/179-cold-chain-energy-growth.json"
 AUDIT = ROOT / "alo186/audits/cold-chain-energy-growth-v179-2026-08-01.md"
-
-
-class LinkParser(HTMLParser):
-    def __init__(self) -> None:
-        super().__init__()
-        self.links: list[dict[str, str]] = []
-
-    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        if tag == "a":
-            self.links.append({key: value or "" for key, value in attrs})
 
 
 def read(path: Path) -> str:
@@ -64,34 +53,37 @@ def test_canonical_schema_and_mobile_contract() -> None:
 
 
 def test_affiliate_links_are_disclosed_and_safe() -> None:
-    affiliate_pages = [PAGES[next(iter(PAGES))], PAGES[list(PAGES)[1]]]
+    affiliate_routes = list(PAGES)[:2]
     total = 0
-    for path in affiliate_pages:
-        html = read(path)
+    for route in affiliate_routes:
+        html = read(PAGES[route])
         assert "Reklam / satış ortaklığı açıklaması" in html
         assert "mevcut" in html.lower()
-        assert "yeni ürün almayın" in html.lower() or "mevcut ölçer yeterli" in html.lower()
-        parser = LinkParser()
-        parser.feed(html)
-        amazon = [link for link in parser.links if "amazon.com.tr" in link.get("href", "")]
-        assert amazon, f"no affiliate link in {path}"
-        total += len(amazon)
-        for link in amazon:
-            assert "alo186rehber-21" in link["href"]
-            rel = set(link.get("rel", "").split())
+        links = re.findall(
+            r'<a[^>]+href="([^"]*amazon\.com\.tr[^"]*)"[^>]+rel="([^"]+)"[^>]*>',
+            html,
+            flags=re.I,
+        )
+        assert links, f"no affiliate link in {PAGES[route]}"
+        total += len(links)
+        for href, rel_value in links:
+            assert "alo186rehber-21" in href
+            rel = set(rel_value.split())
             assert {"sponsored", "nofollow", "noopener"}.issubset(rel)
-            assert link.get("target") == "_blank"
+        assert html.count("type=\"checkbox\"") >= 3
     assert total >= 5
 
 
-def test_fail_closed_safety_language() -> None:
+def test_explicit_no_purchase_and_fail_closed_language() -> None:
     cold = read(PAGES["/hesaplama/elektrik-kesintisinde-buzdolabi-dondurucu-gida-sicaklik-karari/"])
+    assert "Gıda güvenliği alışverişten önce gelir" in cold
     assert "Aktif olayda affiliate bağlantısı gösterilmez" in cold
     assert "Şüpheli gıdayı tatmayın" in cold
     assert "4,4 °C" in cold
     assert "Kuru buz bu tüketici affiliate akışına alınmaz" in cold
 
     energy = read(PAGES["/hesaplama/prizden-cihaz-elektrik-tuketimi-watt-kwh-maliyet-olcumu/"])
+    assert "Mevcut ölçer yeterli görünüyor — yeni ürün almayın" in energy
     assert "Sabit bağlı" in energy
     assert "Hasarlı veya ısınan priz" in energy
     assert "Tüketici priz ölçeri uygun yol değil" in energy
@@ -104,9 +96,7 @@ def test_repeat_visit_and_exports() -> None:
         assert token in tracker
     assert "ALO186 sunucusuna gönderilmez" in tracker
     assert "/iletisim/" in tracker
-    assert "Amazon" not in " ".join(
-        re.findall(r'href="([^"]*amazon[^"]*)"', tracker, flags=re.I)
-    )
+    assert not re.findall(r'href="[^"]*amazon[^"]*"', tracker, flags=re.I)
 
 
 def test_no_unverified_commercial_data() -> None:
