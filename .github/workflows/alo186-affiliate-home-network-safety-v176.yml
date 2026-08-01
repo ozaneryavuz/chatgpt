@@ -93,7 +93,6 @@ jobs:
           set -euo pipefail
           python - <<'PY'
           import json
-          import re
           from pathlib import Path
 
           canonical='/amazon-elektrik-urunleri/ev-ofis-ag-surekliligi-guvenlik-urunleri/'
@@ -117,14 +116,15 @@ jobs:
               assert data_text.count("amazonUrl:amazonSearchUrl")>=1
               assert 'sponsored nofollow noopener' in app_text
               assert '"@type":"Product"' not in html and '"@type":"Offer"' not in html
+              release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
+              assert canonical in release['routes']
               sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
-              assert f'https://alo186.com{canonical}' in sitemap
+              canonical_host=release.get('canonicalHost','https://www.alo186.com').rstrip('/')
+              assert f'{canonical_host}{canonical}' in sitemap, (canonical_host,canonical)
               search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
               entry=next(item for item in search['entries'] if item['canonicalPath']==canonical)
               expected=f'{prefix}{canonical}' if prefix else canonical
               assert entry['url'] in {canonical,expected}
-              release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
-              assert canonical in release['routes']
           print(json.dumps({'ok':True,'route':canonical,'exactProducts':5,'productClasses':12,'tripleGate':True,'searchIndexed':True}))
           PY
 
