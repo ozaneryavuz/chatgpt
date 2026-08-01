@@ -12,7 +12,7 @@ const route='/amazon-elektrik-urunleri/dogrulanmis-tak-calistir-urunler/';
 assert.ok(page.includes('commercial.js'),'Ana ürün merkezi ticari runtimeı yüklemeli.');
 assert.ok(runtime.includes(`const revenueHubRoute = '${route}'`));
 assert.match(runtime,/function injectRevenueHubEntry\(\)/);
-assert.match(runtime,/data\.affiliateRevenueEntryV177 = 'true'/);
+assert.match(runtime,/section\.dataset\.affiliateRevenueEntryV177 = 'true'/);
 assert.match(runtime,/data-commercial-route=\"verified-hub-v177\"/);
 assert.match(runtime,/affiliate_revenue_v177_entry_view/);
 assert.match(runtime,/25\+ uzun kuyruk ürün sınıfını/);
