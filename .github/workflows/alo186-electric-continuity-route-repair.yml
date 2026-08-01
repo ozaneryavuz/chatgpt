@@ -1,0 +1,33 @@
+name: ALO186 electric continuity route repair
+
+on:
+  pull_request:
+    paths:
+      - "alo186/hizmetler/elektrik-surekliligi/**"
+      - "alo186/deployment/routing-overlays/157-electric-continuity-route-repair.json"
+      - "alo186/tests/test_electric_continuity_route_repair.py"
+      - ".github/workflows/alo186-electric-continuity-route-repair.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alo186/hizmetler/elektrik-surekliligi/**"
+      - "alo186/deployment/routing-overlays/157-electric-continuity-route-repair.json"
+      - "alo186/tests/test_electric_continuity_route_repair.py"
+      - ".github/workflows/alo186-electric-continuity-route-repair.yml"
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install test dependency
+        run: python -m pip install -q pytest
+      - name: Verify route bridge contract
+        run: python -m pytest -q alo186/tests/test_electric_continuity_route_repair.py
+      - name: Build canonical production bundle
+        run: python alo186/deployment/build_static_site.py --output _route_repair_site --commit "${GITHUB_SHA}"
+      - name: Verify production bundle
+        run: python alo186/deployment/smoke_static_site.py --bundle _route_repair_site
