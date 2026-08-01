@@ -1,0 +1,34 @@
+name: ALO186 affiliate gap planner v175
+
+on:
+  pull_request:
+    paths:
+      - "alo186/amazon-elektrik-urunleri/kesinti-hazirlik-sepeti-olusturucu/**"
+      - "alo186/amazon-elektrik-urunleri/ev-ofis-elektrik-kesintisi-urun-secici/**"
+      - "alo186/amazon-elektrik-urunleri/yedek-guc-batarya-tekrar-test-merkezi/**"
+      - "alo186/deployment/routing-overlays/175-affiliate-gap-planner.json"
+      - "alo186/audits/affiliate-gap-planner-v175-2026-08-01.md"
+      - "alo186/tests/test_affiliate_gap_planner_v175.py"
+      - ".github/workflows/alo186-affiliate-gap-planner-v175.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alo186/amazon-elektrik-urunleri/kesinti-hazirlik-sepeti-olusturucu/**"
+      - "alo186/amazon-elektrik-urunleri/ev-ofis-elektrik-kesintisi-urun-secici/**"
+      - "alo186/amazon-elektrik-urunleri/yedek-guc-batarya-tekrar-test-merkezi/**"
+      - "alo186/deployment/routing-overlays/175-affiliate-gap-planner.json"
+      - "alo186/tests/test_affiliate_gap_planner_v175.py"
+      - ".github/workflows/alo186-affiliate-gap-planner-v175.yml"
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: python alo186/tests/test_affiliate_gap_planner_v175.py
