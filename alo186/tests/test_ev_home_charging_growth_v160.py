@@ -70,7 +70,7 @@ def main() -> None:
         "Ayrı devre ve koruma kanıtı eksik",
         "Bu sonuç yeni ürün almanızı gerektirmez",
         "IEC 61851-1:2017",
-        "Alternative Fuels Data Center",
+        "ABD Enerji Bakanlığı AFDC",
         "Electrical Safety First",
     ]:
         assert phrase in safety, f"safety phrase missing: {phrase}"
