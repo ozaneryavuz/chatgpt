@@ -99,10 +99,10 @@ jobs:
           canonical='/amazon-elektrik-urunleri/harici-ssd-hdd-usb-yedekleme-urun-secici/'
           canonical_path=canonical.rstrip('/')
           relative='amazon-elektrik-urunleri/harici-ssd-hdd-usb-yedekleme-urun-secici'
-          allowed_hosts={'alo186.com','www.alo186.com'}
-          for root in [
-              Path('/tmp/alo186-backup-exact-v186-custom'),
-              Path('/tmp/alo186-backup-exact-v186-project'),
+          allowed_hosts={'alo186.com','www.alo186.com','ozaneryavuz.github.io'}
+          for root,base_path in [
+              (Path('/tmp/alo186-backup-exact-v186-custom'),''),
+              (Path('/tmp/alo186-backup-exact-v186-project'),'/chatgpt'),
           ]:
               page=(root/relative/'index.html').read_text(encoding='utf-8')
               data=(root/relative/'exact-products-v186.js').read_text(encoding='utf-8')
@@ -118,11 +118,14 @@ jobs:
               assert canonical in routes
               sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
               locations=re.findall(r'<loc>([^<]+)</loc>',sitemap)
+              expected_paths={canonical_path}
+              if base_path:
+                  expected_paths.add(f'{base_path}{canonical}'.rstrip('/'))
               assert any(
                   urlparse(location).hostname in allowed_hosts
-                  and urlparse(location).path.rstrip('/')==canonical_path
+                  and urlparse(location).path.rstrip('/') in expected_paths
                   for location in locations
-              ), (canonical, locations[-10:])
+              ), (canonical,base_path,sorted(expected_paths),locations[-10:])
           print(json.dumps({'ok':True,'route':canonical,'exactModels':4,'tripleGate':True,'staleFailClosed':True,'noUngatedExactLinks':True,'sitemapHosts':sorted(allowed_hosts)}))
           PY
 
