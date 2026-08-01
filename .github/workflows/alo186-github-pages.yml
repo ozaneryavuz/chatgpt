@@ -18,8 +18,8 @@ permissions:
   id-token: write
 
 concurrency:
-  group: alo186-github-pages-${{ github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.event_name == 'pull_request' && format('alo186-pages-pr-{0}', github.event.pull_request.number) || 'alo186-pages-production' }}
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -53,6 +53,7 @@ jobs:
           node alo186/tests/test_technical_shortlist_growth.js
           python alo186/tests/device_damage_deadline_guard.py
           python alo186/tests/test_github_pages_bootstrap.py
+          python alo186/tests/test_pages_single_publisher.py
           python alo186/tests/test_live_quality_hardening.py
           python alo186/tests/test_live_domain_integration_manifest.py
           python alo186/tests/test_ga4_consent_integration.py
