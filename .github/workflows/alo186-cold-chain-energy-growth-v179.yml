@@ -1,0 +1,51 @@
+name: ALO186 cold-chain energy growth v179
+
+on:
+  pull_request:
+    paths:
+      - "alo186/hesaplama/elektrik-kesintisinde-buzdolabi-dondurucu-gida-sicaklik-karari/**"
+      - "alo186/hesaplama/prizden-cihaz-elektrik-tuketimi-watt-kwh-maliyet-olcumu/**"
+      - "alo186/sektor-rehberi/ev-enerji-soguk-zincir-30-gun-takip-merkezi/**"
+      - "alo186/deployment/routing-overlays/179-cold-chain-energy-growth.json"
+      - "alo186/audits/cold-chain-energy-growth-v179-2026-08-01.md"
+      - "alo186/tests/test_cold_chain_energy_growth_v179.py"
+      - ".github/workflows/alo186-cold-chain-energy-growth-v179.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alo186/hesaplama/elektrik-kesintisinde-buzdolabi-dondurucu-gida-sicaklik-karari/**"
+      - "alo186/hesaplama/prizden-cihaz-elektrik-tuketimi-watt-kwh-maliyet-olcumu/**"
+      - "alo186/sektor-rehberi/ev-enerji-soguk-zincir-30-gun-takip-merkezi/**"
+      - "alo186/deployment/routing-overlays/179-cold-chain-energy-growth.json"
+      - "alo186/tests/test_cold_chain_energy_growth_v179.py"
+      - ".github/workflows/alo186-cold-chain-energy-growth-v179.yml"
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python alo186/tests/test_cold_chain_energy_growth_v179.py
+      - name: Check inline JavaScript syntax
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          files = [
+            Path('alo186/hesaplama/elektrik-kesintisinde-buzdolabi-dondurucu-gida-sicaklik-karari/index.html'),
+            Path('alo186/hesaplama/prizden-cihaz-elektrik-tuketimi-watt-kwh-maliyet-olcumu/index.html'),
+            Path('alo186/sektor-rehberi/ev-enerji-soguk-zincir-30-gun-takip-merkezi/index.html'),
+          ]
+          out = Path('/tmp/alo186-v179-js')
+          out.mkdir(exist_ok=True)
+          for index, path in enumerate(files):
+            html = path.read_text(encoding='utf-8')
+            scripts = [s for s in re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>', html, re.S) if not s.lstrip().startswith('{"@context"')]
+            target = out / f'{index}.js'
+            target.write_text('\n'.join(scripts), encoding='utf-8')
+            print(target)
+          PY
+          for f in /tmp/alo186-v179-js/*.js; do node --check "$f"; done
