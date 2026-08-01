@@ -74,6 +74,13 @@ def test_authority_content_run102() -> None:
 
     for phrase in ("12 saati", "ESÜRE", "ESAYI", "başvuru olmaksızın", "mahsup"):
         assert phrase.casefold() in outage.casefold()
+    assert "30 gün içinde başvuru, servis raporu, olay kanıtı" in outage
+    assert "elektrik-dalgalanmasi-cihaz-hasari-edas-basvurusu-30-gun-kanit" in outage
+    for obsolete in (
+        "10 iş günü içinde başvuru",
+        "elektrik-dalgalanmasi-cihaz-hasari-edas-basvurusu-10-is-gunu-kanit",
+    ):
+        assert obsolete.casefold() not in outage.casefold()
     for phrase in ("ramp testi", "0,5×", "1×", "5×", "180°", "selektif"):
         assert phrase.casefold() in rcd.casefold()
     for phrase in ("triplen", "3.", "9.", "15.", "true-RMS", "nötr koruması"):

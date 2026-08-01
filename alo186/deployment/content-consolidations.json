@@ -1,6 +1,6 @@
 {
-  "version": 5,
-  "generatedAt": "2026-07-31",
+  "version": 6,
+  "generatedAt": "2026-08-01",
   "consolidations": [
     {
       "intentKey": "lifepo4-low-temperature-charging",
@@ -71,6 +71,13 @@
       "canonicalPath": "/haberler/santiye-elektrigi-gecici-baglanti-edas-basvurusu",
       "label": "Şantiye elektriği geçici bağlantı ve EDAŞ başvurusu",
       "reason": "İki rehber aynı geçici bağlantı izin, proje, başvuru, kabul ve sayaç zincirini hedefliyor. Mevcut kullanıcı ve arama rotasını korumak için önce yayımlanan URL canonical tutuldu."
+    },
+    {
+      "intentKey": "device-damage-claim-deadline-30-days",
+      "aliasPath": "/haberler/elektrik-dalgalanmasi-cihaz-hasari-edas-basvurusu-10-is-gunu-kanit",
+      "canonicalPath": "/haberler/elektrik-dalgalanmasi-cihaz-hasari-edas-basvurusu-30-gun-kanit",
+      "label": "Cihaz hasarı EDAŞ başvurusu ve 30 günlük süre",
+      "reason": "Eski URL başvuru süresini 10 iş günü olarak yansıtıyordu. Yürürlükteki Kalite Yönetmeliği Madde 26/1 ile uyumlu 30 günlük canonical rotaya kalıcı köprü kurularak paylaşılan bağlantılar ve iç linkler korunur."
     }
   ]
 }

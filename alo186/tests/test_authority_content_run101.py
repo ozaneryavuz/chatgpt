@@ -4,11 +4,15 @@ import re
 
 ROOT = Path(__file__).resolve().parents[2]
 SLUGS = (
-    "elektrik-dalgalanmasi-cihaz-hasari-edas-basvurusu-10-is-gunu-kanit",
+    "elektrik-dalgalanmasi-cihaz-hasari-edas-basvurusu-30-gun-kanit",
     "ges-inverter-dusuk-izolasyon-direnci-riso-toprak-hatasi-string-teshis",
     "ups-inverter-inoperable-output-short-circuit-overload-teshis",
 )
 OVERLAY = ROOT / "alo186/deployment/routing-overlays/content-authority-run101.json"
+CONSOLIDATIONS = ROOT / "alo186/deployment/content-consolidations.json"
+OLD_DAMAGE_ROUTE = "/haberler/elektrik-dalgalanmasi-cihaz-hasari-edas-basvurusu-10-is-gunu-kanit"
+NEW_DAMAGE_ROUTE = "/haberler/elektrik-dalgalanmasi-cihaz-hasari-edas-basvurusu-30-gun-kanit"
+OLD_DAMAGE_PATH = ROOT / "alo186/haberler/elektrik-dalgalanmasi-cihaz-hasari-edas-basvurusu-10-is-gunu-kanit/index.html"
 
 
 def between(pattern: str, html: str) -> str:
@@ -21,8 +25,19 @@ def test_authority_content_run101() -> None:
     overlay = json.loads(OVERLAY.read_text(encoding="utf-8"))
     assert overlay["version"] == 168
     assert overlay["generatedAt"] == "2026-08-01"
-    assert len(overlay["routes"]) == 3
+    assert len(overlay["routes"]) == 4
+    assert OLD_DAMAGE_PATH.is_file()
+
+    consolidation_data = json.loads(CONSOLIDATIONS.read_text(encoding="utf-8"))
+    aliases = {
+        item["aliasPath"]: item["canonicalPath"]
+        for item in consolidation_data["consolidations"]
+    }
+    assert aliases[OLD_DAMAGE_ROUTE] == NEW_DAMAGE_ROUTE
+
     routes = {item["canonicalPath"]: item for item in overlay["routes"]}
+    assert routes[OLD_DAMAGE_ROUTE]["source"] == "alo186/haberler/elektrik-dalgalanmasi-cihaz-hasari-edas-basvurusu-10-is-gunu-kanit/index.html"
+    assert routes[OLD_DAMAGE_ROUTE]["type"] == "article"
     titles, descriptions, h1s = set(), set(), set()
 
     for slug in SLUGS:
@@ -72,12 +87,23 @@ def test_authority_content_run101() -> None:
     assert len(descriptions) == 3
     assert len(h1s) == 3
 
-    edas = (ROOT / "alo186/haberler/elektrik-dalgalanmasi-cihaz-hasari-edas-basvurusu-10-is-gunu-kanit/index.html").read_text(encoding="utf-8")
+    edas = (ROOT / "alo186/haberler/elektrik-dalgalanmasi-cihaz-hasari-edas-basvurusu-30-gun-kanit/index.html").read_text(encoding="utf-8")
+    legacy = OLD_DAMAGE_PATH.read_text(encoding="utf-8")
     ges = (ROOT / "alo186/haberler/ges-inverter-dusuk-izolasyon-direnci-riso-toprak-hatasi-string-teshis/index.html").read_text(encoding="utf-8")
     ups = (ROOT / "alo186/haberler/ups-inverter-inoperable-output-short-circuit-overload-teshis/index.html").read_text(encoding="utf-8")
 
-    for phrase in ("10 iş günü", "teknik kalite ölçümü", "servis raporu", "gerekçeli cevap"):
-        assert phrase.casefold() in edas.casefold()
+    for document in (edas, legacy):
+        for phrase in ("30 gün içinde", "Madde 26/1", "teknik kalite ölçümü", "servis raporu", "gerekçeli cevap"):
+            assert phrase.casefold() in document.casefold()
+        for obsolete in (
+            "10 iş günlük EDAŞ başvurusu",
+            "10 iş günü içinde ilgili dağıtım şirketine talepte",
+            "10 iş günlük başvuru süresi",
+            "10 iş günlük süreyi koruyun",
+        ):
+            assert obsolete.casefold() not in document.casefold()
+    assert "https://www.resmigazete.gov.tr/eskiler/2020/12/20201229M1-1.htm" in edas
+    assert "https://www.resmigazete.gov.tr/eskiler/2025/10/20251023-5.htm" in edas
     for phrase in ("Low Insulation Resistance", "Riso", "DC+/PE", "nem", "string"):
         assert phrase.casefold() in ges.casefold()
     for phrase in ("Inverter Inoperable", "Output Short Circuit", "overload", "waveform", "power sharing"):
