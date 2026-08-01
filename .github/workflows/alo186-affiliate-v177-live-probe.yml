@@ -1,0 +1,153 @@
+name: ALO186 affiliate v177 canlı rota probu
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/alo186-affiliate-v177-live-probe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      LIVE_URL: https://alo186.com/amazon-elektrik-urunleri/dogrulanmis-tak-calistir-urunler/
+      ALIAS_URL: https://www.alo186.com/amazon-elektrik-urunleri/dogrulanmis-tak-calistir-urunler/
+    steps:
+      - name: Canlı rotanın görünmesini bekle
+        shell: bash
+        run: |
+          set -euo pipefail
+          ok=false
+          rm -f /tmp/v177-live.html /tmp/v177-live.meta /tmp/v177-live.headers
+          for attempt in $(seq 1 18); do
+            if curl --silent --show-error --location \
+              --retry 2 --retry-all-errors --retry-delay 1 \
+              --connect-timeout 10 --max-time 30 \
+              -H 'Accept: text/html' \
+              -H 'Cache-Control: no-cache, no-store, max-age=0' \
+              -H 'Pragma: no-cache' \
+              -D /tmp/v177-live.headers \
+              --write-out '%{http_code}\t%{content_type}\t%{url_effective}\t%{num_redirects}\n' \
+              "${LIVE_URL}?probe=${GITHUB_SHA}-${attempt}-$(date +%s)" \
+              -o /tmp/v177-live.html \
+              > /tmp/v177-live.meta; then
+              if python - <<'PY'
+          from pathlib import Path
+          from urllib.parse import urlparse
+          status, content_type, effective_url, redirects = Path('/tmp/v177-live.meta').read_text().strip().split('\t')
+          html = Path('/tmp/v177-live.html').read_text(encoding='utf-8', errors='ignore')
+          folded = html.casefold()
+          assert int(status) == 200, (status, effective_url)
+          assert content_type.casefold().startswith('text/html'), content_type
+          parsed = urlparse(effective_url)
+          assert parsed.hostname == 'alo186.com', effective_url
+          assert parsed.path.rstrip('/') == '/amazon-elektrik-urunleri/dogrulanmis-tak-calistir-urunler'
+          assert len(html) > 5000, len(html)
+          for token in (
+              'doğrulanmış tak-çalıştır elektrik ürünleri',
+              'bir amazon gelir ortağı olarak',
+              'mevcut güvenli ürün ihtiyacımı karşılamıyor',
+              'satış ortaklığı ilişkisini anladım',
+              'güncel doğrulanmış modeller',
+              'ürün sınıfları',
+          ):
+              assert token in folded, token
+          assert 'gateExisting' in html and 'gateTechnical' in html and 'gateAffiliate' in html
+          PY
+              then
+                ok=true
+                break
+              fi
+            fi
+            sleep 10
+          done
+          if [ "$ok" != true ]; then
+            echo 'Yeni affiliate v177 rotası canlı ChatGPT Sites origininde doğrulanamadı.' >&2
+            test -f /tmp/v177-live.meta && cat /tmp/v177-live.meta >&2 || true
+            test -f /tmp/v177-live.headers && tail -n 50 /tmp/v177-live.headers >&2 || true
+            test -f /tmp/v177-live.html && {
+              wc -c /tmp/v177-live.html >&2
+              head -c 1200 /tmp/v177-live.html >&2
+              echo >&2
+            } || true
+            exit 1
+          fi
+
+      - name: www aliasını ve ürün merkezinden keşfi doğrula
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --silent --show-error --location \
+            --retry 2 --retry-all-errors --retry-delay 1 \
+            --connect-timeout 10 --max-time 30 \
+            -H 'Cache-Control: no-cache, no-store, max-age=0' \
+            --write-out '%{http_code}\t%{content_type}\t%{url_effective}\t%{num_redirects}\n' \
+            "${ALIAS_URL}?alias_probe=$(date +%s)" \
+            -o /tmp/v177-alias.html \
+            > /tmp/v177-alias.meta
+          curl --silent --show-error --location --fail-with-body \
+            --connect-timeout 10 --max-time 30 \
+            -H 'Cache-Control: no-cache, no-store, max-age=0' \
+            "https://alo186.com/amazon-elektrik-urunleri?probe=$(date +%s)" \
+            -o /tmp/v177-product-center.html
+          python - <<'PY'
+          from pathlib import Path
+          from urllib.parse import urlparse
+          status, content_type, effective_url, redirects = Path('/tmp/v177-alias.meta').read_text().strip().split('\t')
+          assert int(status) == 200
+          assert content_type.casefold().startswith('text/html')
+          assert urlparse(effective_url).hostname == 'alo186.com'
+          assert int(redirects) >= 1
+          center = Path('/tmp/v177-product-center.html').read_text(encoding='utf-8', errors='ignore')
+          assert '/amazon-elektrik-urunleri/dogrulanmis-tak-calistir-urunler/' in center
+          PY
+
+      - name: Canlı yayın makbuzu
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib, json
+          from datetime import datetime, timezone
+          from pathlib import Path
+          status, content_type, effective_url, redirects = Path('/tmp/v177-live.meta').read_text().strip().split('\t')
+          body = Path('/tmp/v177-live.html').read_bytes()
+          alias_status, alias_type, alias_url, alias_redirects = Path('/tmp/v177-alias.meta').read_text().strip().split('\t')
+          receipt = {
+              'ok': True,
+              'checkedAt': datetime.now(timezone.utc).isoformat(),
+              'route': '/amazon-elektrik-urunleri/dogrulanmis-tak-calistir-urunler/',
+              'httpStatus': int(status),
+              'contentType': content_type,
+              'effectiveUrl': effective_url,
+              'sha256': hashlib.sha256(body).hexdigest(),
+              'bytes': len(body),
+              'wwwAliasStatus': int(alias_status),
+              'wwwAliasEffectiveUrl': alias_url,
+              'wwwAliasRedirectCount': int(alias_redirects),
+              'productCenterDiscoveryLink': True,
+              'affiliateDisclosure': True,
+              'tripleGate': True,
+          }
+          Path('/tmp/v177-live-receipt.json').write_text(json.dumps(receipt, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
+          print(json.dumps(receipt, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Makbuz artifactını yükle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-affiliate-v177-live-receipt
+          path: |
+            /tmp/v177-live-receipt.json
+            /tmp/v177-live.html
+            /tmp/v177-live.meta
+            /tmp/v177-live.headers
+            /tmp/v177-alias.html
+            /tmp/v177-alias.meta
+            /tmp/v177-product-center.html
+          if-no-files-found: warn
+          retention-days: 7
