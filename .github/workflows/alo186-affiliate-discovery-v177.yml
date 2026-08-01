@@ -1,0 +1,101 @@
+name: ALO186 affiliate v177 ürün merkezi keşfi
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/commercial.js'
+      - 'alo186/tests/test_affiliate_discovery_v177.js'
+      - '.github/workflows/alo186-affiliate-discovery-v177.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/commercial.js'
+      - 'alo186/tests/test_affiliate_discovery_v177.js'
+      - '.github/workflows/alo186-affiliate-discovery-v177.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-affiliate-discovery-v177-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Kaynak keşif ve JavaScript sözleşmeleri
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check alo186/amazon-elektrik-urunleri/commercial.js
+          node alo186/tests/test_affiliate_discovery_v177.js
+          node alo186/tests/test_affiliate_revenue_v177.js
+
+      - name: Canonical ve final Pages artifactını oluştur
+        shell: bash
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-discovery-canonical --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-discovery-canonical
+          cp -a /tmp/alo186-discovery-canonical /tmp/alo186-discovery-pages
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-discovery-pages \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-discovery-pages \
+            --base-path ''
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-discovery-pages \
+            --base-path '' \
+            > /tmp/alo186-discovery-growth.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-discovery-pages \
+            --base-path ''
+
+      - name: Final ürün merkezi keşif kabulü
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('/tmp/alo186-discovery-pages')
+          route='/amazon-elektrik-urunleri/dogrulanmis-tak-calistir-urunler/'
+          runtime=(root/'amazon-elektrik-urunleri/commercial.js').read_text(encoding='utf-8')
+          page=(root/'amazon-elektrik-urunleri/index.html').read_text(encoding='utf-8')
+          release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
+          search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
+          assert release['canonicalHost']=='https://alo186.com'
+          assert any(item.get('canonicalPath')==route for item in release['routes'])
+          assert any(item.get('canonicalPath')==route and item.get('url')==route for item in search['entries'])
+          assert 'commercial.js' in page
+          assert route in runtime
+          assert 'data-commercial-route="verified-hub-v177"' in runtime
+          assert 'affiliate_revenue_v177_entry_view' in runtime
+          assert 'href="https://www.amazon.com.tr' not in runtime
+          print({'ok':True,'route':route,'productCenterEntry':True,'canonicalHost':release['canonicalHost']})
+          PY
+
+      - name: Doğrulanmış keşif artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-affiliate-discovery-v177-pages
+          path: |
+            /tmp/alo186-discovery-pages
+            /tmp/alo186-discovery-growth.json
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
