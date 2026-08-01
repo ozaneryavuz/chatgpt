@@ -10,7 +10,7 @@ PAGES = {
     "/haberler/inverter-dc-bus-overvoltage-frenleme-direnci-yavaslama-rampi": {
         "path": ROOT / "alo186/haberler/inverter-dc-bus-overvoltage-frenleme-direnci-yavaslama-rampi/index.html",
         "intent": ("DC bus overvoltage", "rejeneratif enerji", "yavaşlama rampası", "frenleme direnci", "fren kıyıcı"),
-        "sources": ("se.com",),
+        "sources": ("schneider-electric.com",),
         "separation": ("motor yavaşlarken DC baraya dönen enerji", "dV/dt ve sinüs filtre rehberi", "THDi–TDD rehberi"),
         "boundary": "Yavaşlama rampası, yük ataleti ve frenleme enerjisi ölçülmeden fren direnci veya daha büyük sürücü satın almayın",
         "cta": "/hizmetler/elektrik-surekliligi/",
