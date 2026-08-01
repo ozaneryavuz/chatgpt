@@ -1,0 +1,21 @@
+{
+  "version": 182,
+  "generatedAt": "2026-08-01",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/duman-karbonmonoksit-alarmi-pil-omur-test-karari/index.html",
+      "canonicalPath": "/hesaplama/duman-karbonmonoksit-alarmi-pil-omur-test-karari/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/ev-alarm-pil-test-urun-secici/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/ev-alarm-pil-test-urun-secici/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/sektor-rehberi/ev-alarm-30-180-gun-test-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/ev-alarm-30-180-gun-test-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
