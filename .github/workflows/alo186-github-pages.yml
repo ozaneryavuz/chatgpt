@@ -89,10 +89,10 @@ jobs:
             python alo186/deployment/inject_shortlist_growth.py \
               --site "$site" \
               --base-path "$base"
-            python alo186/deployment/inject_contextual_affiliate_growth_v177.py \
+            python alo186/deployment/smoke_github_pages.py \
               --site "$site" \
               --base-path "$base"
-            python alo186/deployment/smoke_github_pages.py \
+            python alo186/deployment/inject_contextual_affiliate_growth_v177.py \
               --site "$site" \
               --base-path "$base"
             python alo186/deployment/inject_live_quality_hardening_v2.py \
@@ -194,13 +194,13 @@ jobs:
           python alo186/deployment/inject_shortlist_growth.py \
             --site /tmp/alo186-pages-site \
             --base-path "$PAGES_BASE_PATH"
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-pages-site \
+            --base-path "$PAGES_BASE_PATH"
           python alo186/deployment/inject_contextual_affiliate_growth_v177.py \
             --site /tmp/alo186-pages-site \
             --base-path "$PAGES_BASE_PATH" \
             | tee /tmp/alo186-contextual-affiliate-v177.json
-          python alo186/deployment/smoke_github_pages.py \
-            --site /tmp/alo186-pages-site \
-            --base-path "$PAGES_BASE_PATH"
           python alo186/deployment/inject_live_quality_hardening_v2.py \
             --site /tmp/alo186-pages-site \
             --base-path "$PAGES_BASE_PATH" \
