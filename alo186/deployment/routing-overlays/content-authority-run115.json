@@ -1,0 +1,22 @@
+{
+  "version": 189,
+  "generatedAt": "2026-08-02",
+  "purpose": "ALO186 content authority run115: generator low oil pressure, EV dynamic load management and PV potential-induced degradation.",
+  "routes": [
+    {
+      "canonicalPath": "/haberler/jenerator-low-oil-pressure-dusuk-yag-basinci-sensor-gercek-basinci-teshis",
+      "source": "alo186/haberler/jenerator-low-oil-pressure-dusuk-yag-basinci-sensor-gercek-basinci-teshis/index.html",
+      "type": "article"
+    },
+    {
+      "canonicalPath": "/haberler/ev-sarj-dinamik-yuk-yonetimi-anti-tripping-ct-sayac-teshis",
+      "source": "alo186/haberler/ev-sarj-dinamik-yuk-yonetimi-anti-tripping-ct-sayac-teshis/index.html",
+      "type": "article"
+    },
+    {
+      "canonicalPath": "/haberler/ges-pid-potential-induced-degradation-anti-pid-teshis",
+      "source": "alo186/haberler/ges-pid-potential-induced-degradation-anti-pid-teshis/index.html",
+      "type": "article"
+    }
+  ]
+}
