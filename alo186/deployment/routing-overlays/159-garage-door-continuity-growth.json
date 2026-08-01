@@ -1,0 +1,21 @@
+{
+  "version": 159,
+  "generatedAt": "2026-08-01",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/garaj-kapisi-elektrik-kesintisi-manuel-acma-guvenligi/index.html",
+      "canonicalPath": "/hesaplama/garaj-kapisi-elektrik-kesintisi-manuel-acma-guvenligi/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/garaj-kapisi-motoru-ups-batarya-w-wh-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/garaj-kapisi-motoru-ups-batarya-w-wh-uygunluk/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/sektor-rehberi/garaj-kapisi-elektrik-kesintisi-guvenlik-test-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/garaj-kapisi-elektrik-kesintisi-guvenlik-test-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
