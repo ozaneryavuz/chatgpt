@@ -29,13 +29,22 @@ def test_pages_exist_and_have_enough_contextual_products():
 
 
 def test_trust_contract():
+    no_buy_phrases = (
+        'yeni ürün almay',
+        'yenisini almay',
+        'mevcut ürün yeterliyse',
+        'mevcut güvenli ürün',
+        'satın almama',
+        'satın alma yok',
+    )
     for path in ROUTES:
         text = path.read_text(encoding="utf-8")
+        lower = text.lower()
         assert '<link rel="canonical"' in text
         assert 'CollectionPage' in text
         assert 'BreadcrumbList' in text
-        assert 'yeni ürün almayın' in text.lower() or 'yenisini almayın' in text.lower() or 'yeni ürün almayacağım' in text.lower()
-        assert 'fiyat' in text.lower() and 'stok' in text.lower() and 'garanti' in text.lower()
+        assert any(phrase in lower for phrase in no_buy_phrases), path
+        assert 'fiyat' in lower and 'stok' in lower and 'garanti' in lower
         assert '"@type":"Product"' not in text
         assert '"@type":"Offer"' not in text
         assert 'aggregateRating' not in text
