@@ -14,13 +14,14 @@ on:
 
 permissions:
   contents: read
+  actions: write
   pages: write
   id-token: write
   issues: write
 
 concurrency:
-  group: alo186-dual-hosting-full-live
-  cancel-in-progress: true
+  group: alo186-pages-production
+  cancel-in-progress: false
 
 jobs:
   probe:
@@ -279,99 +280,24 @@ jobs:
             await upsert(606);
             await upsert(21);
 
-  deploy:
+
+  dispatch_pages:
     needs: probe
     if: needs.probe.outputs.pages_ready == 'true' && needs.probe.outputs.live_current != 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 60
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Tek GitHub Pages yayıncısını tetikle
+        uses: actions/github-script@v7
         with:
-          python-version: '3.12'
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - id: pages
-        uses: actions/configure-pages@v5
-        with:
-          token: ${{ secrets.ALO186_PAGES_ADMIN_TOKEN || github.token }}
-          enablement: false
-      - name: Kaynak ve güvenlik kalite kapıları
-        run: |
-          set -euo pipefail
-          node alo186/tests/test_portal_hardening.js
-          node alo186/tests/test_release_manifest.js
-          node alo186/tests/test_authority_content.js
-          python alo186/tests/device_damage_deadline_guard.py
-          python alo186/tests/test_github_pages_bootstrap.py
-          python alo186/tests/test_live_quality_hardening.py
-          python alo186/tests/test_live_domain_integration_manifest.py
-          python alo186/tests/test_ga4_consent_integration.py
-          python alo186/tests/test_contextual_affiliate_growth_v177.py
-          python alo186/tests/test_contextual_affiliate_live_v177.py
-      - name: Bütün ALO186 çalışmalarını tek artifactta oluştur
-        env:
-          BASE_PATH: ${{ steps.pages.outputs.base_path }}
-          GA4: ${{ vars.ALO186_GA4_MEASUREMENT_ID || 'G-639TVHL0LC' }}
-        run: |
-          set -euo pipefail
-          SITE=/tmp/alo186-full-live
-          python alo186/deployment/build_static_site.py --output "$SITE" --commit "$GITHUB_SHA"
-          python alo186/deployment/prepare_github_pages.py --site "$SITE" --base-path "$BASE_PATH" --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
-          python alo186/deployment/inject_outcome_runtime.py --site "$SITE" --base-path "$BASE_PATH"
-          python alo186/deployment/inject_shortlist_growth.py --site "$SITE" --base-path "$BASE_PATH"
-          python alo186/deployment/smoke_github_pages.py --site "$SITE" --base-path "$BASE_PATH"
-          python alo186/deployment/inject_contextual_affiliate_growth_v177.py --site "$SITE" --base-path "$BASE_PATH" | tee /tmp/alo186-contextual-v177.json
-          python alo186/deployment/guard_commerce_routes_v3.py --site "$SITE" | tee /tmp/alo186-commerce-guard.json
-          python alo186/deployment/inject_live_quality_hardening_v2.py --site "$SITE" --base-path "$BASE_PATH" | tee /tmp/alo186-live-quality.json
-          python alo186/deployment/inject_ga4_consent.py --site "$SITE" --base-path "$BASE_PATH" --measurement-id "$GA4" | tee /tmp/alo186-ga4.json
-      - uses: actions/upload-pages-artifact@v4
-        with:
-          path: /tmp/alo186-full-live
-      - id: deployment
-        uses: actions/deploy-pages@v4
-      - name: Fail-closed Pages yayın sonucu
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          python alo186/deployment/verify_live_origin.py \
-            --origin https://alo186.com \
-            --alias-origin https://www.alo186.com \
-            --expected-commit "$GITHUB_SHA" \
-            --repository "$GITHUB_REPOSITORY" \
-            --github-token "$GITHUB_TOKEN" \
-            --receipt /tmp/alo186-live-origin-receipt.json \
-            --diagnostics /tmp/alo186-origin-diagnostics \
-            --attempts 36 \
-            --sleep-seconds 10
-          python alo186/deployment/verify_contextual_affiliate_live_v177.py \
-            --origin https://alo186.com \
-            --receipt /tmp/alo186-v177-live-receipt.json \
-            --diagnostics /tmp/alo186-v177-diagnostics \
-            --attempts 36 \
-            --sleep-seconds 10
-      - name: Canlı yayın makbuzunu sakla
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: alo186-full-live-receipt
-          path: |
-            /tmp/alo186-live-origin-receipt.json
-            /tmp/alo186-v177-live-receipt.json
-            /tmp/alo186-origin-diagnostics
-            /tmp/alo186-v177-diagnostics
-            /tmp/alo186-contextual-v177.json
-            /tmp/alo186-commerce-guard.json
-            /tmp/alo186-live-quality.json
-            /tmp/alo186-ga4.json
-          if-no-files-found: warn
-          include-hidden-files: true
-          retention-days: 45
+          script: |
+            const response = await github.request('POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'alo186-github-pages.yml',
+              ref: 'main',
+            });
+            core.info(`ALO186 ana Pages workflow dispatch status=${response.status}`);
+      - run: echo 'Pages hazır ve canlı commit güncel değil; tek yayıncı workflow kuyruğa alındı.'
 
   already_current:
     needs: probe

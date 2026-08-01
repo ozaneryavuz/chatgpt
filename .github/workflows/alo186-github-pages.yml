@@ -18,8 +18,8 @@ permissions:
   id-token: write
 
 concurrency:
-  group: alo186-github-pages-${{ github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.event_name == 'pull_request' && format('alo186-pages-pr-{0}', github.event.pull_request.number) || 'alo186-pages-production' }}
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -53,6 +53,7 @@ jobs:
           node alo186/tests/test_technical_shortlist_growth.js
           python alo186/tests/device_damage_deadline_guard.py
           python alo186/tests/test_github_pages_bootstrap.py
+          python alo186/tests/test_pages_single_publisher.py
           python alo186/tests/test_live_quality_hardening.py
           python alo186/tests/test_live_domain_integration_manifest.py
           python alo186/tests/test_ga4_consent_integration.py
@@ -260,11 +261,55 @@ jobs:
     if: github.event_name != 'pull_request' && needs.build.outputs.pages_ready == 'true'
     needs: build
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 60
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Checkout doğrulama araçları
+        uses: actions/checkout@v4
+
+      - name: Python doğrulama ortamı
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
       - name: GitHub Pages'e yayınla
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Fail-closed Pages yayın sonucu
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python alo186/deployment/verify_live_origin.py \
+            --origin https://alo186.com \
+            --alias-origin https://www.alo186.com \
+            --expected-commit "$GITHUB_SHA" \
+            --repository "$GITHUB_REPOSITORY" \
+            --github-token "$GITHUB_TOKEN" \
+            --receipt /tmp/alo186-live-origin-receipt.json \
+            --diagnostics /tmp/alo186-origin-diagnostics \
+            --attempts 36 \
+            --sleep-seconds 10
+          python alo186/deployment/verify_contextual_affiliate_live_v177.py \
+            --origin https://alo186.com \
+            --receipt /tmp/alo186-v177-live-receipt.json \
+            --diagnostics /tmp/alo186-v177-diagnostics \
+            --attempts 36 \
+            --sleep-seconds 10
+
+      - name: Canlı yayın makbuzunu sakla
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-full-live-receipt
+          path: |
+            /tmp/alo186-live-origin-receipt.json
+            /tmp/alo186-v177-live-receipt.json
+            /tmp/alo186-origin-diagnostics
+            /tmp/alo186-v177-diagnostics
+          if-no-files-found: warn
+          include-hidden-files: true
+          retention-days: 45
