@@ -1,0 +1,21 @@
+{
+  "version": 160,
+  "generatedAt": "2026-08-01",
+  "routes": [
+    {
+      "source": "alo186/haberler/bess-hucre-sicaklik-farki-hvac-sivi-sogutma-derating/index.html",
+      "canonicalPath": "/haberler/bess-hucre-sicaklik-farki-hvac-sivi-sogutma-derating",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/dc-hizli-sarj-izolasyon-hatasi-imd-arac-istasyon-ayrimi/index.html",
+      "canonicalPath": "/haberler/dc-hizli-sarj-izolasyon-hatasi-imd-arac-istasyon-ayrimi",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/frekans-inverteri-motor-autotune-statik-doner-id-run/index.html",
+      "canonicalPath": "/haberler/frekans-inverteri-motor-autotune-statik-doner-id-run",
+      "type": "article"
+    }
+  ]
+}
