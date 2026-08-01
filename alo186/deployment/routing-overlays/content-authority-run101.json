@@ -1,0 +1,21 @@
+{
+  "version": 168,
+  "generatedAt": "2026-08-01",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-dalgalanmasi-cihaz-hasari-edas-basvurusu-10-is-gunu-kanit/index.html",
+      "canonicalPath": "/haberler/elektrik-dalgalanmasi-cihaz-hasari-edas-basvurusu-10-is-gunu-kanit",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ges-inverter-dusuk-izolasyon-direnci-riso-toprak-hatasi-string-teshis/index.html",
+      "canonicalPath": "/haberler/ges-inverter-dusuk-izolasyon-direnci-riso-toprak-hatasi-string-teshis",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ups-inverter-inoperable-output-short-circuit-overload-teshis/index.html",
+      "canonicalPath": "/haberler/ups-inverter-inoperable-output-short-circuit-overload-teshis",
+      "type": "article"
+    }
+  ]
+}
