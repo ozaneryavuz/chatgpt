@@ -1,0 +1,57 @@
+name: ALO186 affiliate exact products v175
+
+on:
+  pull_request:
+    paths:
+      - "alo186/amazon-elektrik-urunleri/tasinabilir-enerji-sarj-urunleri/**"
+      - "alo186/tests/test_affiliate_exact_products_v175.js"
+      - "alo186/tests/test_affiliate_contextual_product_hubs_v174.py"
+      - ".github/workflows/alo186-affiliate-exact-products-v175.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alo186/amazon-elektrik-urunleri/tasinabilir-enerji-sarj-urunleri/**"
+      - "alo186/tests/test_affiliate_exact_products_v175.js"
+      - "alo186/tests/test_affiliate_contextual_product_hubs_v174.py"
+      - ".github/workflows/alo186-affiliate-exact-products-v175.yml"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: JavaScript syntax and exact product contract
+        run: |
+          node --check alo186/amazon-elektrik-urunleri/tasinabilir-enerji-sarj-urunleri/exact-products-v175.js
+          node --check alo186/amazon-elektrik-urunleri/tasinabilir-enerji-sarj-urunleri/app-v175.js
+          node alo186/tests/test_affiliate_exact_products_v175.js
+      - name: Contextual hub regression
+        run: python alo186/tests/test_affiliate_contextual_product_hubs_v174.py
+      - name: Canonical production package
+        run: |
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-v175 --commit v175-test
+          test -f /tmp/alo186-v175/amazon-elektrik-urunleri/tasinabilir-enerji-sarj-urunleri/index.html
+          test -f /tmp/alo186-v175/amazon-elektrik-urunleri/tasinabilir-enerji-sarj-urunleri/exact-products-v175.js
+          test -f /tmp/alo186-v175/amazon-elektrik-urunleri/tasinabilir-enerji-sarj-urunleri/app-v175.js
+      - name: Final page safety assertions
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          root=Path('/tmp/alo186-v175/amazon-elektrik-urunleri/tasinabilir-enerji-sarj-urunleri')
+          html=(root/'index.html').read_text(encoding='utf-8')
+          data=(root/'exact-products-v175.js').read_text(encoding='utf-8')
+          app=(root/'app-v175.js').read_text(encoding='utf-8')
+          assert 'amazon.com.tr/dp/' not in html
+          assert 'amazon.com.tr/s?k=' not in html
+          assert all(token in html for token in ('gateExisting','gateTechnical','gateAffiliate'))
+          assert data.count('asin:') == 10
+          assert 'sponsored nofollow noopener' in app
+          assert 'Product"' not in html and 'Offer"' not in html
+          print({'ok': True, 'exactProducts': 10, 'productClasses': 10, 'tripleGate': True})
+          PY
