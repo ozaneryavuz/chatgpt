@@ -1,0 +1,21 @@
+{
+  "version": 179,
+  "generatedAt": "2026-08-01",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/elektrik-kesintisinde-buzdolabi-dondurucu-gida-sicaklik-karari/index.html",
+      "canonicalPath": "/hesaplama/elektrik-kesintisinde-buzdolabi-dondurucu-gida-sicaklik-karari/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/prizden-cihaz-elektrik-tuketimi-watt-kwh-maliyet-olcumu/index.html",
+      "canonicalPath": "/hesaplama/prizden-cihaz-elektrik-tuketimi-watt-kwh-maliyet-olcumu/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/sektor-rehberi/ev-enerji-soguk-zincir-30-gun-takip-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/ev-enerji-soguk-zincir-30-gun-takip-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
