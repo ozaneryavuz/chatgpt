@@ -1,0 +1,21 @@
+{
+  "version": 186,
+  "generatedAt": "2026-08-01",
+  "routes": [
+    {
+      "source": "alo186/haberler/ev-sarj-dinamik-yuk-yonetimi-sayac-ct-yonu-modbus-teshis/index.html",
+      "canonicalPath": "/haberler/ev-sarj-dinamik-yuk-yonetimi-sayac-ct-yonu-modbus-teshis",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ges-inverter-grid-overvoltage-ac-gerilim-yukselmesi-kablo-empedans-teshis/index.html",
+      "canonicalPath": "/haberler/ges-inverter-grid-overvoltage-ac-gerilim-yukselmesi-kablo-empedans-teshis",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/jenerator-ats-3-kutup-4-kutup-anahtarlanan-notr-rcd-teshis/index.html",
+      "canonicalPath": "/haberler/jenerator-ats-3-kutup-4-kutup-anahtarlanan-notr-rcd-teshis",
+      "type": "article"
+    }
+  ]
+}
