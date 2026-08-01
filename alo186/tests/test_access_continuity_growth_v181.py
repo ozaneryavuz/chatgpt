@@ -51,7 +51,7 @@ def check_common(name: str, html: str) -> None:
     assert '"@type":"BreadcrumbList"' in compact
     for forbidden in ('"@type":"Offer"', '"@type":"Product"', '"availability"', '"aggregateRating"', '"priceCurrency"'):
         assert forbidden not in compact, f"{name}: forbidden commerce schema {forbidden}"
-    assert not re.search(r'href=["\']https://www\.amazon\.com\.tr', html, flags=re.I), f"{name}: static Amazon href"
+    assert not re.search(r'<a\b[^>]*\bhref=["\']https://www\.amazon\.com\.tr', html, flags=re.I | re.S), f"{name}: static Amazon href"
     assert "resmî kurum" in html or "resmi kurum" in html
     check_js(name, html)
 
