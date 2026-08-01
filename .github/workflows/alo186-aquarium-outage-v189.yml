@@ -1,0 +1,41 @@
+name: ALO186 akvaryum kesinti büyümesi v189
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/akvaryum-elektrik-kesintisi-oksijen-sicaklik-plani/**'
+      - 'alo186/amazon-elektrik-urunleri/akvaryum-kesinti-hava-pompasi-termometre-secici/**'
+      - 'alo186/sektor-rehberi/akvaryum-kesinti-30-90-gun-test-merkezi/**'
+      - 'alo186/deployment/routing-overlays/189-aquarium-outage-growth.json'
+      - 'alo186/audits/aquarium-outage-growth-v189-2026-08-02.md'
+      - 'alo186/tests/test_aquarium_outage_growth_v189.py'
+      - '.github/workflows/alo186-aquarium-outage-v189.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/akvaryum-elektrik-kesintisi-oksijen-sicaklik-plani/**'
+      - 'alo186/amazon-elektrik-urunleri/akvaryum-kesinti-hava-pompasi-termometre-secici/**'
+      - 'alo186/sektor-rehberi/akvaryum-kesinti-30-90-gun-test-merkezi/**'
+      - 'alo186/deployment/routing-overlays/189-aquarium-outage-growth.json'
+      - 'alo186/audits/aquarium-outage-growth-v189-2026-08-02.md'
+      - 'alo186/tests/test_aquarium_outage_growth_v189.py'
+      - '.github/workflows/alo186-aquarium-outage-v189.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fail-closed kullanıcı güveni ve routing sözleşmesi
+        run: |
+          set -euo pipefail
+          python -m py_compile alo186/tests/test_aquarium_outage_growth_v189.py
+          python alo186/tests/test_aquarium_outage_growth_v189.py
