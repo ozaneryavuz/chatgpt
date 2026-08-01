@@ -1,0 +1,21 @@
+{
+  "version": 158,
+  "generatedAt": "2026-08-01",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/kombi-elektrik-kesintisi-sonrasi-guvenli-yeniden-baslatma/index.html",
+      "canonicalPath": "/hesaplama/kombi-elektrik-kesintisi-sonrasi-guvenli-yeniden-baslatma/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/kombi-ups-w-va-wh-saf-sinus-uygunluk/index.html",
+      "canonicalPath": "/hesaplama/kombi-ups-w-va-wh-saf-sinus-uygunluk/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/sektor-rehberi/kombi-elektrik-surekliligi-donma-koruma-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/kombi-elektrik-surekliligi-donma-koruma-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
