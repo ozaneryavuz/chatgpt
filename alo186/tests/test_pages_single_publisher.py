@@ -32,6 +32,8 @@ def main() -> None:
     assert "actions: write" in bootstrap
     assert "group: alo186-pages-production" in bootstrap
     assert "cancel-in-progress: false" in bootstrap
+    assert "already_live_on_sites:" in bootstrap
+    assert "sites_current == 'true'" in bootstrap
     assert "dispatch_pages:" in bootstrap
     assert "workflow_id: 'alo186-github-pages.yml'" in bootstrap
     assert "ref: 'main'" in bootstrap
@@ -42,6 +44,7 @@ def main() -> None:
         "publisher": publishers[0],
         "sharedProductionConcurrency": "alo186-pages-production",
         "bootstrapRole": "probe-and-dispatch",
+        "chatGPTSitesFallbackPreserved": True,
     }, ensure_ascii=False))
 
 
