@@ -33,7 +33,7 @@ def main() -> None:
         "affiliate_product_select",
         "localStorage",
         "document.cookie",
-        "*/30 * * * *",
+        "her **30 dakikada bir**",
         ".github/workflows/alo186-pages-autobootstrap-live.yml",
         "Pages hazır değilken ChatGPT Sites kabulü",
         "alo186-full-live-reference",
