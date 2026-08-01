@@ -46,6 +46,25 @@ def expect_failure(html: str, token: str) -> None:
         raise AssertionError(f"Beklenen hata oluşmadı: {token}")
 
 
+def validate_workflow_contract() -> None:
+    path = ROOT / ".github/workflows/alo186-contextual-affiliate-v176.yml"
+    workflow = path.read_text(encoding="utf-8")
+    assert "actions/configure-pages" not in workflow
+    assert "actions/upload-pages-artifact" not in workflow
+    assert "actions/deploy-pages" not in workflow
+    for token in (
+        "verify_live_origin.py",
+        "verify_contextual_affiliate_live_v176.py",
+        "verify_live_after_publish",
+        "alo186-contextual-v176-live-receipt",
+        "alo186-v176-live-blocker",
+        "await upsert(606)",
+        "await upsert(21)",
+        "Fail-closed canlı kabul sonucu",
+    ):
+        assert token in workflow, token
+
+
 def main() -> None:
     html = valid_html()
     metrics = verifier.validate_live_html(
@@ -80,12 +99,16 @@ def main() -> None:
     else:
         raise AssertionError("404 rota kabul edilmemeliydi")
 
+    validate_workflow_contract()
+
     print(json.dumps({
         "ok": True,
         "route": verifier.ROUTE,
         "productClassCount": metrics["productClassCount"],
         "affiliateLinkCount": metrics["affiliateLinkCount"],
         "failClosedCases": 6,
+        "hostingAwareWorkflow": True,
+        "pagesAssumptionRemoved": True,
     }, ensure_ascii=False))
 
 
