@@ -30,6 +30,7 @@ def test_pages_exist_and_have_enough_contextual_products():
 
 def test_trust_contract():
     no_buy_phrases = (
+        'almayın',
         'yeni ürün almay',
         'yenisini almay',
         'mevcut ürün yeterliyse',
