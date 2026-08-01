@@ -7,7 +7,9 @@ on:
       - 'alo186/deployment/contextual-affiliate-v176-payload/**'
       - 'alo186/deployment/routing-overlays/176-contextual-affiliate-product-map.json'
       - 'alo186/deployment/inject_contextual_affiliate_v176.py'
+      - 'alo186/deployment/verify_contextual_affiliate_live_v176.py'
       - 'alo186/tests/test_contextual_affiliate_v176.py'
+      - 'alo186/tests/test_contextual_affiliate_live_v176.py'
       - '.github/workflows/alo186-contextual-affiliate-v176.yml'
   push:
     branches: [main]
@@ -16,7 +18,9 @@ on:
       - 'alo186/deployment/contextual-affiliate-v176-payload/**'
       - 'alo186/deployment/routing-overlays/176-contextual-affiliate-product-map.json'
       - 'alo186/deployment/inject_contextual_affiliate_v176.py'
+      - 'alo186/deployment/verify_contextual_affiliate_live_v176.py'
       - 'alo186/tests/test_contextual_affiliate_v176.py'
+      - 'alo186/tests/test_contextual_affiliate_live_v176.py'
       - '.github/workflows/alo186-contextual-affiliate-v176.yml'
   workflow_run:
     workflows: ['ALO186 GitHub Pages — sunucusuz canlı yayın']
@@ -25,8 +29,6 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
   issues: write
 
 concurrency:
@@ -49,7 +51,11 @@ jobs:
       - name: Kaynak ve custom/project artifact kabulü
         run: |
           set -euo pipefail
-          python -m py_compile alo186/deployment/inject_contextual_affiliate_v176.py alo186/tests/test_contextual_affiliate_v176.py
+          python -m py_compile \
+            alo186/deployment/inject_contextual_affiliate_v176.py \
+            alo186/deployment/verify_contextual_affiliate_live_v176.py \
+            alo186/tests/test_contextual_affiliate_v176.py \
+            alo186/tests/test_contextual_affiliate_live_v176.py
           python - <<'PY'
           import sys
           from pathlib import Path
@@ -64,6 +70,7 @@ jobs:
           assert catalog['policy']['existingProductSufficientNoBuy']
           assert catalog['policy']['activeHazardCommercialPathClosed']
           PY
+          python alo186/tests/test_contextual_affiliate_live_v176.py
           python alo186/tests/test_contextual_affiliate_v176.py
       - uses: actions/upload-artifact@v4
         with:
@@ -73,17 +80,18 @@ jobs:
           include-hidden-files: true
           retention-days: 30
 
-  deploy_after_pages:
+  verify_live_after_publish:
     if: >-
       (github.event_name == 'workflow_run' &&
        github.event.workflow_run.conclusion == 'success' &&
        github.event.workflow_run.head_branch == 'main') ||
       github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-    timeout-minutes: 45
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    timeout-minutes: 55
+    env:
+      LIVE_ORIGIN: https://alo186.com
+      LIVE_ALIAS_ORIGIN: https://www.alo186.com
+      TARGET_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -94,72 +102,87 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - id: pages
-        uses: actions/configure-pages@v5
-      - name: Geliştirilmiş canlı artifactı oluştur
-        env:
-          TARGET_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
-          BASE: ${{ steps.pages.outputs.base_path }}
-          GA4: ${{ vars.ALO186_GA4_MEASUREMENT_ID || 'G-639TVHL0LC' }}
+
+      - name: Aynı commit için doğrulanmış referans artifactı oluştur
         run: |
           set -euo pipefail
-          SITE=/tmp/alo186-contextual-live
+          SITE=/tmp/alo186-contextual-reference
           python alo186/deployment/build_static_site.py --output "$SITE" --commit "$TARGET_SHA"
-          python alo186/deployment/prepare_github_pages.py --site "$SITE" --base-path "$BASE" --repository "$GITHUB_REPOSITORY" --commit "$TARGET_SHA"
-          python alo186/deployment/inject_outcome_runtime.py --site "$SITE" --base-path "$BASE"
-          python alo186/deployment/inject_shortlist_growth.py --site "$SITE" --base-path "$BASE"
-          python alo186/deployment/inject_contextual_affiliate_v176.py --site "$SITE" --base-path "$BASE" | tee /tmp/contextual-v176.json
-          python alo186/deployment/smoke_github_pages.py --site "$SITE" --base-path "$BASE"
-          python alo186/deployment/guard_commerce_routes_v3.py --site "$SITE" | tee /tmp/contextual-guard.json
-          python alo186/deployment/inject_live_quality_hardening_v2.py --site "$SITE" --base-path "$BASE"
-          python alo186/deployment/inject_ga4_consent.py --site "$SITE" --base-path "$BASE" --measurement-id "$GA4"
-      - uses: actions/upload-pages-artifact@v4
-        with:
-          path: /tmp/alo186-contextual-live
-      - id: deployment
-        uses: actions/deploy-pages@v4
-      - name: Canlı rota makbuzu
-        id: live_receipt
+          python alo186/deployment/prepare_github_pages.py \
+            --site "$SITE" \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$TARGET_SHA"
+          python alo186/deployment/inject_outcome_runtime.py --site "$SITE" --base-path ''
+          python alo186/deployment/inject_shortlist_growth.py --site "$SITE" --base-path ''
+          python alo186/deployment/inject_contextual_affiliate_v176.py \
+            --site "$SITE" \
+            --base-path '' \
+            | tee /tmp/contextual-v176.json
+          python alo186/deployment/smoke_github_pages.py --site "$SITE" --base-path ''
+          python alo186/deployment/guard_commerce_routes_v3.py \
+            --site "$SITE" \
+            | tee /tmp/contextual-guard.json
+
+      - name: Gerçek canlı hosting modunu doğrula
+        id: live_origin
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          url='https://alo186.com/amazon-elektrik-urunleri/konuya-gore-urun-haritasi/'
-          ok=0
-          verified_attempt=0
-          for attempt in $(seq 1 24); do
-            body=$(curl -fsSL --max-time 20 -H 'Cache-Control: no-cache' "${url}?v=${GITHUB_RUN_ID}-${attempt}" || true)
-            if grep -q 'data-alo186-product-map-v176="true"' <<<"$body" && grep -q 'alo186rehber-21' <<<"$body"; then
-              ok=1
-              verified_attempt=$attempt
-              break
-            fi
-            sleep 10
-          done
-          test "$ok" -eq 1
-          echo "verified_attempt=$verified_attempt" >> "$GITHUB_OUTPUT"
-          echo "verified_url=$url" >> "$GITHUB_OUTPUT"
-      - name: Doğrulanmış canlı makbuzu PR üzerinde yayımla
+          python alo186/deployment/verify_live_origin.py \
+            --origin "$LIVE_ORIGIN" \
+            --alias-origin "$LIVE_ALIAS_ORIGIN" \
+            --expected-commit "$TARGET_SHA" \
+            --repository "$GITHUB_REPOSITORY" \
+            --github-token "$GITHUB_TOKEN" \
+            --receipt /tmp/alo186-live-origin-receipt.json \
+            --diagnostics /tmp/alo186-live-origin-diagnostics \
+            --attempts 3 \
+            --sleep-seconds 5
+
+      - name: v176 ürün haritasını gerçek production origin üzerinde doğrula
+        id: live_v176
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          python alo186/deployment/verify_contextual_affiliate_live_v176.py \
+            --origin "$LIVE_ORIGIN" \
+            --receipt /tmp/alo186-v176-live-receipt.json \
+            --diagnostics /tmp/alo186-v176-live-diagnostics \
+            --attempts 24 \
+            --sleep-seconds 10
+
+      - name: Doğrulanmış canlı makbuzu PR #606 üzerinde yayımla
+        if: >-
+          always() &&
+          steps.live_origin.outcome == 'success' &&
+          steps.live_v176.outcome == 'success'
         uses: actions/github-script@v7
         env:
-          VERIFIED_URL: ${{ steps.live_receipt.outputs.verified_url }}
-          VERIFIED_ATTEMPT: ${{ steps.live_receipt.outputs.verified_attempt }}
-          TARGET_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
-          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+          TARGET_SHA: ${{ env.TARGET_SHA }}
         with:
           script: |
             const fs = require('fs');
+            const read = (path) => JSON.parse(fs.readFileSync(path, 'utf8'));
+            const contextual = read('/tmp/contextual-v176.json');
+            const guard = read('/tmp/contextual-guard.json');
+            const origin = read('/tmp/alo186-live-origin-receipt.json');
+            const live = read('/tmp/alo186-v176-live-receipt.json');
             const marker = '<!-- alo186-contextual-v176-live-receipt -->';
-            const contextual = JSON.parse(fs.readFileSync('/tmp/contextual-v176.json', 'utf8'));
-            const guard = JSON.parse(fs.readFileSync('/tmp/contextual-guard.json', 'utf8'));
             const body = `${marker}
             ## ALO186 v176 canlı yayın makbuzu
 
             - Kaynak commit: \`${process.env.TARGET_SHA}\`
-            - GitHub Pages çıktısı: \`${process.env.PAGE_URL}\`
-            - Canlı rota: \`${process.env.VERIFIED_URL}\`
-            - Cache-bypass doğrulama denemesi: **${process.env.VERIFIED_ATTEMPT}**
+            - Canlı hosting modu: **${origin.mode}**
+            - Platform imzası: \`${origin.platformSignature || 'github-pages'}\`
+            - Canlı rota: \`${live.origin}${live.route}\`
+            - Cache-bypass doğrulama denemesi: **${live.verifiedAttempt}**
+            - HTML SHA-256: \`${live.htmlSha256}\`
             - v176 ürün haritası işareti: **doğrulandı**
-            - Amazon satış ortaklığı etiketi \`alo186rehber-21\`: **doğrulandı**
-            - Ürün sınıfı: **${contextual.catalogProductClassCount}**
+            - Amazon etiketi \`${live.affiliateTag}\`: **doğrulandı**
+            - Ürün sınıfı: **${live.productClassCount}**
             - İhtiyaç grubu: **${contextual.groupCount}**
             - Bağlamsal sayfa: **${contextual.contextualPageCount}**
             - Bağlamsal kart: **${contextual.contextualCardCount}**
@@ -168,7 +191,7 @@ jobs:
             - Kişisel veri alanı eklendi: **hayır**
             - Resmî kurum iddiası: **hayır**
 
-            Bu makbuz gerçek production origin üzerinde, dağıtımdan sonra ve önbellek atlatan HTTP istekleriyle oluşturuldu.`;
+            Makbuz, gerçek production origin üzerinde ve önbellek atlatan HTTP istekleriyle oluşturuldu.`;
             const {data: comments} = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -191,12 +214,90 @@ jobs:
                 body,
               });
             }
-      - if: always()
+
+      - name: Canlı blokajı PR #606 ve P0 issue #21 üzerinde görünür kıl
+        if: >-
+          always() &&
+          (steps.live_origin.outcome != 'success' || steps.live_v176.outcome != 'success')
+        uses: actions/github-script@v7
+        env:
+          TARGET_SHA: ${{ env.TARGET_SHA }}
+          ORIGIN_OUTCOME: ${{ steps.live_origin.outcome }}
+          V176_OUTCOME: ${{ steps.live_v176.outcome }}
+        with:
+          script: |
+            const fs = require('fs');
+            const safeRead = (path) => {
+              try { return JSON.parse(fs.readFileSync(path, 'utf8')); }
+              catch (_) { return {}; }
+            };
+            const origin = safeRead('/tmp/alo186-live-origin-receipt.json');
+            const live = safeRead('/tmp/alo186-v176-live-receipt.json');
+            const lastError = Array.isArray(live.errors) && live.errors.length
+              ? live.errors[live.errors.length - 1].error
+              : 'Canlı rota makbuzu üretilemedi.';
+            const marker = '<!-- alo186-v176-live-blocker -->';
+            const body = `${marker}
+            ## ALO186 v176 canlı yayın blokajı
+
+            - Kaynak commit: \`${process.env.TARGET_SHA}\`
+            - Hosting doğrulaması: **${process.env.ORIGIN_OUTCOME}**
+            - v176 rota doğrulaması: **${process.env.V176_OUTCOME}**
+            - Algılanan canlı mod: **${origin.mode || 'doğrulanamadı'}**
+            - Platform imzası: \`${origin.platformSignature || 'yok'}\`
+            - Son hata: **${lastError}**
+            - Workflow: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}
+
+            Kaynak ve custom/project artifact kontrolleri başarılıdır; bu kayıt gerçek production origin ile kaynak arasındaki yayın farkını fail-closed biçimde görünür kılar. Başarı makbuzu yalnız v176 DOM işareti, 86 ürün kartı, affiliate etiketi ve bağlantı güvenliği canlı rotada birlikte doğrulanırsa oluşturulur.`;
+            async function upsert(issueNumber) {
+              const {data: comments} = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                per_page: 100,
+              });
+              const existing = comments.find(item => item.body && item.body.includes(marker));
+              if (existing) {
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: existing.id,
+                  body,
+                });
+              } else {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNumber,
+                  body,
+                });
+              }
+            }
+            await upsert(606);
+            await upsert(21);
+
+      - name: Canlı doğrulama raporlarını sakla
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: alo186-contextual-affiliate-v176-live-receipt
           path: |
             /tmp/contextual-v176.json
             /tmp/contextual-guard.json
+            /tmp/alo186-live-origin-receipt.json
+            /tmp/alo186-v176-live-receipt.json
+            /tmp/alo186-live-origin-diagnostics
+            /tmp/alo186-v176-live-diagnostics
           if-no-files-found: warn
+          include-hidden-files: true
           retention-days: 30
+
+      - name: Fail-closed canlı kabul sonucu
+        if: always()
+        env:
+          ORIGIN_OUTCOME: ${{ steps.live_origin.outcome }}
+          V176_OUTCOME: ${{ steps.live_v176.outcome }}
+        run: |
+          set -euo pipefail
+          test "$ORIGIN_OUTCOME" = success
+          test "$V176_OUTCOME" = success
