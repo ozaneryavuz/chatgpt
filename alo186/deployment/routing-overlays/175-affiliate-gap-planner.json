@@ -1,0 +1,24 @@
+{
+  "version": 175,
+  "generatedAt": "2026-08-01",
+  "routes": [
+    {
+      "source": "alo186/amazon-elektrik-urunleri/kesinti-hazirlik-sepeti-olusturucu/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/kesinti-hazirlik-sepeti-olusturucu/",
+      "type": "tool",
+      "sitemap": true
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/ev-ofis-elektrik-kesintisi-urun-secici/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/ev-ofis-elektrik-kesintisi-urun-secici/",
+      "type": "tool",
+      "sitemap": true
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/yedek-guc-batarya-tekrar-test-merkezi/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/yedek-guc-batarya-tekrar-test-merkezi/",
+      "type": "tool",
+      "sitemap": true
+    }
+  ]
+}
