@@ -26,6 +26,10 @@ def main() -> None:
     assert "alo186-pages-pr-{0}" in standard
     assert "cancel-in-progress: false" in standard
     assert "python alo186/tests/test_pages_single_publisher.py" in standard
+    assert "Fail-closed Pages yayın sonucu" in standard
+    assert "verify_live_origin.py" in standard
+    assert "verify_contextual_affiliate_live_v177.py" in standard
+    assert "alo186-full-live-receipt" in standard
 
     bootstrap = BOOTSTRAP.read_text(encoding="utf-8")
     assert "actions/deploy-pages@" not in bootstrap
