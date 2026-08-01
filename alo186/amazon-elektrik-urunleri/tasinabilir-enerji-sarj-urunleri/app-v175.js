@@ -97,6 +97,17 @@
     }));
   }
 
+  function appendRevenueHubLink(){
+    const related=document.querySelector('.related');
+    if(!related||related.querySelector('[data-affiliate-revenue-v177]'))return;
+    const link=document.createElement('a');
+    link.href='/amazon-elektrik-urunleri/dogrulanmis-tak-calistir-urunler/';
+    link.dataset.affiliateRevenueV177='true';
+    link.innerHTML='<strong>Powerbank, araç şarjı, kablo ve AA/AAA pil kataloğu</strong><br><small>Güncel doğrulanmış modelleri, 25+ ürün sınıfını ve yedi kullanım paketini birlikte açın.</small>';
+    link.addEventListener('click',()=>emit('affiliate_revenue_v177_entry',{placement:'portable_energy_related'}));
+    related.appendChild(link);
+  }
+
   function injectKnowledgeGraph(){
     const existing=document.getElementById('alo186-exact-affiliate-graph-v175');
     if(existing)existing.remove();
@@ -128,6 +139,7 @@
 
   document.addEventListener('DOMContentLoaded',()=>{
     renderFilters();
+    appendRevenueHubLink();
     injectKnowledgeGraph();
     ['gateExisting','gateTechnical','gateAffiliate'].forEach(id=>$(id)?.addEventListener('change',()=>{
       render();
