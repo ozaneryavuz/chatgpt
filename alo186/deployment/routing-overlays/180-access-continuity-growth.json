@@ -1,0 +1,21 @@
+{
+  "version": 180,
+  "generatedAt": "2026-08-01",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/elektrik-kesintisi-erisilebilir-ev-cikis-aydinlatma-plani/index.html",
+      "canonicalPath": "/hesaplama/elektrik-kesintisi-erisilebilir-ev-cikis-aydinlatma-plani/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/akilli-kilit-pil-acil-guc-mekanik-anahtar-uygunlugu/index.html",
+      "canonicalPath": "/hesaplama/akilli-kilit-pil-acil-guc-mekanik-anahtar-uygunlugu/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/sektor-rehberi/garaj-kapi-panjur-kepenk-elektrik-kesintisi-test-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/garaj-kapi-panjur-kepenk-elektrik-kesintisi-test-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
