@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "publisherCount": 3,
+  "deployStepCount": 4,
+  "publishers": [
+    {
+      "path": ".github/workflows/alo186-github-pages.yml",
+      "deployPagesCount": 1,
+      "concurrencyGroups": [
+        "alo186-github-pages-${{ github.ref }}"
+      ],
+      "cancelInProgress": [
+        "true"
+      ],
+      "workflowRunTrigger": false,
+      "scheduleTrigger": false,
+      "pushMain": true,
+      "sha256": "fe6820832a90436349c16e3d2a3279173c73d4207744a2126ce80ede6a1fbbdd"
+    },
+    {
+      "path": ".github/workflows/alo186-one-shot-pages-publisher-audit.yml",
+      "deployPagesCount": 2,
+      "concurrencyGroups": [
+        "alo186-one-shot-pages-publisher-audit"
+      ],
+      "cancelInProgress": [
+        "false"
+      ],
+      "workflowRunTrigger": true,
+      "scheduleTrigger": true,
+      "pushMain": false,
+      "sha256": "269b8857b4aec836cbd89ec5a3bd0f96f47ac085d842c388c11d0eea720616e9"
+    },
+    {
+      "path": ".github/workflows/alo186-pages-autobootstrap-live.yml",
+      "deployPagesCount": 1,
+      "concurrencyGroups": [
+        "alo186-dual-hosting-full-live"
+      ],
+      "cancelInProgress": [
+        "true"
+      ],
+      "workflowRunTrigger": false,
+      "scheduleTrigger": true,
+      "pushMain": true,
+      "sha256": "e00fb3a29dbcb4b96c70a284a313479c2032bc5e15190ead120f42adea14c8d1"
+    }
+  ],
+  "singleSharedProductionConcurrency": false
+}
