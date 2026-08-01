@@ -1,0 +1,21 @@
+{
+  "version": 178,
+  "generatedAt": "2026-08-01",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/ev-cihaz-kwh-aylik-maliyet-olcum-plani/index.html",
+      "canonicalPath": "/hesaplama/ev-cihaz-kwh-aylik-maliyet-olcum-plani/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/buzdolabi-dondurucu-kesinti-soguk-zincir-plani/index.html",
+      "canonicalPath": "/hesaplama/buzdolabi-dondurucu-kesinti-soguk-zincir-plani/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/olculmus-ihtiyac-listem/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/olculmus-ihtiyac-listem/",
+      "type": "commercial-guide"
+    }
+  ]
+}
