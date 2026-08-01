@@ -30,7 +30,7 @@ concurrency:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -50,7 +50,7 @@ jobs:
           node alo186/tests/test_affiliate_revenue_v177.js
           python alo186/tests/test_affiliate_contextual_product_hubs_v174.py
 
-      - name: Mevcut ürün ve ticari güven regresyonları
+      - name: Mevcut ürün ve kaynak güven regresyonları
         shell: bash
         run: |
           set -euo pipefail
@@ -61,12 +61,33 @@ jobs:
           python alo186/tests/device_damage_deadline_guard.py
           node alo186/tests/test_release_manifest.js
 
-      - name: Canonical üretim paketi
+      - name: Canonical üretim paketini oluştur
         shell: bash
         run: |
           set -euo pipefail
-          python alo186/deployment/build_static_site.py --output /tmp/alo186-affiliate-v177 --commit "$GITHUB_SHA"
-          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-affiliate-v177
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-affiliate-v177-canonical --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-affiliate-v177-canonical
+
+      - name: Final custom-domain Pages artifactını hazırla
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp -a /tmp/alo186-affiliate-v177-canonical /tmp/alo186-affiliate-v177
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-affiliate-v177 \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py \
+            --site /tmp/alo186-affiliate-v177 \
+            --base-path ''
+          python alo186/deployment/inject_shortlist_growth.py \
+            --site /tmp/alo186-affiliate-v177 \
+            --base-path '' \
+            > /tmp/alo186-affiliate-v177-growth.json
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-affiliate-v177 \
+            --base-path ''
           test -f /tmp/alo186-affiliate-v177/amazon-elektrik-urunleri/dogrulanmis-tak-calistir-urunler/index.html
           test -f /tmp/alo186-affiliate-v177/amazon-elektrik-urunleri/dogrulanmis-tak-calistir-urunler/catalog-revenue-v177.js
           test -f /tmp/alo186-affiliate-v177/amazon-elektrik-urunleri/dogrulanmis-tak-calistir-urunler/opportunities-v177.json
@@ -84,7 +105,9 @@ jobs:
           page=(root/route.strip('/')/'index.html').read_text(encoding='utf-8')
           opportunities=json.loads((root/route.strip('/')/'opportunities-v177.json').read_text(encoding='utf-8'))
           release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
+          pages=json.loads((root/'pages-release.json').read_text(encoding='utf-8'))
           sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
+          assert pages['canonicalHost']==release['canonicalHost']=='https://alo186.com'
           assert any(item.get('canonicalPath')==route for item in release['routes'])
           assert f"<loc>{release['canonicalHost'].rstrip('/')}{route}</loc>" in sitemap
           assert len(opportunities['productClasses'])==25
@@ -95,10 +118,13 @@ jobs:
           assert 'Product"' not in page and 'Offer"' not in page
           parent=(root/'amazon-elektrik-urunleri/tasinabilir-enerji-sarj-urunleri/app-v175.js').read_text(encoding='utf-8')
           assert 'dogrulanmis-tak-calistir-urunler' in parent
-          print({'ok':True,'productClasses':25,'bundles':7,'dynamicVerifiedCatalog':True,'tripleGate':True})
+          search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
+          entries={item.get('canonicalPath'):item for item in search.get('entries',[])}
+          assert route in entries and entries[route]['url']==route
+          print({'ok':True,'productClasses':25,'bundles':7,'dynamicVerifiedCatalog':True,'tripleGate':True,'canonicalHost':release['canonicalHost']})
           PY
 
-      - name: Ticari artifact guard
+      - name: Final ticari artifact guard
         shell: bash
         run: |
           set -euo pipefail
@@ -110,6 +136,7 @@ jobs:
           name: alo186-affiliate-revenue-v177-pages
           path: |
             /tmp/alo186-affiliate-v177
+            /tmp/alo186-affiliate-v177-growth.json
             /tmp/alo186-affiliate-v177-guard.json
           if-no-files-found: error
           include-hidden-files: true
