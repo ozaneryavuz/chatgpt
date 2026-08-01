@@ -1,0 +1,21 @@
+{
+  "version": 162,
+  "generatedAt": "2026-08-01",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/duman-alarmi-otuyor-dusuk-pil-yanlis-alarm-acil-durum/index.html",
+      "canonicalPath": "/hesaplama/duman-alarmi-otuyor-dusuk-pil-yanlis-alarm-acil-durum/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/duman-alarmi-ihtiyac-yerlesim-batarya-baglanti-uygunlugu/index.html",
+      "canonicalPath": "/hesaplama/duman-alarmi-ihtiyac-yerlesim-batarya-baglanti-uygunlugu/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/sektor-rehberi/duman-alarmi-yangin-kacis-plani-test-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/duman-alarmi-yangin-kacis-plani-test-merkezi/",
+      "type": "guide"
+    }
+  ]
+}

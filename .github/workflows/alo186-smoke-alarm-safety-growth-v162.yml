@@ -1,0 +1,33 @@
+name: ALO186 smoke alarm safety growth v162
+
+on:
+  pull_request:
+    paths:
+      - "alo186/hesaplama/duman-alarmi-otuyor-dusuk-pil-yanlis-alarm-acil-durum/**"
+      - "alo186/hesaplama/duman-alarmi-ihtiyac-yerlesim-batarya-baglanti-uygunlugu/**"
+      - "alo186/sektor-rehberi/duman-alarmi-yangin-kacis-plani-test-merkezi/**"
+      - "alo186/deployment/routing-overlays/162-smoke-alarm-safety-growth.json"
+      - "alo186/audits/smoke-alarm-safety-growth-v162-2026-08-01.md"
+      - "alo186/tests/test_smoke_alarm_safety_growth_v162.py"
+      - ".github/workflows/alo186-smoke-alarm-safety-growth-v162.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alo186/hesaplama/duman-alarmi-otuyor-dusuk-pil-yanlis-alarm-acil-durum/**"
+      - "alo186/hesaplama/duman-alarmi-ihtiyac-yerlesim-batarya-baglanti-uygunlugu/**"
+      - "alo186/sektor-rehberi/duman-alarmi-yangin-kacis-plani-test-merkezi/**"
+      - "alo186/deployment/routing-overlays/162-smoke-alarm-safety-growth.json"
+      - "alo186/tests/test_smoke_alarm_safety_growth_v162.py"
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python alo186/tests/test_smoke_alarm_safety_growth_v162.py
