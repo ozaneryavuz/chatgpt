@@ -1,0 +1,30 @@
+name: ALO186 affiliate kablo ürünleri v176
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/usb-c-displayport-kablo-secimi/**'
+      - 'alo186/tests/test_affiliate_cables_v176.py'
+      - '.github/workflows/alo186-affiliate-cables-v176.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/usb-c-displayport-kablo-secimi/**'
+      - 'alo186/tests/test_affiliate_cables_v176.py'
+      - '.github/workflows/alo186-affiliate-cables-v176.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  affiliate-cable-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate canonical, KG, ASIN and affiliate gates
+        run: python alo186/tests/test_affiliate_cables_v176.py
