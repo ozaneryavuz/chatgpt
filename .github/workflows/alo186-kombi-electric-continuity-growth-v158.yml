@@ -1,0 +1,33 @@
+name: ALO186 kombi electric continuity growth v158
+
+on:
+  pull_request:
+    paths:
+      - "alo186/hesaplama/kombi-elektrik-kesintisi-sonrasi-guvenli-yeniden-baslatma/**"
+      - "alo186/hesaplama/kombi-ups-w-va-wh-saf-sinus-uygunluk/**"
+      - "alo186/sektor-rehberi/kombi-elektrik-surekliligi-donma-koruma-merkezi/**"
+      - "alo186/deployment/routing-overlays/158-kombi-electric-continuity-growth.json"
+      - "alo186/audits/kombi-electric-continuity-growth-v158-2026-08-01.md"
+      - "alo186/tests/test_kombi_electric_continuity_growth_v158.py"
+      - ".github/workflows/alo186-kombi-electric-continuity-growth-v158.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alo186/hesaplama/kombi-elektrik-kesintisi-sonrasi-guvenli-yeniden-baslatma/**"
+      - "alo186/hesaplama/kombi-ups-w-va-wh-saf-sinus-uygunluk/**"
+      - "alo186/sektor-rehberi/kombi-elektrik-surekliligi-donma-koruma-merkezi/**"
+      - "alo186/deployment/routing-overlays/158-kombi-electric-continuity-growth.json"
+      - "alo186/tests/test_kombi_electric_continuity_growth_v158.py"
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python alo186/tests/test_kombi_electric_continuity_growth_v158.py
