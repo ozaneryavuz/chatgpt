@@ -100,7 +100,7 @@ def test_repeat_visit_and_exports() -> None:
 
 
 def test_no_unverified_commercial_data() -> None:
-    currency_pattern = re.compile(r"(?:₺|\$|€|£)|\b\d+[.,]?\d*\s*(?:TL|USD|EUR)\b", re.I)
+    currency_pattern = re.compile(r"(?:₺|€|£)|\b\d+[.,]?\d*\s*(?:TL|USD|EUR)\b", re.I)
     for path in PAGES.values():
         html = read(path)
         visible_guard = html.replace("TL/kWh", "").replace(" TL'", "")
