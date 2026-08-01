@@ -1,0 +1,21 @@
+{
+  "version": 165,
+  "generatedAt": "2026-08-01",
+  "routes": [
+    {
+      "source": "alo186/sektor-rehberi/62-villa-22-kw-ac-2x180-kw-dc-sarj-altyapisi-projesi/index.html",
+      "canonicalPath": "/sektor-rehberi/62-villa-22-kw-ac-2x180-kw-dc-sarj-altyapisi-projesi/",
+      "type": "guide"
+    },
+    {
+      "source": "alo186/sektor-rehberi/otel-elektrik-odalari-saftlar-pano-yerlesim-projesi/index.html",
+      "canonicalPath": "/sektor-rehberi/otel-elektrik-odalari-saftlar-pano-yerlesim-projesi/",
+      "type": "guide"
+    },
+    {
+      "source": "alo186/sektor-rehberi/otel-trafo-jenerator-ups-kritik-yuk-tek-hat-projesi/index.html",
+      "canonicalPath": "/sektor-rehberi/otel-trafo-jenerator-ups-kritik-yuk-tek-hat-projesi/",
+      "type": "guide"
+    }
+  ]
+}
