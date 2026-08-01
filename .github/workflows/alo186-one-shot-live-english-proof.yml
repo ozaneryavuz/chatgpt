@@ -1,0 +1,65 @@
+name: ALO186 one-shot live English publication proof
+
+on:
+  push:
+    branches:
+      - agent/alo186-live-english-proof
+    paths:
+      - '.github/workflows/alo186-one-shot-live-english-proof.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: alo186-one-shot-live-english-proof
+  cancel-in-progress: false
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/alo186-live-english-proof
+          persist-credentials: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Verify the English core against the real apex domain
+        id: verify
+        continue-on-error: true
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          REPORT: alo186/deployment/live-english-proof.json
+          EXPECTED_CORE_SHA: 663657139ce02c3eb280689dfb1105347553a89c
+        run: |
+          set -euo pipefail
+          python alo186/deployment/check_live_english.py \
+            --origin https://alo186.com \
+            --repository "$GITHUB_REPOSITORY" \
+            --expected-commit "$EXPECTED_CORE_SHA" \
+            --attempts 36 \
+            --interval 15 \
+            --timeout 25 \
+            --report "$REPORT"
+
+      - name: Persist proof and remove the temporary workflow
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f alo186/deployment/live-english-proof.json
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm '.github/workflows/alo186-one-shot-live-english-proof.yml'
+          git add alo186/deployment/live-english-proof.json
+          git commit -m 'test: record live English publication proof'
+          git push origin HEAD:agent/alo186-live-english-proof
+
+      - name: Fail when live proof did not pass
+        if: steps.verify.outcome != 'success'
+        run: exit 1
