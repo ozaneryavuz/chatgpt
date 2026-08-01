@@ -112,13 +112,7 @@ def _route_with_base_path(route: str, base_path: str) -> str:
 
 
 def scope_catalog_tool_routes(catalog: dict, base_path: str) -> int:
-    """Sonradan üretilen katalogdaki araç yollarına yayın taban yolunu uygular.
-
-    ``prepare_github_pages.py`` katalog henüz oluşmadan çalıştığı için bu JSON
-    dosyasındaki kök bağlantıları dönüştüremez. Katalog yazılmadan hemen önce
-    uygulanan bu adım, custom domainde kök yolları korur; proje yayınında ise
-    örneğin ``/hesaplama/...`` yolunu ``/chatgpt/hesaplama/...`` yapar.
-    """
+    """Katalogdaki araç yollarına final yayın taban yolunu uygular."""
     changed = 0
     for group in catalog.get("groups", []):
         for product in group.get("products", []):
@@ -129,6 +123,22 @@ def scope_catalog_tool_routes(catalog: dict, base_path: str) -> int:
             if scoped != route:
                 product["tool"] = scoped
                 changed += 1
+    return changed
+
+
+def scope_materialized_catalog_tool_routes(target: Path, base_path: str) -> int:
+    """Doğrulama tamamlandıktan sonra yalnız final JSON bağlantılarını scope eder.
+
+    Dahili katalog doğrulayıcısı artifact dosya sisteminde kök rotaları kontrol
+    eder. Bu nedenle ``/chatgpt`` gibi yayın önekleri doğrulamadan önce değil,
+    final katalog yazıldıktan sonra uygulanır. Böylece hem custom domain hem de
+    GitHub Pages proje yayını aynı kaynak katalogla güvenli biçimde çalışır.
+    """
+    catalog = json.loads(target.read_text(encoding="utf-8"))
+    changed = scope_catalog_tool_routes(catalog, base_path)
+    rendered = json.dumps(catalog, ensure_ascii=False, indent=2) + "\n"
+    if target.read_text(encoding="utf-8") != rendered:
+        target.write_text(rendered, encoding="utf-8")
     return changed
 
 
@@ -174,25 +184,22 @@ def normalize_catalog_explanations(catalog: dict) -> list[dict[str, str]]:
 
 def materialize_catalog(
     site: Path,
-    base_path: str = "",
-) -> tuple[Path, list[dict[str, str]], list[dict[str, str]], int]:
+) -> tuple[Path, list[dict[str, str]], list[dict[str, str]]]:
     target = Path(site) / "amazon-elektrik-urunleri/konuya-gore-urun-haritasi/catalog-v176.json"
     target.parent.mkdir(parents=True, exist_ok=True)
     catalog = embedded_catalog()
     explanation_changes = normalize_catalog_explanations(catalog)
     fallbacks = normalize_catalog_tool_routes(Path(site), catalog)
-    scoped_tool_route_count = scope_catalog_tool_routes(catalog, base_path)
     rendered = json.dumps(catalog, ensure_ascii=False, indent=2) + "\n"
     if not target.is_file() or target.read_text(encoding="utf-8") != rendered:
         target.write_text(rendered, encoding="utf-8")
-    return target, fallbacks, explanation_changes, scoped_tool_route_count
+    return target, fallbacks, explanation_changes
 
 
 def run(site: Path, base_path: str = "") -> dict:
-    _target, fallbacks, explanation_changes, scoped_tool_route_count = materialize_catalog(
-        Path(site), base_path
-    )
+    target, fallbacks, explanation_changes = materialize_catalog(Path(site))
     result = _impl_run(Path(site), base_path)
+    scoped_tool_route_count = scope_materialized_catalog_tool_routes(target, base_path)
     result["toolRouteFallbacks"] = fallbacks
     result["toolRouteFallbackCount"] = len(fallbacks)
     result["explanatoryCopyNormalizations"] = explanation_changes
