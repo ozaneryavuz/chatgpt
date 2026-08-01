@@ -1,0 +1,21 @@
+{
+  "version": 173,
+  "generatedAt": "2026-08-01",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/asansorde-elektrik-kesintisi-mahsur-kalma-guvenligi/index.html",
+      "canonicalPath": "/hesaplama/asansorde-elektrik-kesintisi-mahsur-kalma-guvenligi/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/asansor-otomatik-kurtarma-alarm-aku-jenerator-uygunluk-kontrolu/index.html",
+      "canonicalPath": "/hesaplama/asansor-otomatik-kurtarma-alarm-aku-jenerator-uygunluk-kontrolu/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/sektor-rehberi/apartman-otel-asansor-elektrik-kesintisi-test-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/apartman-otel-asansor-elektrik-kesintisi-test-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
