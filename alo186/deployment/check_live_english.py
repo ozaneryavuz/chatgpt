@@ -160,6 +160,13 @@ def _contains_in_language_en(value: Any) -> bool:
     return False
 
 
+def parse_release_marker(release_text: str) -> str:
+    release = json.loads(release_text)
+    if not isinstance(release, dict):
+        raise LiveValidationError("pages-release.json kök nesnesi object değil")
+    return str(release.get("commit", "")).strip()
+
+
 def validate_english_page(route: str, html: str, origin: str, status: int = 200) -> RouteResult:
     if route not in LANGUAGE_PAIRS:
         raise LiveValidationError(f"Bilinmeyen İngilizce rota: {route}")
@@ -349,8 +356,7 @@ def run_live_smoke(
             release_status, release_text, _headers = fetch_text(release_url, timeout=timeout)
             if release_status != 200:
                 raise LiveValidationError(f"pages-release.json HTTP {release_status}")
-            release = json.loads(release_text)
-            live_commit = str(release.get("commit", "")).strip()
+            live_commit = parse_release_marker(release_text)
             report.live_commit = live_commit
             relation = compare_commits(repository, expected_commit, live_commit, github_token)
             report.live_commit_relation = relation

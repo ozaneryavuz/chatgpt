@@ -48,6 +48,13 @@ def expect_error(callback, fragment: str) -> None:
 
 
 def main() -> None:
+    assert MODULE.parse_release_marker('{"commit":"abc123"}') == "abc123"
+    for malformed_marker in ("null", "[]", '"text"', "42", "true"):
+        expect_error(
+            lambda marker=malformed_marker: MODULE.parse_release_marker(marker),
+            "kök nesnesi object değil",
+        )
+
     for route in MODULE.LANGUAGE_PAIRS:
         result = MODULE.validate_english_page(route, valid_html(route), ORIGIN)
         assert result.route == route
