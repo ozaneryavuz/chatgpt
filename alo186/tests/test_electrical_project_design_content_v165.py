@@ -82,7 +82,6 @@ def main() -> None:
         article = next(node for node in nodes if node.get("@type") == "Article")
         assert article["mainEntityOfPage"] == CANONICALS[name]
 
-    # The three new guides must cross-link instead of forming isolated pages.
     for name, html in pages.items():
         linked = sum(canonical.replace("https://www.alo186.com", "") in html for canonical in CANONICALS.values())
         assert linked >= 2, f"{name}: insufficient internal links"
@@ -98,7 +97,6 @@ def main() -> None:
         assert route["type"] == "guide"
         assert (ROOT / route["source"]).exists()
 
-    # Fail on exact canonical/headline duplication across source HTML.
     all_html = "\n".join(path.read_text(encoding="utf-8") for path in (ROOT / "alo186").rglob("*.html"))
     for canonical in CANONICALS.values():
         assert all_html.count(f'<link rel="canonical" href="{canonical}">') == 1
@@ -123,7 +121,6 @@ def main() -> None:
     ):
         assert phrase in audit
 
-    # The production builder must expose all routes and regenerate sitemap.xml.
     with tempfile.TemporaryDirectory(prefix="alo186-project-v165-") as temp_dir:
         output = Path(temp_dir)
         subprocess.run(
@@ -137,8 +134,6 @@ def main() -> None:
             ],
             cwd=ROOT,
             check=True,
-            capture_output=True,
-            text=True,
         )
         sitemap = ET.parse(output / "sitemap.xml")
         namespace = {"s": "http://www.sitemaps.org/schemas/sitemap/0.9"}
