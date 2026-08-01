@@ -1,0 +1,22 @@
+{
+  "version": 190,
+  "generatedAt": "2026-08-02",
+  "purpose": "ALO186 içerik otoritesi run116: jeneratör yakıt basıncı, VFD encoder feedback ve VPP dispatch zarfı",
+  "routes": [
+    {
+      "canonicalPath": "/haberler/jenerator-low-fuel-pressure-yakit-basinci-filtre-transfer-pompasi-teshis",
+      "source": "alo186/haberler/jenerator-low-fuel-pressure-yakit-basinci-filtre-transfer-pompasi-teshis/index.html",
+      "type": "article"
+    },
+    {
+      "canonicalPath": "/haberler/frekans-inverteri-encoder-feedback-loss-speed-feedback-hatasi-teshis",
+      "source": "alo186/haberler/frekans-inverteri-encoder-feedback-loss-speed-feedback-hatasi-teshis/index.html",
+      "type": "article"
+    },
+    {
+      "canonicalPath": "/haberler/vpp-soc-rezervi-kullanilabilir-mw-mwh-dispatch-zarfi",
+      "source": "alo186/haberler/vpp-soc-rezervi-kullanilabilir-mw-mwh-dispatch-zarfi/index.html",
+      "type": "article"
+    }
+  ]
+}
