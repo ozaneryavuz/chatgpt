@@ -1,0 +1,16 @@
+{
+  "version": 187,
+  "generatedAt": "2026-08-02",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/oda-co2-havalandirma-sicaklik-nem-izleme/index.html",
+      "canonicalPath": "/hesaplama/oda-co2-havalandirma-sicaklik-nem-izleme/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/usb-ethernet-dusuk-gerilim-test-urun-secici/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/usb-ethernet-dusuk-gerilim-test-urun-secici/",
+      "type": "commerce-guide"
+    }
+  ]
+}
