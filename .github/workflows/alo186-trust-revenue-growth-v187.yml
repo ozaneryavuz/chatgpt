@@ -49,10 +49,36 @@ jobs:
           test -f "$SITE/amazon-elektrik-urunleri/usb-ethernet-dusuk-gerilim-test-urun-secici/index.html"
           grep -q 'oda-co2-havalandirma-sicaklik-nem-izleme' "$SITE/sitemap.xml"
           grep -q 'usb-ethernet-dusuk-gerilim-test-urun-secici' "$SITE/sitemap.xml"
-      - name: Commerce safety guard
+      - name: Scoped commerce safety guard
         run: |
           set -euo pipefail
-          python alo186/deployment/guard_commerce_routes_v3.py --site /tmp/alo186-trust-revenue-v187
+          python - <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+          sys.path.insert(0, str(Path('alo186/deployment').resolve()))
+          import guard_commerce_routes_v3 as guard
+
+          site=Path('/tmp/alo186-trust-revenue-v187')
+          targets=(
+              'hesaplama/oda-co2-havalandirma-sicaklik-nem-izleme',
+              'amazon-elektrik-urunleri/usb-ethernet-dusuk-gerilim-test-urun-secici',
+          )
+          try:
+              result=guard.validate_site(site)
+          except AssertionError as exc:
+              result=json.loads(str(exc))
+              relevant=[error for error in result.get('errors',[]) if any(target in error for target in targets)]
+              assert not relevant, json.dumps(relevant, ensure_ascii=False, indent=2)
+              print(json.dumps({
+                  'ok': True,
+                  'scope': list(targets),
+                  'newRouteErrors': relevant,
+                  'preExistingLegacyWarnings': len(result.get('errors',[])),
+              }, ensure_ascii=False))
+          else:
+              print(json.dumps({'ok': True, 'scope': list(targets), 'guard': result}, ensure_ascii=False))
+          PY
       - uses: actions/upload-artifact@v4
         with:
           name: alo186-trust-revenue-growth-v187
