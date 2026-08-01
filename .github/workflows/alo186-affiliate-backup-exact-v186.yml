@@ -114,8 +114,11 @@ jobs:
               assert 'sponsored nofollow noopener' in app
               assert '"@type":"Product"' not in page and '"@type":"Offer"' not in page
               release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
-              routes={item.get('canonicalPath') if isinstance(item,dict) else item for item in release.get('routes',[])}
-              assert canonical in routes
+              routes={
+                  str(item.get('canonicalPath','') if isinstance(item,dict) else item).rstrip('/')
+                  for item in release.get('routes',[])
+              }
+              assert canonical_path in routes, (canonical_path, sorted(route for route in routes if 'harici-ssd' in route))
               sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
               locations=re.findall(r'<loc>([^<]+)</loc>',sitemap)
               expected_paths={canonical_path}
