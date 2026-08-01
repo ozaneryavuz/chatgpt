@@ -1,0 +1,116 @@
+name: ALO186 affiliate gelir merkezi v177
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/dogrulanmis-tak-calistir-urunler/**'
+      - 'alo186/amazon-elektrik-urunleri/tasinabilir-enerji-sarj-urunleri/app-v175.js'
+      - 'alo186/deployment/routing-overlays/177-affiliate-revenue-hub.json'
+      - 'alo186/tests/test_affiliate_revenue_v177.js'
+      - 'alo186/tests/test_affiliate_contextual_product_hubs_v174.py'
+      - '.github/workflows/alo186-affiliate-revenue-v177.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/dogrulanmis-tak-calistir-urunler/**'
+      - 'alo186/amazon-elektrik-urunleri/tasinabilir-enerji-sarj-urunleri/app-v175.js'
+      - 'alo186/deployment/routing-overlays/177-affiliate-revenue-hub.json'
+      - 'alo186/tests/test_affiliate_revenue_v177.js'
+      - 'alo186/tests/test_affiliate_contextual_product_hubs_v174.py'
+      - '.github/workflows/alo186-affiliate-revenue-v177.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-affiliate-revenue-v177-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Katalog, ürün niyeti ve JavaScript sözleşmeleri
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check alo186/amazon-elektrik-urunleri/dogrulanmis-tak-calistir-urunler/catalog-revenue-v177.js
+          node --check alo186/amazon-elektrik-urunleri/dogrulanmis-tak-calistir-urunler/app-v177.js
+          python -m json.tool alo186/amazon-elektrik-urunleri/dogrulanmis-tak-calistir-urunler/opportunities-v177.json >/dev/null
+          node alo186/tests/test_affiliate_revenue_v177.js
+          python alo186/tests/test_affiliate_contextual_product_hubs_v174.py
+
+      - name: Mevcut ürün ve ticari güven regresyonları
+        shell: bash
+        run: |
+          set -euo pipefail
+          node alo186/tests/test_product_matcher.js
+          node alo186/tests/test_battery_continuity_affiliate_run75.js
+          node alo186/tests/test_affiliate_exact_products_v175.js
+          python alo186/tests/test_commerce_governance_v3.py
+          python alo186/tests/device_damage_deadline_guard.py
+          node alo186/tests/test_release_manifest.js
+
+      - name: Canonical üretim paketi
+        shell: bash
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-affiliate-v177 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-affiliate-v177
+          test -f /tmp/alo186-affiliate-v177/amazon-elektrik-urunleri/dogrulanmis-tak-calistir-urunler/index.html
+          test -f /tmp/alo186-affiliate-v177/amazon-elektrik-urunleri/dogrulanmis-tak-calistir-urunler/catalog-revenue-v177.js
+          test -f /tmp/alo186-affiliate-v177/amazon-elektrik-urunleri/dogrulanmis-tak-calistir-urunler/opportunities-v177.json
+          test -f /tmp/alo186-affiliate-v177/amazon-elektrik-urunleri/dogrulanmis-tak-calistir-urunler/app-v177.js
+
+      - name: Final artifact gelir ve güven kabulü
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('/tmp/alo186-affiliate-v177')
+          route='/amazon-elektrik-urunleri/dogrulanmis-tak-calistir-urunler/'
+          page=(root/route.strip('/')/'index.html').read_text(encoding='utf-8')
+          opportunities=json.loads((root/route.strip('/')/'opportunities-v177.json').read_text(encoding='utf-8'))
+          release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
+          sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
+          assert any(item.get('canonicalPath')==route for item in release['routes'])
+          assert f"<loc>{release['canonicalHost'].rstrip('/')}{route}</loc>" in sitemap
+          assert len(opportunities['productClasses'])==25
+          assert len(opportunities['bundles'])==7
+          assert 'Bir Amazon Gelir Ortağı olarak' in page
+          assert 'amazon.com.tr/dp/' not in page and 'amazon.com.tr/s?' not in page
+          assert all(token in page for token in ('gateExisting','gateTechnical','gateAffiliate','catalogSearch','bundles','exactProducts','productClasses'))
+          assert 'Product"' not in page and 'Offer"' not in page
+          parent=(root/'amazon-elektrik-urunleri/tasinabilir-enerji-sarj-urunleri/app-v175.js').read_text(encoding='utf-8')
+          assert 'dogrulanmis-tak-calistir-urunler' in parent
+          print({'ok':True,'productClasses':25,'bundles':7,'dynamicVerifiedCatalog':True,'tripleGate':True})
+          PY
+
+      - name: Ticari artifact guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          python alo186/deployment/guard_commerce_routes_v3.py --site /tmp/alo186-affiliate-v177 | tee /tmp/alo186-affiliate-v177-guard.json
+
+      - name: Doğrulanmış affiliate gelir artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-affiliate-revenue-v177-pages
+          path: |
+            /tmp/alo186-affiliate-v177
+            /tmp/alo186-affiliate-v177-guard.json
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
