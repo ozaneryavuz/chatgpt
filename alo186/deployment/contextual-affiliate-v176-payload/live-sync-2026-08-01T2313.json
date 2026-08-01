@@ -1,0 +1,19 @@
+{
+  "release": "alo186-live-sync-2026-08-01T23:13+03:00",
+  "sourceMain": "6242ac16b6d72fda41d831c584f4f913c7fdfe11",
+  "purpose": "Rebuild and deploy all completed ALO186 work from main to GitHub Pages custom domain and project-path artifacts.",
+  "scope": [
+    "all canonical routes and routing overlays",
+    "contextual affiliate product map v176",
+    "latest technical content authority routes",
+    "sitemap, canonical, breadcrumb and structured-data output",
+    "commerce guard, trust disclosures and no-buy rules",
+    "GA4 consent layer and live quality hardening"
+  ],
+  "trust": {
+    "officialInstitutionClaim": false,
+    "unverifiedPriceStockRatingWarranty": false,
+    "affiliateDisclosureRequired": true,
+    "activeHazardCommerceClosed": true
+  }
+}
