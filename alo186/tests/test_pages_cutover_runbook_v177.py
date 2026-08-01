@@ -64,8 +64,8 @@ def main() -> None:
         "sites_current",
         "schedule:",
         "*/30 * * * *",
-        "Pages: Read and write",
-        "Administration: Read and write",
+        "Pages write",
+        "Administration write",
     )
     for token in required_live_workflow_tokens:
         assert token in live_workflow, f"Canlı workflow sözleşmesi eksik: {token}"
