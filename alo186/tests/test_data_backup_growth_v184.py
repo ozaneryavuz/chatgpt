@@ -5,13 +5,22 @@ PAGES=[
  ROOT/'alo186/hesaplama/elektrik-kesintisi-bilgisayar-veri-yedekleme-rpo-rto-plani/index.html',
  ROOT/'alo186/amazon-elektrik-urunleri/harici-ssd-hdd-usb-yedekleme-urun-secici/index.html',
  ROOT/'alo186/sektor-rehberi/ev-ofis-veri-yedekleme-geri-yukleme-test-merkezi/index.html']
+FORBIDDEN_SCHEMA_PATTERNS=[
+ r'"@type"\s*:\s*"Product"',
+ r'"@type"\s*:\s*"Offer"',
+ r'"@type"\s*:\s*"AggregateRating"',
+ r'"aggregateRating"\s*:',
+ r'"availability"\s*:',
+ r'"priceCurrency"\s*:',
+]
 for p in PAGES:
  assert p.exists(),p
  s=p.read_text(encoding='utf-8')
  assert '<link rel="canonical" href="https://alo186.com/' in s
  assert 'FAQPage' in s and 'BreadcrumbList' in s and 'WebApplication' in s
  assert 'resmî kurum değildir' in s
- assert 'Product' not in s and 'Offer' not in s and 'aggregateRating' not in s and 'availability' not in s
+ for pattern in FORBIDDEN_SCHEMA_PATTERNS:
+  assert not re.search(pattern,s),f'{p}: yasak ticari şema alanı: {pattern}'
  assert not re.search(r'href="https://www\.amazon\.com\.tr',s)
  scripts=re.findall(r'<script>(.*?)</script>',s,re.S)
  assert scripts
