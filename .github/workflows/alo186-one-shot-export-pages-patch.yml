@@ -6,6 +6,9 @@ on:
       - agent/alo186-export-pages-patch
     paths:
       - '.github/workflows/alo186-one-shot-export-pages-patch.yml'
+  pull_request:
+    paths:
+      - '.github/workflows/alo186-one-shot-export-pages-patch.yml'
 
 permissions:
   contents: read
