@@ -8,9 +8,11 @@ on:
       - 'alo186/kurumsal-on-degerlendirme/**'
       - 'alo186/urun-eslestirme/catalog.js'
       - 'alo186/deployment/guard_commerce_routes_v2.py'
+      - 'alo186/deployment/guard_commerce_routes_v3.py'
       - 'alo186/deployment/verify_live_origin.py'
       - 'alo186/deployment/inject_shortlist_growth.py'
       - 'alo186/tests/test_commerce_governance_v2.py'
+      - 'alo186/tests/test_commerce_governance_v3.py'
       - 'alo186/tests/test_live_freshness_workflow.py'
       - 'alo186/tests/test_live_origin_verifier.py'
       - '.github/workflows/alo186-commerce-governance-v2.yml'
@@ -22,9 +24,11 @@ on:
       - 'alo186/kurumsal-on-degerlendirme/**'
       - 'alo186/urun-eslestirme/catalog.js'
       - 'alo186/deployment/guard_commerce_routes_v2.py'
+      - 'alo186/deployment/guard_commerce_routes_v3.py'
       - 'alo186/deployment/verify_live_origin.py'
       - 'alo186/deployment/inject_shortlist_growth.py'
       - 'alo186/tests/test_commerce_governance_v2.py'
+      - 'alo186/tests/test_commerce_governance_v3.py'
       - 'alo186/tests/test_live_freshness_workflow.py'
       - 'alo186/tests/test_live_origin_verifier.py'
       - '.github/workflows/alo186-commerce-governance-v2.yml'
@@ -61,9 +65,11 @@ jobs:
         run: |
           set -euo pipefail
           python alo186/tests/test_commerce_governance_v2.py
+          python alo186/tests/test_commerce_governance_v3.py
           python alo186/tests/test_live_freshness_workflow.py
           python alo186/tests/test_live_origin_verifier.py
           python -m py_compile alo186/deployment/guard_commerce_routes_v2.py
+          python -m py_compile alo186/deployment/guard_commerce_routes_v3.py
           python -m py_compile alo186/deployment/verify_live_origin.py
           node --check alo186/amazon-elektrik-urunleri/commercial.js
           node --check alo186/urun-eslestirme/catalog.js
@@ -114,7 +120,7 @@ jobs:
             python alo186/deployment/smoke_github_pages.py \
               --site "$target" \
               --base-path "$base"
-            python alo186/deployment/guard_commerce_routes_v2.py \
+            python alo186/deployment/guard_commerce_routes_v3.py \
               --site "$target" \
               | tee "/tmp/alo186-commerce-${name}-guard.json"
           done
