@@ -77,7 +77,7 @@
       "aliasPath": "/haberler/elektrik-dalgalanmasi-cihaz-hasari-edas-basvurusu-10-is-gunu-kanit",
       "canonicalPath": "/haberler/elektrik-dalgalanmasi-cihaz-hasari-edas-basvurusu-30-gun-kanit",
       "label": "Cihaz hasarı EDAŞ başvurusu ve 30 günlük süre",
-      "reason": "Eski URL başvuru süresini 10 iş günü olarak yansıtıyordu. Yürürlükteki Kalite Yönetmeliği Madde 26/1 ile uyumlu 30 günlük canonical rotaya kalıcı köprü kurularak paylaşılan bağlantılar ve iç linkler korunur."
+      "reason": "Eski URL artık geçerli olmayan bir başvuru süresi yansıtıyordu. Yürürlükteki Kalite Yönetmeliği Madde 26/1 ile uyumlu 30 günlük canonical rotaya kalıcı köprü kurularak paylaşılan bağlantılar ve iç linkler korunur."
     },
     {
       "intentKey": "rcd-ramp-trip-current-time-interpretation",
