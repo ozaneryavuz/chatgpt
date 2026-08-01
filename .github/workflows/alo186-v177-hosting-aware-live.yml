@@ -5,15 +5,21 @@ on:
     paths:
       - '.github/workflows/alo186-pages-autobootstrap-live.yml'
       - '.github/workflows/alo186-v177-hosting-aware-live.yml'
+      - 'alo186/deployment/GITHUB_PAGES_CUTOVER.md'
+      - 'alo186/deployment/device_damage_deadline.py'
       - 'alo186/deployment/verify_contextual_affiliate_live_v177.py'
       - 'alo186/tests/test_contextual_affiliate_live_v177.py'
+      - 'alo186/tests/test_pages_cutover_runbook_v177.py'
   push:
     branches: [main]
     paths:
       - '.github/workflows/alo186-pages-autobootstrap-live.yml'
       - '.github/workflows/alo186-v177-hosting-aware-live.yml'
+      - 'alo186/deployment/GITHUB_PAGES_CUTOVER.md'
+      - 'alo186/deployment/device_damage_deadline.py'
       - 'alo186/deployment/verify_contextual_affiliate_live_v177.py'
       - 'alo186/tests/test_contextual_affiliate_live_v177.py'
+      - 'alo186/tests/test_pages_cutover_runbook_v177.py'
   workflow_dispatch:
 
 permissions:
@@ -35,12 +41,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Sözdizimi ve ağsız fail-closed sözleşme
+      - name: Sözdizimi, runbook ve ağsız fail-closed sözleşme
         run: |
           set -euo pipefail
           python -m py_compile \
             alo186/deployment/verify_contextual_affiliate_live_v177.py \
-            alo186/tests/test_contextual_affiliate_live_v177.py
+            alo186/tests/test_contextual_affiliate_live_v177.py \
+            alo186/tests/test_pages_cutover_runbook_v177.py
+          python alo186/tests/test_pages_cutover_runbook_v177.py
           python alo186/tests/test_contextual_affiliate_live_v177.py
       - name: Güncel v177 artifact regresyonu
         run: |
