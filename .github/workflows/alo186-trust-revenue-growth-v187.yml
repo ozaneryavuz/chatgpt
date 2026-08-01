@@ -1,0 +1,88 @@
+name: ALO186 trust revenue growth v187
+
+on:
+  pull_request:
+    paths:
+      - "alo186/hesaplama/oda-co2-havalandirma-sicaklik-nem-izleme/**"
+      - "alo186/amazon-elektrik-urunleri/usb-ethernet-dusuk-gerilim-test-urun-secici/**"
+      - "alo186/deployment/routing-overlays/187-trust-revenue-growth.json"
+      - "alo186/audits/trust-revenue-growth-v187-2026-08-02.md"
+      - "alo186/tests/test_trust_revenue_growth_v187.py"
+      - ".github/workflows/alo186-trust-revenue-growth-v187.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alo186/hesaplama/oda-co2-havalandirma-sicaklik-nem-izleme/**"
+      - "alo186/amazon-elektrik-urunleri/usb-ethernet-dusuk-gerilim-test-urun-secici/**"
+      - "alo186/deployment/routing-overlays/187-trust-revenue-growth.json"
+      - "alo186/tests/test_trust_revenue_growth_v187.py"
+      - ".github/workflows/alo186-trust-revenue-growth-v187.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-trust-revenue-growth-v187-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Trust and commerce contract
+        run: |
+          set -euo pipefail
+          python alo186/tests/test_trust_revenue_growth_v187.py
+      - name: Canonical production artifact
+        run: |
+          set -euo pipefail
+          SITE=/tmp/alo186-trust-revenue-v187
+          python alo186/deployment/build_static_site.py --output "$SITE" --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle "$SITE"
+          test -f "$SITE/hesaplama/oda-co2-havalandirma-sicaklik-nem-izleme/index.html"
+          test -f "$SITE/amazon-elektrik-urunleri/usb-ethernet-dusuk-gerilim-test-urun-secici/index.html"
+          grep -q 'oda-co2-havalandirma-sicaklik-nem-izleme' "$SITE/sitemap.xml"
+          grep -q 'usb-ethernet-dusuk-gerilim-test-urun-secici' "$SITE/sitemap.xml"
+      - name: Scoped commerce safety guard
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+          sys.path.insert(0, str(Path('alo186/deployment').resolve()))
+          import guard_commerce_routes_v3 as guard
+
+          site=Path('/tmp/alo186-trust-revenue-v187')
+          targets=(
+              'hesaplama/oda-co2-havalandirma-sicaklik-nem-izleme',
+              'amazon-elektrik-urunleri/usb-ethernet-dusuk-gerilim-test-urun-secici',
+          )
+          try:
+              result=guard.validate_site(site)
+          except AssertionError as exc:
+              result=json.loads(str(exc))
+              relevant=[error for error in result.get('errors',[]) if any(target in error for target in targets)]
+              assert not relevant, json.dumps(relevant, ensure_ascii=False, indent=2)
+              print(json.dumps({
+                  'ok': True,
+                  'scope': list(targets),
+                  'newRouteErrors': relevant,
+                  'preExistingLegacyWarnings': len(result.get('errors',[])),
+              }, ensure_ascii=False))
+          else:
+              print(json.dumps({'ok': True, 'scope': list(targets), 'guard': result}, ensure_ascii=False))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: alo186-trust-revenue-growth-v187
+          path: /tmp/alo186-trust-revenue-v187
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
