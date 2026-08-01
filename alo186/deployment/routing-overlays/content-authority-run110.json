@@ -1,0 +1,21 @@
+{
+  "version": 182,
+  "generatedAt": "2026-08-01",
+  "routes": [
+    {
+      "source": "alo186/haberler/bess-insulation-monitoring-device-imd-izolasyon-hatasi-teshis/index.html",
+      "canonicalPath": "/haberler/bess-insulation-monitoring-device-imd-izolasyon-hatasi-teshis",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/frekans-inverteri-sto-active-safe-torque-off-motor-calismiyor/index.html",
+      "canonicalPath": "/haberler/frekans-inverteri-sto-active-safe-torque-off-motor-calismiyor",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ups-epo-active-emergency-power-off-uzak-acil-kapatma-teshis/index.html",
+      "canonicalPath": "/haberler/ups-epo-active-emergency-power-off-uzak-acil-kapatma-teshis",
+      "type": "article"
+    }
+  ]
+}
