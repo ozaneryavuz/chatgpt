@@ -1,0 +1,21 @@
+{
+  "version": 180,
+  "generatedAt": "2026-08-01",
+  "routes": [
+    {
+      "source": "alo186/haberler/parafudr-tip-1-tip-2-tip-3-kademeli-koruma-koordinasyon/index.html",
+      "canonicalPath": "/haberler/parafudr-tip-1-tip-2-tip-3-kademeli-koruma-koordinasyon",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ups-aku-modunda-notr-toprak-gerilimi-floating-neutral-rcd-teshis/index.html",
+      "canonicalPath": "/haberler/ups-aku-modunda-notr-toprak-gerilimi-floating-neutral-rcd-teshis",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ev-sarj-control-pilot-cp-proximity-pilot-pp-hatasi-teshis/index.html",
+      "canonicalPath": "/haberler/ev-sarj-control-pilot-cp-proximity-pilot-pp-hatasi-teshis",
+      "type": "article"
+    }
+  ]
+}
