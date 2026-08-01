@@ -4,7 +4,7 @@ import re
 
 ROOT = Path(__file__).resolve().parents[2]
 SLUGS = (
-    "elektrik-sayaci-hizli-donuyor-yuksek-fatura-sayac-kontrol-itiraz",
+    "akim-trafolu-elektrik-sayaci-carpan-hatasi-yuksek-fatura-teshis",
     "ges-inverter-afci-dc-ark-hatasi-konnektor-string-teshis",
     "jenerator-yuksek-sogutma-suyu-sicakligi-high-coolant-temperature-teshis",
 )
@@ -19,7 +19,7 @@ def between(pattern: str, html: str) -> str:
 
 def test_authority_content_run103() -> None:
     overlay = json.loads(OVERLAY.read_text(encoding="utf-8"))
-    assert overlay["version"] == 171
+    assert overlay["version"] == 172
     assert overlay["generatedAt"] == "2026-08-01"
     assert len(overlay["routes"]) == 3
     routes = {item["canonicalPath"]: item for item in overlay["routes"]}
@@ -68,15 +68,19 @@ def test_authority_content_run103() -> None:
     assert len(descriptions) == 3
     assert len(h1s) == 3
 
-    meter = (ROOT / f"alo186/haberler/{SLUGS[0]}/index.html").read_text(encoding="utf-8")
+    ct_meter = (ROOT / f"alo186/haberler/{SLUGS[0]}/index.html").read_text(encoding="utf-8")
     afci = (ROOT / f"alo186/haberler/{SLUGS[1]}/index.html").read_text(encoding="utf-8")
     coolant = (ROOT / f"alo186/haberler/{SLUGS[2]}/index.html").read_text(encoding="utf-8")
 
-    for phrase in ("ilk-son endeks", "okuma dönemi", "bir yıl", "yüzde 30", "mühür"):
-        assert phrase.casefold() in meter.casefold()
+    for phrase in ("CT/VT", "sayaç çarpanı", "S1-S2", "fazör diyagramı", "burden", "IEC 62053-22"):
+        assert phrase.casefold() in ct_meter.casefold()
     for phrase in ("AFCI", "DC ark", "MPPT", "konnektör", "krimp", "IEC 63027"):
         assert phrase.casefold() in afci.casefold()
     for phrase in ("high coolant temperature", "SPN 110", "radyatör", "termostat", "su pompası", "kademeli yük"):
         assert phrase.casefold() in coolant.casefold()
+
+    duplicate = ROOT / "alo186/haberler/elektrik-sayaci-hizli-donuyor-yuksek-fatura-sayac-kontrol-itiraz/index.html"
+    assert not duplicate.exists()
+    assert "elektrik-sayaci-hizli-donuyor-yuksek-fatura-sayac-kontrol-itiraz" not in OVERLAY.read_text(encoding="utf-8")
 
     print("ALO186 içerik otoritesi run103: PASS")
