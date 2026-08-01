@@ -90,7 +90,7 @@ Beklenen gelir/lead etkisi: çok yüksek; otel kritik güç renovasyonu, proje v
 
 ## Güven ve ticari sınırlar
 
-- Üç sayfada affiliate bağlantısı yoktur.
+- Affiliate bağlantısı yoktur; üç rehber de ürün satışı yerine proje kapsamı ve doğrulama kanıtlarına odaklanır.
 - Doğrulanmamış fiyat, stok, puan, satıcı, teslimat, lisans bedeli, garanti veya performans iddiası kullanılmaz.
 - `Product`, `Offer`, `availability` veya `aggregateRating` yapılandırılmış verisi bulunmaz.
 - CTA yalnız proje girdisi hazırlama ve bağımsız kapsam ön değerlendirmesine yönelir.
