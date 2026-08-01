@@ -1,0 +1,198 @@
+name: ALO186 one-shot single Pages publisher migration
+
+on:
+  push:
+    branches:
+      - agent/alo186-pages-single-publisher
+    paths:
+      - '.github/workflows/alo186-one-shot-single-pages-publisher.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: alo186-one-shot-single-pages-publisher
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/alo186-pages-single-publisher
+          persist-credentials: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Serialize production publishing and add a regression contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          root = Path('.')
+          standard = root / '.github/workflows/alo186-github-pages.yml'
+          bootstrap = root / '.github/workflows/alo186-pages-autobootstrap-live.yml'
+
+          standard_text = standard.read_text(encoding='utf-8')
+          old_standard_concurrency = '''concurrency:
+            group: alo186-github-pages-${{ github.ref }}
+            cancel-in-progress: true
+          '''
+          expression = '$' + "{{ github.event_name == 'pull_request' && format('alo186-pages-pr-{0}', github.event.pull_request.number) || 'alo186-pages-production' }}"
+          new_standard_concurrency = f'''concurrency:
+            group: {expression}
+            cancel-in-progress: false
+          '''
+          if old_standard_concurrency not in standard_text:
+              raise SystemExit('Standard Pages concurrency block not found')
+          standard_text = standard_text.replace(
+              old_standard_concurrency,
+              new_standard_concurrency,
+              1,
+          )
+          bootstrap_test_line = '          python alo186/tests/test_github_pages_bootstrap.py\n'
+          publisher_test_line = '          python alo186/tests/test_pages_single_publisher.py\n'
+          if publisher_test_line not in standard_text:
+              if bootstrap_test_line not in standard_text:
+                  raise SystemExit('Standard quality gate insertion point not found')
+              standard_text = standard_text.replace(
+                  bootstrap_test_line,
+                  bootstrap_test_line + publisher_test_line,
+                  1,
+              )
+          standard.write_text(standard_text, encoding='utf-8')
+
+          bootstrap_text = bootstrap.read_text(encoding='utf-8')
+          old_permissions = '''permissions:
+            contents: read
+            pages: write
+            id-token: write
+            issues: write
+          '''
+          new_permissions = '''permissions:
+            contents: read
+            actions: write
+            pages: write
+            id-token: write
+            issues: write
+          '''
+          if old_permissions not in bootstrap_text:
+              raise SystemExit('Bootstrap permissions block not found')
+          bootstrap_text = bootstrap_text.replace(old_permissions, new_permissions, 1)
+
+          old_bootstrap_concurrency = '''concurrency:
+            group: alo186-dual-hosting-full-live
+            cancel-in-progress: true
+          '''
+          new_bootstrap_concurrency = '''concurrency:
+            group: alo186-pages-production
+            cancel-in-progress: false
+          '''
+          if old_bootstrap_concurrency not in bootstrap_text:
+              raise SystemExit('Bootstrap concurrency block not found')
+          bootstrap_text = bootstrap_text.replace(
+              old_bootstrap_concurrency,
+              new_bootstrap_concurrency,
+              1,
+          )
+
+          start_marker = '\n  deploy:\n'
+          end_marker = '\n  already_current:\n'
+          if start_marker not in bootstrap_text or end_marker not in bootstrap_text:
+              raise SystemExit('Bootstrap deploy job boundaries not found')
+          before, remainder = bootstrap_text.split(start_marker, 1)
+          _old_deploy, after = remainder.split(end_marker, 1)
+          dispatch_job = '''
+            dispatch_pages:
+              needs: probe
+              if: needs.probe.outputs.pages_ready == 'true' && needs.probe.outputs.live_current != 'true'
+              runs-on: ubuntu-latest
+              steps:
+                - name: Tek GitHub Pages yayıncısını tetikle
+                  uses: actions/github-script@v7
+                  with:
+                    script: |
+                      const response = await github.request('POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches', {
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        workflow_id: 'alo186-github-pages.yml',
+                        ref: 'main',
+                      });
+                      core.info(`ALO186 ana Pages workflow dispatch status=${response.status}`);
+                - run: echo 'Pages hazır ve canlı commit güncel değil; tek yayıncı workflow kuyruğa alındı.'
+          '''
+          bootstrap_text = before + '\n' + dispatch_job + end_marker + after
+          bootstrap.write_text(bootstrap_text, encoding='utf-8')
+
+          test_path = root / 'alo186/tests/test_pages_single_publisher.py'
+          test_path.write_text('''from __future__ import annotations
+
+          import json
+          from pathlib import Path
+
+          ROOT = Path(__file__).resolve().parents[2]
+          WORKFLOWS = ROOT / ".github/workflows"
+          STANDARD = WORKFLOWS / "alo186-github-pages.yml"
+          BOOTSTRAP = WORKFLOWS / "alo186-pages-autobootstrap-live.yml"
+
+
+          def main() -> None:
+              publishers: list[str] = []
+              for path in sorted(WORKFLOWS.glob("*.y*ml")):
+                  if path.name.startswith("alo186-one-shot-"):
+                      continue
+                  text = path.read_text(encoding="utf-8")
+                  if "actions/deploy-pages@" in text:
+                      publishers.append(path.name)
+
+              assert publishers == ["alo186-github-pages.yml"], publishers
+
+              standard = STANDARD.read_text(encoding="utf-8")
+              assert standard.count("actions/deploy-pages@") == 1
+              assert "alo186-pages-production" in standard
+              assert "alo186-pages-pr-{0}" in standard
+              assert "cancel-in-progress: false" in standard
+              assert "python alo186/tests/test_pages_single_publisher.py" in standard
+
+              bootstrap = BOOTSTRAP.read_text(encoding="utf-8")
+              assert "actions/deploy-pages@" not in bootstrap
+              assert "actions: write" in bootstrap
+              assert "group: alo186-pages-production" in bootstrap
+              assert "cancel-in-progress: false" in bootstrap
+              assert "dispatch_pages:" in bootstrap
+              assert "workflow_id: 'alo186-github-pages.yml'" in bootstrap
+              assert "ref: 'main'" in bootstrap
+
+              print(json.dumps({
+                  "ok": True,
+                  "publisherCount": len(publishers),
+                  "publisher": publishers[0],
+                  "sharedProductionConcurrency": "alo186-pages-production",
+                  "bootstrapRole": "probe-and-dispatch",
+              }, ensure_ascii=False))
+
+
+          if __name__ == "__main__":
+              main()
+          ''', encoding='utf-8')
+          PY
+
+          python -m py_compile alo186/tests/test_pages_single_publisher.py
+          python alo186/tests/test_pages_single_publisher.py
+          python alo186/tests/test_github_pages_bootstrap.py
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm '.github/workflows/alo186-one-shot-single-pages-publisher.yml'
+          git add \
+            .github/workflows/alo186-github-pages.yml \
+            .github/workflows/alo186-pages-autobootstrap-live.yml \
+            alo186/tests/test_pages_single_publisher.py
+          git commit -m 'ci: serialize GitHub Pages production publishing'
+          git push origin HEAD:agent/alo186-pages-single-publisher
