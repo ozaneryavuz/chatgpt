@@ -56,6 +56,7 @@ jobs:
           python alo186/tests/test_live_quality_hardening.py
           python alo186/tests/test_live_domain_integration_manifest.py
           python alo186/tests/test_ga4_consent_integration.py
+          python alo186/tests/test_contextual_affiliate_growth_v177.py
 
       - name: Canonical statik siteyi oluştur
         shell: bash
@@ -89,6 +90,9 @@ jobs:
               --site "$site" \
               --base-path "$base"
             python alo186/deployment/smoke_github_pages.py \
+              --site "$site" \
+              --base-path "$base"
+            python alo186/deployment/inject_contextual_affiliate_growth_v177.py \
               --site "$site" \
               --base-path "$base"
             python alo186/deployment/inject_live_quality_hardening_v2.py \
@@ -193,6 +197,10 @@ jobs:
           python alo186/deployment/smoke_github_pages.py \
             --site /tmp/alo186-pages-site \
             --base-path "$PAGES_BASE_PATH"
+          python alo186/deployment/inject_contextual_affiliate_growth_v177.py \
+            --site /tmp/alo186-pages-site \
+            --base-path "$PAGES_BASE_PATH" \
+            | tee /tmp/alo186-contextual-affiliate-v177.json
           python alo186/deployment/inject_live_quality_hardening_v2.py \
             --site /tmp/alo186-pages-site \
             --base-path "$PAGES_BASE_PATH" \
@@ -209,6 +217,7 @@ jobs:
           name: alo186-github-pages-preview
           path: |
             /tmp/alo186-pages-site
+            /tmp/alo186-contextual-affiliate-v177.json
             /tmp/alo186-live-quality-hardening.json
             /tmp/alo186-ga4-release.json
           if-no-files-found: error
@@ -237,6 +246,7 @@ jobs:
             echo "- Yönetici bootstrap tokenı mevcut: **${ADMIN_TOKEN_PRESENT:-false}**"
             echo '- Custom domain hedefi: `alo186.com`'
             echo '- Canonical, sitemap, robots ve release kimliği apex origin üzerinde birleştirildi.'
+            echo '- 40 yüksek niyetli rehbere 120 bağlamsal ürün kartı, üçlü güven kapısı ve açık satış ortaklığı bilgisi eklendi.'
             echo '- 44 px dokunma hedefi, görünür odak, taşma ve bilinen kontrast seçicileri son artifact katmanında sertleştirildi.'
             echo '- Cihaz hasarı başvurusu için 10 iş günü fail-closed koruması uygulandı.'
             if [ -n "$GA4_MEASUREMENT_ID" ]; then
