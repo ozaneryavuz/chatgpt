@@ -1,0 +1,21 @@
+{
+  "version": 162,
+  "generatedAt": "2026-08-01",
+  "routes": [
+    {
+      "source": "alo186/haberler/kacak-akim-rolesi-test-dugmesi-calismiyor-teshis/index.html",
+      "canonicalPath": "/haberler/kacak-akim-rolesi-test-dugmesi-calismiyor-teshis",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/parafudr-kirmizi-yesil-gosterge-uzak-kontak-degisim/index.html",
+      "canonicalPath": "/haberler/parafudr-kirmizi-yesil-gosterge-uzak-kontak-degisim",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ups-epo-repo-active-alarmi-acil-kapatma-reset-teshis/index.html",
+      "canonicalPath": "/haberler/ups-epo-repo-active-alarmi-acil-kapatma-reset-teshis",
+      "type": "article"
+    }
+  ]
+}
