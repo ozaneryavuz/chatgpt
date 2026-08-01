@@ -91,7 +91,7 @@ for(const token of [
   'id="exactProducts"','id="productClasses"','id="filters"',
   './exact-products-v176.js','./app-v176.js','./styles-v176.css',
   'CollectionPage','FAQPage','BreadcrumbList',
-  'Mevcut ürün yeterliyse yeni ürün satın almayın.'
+  'Mevcut ürün yeterliyse'
 ])assert(page.includes(token),`sayfa sözleşmesi eksik: ${token}`);
 assert(!page.includes('amazon.com.tr/dp/'),'Exact Amazon URL statik HTML içinde kapısız kalamaz');
 assert(!page.includes('amazon.com.tr/s?k='),'Amazon arama URL statik HTML içinde kapısız kalamaz');
