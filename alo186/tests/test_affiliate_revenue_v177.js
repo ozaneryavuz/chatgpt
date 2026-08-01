@@ -26,6 +26,14 @@ assert.equal(opportunities.productClasses.length,25);
 assert.equal(data.stats.exactProducts,data.products.length);
 assert.equal(data.stats.productClasses,data.productClasses.length);
 
+assert.equal(engine.mapCategory('usb_gigabit_ethernet_adapter'),'hub');
+assert.equal(engine.mapCategory('grounded_travel_adapter'),'travel');
+const expectedEthernet=catalog.products.filter(item=>item.category==='usb_gigabit_ethernet_adapter'&&catalog.publicAffiliateEligible(item,{now}));
+const actualEthernet=data.products.filter(item=>item.rawCategory==='usb_gigabit_ethernet_adapter');
+assert.ok(expectedEthernet.length>=3,`Doğrulanmış Ethernet model sayısı beklenenden düşük: ${expectedEthernet.length}`);
+assert.equal(actualEthernet.length,expectedEthernet.length);
+assert.ok(actualEthernet.every(item=>item.category==='hub'),'Ethernet adaptörleri Hub ve ağ kategorisinde kalmalı.');
+
 const asins=new Set();
 const ids=new Set();
 const forbiddenDirectCategories=new Set(['surge_strip','mini_ups','emergency_light','smoke_alarm','co_alarm','power_station','generator','inverter','outlet_tester','smart_plug','ev_cable','ups_battery','extension_cord','portable_evse','rccb','rcbo','mcb','spd','wallbox']);
@@ -50,6 +58,10 @@ for(const item of data.productClasses){
   assert.ok(Array.isArray(item.evidence)&&item.evidence.length>=1,`Sınıf kanıtı eksik: ${item.id}`);
   assert.ok(item.noBuyWhen,`Sınıf satın almama sınırı eksik: ${item.id}`);
 }
+const ethernetClass=data.productClasses.find(item=>item.rawCategory==='usb_gigabit_ethernet_adapter');
+assert.ok(ethernetClass,'Ethernet ürün sınıfı üretilmeli.');
+assert.equal(ethernetClass.category,'hub');
+assert.equal(ethernetClass.tool,'/hesaplama/usb-c-hub-goruntu-pd-uygunluk/');
 
 const requiredManual=['qi2-manyetik-powerbank','gan-100-140w-pd31','usb-c-240w-epr','usb-c-hub-hdmi-ethernet','hdmi21-4k120','arac-65w-pd','toprakli-seyahat-adaptoru','nimh-bagimsiz-kanal','usb-c-guc-olcer'];
 for(const id of requiredManual)assert.ok(classIds.has(id),`Yüksek niyetli ürün sınıfı eksik: ${id}`);
@@ -83,6 +95,8 @@ console.log(JSON.stringify({
   productClasses:data.productClasses.length,
   bundles:data.bundles.length,
   directCategories:data.stats.directCategories,
+  ethernetProducts:actualEthernet.length,
+  ethernetCategory:'hub',
   duplicateAsinGuard:true,
   highRiskDirectAffiliate:false,
   tripleGate:true,
