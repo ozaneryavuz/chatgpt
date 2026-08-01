@@ -1,0 +1,34 @@
+name: ALO186 data backup growth v184
+
+on:
+  pull_request:
+    paths:
+      - "alo186/hesaplama/elektrik-kesintisi-bilgisayar-veri-yedekleme-rpo-rto-plani/**"
+      - "alo186/amazon-elektrik-urunleri/harici-ssd-hdd-usb-yedekleme-urun-secici/**"
+      - "alo186/sektor-rehberi/ev-ofis-veri-yedekleme-geri-yukleme-test-merkezi/**"
+      - "alo186/deployment/routing-overlays/184-data-backup-growth.json"
+      - "alo186/audits/data-backup-growth-v184-2026-08-01.md"
+      - "alo186/tests/test_data_backup_growth_v184.py"
+      - ".github/workflows/alo186-data-backup-growth-v184.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alo186/hesaplama/elektrik-kesintisi-bilgisayar-veri-yedekleme-rpo-rto-plani/**"
+      - "alo186/amazon-elektrik-urunleri/harici-ssd-hdd-usb-yedekleme-urun-secici/**"
+      - "alo186/sektor-rehberi/ev-ofis-veri-yedekleme-geri-yukleme-test-merkezi/**"
+      - "alo186/deployment/routing-overlays/184-data-backup-growth.json"
+      - "alo186/tests/test_data_backup_growth_v184.py"
+      - ".github/workflows/alo186-data-backup-growth-v184.yml"
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: python alo186/tests/test_data_backup_growth_v184.py
