@@ -45,10 +45,12 @@ jobs:
           bootstrap = root / '.github/workflows/alo186-pages-autobootstrap-live.yml'
 
           standard_text = standard.read_text(encoding='utf-8')
-          old_standard_concurrency = '''concurrency:
-            group: alo186-github-pages-${{ github.ref }}
-            cancel-in-progress: true
-          '''
+          old_ref_expression = '$' + '{{ github.ref }}'
+          old_standard_concurrency = (
+              'concurrency:\n'
+              f'  group: alo186-github-pages-{old_ref_expression}\n'
+              '  cancel-in-progress: true\n'
+          )
           expression = '$' + "{{ github.event_name == 'pull_request' && format('alo186-pages-pr-{0}', github.event.pull_request.number) || 'alo186-pages-production' }}"
           new_standard_concurrency = f'''concurrency:
             group: {expression}
