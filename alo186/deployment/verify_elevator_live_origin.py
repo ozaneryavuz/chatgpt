@@ -6,6 +6,7 @@ import json
 import re
 import sys
 import time
+import unicodedata
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from html.parser import HTMLParser
@@ -16,6 +17,14 @@ from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
 DEFAULT_ORIGIN = "https://alo186.com"
+AFFILIATE_HOSTS = {"amazon.com.tr", "amzn.to"}
+HTML_MEDIA_TYPES = {"text/html", "application/xhtml+xml"}
+SITEMAP_MEDIA_TYPES = {
+    "application/xml",
+    "text/xml",
+    "application/xhtml+xml",
+    "text/plain",
+}
 
 
 @dataclass(frozen=True)
@@ -24,10 +33,6 @@ class RouteSpec:
     title: str
     schema_types: frozenset[str]
     markers: tuple[str, ...]
-
-    @property
-    def canonical(self) -> str:
-        return f"{DEFAULT_ORIGIN}{self.path}"
 
 
 ROUTES: tuple[RouteSpec, ...] = (
@@ -51,10 +56,6 @@ ROUTES: tuple[RouteSpec, ...] = (
     ),
 )
 
-AFFILIATE_HOSTS = {"amazon.com.tr", "amzn.to"}
-HTML_MEDIA_TYPES = {"text/html", "application/xhtml+xml"}
-SITEMAP_MEDIA_TYPES = {"application/xml", "text/xml", "application/xhtml+xml", "text/plain"}
-
 
 class HeadParser(HTMLParser):
     def __init__(self) -> None:
@@ -77,16 +78,20 @@ class HeadParser(HTMLParser):
         attributes = self._attrs(attrs)
         if lowered == "title":
             self._in_title = True
-        elif lowered == "link":
+            return
+        if lowered == "link":
             rel = set(attributes.get("rel", "").casefold().split())
             if "canonical" in rel:
                 self.canonical = attributes.get("href", "").strip()
-        elif lowered == "meta" and attributes.get("name", "").casefold() == "robots":
+            return
+        if lowered == "meta" and attributes.get("name", "").casefold() == "robots":
             self.robots = attributes.get("content", "").strip()
-        elif lowered == "script" and attributes.get("type", "").casefold() == "application/ld+json":
+            return
+        if lowered == "script" and attributes.get("type", "").casefold() == "application/ld+json":
             self._in_jsonld = True
             self._script_parts = []
-        elif lowered == "a":
+            return
+        if lowered == "a":
             href = attributes.get("href", "").strip()
             if href:
                 self.links.append(href)
@@ -118,6 +123,12 @@ def normalize_origin(value: str) -> str:
     if parsed.path not in {"", "/"} or parsed.query or parsed.fragment:
         raise ValueError(f"Canlı origin yol veya sorgu içermemelidir: {value!r}")
     return f"https://{parsed.hostname}"
+
+
+def fold_text(value: str) -> str:
+    """Türkçe büyük İ dâhil Unicode metni karşılaştırmaya uygun hâle getirir."""
+    decomposed = unicodedata.normalize("NFKD", value.casefold())
+    return "".join(character for character in decomposed if not unicodedata.combining(character))
 
 
 def collect_schema_types(value: Any) -> set[str]:
@@ -168,18 +179,22 @@ def audit_html(
     parser.close()
 
     expected_canonical = f"{normalize_origin(origin)}{spec.path}"
-    folded = html.casefold()
+    folded_html = fold_text(html)
     schema_types, schema_errors = parse_schema_types(parser.jsonld)
     issues: list[str] = list(schema_errors)
 
     if len(html.encode("utf-8")) < 1000:
         issues.append("html_body_too_small")
-    if spec.title.casefold() not in parser.title.casefold():
+    if fold_text(spec.title) not in fold_text(parser.title):
         issues.append("expected_title_missing")
     if parser.canonical != expected_canonical:
         issues.append("canonical_mismatch")
 
-    robots_tokens = {token.strip() for token in parser.robots.casefold().split(",") if token.strip()}
+    robots_tokens = {
+        token.strip()
+        for token in parser.robots.casefold().split(",")
+        if token.strip()
+    }
     if "noindex" in robots_tokens or "none" in robots_tokens:
         issues.append("route_must_be_indexable")
     if "index" not in robots_tokens:
@@ -189,7 +204,11 @@ def audit_html(
     if missing_types:
         issues.append("schema_types_missing:" + ",".join(missing_types))
 
-    missing_markers = [marker for marker in spec.markers if marker.casefold() not in folded]
+    missing_markers = [
+        marker
+        for marker in spec.markers
+        if fold_text(marker) not in folded_html
+    ]
     if missing_markers:
         issues.append("content_markers_missing:" + "|".join(missing_markers))
 
@@ -224,20 +243,25 @@ def audit_html(
 def audit_sitemap(xml: str, *, origin: str = DEFAULT_ORIGIN) -> dict[str, Any]:
     normalized_origin = normalize_origin(origin)
     expected = [f"{normalized_origin}{spec.path}" for spec in ROUTES]
-    missing = [url for url in expected if url not in xml]
-    duplicate = [url for url in expected if xml.count(url) != 1]
+    locations = [
+        value.strip()
+        for value in re.findall(r"<loc>\s*([^<]+?)\s*</loc>", xml, re.I | re.S)
+    ]
+    missing = [url for url in expected if url not in locations]
+    non_unique = [url for url in expected if locations.count(url) != 1]
     issues: list[str] = []
     if missing:
         issues.append("sitemap_routes_missing")
-    if duplicate:
+    if non_unique:
         issues.append("sitemap_route_count_must_equal_one")
-    if "<urlset" not in xml.casefold() and "<sitemapindex" not in xml.casefold():
+    folded = xml.casefold()
+    if "<urlset" not in folded and "<sitemapindex" not in folded:
         issues.append("sitemap_root_missing")
     return {
         "ok": not issues,
         "expectedUrls": expected,
         "missingUrls": missing,
-        "nonUniqueUrls": duplicate,
+        "nonUniqueUrls": non_unique,
         "bytes": len(xml.encode("utf-8")),
         "sha256": hashlib.sha256(xml.encode("utf-8")).hexdigest(),
         "issues": issues,
@@ -246,9 +270,8 @@ def audit_sitemap(xml: str, *, origin: str = DEFAULT_ORIGIN) -> dict[str, Any]:
 
 def audit_robots(text: str, *, origin: str = DEFAULT_ORIGIN) -> dict[str, Any]:
     expected = f"Sitemap: {normalize_origin(origin)}/sitemap.xml"
-    folded = text.casefold()
     issues: list[str] = []
-    if expected.casefold() not in folded:
+    if expected.casefold() not in text.casefold():
         issues.append("robots_sitemap_declaration_missing")
     if re.search(r"(?im)^\s*disallow:\s*/\s*$", text):
         issues.append("robots_blocks_entire_site")
@@ -292,19 +315,29 @@ def fetch(url: str, *, accept: str, timeout: int = 30) -> ResponseSnapshot:
                 headers={key.casefold(): value for key, value in response.headers.items()},
             )
     except HTTPError as exc:
-        body = exc.read().decode(exc.headers.get_content_charset() or "utf-8", errors="replace")
+        headers = exc.headers
+        raw = exc.read()
+        charset = headers.get_content_charset() or "utf-8"
         return ResponseSnapshot(
             status=int(exc.code),
-            content_type=exc.headers.get_content_type(),
+            content_type=headers.get_content_type(),
             effective_url=exc.geturl(),
-            body=body,
-            headers={key.casefold(): value for key, value in exc.headers.items()},
+            body=raw.decode(charset, errors="replace"),
+            headers={key.casefold(): value for key, value in headers.items()},
         )
 
 
 def cache_receipt(headers: dict[str, str]) -> dict[str, str]:
-    keys = ("age", "cache-control", "cf-cache-status", "etag", "last-modified", "server", "vary")
-    return {key: headers.get(key, "") for key in keys if headers.get(key)}
+    keys = (
+        "age",
+        "cache-control",
+        "cf-cache-status",
+        "etag",
+        "last-modified",
+        "server",
+        "vary",
+    )
+    return {key: headers[key] for key in keys if headers.get(key)}
 
 
 def verify_once(origin: str, *, timeout: int = 30) -> dict[str, Any]:
@@ -314,8 +347,7 @@ def verify_once(origin: str, *, timeout: int = 30) -> dict[str, Any]:
     issues: list[str] = []
 
     for index, spec in enumerate(ROUTES):
-        separator = "&" if "?" in spec.path else "?"
-        url = f"{normalized_origin}{spec.path}{separator}live_receipt={nonce}-{index}"
+        url = f"{normalized_origin}{spec.path}?live_receipt={nonce}-{index}"
         snapshot = fetch(url, accept="text/html,application/xhtml+xml", timeout=timeout)
         route_report = audit_html(
             snapshot.body,
@@ -323,12 +355,14 @@ def verify_once(origin: str, *, timeout: int = 30) -> dict[str, Any]:
             origin=normalized_origin,
             effective_url=snapshot.effective_url,
         )
-        route_report.update({
-            "status": snapshot.status,
-            "contentType": snapshot.content_type,
-            "effectiveUrl": snapshot.effective_url,
-            "cache": cache_receipt(snapshot.headers),
-        })
+        route_report.update(
+            {
+                "status": snapshot.status,
+                "contentType": snapshot.content_type,
+                "effectiveUrl": snapshot.effective_url,
+                "cache": cache_receipt(snapshot.headers),
+            }
+        )
         if snapshot.status != 200:
             route_report["issues"].append(f"http_status:{snapshot.status}")
         if snapshot.content_type.casefold() not in HTML_MEDIA_TYPES:
@@ -345,12 +379,14 @@ def verify_once(origin: str, *, timeout: int = 30) -> dict[str, Any]:
         timeout=timeout,
     )
     sitemap = audit_sitemap(sitemap_snapshot.body, origin=normalized_origin)
-    sitemap.update({
-        "status": sitemap_snapshot.status,
-        "contentType": sitemap_snapshot.content_type,
-        "effectiveUrl": sitemap_snapshot.effective_url,
-        "cache": cache_receipt(sitemap_snapshot.headers),
-    })
+    sitemap.update(
+        {
+            "status": sitemap_snapshot.status,
+            "contentType": sitemap_snapshot.content_type,
+            "effectiveUrl": sitemap_snapshot.effective_url,
+            "cache": cache_receipt(sitemap_snapshot.headers),
+        }
+    )
     if sitemap_snapshot.status != 200:
         sitemap["issues"].append(f"http_status:{sitemap_snapshot.status}")
     if sitemap_snapshot.content_type.casefold() not in SITEMAP_MEDIA_TYPES:
@@ -366,12 +402,14 @@ def verify_once(origin: str, *, timeout: int = 30) -> dict[str, Any]:
         timeout=timeout,
     )
     robots = audit_robots(robots_snapshot.body, origin=normalized_origin)
-    robots.update({
-        "status": robots_snapshot.status,
-        "contentType": robots_snapshot.content_type,
-        "effectiveUrl": robots_snapshot.effective_url,
-        "cache": cache_receipt(robots_snapshot.headers),
-    })
+    robots.update(
+        {
+            "status": robots_snapshot.status,
+            "contentType": robots_snapshot.content_type,
+            "effectiveUrl": robots_snapshot.effective_url,
+            "cache": cache_receipt(robots_snapshot.headers),
+        }
+    )
     if robots_snapshot.status != 200:
         robots["issues"].append(f"http_status:{robots_snapshot.status}")
     robots["issues"] = sorted(set(robots["issues"]))
@@ -380,7 +418,8 @@ def verify_once(origin: str, *, timeout: int = 30) -> dict[str, Any]:
         issues.append("robots_failed")
 
     fingerprint_source = "\n".join(
-        [item["sha256"] for item in routes] + [sitemap["sha256"], robots["sha256"]]
+        [item["sha256"] for item in routes]
+        + [sitemap["sha256"], robots["sha256"]]
     )
     return {
         "ok": not issues,
@@ -390,7 +429,9 @@ def verify_once(origin: str, *, timeout: int = 30) -> dict[str, Any]:
         "routes": routes,
         "sitemap": sitemap,
         "robots": robots,
-        "liveFingerprint": hashlib.sha256(fingerprint_source.encode("ascii")).hexdigest(),
+        "liveFingerprint": hashlib.sha256(
+            fingerprint_source.encode("ascii")
+        ).hexdigest(),
         "issues": issues,
     }
 
@@ -413,17 +454,21 @@ def verify_with_retry(
             reports.append(report)
             if report["ok"]:
                 report["attemptsUsed"] = attempt
-                report["previousFailures"] = [item["issues"] for item in reports[:-1]]
+                report["previousFailures"] = [
+                    item["issues"] for item in reports[:-1]
+                ]
                 return report
             last_error = json.dumps(report["issues"], ensure_ascii=False)
         except (URLError, TimeoutError, OSError, ValueError) as exc:
             last_error = f"{type(exc).__name__}: {exc}"
-            reports.append({
-                "ok": False,
-                "attempt": attempt,
-                "checkedAt": datetime.now(timezone.utc).isoformat(),
-                "issues": [last_error],
-            })
+            reports.append(
+                {
+                    "ok": False,
+                    "attempt": attempt,
+                    "checkedAt": datetime.now(timezone.utc).isoformat(),
+                    "issues": [last_error],
+                }
+            )
         if attempt < attempts:
             time.sleep(sleep_seconds)
 
@@ -439,7 +484,10 @@ def verify_with_retry(
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="ALO186 asansör sürekliliği rotaları için canlı origin, cache ve sitemap makbuzu üretir."
+        description=(
+            "ALO186 asansör sürekliliği rotaları için canlı origin, "
+            "cache ve sitemap makbuzu üretir."
+        )
     )
     parser.add_argument("--origin", default=DEFAULT_ORIGIN)
     parser.add_argument("--attempts", type=int, default=1)
