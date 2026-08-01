@@ -7,6 +7,8 @@ on:
       - '.github/workflows/alo186-pages-autobootstrap-live.yml'
       - 'alo186/deployment/live-release-trigger.json'
   workflow_dispatch:
+  schedule:
+    - cron: '*/30 * * * *'
 
 permissions:
   contents: read
@@ -18,7 +20,116 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    outputs:
+      pages_ready: ${{ steps.pages_probe.outputs.pages_ready }}
+      blocker: ${{ steps.pages_probe.outputs.blocker }}
+      live_current: ${{ steps.live_probe.outputs.live_current }}
+    steps:
+      - name: Pages sitesini denetle ve yetki varsa otomatik etkinleştir
+        id: pages_probe
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.ALO186_PAGES_ADMIN_TOKEN || github.token }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            let ready = false;
+            let created = false;
+            let blocker = '';
+            try {
+              await github.request('GET /repos/{owner}/{repo}/pages', { owner, repo });
+              ready = true;
+            } catch (error) {
+              if (error.status !== 404) throw error;
+              try {
+                await github.request('POST /repos/{owner}/{repo}/pages', {
+                  owner,
+                  repo,
+                  build_type: 'workflow',
+                });
+                ready = true;
+                created = true;
+              } catch (createError) {
+                if (createError.status === 403) {
+                  blocker = 'GitHub Pages repository düzeyinde etkin değil; Pages write + Administration write yetkili token veya Settings > Pages > Source: GitHub Actions gerekiyor.';
+                } else {
+                  throw createError;
+                }
+              }
+            }
+            if (ready) {
+              try {
+                await github.request('PUT /repos/{owner}/{repo}/pages', {
+                  owner,
+                  repo,
+                  build_type: 'workflow',
+                  cname: 'alo186.com',
+                });
+              } catch (updateError) {
+                if (updateError.status === 403) {
+                  blocker = 'Pages sitesi okunabiliyor ancak workflow/custom-domain ayarını değiştirmek için Administration write yetkisi gerekiyor.';
+                  ready = false;
+                } else {
+                  throw updateError;
+                }
+              }
+            }
+            core.setOutput('pages_ready', String(ready));
+            core.setOutput('created', String(created));
+            core.setOutput('blocker', blocker);
+            core.info(`pages_ready=${ready}; created=${created}; blocker=${blocker || 'yok'}`);
+
+      - name: Canlıdaki commit güncel mi?
+        id: live_probe
+        if: steps.pages_probe.outputs.pages_ready == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          release=$(curl -fsSL --max-time 20 -H 'Cache-Control: no-cache' "https://alo186.com/pages-release.json?cb=${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" || true)
+          live_commit=$(python -c 'import json,sys; d=json.loads(sys.stdin.read() or "{}"); print(d.get("commit", ""))' <<<"$release" 2>/dev/null || true)
+          if [ "$live_commit" = "$GITHUB_SHA" ]; then
+            echo 'live_current=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'live_current=false' >> "$GITHUB_OUTPUT"
+          fi
+          echo "live_commit=$live_commit; target=$GITHUB_SHA"
+
+      - name: Hazırlık özeti
+        shell: bash
+        env:
+          READY: ${{ steps.pages_probe.outputs.pages_ready }}
+          BLOCKER: ${{ steps.pages_probe.outputs.blocker }}
+          LIVE_CURRENT: ${{ steps.live_probe.outputs.live_current }}
+        run: |
+          {
+            echo '## ALO186 canlı yayın hazırlığı'
+            echo
+            echo "- GitHub Pages hazır: **${READY:-false}**"
+            echo "- Canlı commit güncel: **${LIVE_CURRENT:-false}**"
+            if [ -n "${BLOCKER:-}" ]; then
+              echo "- Blokaj: ${BLOCKER}"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  waiting_for_pages:
+    needs: probe
+    if: needs.probe.outputs.pages_ready != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hesap düzeyi Pages ayarını bekle
+        shell: bash
+        env:
+          BLOCKER: ${{ needs.probe.outputs.blocker }}
+        run: |
+          echo "Canlı artifact hazır; repository Pages ayarı bekleniyor: ${BLOCKER:-GitHub Pages etkin değil.}"
+          echo 'Workflow her 30 dakikada yeniden deneyecek; Pages etkinleştiğinde ek rerun gerektirmeden tam deploy başlayacak.'
+
   deploy:
+    needs: probe
+    if: needs.probe.outputs.pages_ready == 'true' && needs.probe.outputs.live_current != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 55
     environment:
@@ -38,41 +149,12 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Pages sitesini workflow modunda etkinleştir
-        id: bootstrap
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.ALO186_PAGES_ADMIN_TOKEN || github.token }}
-          script: |
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
-            let created = false;
-            try {
-              await github.request('GET /repos/{owner}/{repo}/pages', { owner, repo });
-            } catch (error) {
-              if (error.status !== 404) throw error;
-              await github.request('POST /repos/{owner}/{repo}/pages', {
-                owner,
-                repo,
-                build_type: 'workflow',
-              });
-              created = true;
-            }
-            await github.request('PUT /repos/{owner}/{repo}/pages', {
-              owner,
-              repo,
-              build_type: 'workflow',
-              cname: 'alo186.com',
-            });
-            core.setOutput('created', String(created));
-            core.info(`GitHub Pages hazır. created=${created}`);
-
       - name: GitHub Pages ayarlarını doğrula
         id: pages
         uses: actions/configure-pages@v5
         with:
           token: ${{ secrets.ALO186_PAGES_ADMIN_TOKEN || github.token }}
-          enablement: true
+          enablement: false
 
       - name: Kaynak ve güvenlik kalite kapıları
         shell: bash
@@ -120,7 +202,6 @@ jobs:
         uses: actions/deploy-pages@v4
 
       - name: Production commit ve kritik rotaları doğrula
-        id: live
         shell: bash
         run: |
           set -euo pipefail
@@ -180,3 +261,10 @@ jobs:
             /tmp/alo186-ga4.json
           if-no-files-found: warn
           retention-days: 45
+
+  already_current:
+    needs: probe
+    if: needs.probe.outputs.pages_ready == 'true' && needs.probe.outputs.live_current == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo 'Canlı site zaten güncel main commitini taşıyor; yeniden deploy gerekmedi.'
