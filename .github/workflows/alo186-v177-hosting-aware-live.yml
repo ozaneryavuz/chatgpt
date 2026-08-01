@@ -1,0 +1,51 @@
+name: ALO186 v177 hosting-aware canlı yayın kalite kapısı
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/alo186-pages-autobootstrap-live.yml'
+      - '.github/workflows/alo186-v177-hosting-aware-live.yml'
+      - 'alo186/deployment/verify_contextual_affiliate_live_v177.py'
+      - 'alo186/tests/test_contextual_affiliate_live_v177.py'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/alo186-pages-autobootstrap-live.yml'
+      - '.github/workflows/alo186-v177-hosting-aware-live.yml'
+      - 'alo186/deployment/verify_contextual_affiliate_live_v177.py'
+      - 'alo186/tests/test_contextual_affiliate_live_v177.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-v177-hosting-aware-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Sözdizimi ve ağsız fail-closed sözleşme
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            alo186/deployment/verify_contextual_affiliate_live_v177.py \
+            alo186/tests/test_contextual_affiliate_live_v177.py
+          python alo186/tests/test_contextual_affiliate_live_v177.py
+      - name: Güncel v177 artifact regresyonu
+        run: |
+          set -euo pipefail
+          python alo186/tests/test_contextual_affiliate_growth_v177.py
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
