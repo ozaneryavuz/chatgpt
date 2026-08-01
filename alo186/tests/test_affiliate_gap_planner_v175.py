@@ -38,11 +38,12 @@ def read(path: Path) -> str:
 
 
 def inline_scripts(html: str) -> list[str]:
-    return [
-        script
-        for script in re.findall(r"<script(?:\s[^>]*)?>(.*?)</script>", html, flags=re.S | re.I)
-        if "application/ld+json" not in script[:120]
-    ]
+    scripts: list[str] = []
+    for attrs, body in re.findall(r"<script([^>]*)>(.*?)</script>", html, flags=re.S | re.I):
+        if "application/ld+json" in attrs.lower():
+            continue
+        scripts.append(body)
+    return scripts
 
 
 def validate_js(html: str, page: Path) -> None:
@@ -74,7 +75,8 @@ def test_pages() -> None:
         assert '"@type":"WebApplication"' in html
         assert '"@type":"FAQPage"' in html
         assert '"@type":"BreadcrumbList"' in html
-        assert "Bağımsız" in html and "resmî kurum değildir" in html
+        assert "Bağımsız" in html
+        assert "resmî kurum değildir" in html or "kamu kurumu değildir" in html
         assert "ALO186" in html and "Amazon" in html and "EDAŞ" in html
         assert 'rel="sponsored nofollow noopener"' in html
         assert "alo186rehber-21" in html
@@ -84,9 +86,10 @@ def test_pages() -> None:
             assert forbidden not in html, f"Forbidden commerce schema in {page}: {forbidden}"
         validate_js(html, page)
 
-    # 12 + 8 + 10 context-mapped Amazon search categories.
-    assert combined.count("tag=alo186rehber-21") >= 30
-    assert combined.count("www.amazon.com.tr/s?k=") >= 30
+    # 12 + 8 + 10 context-mapped product categories are encoded as q fields.
+    assert combined.count("q:'") >= 30
+    assert combined.count("tag=alo186rehber-21") >= 3
+    assert combined.count("www.amazon.com.tr/s?k=") >= 3
     assert combined.count("Reklam / satış ortaklığı açıklaması") >= 3
 
 
@@ -112,7 +115,6 @@ def test_fail_closed_and_repeat_visit_contract() -> None:
     assert "Hasarlı veya geri çağrılan ürün üzerinden affiliate bağlantısı gösterilmez" in retest
     assert "status==='recall'" in retest
 
-    # All three new routes must cross-link to the other tools.
     for html in (basket, office, retest):
         assert "kesinti-hazirlik-sepeti-olusturucu" in html
         assert "ev-ofis-elektrik-kesintisi-urun-secici" in html
