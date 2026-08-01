@@ -30,6 +30,8 @@ def main() -> None:
     assert "verify_live_origin.py" in standard
     assert "verify_contextual_affiliate_live_v177.py" in standard
     assert "alo186-full-live-receipt" in standard
+    assert "timeout-minutes: 30" in standard
+    assert "retention-days: 45" in standard
 
     bootstrap = BOOTSTRAP.read_text(encoding="utf-8")
     assert "actions/deploy-pages@" not in bootstrap
@@ -50,6 +52,7 @@ def main() -> None:
         "bootstrapRole": "probe-and-dispatch",
         "chatGPTSitesFallbackPreserved": True,
         "failClosedLiveReceiptInPublisher": True,
+        "liveReceiptRetentionDays": 45,
     }, ensure_ascii=False))
 
 
