@@ -78,7 +78,7 @@ def main() -> None:
     selector = content["selector"]
     for marker in ("aa:{", "aaa:{", "'9v':{", "tester:{", "smoke:{", "co:{", "combo:{", "access:{"):
         assert marker in selector, f"selector catalog missing {marker}"
-    for marker in ("25 Haziran", "9 Temmuz 2026", "ilan başlığı tek başına", "pil test cihazı alarm testinin yerini"):
+    for marker in ("25 Haziran", "9 Temmuz 2026", "güvenlik kanıtı değildir", "pil test cihazı alarm testinin yerini"):
         assert marker.lower() in selector.lower(), marker
     assert "productCard" in selector
 
