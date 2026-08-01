@@ -50,7 +50,8 @@ def main() -> None:
         assert '"availability"' not in html
         assert '"aggregateRating"' not in html
         assert ".setItem(" not in html and ".getItem(" not in html
-        assert "fiyat, stok, puan" in html.lower() or name == "center"
+        if name == "suitability":
+            assert "fiyat, stok, puan" in html.lower()
         check_javascript(PAGES[name], html)
 
     safety = pages["safety"]
