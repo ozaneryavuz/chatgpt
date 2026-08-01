@@ -1,0 +1,21 @@
+{
+  "version": 166,
+  "generatedAt": "2026-08-01",
+  "routes": [
+    {
+      "source": "alo186/haberler/kacak-akim-rolesi-kapanmiyor-hemen-atiyor-devre-ayirma-teshis/index.html",
+      "canonicalPath": "/haberler/kacak-akim-rolesi-kapanmiyor-hemen-atiyor-devre-ayirma-teshis",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ups-rectifier-inoperable-dogrultucu-charger-dc-bus-alarmi-teshis/index.html",
+      "canonicalPath": "/haberler/ups-rectifier-inoperable-dogrultucu-charger-dc-bus-alarmi-teshis",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/jenerator-fail-to-start-overcrank-mars-aku-yakit-teshis/index.html",
+      "canonicalPath": "/haberler/jenerator-fail-to-start-overcrank-mars-aku-yakit-teshis",
+      "type": "article"
+    }
+  ]
+}
