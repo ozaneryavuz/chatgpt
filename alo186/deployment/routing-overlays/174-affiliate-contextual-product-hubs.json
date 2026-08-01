@@ -1,0 +1,21 @@
+{
+  "version": 174,
+  "generatedAt": "2026-08-01",
+  "routes": [
+    {
+      "source": "alo186/amazon-elektrik-urunleri/elektrik-kesintisi-hazirlik-urunleri/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/elektrik-kesintisi-hazirlik-urunleri/",
+      "type": "commercial-guide"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/ev-elektrik-olcum-koruma-urunleri/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/ev-elektrik-olcum-koruma-urunleri/",
+      "type": "commercial-guide"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/tasinabilir-enerji-sarj-urunleri/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/tasinabilir-enerji-sarj-urunleri/",
+      "type": "commercial-guide"
+    }
+  ]
+}
