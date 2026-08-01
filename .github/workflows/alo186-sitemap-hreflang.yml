@@ -1,0 +1,71 @@
+name: ALO186 sitemap hreflang AEO contract
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/deployment/build_static_site.py'
+      - 'alo186/deployment/build_static_site_core.py'
+      - 'alo186/deployment/sitemap_hreflang.py'
+      - 'alo186/deployment/language-alternates.json'
+      - 'alo186/deployment/routing-manifest.json'
+      - 'alo186/deployment/routing-overlays/**'
+      - 'alo186/en/**'
+      - 'alo186/elektrik-kesintisi/**'
+      - 'alo186/acil-numaralar/**'
+      - 'alo186/hakkimizda/**'
+      - 'alo186/yayin-ilkeleri/**'
+      - 'alo186/kaynaklar/**'
+      - 'alo186/gizlilik/**'
+      - 'alo186/iletisim/**'
+      - 'alo186/yasal/amazon-satis-ortakligi/**'
+      - 'alo186/tests/test_sitemap_hreflang.py'
+      - '.github/workflows/alo186-sitemap-hreflang.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/deployment/build_static_site.py'
+      - 'alo186/deployment/build_static_site_core.py'
+      - 'alo186/deployment/sitemap_hreflang.py'
+      - 'alo186/deployment/language-alternates.json'
+      - 'alo186/deployment/routing-manifest.json'
+      - 'alo186/deployment/routing-overlays/**'
+      - 'alo186/en/**'
+      - 'alo186/elektrik-kesintisi/**'
+      - 'alo186/acil-numaralar/**'
+      - 'alo186/hakkimizda/**'
+      - 'alo186/yayin-ilkeleri/**'
+      - 'alo186/kaynaklar/**'
+      - 'alo186/gizlilik/**'
+      - 'alo186/iletisim/**'
+      - 'alo186/yasal/amazon-satis-ortakligi/**'
+      - 'alo186/tests/test_sitemap_hreflang.py'
+      - '.github/workflows/alo186-sitemap-hreflang.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-sitemap-hreflang-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Hreflang manifest, wrapper and final sitemap contract
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            alo186/deployment/build_static_site.py \
+            alo186/deployment/build_static_site_core.py \
+            alo186/deployment/sitemap_hreflang.py \
+            alo186/tests/test_sitemap_hreflang.py
+          python alo186/tests/test_sitemap_hreflang.py
