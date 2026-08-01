@@ -1,4 +1,4 @@
-name: ALO186 Pages otomatik etkinleştirme ve tam canlı yayın
+name: ALO186 çift modlu tam canlı yayın ve doğrulama
 
 on:
   push:
@@ -6,24 +6,27 @@ on:
     paths:
       - '.github/workflows/alo186-pages-autobootstrap-live.yml'
       - 'alo186/deployment/live-release-trigger.json'
+      - 'alo186/deployment/verify_contextual_affiliate_live_v177.py'
+      - 'alo186/tests/test_contextual_affiliate_live_v177.py'
   workflow_dispatch:
 
 permissions:
   contents: read
   pages: write
   id-token: write
+  issues: write
 
 concurrency:
-  group: alo186-pages-autobootstrap-live
+  group: alo186-dual-hosting-full-live
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  deploy-or-verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 55
+    timeout-minutes: 65
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: https://alo186.com
     steps:
       - name: Kaynak kodu al
         uses: actions/checkout@v4
@@ -38,41 +41,112 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Pages sitesini workflow modunda etkinleştir
+      - name: Pages durumunu ve yönetici yetkisini fail-safe belirle
         id: bootstrap
         uses: actions/github-script@v7
+        env:
+          ADMIN_TOKEN_PRESENT: ${{ secrets.ALO186_PAGES_ADMIN_TOKEN != '' }}
         with:
           github-token: ${{ secrets.ALO186_PAGES_ADMIN_TOKEN || github.token }}
           script: |
+            const fs = require('fs');
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            let created = false;
+            const adminTokenPresent = process.env.ADMIN_TOKEN_PRESENT === 'true';
+            let pagesReady = false;
+            let pagesCreated = false;
+            let customDomainConfigured = false;
+            let reason = '';
+            let apiStatus = null;
+
             try {
-              await github.request('GET /repos/{owner}/{repo}/pages', { owner, repo });
+              const response = await github.request('GET /repos/{owner}/{repo}/pages', { owner, repo });
+              apiStatus = response.status;
+              pagesReady = response.status === 200;
             } catch (error) {
-              if (error.status !== 404) throw error;
-              await github.request('POST /repos/{owner}/{repo}/pages', {
-                owner,
-                repo,
-                build_type: 'workflow',
-              });
-              created = true;
+              apiStatus = error.status || null;
+              if (error.status === 404) {
+                if (!adminTokenPresent) {
+                  reason = 'ALO186_PAGES_ADMIN_TOKEN eksik; Pages oluşturmak için Pages write ve Administration write yetkileri birlikte gerekir.';
+                } else {
+                  try {
+                    const created = await github.request('POST /repos/{owner}/{repo}/pages', {
+                      owner,
+                      repo,
+                      build_type: 'workflow',
+                    });
+                    pagesReady = created.status === 201;
+                    pagesCreated = pagesReady;
+                    apiStatus = created.status;
+                  } catch (createError) {
+                    apiStatus = createError.status || null;
+                    reason = `Pages oluşturulamadı: ${createError.message}`;
+                  }
+                }
+              } else if (error.status === 403) {
+                reason = 'Pages API erişimi reddedildi; yönetici yetkili ALO186_PAGES_ADMIN_TOKEN gerekli.';
+              } else {
+                reason = `Pages durumu okunamadı: ${error.message}`;
+              }
             }
-            await github.request('PUT /repos/{owner}/{repo}/pages', {
-              owner,
-              repo,
-              build_type: 'workflow',
-              cname: 'alo186.com',
-            });
-            core.setOutput('created', String(created));
-            core.info(`GitHub Pages hazır. created=${created}`);
+
+            if (pagesReady && adminTokenPresent) {
+              try {
+                await github.request('PUT /repos/{owner}/{repo}/pages', {
+                  owner,
+                  repo,
+                  build_type: 'workflow',
+                  cname: 'alo186.com',
+                });
+                customDomainConfigured = true;
+              } catch (updateError) {
+                reason = `Pages bulundu fakat özel alan adı ayarlanamadı: ${updateError.message}`;
+                pagesReady = false;
+                apiStatus = updateError.status || apiStatus;
+              }
+            }
+
+            const receipt = {
+              pagesReady,
+              pagesCreated,
+              customDomainConfigured,
+              adminTokenPresent,
+              apiStatus,
+              reason: reason || (pagesReady ? 'GitHub Pages hazır.' : 'GitHub Pages hazır değil.'),
+            };
+            fs.writeFileSync('/tmp/alo186-pages-bootstrap.json', JSON.stringify(receipt, null, 2) + '\n');
+            core.setOutput('pages_ready', String(pagesReady));
+            core.setOutput('pages_created', String(pagesCreated));
+            core.setOutput('admin_token_present', String(adminTokenPresent));
+            core.setOutput('reason', receipt.reason);
+            core.info(JSON.stringify(receipt));
 
       - name: GitHub Pages ayarlarını doğrula
         id: pages
+        if: steps.bootstrap.outputs.pages_ready == 'true'
+        continue-on-error: true
         uses: actions/configure-pages@v5
         with:
           token: ${{ secrets.ALO186_PAGES_ADMIN_TOKEN || github.token }}
-          enablement: true
+
+      - name: Gerçek çalışma modunu seç
+        id: mode
+        shell: bash
+        env:
+          PAGES_READY: ${{ steps.bootstrap.outputs.pages_ready }}
+          CONFIGURE_OUTCOME: ${{ steps.pages.outcome }}
+          CONFIGURED_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+        run: |
+          set -euo pipefail
+          if [ "$PAGES_READY" = true ] && [ "$CONFIGURE_OUTCOME" = success ]; then
+            echo 'deploy_ready=true' >> "$GITHUB_OUTPUT"
+            printf 'base_path=%s\n' "$CONFIGURED_BASE_PATH" >> "$GITHUB_OUTPUT"
+            echo 'mode=github-pages-deploy' >> "$GITHUB_OUTPUT"
+          else
+            echo 'deploy_ready=false' >> "$GITHUB_OUTPUT"
+            echo 'base_path=' >> "$GITHUB_OUTPUT"
+            echo 'mode=chatgpt-sites-verify' >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Kaynak ve güvenlik kalite kapıları
         shell: bash
@@ -87,10 +161,12 @@ jobs:
           python alo186/tests/test_live_domain_integration_manifest.py
           python alo186/tests/test_ga4_consent_integration.py
           python alo186/tests/test_contextual_affiliate_growth_v177.py
+          python alo186/tests/test_contextual_affiliate_live_v177.py
+          python -m py_compile alo186/deployment/verify_contextual_affiliate_live_v177.py
 
-      - name: Bütün ALO186 çalışmalarını tek artifactta oluştur
+      - name: Bütün ALO186 çalışmalarını tek doğrulanmış artifactta oluştur
         env:
-          BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          BASE_PATH: ${{ steps.mode.outputs.base_path }}
           GA4: ${{ vars.ALO186_GA4_MEASUREMENT_ID || 'G-639TVHL0LC' }}
         shell: bash
         run: |
@@ -100,83 +176,231 @@ jobs:
           python alo186/deployment/prepare_github_pages.py --site "$SITE" --base-path "$BASE_PATH" --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
           python alo186/deployment/inject_outcome_runtime.py --site "$SITE" --base-path "$BASE_PATH"
           python alo186/deployment/inject_shortlist_growth.py --site "$SITE" --base-path "$BASE_PATH"
-          python alo186/deployment/smoke_github_pages.py --site "$SITE" --base-path "$BASE_PATH"
           python alo186/deployment/inject_contextual_affiliate_growth_v177.py --site "$SITE" --base-path "$BASE_PATH" | tee /tmp/alo186-contextual-v177.json
           python alo186/deployment/guard_commerce_routes_v3.py --site "$SITE" | tee /tmp/alo186-commerce-guard.json
           python alo186/deployment/inject_live_quality_hardening_v2.py --site "$SITE" --base-path "$BASE_PATH" | tee /tmp/alo186-live-quality.json
           python alo186/deployment/inject_ga4_consent.py --site "$SITE" --base-path "$BASE_PATH" --measurement-id "$GA4" | tee /tmp/alo186-ga4.json
+          python alo186/deployment/smoke_github_pages.py --site "$SITE" --base-path "$BASE_PATH"
           test -f "$SITE/pages-release.json"
           test -f "$SITE/amazon-elektrik-urunleri/konuya-gore-urun-haritasi/index.html"
           grep -q 'data-alo186-contextual-affiliate-v177' "$SITE/amazon-elektrik-urunleri/konuya-gore-urun-haritasi/index.html"
           grep -q 'alo186rehber-21' "$SITE/amazon-elektrik-urunleri/konuya-gore-urun-haritasi/index.html"
 
-      - name: Pages artifactını yükle
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: /tmp/alo186-full-live
-
-      - name: Canlı siteye yayınla
-        id: deployment
-        uses: actions/deploy-pages@v4
-
-      - name: Production commit ve kritik rotaları doğrula
-        id: live
-        shell: bash
-        run: |
-          set -euo pipefail
-          base='https://alo186.com'
-          receipt=/tmp/alo186-live-receipt.json
-          success=0
-          for attempt in $(seq 1 36); do
-            nonce="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${attempt}"
-            release=$(curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "$base/pages-release.json?cb=$nonce" || true)
-            live_commit=$(python -c 'import json,sys; d=json.loads(sys.stdin.read() or "{}"); print(d.get("commit", ""))' <<<"$release" 2>/dev/null || true)
-            home=$(curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "$base/?cb=$nonce" || true)
-            portal=$(curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "$base/elektrik-portali?cb=$nonce" || true)
-            edas=$(curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "$base/edas-bul?cb=$nonce" || true)
-            products=$(curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "$base/amazon-elektrik-urunleri/konuya-gore-urun-haritasi/?cb=$nonce" || true)
-            if [ "$live_commit" = "$GITHUB_SHA" ] \
-              && grep -qi '<h1' <<<"$home" \
-              && grep -qi '<h1' <<<"$portal" \
-              && grep -qi '<h1' <<<"$edas" \
-              && grep -q 'data-alo186-contextual-affiliate-v177' <<<"$products" \
-              && grep -q 'alo186rehber-21' <<<"$products"; then
-              success=1
-              python - <<PY > "$receipt"
-          import json
-          print(json.dumps({
-            "status": "verified",
-            "sourceCommit": "$GITHUB_SHA",
-            "pagesUrl": "${{ steps.deployment.outputs.page_url }}",
-            "productionOrigin": "$base",
-            "verifiedAttempt": $attempt,
-            "criticalRoutes": [
-              "/",
-              "/elektrik-portali",
-              "/edas-bul",
-              "/amazon-elektrik-urunleri/konuya-gore-urun-haritasi/"
-            ],
-            "contextualAffiliateV177": True,
-            "affiliateTag": "alo186rehber-21"
-          }, ensure_ascii=False, indent=2))
-          PY
-              break
-            fi
-            sleep 10
-          done
-          test "$success" -eq 1
-          cat "$receipt"
-
-      - name: Canlı yayın makbuzunu sakla
+      - name: Referans artifactı ve bootstrap tanısını sakla
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: alo186-full-live-receipt
+          name: alo186-full-live-reference
           path: |
-            /tmp/alo186-live-receipt.json
+            /tmp/alo186-full-live
+            /tmp/alo186-pages-bootstrap.json
             /tmp/alo186-contextual-v177.json
             /tmp/alo186-commerce-guard.json
             /tmp/alo186-live-quality.json
             /tmp/alo186-ga4.json
           if-no-files-found: warn
+          include-hidden-files: true
           retention-days: 45
+
+      - name: Pages artifactını yükle
+        if: steps.mode.outputs.deploy_ready == 'true'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: /tmp/alo186-full-live
+
+      - name: GitHub Pages'e yayınla
+        id: deployment
+        if: steps.mode.outputs.deploy_ready == 'true'
+        continue-on-error: true
+        uses: actions/deploy-pages@v4
+
+      - name: Gerçek canlı hosting modunu doğrula
+        id: live_origin
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python alo186/deployment/verify_live_origin.py \
+            --origin https://alo186.com \
+            --alias-origin https://www.alo186.com \
+            --expected-commit "$GITHUB_SHA" \
+            --repository "$GITHUB_REPOSITORY" \
+            --github-token "$GITHUB_TOKEN" \
+            --receipt /tmp/alo186-live-origin-receipt.json \
+            --diagnostics /tmp/alo186-live-origin-diagnostics \
+            --attempts 24 \
+            --sleep-seconds 10
+
+      - name: v177 ürün haritasını gerçek production origin üzerinde doğrula
+        id: live_v177
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          python alo186/deployment/verify_contextual_affiliate_live_v177.py \
+            --origin https://alo186.com \
+            --receipt /tmp/alo186-v177-live-receipt.json \
+            --diagnostics /tmp/alo186-v177-live-diagnostics \
+            --attempts 36 \
+            --sleep-seconds 10
+
+      - name: Doğrulanmış canlı makbuzu yayımla
+        if: >-
+          always() &&
+          steps.live_origin.outcome == 'success' &&
+          steps.live_v177.outcome == 'success' &&
+          (steps.mode.outputs.deploy_ready != 'true' || steps.deployment.outcome == 'success')
+        uses: actions/github-script@v7
+        env:
+          RUN_MODE: ${{ steps.mode.outputs.mode }}
+          DEPLOY_READY: ${{ steps.mode.outputs.deploy_ready }}
+          DEPLOY_OUTCOME: ${{ steps.deployment.outcome }}
+          ADMIN_TOKEN_PRESENT: ${{ steps.bootstrap.outputs.admin_token_present }}
+        with:
+          script: |
+            const fs = require('fs');
+            const read = (path) => JSON.parse(fs.readFileSync(path, 'utf8'));
+            const origin = read('/tmp/alo186-live-origin-receipt.json');
+            const live = read('/tmp/alo186-v177-live-receipt.json');
+            const contextual = read('/tmp/alo186-contextual-v177.json');
+            const guard = read('/tmp/alo186-commerce-guard.json');
+            const bootstrap = read('/tmp/alo186-pages-bootstrap.json');
+            const marker = '<!-- alo186-v177-live-receipt -->';
+            const body = `${marker}
+            ## ALO186 doğrulanmış canlı yayın makbuzu
+
+            - Kaynak commit: \`${context.sha}\`
+            - Çalışma modu: **${process.env.RUN_MODE}**
+            - Canlı hosting modu: **${origin.mode}**
+            - Platform imzası: \`${origin.platformSignature || 'github-pages'}\`
+            - Pages deploy sonucu: **${process.env.DEPLOY_OUTCOME || 'uygulanmadı'}**
+            - Yönetici tokenı mevcut: **${process.env.ADMIN_TOKEN_PRESENT}**
+            - Canlı v177 rota: \`${live.origin}${live.route}\`
+            - Cache-bypass denemesi: **${live.verifiedAttempt}**
+            - Sayfa SHA-256: \`${live.pageSha256}\`
+            - v177 ürün yerleşimi: **${live.placementCount}**
+            - v177 ticari kapı: **${live.gateCount}**
+            - Static kapısız mağaza bağlantısı: **${live.staticStoreLinkCount}**
+            - Referans hedef rota: **${contextual.targetRouteCount}**
+            - Referans yerleşim: **${contextual.placementCount}**
+            - Referans ürün sınıfı: **${contextual.productClassCount}**
+            - Commerce guard hatası: **${guard.errorCount}**
+            - Bootstrap: ${bootstrap.reason}
+
+            Gerçek production origin, v177 JavaScript güven sözleşmesi, affiliate etiketi ve kullanıcıya açık satın almama sınırı birlikte doğrulandı.`;
+            async function upsert(issueNumber) {
+              const {data: comments} = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                per_page: 100,
+              });
+              const existing = comments.find(item => item.body && item.body.includes(marker));
+              if (existing) {
+                await github.rest.issues.updateComment({owner: context.repo.owner, repo: context.repo.repo, comment_id: existing.id, body});
+              } else {
+                await github.rest.issues.createComment({owner: context.repo.owner, repo: context.repo.repo, issue_number: issueNumber, body});
+              }
+            }
+            await upsert(606);
+            await upsert(21);
+            if (origin.mode === 'github-pages' && origin.exactCommitReceiptAvailable === true) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: 21,
+                state: 'closed',
+              });
+            }
+
+      - name: Canlı blokajı P0 kaydında görünür kıl
+        if: >-
+          always() &&
+          (steps.live_origin.outcome != 'success' ||
+           steps.live_v177.outcome != 'success' ||
+           (steps.mode.outputs.deploy_ready == 'true' && steps.deployment.outcome != 'success'))
+        uses: actions/github-script@v7
+        env:
+          RUN_MODE: ${{ steps.mode.outputs.mode }}
+          DEPLOY_READY: ${{ steps.mode.outputs.deploy_ready }}
+          DEPLOY_OUTCOME: ${{ steps.deployment.outcome }}
+          BOOTSTRAP_REASON: ${{ steps.bootstrap.outputs.reason }}
+          ADMIN_TOKEN_PRESENT: ${{ steps.bootstrap.outputs.admin_token_present }}
+          ORIGIN_OUTCOME: ${{ steps.live_origin.outcome }}
+          V177_OUTCOME: ${{ steps.live_v177.outcome }}
+        with:
+          script: |
+            const fs = require('fs');
+            const safeRead = (path) => {
+              try { return JSON.parse(fs.readFileSync(path, 'utf8')); }
+              catch (_) { return {}; }
+            };
+            const origin = safeRead('/tmp/alo186-live-origin-receipt.json');
+            const live = safeRead('/tmp/alo186-v177-live-receipt.json');
+            const lastError = Array.isArray(live.errors) && live.errors.length
+              ? live.errors[live.errors.length - 1].error
+              : 'Canlı v177 rota makbuzu üretilemedi.';
+            const marker = '<!-- alo186-v177-live-blocker -->';
+            const body = `${marker}
+            ## ALO186 canlı yayın blokajı
+
+            - Kaynak commit: \`${context.sha}\`
+            - Çalışma modu: **${process.env.RUN_MODE}**
+            - Yönetici tokenı mevcut: **${process.env.ADMIN_TOKEN_PRESENT}**
+            - Bootstrap: **${process.env.BOOTSTRAP_REASON}**
+            - Pages deploy: **${process.env.DEPLOY_OUTCOME || 'uygulanmadı'}**
+            - Hosting doğrulaması: **${process.env.ORIGIN_OUTCOME}**
+            - v177 rota doğrulaması: **${process.env.V177_OUTCOME}**
+            - Algılanan canlı mod: **${origin.mode || 'doğrulanamadı'}**
+            - Son hata: **${lastError}**
+            - Workflow: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}
+
+            Kaynak, custom/project artifact, v177 yerleşimleri ve commerce guard doğrulanmıştır. Başarı makbuzu yalnız gerçek production origin güncel v177 markerını, üç ticari kapıyı, güvenli JavaScript assetini ve affiliate etiketini birlikte sunduğunda oluşturulur.`;
+            async function upsert(issueNumber) {
+              const {data: comments} = await github.rest.issues.listComments({owner: context.repo.owner, repo: context.repo.repo, issue_number: issueNumber, per_page: 100});
+              const existing = comments.find(item => item.body && item.body.includes(marker));
+              if (existing) {
+                await github.rest.issues.updateComment({owner: context.repo.owner, repo: context.repo.repo, comment_id: existing.id, body});
+              } else {
+                await github.rest.issues.createComment({owner: context.repo.owner, repo: context.repo.repo, issue_number: issueNumber, body});
+              }
+            }
+            await upsert(606);
+            await upsert(21);
+
+      - name: Canlı yayın makbuzlarını sakla
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-full-live-receipt
+          path: |
+            /tmp/alo186-pages-bootstrap.json
+            /tmp/alo186-live-origin-receipt.json
+            /tmp/alo186-v177-live-receipt.json
+            /tmp/alo186-live-origin-diagnostics
+            /tmp/alo186-v177-live-diagnostics
+            /tmp/alo186-contextual-v177.json
+            /tmp/alo186-commerce-guard.json
+            /tmp/alo186-live-quality.json
+            /tmp/alo186-ga4.json
+          if-no-files-found: warn
+          include-hidden-files: true
+          retention-days: 45
+
+      - name: Fail-closed canlı kabul sonucu
+        if: always()
+        env:
+          DEPLOY_READY: ${{ steps.mode.outputs.deploy_ready }}
+          DEPLOY_OUTCOME: ${{ steps.deployment.outcome }}
+          ORIGIN_OUTCOME: ${{ steps.live_origin.outcome }}
+          V177_OUTCOME: ${{ steps.live_v177.outcome }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$ORIGIN_OUTCOME" = success
+          test "$V177_OUTCOME" = success
+          if [ "$DEPLOY_READY" = true ]; then
+            test "$DEPLOY_OUTCOME" = success
+          fi
