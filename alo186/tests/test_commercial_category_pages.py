@@ -23,13 +23,23 @@ DIRECT_COMMERCIAL_ROUTES = {
     "/amazon-elektrik-urunleri",
     "/amazon-elektrik-urunleri/powerbank-usb-c-secimi",
 }
-EXPANSION_ROUTES = {
+PRIORITY_ROUTES = {
+    "/amazon-elektrik-urunleri/modem-ont-mini-ups-yedekleme-secici/",
+    "/amazon-elektrik-urunleri/nas-ups-usb-snmp-uygunluk-secici/",
+    "/amazon-elektrik-urunleri/guvenlik-kamerasi-nvr-poe-ups-secici/",
+    "/amazon-elektrik-urunleri/alarm-paneli-aku-uygunluk-secici/",
+    "/amazon-elektrik-urunleri/cpap-yedek-guc-uygunluk-secici/",
+    "/amazon-elektrik-urunleri/mobil-hotspot-4g-5g-yedek-internet-secici/",
+}
+CORE_HUB_ROUTES = {
+    "/amazon-elektrik-urunleri/powerbank-usb-c-secimi",
+    "/amazon-elektrik-urunleri/akim-korumali-grup-priz-secimi",
     "/amazon-elektrik-urunleri/tasinabilir-guc-istasyonu-secimi",
     "/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi",
-    "/amazon-elektrik-urunleri/ges-malzemeleri-secimi",
     "/amazon-elektrik-urunleri/kombi-ups-power-station-secimi",
-    "/amazon-elektrik-urunleri/buzdolabi-dondurucu-power-station-secimi",
+    "/amazon-elektrik-urunleri/buzdolabi-dondurucu-kesinti-gida-guvenligi-secici/",
 }
+VISIBLE_HUB_ROUTES = PRIORITY_ROUTES | CORE_HUB_ROUTES
 
 
 def text_of(html: str, tag: str) -> str:
@@ -37,6 +47,17 @@ def text_of(html: str, tag: str) -> str:
     if not match:
         return ""
     return re.sub(r"\s+", " ", unescape(re.sub(r"<[^>]+>", " ", match.group(1)))).strip()
+
+
+def jsonld_items(html: str) -> list[dict]:
+    items: list[dict] = []
+    for block in re.findall(r'<script\s+type=["\']application/ld\+json["\']>(.*?)</script>', html, re.I | re.S):
+        payload = json.loads(block)
+        if isinstance(payload, dict) and isinstance(payload.get("@graph"), list):
+            items.extend(item for item in payload["@graph"] if isinstance(item, dict))
+        elif isinstance(payload, dict):
+            items.append(payload)
+    return items
 
 
 class CommercialCategoryPagesTests(unittest.TestCase):
@@ -82,15 +103,34 @@ class CommercialCategoryPagesTests(unittest.TestCase):
                 self.assertIn("fiyat", lower)
                 self.assertIn("stok", lower)
 
-    def test_hub_links_to_every_dedicated_page(self) -> None:
+    def test_hub_matches_current_twelve_card_information_architecture(self) -> None:
         html = ROUTES["/amazon-elektrik-urunleri"].read_text(encoding="utf-8")
-        for route in (set(ROUTES) - {"/amazon-elektrik-urunleri"}) | EXPANSION_ROUTES:
-            self.assertIn(f'href="{route}"', html)
-        expected_guide_count = len((set(ROUTES) - {"/amazon-elektrik-urunleri"}) | EXPANSION_ROUTES)
-        self.assertIn(f"{expected_guide_count} özel rehber", html)
-        self.assertEqual(html.count('class="card route-card"'), expected_guide_count)
-        self.assertIn("Mevcut ürün yeterliyse satın alma yok", html)
+        for route in VISIBLE_HUB_ROUTES:
+            self.assertIn(f'href="{route}"', html, route)
+
+        self.assertEqual(html.count('class="card route-card"'), 12)
+        self.assertEqual(html.count('data-commercial-route="priority-card"'), 6)
+        self.assertEqual(html.count('data-commercial-route="core-card"'), 6)
+        self.assertIn("18+ karar rotası", html)
+        self.assertIn("Mevcut sistem yeterliyse satın alma yok", html)
         self.assertIn("Aktif tehlikede satış yolu kapalı", html)
+
+        schemas = jsonld_items(html)
+        item_lists = [item for item in schemas if item.get("@type") == "ItemList"]
+        self.assertEqual(len(item_lists), 1)
+        item_list = item_lists[0]
+        elements = item_list.get("itemListElement")
+        self.assertIsInstance(elements, list)
+        self.assertEqual(item_list.get("numberOfItems"), 12)
+        self.assertEqual(len(elements), 12)
+        self.assertEqual([item.get("position") for item in elements], list(range(1, 13)))
+        schema_routes = {item.get("item") for item in elements}
+        expected_routes = {f"{CANONICAL_ORIGIN}{route}" for route in VISIBLE_HUB_ROUTES}
+        self.assertEqual(schema_routes, expected_routes)
+        for item in elements:
+            url = str(item.get("item") or "")
+            self.assertTrue(url.startswith(f"{CANONICAL_ORIGIN}/amazon-elektrik-urunleri/"), url)
+            self.assertNotRegex(url, r"amazon-elektrik-urunleri(?!/)")
 
     def test_direct_affiliate_links_are_freshness_gated_and_only_powerbank_is_direct(self) -> None:
         runtime = (SOURCE_ROOT / "commercial.js").read_text(encoding="utf-8")
