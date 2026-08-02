@@ -1,0 +1,113 @@
+name: ALO186 affiliate endurance microSD v200
+
+on:
+  pull_request:
+    paths:
+      - "alo186/amazon-elektrik-urunleri/kamera-kayit-yuksek-dayanim-microsd-secimi/**"
+      - "alo186/deployment/build_static_site.py"
+      - "alo186/deployment/routing-overlays/200-affiliate-endurance-microsd.json"
+      - "alo186/tests/test_affiliate_endurance_microsd_v200.js"
+      - "alo186/tests/test_routing_legacy_article_bridge_v200.py"
+      - ".github/workflows/alo186-affiliate-endurance-microsd-v200.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alo186/amazon-elektrik-urunleri/kamera-kayit-yuksek-dayanim-microsd-secimi/**"
+      - "alo186/deployment/build_static_site.py"
+      - "alo186/deployment/routing-overlays/200-affiliate-endurance-microsd.json"
+      - "alo186/tests/test_affiliate_endurance_microsd_v200.js"
+      - "alo186/tests/test_routing_legacy_article_bridge_v200.py"
+      - ".github/workflows/alo186-affiliate-endurance-microsd-v200.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-affiliate-endurance-microsd-v200-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install test dependency
+        run: python -m pip install -q pytest
+
+      - name: Exact ASIN, Knowledge Graph and stale gate
+        run: |
+          set -euo pipefail
+          node --check alo186/amazon-elektrik-urunleri/kamera-kayit-yuksek-dayanim-microsd-secimi/catalog-v200.js
+          node --check alo186/amazon-elektrik-urunleri/kamera-kayit-yuksek-dayanim-microsd-secimi/app-v200.js
+          node alo186/tests/test_affiliate_endurance_microsd_v200.js
+
+      - name: Legacy routing bridge remains fail-closed
+        run: |
+          set -euo pipefail
+          python -m pytest -q alo186/tests/test_routing_legacy_article_bridge_v200.py
+
+      - name: Existing affiliate and publication regressions
+        run: |
+          set -euo pipefail
+          node alo186/tests/test_product_matcher.js
+          node alo186/tests/test_release_manifest.js
+          python alo186/tests/device_damage_deadline_guard.py
+          python alo186/tests/test_active_production_contract.py
+
+      - name: Canonical production bundle
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-endurance-microsd-v200 \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-endurance-microsd-v200
+          route=/tmp/alo186-endurance-microsd-v200/amazon-elektrik-urunleri/kamera-kayit-yuksek-dayanim-microsd-secimi
+          test -f "$route/index.html"
+          test -f "$route/app-v200.js"
+          test -f "$route/catalog-v200.js"
+          grep -Fq 'B07NY23WBG' "$route/index.html"
+          grep -Fq 'B07PGBYMVH' "$route/index.html"
+          grep -Fq 'B084CJ9T2R' "$route/index.html"
+          grep -Fq 'alo186rehber-21' "$route/catalog-v200.js"
+          ! grep -Eq 'href="https://www\.amazon\.com\.tr/dp/' "$route/index.html"
+
+      - name: Custom-domain and project-path acceptance
+        run: |
+          set -euo pipefail
+          cp -a /tmp/alo186-endurance-microsd-v200 /tmp/alo186-endurance-microsd-v200-custom
+          cp -a /tmp/alo186-endurance-microsd-v200 /tmp/alo186-endurance-microsd-v200-project
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-endurance-microsd-v200-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-endurance-microsd-v200-custom \
+            --base-path ''
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-endurance-microsd-v200-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-endurance-microsd-v200-project \
+            --base-path '/chatgpt'
+
+      - name: Verified production artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-affiliate-endurance-microsd-v200
+          path: /tmp/alo186-endurance-microsd-v200-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
