@@ -105,6 +105,8 @@ jobs:
           import json
           from pathlib import Path
 
+          canonical_origin = 'https://alo186.com'
+          legacy_origin = 'https://www.alo186.com'
           routes = [
               '/hizmetler/otel-elektrik-surekliligi-denetimi/',
               '/hizmetler/elektrik-teklif-teknik-inceleme/',
@@ -118,6 +120,7 @@ jobs:
               sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
               release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
               search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
+              assert release['canonicalHost'] == canonical_origin
               def canonical_route(value):
                   if prefix and value.startswith(prefix + '/'):
                       return value[len(prefix):]
@@ -131,12 +134,17 @@ jobs:
                   assert physical.is_file(), physical
                   assert stylesheet.is_file() and stylesheet.stat().st_size>5000, stylesheet
                   html=physical.read_text(encoding='utf-8')
+                  canonical=f'{canonical_origin}{route}'
+                  legacy=f'{legacy_origin}{route}'
                   assert 'href="./styles.css"' in html
                   assert 'Ücretli' in html or 'ücretli' in html
                   assert 'application/ld+json' in html
                   assert '<form' not in html.lower()
                   assert 'amazon.' not in html.lower() and 'amzn.' not in html.lower()
-                  assert f'https://www.alo186.com{route}' in sitemap
+                  assert canonical in html
+                  assert legacy not in html
+                  assert canonical in sitemap
+                  assert legacy not in sitemap
                   artifact_route=prefix+route if prefix else route
                   assert artifact_route in html or 'rel="canonical"' in html
                   assert route in route_map and route_map[route]['type']=='service'
