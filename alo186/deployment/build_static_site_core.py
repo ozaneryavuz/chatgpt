@@ -28,8 +28,8 @@ except ImportError:
         validate_published_site,
     )
 
-CANONICAL_HOST = "https://www.alo186.com"
-LEGACY_HOST = "https://alo186.com"
+CANONICAL_HOST = "https://alo186.com"
+LEGACY_HOST = "https://www.alo186.com"
 ROUTING_OVERLAY_DIRECTORY = "alo186/deployment/routing-overlays"
 
 LEGACY_ASSET_DIRECTORIES = (
@@ -63,7 +63,7 @@ REQUIRED_SECURITY_HEADERS = (
     "Permissions-Policy",
 )
 REQUIRED_APACHE_TOKENS = (
-    "RewriteRule ^ https://www.alo186.com%{REQUEST_URI}",
+    "RewriteRule ^ https://alo186.com%{REQUEST_URI}",
     "Cihaz hasarı başvuru süresi HTML yanıt katmanında değiştirilmez",
 )
 
@@ -298,7 +298,7 @@ def validate_bundle(output: Path, manifest: dict) -> dict[str, object]:
         if LEGACY_HOST in text:
             legacy_locations.append(path.relative_to(output).as_posix())
     if legacy_locations:
-        failures.append(f"Eski apex origin artifact'ta kaldı: {', '.join(legacy_locations[:20])}")
+        failures.append(f"Eski www origin artifact'ta kaldı: {', '.join(legacy_locations[:20])}")
 
     stale_deadlines = find_stale_application_deadlines(output)
     if stale_deadlines:
@@ -329,15 +329,15 @@ def validate_bundle(output: Path, manifest: dict) -> dict[str, object]:
 
     robots = output / "robots.txt"
     if robots.is_file() and f"Sitemap: {CANONICAL_HOST}/sitemap.xml" not in robots.read_text(encoding="utf-8"):
-        failures.append("robots.txt www canonical sitemap adresini taşımıyor")
+        failures.append("robots.txt apex canonical sitemap adresini taşımıyor")
 
     sitemap = output / "sitemap.xml"
     if sitemap.is_file():
         sitemap_text = sitemap.read_text(encoding="utf-8")
         if CANONICAL_HOST not in sitemap_text:
-            failures.append("sitemap.xml www canonical origin taşımıyor")
+            failures.append("sitemap.xml apex canonical origin taşımıyor")
         if LEGACY_HOST in sitemap_text:
-            failures.append("sitemap.xml eski apex origin taşıyor")
+            failures.append("sitemap.xml eski www origin taşıyor")
         for route in manifest["routes"]:
             canonical = f"{CANONICAL_HOST}{route['canonicalPath']}"
             if canonical not in sitemap_text:

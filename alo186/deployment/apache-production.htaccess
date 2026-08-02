@@ -5,17 +5,17 @@ ErrorDocument 404 /404.html
 <IfModule mod_rewrite.c>
 RewriteEngine On
 
-# Tek canonical host: kök alan adındaki aynı path ve query tek yönlendirmeyle www'ye gider.
-RewriteCond %{HTTP_HOST} !^www\.alo186\.com$ [NC]
-RewriteRule ^ https://www.alo186.com%{REQUEST_URI} [R=301,L,NE]
+# Tek canonical host: www veya başka bir Host aynı path ve query ile apex'e gider.
+RewriteCond %{HTTP_HOST} !^alo186\.com$ [NC]
+RewriteRule ^ https://alo186.com%{REQUEST_URI} [R=301,L,NE]
 
-# www host üzerindeki doğrudan HTTP isteğini HTTPS'e taşı. CDN/proxy
+# Apex host üzerindeki doğrudan HTTP isteğini HTTPS'e taşı. CDN/proxy
 # X-Forwarded-Proto gönderiyorsa HTTPS isteğinde yönlendirme döngüsü oluşmaz.
 RewriteCond %{HTTPS} !=on
 RewriteCond %{HTTP:X-Forwarded-Proto} !https [NC]
-RewriteRule ^ https://www.alo186.com%{REQUEST_URI} [R=301,L,NE]
+RewriteRule ^ https://alo186.com%{REQUEST_URI} [R=301,L,NE]
 
-# Eski/canlı uygulama manifesti apex origin ile çağırsa da canonical www üzerinde
+# Eski/canlı uygulama manifesti www origin ile çağırsa da canonical apex üzerinde
 # aynı dosya ve doğru MIME türü sunulur. Dosya hesaplama rotasıyla artifact'a girer.
 RewriteRule ^manifest\.webmanifest$ hesaplama/manifest.webmanifest [T=application/manifest+json,L]
 
@@ -51,7 +51,7 @@ Header set Cache-Control "public, max-age=86400, must-revalidate"
 Header set Cache-Control "public, max-age=604800, immutable"
 </Files>
 <Files "manifest.webmanifest">
-Header always set Access-Control-Allow-Origin "https://www.alo186.com"
+Header always set Access-Control-Allow-Origin "https://alo186.com"
 Header always set Cross-Origin-Resource-Policy "cross-origin"
 Header set Cache-Control "public, max-age=86400, must-revalidate"
 </Files>

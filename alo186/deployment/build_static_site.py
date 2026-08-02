@@ -67,8 +67,8 @@ FORBIDDEN_PUBLIC_FILE_PATTERNS
 public_copy_ignore
 find_forbidden_public_files
 publicArtifactPolicy
-https://www.alo186.com
 https://alo186.com
+https://www.alo186.com
 '''
 
 
