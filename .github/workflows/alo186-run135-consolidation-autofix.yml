@@ -1,0 +1,50 @@
+name: ALO186 run135 consolidation autofix
+
+on:
+  push:
+    branches: [alo186-intent-tools-run135]
+    paths:
+      - '.github/workflows/alo186-run135-consolidation-autofix.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: alo186-intent-tools-run135
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Add device-damage canonical consolidation and remove helper
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          path = Path('alo186/deployment/content-consolidations.json')
+          data = json.loads(path.read_text(encoding='utf-8'))
+          item = {
+            'intentKey': 'device-damage-edas-claim-current-guide',
+            'aliasPath': '/haberler/elektrik-kesintisi-gerilim-dalgalanmasi-cihaz-hasari-edas-tazminat-basvurusu',
+            'canonicalPath': '/haberler/elektrik-kesintisi-cihaz-hasari-edas-basvurusu',
+            'label': 'Elektrik kesintisi cihaz hasarı EDAŞ başvurusu',
+            'reason': 'İki rehber aynı cihaz hasarı, dağıtım şirketi başvurusu, kanıt ve güncel 30 günlük süre niyetini hedefliyor. Daha kısa ve güncel rota canonical tutuldu.'
+          }
+          items = data.setdefault('consolidations', [])
+          if not any(x.get('aliasPath') == item['aliasPath'] for x in items):
+              items.append(item)
+          data['version'] = max(int(data.get('version', 0)), 9)
+          data['generatedAt'] = '2026-08-02'
+          path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          PY
+          rm .github/workflows/alo186-run135-consolidation-autofix.yml
+          git config user.name 'alo186-release-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add alo186/deployment/content-consolidations.json .github/workflows/alo186-run135-consolidation-autofix.yml
+          git commit -m 'fix(alo186): consolidate device damage claim intent'
+          git push origin HEAD:alo186-intent-tools-run135
