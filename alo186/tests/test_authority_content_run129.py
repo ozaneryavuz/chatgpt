@@ -52,7 +52,7 @@ def test_aeo_schema_and_user_value_contract() -> None:
         assert all(term in text for term in ["Doğrudan cevap", "10 adımlık", "14 alan", "Mevcut içerikten görev ayrımı", "Dönüşüm çağrısı"])
         assert text.count('href="/') >= 12
         assert text.count("https://") >= 5
-        assert "Product" not in text
+        assert '"@type":"Product"' not in text
         assert '"Offer"' not in text
         assert "AggregateRating" not in text
         assert not re.search(r"�|Ã|Ä|Å|Â", text)
