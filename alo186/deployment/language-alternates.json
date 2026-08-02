@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-02",
+  "expectedPairCount": 10,
+  "pairs": [
+    {
+      "turkishPath": "/elektrik-portali",
+      "englishPath": "/en/",
+      "xDefaultPath": "/elektrik-portali"
+    },
+    {
+      "turkishPath": "/elektrik-kesintisi",
+      "englishPath": "/en/electricity-outage-turkey/",
+      "xDefaultPath": "/elektrik-kesintisi"
+    },
+    {
+      "turkishPath": "/edas-bul",
+      "englishPath": "/en/electricity-distribution-company-finder/",
+      "xDefaultPath": "/edas-bul"
+    },
+    {
+      "turkishPath": "/acil-numaralar",
+      "englishPath": "/en/emergency-numbers-turkey/",
+      "xDefaultPath": "/acil-numaralar"
+    },
+    {
+      "turkishPath": "/hakkimizda",
+      "englishPath": "/en/about/",
+      "xDefaultPath": "/hakkimizda"
+    },
+    {
+      "turkishPath": "/yayin-ilkeleri",
+      "englishPath": "/en/editorial-methodology/",
+      "xDefaultPath": "/yayin-ilkeleri"
+    },
+    {
+      "turkishPath": "/kaynaklar",
+      "englishPath": "/en/sources/",
+      "xDefaultPath": "/kaynaklar"
+    },
+    {
+      "turkishPath": "/gizlilik",
+      "englishPath": "/en/privacy/",
+      "xDefaultPath": "/gizlilik"
+    },
+    {
+      "turkishPath": "/iletisim",
+      "englishPath": "/en/contact/",
+      "xDefaultPath": "/iletisim"
+    },
+    {
+      "turkishPath": "/yasal/amazon-satis-ortakligi",
+      "englishPath": "/en/affiliate-disclosure/",
+      "xDefaultPath": "/yasal/amazon-satis-ortakligi"
+    }
+  ]
+}
