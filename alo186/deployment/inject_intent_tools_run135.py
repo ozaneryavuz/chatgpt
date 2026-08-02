@@ -12,7 +12,12 @@ import inject_private_search as private_search
 
 VERSION = 216
 TARGET = Path("hesaplama/index.html")
+PRODUCT_HUB = Path("amazon-elektrik-urunleri/index.html")
 MARKER = 'data-alo186-intent-tools-run135="true"'
+MALFORMED_PRODUCT_URL = re.compile(
+    r"https://alo186\.com/amazon-elektrik-urunleri(?=[a-z0-9])",
+    re.I,
+)
 ROUTES = (
     "/hesaplama/elektrik-kesintisi-tazminat-kontrolu/",
     "/hesaplama/ges-kesinti-yedekleme-mimarisi/",
@@ -71,6 +76,38 @@ def cards(base_path: str) -> str:
     )
 
 
+def jsonld_payloads(html: str) -> list[dict]:
+    payloads: list[dict] = []
+    for raw in re.findall(
+        r'<script\b[^>]*type=["\']application/ld\+json["\'][^>]*>(.*?)</script>',
+        html,
+        re.I | re.S,
+    ):
+        parsed = json.loads(raw)
+        if isinstance(parsed, dict):
+            payloads.append(parsed)
+    return payloads
+
+
+def normalize_product_hub_jsonld(site: Path) -> int:
+    path = site / PRODUCT_HUB
+    if not path.is_file():
+        raise FileNotFoundError(f"Ürün merkezi artifactı bulunamadı: {path}")
+    text = path.read_text(encoding="utf-8", errors="strict")
+    updated, count = MALFORMED_PRODUCT_URL.subn(
+        "https://alo186.com/amazon-elektrik-urunleri/",
+        text,
+    )
+    if MALFORMED_PRODUCT_URL.search(updated):
+        raise RuntimeError("Ürün merkezi JSON-LD rota ayıracı düzeltilemedi")
+    payloads = jsonld_payloads(updated)
+    if not payloads:
+        raise RuntimeError("Ürün merkezi JSON-LD bulunamadı veya ayrıştırılamadı")
+    if count:
+        path.write_text(updated, encoding="utf-8")
+    return count
+
+
 def harden_outage_input(site: Path) -> bool:
     path = site / ROUTES[0].strip("/") / "index.html"
     if not path.is_file():
@@ -125,7 +162,7 @@ def inject_hub(path: Path, base_path: str) -> bool:
     return True
 
 
-def update_release(site: Path, base_path: str, added: bool, search_result: dict) -> None:
+def update_release(site: Path, base_path: str, added: bool, search_result: dict, product_hub_fixes: int) -> None:
     path = site / "pages-release.json"
     if not path.is_file():
         raise FileNotFoundError(f"Pages release kaydı bulunamadı: {path}")
@@ -141,6 +178,7 @@ def update_release(site: Path, base_path: str, added: bool, search_result: dict)
         "routes": [public_url(base_path, route) for route in ROUTES],
         "searchIndexGenerated": bool(search_result.get("ok")),
         "searchEntryCount": int(search_result.get("entryCount") or 0),
+        "productHubJsonLdFixes": product_hub_fixes,
         "directMarketplaceLinks": 0,
         "personalDataCollected": False,
         "failClosed": True,
@@ -179,6 +217,11 @@ def validate(site: Path, base_path: str) -> dict:
     ):
         if token not in outage:
             raise RuntimeError(f"Kesinti aracı fail-closed sözleşmesi eksik: {token}")
+
+    product_hub = (site / PRODUCT_HUB).read_text(encoding="utf-8", errors="strict")
+    if MALFORMED_PRODUCT_URL.search(product_hub):
+        raise RuntimeError("Ürün merkezi JSON-LD içinde birleşmiş rota bulundu")
+    jsonld_payloads(product_hub)
 
     sitemap_path = site / "sitemap.xml"
     sitemap_root = ET.parse(sitemap_path).getroot()
@@ -225,22 +268,25 @@ def validate(site: Path, base_path: str) -> dict:
         "routes": list(ROUTES),
         "searchEntryCount": len(active),
         "sitemapWellFormed": True,
+        "productHubJsonLdValid": True,
     }
 
 
 def inject(site: Path, base_path: str) -> dict:
     site = site.resolve()
     base_path = normalize_base_path(base_path)
+    product_hub_fixes = normalize_product_hub_jsonld(site)
     outage_hardened = harden_outage_input(site)
     hub_added = inject_hub(site / TARGET, base_path)
     search_result = private_search.run(site, base_path)
-    update_release(site, base_path, hub_added, search_result)
+    update_release(site, base_path, hub_added, search_result, product_hub_fixes)
     recompute_checksums(site)
     validation = validate(site, base_path)
     return {
         **validation,
         "outageInputHardened": outage_hardened,
         "hubAddedThisRun": hub_added,
+        "productHubJsonLdFixes": product_hub_fixes,
     }
 
 
