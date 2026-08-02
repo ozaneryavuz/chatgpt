@@ -10,6 +10,7 @@ from pathlib import Path
 import guard_commerce_routes_v2 as v2
 import aeo_control_plane_v216 as aeo_authority
 import inject_affiliate_decision_funnel_v215 as affiliate_decision
+import inject_intent_tools_run135 as intent_tools
 import inject_portal_purchase_checkpoint_v213 as portal_checkpoint
 
 # V2, bağlantının çevresindeki sabit 900 karakteri tarıyordu. Uzun hesaplayıcı
@@ -205,15 +206,17 @@ def _checkpoint_base_path(site: Path) -> str:
 
 
 def validate_site(site: Path) -> dict:
-    """Son artifacta karar hunisi, portal kontrolü ve AEO otoritesini ekler; ardından fail-closed tarar."""
+    """Son artifacta karar hunisi, portal kontrolü, run135 keşfi ve AEO otoritesini ekler; sonra fail-closed tarar."""
     resolved = site.resolve()
     base_path = _checkpoint_base_path(resolved)
     decision_result = affiliate_decision.inject(resolved, base_path)
     checkpoint_result = portal_checkpoint.inject(resolved, base_path)
+    intent_result = intent_tools.inject(resolved, base_path)
     authority_result = aeo_authority.inject(resolved, base_path)
     result = _original_validate_site(resolved)
     result["affiliateDecisionFunnel"] = decision_result
     result["portalPurchaseCheckpoint"] = checkpoint_result
+    result["intentToolsRun135"] = intent_result
     result["aeoAuthority"] = authority_result
     return result
 
