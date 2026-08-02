@@ -1,0 +1,87 @@
+name: ALO186 AI CMS içerik fırsatı
+description: Kullanıcı niyetine dayalı yeni içerik veya karar aracı fırsatı öner
+title: "[AI CMS] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Bu form yayın emri değildir. Fırsat önce mevcut canonical içerik, kaynak, güvenlik ve kullanıcı görevi açısından denetlenir.
+  - type: dropdown
+    id: topic
+    attributes:
+      label: Ana konu
+      options:
+        - Elektrik güvenliği
+        - Elektrik kesintileri
+        - EDAŞ süreçleri
+        - UPS
+        - Jeneratör
+        - İnverter
+        - Kaçak akım rölesi
+        - Parafudr
+        - Topraklama
+        - Harmonik
+        - GES
+        - Enerji depolama
+        - EV şarj
+        - VPP
+    validations:
+      required: true
+  - type: textarea
+    id: user-task
+    attributes:
+      label: Kullanıcının tamamlamak istediği görev
+      description: Yalnız anahtar kelime değil; kullanıcının hangi sonucu almak istediğini yazın.
+      placeholder: "Kullanıcı ... bilgisini girip ... sonucunu, kanıt listesini ve doğru sonraki adımı almak istiyor."
+    validations:
+      required: true
+  - type: textarea
+    id: queries
+    attributes:
+      label: Karşılanacak gerçek sorgular
+      description: En az üç farklı soru veya arama biçimi.
+      placeholder: |
+        - ... nasıl anlaşılır?
+        - ... kaç olmalı?
+        - ... ne zaman gerekir?
+    validations:
+      required: true
+  - type: textarea
+    id: boundary
+    attributes:
+      label: Mevcut içerikten görev ayrımı
+      description: Hangi mevcut rotayı neden tekrar etmediğini açıklayın.
+    validations:
+      required: true
+  - type: textarea
+    id: sources
+    attributes:
+      label: Birincil kaynak adayları
+      description: Mevzuat, standart, şebeke işletmecisi, üretici veya laboratuvar bağlantıları.
+      placeholder: |
+        - https://...
+        - https://...
+        - https://...
+    validations:
+      required: true
+  - type: textarea
+    id: benefit
+    attributes:
+      label: Somut kullanıcı faydası ve çıktı
+      placeholder: "Karar matrisi, hesap, indirilebilir plan, kanıt dosyası, güvenli başvuru akışı..."
+    validations:
+      required: true
+  - type: textarea
+    id: safety
+    attributes:
+      label: Güvenlik ve satın almama sınırı
+      description: Kullanıcının yapmaması gereken müdahale ve mevcut sistem yeterliyse satın almama sonucu.
+    validations:
+      required: true
+  - type: textarea
+    id: conversion
+    attributes:
+      label: Uygun dönüşüm çağrısı
+      description: Resmî kanal, ücretsiz araç, indirilebilir çıktı, teknik ön değerlendirme veya güvenli ürün seçimi.
+    validations:
+      required: true
