@@ -56,7 +56,10 @@ def inject_product_hub(site: Path, base_path: str) -> int:
     anchor = '<article class="card route-card"><span class="number">07</span>'
     start = text.find(anchor)
     if start < 0:
-        raise RuntimeError("Ürün merkezindeki 07 numaralı GES kartı bulunamadı")
+        # Ürün merkezi daha yeni görev bazlı düzene geçtiyse eski sıralı kart
+        # enjeksiyonunu güvenle atla. Eski büyüme koşusunun yeni merkezi bozmasına
+        # veya tüm yayın artifactını durdurmasına izin verme.
+        return 0
     article_end = text.find("</article>", start)
     grid_end = text.find("</div>", article_end + len("</article>"))
     if grid_end < 0:
@@ -118,8 +121,11 @@ def append_sitemap(site: Path) -> None:
     if not path.is_file():
         return
     text = path.read_text(encoding="utf-8")
+    # Site genelindeki tercih edilen alan adı apex'tir. Eski koşunun www URL
+    # üretmesini ve canonical sinyallerini bölmesini engelle.
+    text = text.replace("https://www.alo186.com", "https://alo186.com")
     for route in ROUTES.values():
-        loc = f"https://www.alo186.com{route}"
+        loc = f"https://alo186.com{route}"
         if f"<loc>{loc}</loc>" not in text:
             text = text.replace("</urlset>", f"<url><loc>{loc}</loc></url></urlset>", 1)
     path.write_text(text, encoding="utf-8")
