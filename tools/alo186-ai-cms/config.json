@@ -1,0 +1,132 @@
+{
+  "version": 220,
+  "site": {
+    "slug": "alo186",
+    "canonicalOrigin": "https://alo186.com",
+    "livePlatform": "chatgpt-sites",
+    "repository": "ozaneryavuz/chatgpt",
+    "publicCmsRouteAllowed": false
+  },
+  "runPolicy": {
+    "maximumSelections": 3,
+    "maximumPerCluster": 1,
+    "minimumPublishScore": 76,
+    "collisionThreshold": 0.58,
+    "warningCollisionThreshold": 0.46,
+    "minimumInternalLinks": 6,
+    "minimumSources": 3,
+    "minimumPrimarySources": 2,
+    "maximumSourceAgeDays": 180,
+    "requireHumanPreviewBeforeSitesDeploy": true,
+    "allowAutomaticSitesDeploy": false
+  },
+  "scoringWeights": {
+    "searchDemand": 0.2,
+    "taskUrgency": 0.16,
+    "taskCompletionValue": 0.16,
+    "authorityFit": 0.14,
+    "contentGap": 0.12,
+    "commercialFit": 0.08,
+    "internalLinkFit": 0.08,
+    "sourceConfidence": 0.06
+  },
+  "topics": [
+    "elektrik-guvenligi",
+    "elektrik-kesintileri",
+    "edas-surecleri",
+    "ups",
+    "jenerator",
+    "inverter",
+    "kacak-akim-rolesi",
+    "parafudr",
+    "topraklama",
+    "harmonik",
+    "ges",
+    "enerji-depolama",
+    "ev-sarj",
+    "vpp"
+  ],
+  "states": [
+    "discovery",
+    "research",
+    "ready",
+    "drafted",
+    "validated",
+    "sites-ready",
+    "published",
+    "hold",
+    "rejected"
+  ],
+  "sourcePolicy": {
+    "allowedClasses": [
+      "regulation",
+      "standard",
+      "grid-operator",
+      "manufacturer",
+      "laboratory",
+      "research",
+      "public-authority",
+      "industry-body"
+    ],
+    "primaryClasses": [
+      "regulation",
+      "standard",
+      "grid-operator",
+      "manufacturer",
+      "laboratory",
+      "public-authority"
+    ],
+    "blockedDomains": [
+      "pinterest.com",
+      "quora.com"
+    ]
+  },
+  "schemaPolicy": {
+    "article": [
+      "Article",
+      "FAQPage",
+      "BreadcrumbList"
+    ],
+    "tool": [
+      "WebApplication",
+      "FAQPage",
+      "BreadcrumbList"
+    ],
+    "business-tool": [
+      "WebApplication",
+      "FAQPage",
+      "BreadcrumbList"
+    ],
+    "forbiddenTypes": [
+      "Product",
+      "Offer",
+      "AggregateOffer",
+      "AggregateRating",
+      "Person",
+      "ProfilePage"
+    ]
+  },
+  "commercialPolicy": {
+    "forbiddenClaims": [
+      "fiyat garantisi",
+      "stok garantisi",
+      "en ucuz",
+      "kesin kazanç",
+      "resmî onaylı"
+    ],
+    "forbiddenAffiliateOnClusters": [
+      "safety",
+      "official-routing",
+      "consumer-rights",
+      "high-voltage",
+      "bess-safety"
+    ],
+    "affiliateRequiresExplicitTechnicalGap": true,
+    "purchaseNotRequiredOutcome": true
+  },
+  "privacyPolicy": {
+    "personalDataFieldsAllowed": false,
+    "analyticsMayReceiveRawUserInputs": false,
+    "localOnlyDownloadsPreferred": true
+  }
+}
