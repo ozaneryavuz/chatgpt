@@ -10,7 +10,6 @@ from typing import Any
 
 VERSION = 225
 CANONICAL_ORIGIN = "https://alo186.com"
-LEGACY_ORIGIN = "https://www.alo186.com"
 ROBOTS_TEXT = "User-agent: *\nAllow: /\n\nSitemap: https://alo186.com/sitemap.xml\n"
 
 
@@ -72,6 +71,16 @@ def qualify_url(value: str) -> str:
     return urllib.parse.urlunsplit(("https", "alo186.com", path, "", ""))
 
 
+def persist_release_proof(site: Path, report: dict[str, Any]) -> None:
+    for name in ("alo186-release.json", "pages-release.json"):
+        path = site / name
+        if not path.is_file():
+            continue
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        payload["sitemapQualityV225"] = report
+        path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
 def run(site: Path, base_path: str = "") -> dict[str, Any]:
     site = site.resolve()
     sitemap_path = site / "sitemap.xml"
@@ -115,12 +124,12 @@ def run(site: Path, base_path: str = "") -> dict[str, Any]:
             root.remove(url_node)
             removed_missing.append(normalized)
             continue
-        html = path.read_text(encoding="utf-8", errors="strict")
-        if "noindex" in meta_robots(html):
+        source = path.read_text(encoding="utf-8", errors="strict")
+        if "noindex" in meta_robots(source):
             root.remove(url_node)
             removed_noindex.append(normalized)
             continue
-        page_canonical = canonical(html)
+        page_canonical = canonical(source)
         if not page_canonical:
             root.remove(url_node)
             removed_noncanonical.append(normalized + " → canonical eksik/çoklu")
@@ -142,8 +151,8 @@ def run(site: Path, base_path: str = "") -> dict[str, Any]:
     homepage_file = site / "index.html"
     homepage_added = False
     if homepage_file.is_file():
-        html = homepage_file.read_text(encoding="utf-8", errors="strict")
-        if "noindex" not in meta_robots(html) and homepage not in seen:
+        source = homepage_file.read_text(encoding="utf-8", errors="strict")
+        if "noindex" not in meta_robots(source) and homepage not in seen:
             url_node = ET.Element(f"{prefix}url")
             loc_node = ET.SubElement(url_node, f"{prefix}loc")
             loc_node.text = homepage
@@ -184,6 +193,7 @@ def run(site: Path, base_path: str = "") -> dict[str, Any]:
         json.dumps(report, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
+    persist_release_proof(site, report)
     return report
 
 
