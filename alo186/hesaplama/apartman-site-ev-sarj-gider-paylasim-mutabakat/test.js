@@ -1,0 +1,10 @@
+'use strict';
+const fs=require('fs');const path=require('path');const vm=require('vm');const assert=require('assert');
+const html=fs.readFileSync(path.join(__dirname,'index.html'),'utf8');
+for(const text of ['WebApplication','FAQPage','BreadcrumbList','Feeder Meter Energy','Measurement Difference','Ortak besleme sayacı','Kaynak doğrulama tarihi']) assert(html.includes(text),text);
+assert(!html.includes('"@type":"Product"'));assert(!html.includes('"@type":"Offer"'));assert(!/amazon\.(com|com\.tr)|amzn\.to/i.test(html));
+const match=html.match(/function reconcileEvCost\(i\)\{[\s\S]*?\n\}/);assert(match,'reconcileEvCost missing');const context={};vm.createContext(context);vm.runInContext(match[0]+';this.reconcileEvCost=reconcileEvCost;',context);
+let out=context.reconcileEvCost({feederKwh:1000,sessionsKwh:950,userKwh:190,unitCost:4.5,fixedCost:500,participants:10});assert(Math.abs(out.difference-50)<1e-9);assert(Math.abs(out.userRatio-.2)<1e-9);assert(Math.abs(out.reconciledUserKwh-200)<1e-9);assert(Math.abs(out.total-950)<1e-9);
+out=context.reconcileEvCost({feederKwh:900,sessionsKwh:950,userKwh:95,unitCost:5,fixedCost:0,participants:5});assert(out.difference<0);assert(Math.abs(out.total-450)<1e-9);
+assert.throws(()=>context.reconcileEvCost({feederKwh:100,sessionsKwh:90,userKwh:100,unitCost:1,fixedCost:0,participants:1}));
+console.log('EV şarj gider paylaşım mutabakatı: PASS');

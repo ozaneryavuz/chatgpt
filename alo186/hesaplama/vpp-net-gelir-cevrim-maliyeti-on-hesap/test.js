@@ -1,0 +1,11 @@
+'use strict';
+const fs=require('fs');const path=require('path');const vm=require('vm');const assert=require('assert');
+const html=fs.readFileSync(path.join(__dirname,'index.html'),'utf8');
+for(const text of ['WebApplication','FAQPage','BreadcrumbList','Availability Payment','Aggregator Share','Penalty Reserve','Kaynak doğrulama tarihi']) assert(html.includes(text),text);
+assert(!html.includes('"@type":"Product"'));assert(!html.includes('"@type":"Offer"'));assert(!/amazon\.(com|com\.tr)|amzn\.to/i.test(html));
+const match=html.match(/function calculateVppValue\(i\)\{[\s\S]*?\n\}/);assert(match,'calculateVppValue missing');const context={};vm.createContext(context);vm.runInContext(match[0]+';this.calculateVppValue=calculateVppValue;',context);
+let out=context.calculateVppValue({availabilityMw:1,availabilityHours:100,availabilityRate:500,deliveredMwh:40,deliveryRate:2500,performancePct:95,aggregatorPct:15,degradationCost:600,auxCost:150,penaltyPct:5});assert(Math.abs(out.gross-145000)<1e-9);assert(Math.abs(out.net-86000)<1e-9);assert(out.marginPct>59&&out.marginPct<60);
+out=context.calculateVppValue({availabilityMw:0,availabilityHours:0,availabilityRate:0,deliveredMwh:10,deliveryRate:100,performancePct:50,aggregatorPct:20,degradationCost:200,auxCost:50,penaltyPct:10});assert(out.net<0);
+out=context.calculateVppValue({availabilityMw:1,availabilityHours:1,availabilityRate:100,deliveredMwh:0,deliveryRate:0,performancePct:100,aggregatorPct:0,degradationCost:0,auxCost:0,penaltyPct:0});assert(out.netPerMwh===null);
+assert.throws(()=>context.calculateVppValue({availabilityMw:1,availabilityHours:1,availabilityRate:1,deliveredMwh:1,deliveryRate:1,performancePct:101,aggregatorPct:0,degradationCost:0,auxCost:0,penaltyPct:0}));
+console.log('VPP net gelir ve çevrim maliyeti ön hesabı: PASS');
