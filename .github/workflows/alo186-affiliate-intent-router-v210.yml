@@ -6,21 +6,21 @@ on:
       - 'alo186/deployment/inject_affiliate_intent_router_v210.py'
       - 'alo186/tests/test_affiliate_intent_router_v210.py'
       - '.github/workflows/alo186-affiliate-intent-router-v210.yml'
+      - '.github/workflows/alo186-github-pages.yml'
   push:
     branches: [main]
     paths:
       - 'alo186/deployment/inject_affiliate_intent_router_v210.py'
       - 'alo186/tests/test_affiliate_intent_router_v210.py'
       - '.github/workflows/alo186-affiliate-intent-router-v210.yml'
+      - '.github/workflows/alo186-github-pages.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: alo186-affiliate-intent-v210-${{ github.ref }}
+  group: alo186-affiliate-intent-v210-validation-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -28,71 +28,24 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: '22'
+          node-version: '24'
+          package-manager-cache: false
       - name: Python ve fail-closed sözleşmesi
         run: |
           set -euo pipefail
-          python -m py_compile alo186/deployment/inject_affiliate_intent_router_v210.py alo186/tests/test_affiliate_intent_router_v210.py
+          python -m py_compile \
+            alo186/deployment/inject_affiliate_intent_router_v210.py \
+            alo186/tests/test_affiliate_intent_router_v210.py
           python alo186/tests/test_affiliate_intent_router_v210.py
-
-  deploy:
-    if: github.event_name != 'pull_request'
-    needs: validate
-    runs-on: ubuntu-latest
-    timeout-minutes: 55
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - id: pages
-        uses: actions/configure-pages@v5
-      - name: Güncel üretim artifactını oluştur ve yönlendiriciyi ekle
-        env:
-          BASE: ${{ steps.pages.outputs.base_path }}
-          GA4: ${{ vars.ALO186_GA4_MEASUREMENT_ID || 'G-639TVHL0LC' }}
+      - name: Canonical yayıncı entegrasyonu
         run: |
           set -euo pipefail
-          SITE=/tmp/alo186-affiliate-intent-v210
-          python alo186/deployment/build_static_site.py --output "$SITE" --commit "$GITHUB_SHA"
-          python alo186/deployment/prepare_github_pages.py --site "$SITE" --base-path "$BASE" --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
-          python alo186/deployment/inject_outcome_runtime.py --site "$SITE" --base-path "$BASE"
-          python alo186/deployment/inject_shortlist_growth.py --site "$SITE" --base-path "$BASE"
-          python alo186/deployment/inject_contextual_affiliate_v176.py --site "$SITE" --base-path "$BASE"
-          python alo186/deployment/inject_home_affiliate_banner_v209.py --site "$SITE" --base-path "$BASE"
-          python alo186/deployment/inject_affiliate_intent_router_v210.py --site "$SITE" --base-path "$BASE" | tee /tmp/affiliate-intent-v210.json
-          python alo186/deployment/inject_live_quality_hardening_v2.py --site "$SITE" --base-path "$BASE"
-          python alo186/deployment/inject_ga4_consent.py --site "$SITE" --base-path "$BASE" --measurement-id "$GA4"
-          python alo186/deployment/smoke_github_pages.py --site "$SITE" --base-path "$BASE"
-          python alo186/deployment/guard_commerce_routes_v3.py --site "$SITE" | tee /tmp/affiliate-intent-v210-guard.json
-          PAGE="$SITE/amazon-elektrik-urunleri/index.html"
-          grep -q 'data-alo186-affiliate-intent-v210="true"' "$PAGE"
-          grep -q 'Mevcut güvenli çözüm yeterli — yeni ürün almayın' "$PAGE"
-          grep -q 'Tüketici affiliate yolu uygun değil' "$PAGE"
-          ! grep -Eqi 'amazon\.(com|com\.tr)|amzn\.to|alo186rehber-21' "$PAGE"
-      - uses: actions/upload-pages-artifact@v4
-        with:
-          path: /tmp/alo186-affiliate-intent-v210
-      - id: deployment
-        uses: actions/deploy-pages@v4
-      - if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: alo186-affiliate-intent-v210-receipt
-          path: |
-            /tmp/affiliate-intent-v210.json
-            /tmp/affiliate-intent-v210-guard.json
-          if-no-files-found: warn
-          retention-days: 30
+          grep -q 'inject_affiliate_intent_router_v210.py' .github/workflows/alo186-github-pages.yml
+          ! grep -q 'actions/deploy-pages' .github/workflows/alo186-affiliate-intent-router-v210.yml
+          ! grep -q 'actions/upload-pages-artifact' .github/workflows/alo186-affiliate-intent-router-v210.yml
