@@ -18,6 +18,7 @@ import smoke_live_routes  # noqa: E402
 import smoke_static_site  # noqa: E402
 
 
+# Kaynak manifest, üretilen artifact ve canlı yönlendirme aynı tek origin üzerinde kalmalıdır.
 CANONICAL = "https://alo186.com"
 LEGACY = "https://www.alo186.com"
 
