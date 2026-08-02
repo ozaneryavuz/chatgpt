@@ -1,0 +1,31 @@
+{
+  "version": 214,
+  "generatedAt": "2026-08-02",
+  "source": "ALO186 intent tools run135",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/elektrik-kesintisi-tazminat-kontrolu/index.html",
+      "canonicalPath": "/hesaplama/elektrik-kesintisi-tazminat-kontrolu/",
+      "type": "tool"
+    },
+    {
+      "source": "alo186/hesaplama/ges-kesinti-yedekleme-mimarisi/index.html",
+      "canonicalPath": "/hesaplama/ges-kesinti-yedekleme-mimarisi/",
+      "type": "tool"
+    },
+    {
+      "source": "alo186/hesaplama/ev-sarj-kacak-akim-koruma-secici/index.html",
+      "canonicalPath": "/hesaplama/ev-sarj-kacak-akim-koruma-secici/",
+      "type": "tool"
+    }
+  ],
+  "trust": {
+    "officialImpersonation": false,
+    "directAffiliateLinks": false,
+    "productOfferSchema": false,
+    "priceStockRatingWarrantyClaims": false,
+    "hazardCommerceClosed": true,
+    "personalDataCollected": false
+  },
+  "qualityGate": "alo186/tests/test_intent_tools_run135.py"
+}
