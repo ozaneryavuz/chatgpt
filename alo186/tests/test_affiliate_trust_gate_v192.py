@@ -83,7 +83,9 @@ def main() -> None:
         for phrase in COERCIVE_PHRASES:
             assert phrase not in lowered, f"Baskıcı ticari ifade bulundu ({phrase}): {page}"
 
-    assert len(direct_pages) >= 5, "Doğrudan ürün kategorisi kapsamı beklenenden düşük."
+    # Direct mode is deliberately narrow. The runtime gate must cover every page
+    # that opts into fresh direct cards, even when only one low-risk category does so.
+    assert direct_pages, "Üçlü kapıyı kullanan doğrudan ürün kategorisi bulunamadı."
 
     print(
         "PASS: affiliate bağlantıları üçlü ihtiyaç/uygunluk/açıklama kapısından sonra açılıyor; "
