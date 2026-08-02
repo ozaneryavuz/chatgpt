@@ -70,10 +70,10 @@ def hub_inventory_claim(html: str) -> tuple[int, bool, str]:
     """Return visible count, lower-bound semantics and the counted surface.
 
     ``N özel rehber`` counts direct product-guide links. The current
-    ``N+ karar rotası`` headline counts every visible route card, including
-    tool-first and professional-only cards that intentionally do not point to
-    an affiliate guide. Script/style payloads are ignored so JSON-LD cannot
-    satisfy the visible-copy contract accidentally.
+    ``N+ karar rotası`` headline counts unique actionable destinations in the
+    main content: tools, no-buy tests, professional gates and product guides.
+    Script/style payloads are ignored so JSON-LD cannot satisfy the visible-copy
+    contract accidentally.
     """
 
     visible = re.sub(r"<(?:script|style)\b[^>]*>.*?</(?:script|style)>", " ", html, flags=re.I | re.S)
@@ -83,6 +83,22 @@ def hub_inventory_claim(html: str) -> tuple[int, bool, str]:
         raise AssertionError("Ürün merkezinde görünür rehber/karar rotası sayısı bulunamadı")
     surface = "guides" if match.group(3).casefold() == "özel rehber" else "routes"
     return int(match.group(1)), bool(match.group(2)), surface
+
+
+def main_decision_routes(html: str) -> set[str]:
+    main = re.search(r"<main\b[^>]*>(.*?)</main>", html, re.I | re.S)
+    if not main:
+        raise AssertionError("Ürün merkezinin main içeriği bulunamadı")
+    result: set[str] = set()
+    for href in re.findall(r'<a\b[^>]*href=["\']([^"\']+)["\']', main.group(1), re.I | re.S):
+        parsed = urlsplit(unescape(href))
+        if parsed.scheme or parsed.netloc or not parsed.path.startswith("/"):
+            continue
+        path = parsed.path.rstrip("/") or "/"
+        if path in {"/", "/amazon-elektrik-urunleri"}:
+            continue
+        result.add(path)
+    return result
 
 
 class CommercialCategoryExpansionTests(unittest.TestCase):
@@ -178,6 +194,12 @@ class CommercialCategoryExpansionTests(unittest.TestCase):
         with self.assertRaisesRegex(AssertionError, "görünür"):
             hub_inventory_claim('<script type="application/ld+json">{"name":"99 özel rehber"}</script>')
 
+    def test_main_decision_routes_exclude_navigation_and_external_targets(self) -> None:
+        sample = '''<main><a href="/">Ana sayfa</a><a href="/amazon-elektrik-urunleri/">Bu sayfa</a>
+        <a href="/hesaplama/test/?from=hub#result">Araç</a><a href="/hesaplama/test/">Aynı araç</a>
+        <a href="https://example.com/x">Dış</a><a href="mailto:test@example.com">E-posta</a></main>'''
+        self.assertEqual(main_decision_routes(sample), {"/hesaplama/test"})
+
     def test_hub_inventory_matches_visible_count_and_grows_without_stale_fixture(self) -> None:
         hub = (SOURCE_ROOT / "index.html").read_text(encoding="utf-8")
         guide_links = re.findall(
@@ -185,20 +207,20 @@ class CommercialCategoryExpansionTests(unittest.TestCase):
             hub,
             re.I,
         )
-        unique = set(guide_links)
-        route_card_count = hub.count('class="card route-card"')
+        unique = {urlsplit(value).path.rstrip("/") for value in guide_links}
+        decision_routes = main_decision_routes(hub)
         declared_count, is_minimum, surface = hub_inventory_claim(hub)
-        observed_count = len(unique) if surface == "guides" else route_card_count
+        observed_count = len(unique) if surface == "guides" else len(decision_routes)
         if is_minimum:
-            self.assertGreaterEqual(observed_count, declared_count)
+            self.assertGreaterEqual(observed_count, declared_count, sorted(decision_routes))
         else:
             self.assertEqual(observed_count, declared_count)
         self.assertGreaterEqual(len(unique), 7, sorted(unique))
         self.assertEqual(len(guide_links), len(unique), "Aynı ürün rehberi merkezde yinelenmemeli")
-        self.assertGreaterEqual(route_card_count, len(unique))
+        self.assertTrue(unique <= decision_routes)
         self.assertIn("ayrı ihtiyacı", hub)
         for route in ROUTES:
-            self.assertIn(route, unique)
+            self.assertIn(route.rstrip("/"), unique)
         self.assertNotIn("/urun-rehberleri/", hub)
 
     def test_production_bundle_sitemap_and_private_search_include_expansion(self) -> None:
