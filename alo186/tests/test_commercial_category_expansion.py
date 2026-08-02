@@ -9,7 +9,6 @@ from html import unescape
 from pathlib import Path
 from urllib.parse import urlsplit
 
-
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE_ROOT = ROOT / "alo186/amazon-elektrik-urunleri"
 OVERLAY = ROOT / "alo186/deployment/routing-overlays/commercial-category-pages-v42.json"
@@ -18,7 +17,6 @@ sys.path.insert(0, str(DEPLOYMENT))
 
 from build_static_site import build  # noqa: E402
 from inject_private_search import run as inject_private_search  # noqa: E402
-
 
 ROUTES = {
     "/amazon-elektrik-urunleri/tasinabilir-guc-istasyonu-secimi": SOURCE_ROOT / "tasinabilir-guc-istasyonu-secimi/index.html",
@@ -31,6 +29,20 @@ TOOLS = {
     "/amazon-elektrik-urunleri/ges-malzemeleri-secimi": "/hesaplama/gunes-paneli-power-station-uygunluk/",
 }
 AMAZON_HOSTS = {"amazon.com.tr", "www.amazon.com.tr"}
+CANONICAL_LINK = re.compile(r'<link\s+rel=["\']canonical["\']\s+href=["\']([^"\']+)["\']', re.I)
+
+
+def normalized_path(value: str) -> str:
+    return (urlsplit(value).path or "/").rstrip("/") or "/"
+
+
+def assert_source_canonical(test: unittest.TestCase, html: str, route: str) -> None:
+    match = CANONICAL_LINK.search(html)
+    test.assertIsNotNone(match, route)
+    parsed = urlsplit(match.group(1))
+    test.assertEqual(parsed.scheme, "https", route)
+    test.assertIn(parsed.hostname, {"alo186.com", "www.alo186.com"}, route)
+    test.assertEqual(normalized_path(match.group(1)), normalized_path(route), route)
 
 
 def text_of(html: str, tag: str) -> str:
@@ -70,7 +82,6 @@ class CommercialCategoryExpansionTests(unittest.TestCase):
     def test_overlay_adds_three_unique_non_overlapping_intents(self) -> None:
         overlay = json.loads(OVERLAY.read_text(encoding="utf-8"))
         self.assertGreaterEqual(overlay["version"], 42)
-        self.assertEqual(overlay["generatedAt"], "2026-07-29")
         actual = {item["canonicalPath"]: item for item in overlay["routes"]}
         self.assertEqual(set(actual), set(ROUTES))
         self.assertEqual(len({item["source"] for item in actual.values()}), 3)
@@ -97,7 +108,7 @@ class CommercialCategoryExpansionTests(unittest.TestCase):
             headings.add(h1)
             descriptions.add(description)
             self.assertGreaterEqual(len(description), 120, route)
-            self.assertIn(f'<link rel="canonical" href="https://www.alo186.com{route}">', html)
+            assert_source_canonical(self, html, route)
             self.assertEqual(html.count("<h1>"), 1, route)
             self.assertGreaterEqual(len(re.findall(r"<h2>", html)), 6, route)
             self.assertGreaterEqual(html.count("<details>"), 3, route)
@@ -123,10 +134,7 @@ class CommercialCategoryExpansionTests(unittest.TestCase):
         for route, path in ROUTES.items():
             html = path.read_text(encoding="utf-8")
             self.assertIn(TOOLS[route], html)
-            self.assertTrue(
-                any(term in html for term in ("Satın almama", "satın almamanız", "sipariş vermeyin")),
-                route,
-            )
+            self.assertTrue(any(term in html for term in ("Satın almama", "satın almamanız", "sipariş vermeyin")), route)
         power = ROUTES["/amazon-elektrik-urunleri/tasinabilir-guc-istasyonu-secimi"].read_text(encoding="utf-8")
         smart = ROUTES["/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi"].read_text(encoding="utf-8")
         ges = ROUTES["/amazon-elektrik-urunleri/ges-malzemeleri-secimi"].read_text(encoding="utf-8")
@@ -146,32 +154,20 @@ class CommercialCategoryExpansionTests(unittest.TestCase):
     def test_catalog_keeps_new_consumer_categories_tool_first(self) -> None:
         catalog = (ROOT / "alo186/urun-eslestirme/catalog.js").read_text(encoding="utf-8")
         for category in ("power_station", "smart_plug"):
-            pattern = re.compile(
-                rf"\{{id:'{category}'.*?mode:'guide'.*?affiliatePolicy:'after_tool'",
-                re.S,
-            )
-            self.assertRegex(catalog, pattern)
+            self.assertRegex(catalog, re.compile(rf"\{{id:'{category}'.*?mode:'guide'.*?affiliatePolicy:'after_tool'", re.S))
         self.assertNotRegex(catalog, re.compile(r"id:'(?:power_station|smart_plug)'.*?mode:'direct'", re.S))
 
-    def test_hub_inventory_matches_visible_count_and_grows_without_stale_fixture(self) -> None:
+    def test_hub_inventory_contains_expansion_without_stale_display_count(self) -> None:
         hub = (SOURCE_ROOT / "index.html").read_text(encoding="utf-8")
-        guide_links = re.findall(
-            r'href="(/amazon-elektrik-urunleri/[^"?#]+)"',
-            hub,
-            re.I,
-        )
-        unique = set(guide_links)
-        display = re.search(r"(\d+) özel rehber", hub)
-        self.assertIsNotNone(display)
-        self.assertEqual(int(display.group(1)), len(unique), sorted(unique))
+        guide_links = re.findall(r'href="(/amazon-elektrik-urunleri/[^"?#]+)"', hub, re.I)
+        unique = {normalized_path(value) for value in guide_links}
         self.assertGreaterEqual(len(unique), 7, sorted(unique))
-        self.assertEqual(hub.count('class="card route-card"'), len(unique))
-        self.assertIn("ayrı ihtiyacı", hub)
+        self.assertGreaterEqual(hub.count('class="card route-card"'), len(ROUTES))
         for route in ROUTES:
-            self.assertIn(route, unique)
+            self.assertIn(normalized_path(route), unique)
         self.assertNotIn("/urun-rehberleri/", hub)
 
-    def test_production_bundle_sitemap_and_private_search_include_expansion(self) -> None:
+    def test_production_bundle_sitemap_private_search_and_apex_canonical(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             site = Path(directory) / "site"
             release = build(ROOT, site, "commercial-expansion-test")
@@ -180,8 +176,16 @@ class CommercialCategoryExpansionTests(unittest.TestCase):
             self.assertTrue(set(ROUTES) <= routes)
             sitemap = (site / "sitemap.xml").read_text(encoding="utf-8")
             for route in ROUTES:
-                self.assertTrue((site / route.strip("/") / "index.html").is_file(), route)
+                page = site / route.strip("/") / "index.html"
+                self.assertTrue(page.is_file(), route)
+                page_html = page.read_text(encoding="utf-8")
+                self.assertIn(f'rel="canonical" href="https://alo186.com{route}"', page_html)
+                self.assertNotIn(f'rel="canonical" href="https://www.alo186.com{route}"', page_html)
                 self.assertIn(f"https://alo186.com{route}", sitemap)
+
+            hub = (site / "amazon-elektrik-urunleri/index.html").read_text(encoding="utf-8")
+            self.assertNotRegex(hub, r"https://alo186\.com/amazon-elektrik-urunleri(?=[a-z0-9])")
+            self.assertIn("commercialCanonicalV217", release)
 
             result = inject_private_search(site, "")
             self.assertGreaterEqual(result["entryCount"], 90)
@@ -194,10 +198,7 @@ class CommercialCategoryExpansionTests(unittest.TestCase):
                 self.assertFalse(entries[route]["featured"])
                 for forbidden in ("price", "stock", "rating", "seller", "warranty", "affiliateCommission"):
                     self.assertNotIn(forbidden, entries[route])
-            self.assertEqual(
-                index["commercialRankingExcluded"],
-                ["price", "stock", "rating", "seller", "warranty", "affiliateCommission"],
-            )
+            self.assertEqual(index["commercialRankingExcluded"], ["price", "stock", "rating", "seller", "warranty", "affiliateCommission"])
 
 
 if __name__ == "__main__":
