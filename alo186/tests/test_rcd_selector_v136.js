@@ -110,7 +110,7 @@ for (const [name, basePath] of [['custom', ''], ['project', '/chatgpt']]) {
   assert(publishedJs.includes('rel="sponsored nofollow noopener"'));
   assert(published.includes('data-alo186-sitewide-ux="true"'));
   const sitemap = fs.readFileSync(path.join(target, 'sitemap.xml'), 'utf8');
-  assert(sitemap.includes(`https://alo186.com${ROUTE}`) || sitemap.includes(`https://www.alo186.com${ROUTE}`));
+  assert(sitemap.includes(`https://alo186.com${ROUTE}`) || sitemap.includes(`https://alo186.com${ROUTE}`));
   const searchIndex = fs.readFileSync(path.join(target, 'arama/search-index.json'), 'utf8');
   assert(searchIndex.includes(ROUTE));
 }

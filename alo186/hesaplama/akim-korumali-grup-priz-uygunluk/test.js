@@ -125,6 +125,6 @@ assert.match(app,/commercialData:\{price:false,stock:false,rating:false,seller:f
 assert.match(hub,/[3-9][0-9]* çekirdek araç/);
 assert.match(hub,/\.\/akim-korumali-grup-priz-uygunluk\//);
 assert.match(manifest,/alo186\/hesaplama\/akim-korumali-grup-priz-uygunluk\/index\.html/);
-assert.match(sitemap,/https:\/\/www\.alo186\.com\/hesaplama\/akim-korumali-grup-priz-uygunluk\//);
+assert.match(sitemap,/https:\/\/alo186\.com\/hesaplama\/akim-korumali-grup-priz-uygunluk\//);
 
 console.log('Akım korumalı grup priz: geri çağırma, gösterge, gerçek test, satın almama, üçlü affiliate, JSON/ICS, gizlilik ve yayın testleri başarılı.');

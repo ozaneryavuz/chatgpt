@@ -135,7 +135,7 @@ for (const [name, basePath] of [['custom', ''], ['project', '/chatgpt']]) {
     assert(fs.existsSync(path.join(routeDir, 'styles.css')), `${name} rota stili yok: ${route}`);
     const published = fs.readFileSync(page, 'utf8');
     assert(published.includes('data-alo186-sitewide-ux="true"'));
-    assert(sitemap.includes(`https://alo186.com${route}`) || sitemap.includes(`https://www.alo186.com${route}`));
+    assert(sitemap.includes(`https://alo186.com${route}`) || sitemap.includes(`https://alo186.com${route}`));
     assert(searchIndex.includes(route));
   }
 }

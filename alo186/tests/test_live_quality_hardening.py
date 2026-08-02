@@ -49,8 +49,8 @@ def seed(site: Path, base_path: str) -> None:
 </main></body></html>'''
     (route / "index.html").write_text(portal_html, encoding="utf-8")
     (site / "index.html").write_text(root_html, encoding="utf-8")
-    (site / "robots.txt").write_text("User-agent: *\nAllow: /\nSitemap: https://www.alo186.com/sitemap.xml\n", encoding="utf-8")
-    (site / "sitemap.xml").write_text('<?xml version="1.0"?><urlset><url><loc>https://www.alo186.com/elektrik-portali</loc></url></urlset>', encoding="utf-8")
+    (site / "robots.txt").write_text("User-agent: *\nAllow: /\nSitemap: https://alo186.com/sitemap.xml\n", encoding="utf-8")
+    (site / "sitemap.xml").write_text('<?xml version="1.0"?><urlset><url><loc>https://alo186.com/elektrik-portali</loc></url></urlset>', encoding="utf-8")
     (site / ".htaccess").write_text("RewriteCond %{HTTP_HOST} !^www\\.alo186\\.com$ [NC]\nRewriteRule ^ https://www.alo186.com%{REQUEST_URI} [R=301,L]\n", encoding="utf-8")
     release = {
         "canonicalHost": "https://www.alo186.com",
