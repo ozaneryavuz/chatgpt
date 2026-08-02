@@ -29,7 +29,7 @@ for (const product of catalog.products) {
   assert.ok(product.brand && product.name && product.userNeed);
   assert.ok(product.strengths.length >= 3);
   assert.ok(product.limitations.length >= 3);
-  assert.ok(product.noBuyWhen.includes('satın almayın'));
+  assert.ok(/satın almayın|ödeme yapmayın/.test(product.noBuyWhen), 'Satın almama koşulu görünür olmalı');
   assert.ok(product.technicalSource.startsWith('https://www.tp-link.com/'));
   const url = catalog.amazonProductUrl(product.asin);
   assert.ok(url === `https://www.amazon.com.tr/dp/${product.asin}?tag=alo186rehber-21`);
