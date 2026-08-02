@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 ROUTE = "/hesaplama/kombi-kesinti-yedek-guc-uygunluk/"
@@ -38,9 +39,15 @@ def public_url(base_path: str, route: str) -> str:
 def append_sitemap(site: Path) -> None:
     path = site / "sitemap.xml"
     text = path.read_text(encoding="utf-8")
-    if f"<loc>{CANONICAL}</loc>" not in text:
-        text = text.replace("</urlset>", f"<url><loc>{CANONICAL}</loc></urlset>", 1)
-        path.write_text(text, encoding="utf-8")
+    if f"<loc>{CANONICAL}</loc>" in text:
+        ET.fromstring(text)
+        return
+    if "</urlset>" not in text:
+        raise RuntimeError("Sitemap kapanış etiketi bulunamadı")
+    entry = f"<url><loc>{CANONICAL}</loc></url>"
+    updated = text.replace("</urlset>", entry + "</urlset>", 1)
+    ET.fromstring(updated)
+    path.write_text(updated, encoding="utf-8")
 
 
 def append_search(site: Path, base_path: str) -> None:
