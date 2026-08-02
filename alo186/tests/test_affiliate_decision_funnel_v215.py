@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -39,6 +40,14 @@ def seed(site: Path) -> None:
     (site / 'checksums.sha256').write_text('placeholder\n', encoding='utf-8')
 
 
+def assert_document_closures(text: str) -> None:
+    for tag in ('head', 'main', 'body'):
+        assert re.search(rf'</{tag}\s*>', text, re.I), tag
+    assert text.lower().find('</head') < text.lower().find('<body')
+    assert text.lower().find('<main') < text.lower().rfind('</main')
+    assert text.lower().rfind('</main') < text.lower().rfind('</body')
+
+
 def assert_page(text: str, flow: str, base_path: str) -> None:
     assert text.count(module.MARKER) == 1
     assert f'data-decision-flow="{flow}"' in text
@@ -56,6 +65,7 @@ def assert_page(text: str, flow: str, base_path: str) -> None:
     css = f'{base_path}/assets/affiliate-decision-funnel-v215.css' if base_path else '/assets/affiliate-decision-funnel-v215.css'
     js = f'{base_path}/assets/affiliate-decision-funnel-v215.js' if base_path else '/assets/affiliate-decision-funnel-v215.js'
     assert css in text and js in text
+    assert_document_closures(text)
 
 
 def assert_contract() -> None:
@@ -73,6 +83,20 @@ def assert_contract() -> None:
     assert actual['privacy']['userOrDeviceIdentifierAllowed'] is False
 
 
+def assert_runtime_asset(site: Path) -> None:
+    asset = site / module.ASSET_JS
+    js = asset.read_text(encoding='utf-8')
+    for event in module.EVENTS:
+        assert event in js
+    assert "getConsent?.()==='granted'" in js
+    assert 'numericElectricalInputs' not in js
+    for forbidden in ('product_key', 'asin', 'search_query', 'email', 'phone', 'address'):
+        assert forbidden not in js.lower()
+    node = shutil.which('node')
+    if node:
+        subprocess.run([node, '--check', str(asset)], check=True)
+
+
 def run_case(base_path: str) -> None:
     with tempfile.TemporaryDirectory() as tmp:
         site = Path(tmp)
@@ -82,6 +106,7 @@ def run_case(base_path: str) -> None:
         assert first['version'] == 215
         assert first['basePath'] == base_path
         assert first['injectedFlows'] == ['mini_ups', 'ups_runtime', 'power_station']
+        assert first['normalizedClosures'] == {}
         assert first['tierCount'] == 3
         assert first['directAmazonLinksAdded'] == 0
         assert first['rawDestinationUrlStored'] is False
@@ -108,24 +133,62 @@ def run_case(base_path: str) -> None:
         assert funnel['flows'] == ['mini_ups', 'ups_runtime', 'power_station']
         assert funnel['events'] == list(module.EVENTS)
         assert funnel['placements'] == list(module.PLACEMENTS)
+        assert funnel['normalizedClosures'] == {}
+        assert funnel['documentRepairPolicy'] == 'only-missing-closing-tags-with-valid-open-structure'
         assert funnel['noBuyOutcome'] is True
         assert funnel['commerceBlockOutcome'] is True
         assert funnel['directAmazonLinksAdded'] == 0
-        asset = site / module.ASSET_JS
-        js = asset.read_text(encoding='utf-8')
-        for event in module.EVENTS:
-            assert event in js
-        assert "getConsent?.()==='granted'" in js
-        assert 'numericElectricalInputs' not in js
-        for forbidden in ('product_key', 'asin', 'search_query', 'email', 'phone', 'address'):
-            assert forbidden not in js.lower()
-        node = shutil.which('node')
-        if node:
-            subprocess.run([node, '--check', str(asset)], check=True)
+        assert_runtime_asset(site)
         second = module.inject(site, base_path)
         assert second['injectedFlows'] == []
+        assert second['normalizedClosures'] == {}
         for target in module.TARGETS:
             assert_page((site / target.path).read_text(encoding='utf-8'), target.flow, base_path)
+
+
+def run_artifact_normalization_case() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        site = Path(tmp)
+        seed(site)
+
+        mini_path = site / module.TARGETS[0].path
+        mini = mini_path.read_text(encoding='utf-8')
+        mini = mini.replace('</head>', '</HEAD >').replace('</main>', '').replace('</body>', '</BODY >')
+        mini_path.write_text(mini, encoding='utf-8')
+
+        ups_path = site / module.TARGETS[1].path
+        ups_path.write_text(
+            ups_path.read_text(encoding='utf-8').replace('</head>', ''),
+            encoding='utf-8',
+        )
+
+        power_path = site / module.TARGETS[2].path
+        power_path.write_text(
+            power_path.read_text(encoding='utf-8').replace('</body>', ''),
+            encoding='utf-8',
+        )
+
+        first = module.inject(site, '/chatgpt')
+        expected = {
+            'mini_ups': ['main'],
+            'ups_runtime': ['head'],
+            'power_station': ['body'],
+        }
+        assert first['normalizedClosures'] == expected, first
+        for target in module.TARGETS:
+            assert_page(
+                (site / target.path).read_text(encoding='utf-8'),
+                target.flow,
+                '/chatgpt',
+            )
+
+        release = json.loads((site / 'pages-release.json').read_text(encoding='utf-8'))
+        assert release['affiliateDecisionFunnel']['normalizedClosures'] == expected
+        second = module.inject(site, '/chatgpt')
+        assert second['injectedFlows'] == []
+        assert second['normalizedClosures'] == {}
+        retained = json.loads((site / 'pages-release.json').read_text(encoding='utf-8'))
+        assert retained['affiliateDecisionFunnel']['normalizedClosures'] == expected
 
 
 def test_missing_target_fails_closed() -> None:
@@ -138,10 +201,27 @@ def test_missing_target_fails_closed() -> None:
         raise AssertionError('Eksik karar hunisi hedefi fail-closed durmadı')
 
 
+def test_truncated_document_fails_closed() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        site = Path(tmp)
+        seed(site)
+        path = site / module.TARGETS[0].path
+        text = path.read_text(encoding='utf-8').replace('</body>', '').replace('</html>', '')
+        path.write_text(text, encoding='utf-8')
+        try:
+            module.inject(site, '')
+        except RuntimeError as error:
+            assert 'güvenle' in str(error) or 'bulunamadı' in str(error)
+            return
+        raise AssertionError('Belirsiz biçimde kesilmiş HTML fail-closed durmadı')
+
+
 if __name__ == '__main__':
     assert_contract()
     run_case('')
     run_case('/chatgpt')
     run_case('/preview/alo186')
+    run_artifact_normalization_case()
     test_missing_target_fails_closed()
+    test_truncated_document_fails_closed()
     print('ALO186 affiliate decision funnel v215: PASS')
