@@ -30,6 +30,7 @@ from inject_revenue_trust_proof import run as run_revenue_trust_proof
 from inject_retention_growth import run as run_retention_growth
 from normalize_article_followup_paths import run as normalize_article_followup_paths
 from normalize_consolidated_release import run as normalize_consolidated_release
+from sitemap_hreflang import write_effective_sitemap
 
 CANONICAL = "https://www.alo186.com/hesaplama/teknik-urun-karsilastirma/"
 CANONICAL_PATH = "/hesaplama/teknik-urun-karsilastirma/"
@@ -224,12 +225,17 @@ def reconcile_sitemap_with_release(site: Path) -> dict:
         root=tree.getroot()
         namespace=root.tag.split("}")[0].strip("{") if "}" in root.tag else ""
     except ET.ParseError:
-        # The release inventory is the fail-closed source of truth. A previous
-        # legacy growth injector may leave partially written XML; rebuild only
-        # from active canonical routes instead of publishing a broken sitemap.
-        namespace="http://www.sitemaps.org/schemas/sitemap/0.9"
-        root=ET.Element(f"{{{namespace}}}urlset")
-        tree=ET.ElementTree(root)
+        # Rebuild through the canonical bilingual sitemap writer so malformed
+        # legacy XML cannot erase XHTML hreflang alternates. The active release
+        # inventory remains the fail-closed source of routes and excludes aliases.
+        manifest={
+            "canonicalHost":str(release.get("canonicalHost") or "https://alo186.com"),
+            "routes":list(release.get("routes") or []),
+        }
+        write_effective_sitemap(site,manifest)
+        tree=ET.parse(sitemap_path)
+        root=tree.getroot()
+        namespace=root.tag.split("}")[0].strip("{") if "}" in root.tag else ""
         recovered_malformed=True
     ns=f"{{{namespace}}}" if namespace else ""
     def normalized_path(value: str) -> str:
