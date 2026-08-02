@@ -1,0 +1,68 @@
+name: ALO186 insülin ve ilaç soğuk zincir v196
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/elektrik-kesintisi-insulin-ilac-soguk-zincir-karar-destegi/**'
+      - 'alo186/amazon-elektrik-urunleri/insulin-ilac-soguk-zincir-hazirlik-secici/**'
+      - 'alo186/sektor-rehberi/insulin-ilac-soguk-zincir-30-90-gun-test-merkezi/**'
+      - 'alo186/audits/insulin-medicine-cold-chain-growth-v196-2026-08-02.md'
+      - 'alo186/deployment/routing-overlays/196-insulin-medicine-cold-chain-growth.json'
+      - 'alo186/tests/test_insulin_medicine_cold_chain_growth_v196.py'
+      - '.github/workflows/alo186-insulin-medicine-cold-chain-v196.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/elektrik-kesintisi-insulin-ilac-soguk-zincir-karar-destegi/**'
+      - 'alo186/amazon-elektrik-urunleri/insulin-ilac-soguk-zincir-hazirlik-secici/**'
+      - 'alo186/sektor-rehberi/insulin-ilac-soguk-zincir-30-90-gun-test-merkezi/**'
+      - 'alo186/audits/insulin-medicine-cold-chain-growth-v196-2026-08-02.md'
+      - 'alo186/deployment/routing-overlays/196-insulin-medicine-cold-chain-growth.json'
+      - 'alo186/tests/test_insulin_medicine_cold_chain_growth_v196.py'
+      - '.github/workflows/alo186-insulin-medicine-cold-chain-v196.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Fail-closed sağlık ve ticari güven sözleşmesi
+        run: |
+          set -euo pipefail
+          python -m py_compile alo186/tests/test_insulin_medicine_cold_chain_growth_v196.py
+          python alo186/tests/test_insulin_medicine_cold_chain_growth_v196.py
+      - name: Sayfa JavaScript sözdizimi
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import re
+          import subprocess
+          import tempfile
+          from pathlib import Path
+          pages = [
+              Path('alo186/hesaplama/elektrik-kesintisi-insulin-ilac-soguk-zincir-karar-destegi/index.html'),
+              Path('alo186/amazon-elektrik-urunleri/insulin-ilac-soguk-zincir-hazirlik-secici/index.html'),
+              Path('alo186/sektor-rehberi/insulin-ilac-soguk-zincir-30-90-gun-test-merkezi/index.html'),
+          ]
+          for page in pages:
+              html = page.read_text(encoding='utf-8')
+              scripts = re.findall(r'<script(?![^>]*application/ld\+json)[^>]*>(.*?)</script>', html, re.S | re.I)
+              assert scripts, f'javascript missing: {page}'
+              for index, script in enumerate(scripts):
+                  target = Path(tempfile.gettempdir()) / f'{page.parent.name}-{index}.js'
+                  target.write_text(script, encoding='utf-8')
+                  subprocess.run(['node', '--check', str(target)], check=True)
+          PY
+      - name: Routing overlay JSON
+        run: python -m json.tool alo186/deployment/routing-overlays/196-insulin-medicine-cold-chain-growth.json >/dev/null
