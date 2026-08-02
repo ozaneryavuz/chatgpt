@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from html import unescape
 from html.parser import HTMLParser
 from pathlib import Path
+from xml.etree import ElementTree
 
 import guard_commerce_routes_v2 as v2
 import aeo_control_plane_v219 as aeo_institutional
@@ -199,6 +200,46 @@ def _checkpoint_base_path(site: Path) -> str:
     return value if isinstance(value, str) else ""
 
 
+def _deduplicate_sitemap(site: Path) -> dict[str, object]:
+    """Growth katmanlarının aynı canonicalı tekrar yazmasını güvenle tekilleştirir."""
+    sitemap = site / "sitemap.xml"
+    if not sitemap.is_file():
+        raise AssertionError("sitemap.xml eksik")
+    try:
+        tree = ElementTree.parse(sitemap)
+    except ElementTree.ParseError as exc:
+        raise AssertionError(f"sitemap.xml parse edilemiyor: {exc}") from exc
+
+    root = tree.getroot()
+    seen: set[str] = set()
+    removed: list[str] = []
+    for url_node in list(root):
+        loc = url_node.find("{*}loc")
+        location = (loc.text or "").strip() if loc is not None else ""
+        if not location:
+            raise AssertionError("sitemap URL kaydı loc taşımıyor")
+        if location in seen:
+            root.remove(url_node)
+            removed.append(location)
+            continue
+        seen.add(location)
+
+    if removed:
+        ElementTree.register_namespace("", "http://www.sitemaps.org/schemas/sitemap/0.9")
+        ElementTree.register_namespace("xhtml", "http://www.w3.org/1999/xhtml")
+        tree.write(sitemap, encoding="utf-8", xml_declaration=True)
+        reparsed = ElementTree.parse(sitemap).getroot()
+        locations = [((node.text or "").strip()) for node in reparsed.findall(".//{*}loc")]
+        if len(locations) != len(set(locations)):
+            raise AssertionError("sitemap tekilleştirmesi başarısız")
+
+    return {
+        "removedCount": len(removed),
+        "removedUrls": removed[:20],
+        "remainingUrlCount": len(seen),
+    }
+
+
 def validate_site(site: Path) -> dict:
     """Bütün growth enjeksiyonlarından sonra commerce, anonim AEO ve live quality'yi doğrular."""
     resolved = site.resolve()
@@ -218,12 +259,14 @@ def validate_site(site: Path) -> dict:
             + "; ".join(aeo_validation.get("errors", []))
         )
     result = _original_validate_site(resolved)
+    sitemap_deduplication = _deduplicate_sitemap(resolved)
     quality_result = live_quality.run(resolved, base_path)
     result["affiliateDecisionFunnel"] = decision_result
     result["portalPurchaseCheckpoint"] = checkpoint_result
     result["intentToolsRun135"] = intent_result
     result["aeoInstitutionalV219"] = aeo_result
     result["aeoInstitutionalV219Validation"] = aeo_validation
+    result["sitemapDeduplication"] = sitemap_deduplication
     result["liveQualityV218"] = quality_result
     return result
 
