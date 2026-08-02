@@ -9,12 +9,14 @@ on:
       - 'alo186/deployment/verify_contextual_affiliate_live_v177.py'
       - 'alo186/deployment/verify_live_origin.py'
       - 'alo186/tests/test_contextual_affiliate_live_v177.py'
+      - 'alo186/tests/test_pages_single_publisher.py'
   workflow_dispatch:
   schedule:
     - cron: '*/30 * * * *'
 
 permissions:
   contents: read
+  deployments: read
   actions: write
   pages: write
   id-token: write
@@ -32,6 +34,8 @@ jobs:
       pages_ready: ${{ steps.pages_probe.outputs.pages_ready }}
       blocker: ${{ steps.pages_probe.outputs.blocker }}
       admin_token_present: ${{ steps.pages_probe.outputs.admin_token_present }}
+      pages_deployment_succeeded: ${{ steps.pages_probe.outputs.pages_deployment_succeeded }}
+      origin_probe_ok: ${{ steps.origin_state.outputs.origin_probe_ok }}
       live_current: ${{ steps.origin_state.outputs.live_current }}
       sites_current: ${{ steps.sites_probe.outputs.sites_current }}
       hosting_mode: ${{ steps.origin_state.outputs.hosting_mode }}
@@ -45,7 +49,7 @@ jobs:
       - name: Tanı klasörünü hazırla
         run: mkdir -p /tmp/alo186-live-probe
 
-      - name: Pages durumunu ve yönetici yetkisini fail-safe belirle
+      - name: Pages, yönetici yetkisi ve ilk artifact durumunu belirle
         id: pages_probe
         uses: actions/github-script@v7
         env:
@@ -61,6 +65,7 @@ jobs:
             let created = false;
             let blocker = '';
             let apiStatus = null;
+            let pagesDeploymentSucceeded = false;
 
             try {
               const response = await github.request('GET /repos/{owner}/{repo}/pages', {owner, repo});
@@ -108,15 +113,40 @@ jobs:
               }
             }
 
+            try {
+              const {data: deployments} = await github.rest.repos.listDeployments({
+                owner,
+                repo,
+                environment: 'github-pages',
+                per_page: 20,
+              });
+              for (const deployment of deployments) {
+                const {data: statuses} = await github.rest.repos.listDeploymentStatuses({
+                  owner,
+                  repo,
+                  deployment_id: deployment.id,
+                  per_page: 10,
+                });
+                if (statuses.some(status => status.state === 'success')) {
+                  pagesDeploymentSucceeded = true;
+                  break;
+                }
+              }
+            } catch (deploymentError) {
+              core.warning(`GitHub Pages deployment geçmişi okunamadı: ${deploymentError.message}`);
+            }
+
             const receipt = {
               pagesReady: ready,
               pagesCreated: created,
+              pagesDeploymentSucceeded,
               adminTokenPresent,
               apiStatus,
               blocker: blocker || null,
             };
             fs.writeFileSync('/tmp/alo186-live-probe/pages-probe.json', JSON.stringify(receipt, null, 2) + '\n');
             core.setOutput('pages_ready', String(ready));
+            core.setOutput('pages_deployment_succeeded', String(pagesDeploymentSucceeded));
             core.setOutput('admin_token_present', String(adminTokenPresent));
             core.setOutput('blocker', blocker);
             core.info(JSON.stringify(receipt));
@@ -159,22 +189,25 @@ jobs:
           mode = str(payload.get('mode') or 'unknown')
           contains_expected = bool(payload.get('containsExpectedCommit'))
           receipt_available = bool(payload.get('exactCommitReceiptAvailable'))
-          ok = bool(payload.get('ok'))
+          origin_probe_ok = bool(payload.get('ok'))
           live_current = (
               mode == 'github-pages'
               and contains_expected
               and receipt_available
-              and ok
+              and origin_probe_ok
           )
-          dns_cutover_required = mode != 'github-pages'
+          dns_cutover_required = origin_probe_ok and mode != 'github-pages'
           print(f'hosting_mode={mode}')
+          print(f'origin_probe_ok={str(origin_probe_ok).lower()}')
           print(f'live_current={str(live_current).lower()}')
           print(f'dns_cutover_required={str(dns_cutover_required).lower()}')
           PY
 
-      - name: ChatGPT Sites yüzeyindeyse canlı v177 sözleşmesini doğrula
+      - name: Doğrulanmış dış hosting yüzeyinde canlı v177 sözleşmesini ölç
         id: sites_probe
-        if: steps.origin_state.outputs.hosting_mode != 'github-pages'
+        if: >-
+          steps.origin_state.outputs.origin_probe_ok == 'true' &&
+          steps.origin_state.outputs.hosting_mode != 'github-pages'
         continue-on-error: true
         shell: bash
         run: |
@@ -208,6 +241,8 @@ jobs:
         shell: bash
         env:
           READY: ${{ steps.pages_probe.outputs.pages_ready }}
+          PAGES_DEPLOYED: ${{ steps.pages_probe.outputs.pages_deployment_succeeded }}
+          ORIGIN_PROBE_OK: ${{ steps.origin_state.outputs.origin_probe_ok }}
           BLOCKER: ${{ steps.pages_probe.outputs.blocker }}
           ADMIN: ${{ steps.pages_probe.outputs.admin_token_present }}
           LIVE_CURRENT: ${{ steps.origin_state.outputs.live_current }}
@@ -219,6 +254,8 @@ jobs:
             echo '## ALO186 canlı yayın hazırlığı'
             echo
             echo "- GitHub Pages hazır: **${READY:-false}**"
+            echo "- Başarılı Pages deploymentı mevcut: **${PAGES_DEPLOYED:-false}**"
+            echo "- Origin makbuzu geçerli: **${ORIGIN_PROBE_OK:-false}**"
             echo "- Yönetici tokenı mevcut: **${ADMIN:-false}**"
             echo "- Canlı hosting modu: **${HOSTING_MODE:-unknown}**"
             echo "- Pages exact commit güncel: **${LIVE_CURRENT:-false}**"
@@ -236,28 +273,25 @@ jobs:
         with:
           name: alo186-live-probe
           path: /tmp/alo186-live-probe
-      - name: Kesin Pages blokajını P0 kaydında görünür kıl
+      - name: Pages blokajını P0 kaydında görünür kıl
         uses: actions/github-script@v7
         env:
           BLOCKER: ${{ needs.probe.outputs.blocker }}
           ADMIN_TOKEN_PRESENT: ${{ needs.probe.outputs.admin_token_present }}
+          ORIGIN_PROBE_OK: ${{ needs.probe.outputs.origin_probe_ok }}
         with:
           script: |
-            const fs = require('fs');
-            const read = (path) => { try { return JSON.parse(fs.readFileSync(path, 'utf8')); } catch (_) { return {}; } };
-            const live = read('/tmp/alo186-live-probe/live-v177.json');
-            const lastError = Array.isArray(live.errors) && live.errors.length ? live.errors[live.errors.length - 1].error : 'Canlı v177 rota doğrulanamadı.';
             const marker = '<!-- alo186-v177-live-blocker -->';
             const body = `${marker}
             ## ALO186 canlı yayın blokajı
 
             - Kaynak commit: \`${context.sha}\`
             - Yönetici tokenı mevcut: **${process.env.ADMIN_TOKEN_PRESENT}**
+            - Origin makbuzu geçerli: **${process.env.ORIGIN_PROBE_OK}**
             - Pages blokajı: **${process.env.BLOCKER || 'GitHub Pages etkin değil.'}**
-            - ChatGPT Sites son doğrulama: **${lastError}**
             - Workflow: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}
 
-            Kaynak, custom/project artifact, v177 yerleşimleri ve ticari güvenlik kapıları hazırdır. Pages etkinleştirilirse periyodik workflow otomatik tam deploy yapacaktır.`;
+            Kaynak ve artifact sözleşmeleri hazırdır. Pages etkinleştirilirse state machine ilk artifactı tek kez yayınlayacaktır.`;
             async function upsert(issueNumber) {
               const {data: comments} = await github.rest.issues.listComments({owner: context.repo.owner, repo: context.repo.repo, issue_number: issueNumber, per_page: 100});
               const existing = comments.find(item => item.body && item.body.includes(marker));
@@ -266,11 +300,13 @@ jobs:
             }
             await upsert(400);
             await upsert(21);
-      - run: echo 'Workflow her 30 dakikada Pages ve ChatGPT Sites durumunu yeniden doğrulayacak.'
 
   already_live_on_sites:
     needs: probe
-    if: needs.probe.outputs.pages_ready != 'true' && needs.probe.outputs.sites_current == 'true'
+    if: >-
+      needs.probe.outputs.pages_ready != 'true' &&
+      needs.probe.outputs.origin_probe_ok == 'true' &&
+      needs.probe.outputs.sites_current == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -290,17 +326,13 @@ jobs:
 
             - Kaynak commit: \`${context.sha}\`
             - Canlı hosting modu: **${origin.mode}**
-            - Platform imzası: \`${origin.platformSignature || 'github-pages'}\`
+            - Platform imzası: \`${origin.platformSignature || 'external'}\`
             - Canlı rota: \`${live.origin}${live.route}\`
-            - Doğrulama denemesi: **${live.verifiedAttempt}**
-            - Sayfa SHA-256: \`${live.pageSha256}\`
             - Ürün yerleşimi: **${live.placementCount}**
             - Ticari kapı: **${live.gateCount}**
             - Kapısız mağaza bağlantısı: **${live.staticStoreLinkCount}**
-            - Affiliate etiketi: \`${live.affiliateTag}\`
-            - Kişisel veri alanı: **yok**
 
-            Canlı production origin ve v177 JavaScript güven sözleşmesi önbellek atlatan HTTP istekleriyle doğrulandı.`;
+            Canlı production origin ve v177 güven sözleşmesi doğrulanmıştır; exact GitHub commit makbuzu bu hosting modunda mevcut değildir.`;
             async function upsert(issueNumber) {
               const {data: comments} = await github.rest.issues.listComments({owner: context.repo.owner, repo: context.repo.repo, issue_number: issueNumber, per_page: 100});
               const existing = comments.find(item => item.body && item.body.includes(marker));
@@ -310,15 +342,39 @@ jobs:
             await upsert(400);
             await upsert(21);
 
-  waiting_for_dns_cutover:
+  dispatch_pages:
     needs: probe
-    if: needs.probe.outputs.pages_ready == 'true' && needs.probe.outputs.hosting_mode != 'github-pages'
+    if: >-
+      needs.probe.outputs.pages_ready == 'true' &&
+      needs.probe.outputs.live_current != 'true' &&
+      (
+        needs.probe.outputs.hosting_mode == 'github-pages' ||
+        needs.probe.outputs.pages_deployment_succeeded != 'true'
+      )
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - name: İlk veya stale GitHub Pages artifactını tek yayıncıyla tetikle
+        uses: actions/github-script@v7
         with:
-          name: alo186-live-probe
-          path: /tmp/alo186-live-probe
+          script: |
+            const response = await github.request('POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'alo186-github-pages.yml',
+              ref: 'main',
+            });
+            core.info(`ALO186 ana Pages workflow dispatch status=${response.status}`);
+      - run: echo 'İlk Pages artifactı veya stale Pages commit için tek yayıncı workflow kuyruğa alındı.'
+
+  waiting_for_dns_cutover:
+    needs: probe
+    if: >-
+      needs.probe.outputs.pages_ready == 'true' &&
+      needs.probe.outputs.pages_deployment_succeeded == 'true' &&
+      needs.probe.outputs.origin_probe_ok == 'true' &&
+      needs.probe.outputs.hosting_mode != 'github-pages'
+    runs-on: ubuntu-latest
+    steps:
       - name: DNS cutover blokajını tekilleştir
         uses: actions/github-script@v7
         env:
@@ -331,14 +387,13 @@ jobs:
             ## ALO186 GitHub Pages hazır — DNS cutover bekleniyor
 
             - Kaynak commit: \`${context.sha}\`
-            - GitHub Pages API ve deployment hattı: **hazır**
-            - `alo186.com` canlı hosting modu: **${process.env.HOSTING_MODE || 'unknown'}**
-            - Mevcut ChatGPT Sites v177 sözleşmesi: **${process.env.SITES_CURRENT || 'false'}**
+            - Başarılı GitHub Pages deploymentı: **var**
+            - \`alo186.com\` canlı hosting modu: **${process.env.HOSTING_MODE || 'unknown'}**
+            - Mevcut dış hosting v177 sözleşmesi: **${process.env.SITES_CURRENT || 'false'}**
             - Otomatik Pages yeniden-dispatch: **durduruldu**
             - Runbook: \`alo186/deployment/GITHUB_PAGES_CUTOVER.md\`
-            - Workflow: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}
 
-            Aynı artifactı 30 dakikada bir yeniden yayınlamak DNS yetkisini değiştirmez. Apex A kayıtları GitHub Pages IP'lerine ve \`www\` CNAME kaydı \`ozaneryavuz.github.io\` hedefine taşındığında workflow exact-commit doğrulamasına otomatik geçecektir. MX, SPF, DKIM, DMARC ve doğrulama TXT kayıtları korunmalıdır.`;
+            Aynı artifactı yeniden yayınlamak DNS yetkisini değiştirmez. Apex ve www kayıtları GitHub Pages'e taşındığında state machine exact-commit doğrulamasına otomatik geçecektir. MX, SPF, DKIM, DMARC ve doğrulama TXT kayıtları korunmalıdır.`;
             async function upsert(issueNumber) {
               const {data: comments} = await github.rest.issues.listComments({owner: context.repo.owner, repo: context.repo.repo, issue_number: issueNumber, per_page: 100});
               const existing = comments.find(item => item.body && item.body.includes(marker));
@@ -347,28 +402,28 @@ jobs:
             }
             await upsert(400);
             await upsert(21);
-      - run: echo 'Pages artifact hazır; dış DNS yetkisi değişene kadar gereksiz deploy tekrarı yapılmayacak.'
 
-  dispatch_pages:
+  origin_probe_failed:
     needs: probe
     if: >-
       needs.probe.outputs.pages_ready == 'true' &&
-      needs.probe.outputs.hosting_mode == 'github-pages' &&
-      needs.probe.outputs.live_current != 'true'
+      needs.probe.outputs.pages_deployment_succeeded == 'true' &&
+      needs.probe.outputs.origin_probe_ok != 'true'
     runs-on: ubuntu-latest
     steps:
-      - name: Tek GitHub Pages yayıncısını tetikle
+      - name: Origin makbuzu eksikliğini görünür kıl
         uses: actions/github-script@v7
         with:
           script: |
-            const response = await github.request('POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches', {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'alo186-github-pages.yml',
-              ref: 'main',
-            });
-            core.info(`ALO186 ana Pages workflow dispatch status=${response.status}`);
-      - run: echo 'Canlı origin GitHub Pages üzerinde fakat exact commit güncel değil; tek yayıncı workflow kuyruğa alındı.'
+            const marker = '<!-- alo186-origin-probe-invalid -->';
+            const body = `${marker}
+            ## ALO186 origin makbuzu doğrulanamadı
+
+            GitHub Pages deployment geçmişinde başarılı bir yayın var; ancak \`alo186.com\` hosting makbuzu okunamadığı için Sites güncel veya DNS cutover hazır kabul edilmedi. Yeni deploy döngüsü başlatılmadı. Workflow: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const {data: comments} = await github.rest.issues.listComments({owner: context.repo.owner, repo: context.repo.repo, issue_number: 400, per_page: 100});
+            const existing = comments.find(item => item.body && item.body.includes(marker));
+            if (existing) await github.rest.issues.updateComment({owner: context.repo.owner, repo: context.repo.repo, comment_id: existing.id, body});
+            else await github.rest.issues.createComment({owner: context.repo.owner, repo: context.repo.repo, issue_number: 400, body});
 
   already_current:
     needs: probe
