@@ -10,7 +10,7 @@
     {"intentId":"edas-discovery","question":"Bulunduğum bölgenin elektrik dağıtım şirketi hangisi?","canonicalPath":"/edas-bul","cluster":"official-routing"},
     {"intentId":"outage-official-source","question":"Elektrik kesintisi nereden resmî olarak sorgulanır?","canonicalPath":"/elektrik-kesintisi","cluster":"official-routing"},
     {"intentId":"emergency-number-choice","question":"112 mi, 186 mı, elektrikçi mi aranmalı?","canonicalPath":"/acil-numaralar","cluster":"safety"},
-    {"intentId":"planned-outage-query","question":"Planlı elektrik kesintisi nereden sorgulanır?","canonicalPath":"/sektor-rehberi/planli-elektrik-kesintisi-sorgulama","cluster":"official-routing"},
+    {"intentId":"planned-outage-query","question":"Planlı elektrik kesintisi ne kadar önce bildirilir ve nereden kontrol edilir?","canonicalPath":"/haberler/planli-elektrik-kesintisi-ne-kadar-once-bildirilir","cluster":"official-routing"},
     {"intentId":"ups-runtime","question":"UPS kaç saat çalışır?","canonicalPath":"/hesaplama/ups-suresi/","cluster":"backup-power"},
     {"intentId":"backup-power-choice","question":"UPS, power station veya jeneratörden hangisi uygun?","canonicalPath":"/hesaplama/yedek-guc-cozum-secici/","cluster":"backup-power"},
     {"intentId":"generator-sizing","question":"Jeneratör gücü nasıl seçilir?","canonicalPath":"/hesaplama/jenerator-gucu-secimi/","cluster":"backup-power"},
