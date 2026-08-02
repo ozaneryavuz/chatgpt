@@ -1,0 +1,23 @@
+{
+  "version": 202,
+  "generatedAt": "2026-08-02",
+  "source": "ALO186 content authority run125",
+  "routes": [
+    {
+      "path": "/haberler/vpp-telemetri-stale-data-zaman-damgasi-sayac-mutabakat-teshis",
+      "file": "haberler/vpp-telemetri-stale-data-zaman-damgasi-sayac-mutabakat-teshis/index.html",
+      "intent": "VPP telemetri stale data zaman damgası sayaç dispatch mutabakatı"
+    },
+    {
+      "path": "/haberler/ges-string-current-mismatch-dc-sigorta-mppt-akim-farki-teshis",
+      "file": "haberler/ges-string-current-mismatch-dc-sigorta-mppt-akim-farki-teshis/index.html",
+      "intent": "GES string current mismatch DC sigorta MPPT akım farkı teşhisi"
+    },
+    {
+      "path": "/haberler/bess-hvil-open-high-voltage-interlock-service-disconnect-teshis",
+      "file": "haberler/bess-hvil-open-high-voltage-interlock-service-disconnect-teshis/index.html",
+      "intent": "BESS HVIL Open high voltage interlock service disconnect teşhisi"
+    }
+  ],
+  "qualityGate": "alo186/tests/test_authority_content_run125.py"
+}
