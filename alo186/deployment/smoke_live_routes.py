@@ -11,7 +11,8 @@ from urllib.parse import urljoin
 from urllib.request import Request, build_opener, HTTPRedirectHandler
 
 
-CANONICAL_HOST = "https://www.alo186.com"
+CANONICAL_HOST = "https://alo186.com"
+LEGACY_HOST = "https://www.alo186.com"
 REQUIRED_SECURITY_HEADERS = (
     "strict-transport-security",
     "x-content-type-options",
@@ -36,16 +37,16 @@ STALE_DEADLINE = re.compile(
 CURRENT_DEADLINE = re.compile(r"\b30\s*(?:takvim\s*)?gün(?:lük|ü|ün|de|den|içinde)?\b", re.IGNORECASE)
 
 ROUTES = [
-    ("/", "Elektrik kesintisi", "https://www.alo186.com/"),
-    ("/elektrik-portali", "ALO186", "https://www.alo186.com/elektrik-portali"),
-    ("/edas-bul", "EDAŞ", "https://www.alo186.com/edas-bul"),
-    ("/karar-motoru", "186 mı", "https://www.alo186.com/karar-motoru"),
-    ("/hesaplama/", "Hesaplama", "https://www.alo186.com/hesaplama/"),
-    ("/akilli-urun-secimi", "Ürün", "https://www.alo186.com/akilli-urun-secimi"),
-    ("/isletme-surekliligi", "Sürekliliği", "https://www.alo186.com/isletme-surekliligi"),
-    ("/fatura-analizi", "Faturası", "https://www.alo186.com/fatura-analizi"),
-    ("/hesaplama/yedek-guc", "Yedek Güç", "https://www.alo186.com/hesaplama/yedek-guc"),
-    ("/hesaplama/kesinti-maliyeti", "Kesinti", "https://www.alo186.com/hesaplama/kesinti-maliyeti"),
+    ("/", "Elektrik kesintisi", "https://alo186.com/"),
+    ("/elektrik-portali", "ALO186", "https://alo186.com/elektrik-portali"),
+    ("/edas-bul", "EDAŞ", "https://alo186.com/edas-bul"),
+    ("/karar-motoru", "186 mı", "https://alo186.com/karar-motoru"),
+    ("/hesaplama/", "Hesaplama", "https://alo186.com/hesaplama/"),
+    ("/akilli-urun-secimi", "Ürün", "https://alo186.com/akilli-urun-secimi"),
+    ("/isletme-surekliligi", "Sürekliliği", "https://alo186.com/isletme-surekliligi"),
+    ("/fatura-analizi", "Faturası", "https://alo186.com/fatura-analizi"),
+    ("/hesaplama/yedek-guc", "Yedek Güç", "https://alo186.com/hesaplama/yedek-guc"),
+    ("/hesaplama/kesinti-maliyeti", "Kesinti", "https://alo186.com/hesaplama/kesinti-maliyeti"),
 ]
 
 
@@ -149,23 +150,23 @@ def run(base_url: str, check_assets: bool = True) -> dict:
     results: list[dict] = []
     failures: list[str] = []
 
-    # Apex URL'nin aynı path ile tek canonical www hostuna ulaşmasını doğrula.
-    apex_url = base_url.replace("://www.", "://", 1) + "/"
+    # www URL'nin aynı path ile tek canonical apex hostuna ulaşmasını doğrula.
+    www_url = LEGACY_HOST + "/"
     try:
-        status, final_url, _body, _headers, duration = fetch(apex_url)
+        status, final_url, _body, _headers, duration = fetch(www_url)
         results.append(
             {
-                "path": "apex-redirect",
+                "path": "www-redirect",
                 "status": status,
-                "requestedUrl": apex_url,
+                "requestedUrl": www_url,
                 "finalUrl": final_url,
                 "durationMs": round(duration * 1000, 1),
             }
         )
         if status != 200 or normalize_url(final_url) != normalize_url(f"{CANONICAL_HOST}/"):
-            failures.append(f"Apex canonical yönlendirme yanlış: {apex_url} → {final_url} (HTTP {status})")
+            failures.append(f"www canonical yönlendirme yanlış: {www_url} → {final_url} (HTTP {status})")
     except (HTTPError, URLError, TimeoutError, ssl.SSLError) as exc:
-        failures.append(f"Apex canonical yönlendirme erişim hatası: {exc}")
+        failures.append(f"www canonical yönlendirme erişim hatası: {exc}")
 
     for path, marker, canonical in ROUTES:
         url = f"{base_url}{path}"
@@ -190,8 +191,8 @@ def run(base_url: str, check_assets: bool = True) -> dict:
                 failures.append(f"{path}: beklenen içerik işareti yok: {marker}")
             if not parser.canonical or normalize_url(parser.canonical) != normalize_url(canonical):
                 failures.append(f"{path}: canonical yanlış: {parser.canonical!r}")
-            if normalize_url(final_url).startswith("https://alo186.com"):
-                failures.append(f"{path}: www olmayan final URL: {final_url}")
+            if normalize_url(final_url).startswith(LEGACY_HOST):
+                failures.append(f"{path}: canonical olmayan www final URL: {final_url}")
             for header_name in REQUIRED_SECURITY_HEADERS:
                 if not headers.get(header_name):
                     failures.append(f"{path}: güvenlik başlığı eksik: {header_name}")
@@ -256,8 +257,8 @@ def run(base_url: str, check_assets: bool = True) -> dict:
                 failures.append(f"{root_path}: CSS MIME yanlış: {content_type!r}")
             if root_path == "/robots.txt" and f"Sitemap: {CANONICAL_HOST}/sitemap.xml" not in body.decode("utf-8", errors="replace"):
                 failures.append("/robots.txt: canonical sitemap adresi yanlış")
-            if root_path == "/sitemap.xml" and "https://alo186.com" in body.decode("utf-8", errors="replace"):
-                failures.append("/sitemap.xml: eski apex origin içeriyor")
+            if root_path == "/sitemap.xml" and LEGACY_HOST in body.decode("utf-8", errors="replace"):
+                failures.append("/sitemap.xml: eski www origin içeriyor")
         except Exception as exc:  # noqa: BLE001
             failures.append(f"{root_path}: erişim hatası: {exc}")
 

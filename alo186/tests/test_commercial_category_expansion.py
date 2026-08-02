@@ -181,7 +181,7 @@ class CommercialCategoryExpansionTests(unittest.TestCase):
             sitemap = (site / "sitemap.xml").read_text(encoding="utf-8")
             for route in ROUTES:
                 self.assertTrue((site / route.strip("/") / "index.html").is_file(), route)
-                self.assertIn(f"https://www.alo186.com{route}", sitemap)
+                self.assertIn(f"https://alo186.com{route}", sitemap)
 
             result = inject_private_search(site, "")
             self.assertGreaterEqual(result["entryCount"], 90)

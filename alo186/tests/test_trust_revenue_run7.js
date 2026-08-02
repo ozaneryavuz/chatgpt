@@ -64,5 +64,5 @@ for(const[name,text]of[['catalog',catalogHtml],['corporate',corporateHtml],['sup
   assert.match(text,/Bağımsız|bağımsız/i,`${name}: independence wording missing`);
 }
 assert(routing.routes.some(route=>route.source==='alo186/katalog-guven-durumu/index.html'&&route.canonicalPath==='/katalog-guven-durumu'&&route.type==='collection'));
-assert.match(sitemap,/https:\/\/www\.alo186\.com\/katalog-guven-durumu/);
+assert.match(sitemap,/https:\/\/alo186\.com\/katalog-guven-durumu/);
 console.log(`ALO186 güvenli büyüme: ${productCatalog.categories.length} kategorilik katalog güveni, ${productCatalog.products.length} doğrulanmış ASIN, kurumsal lead ve tedarikçi hazırlığı başarılı.`);

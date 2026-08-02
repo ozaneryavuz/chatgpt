@@ -10,8 +10,8 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 
-CANONICAL_HOST = "https://www.alo186.com"
-LEGACY_HOST = "https://alo186.com"
+CANONICAL_HOST = "https://alo186.com"
+LEGACY_HOST = "https://www.alo186.com"
 REQUIRED_ROOT_FILES = (
     "robots.txt",
     "sitemap.xml",
@@ -29,7 +29,7 @@ REQUIRED_SECURITY_HEADERS = (
     "Permissions-Policy",
 )
 REQUIRED_APACHE_TOKENS = (
-    "RewriteRule ^ https://www.alo186.com%{REQUEST_URI}",
+    "RewriteRule ^ https://alo186.com%{REQUEST_URI}",
     "Cihaz hasarı başvuru süresi HTML yanıt katmanında değiştirilmez",
     "ForceType text/css",
 )
@@ -164,7 +164,7 @@ def smoke(bundle: Path, repo_root: Path) -> dict:
         if parser.canonical != expected:
             failures.append(f"Canonical eşleşmiyor: {route['canonicalPath']} → {parser.canonical!r}")
         if LEGACY_HOST in html:
-            failures.append(f"Eski apex origin route HTML içinde kaldı: {route['canonicalPath']}")
+            failures.append(f"Eski www origin route HTML içinde kaldı: {route['canonicalPath']}")
         for context in stale_damage_application_contexts(html):
             failures.append(f"{route['canonicalPath']}: eski cihaz hasarı başvuru süresi → {context}")
         for reference in parser.assets:

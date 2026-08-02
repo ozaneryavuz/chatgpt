@@ -66,7 +66,7 @@ assert.match(html,/mum yerine/i);
 assert.doesNotMatch(html,/amazon\.(com|com\.tr)\//i);
 assert.doesNotMatch(html,/type="(?:email|tel|text)"/i);
 assert.match(manifest,/alo186\/hesaplama\/acil-aydinlatma-sure-uygunluk\/index\.html/);
-assert.match(sitemap,/https:\/\/www\.alo186\.com\/hesaplama\/acil-aydinlatma-sure-uygunluk\//);
+assert.match(sitemap,/https:\/\/alo186\.com\/hesaplama\/acil-aydinlatma-sure-uygunluk\//);
 assert.equal(catalog.getCategory('emergency_light').affiliatePolicy,'after_tool');
 assert.match(catalog.getCategory('emergency_light').nextStepUrl,/acil-aydinlatma-sure-uygunluk/);
 

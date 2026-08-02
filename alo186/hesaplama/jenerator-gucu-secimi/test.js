@@ -72,7 +72,7 @@ assert.match(hub, /\.\/jenerator-gucu-secimi\//);
 assert.match(portal, /href="\/hesaplama\/jenerator-gucu-secimi\//);
 assert.doesNotMatch(portal, /href="\.\/hesaplama\/jenerator-gucu-secimi\//);
 assert.match(manifest, /alo186\/hesaplama\/jenerator-gucu-secimi\/index\.html/);
-assert.match(sitemap, /https:\/\/www\.alo186\.com\/hesaplama\/jenerator-gucu-secimi\//);
+assert.match(sitemap, /https:\/\/alo186\.com\/hesaplama\/jenerator-gucu-secimi\//);
 assert.ok(catalog.getCategory('generator'));
 assert.equal(catalog.getCategory('generator').mode, 'guide');
 assert.equal(catalog.getCategory('generator').risk, 'safety');

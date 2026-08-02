@@ -169,7 +169,7 @@ for (const [name, basePath] of [['custom', ''], ['project', '/chatgpt']]) {
   const published = fs.readFileSync(page, 'utf8');
   assert(published.includes('Jeneratör Yakıt Tüketimi'));
   const sitemap = fs.readFileSync(path.join(target, 'sitemap.xml'), 'utf8');
-  assert(sitemap.includes(`https://alo186.com${ROUTE}`) || sitemap.includes(`https://www.alo186.com${ROUTE}`));
+  assert(sitemap.includes(`https://alo186.com${ROUTE}`) || sitemap.includes(`https://alo186.com${ROUTE}`));
   const searchIndex = fs.readFileSync(path.join(target, 'arama/search-index.json'), 'utf8');
   assert(searchIndex.includes(ROUTE));
 }

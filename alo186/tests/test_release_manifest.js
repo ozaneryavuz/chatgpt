@@ -7,8 +7,10 @@ const manifestPath=path.join(repoRoot,'alo186/deployment/routing-manifest.json')
 const manifest=JSON.parse(fs.readFileSync(manifestPath,'utf8'));
 const sitemap=fs.readFileSync(path.join(repoRoot,'alo186/sitemap.xml'),'utf8');
 const hub=fs.readFileSync(path.join(repoRoot,'alo186/index.html'),'utf8');
+const canonicalHost='https://alo186.com';
+const legacyHost='https://www.alo186.com';
 
-assert.strictEqual(manifest.canonicalHost,'https://www.alo186.com');
+assert.strictEqual(manifest.canonicalHost,canonicalHost);
 assert(manifest.routes.length>=13,'Yayın manifestinde beklenen çekirdek rotalar bulunmalı.');
 
 const paths=manifest.routes.map(x=>x.canonicalPath);
@@ -19,9 +21,9 @@ for(const route of manifest.routes){
   assert(fs.existsSync(sourcePath),`Kaynak dosya bulunamadı: ${route.source}`);
   const html=fs.readFileSync(sourcePath,'utf8');
   const canonical=route.canonicalUrl||`${manifest.canonicalHost}${route.canonicalPath}`;
-  const liveCanonical=canonical.replace('https://www.alo186.com','https://alo186.com');
-  const sourceCanonicalMatches=[canonical,liveCanonical].some(value=>html.includes(`rel="canonical" href="${value}"`)||html.includes(`href="${value}" rel="canonical"`));
-  assert(sourceCanonicalMatches,`Canonical eşleşmiyor: ${route.source} → ${canonical} veya ${liveCanonical}`);
+  const legacyCanonical=canonical.replace(canonicalHost,legacyHost);
+  const sourceCanonicalMatches=[canonical,legacyCanonical].some(value=>html.includes(`rel="canonical" href="${value}"`)||html.includes(`href="${value}" rel="canonical"`));
+  assert(sourceCanonicalMatches,`Canonical eşleşmiyor: ${route.source} → ${canonical} veya ${legacyCanonical}`);
   if(route.includeInSitemap!==false){
     assert(sitemap.includes(`<loc>${canonical}</loc>`),`Sitemap rotası eksik: ${canonical}`);
     assert(canonical.startsWith(manifest.canonicalHost),`Sitemap rotası canonicalHost altında olmalı: ${canonical}`);
@@ -38,7 +40,8 @@ for(const stale of ['./turkiye-arama/','./karar-motoru/','./urun-eslestirme/','.
 }
 
 const robots=fs.readFileSync(path.join(repoRoot,'alo186/robots.txt'),'utf8');
-assert(robots.includes('Sitemap: https://www.alo186.com/sitemap.xml'));
+assert(robots.includes(`Sitemap: ${canonicalHost}/sitemap.xml`));
+assert(!robots.includes(`Sitemap: ${legacyHost}/sitemap.xml`));
 assert(robots.includes('Allow: /'));
 
-console.log('ALO186 yayın manifesti, legacy/live canonical geçişi, portal bağlantıları ve sitemap testleri başarılı.');
+console.log('ALO186 yayın manifesti, apex canonical sözleşmesi, portal bağlantıları ve sitemap testleri başarılı.');

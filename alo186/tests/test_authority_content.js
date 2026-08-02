@@ -127,7 +127,7 @@ assert.strictEqual(routing.routes.filter(route=>route.type==='article').length,7
 assert(portal.includes('kaynak doğrulamalı rehberler'),'Portal kaynak doğrulamalı rehber ailesini görünür göstermeli; routing ve sitemap tam makale envanterini doğrular.');
 for(const article of articles){
   const canonicalPath=`/haberler/${article.slug}`;
-  assert(sitemap.includes(`https://www.alo186.com${canonicalPath}`),`Sitemap eksik: ${article.slug}`);
+  assert(sitemap.includes(`${routing.canonicalHost}${canonicalPath}`),`Sitemap eksik: ${article.slug}`);
   assert(routing.routes.some(route=>route.canonicalPath===canonicalPath&&route.type==='article'),`Routing manifest eksik: ${article.slug}`);
   if(!article.portalOptional){
     assert(portal.includes(`href="${canonicalPath}"`),`Portal kartı eksik: ${article.slug}`);

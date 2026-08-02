@@ -8,7 +8,7 @@ const repoRoot = path.resolve(__dirname, '../..');
 const read = (relative) => fs.readFileSync(path.join(repoRoot, relative), 'utf8');
 
 const route = '/hesaplama/cozum-sonucu/';
-const canonical = `https://www.alo186.com${route}`;
+const sourceCanonical = `https://www.alo186.com${route}`;
 const toolHtml = read('alo186/hesaplama/cozum-sonucu/index.html');
 const toolCore = read('alo186/hesaplama/cozum-sonucu/core.js');
 const toolApp = read('alo186/hesaplama/cozum-sonucu/app.js');
@@ -19,12 +19,13 @@ const workshopApp = read('alo186/kesinti-hazirlik-atolyesi/app.js');
 const productJourney = read('alo186/urun-eslestirme/journey-retention.js');
 const manifest = JSON.parse(read('alo186/deployment/routing-manifest.json'));
 const sitemap = read('alo186/sitemap.xml');
+const sitemapCanonical = `${manifest.canonicalHost}${route}`;
 
 assert(manifest.version >= 28, 'Routing manifest closed-loop sürümü v28 veya üzeri olmalı.');
 assert(manifest.routes.some((item) => item.source === 'alo186/hesaplama/cozum-sonucu/index.html' && item.canonicalPath === route && item.type === 'tool'), 'Çözüm sonucu rotası routing manifestte eksik.');
-assert(sitemap.includes(`<loc>${canonical}</loc>`), 'Çözüm sonucu rotası sitemapte eksik.');
+assert(sitemap.includes(`<loc>${sitemapCanonical}</loc>`), 'Çözüm sonucu rotası sitemapte eksik.');
 
-assert(toolHtml.includes(`rel="canonical" href="${canonical}"`), 'Çözüm sonucu canonical eksik.');
+assert(toolHtml.includes(`rel="canonical" href="${sourceCanonical}"`), 'Çözüm sonucu canonical eksik.');
 assert(toolHtml.includes('WebApplication'), 'WebApplication schema eksik.');
 assert(toolHtml.includes('FAQPage'), 'FAQPage schema eksik.');
 assert(toolHtml.includes('Satın alma gerekmedi'), 'Satın almama kapalı uçlu seçeneği eksik.');

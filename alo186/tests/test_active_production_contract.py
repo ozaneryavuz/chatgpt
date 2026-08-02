@@ -107,11 +107,11 @@ def main() -> None:
     ):
         assert token in static_smoke, f"Static smoke public-artifact hygiene missing: {token}"
 
-    # Canonical host policy is www everywhere and live smoke verifies apex redirect.
-    assert "https://www.alo186.com" in apache
-    assert "https://www.alo186.com" in builder
-    assert "apex-redirect" in live_smoke
+    # Canonical host policy is apex everywhere and live smoke verifies www redirect.
+    assert "https://alo186.com" in apache
     assert "https://alo186.com" in builder
+    assert "www-redirect" in live_smoke
+    assert "https://www.alo186.com" in builder
 
     print(
         "PASS: active ALO186 production builder, 30-day legal deadline, public artifact "
