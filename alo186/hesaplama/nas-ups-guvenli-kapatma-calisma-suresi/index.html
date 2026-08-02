@@ -44,7 +44,8 @@ function eventPush(name, detail = {}) {
 }
 function readBoundedInput(id) {
   const input = $(id);
-  const value = Number(input.value);
+  const raw = input.value.trim();
+  const value = raw === '' ? NaN : Number(raw);
   const min = input.min === '' ? -Infinity : Number(input.min);
   const max = input.max === '' ? Infinity : Number(input.max);
   const valid = Number.isFinite(value) && value >= min && value <= max;
