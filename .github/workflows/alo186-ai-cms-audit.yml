@@ -15,11 +15,11 @@ concurrency:
 
 jobs:
   audit:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -53,17 +53,18 @@ jobs:
             echo '- Denetlenenler: kaynak erişim yaşı, primary source, kalite puanı, canonical çakışma, iç linkler, kanibalizasyon, kişisel veri ve risk/commerce sınırı.'
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: alo186-ai-cms-weekly-audit-${{ github.run_id }}
           path: /tmp/alo186-ai-cms-audit/
           if-no-files-found: error
           retention-days: 90
+          include-hidden-files: false
 
       - name: Başarısızlık issue oluştur veya güncelle
         if: steps.audit.outcome == 'failure'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const fs = require('fs');
@@ -90,7 +91,7 @@ jobs:
 
       - name: İyileşince açık denetim issue'sunu kapat
         if: steps.audit.outcome == 'success'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const title = '[AI CMS] Kaynak veya yayın denetimi başarısız';
