@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'alo186/deployment/inject_live_quality_v218.py'
+      - 'alo186/deployment/inject_live_quality_v218_compat.py'
       - 'alo186/deployment/guard_commerce_routes_v3.py'
       - 'alo186/tests/test_live_quality_v218.py'
       - '.github/workflows/alo186-live-quality-v218.yml'
@@ -11,6 +12,7 @@ on:
     branches: [main]
     paths:
       - 'alo186/deployment/inject_live_quality_v218.py'
+      - 'alo186/deployment/inject_live_quality_v218_compat.py'
       - 'alo186/deployment/guard_commerce_routes_v3.py'
       - 'alo186/tests/test_live_quality_v218.py'
       - '.github/workflows/alo186-live-quality-v218.yml'
@@ -102,6 +104,8 @@ jobs:
               assert receipt['personalDataCollectionAdded'] is False
               assert receipt['officialInstitutionClaimed'] is False
               assert receipt['newCommerceLinksAdded'] is False
+              assert receipt['skipLinks']['missingMain']==0
+              assert receipt['skipLinks']['injected'] + receipt['skipLinks']['targetRepaired'] + receipt['skipLinks']['alreadyValid']==9
               audit=receipt['audit']
               assert audit['criticalPageCount']==9
               assert audit['criticalBrokenInternalLinkCount']==0
