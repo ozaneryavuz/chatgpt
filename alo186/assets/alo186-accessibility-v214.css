@@ -1,0 +1,155 @@
+:root{
+  --alo186-a11y-focus:#ffbf47;
+  --alo186-a11y-112:#a61f2d;
+  --alo186-a11y-186:#0756d9;
+  --alo186-a11y-media:#edf3f8;
+}
+
+/* Critical navigation and action surfaces receive a 44 CSS px touch target. */
+:where(
+  .top nav a,
+  .site-header nav a,
+  .nav a,
+  .breadcrumbs a,
+  .breadcrumb a,
+  nav[aria-label*="breadcrumb" i] a,
+  nav[aria-label*="içerik yolu" i] a,
+  nav[aria-label*="sayfa yolu" i] a,
+  nav[aria-label*="makale gezinme" i] a,
+  .toc a,
+  .sources a,
+  .source-card a,
+  .article-card > a,
+  [data-article-card] > a,
+  .news-card > a,
+  [data-news-card] > a,
+  .card > b > a,
+  .footer-links a,
+  .site-footer a,
+  footer nav a,
+  footer .wrap a
+){
+  display:inline-flex;
+  min-block-size:44px;
+  align-items:center;
+  padding-block:.45rem;
+}
+
+:where(
+  .top nav,
+  .site-header nav,
+  .nav,
+  .breadcrumbs,
+  .breadcrumb,
+  nav[aria-label*="breadcrumb" i],
+  nav[aria-label*="içerik yolu" i],
+  nav[aria-label*="sayfa yolu" i],
+  .footer-links,
+  footer nav
+){
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+/* Emergency telephone links must never remain tiny inline targets. */
+a[href^="tel:112"],
+a[href^="tel:186"]{
+  display:inline-flex;
+  min-inline-size:44px;
+  min-block-size:44px;
+  align-items:center;
+  justify-content:center;
+  padding:.6rem .9rem;
+  border-radius:10px;
+  color:#fff!important;
+  font-weight:850;
+  line-height:1.2;
+  text-decoration:none;
+  text-align:center;
+}
+a[href^="tel:112"]{background:var(--alo186-a11y-112)}
+a[href^="tel:186"]{background:var(--alo186-a11y-186)}
+a[href^="tel:112"]:hover,
+a[href^="tel:186"]:hover{filter:brightness(.9)}
+
+:where(
+  input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea,
+  summary,
+  [role="button"],
+  [data-filter],
+  [data-chip],
+  .filter-chip,
+  .query-chip,
+  .popular-searches button,
+  .search-chips button
+){
+  min-block-size:44px;
+}
+:where(summary,[role="button"]){touch-action:manipulation}
+
+:where(.article-card,.news-card,[data-article-card],[data-news-card]) > a{
+  margin-block-start:auto;
+  padding-inline:.5rem;
+  font-weight:800;
+}
+
+/* Reserve space only for content media lacking intrinsic dimensions. */
+:where(
+  main figure > img,
+  main .hero-image img,
+  main .hero-media img,
+  main .article-image img,
+  main .article-media img,
+  main .news-card img,
+  main .article-card img,
+  main [data-article-media] img,
+  main [data-card-media] img
+):not([width]),
+:where(
+  main figure > img,
+  main .hero-image img,
+  main .hero-media img,
+  main .article-image img,
+  main .article-media img,
+  main .news-card img,
+  main .article-card img,
+  main [data-article-media] img,
+  main [data-card-media] img
+):not([height]){
+  display:block;
+  inline-size:100%;
+  aspect-ratio:16 / 9;
+  object-fit:cover;
+  background:var(--alo186-a11y-media);
+}
+
+:where(a,button,input,select,textarea,summary,[role="button"],[tabindex]):focus-visible{
+  outline:3px solid var(--alo186-a11y-focus)!important;
+  outline-offset:3px!important;
+}
+
+@media(max-width:390px){
+  :where(.top nav,.site-header nav,.nav,.breadcrumbs,.breadcrumb,.footer-links,footer nav){
+    row-gap:4px;
+  }
+  :where(.top nav a,.site-header nav a,.nav a,.footer-links a,.site-footer a,footer nav a){
+    max-inline-size:100%;
+    overflow-wrap:anywhere;
+  }
+  a[href^="tel:112"],a[href^="tel:186"]{inline-size:100%}
+}
+
+@media(forced-colors:active){
+  a[href^="tel:112"],a[href^="tel:186"]{
+    border:2px solid ButtonText;
+    background:ButtonFace;
+    color:ButtonText!important;
+    forced-color-adjust:auto;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  a[href^="tel:112"],a[href^="tel:186"]{transition:none}
+}
