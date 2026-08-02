@@ -39,15 +39,24 @@ def main() -> None:
     bootstrap = BOOTSTRAP.read_text(encoding="utf-8")
     assert "actions/deploy-pages@" not in bootstrap
     assert "actions: write" in bootstrap
+    assert "deployments: read" in bootstrap
     assert "group: alo186-pages-production" in bootstrap
     assert "cancel-in-progress: false" in bootstrap
     assert "containsExpectedCommit" in bootstrap
     assert "exactCommitReceiptAvailable" in bootstrap
+    assert "origin_probe_ok" in bootstrap
+    assert "steps.origin_state.outputs.origin_probe_ok == 'true'" in bootstrap
+    assert "pages_deployment_succeeded" in bootstrap
+    assert "listDeployments" in bootstrap
+    assert "listDeploymentStatuses" in bootstrap
     assert "waiting_for_dns_cutover:" in bootstrap
+    assert "origin_probe_failed:" in bootstrap
     assert "alo186-dns-cutover-required" in bootstrap
     assert "Otomatik Pages yeniden-dispatch: **durduruldu**" in bootstrap
     assert "dispatch_pages:" in bootstrap
     assert "needs.probe.outputs.hosting_mode == 'github-pages'" in bootstrap
+    assert "needs.probe.outputs.pages_deployment_succeeded != 'true'" in bootstrap
+    assert "needs.probe.outputs.pages_deployment_succeeded == 'true'" in bootstrap
     assert "workflow_id: 'alo186-github-pages.yml'" in bootstrap
     assert "ref: 'main'" in bootstrap
 
@@ -61,6 +70,8 @@ def main() -> None:
                 "bootstrapRole": "probe-state-machine-and-dispatch",
                 "externalDnsRedispatchLoopClosed": True,
                 "hostingAuthorityReceiptRequired": True,
+                "firstPagesArtifactDeadlockClosed": True,
+                "invalidOriginCannotMarkSitesCurrent": True,
             },
             ensure_ascii=False,
         )
