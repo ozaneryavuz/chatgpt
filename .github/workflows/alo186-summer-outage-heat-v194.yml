@@ -1,0 +1,69 @@
+name: ALO186 yaz kesintisi ve sıcak hava v194
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/elektrik-kesintisi-sicak-hava-usb-vantilator-calisma-suresi/**'
+      - 'alo186/amazon-elektrik-urunleri/sarjli-vantilator-usb-fan-sicak-hava-secici/**'
+      - 'alo186/sektor-rehberi/yaz-elektrik-kesintisi-sicak-hava-30-90-gun-hazirlik-merkezi/**'
+      - 'alo186/audits/summer-outage-heat-growth-v194-2026-08-02.md'
+      - 'alo186/deployment/routing-overlays/194-summer-outage-heat-growth.json'
+      - 'alo186/tests/test_summer_outage_heat_growth_v194.py'
+      - '.github/workflows/alo186-summer-outage-heat-v194.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/elektrik-kesintisi-sicak-hava-usb-vantilator-calisma-suresi/**'
+      - 'alo186/amazon-elektrik-urunleri/sarjli-vantilator-usb-fan-sicak-hava-secici/**'
+      - 'alo186/sektor-rehberi/yaz-elektrik-kesintisi-sicak-hava-30-90-gun-hazirlik-merkezi/**'
+      - 'alo186/audits/summer-outage-heat-growth-v194-2026-08-02.md'
+      - 'alo186/deployment/routing-overlays/194-summer-outage-heat-growth.json'
+      - 'alo186/tests/test_summer_outage_heat_growth_v194.py'
+      - '.github/workflows/alo186-summer-outage-heat-v194.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Fail-closed içerik ve ticari güven sözleşmesi
+        run: |
+          set -euo pipefail
+          python -m py_compile alo186/tests/test_summer_outage_heat_growth_v194.py
+          python alo186/tests/test_summer_outage_heat_growth_v194.py
+      - name: Sayfa JavaScript sözdizimi
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import re
+          import subprocess
+          import tempfile
+          from pathlib import Path
+
+          pages = [
+              Path('alo186/hesaplama/elektrik-kesintisi-sicak-hava-usb-vantilator-calisma-suresi/index.html'),
+              Path('alo186/amazon-elektrik-urunleri/sarjli-vantilator-usb-fan-sicak-hava-secici/index.html'),
+              Path('alo186/sektor-rehberi/yaz-elektrik-kesintisi-sicak-hava-30-90-gun-hazirlik-merkezi/index.html'),
+          ]
+          for page in pages:
+              html = page.read_text(encoding='utf-8')
+              scripts = re.findall(r'<script(?![^>]*application/ld\+json)[^>]*>(.*?)</script>', html, re.S | re.I)
+              assert scripts, f'javascript missing: {page}'
+              for index, script in enumerate(scripts):
+                  target = Path(tempfile.gettempdir()) / f'{page.parent.name}-{index}.js'
+                  target.write_text(script, encoding='utf-8')
+                  subprocess.run(['node', '--check', str(target)], check=True)
+          PY
+      - name: Routing overlay JSON
+        run: python -m json.tool alo186/deployment/routing-overlays/194-summer-outage-heat-growth.json >/dev/null
