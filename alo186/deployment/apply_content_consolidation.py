@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 from html import escape
 from pathlib import Path
 
-CANONICAL_HOST = "https://www.alo186.com"
+CANONICAL_HOST = "https://alo186.com"
 DEFAULT_CONFIG = Path(__file__).with_name("content-consolidations.json")
 MARKER_START = "# BEGIN ALO186 CONTENT CONSOLIDATIONS"
 MARKER_END = "# END ALO186 CONTENT CONSOLIDATIONS"
