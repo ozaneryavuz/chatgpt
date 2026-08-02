@@ -1,0 +1,21 @@
+{
+  "version": 200,
+  "generatedAt": "2026-08-02",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/guvenlik-kamerasi-nvr-poe-ups-calisma-suresi/index.html",
+      "canonicalPath": "/hesaplama/guvenlik-kamerasi-nvr-poe-ups-calisma-suresi/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/guvenlik-kamerasi-nvr-poe-ups-secici/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/guvenlik-kamerasi-nvr-poe-ups-secici/",
+      "type": "commerce-guide"
+    },
+    {
+      "source": "alo186/sektor-rehberi/guvenlik-kamerasi-kesinti-30-90-gun-test-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/guvenlik-kamerasi-kesinti-30-90-gun-test-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
