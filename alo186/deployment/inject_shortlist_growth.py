@@ -217,11 +217,21 @@ def reconcile_sitemap_with_release(site: Path) -> dict:
     release_path=site / "alo186-release.json"
     if not sitemap_path.is_file() or not release_path.is_file():
         raise FileNotFoundError("Sitemap veya release envanteri bulunamadı")
-    tree=ET.parse(sitemap_path)
-    root=tree.getroot()
-    namespace=root.tag.split("}")[0].strip("{") if "}" in root.tag else ""
-    ns=f"{{{namespace}}}" if namespace else ""
     release=json.loads(release_path.read_text(encoding="utf-8"))
+    recovered_malformed=False
+    try:
+        tree=ET.parse(sitemap_path)
+        root=tree.getroot()
+        namespace=root.tag.split("}")[0].strip("{") if "}" in root.tag else ""
+    except ET.ParseError:
+        # The release inventory is the fail-closed source of truth. A previous
+        # legacy growth injector may leave partially written XML; rebuild only
+        # from active canonical routes instead of publishing a broken sitemap.
+        namespace="http://www.sitemaps.org/schemas/sitemap/0.9"
+        root=ET.Element(f"{{{namespace}}}urlset")
+        tree=ET.ElementTree(root)
+        recovered_malformed=True
+    ns=f"{{{namespace}}}" if namespace else ""
     def normalized_path(value: str) -> str:
         parsed=urlsplit(str(value or "")).path or "/"
         return parsed.rstrip("/") or "/"
@@ -247,7 +257,7 @@ def reconcile_sitemap_with_release(site: Path) -> dict:
     ET.register_namespace("",namespace)
     ET.indent(tree,space="  ")
     tree.write(sitemap_path,encoding="utf-8",xml_declaration=True)
-    return {"activeRouteCount":len(release.get("routes",[])),"addedCount":len(added),"added":added,"policy":"active-release-routes-must-exist-in-sitemap"}
+    return {"activeRouteCount":len(release.get("routes",[])),"addedCount":len(added),"added":added,"recoveredMalformedSitemap":recovered_malformed,"policy":"active-release-routes-must-exist-in-sitemap"}
 
 
 def recompute(site: Path) -> None:
