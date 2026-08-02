@@ -1,0 +1,221 @@
+name: ALO186 canlı teknik kalite v214
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/**'
+      - '.github/workflows/alo186-live-quality-v214.yml'
+      - '.github/workflows/alo186-github-pages.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/**'
+      - '.github/workflows/alo186-live-quality-v214.yml'
+      - '.github/workflows/alo186-github-pages.yml'
+  workflow_dispatch:
+  workflow_run:
+    workflows: ['ALO186 GitHub Pages — sunucusuz canlı yayın']
+    types: [completed]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-live-quality-v214-${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-artifact:
+    if: github.event_name != 'workflow_run'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+
+      - name: Kaynak ve regresyon sözleşmeleri
+        shell: bash
+        run: |
+          set -euo pipefail
+          python alo186/tests/test_live_quality_hardening.py
+          python alo186/tests/test_live_quality_completion_v214.py
+          python alo186/tests/test_live_domain_integration_manifest.py
+          python alo186/tests/test_pages_single_publisher.py
+          python alo186/tests/test_ga4_consent_integration.py
+          python alo186/tests/test_affiliate_measurement_v211.py
+          python alo186/tests/device_damage_deadline_guard.py
+          python -m py_compile alo186/deployment/inject_live_quality_completion_v214.py
+          python -m py_compile alo186/deployment/verify_live_copy_v214.py
+          python -m py_compile alo186/deployment/audit_lighthouse_v214.py
+          python -m py_compile alo186/deployment/guard_commerce_routes_v3.py
+
+      - name: Canonical statik siteyi oluştur
+        shell: bash
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-v214-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-v214-canonical
+
+      - name: Custom-domain ve project-path final artifactlarını doğrula
+        shell: bash
+        run: |
+          set -euo pipefail
+          for spec in 'custom|' 'project|/chatgpt'; do
+            name=${spec%%|*}
+            base=${spec#*|}
+            site="/tmp/alo186-v214-${name}"
+            rm -rf "$site"
+            cp -a /tmp/alo186-v214-canonical "$site"
+            python alo186/deployment/prepare_github_pages.py \
+              --site "$site" \
+              --base-path "$base" \
+              --repository "$GITHUB_REPOSITORY" \
+              --commit "$GITHUB_SHA"
+            python alo186/deployment/inject_outcome_runtime.py \
+              --site "$site" \
+              --base-path "$base"
+            python alo186/deployment/smoke_github_pages.py \
+              --site "$site" \
+              --base-path "$base"
+            python alo186/deployment/inject_contextual_affiliate_growth_v177.py \
+              --site "$site" \
+              --base-path "$base"
+            python alo186/deployment/inject_live_quality_hardening_v2.py \
+              --site "$site" \
+              --base-path "$base"
+            python alo186/deployment/inject_home_affiliate_banner_v209.py \
+              --site "$site" \
+              --base-path "$base"
+            python alo186/deployment/inject_affiliate_intent_router_v210.py \
+              --site "$site" \
+              --base-path "$base"
+            python alo186/deployment/inject_ga4_consent.py \
+              --site "$site" \
+              --base-path "$base" \
+              --measurement-id ''
+            python alo186/deployment/inject_affiliate_measurement_v211.py \
+              --site "$site" \
+              --base-path "$base"
+            node --check "$site/assets/affiliate-measurement-v211.js"
+            python alo186/deployment/guard_commerce_routes_v3.py \
+              --site "$site" \
+              | tee "/tmp/alo186-v214-${name}-guard.json"
+            python alo186/deployment/smoke_github_pages.py \
+              --site "$site" \
+              --base-path "$base"
+            python - <<PY
+          import json
+          from pathlib import Path
+          site=Path('$site')
+          quality=json.loads((site/'live-quality-v214.json').read_text(encoding='utf-8'))
+          release=json.loads((site/'pages-release.json').read_text(encoding='utf-8'))
+          assert quality['ok'] is True
+          assert quality['internalLinks']['brokenInternalLinks']==0
+          assert quality['searchDiscovery']['sitemapCanonicalMismatches']==0
+          assert quality['criticalPages']['criticalPageCount']==9
+          assert release['liveQualityCompletionV214']['version']==214
+          assert release['liveQualityCompletionV214']['personalDataCollectionAdded'] is False
+          assert release['liveQualityCompletionV214']['officialInstitutionClaimed'] is False
+          PY
+          done
+
+      - name: Mobil ve masaüstü Lighthouse laboratuvar ölçümü
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m http.server 4173 --directory /tmp/alo186-v214-custom >/tmp/alo186-v214-server.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 30); do
+            if curl --silent --fail http://127.0.0.1:4173/ >/dev/null; then break; fi
+            sleep 1
+          done
+          chrome_flags='--headless --no-sandbox --disable-dev-shm-usage'
+          npx --yes lighthouse@12.8.2 http://127.0.0.1:4173/ \
+            --quiet --chrome-flags="$chrome_flags" \
+            --only-categories=performance,accessibility,best-practices,seo \
+            --output=json --output-path=/tmp/lighthouse-mobile-root.json
+          npx --yes lighthouse@12.8.2 http://127.0.0.1:4173/elektrik-portali/ \
+            --quiet --chrome-flags="$chrome_flags" \
+            --only-categories=performance,accessibility,best-practices,seo \
+            --output=json --output-path=/tmp/lighthouse-mobile-portal.json
+          npx --yes lighthouse@12.8.2 http://127.0.0.1:4173/ \
+            --quiet --preset=desktop --chrome-flags="$chrome_flags" \
+            --only-categories=performance,accessibility,best-practices,seo \
+            --output=json --output-path=/tmp/lighthouse-desktop-root.json
+          npx --yes lighthouse@12.8.2 http://127.0.0.1:4173/elektrik-portali/ \
+            --quiet --preset=desktop --chrome-flags="$chrome_flags" \
+            --only-categories=performance,accessibility,best-practices,seo \
+            --output=json --output-path=/tmp/lighthouse-desktop-portal.json
+          python alo186/deployment/audit_lighthouse_v214.py \
+            --report mobile-root=/tmp/lighthouse-mobile-root.json \
+            --report mobile-portal=/tmp/lighthouse-mobile-portal.json \
+            --report desktop-root=/tmp/lighthouse-desktop-root.json \
+            --report desktop-portal=/tmp/lighthouse-desktop-portal.json \
+            --receipt /tmp/alo186-lighthouse-v214.json
+
+      - name: Teknik kalite artifactını sakla
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: alo186-live-quality-v214
+          path: |
+            /tmp/alo186-v214-custom
+            /tmp/alo186-v214-project/live-quality-v214.json
+            /tmp/alo186-v214-custom-guard.json
+            /tmp/alo186-v214-project-guard.json
+            /tmp/lighthouse-mobile-root.json
+            /tmp/lighthouse-mobile-portal.json
+            /tmp/lighthouse-desktop-root.json
+            /tmp/lighthouse-desktop-portal.json
+            /tmp/alo186-lighthouse-v214.json
+            /tmp/alo186-v214-server.log
+          if-no-files-found: warn
+          include-hidden-files: true
+          retention-days: 30
+
+  verify-live:
+    if: >-
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Canlı ana sayfa, portal, release, robots ve sitemap kabulü
+        run: |
+          set -euo pipefail
+          python alo186/deployment/verify_live_copy_v214.py \
+            --origin https://alo186.com \
+            --expected-commit '${{ github.event.workflow_run.head_sha }}' \
+            --attempts 36 \
+            --sleep-seconds 10 \
+            --receipt /tmp/alo186-live-copy-v214.json
+
+      - name: Canlı kalite makbuzunu sakla
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: alo186-live-copy-v214-${{ github.event.workflow_run.head_sha }}
+          path: /tmp/alo186-live-copy-v214.json
+          if-no-files-found: warn
+          retention-days: 45
