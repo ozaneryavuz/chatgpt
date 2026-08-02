@@ -1,0 +1,21 @@
+{
+  "version": 199,
+  "generatedAt": "2026-08-02",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/mobil-hotspot-yedek-internet-veri-gb-batarya-sure-hesabi/index.html",
+      "canonicalPath": "/hesaplama/mobil-hotspot-yedek-internet-veri-gb-batarya-sure-hesabi/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/mobil-hotspot-4g-5g-yedek-internet-secici/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/mobil-hotspot-4g-5g-yedek-internet-secici/",
+      "type": "commerce-guide"
+    },
+    {
+      "source": "alo186/sektor-rehberi/mobil-internet-failover-30-90-gun-test-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/mobil-internet-failover-30-90-gun-test-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
