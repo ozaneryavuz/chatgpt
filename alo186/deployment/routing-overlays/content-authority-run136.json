@@ -1,0 +1,32 @@
+{
+  "version": 218,
+  "generatedAt": "2026-08-02",
+  "source": "ALO186 content authority run136",
+  "routes": [
+    {
+      "path": "/hesaplama/ev-enerji-depolama-kritik-yuk-plani/",
+      "file": "hesaplama/ev-enerji-depolama-kritik-yuk-plani/index.html",
+      "intent": "Kritik yük gücü, kalkış gücü, hedef süre, verim ve enerji rezervinden ev bataryası ile inverter ön boyutlandırması ve güvenli ada modu kapsamı oluşturmak",
+      "canonicalPath": "/hesaplama/ev-enerji-depolama-kritik-yuk-plani/",
+      "source": "alo186/hesaplama/ev-enerji-depolama-kritik-yuk-plani/index.html",
+      "type": "calculator"
+    },
+    {
+      "path": "/hesaplama/otel-guc-kalitesi-kayip-hesabi/",
+      "file": "hesaplama/otel-guc-kalitesi-kayip-hesabi/index.html",
+      "intent": "Otel kesinti, gerilim, harmonik, yeniden başlatma, personel ve cihaz hasarı kayıtlarını yıllık ekonomik kayba ve ölçüm önceliğine dönüştürmek",
+      "canonicalPath": "/hesaplama/otel-guc-kalitesi-kayip-hesabi/",
+      "source": "alo186/hesaplama/otel-guc-kalitesi-kayip-hesabi/index.html",
+      "type": "business-tool"
+    },
+    {
+      "path": "/hesaplama/bess-vpp-gelir-hazirligi/",
+      "file": "hesaplama/bess-vpp-gelir-hazirligi/index.html",
+      "intent": "BESS telemetri, ortak saat, sayaç mutabakatı, SoC rezervi, dispatch, performans testi, siber erişim ve toplayıcı sözleşme hazırlığını teknik skora dönüştürmek",
+      "canonicalPath": "/hesaplama/bess-vpp-gelir-hazirligi/",
+      "source": "alo186/hesaplama/bess-vpp-gelir-hazirligi/index.html",
+      "type": "business-tool"
+    }
+  ],
+  "qualityGate": "alo186/tests/test_authority_content_run136.py"
+}
