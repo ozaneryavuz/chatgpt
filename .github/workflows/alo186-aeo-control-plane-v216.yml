@@ -91,6 +91,7 @@ jobs:
             python alo186/deployment/aeo_control_plane_v216.py validate \
               --site "$site" \
               --repo-root . \
+              --require-release-proof \
               --report "/tmp/alo186-aeo-v216-${name}-report.json"
             python alo186/deployment/smoke_github_pages.py \
               --site "$site" \
