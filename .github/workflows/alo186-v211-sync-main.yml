@@ -1,0 +1,49 @@
+name: ALO186 v211 sync main
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/alo186-v211-sync-main.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: alo186-v211-sync-main-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  merge-main:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - name: Ana dalı birleştir ve doğrulanmış 30 günlük içeriği koru
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          TARGET='alo186/haberler/elektrik-kesintisi-gerilim-dalgalanmasi-cihaz-hasari-edas-tazminat-basvurusu/index.html'
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git fetch origin main "$HEAD_REF"
+          set +e
+          git merge --no-ff --no-commit origin/main
+          rc=$?
+          set -e
+          if [ "$rc" -ne 0 ]; then
+            conflicts="$(git diff --name-only --diff-filter=U)"
+            test "$conflicts" = "$TARGET"
+            git checkout --ours -- "$TARGET"
+            git add "$TARGET"
+          fi
+          test -z "$(git diff --name-only --diff-filter=U)"
+          grep -q 'zararın ortaya çıktığı tarihten itibaren 30 gün içinde' "$TARGET"
+          ! grep -Eqi '10 iş günlük|on iş günü içinde dağıtım şirketine talep|Ten Business Days' "$TARGET"
+          git commit -m 'Merge main into ALO186 affiliate measurement v211'
+          git push origin HEAD:"$HEAD_REF"
