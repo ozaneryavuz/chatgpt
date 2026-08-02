@@ -1,0 +1,23 @@
+{
+  "version": 199,
+  "generatedAt": "2026-08-02",
+  "source": "ALO186 content authority run123",
+  "routes": [
+    {
+      "path": "/haberler/ges-inverter-afci-dc-arc-fault-seri-ark-alarmi-teshis",
+      "file": "haberler/ges-inverter-afci-dc-arc-fault-seri-ark-alarmi-teshis/index.html",
+      "intent": "GES inverter AFCI DC Arc Fault seri ark alarmı teşhisi"
+    },
+    {
+      "path": "/haberler/kompanzasyon-harmonik-rezonans-kondansator-reaktor-asiri-akim-teshis",
+      "file": "haberler/kompanzasyon-harmonik-rezonans-kondansator-reaktor-asiri-akim-teshis/index.html",
+      "intent": "kompanzasyon harmonik rezonans kondansatör reaktör aşırı akım teşhisi"
+    },
+    {
+      "path": "/haberler/edas-12-saati-asan-elektrik-kesintisi-tazminati-odeme-kontrolu",
+      "file": "haberler/edas-12-saati-asan-elektrik-kesintisi-tazminati-odeme-kontrolu/index.html",
+      "intent": "EDAŞ 12 saati aşan elektrik kesintisi tazminatı ödeme kontrolü"
+    }
+  ],
+  "qualityGate": "alo186/tests/test_authority_content_run123.py"
+}
