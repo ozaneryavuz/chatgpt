@@ -122,13 +122,13 @@ def test_no_unverified_commercial_claims_or_pressure_language() -> None:
         "en ucuz",
         "en iyi fiyat",
         "sınırlı stok",
-        "hız garantisi",
     ):
         assert phrase not in joined.lower()
     assert not re.search(r"\b\d+[.,]?\d*\s*(?:₺|TL)\b", joined)
     selector = read(ROUTES["selector"]).lower()
     for claim in ("fiyat, stok", "puan", "garanti"):
         assert claim in selector
+    assert "hız veya kesintisiz bağlantı garantisi değildir" in selector
 
 
 def test_audit_documents_required_growth_dimensions() -> None:
