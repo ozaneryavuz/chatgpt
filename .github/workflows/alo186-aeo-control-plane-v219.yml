@@ -1,0 +1,136 @@
+name: ALO186 anonymous institutional AEO v219
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/deployment/aeo_control_plane_v219.py'
+      - 'alo186/deployment/aeo-institutional-v219.css'
+      - 'alo186/deployment/guard_commerce_routes_v3.py'
+      - 'alo186/deployment/routing-overlays/aeo-institutional-v219.json'
+      - 'alo186/yayin-politikasi/**'
+      - 'alo186/aeo/*-v219.json'
+      - 'alo186/tests/test_aeo_control_plane_v219.py'
+      - '.github/workflows/alo186-aeo-control-plane-v219.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/deployment/aeo_control_plane_v219.py'
+      - 'alo186/deployment/aeo-institutional-v219.css'
+      - 'alo186/deployment/guard_commerce_routes_v3.py'
+      - 'alo186/deployment/routing-overlays/aeo-institutional-v219.json'
+      - 'alo186/yayin-politikasi/**'
+      - 'alo186/aeo/*-v219.json'
+      - 'alo186/tests/test_aeo_control_plane_v219.py'
+      - '.github/workflows/alo186-aeo-control-plane-v219.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-aeo-control-plane-v219-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Python ve anonimlik sözleşmesi
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            alo186/deployment/aeo_control_plane_v219.py \
+            alo186/deployment/guard_commerce_routes_v3.py \
+            alo186/tests/test_aeo_control_plane_v219.py
+          python alo186/tests/test_aeo_control_plane_v219.py
+          ! grep -ERIi 'ProfilePage|/uzman/|"@type"[[:space:]]*:[[:space:]]*"Person"' \
+            alo186/deployment/aeo-institutional-v219.css \
+            alo186/deployment/routing-overlays/aeo-institutional-v219.json \
+            alo186/yayin-politikasi \
+            alo186/aeo/intent-registry-v219.json \
+            alo186/aeo/ai-citation-benchmark-v219.json
+          ! grep -Eq 'actions/(upload-pages-artifact|deploy-pages)' .github/workflows/alo186-aeo-control-plane-v219.yml
+
+      - name: Canonical artifact ve AEO kapısı
+        shell: bash
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-aeo-v219-raw \
+            --commit "$GITHUB_SHA"
+          rm -rf /tmp/alo186-aeo-v219-canonical
+          cp -a /tmp/alo186-aeo-v219-raw /tmp/alo186-aeo-v219-canonical
+          python alo186/deployment/aeo_control_plane_v219.py inject \
+            --site /tmp/alo186-aeo-v219-canonical
+          ! grep -ERIi 'ProfilePage|/uzman/|"@type"[[:space:]]*:[[:space:]]*"Person"' \
+            /tmp/alo186-aeo-v219-canonical
+          python alo186/deployment/aeo_control_plane_v219.py validate \
+            --site /tmp/alo186-aeo-v219-canonical \
+            --repo-root . \
+            --report /tmp/alo186-aeo-v219-canonical-report.json
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-aeo-v219-canonical
+
+      - name: Custom domain ve project-path sözleşmesi
+        shell: bash
+        run: |
+          set -euo pipefail
+          for spec in 'custom|' 'project|/chatgpt'; do
+            name=${spec%%|*}
+            base=${spec#*|}
+            site="/tmp/alo186-aeo-v219-${name}"
+            rm -rf "$site"
+            cp -a /tmp/alo186-aeo-v219-raw "$site"
+            python alo186/deployment/prepare_github_pages.py \
+              --site "$site" \
+              --base-path "$base" \
+              --repository "$GITHUB_REPOSITORY" \
+              --commit "$GITHUB_SHA"
+            python alo186/deployment/aeo_control_plane_v219.py inject \
+              --site "$site" \
+              --base-path "$base"
+            ! grep -ERIi 'ProfilePage|/uzman/|"@type"[[:space:]]*:[[:space:]]*"Person"' \
+              "$site"
+            python alo186/deployment/aeo_control_plane_v219.py validate \
+              --site "$site" \
+              --repo-root . \
+              --require-release-proof \
+              --report "/tmp/alo186-aeo-v219-${name}-report.json"
+            python alo186/deployment/smoke_github_pages.py \
+              --site "$site" \
+              --base-path "$base"
+          done
+
+      - name: Kurumsal AEO kanıt özeti
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('/tmp/alo186-aeo-v219-custom-report.json').read_text(encoding='utf-8'))
+          assert report['ok'] is True, report
+          assert report['score'] >= 90, report
+          assert report['metrics']['queryCount'] >= 15, report
+          assert report['metrics']['intentCount'] >= 15, report
+          assert report['metrics']['criticalPagePassCount'] == report['metrics']['criticalPageCount'], report
+          release = report['release']
+          assert release['editorType'] == 'Organization', release
+          assert release['personalProfilePublished'] is False, release
+          assert release['personalContactPublished'] is False, release
+          print(json.dumps({
+              'ok': report['ok'],
+              'score': report['score'],
+              'queries': report['metrics']['queryCount'],
+              'intents': report['metrics']['intentCount'],
+              'criticalPassed': report['metrics']['criticalPagePassCount'],
+              'personalProfilePublished': release['personalProfilePublished'],
+          }, ensure_ascii=False, indent=2))
+          PY

@@ -8,6 +8,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 import guard_commerce_routes_v2 as v2
+import aeo_control_plane_v219 as aeo_institutional
 import inject_affiliate_decision_funnel_v215 as affiliate_decision
 import inject_intent_tools_run135 as intent_tools
 import inject_live_quality_v218_compat as live_quality
@@ -199,17 +200,30 @@ def _checkpoint_base_path(site: Path) -> str:
 
 
 def validate_site(site: Path) -> dict:
-    """Bütün growth enjeksiyonlarından sonra commerce ve live quality'yi fail-closed doğrular."""
+    """Bütün growth enjeksiyonlarından sonra commerce, anonim AEO ve live quality'yi doğrular."""
     resolved = site.resolve()
     base_path = _checkpoint_base_path(resolved)
     decision_result = affiliate_decision.inject(resolved, base_path)
     checkpoint_result = portal_checkpoint.inject(resolved, base_path)
     intent_result = intent_tools.inject(resolved, base_path)
+    aeo_result = aeo_institutional.inject(resolved, base_path)
+    aeo_validation = aeo_institutional.validate(
+        resolved,
+        Path(__file__).resolve().parents[2],
+        require_release_proof=True,
+    )
+    if not aeo_validation["ok"]:
+        raise RuntimeError(
+            "AEO v219 release gate failed: "
+            + "; ".join(aeo_validation.get("errors", []))
+        )
     result = _original_validate_site(resolved)
     quality_result = live_quality.run(resolved, base_path)
     result["affiliateDecisionFunnel"] = decision_result
     result["portalPurchaseCheckpoint"] = checkpoint_result
     result["intentToolsRun135"] = intent_result
+    result["aeoInstitutionalV219"] = aeo_result
+    result["aeoInstitutionalV219Validation"] = aeo_validation
     result["liveQualityV218"] = quality_result
     return result
 

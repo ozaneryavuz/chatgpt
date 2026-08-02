@@ -1,0 +1,44 @@
+.alo-aeo-institutional-v219 {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: min(100%, 72rem);
+  margin: 2.5rem auto 1.25rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid rgba(15, 76, 129, .18);
+  border-radius: .9rem;
+  background: rgba(239, 247, 255, .72);
+  color: #10233d;
+  line-height: 1.45;
+}
+.alo-aeo-institutional-v219__identity { min-width: 0; }
+.alo-aeo-institutional-v219__identity span {
+  display: block;
+  margin-bottom: .15rem;
+  color: #425b76;
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.alo-aeo-institutional-v219__identity strong { display: block; font-size: 1rem; }
+.alo-aeo-institutional-v219__identity a,
+.alo-aeo-institutional-v219__method { color: #064f8c; text-underline-offset: .16em; }
+.alo-aeo-institutional-v219__identity p { margin: .2rem 0 0; color: #425b76; font-size: .9rem; }
+.alo-aeo-institutional-v219__method {
+  flex: 0 0 auto;
+  padding: .58rem .75rem;
+  border: 1px solid rgba(6, 79, 140, .28);
+  border-radius: .65rem;
+  font-size: .86rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+.alo-aeo-institutional-v219__method:hover,
+.alo-aeo-institutional-v219__method:focus-visible { text-decoration: underline; }
+@media (max-width: 640px) {
+  .alo-aeo-institutional-v219 { align-items: flex-start; flex-direction: column; }
+  .alo-aeo-institutional-v219__method { width: 100%; text-align: center; }
+}
