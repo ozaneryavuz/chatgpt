@@ -1,0 +1,87 @@
+name: ALO186 content authority run136
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/ev-enerji-depolama-kritik-yuk-plani/**'
+      - 'alo186/hesaplama/otel-guc-kalitesi-kayip-hesabi/**'
+      - 'alo186/hesaplama/bess-vpp-gelir-hazirligi/**'
+      - 'alo186/deployment/routing-overlays/content-authority-run136.json'
+      - 'alo186/tests/test_authority_content_run136.py'
+      - '.github/workflows/alo186-content-authority-run136.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/ev-enerji-depolama-kritik-yuk-plani/**'
+      - 'alo186/hesaplama/otel-guc-kalitesi-kayip-hesabi/**'
+      - 'alo186/hesaplama/bess-vpp-gelir-hazirligi/**'
+      - 'alo186/deployment/routing-overlays/content-authority-run136.json'
+      - 'alo186/tests/test_authority_content_run136.py'
+      - '.github/workflows/alo186-content-authority-run136.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-content-authority-run136-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      SITE: /tmp/alo186-content-authority-run136
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Modül ve içerik sözleşmeleri
+        run: |
+          set -euo pipefail
+          node alo186/hesaplama/ev-enerji-depolama-kritik-yuk-plani/test.js
+          node alo186/hesaplama/otel-guc-kalitesi-kayip-hesabi/test.js
+          node alo186/hesaplama/bess-vpp-gelir-hazirligi/test.js
+          python -m py_compile alo186/tests/test_authority_content_run136.py
+          python alo186/tests/test_authority_content_run136.py
+      - name: Canonical artifact ve routing kabulü
+        run: |
+          set -euo pipefail
+          rm -rf "$SITE"
+          python alo186/deployment/build_static_site.py --output "$SITE" --commit "$GITHUB_SHA"
+          python alo186/deployment/prepare_github_pages.py --site "$SITE" --base-path '' --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_github_pages.py --site "$SITE" --base-path ''
+          for route in \
+            hesaplama/ev-enerji-depolama-kritik-yuk-plani \
+            hesaplama/otel-guc-kalitesi-kayip-hesabi \
+            hesaplama/bess-vpp-gelir-hazirligi; do
+            test -f "$SITE/$route/index.html"
+            grep -q 'https://alo186.com/' "$SITE/$route/index.html"
+          done
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          overlay=json.loads(Path('alo186/deployment/routing-overlays/content-authority-run136.json').read_text(encoding='utf-8'))
+          assert overlay['version']==218
+          assert len(overlay['routes'])==3
+          for route in overlay['routes']:
+              assert route['path']==route['canonicalPath']
+              assert route['source']=='alo186/'+route['file']
+          print('run136 canonical artifact: PASS')
+          PY
+      - if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: alo186-content-authority-run136
+          path: |
+            /tmp/alo186-content-authority-run136/pages-release.json
+            /tmp/alo186-content-authority-run136/checksums.sha256
+            alo186/deployment/routing-overlays/content-authority-run136.json
+          if-no-files-found: warn
+          retention-days: 30
