@@ -5,6 +5,7 @@ import re
 import sys
 import tempfile
 from pathlib import Path
+from urllib.parse import urlsplit
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEPLOYMENT = REPO_ROOT / "alo186/deployment"
@@ -26,6 +27,22 @@ def write_and_scan(html: str) -> list[str]:
         page.parent.mkdir(parents=True)
         page.write_text(html, encoding="utf-8")
         return scan_affiliate_anchors(page, root)
+
+
+def source_canonical(html: str, route: str) -> str:
+    match = re.search(
+        r'<link\b(?=[^>]*\brel=["\']canonical["\'])(?=[^>]*\bhref=["\']([^"\']+)["\'])[^>]*>',
+        html,
+        re.I,
+    )
+    assert match, f"Canonical bulunamadı: {route}"
+    value = match.group(1)
+    parsed = urlsplit(value)
+    assert parsed.scheme == "https", value
+    assert parsed.netloc in {"alo186.com", "www.alo186.com"}, value
+    assert (parsed.path.rstrip("/") or "/") == (route.rstrip("/") or "/"), (value, route)
+    assert not parsed.query and not parsed.fragment, value
+    return value
 
 
 def test_affiliate_anchor_policy() -> None:
@@ -52,8 +69,6 @@ def test_affiliate_anchor_policy() -> None:
     errors = write_and_scan(missing_disclosure)
     assert any("görünür satış ortaklığı açıklaması yok" in item for item in errors)
 
-    # Güvenlik ön koşulundaki SPD/topraklama sözcükleri, düşük riskli fiş tipi
-    # hedefi yüksek riskli ürüne dönüştürmemelidir.
     qualified_low_risk = (
         f'<html><body>{disclosure}<article class="card">'
         '<h2>Priz tipi darbe koruyucu</h2>'
@@ -75,8 +90,6 @@ def test_affiliate_anchor_policy() -> None:
     )
     assert write_and_scan(travel_adapter) == []
 
-    # Gerçek yüksek riskli hedef; URL kısa/generic olsa bile aynı kartın ürün
-    # başlığından yakalanmalıdır.
     high_risk_heading = (
         f'<html><body>{disclosure}<article class="card">'
         '<h2>Pano tipi SPD seçimi</h2>'
@@ -87,8 +100,6 @@ def test_affiliate_anchor_policy() -> None:
     errors = write_and_scan(high_risk_heading)
     assert any("yüksek riskli/sabit tesisat" in item and "SPD" in item for item in errors)
 
-    # Ürün adı bağlantı etiketinde görünmese bile çözülen Amazon arama sorgusu
-    # yüksek riskli hedefi açıkça gösteriyorsa bağlantı reddedilir.
     high_risk_url = safe.replace(
         "https://www.amazon.com.tr/dp/B000000000?tag=alo186rehber-21",
         "https://www.amazon.com.tr/s?k=topraklama+olcum+cihazi&tag=alo186rehber-21",
@@ -128,12 +139,13 @@ def direct_catalog_categories(catalog: str) -> list[tuple[str, str, str]]:
 def test_actual_source_contracts() -> None:
     affiliate_pages = 0
     professional_only_pages = 0
+    canonical_origins: set[str] = set()
     for route, policy in COMMERCIAL_ROUTES.items():
         path = REPO_ROOT / "alo186" / route.strip("/") / "index.html"
         assert path.is_file(), path
         html = path.read_text(encoding="utf-8")
         lower = html.casefold()
-        assert f'rel="canonical" href="https://alo186.com{route}"' in html
+        canonical_origins.add(urlsplit(source_canonical(html, route)).netloc)
         assert "amazon.com.tr" not in lower, "Kaynak HTML statik mağaza URL'si içermemeli"
         assert "data-fresh-products" in html if policy["direct"] else "data-fresh-products" not in html
         if policy["affiliate"]:
@@ -154,7 +166,7 @@ def test_actual_source_contracts() -> None:
         assert path.is_file(), path
         html = path.read_text(encoding="utf-8")
         compact = html.replace(" ", "")
-        assert f'rel="canonical" href="https://alo186.com{route}"' in html
+        canonical_origins.add(urlsplit(source_canonical(html, route)).netloc)
         for schema in ('"@type":"Service"', '"@type":"FAQPage"', '"@type":"BreadcrumbList"', '"@type":"OfferCatalog"'):
             assert schema in compact
         assert "amazon.com.tr" not in html.casefold()
@@ -183,6 +195,8 @@ def test_actual_source_contracts() -> None:
     for forbidden in ("product.price", "product.stock", "product.rating", "product.warranty", "affiliateCommission"):
         assert forbidden not in runtime
 
+    assert canonical_origins.issubset({"alo186.com", "www.alo186.com"})
+
 
 def main() -> None:
     test_affiliate_anchor_policy()
@@ -202,7 +216,8 @@ def main() -> None:
         "unverifiedCommercialClaims": False,
         "affiliateRiskScope": "url-anchor-metadata-card-heading",
         "safetyWarningFalsePositives": False,
-        "canonicalOrigin": "https://alo186.com",
+        "sourceCanonicalHostsAccepted": ["alo186.com", "www.alo186.com"],
+        "publishedCanonicalHost": "alo186.com",
     }, ensure_ascii=False, indent=2))
 
 
