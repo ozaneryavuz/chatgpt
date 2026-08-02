@@ -30,17 +30,18 @@ jobs:
       base_path: ${{ steps.pages_mode.outputs.base_path }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
       - name: Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: '22'
+          node-version: '24'
+          package-manager-cache: false
 
       - name: Kaynak güvenlik ve yayın sözleşmeleri
         shell: bash
@@ -58,6 +59,7 @@ jobs:
           python alo186/tests/test_live_domain_integration_manifest.py
           python alo186/tests/test_ga4_consent_integration.py
           python alo186/tests/test_contextual_affiliate_growth_v177.py
+          python alo186/tests/test_affiliate_measurement_v211.py
 
       - name: Canonical statik siteyi oluştur
         shell: bash
@@ -87,9 +89,6 @@ jobs:
             python alo186/deployment/inject_outcome_runtime.py \
               --site "$site" \
               --base-path "$base"
-            python alo186/deployment/inject_shortlist_growth.py \
-              --site "$site" \
-              --base-path "$base"
             python alo186/deployment/smoke_github_pages.py \
               --site "$site" \
               --base-path "$base"
@@ -99,10 +98,25 @@ jobs:
             python alo186/deployment/inject_live_quality_hardening_v2.py \
               --site "$site" \
               --base-path "$base"
+            python alo186/deployment/inject_home_affiliate_banner_v209.py \
+              --site "$site" \
+              --base-path "$base"
+            python alo186/deployment/inject_affiliate_intent_router_v210.py \
+              --site "$site" \
+              --base-path "$base"
             python alo186/deployment/inject_ga4_consent.py \
               --site "$site" \
               --base-path "$base" \
               --measurement-id ""
+            python alo186/deployment/inject_affiliate_measurement_v211.py \
+              --site "$site" \
+              --base-path "$base"
+            node --check "$site/assets/affiliate-measurement-v211.js"
+            python alo186/deployment/smoke_github_pages.py \
+              --site "$site" \
+              --base-path "$base"
+            python alo186/deployment/guard_commerce_routes_v3.py \
+              --site "$site"
           done
 
       - name: Pages yönetici tokenı durumunu belirle
@@ -135,7 +149,7 @@ jobs:
 
       - name: Pages bootstrap tanısını sakla
         if: always() && github.event_name != 'pull_request'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: alo186-github-pages-bootstrap
           path: /tmp/alo186-pages-bootstrap.json
@@ -192,9 +206,6 @@ jobs:
           python alo186/deployment/inject_outcome_runtime.py \
             --site /tmp/alo186-pages-site \
             --base-path "$PAGES_BASE_PATH"
-          python alo186/deployment/inject_shortlist_growth.py \
-            --site /tmp/alo186-pages-site \
-            --base-path "$PAGES_BASE_PATH"
           python alo186/deployment/smoke_github_pages.py \
             --site /tmp/alo186-pages-site \
             --base-path "$PAGES_BASE_PATH"
@@ -206,21 +217,44 @@ jobs:
             --site /tmp/alo186-pages-site \
             --base-path "$PAGES_BASE_PATH" \
             | tee /tmp/alo186-live-quality-hardening.json
+          python alo186/deployment/inject_home_affiliate_banner_v209.py \
+            --site /tmp/alo186-pages-site \
+            --base-path "$PAGES_BASE_PATH" \
+            | tee /tmp/alo186-home-affiliate-v209.json
+          python alo186/deployment/inject_affiliate_intent_router_v210.py \
+            --site /tmp/alo186-pages-site \
+            --base-path "$PAGES_BASE_PATH" \
+            | tee /tmp/alo186-affiliate-intent-v210.json
           python alo186/deployment/inject_ga4_consent.py \
             --site /tmp/alo186-pages-site \
             --base-path "$PAGES_BASE_PATH" \
             --measurement-id "${ALO186_GA4_MEASUREMENT_ID:-}" \
             | tee /tmp/alo186-ga4-release.json
+          python alo186/deployment/inject_affiliate_measurement_v211.py \
+            --site /tmp/alo186-pages-site \
+            --base-path "$PAGES_BASE_PATH" \
+            | tee /tmp/alo186-affiliate-measurement-v211.json
+          node --check /tmp/alo186-pages-site/assets/affiliate-measurement-v211.js
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-pages-site \
+            --base-path "$PAGES_BASE_PATH"
+          python alo186/deployment/guard_commerce_routes_v3.py \
+            --site /tmp/alo186-pages-site \
+            | tee /tmp/alo186-commerce-guard-v211.json
 
       - name: Pages önizleme artifactını sakla
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: alo186-github-pages-preview
           path: |
             /tmp/alo186-pages-site
             /tmp/alo186-contextual-affiliate-v177.json
             /tmp/alo186-live-quality-hardening.json
+            /tmp/alo186-home-affiliate-v209.json
+            /tmp/alo186-affiliate-intent-v210.json
             /tmp/alo186-ga4-release.json
+            /tmp/alo186-affiliate-measurement-v211.json
+            /tmp/alo186-commerce-guard-v211.json
           if-no-files-found: error
           include-hidden-files: true
           retention-days: 30
@@ -248,6 +282,9 @@ jobs:
             echo '- Custom domain hedefi: `alo186.com`'
             echo '- Canonical, sitemap, robots ve release kimliği apex origin üzerinde birleştirildi.'
             echo '- 40 yüksek niyetli rehbere 120 bağlamsal ürün kartı, üçlü güven kapısı ve açık satış ortaklığı bilgisi eklendi.'
+            echo '- Ana sayfa vitrini v209 ve görev bazlı ihtiyaç yönlendiricisi v210 tek yetkili Pages artifactına bağlandı.'
+            echo '- Affiliate ölçüm v211; açık rıza, anonim ürün anahtarı, link türü, içerik kümesi ve yerleşim boyutlarıyla etkinleştirildi.'
+            echo '- Ham hedef URL, Amazon arama sorgusu ve kullanıcı/cihaz kimliği analitiğe gönderilmez.'
             echo '- 44 px dokunma hedefi, görünür odak, taşma ve bilinen kontrast seçicileri son artifact katmanında sertleştirildi.'
             echo '- Cihaz hasarı başvurusu için 10 iş günü fail-closed koruması uygulandı.'
             if [ -n "$GA4_MEASUREMENT_ID" ]; then
@@ -267,10 +304,10 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout doğrulama araçları
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Python doğrulama ortamı
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -299,15 +336,55 @@ jobs:
             --diagnostics /tmp/alo186-v177-diagnostics \
             --attempts 36 \
             --sleep-seconds 10
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from urllib.parse import urljoin
+          from urllib.request import Request, urlopen
+
+          origin = 'https://alo186.com/'
+          headers = {'User-Agent': 'ALO186-release-verifier/211'}
+
+          def fetch_json(url: str) -> dict:
+              with urlopen(Request(url, headers=headers), timeout=30) as response:
+                  return json.loads(response.read().decode('utf-8'))
+
+          release = fetch_json(urljoin(origin, 'pages-release.json'))
+          measurement = release.get('affiliateMeasurement') or {}
+          assert measurement.get('version') == 211, measurement
+          inventory = fetch_json(urljoin(origin, str(measurement.get('inventory') or 'affiliate-measurement-v211.json')))
+          assert inventory.get('version') == 211
+          assert inventory.get('events') == ['affiliate_page_view', 'affiliate_click']
+          assert inventory.get('privacy', {}).get('rawDestinationUrlStored') is False
+          assert inventory.get('privacy', {}).get('userIdentifierStored') is False
+          asset_url = urljoin(origin, str(measurement.get('asset') or 'assets/affiliate-measurement-v211.js'))
+          with urlopen(Request(asset_url, headers=headers), timeout=30) as response:
+              asset = response.read().decode('utf-8')
+          assert 'affiliate_page_view' in asset and 'affiliate_click' in asset
+          receipt = {
+              'ok': True,
+              'version': 211,
+              'asset': asset_url,
+              'inventorySummary': inventory.get('summary', {}),
+              'rawDestinationUrlStored': False,
+              'userIdentifierStored': False,
+          }
+          Path('/tmp/alo186-v211-live-receipt.json').write_text(
+              json.dumps(receipt, ensure_ascii=False, indent=2) + '\n',
+              encoding='utf-8',
+          )
+          print(json.dumps(receipt, ensure_ascii=False, indent=2))
+          PY
 
       - name: Canlı yayın makbuzunu sakla
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: alo186-full-live-receipt
           path: |
             /tmp/alo186-live-origin-receipt.json
             /tmp/alo186-v177-live-receipt.json
+            /tmp/alo186-v211-live-receipt.json
             /tmp/alo186-origin-diagnostics
             /tmp/alo186-v177-diagnostics
           if-no-files-found: warn
