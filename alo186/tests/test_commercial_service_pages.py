@@ -8,6 +8,8 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEPLOYMENT = REPO_ROOT / "alo186/deployment"
+CANONICAL_ORIGIN = "https://alo186.com"
+LEGACY_ORIGIN = "https://www.alo186.com"
 sys.path.insert(0, str(DEPLOYMENT))
 
 from build_static_site import load_effective_manifest  # noqa: E402
@@ -102,7 +104,10 @@ def main() -> None:
         h1 = one_tag(html, "h1")
         description = meta_content(html, "description")
         canonical_match = re.search(r'<link\s+rel=["\']canonical["\']\s+href=["\']([^"\']+)["\']', html, re.I)
-        assert canonical_match and canonical_match.group(1) == f"https://www.alo186.com{canonical}"
+        expected = f"{CANONICAL_ORIGIN}{canonical}"
+        legacy = f"{LEGACY_ORIGIN}{canonical}"
+        assert canonical_match and canonical_match.group(1) == expected
+        assert legacy not in html, f"Legacy www service URL kaldı: {canonical}"
         assert 70 <= len(description) <= 220, (canonical, len(description))
         assert title not in titles and h1 not in h1s, "Ticari sayfalar benzersiz title ve H1 taşımalı"
         titles.add(title)
@@ -112,7 +117,7 @@ def main() -> None:
         types = {item.get("@type") for item in schemas}
         assert {"Service", "FAQPage", "BreadcrumbList"}.issubset(types), (canonical, types)
         service = next(item for item in schemas if item.get("@type") == "Service")
-        assert service.get("url") == f"https://www.alo186.com{canonical}"
+        assert service.get("url") == expected
         assert service.get("areaServed", {}).get("name") == "Türkiye"
         assert isinstance(service.get("hasOfferCatalog", {}).get("itemListElement"), list)
         assert len(service["hasOfferCatalog"]["itemListElement"]) >= 3
@@ -158,6 +163,8 @@ def main() -> None:
 
     print(json.dumps({
         "ok": True,
+        "canonicalOrigin": CANONICAL_ORIGIN,
+        "legacyCanonicalRejected": True,
         "routingVersion": manifest["version"],
         "commercialServicePageCountAdded": len(SERVICES),
         "routes": sorted(SERVICES),
