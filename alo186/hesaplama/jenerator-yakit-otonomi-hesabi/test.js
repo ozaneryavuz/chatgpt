@@ -1,0 +1,10 @@
+'use strict';
+const fs=require('fs');const path=require('path');const vm=require('vm');const assert=require('assert');
+const html=fs.readFileSync(path.join(__dirname,'index.html'),'utf8');
+for(const text of ['WebApplication','FAQPage','BreadcrumbList','Volumetric Fuel Consumption','Kullanılabilir yakıt','Planlama belirsizlik payı','Kaynak doğrulama tarihi']) assert(html.includes(text),text);
+assert(!html.includes('"@type":"Product"'));assert(!html.includes('"@type":"Offer"'));assert(!/amazon\.(com|com\.tr)|amzn\.to/i.test(html));
+const match=html.match(/function calculateFuel\(i\)\{[\s\S]*?\n\}/);assert(match,'calculateFuel missing');const context={};vm.createContext(context);vm.runInContext(match[0]+';this.calculateFuel=calculateFuel;',context);
+let out=context.calculateFuel({tank:500,reserve:15,unusable:5,lph:25,margin:10,target:12});assert(Math.abs(out.usable-400)<1e-9);assert(Math.abs(out.planningLph-27.5)<1e-9);assert(out.runtime>14&&out.runtime<15);assert(out.deficit===0);
+out=context.calculateFuel({tank:200,reserve:20,unusable:5,lph:30,margin:10,target:8});assert(out.deficit>0);assert(out.coverage<100);
+assert.throws(()=>context.calculateFuel({tank:100,reserve:90,unusable:10,lph:10,margin:0,target:1}));
+console.log('Jeneratör yakıt otonomi hesabı: PASS');
