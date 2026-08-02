@@ -1,0 +1,66 @@
+{
+  "id": "ornek-yeni-kullanici-gorevi",
+  "status": "research",
+  "topic": "ups",
+  "cluster": "backup-power",
+  "contentType": "tool",
+  "title": "Örnek kullanıcı görevi için karar aracı",
+  "task": "Kullanıcının belirli bir belirtiyi güvenli biçimde sınıflandırıp hangi kanıtı toplayacağını ve hangi sonraki adıma ilerleyeceğini belirlemek.",
+  "intentBoundary": "Mevcut genel tanım veya ürün karşılaştırması sayfasını tekrar etmez; yalnız yeni belirtilen görev, kanıt zinciri ve sonuç üretimine odaklanır.",
+  "proposedRoute": "/hesaplama/ornek-yeni-kullanici-gorevi/",
+  "supportingOf": null,
+  "audience": "Ev ve küçük işletme kullanıcıları",
+  "scores": {
+    "searchDemand": 80,
+    "taskUrgency": 85,
+    "taskCompletionValue": 92,
+    "authorityFit": 95,
+    "contentGap": 90,
+    "commercialFit": 55,
+    "internalLinkFit": 88,
+    "sourceConfidence": 90
+  },
+  "sources": [
+    {
+      "url": "https://example.com/primary-source-1",
+      "publisher": "Birincil kaynak",
+      "class": "standard",
+      "primary": true,
+      "verifiedAt": "2026-08-02",
+      "claims": ["Karar zincirinin teknik dayanağı"]
+    },
+    {
+      "url": "https://example.org/primary-source-2",
+      "publisher": "İkinci birincil kaynak",
+      "class": "manufacturer",
+      "primary": true,
+      "verifiedAt": "2026-08-02",
+      "claims": ["Üreticiye özgü kabul sınırı"]
+    },
+    {
+      "url": "https://example.net/research-source",
+      "publisher": "Araştırma kaynağı",
+      "class": "research",
+      "primary": false,
+      "verifiedAt": "2026-08-02",
+      "claims": ["Kullanıcı faydasını destekleyen ek kanıt"]
+    }
+  ],
+  "internalLinks": [
+    "/elektrik-portali",
+    "/hesaplama/",
+    "/karar-motoru",
+    "/edas-bul",
+    "/hesaplama/yedek-guc",
+    "/kurumsal-elektrik-surekliligi-on-degerlendirme"
+  ],
+  "schemaTypes": ["WebApplication", "FAQPage", "BreadcrumbList"],
+  "conversion": {
+    "primaryCta": "Kişisel verisiz sonuç planını oluştur",
+    "secondaryCta": "Teknik ön değerlendirme kapsamını gör",
+    "events": ["example_result"],
+    "affiliateAllowed": false
+  },
+  "safetyBoundary": "Enerjili pano, akü, UPS çıkışı veya sabit tesisata kullanıcı müdahalesi önerilmez; tehlikede enerji kesilir ve yetkin destek kullanılır.",
+  "draft": null
+}
