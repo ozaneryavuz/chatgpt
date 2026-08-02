@@ -28,6 +28,7 @@ TOOLS = {
     "/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi": "/hesaplama/akilli-priz-enerji-olcer-uygunluk/",
     "/amazon-elektrik-urunleri/ges-malzemeleri-secimi": "/hesaplama/gunes-paneli-power-station-uygunluk/",
 }
+PROFESSIONAL_ROUTE = "/amazon-elektrik-urunleri/ges-malzemeleri-secimi"
 AMAZON_HOSTS = {"amazon.com.tr", "www.amazon.com.tr"}
 
 
@@ -132,7 +133,7 @@ class CommercialCategoryExpansionTests(unittest.TestCase):
             self.assertTrue(any(term in html for term in ("Satın almama", "satın almamanız", "sipariş vermeyin")), route)
         power = ROUTES["/amazon-elektrik-urunleri/tasinabilir-guc-istasyonu-secimi"].read_text(encoding="utf-8")
         smart = ROUTES["/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi"].read_text(encoding="utf-8")
-        ges = ROUTES["/amazon-elektrik-urunleri/ges-malzemeleri-secimi"].read_text(encoding="utf-8")
+        ges = ROUTES[PROFESSIONAL_ROUTE].read_text(encoding="utf-8")
         self.assertIn('data-category="power_station"', power)
         self.assertIn('data-category="smart_plug"', smart)
         self.assertIn("data-product-center", power)
@@ -154,8 +155,9 @@ class CommercialCategoryExpansionTests(unittest.TestCase):
         self.assertIn("Mevcut sistem yeterliyse satın alma yok", hub)
         self.assertIn("Aktif tehlikede satış yolu kapalı", hub)
         self.assertNotIn("özel rehber", hub)
-        for route in ROUTES:
+        for route in set(ROUTES) - {PROFESSIONAL_ROUTE}:
             self.assertIn(route, unique)
+        self.assertNotIn(PROFESSIONAL_ROUTE, unique)
         self.assertNotIn("/urun-rehberleri/", hub)
 
     def test_production_bundle_sitemap_and_private_search_include_expansion(self) -> None:
