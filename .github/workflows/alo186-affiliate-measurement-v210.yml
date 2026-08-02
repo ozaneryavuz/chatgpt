@@ -1,0 +1,139 @@
+name: ALO186 affiliate measurement v210
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/deployment/inject_affiliate_measurement_v210.py'
+      - 'alo186/tests/test_affiliate_measurement_v210.py'
+      - 'alo186/audits/affiliate-measurement-v210-2026-08-02.md'
+      - '.github/workflows/alo186-affiliate-measurement-v210.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/deployment/inject_affiliate_measurement_v210.py'
+      - 'alo186/tests/test_affiliate_measurement_v210.py'
+      - 'alo186/audits/affiliate-measurement-v210-2026-08-02.md'
+      - '.github/workflows/alo186-affiliate-measurement-v210.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: alo186-affiliate-measurement-v210-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Birim ve sözdizimi testleri
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            alo186/deployment/inject_affiliate_measurement_v210.py \
+            alo186/tests/test_affiliate_measurement_v210.py
+          python alo186/tests/test_affiliate_measurement_v210.py
+      - id: pages
+        if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@v5
+      - name: Tam üretim artifactı ve affiliate ölçüm kalite kapısı
+        env:
+          BASE: ${{ steps.pages.outputs.base_path || '' }}
+          GA4: ${{ vars.ALO186_GA4_MEASUREMENT_ID || 'G-639TVHL0LC' }}
+        run: |
+          set -euo pipefail
+          SITE=/tmp/alo186-affiliate-measurement-v210
+          rm -rf "$SITE"
+          python alo186/deployment/build_static_site.py --output "$SITE" --commit "$GITHUB_SHA"
+          python alo186/deployment/prepare_github_pages.py --site "$SITE" --base-path "$BASE" --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py --site "$SITE" --base-path "$BASE"
+          python alo186/deployment/inject_shortlist_growth.py --site "$SITE" --base-path "$BASE"
+          python alo186/deployment/inject_contextual_affiliate_v176.py --site "$SITE" --base-path "$BASE"
+          python alo186/deployment/inject_home_affiliate_banner_v209.py --site "$SITE" --base-path "$BASE"
+          python alo186/deployment/inject_live_quality_hardening_v2.py --site "$SITE" --base-path "$BASE"
+          python alo186/deployment/inject_affiliate_measurement_v210.py --site "$SITE" --base-path "$BASE" | tee /tmp/affiliate-measurement-v210-receipt.json
+          python alo186/deployment/inject_ga4_consent.py --site "$SITE" --base-path "$BASE" --measurement-id "$GA4"
+          node --check "$SITE/assets/affiliate-measurement-v210.js"
+          python alo186/deployment/smoke_github_pages.py --site "$SITE" --base-path "$BASE"
+          python alo186/deployment/guard_commerce_routes_v3.py --site "$SITE" | tee /tmp/affiliate-measurement-v210-guard.json
+          SITE="$SITE" python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          site = Path(os.environ['SITE'])
+          inventory_path = site / 'affiliate-measurement-v210.json'
+          release_path = site / 'pages-release.json'
+          inventory_text = inventory_path.read_text(encoding='utf-8')
+          inventory = json.loads(inventory_text)
+          release = json.loads(release_path.read_text(encoding='utf-8'))
+          summary = inventory['summary']
+
+          assert inventory['version'] == 210
+          assert inventory['events'] == ['affiliate_page_view', 'affiliate_click']
+          assert summary['scannedPages'] > 0
+          assert summary['instrumentedPages'] == summary['scannedPages']
+          assert summary['normalizedAffiliateLinks'] == summary['staticAffiliateLinks']
+          assert inventory['privacy']['rawDestinationUrlStored'] is False
+          assert inventory['privacy']['rawSearchQueryStored'] is False
+          assert inventory['privacy']['userIdentifierStored'] is False
+          assert 'amazon.com' not in inventory_text.lower()
+          assert 'alo186rehber-21' not in inventory_text
+          assert release['affiliateMeasurement']['version'] == 210
+          assert release['affiliateMeasurement']['rawDestinationUrlInAnalytics'] is False
+          assert release['affiliateMeasurement']['personalIdentifiers'] is False
+
+          home = (site / 'index.html').read_text(encoding='utf-8')
+          assert home.count('data-alo186-affiliate-measurement-v210="true"') == 1
+          asset = (site / 'assets/affiliate-measurement-v210.js').read_text(encoding='utf-8')
+          for event in ('affiliate_page_view', 'affiliate_click'):
+              assert event in asset
+          for field in (
+              'affiliate_network', 'page_path', 'content_cluster',
+              'link_placement', 'link_type', 'product_key', 'measurement_version',
+          ):
+              assert field in asset
+          assert "getConsent?.()==='granted'" in asset
+          assert 'destination_url' not in asset
+          assert 'link_url' not in asset
+          print(json.dumps(summary, ensure_ascii=False, indent=2))
+          PY
+      - if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: alo186-affiliate-measurement-v210-receipt
+          path: |
+            /tmp/affiliate-measurement-v210-receipt.json
+            /tmp/affiliate-measurement-v210-guard.json
+            /tmp/alo186-affiliate-measurement-v210/affiliate-measurement-v210.json
+            /tmp/alo186-affiliate-measurement-v210/pages-release.json
+          if-no-files-found: warn
+          retention-days: 45
+      - if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: /tmp/alo186-affiliate-measurement-v210
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build-and-validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
