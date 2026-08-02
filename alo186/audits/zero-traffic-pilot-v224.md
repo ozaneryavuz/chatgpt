@@ -52,6 +52,10 @@ Her konumda en az iki kişi kartı birlikte değerlendirmelidir: konumu kullanan
 
 Analitiğe form yanıtları, açık adres, telefon, e-posta, abonelik numarası, serbest metin veya paylaşım bağlantısının hash içeriği gönderilmez.
 
+## Tarayıcı depolama dayanıklılığı
+
+Sonuç saklama kullanıcının açık seçimine bağlıdır. Tarayıcı gizlilik modu, gömülü web görünümü veya kurumsal politika `localStorage` erişimini engellerse araç puanlama, aksiyon üretme ve paylaşım işlevlerini bellekte sürdürür; yalnız 90 günlük geri yükleme özelliği kapanır. Depolama hatası kullanıcı akışını veya 112 / 186 güvenlik yönünü kesemez.
+
 ## Görüşme soruları
 
 1. Kartı neden tamamladınız veya neden yarıda bıraktınız?
