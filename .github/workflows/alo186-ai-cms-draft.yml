@@ -75,7 +75,7 @@ concurrency:
 jobs:
   draft:
     if: github.ref_name == 'main'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 35
     env:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -95,13 +95,13 @@ jobs:
       GH_TOKEN: ${{ github.token }}
     steps:
       - name: Checkout main
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: main
           fetch-depth: 0
 
       - name: Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -160,7 +160,7 @@ jobs:
           grep -q '"personalDataSent": false' /tmp/alo186-ai-cms-input-guard.json
 
       - name: Dashboard artifactı
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: alo186-ai-cms-${{ inputs.slug }}-${{ github.run_id }}
           path: |
@@ -170,6 +170,7 @@ jobs:
             alo186/ai-cms/previews/${{ inputs.slug }}.html
           if-no-files-found: error
           retention-days: 30
+          include-hidden-files: false
 
       - name: Review branch ve commit
         id: branch
@@ -214,7 +215,7 @@ jobs:
 
           \`/cms approve $CMS_SLUG\`
 
-          AI ve bot yorumları onay sayılmaz. Onay workflow'u canonical HTML ve routing overlay üretir; PR yine insan merge'i olmadan yayımlanmaz.
+          AI ve bot yorumları onay sayılmaz. Onay workflow'u canonical HTML ve routing overlay üretir; PR yine insan merge'i olmadan yayımlanmaz. İnsan onayından sonra aynı artifact içinde ChatGPT Sites önizleme paketi de oluşturulur.
 
           Workflow run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
           EOF
@@ -235,6 +236,7 @@ jobs:
           - Kişisel veri input guardı: **başarılı**
           - Canonical yayın: **hayır**
           - İnsan onayı: **bekleniyor**
+          - ChatGPT Sites paketi: **insan onayından sonra**
           - PR: ${{ steps.pr.outputs.url }}
           - Onay komutu: \`/cms approve $CMS_SLUG\`
           EOF
