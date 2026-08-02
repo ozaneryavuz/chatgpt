@@ -1,0 +1,63 @@
+name: ALO186 NAS UPS continuity v205
+
+on:
+  push:
+    paths:
+      - 'alo186/hesaplama/nas-ups-guvenli-kapatma-calisma-suresi/**'
+      - 'alo186/amazon-elektrik-urunleri/nas-ups-usb-snmp-uygunluk-secici/**'
+      - 'alo186/sektor-rehberi/nas-elektrik-kesintisi-30-90-gun-test-merkezi/**'
+      - 'alo186/deployment/routing-overlays/205-nas-ups-continuity-growth.json'
+      - 'alo186/audits/nas-ups-continuity-growth-v205-2026-08-02.md'
+      - 'alo186/tests/test_nas_ups_continuity_growth_v205.py'
+      - '.github/workflows/alo186-nas-ups-continuity-v205.yml'
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/nas-ups-guvenli-kapatma-calisma-suresi/**'
+      - 'alo186/amazon-elektrik-urunleri/nas-ups-usb-snmp-uygunluk-secici/**'
+      - 'alo186/sektor-rehberi/nas-elektrik-kesintisi-30-90-gun-test-merkezi/**'
+      - 'alo186/deployment/routing-overlays/205-nas-ups-continuity-growth.json'
+      - 'alo186/audits/nas-ups-continuity-growth-v205-2026-08-02.md'
+      - 'alo186/tests/test_nas_ups_continuity_growth_v205.py'
+      - '.github/workflows/alo186-nas-ups-continuity-v205.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  trust-and-routing:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+      - name: Fail-closed growth contract
+        run: python alo186/tests/test_nas_ups_continuity_growth_v205.py
+      - name: Routing JSON syntax
+        run: python -m json.tool alo186/deployment/routing-overlays/205-nas-ups-continuity-growth.json >/dev/null
+      - name: Inline JavaScript syntax
+        shell: bash
+        run: |
+          python - <<'PY'
+          import re
+          from pathlib import Path
+          pages = [
+              Path('alo186/hesaplama/nas-ups-guvenli-kapatma-calisma-suresi/index.html'),
+              Path('alo186/amazon-elektrik-urunleri/nas-ups-usb-snmp-uygunluk-secici/index.html'),
+              Path('alo186/sektor-rehberi/nas-elektrik-kesintisi-30-90-gun-test-merkezi/index.html'),
+          ]
+          out = Path('/tmp/alo186-nas-js')
+          out.mkdir(exist_ok=True)
+          for page in pages:
+              html = page.read_text(encoding='utf-8')
+              scripts = re.findall(r'<script(?![^>]*application/ld\+json)[^>]*>(.*?)</script>', html, flags=re.S|re.I)
+              assert scripts, page
+              target = out / (page.parent.name + '.js')
+              target.write_text('\n'.join(scripts), encoding='utf-8')
+              print(target)
+          PY
+          for file in /tmp/alo186-nas-js/*.js; do node --check "$file"; done
