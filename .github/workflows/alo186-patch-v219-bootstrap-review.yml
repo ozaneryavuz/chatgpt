@@ -1,0 +1,205 @@
+name: ALO186 patch v219 Pages bootstrap review findings
+
+on:
+  push:
+    branches:
+      - agent/alo186-v219-hosting-sitemap
+    paths:
+      - '.github/workflows/alo186-patch-v219-bootstrap-review.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: alo186-patch-v219-bootstrap-review
+  cancel-in-progress: false
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/alo186-v219-hosting-sitemap
+          persist-credentials: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Patch first-deployment, origin-receipt and state-machine contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace_once(text: str, old: str, new: str, label: str) -> str:
+              if text.count(old) != 1:
+                  raise SystemExit(f'{label}: expected one occurrence, found {text.count(old)}')
+              return text.replace(old, new, 1)
+
+          workflow = Path('.github/workflows/alo186-pages-autobootstrap-live.yml')
+          text = workflow.read_text(encoding='utf-8')
+
+          text = replace_once(
+              text,
+              'permissions:\n  contents: read\n  actions: write\n',
+              'permissions:\n  contents: read\n  deployments: read\n  actions: write\n',
+              'deployments permission',
+          )
+          text = replace_once(
+              text,
+              '      admin_token_present: ${{ steps.pages_probe.outputs.admin_token_present }}\n      live_current: ${{ steps.origin_state.outputs.live_current }}\n',
+              '      admin_token_present: ${{ steps.pages_probe.outputs.admin_token_present }}\n      pages_deployment_succeeded: ${{ steps.pages_probe.outputs.pages_deployment_succeeded }}\n      live_current: ${{ steps.origin_state.outputs.live_current }}\n      origin_probe_ok: ${{ steps.origin_state.outputs.origin_probe_ok }}\n',
+              'probe outputs',
+          )
+          text = replace_once(
+              text,
+              "            let apiStatus = null;\n",
+              "            let apiStatus = null;\n            let pagesDeploymentSucceeded = false;\n",
+              'pages deployment variable',
+          )
+          text = replace_once(
+              text,
+              '            const receipt = {\n              pagesReady: ready,\n',
+              '''            try {
+              const {data: deployments} = await github.rest.repos.listDeployments({
+                owner,
+                repo,
+                environment: 'github-pages',
+                per_page: 20,
+              });
+              for (const deployment of deployments) {
+                const {data: statuses} = await github.rest.repos.listDeploymentStatuses({
+                  owner,
+                  repo,
+                  deployment_id: deployment.id,
+                  per_page: 10,
+                });
+                if (statuses.some(status => status.state === 'success')) {
+                  pagesDeploymentSucceeded = true;
+                  break;
+                }
+              }
+            } catch (deploymentError) {
+              core.warning(`GitHub Pages deployment geçmişi okunamadı: ${deploymentError.message}`);
+            }
+
+            const receipt = {
+              pagesReady: ready,
+              pagesDeploymentSucceeded,
+''',
+              'deployment history probe',
+          )
+          text = replace_once(
+              text,
+              "            core.setOutput('pages_ready', String(ready));\n            core.setOutput('admin_token_present', String(adminTokenPresent));\n",
+              "            core.setOutput('pages_ready', String(ready));\n            core.setOutput('pages_deployment_succeeded', String(pagesDeploymentSucceeded));\n            core.setOutput('admin_token_present', String(adminTokenPresent));\n",
+              'deployment output',
+          )
+          text = replace_once(
+              text,
+              "          ok = bool(payload.get('ok'))\n          live_current = (\n",
+              "          ok = bool(payload.get('ok'))\n          origin_probe_ok = ok\n          live_current = (\n",
+              'origin probe state',
+          )
+          text = replace_once(
+              text,
+              "          print(f'hosting_mode={mode}')\n          print(f'live_current={str(live_current).lower()}')\n",
+              "          print(f'hosting_mode={mode}')\n          print(f'origin_probe_ok={str(origin_probe_ok).lower()}')\n          print(f'live_current={str(live_current).lower()}')\n",
+              'origin probe output',
+          )
+          text = replace_once(
+              text,
+              "        if: steps.origin_state.outputs.hosting_mode != 'github-pages'\n",
+              "        if: >-\n          steps.origin_state.outputs.hosting_mode != 'github-pages' &&\n          steps.origin_state.outputs.origin_probe_ok == 'true'\n",
+              'sites probe gate',
+          )
+          text = replace_once(
+              text,
+              '          READY: ${{ steps.pages_probe.outputs.pages_ready }}\n          BLOCKER: ${{ steps.pages_probe.outputs.blocker }}\n',
+              '          READY: ${{ steps.pages_probe.outputs.pages_ready }}\n          PAGES_DEPLOYED: ${{ steps.pages_probe.outputs.pages_deployment_succeeded }}\n          ORIGIN_PROBE_OK: ${{ steps.origin_state.outputs.origin_probe_ok }}\n          BLOCKER: ${{ steps.pages_probe.outputs.blocker }}\n',
+              'summary env',
+          )
+          text = replace_once(
+              text,
+              '            echo "- GitHub Pages hazır: **${READY:-false}**"\n            echo "- Yönetici tokenı mevcut: **${ADMIN:-false}**"\n',
+              '            echo "- GitHub Pages hazır: **${READY:-false}**"\n            echo "- Başarılı Pages deploymentı mevcut: **${PAGES_DEPLOYED:-false}**"\n            echo "- Origin makbuzu geçerli: **${ORIGIN_PROBE_OK:-false}**"\n            echo "- Yönetici tokenı mevcut: **${ADMIN:-false}**"\n',
+              'summary lines',
+          )
+          text = replace_once(
+              text,
+              "    if: needs.probe.outputs.pages_ready == 'true' && needs.probe.outputs.hosting_mode != 'github-pages'\n",
+              "    if: >-\n      needs.probe.outputs.pages_ready == 'true' &&\n      needs.probe.outputs.pages_deployment_succeeded == 'true' &&\n      needs.probe.outputs.hosting_mode != 'github-pages'\n",
+              'dns cutover gate',
+          )
+          text = replace_once(
+              text,
+              "      needs.probe.outputs.pages_ready == 'true' &&\n      needs.probe.outputs.hosting_mode == 'github-pages' &&\n      needs.probe.outputs.live_current != 'true'\n",
+              "      needs.probe.outputs.pages_ready == 'true' &&\n      needs.probe.outputs.live_current != 'true' &&\n      (\n        needs.probe.outputs.hosting_mode == 'github-pages' ||\n        needs.probe.outputs.pages_deployment_succeeded != 'true'\n      )\n",
+              'first deployment dispatch gate',
+          )
+          workflow.write_text(text, encoding='utf-8')
+
+          single = Path('alo186/tests/test_pages_single_publisher.py')
+          text = single.read_text(encoding='utf-8')
+          text = replace_once(
+              text,
+              '    assert "actions: write" in bootstrap\n',
+              '    assert "actions: write" in bootstrap\n    assert "deployments: read" in bootstrap\n    assert "pages_deployment_succeeded" in bootstrap\n    assert "listDeployments" in bootstrap\n    assert "listDeploymentStatuses" in bootstrap\n',
+              'single publisher deployment assertions',
+          )
+          text = replace_once(
+              text,
+              '    assert "containsExpectedCommit" in bootstrap\n',
+              '    assert "containsExpectedCommit" in bootstrap\n    assert "origin_probe_ok" in bootstrap\n    assert "steps.origin_state.outputs.origin_probe_ok == \'true\'" in bootstrap\n',
+              'single publisher origin assertions',
+          )
+          text = replace_once(
+              text,
+              '    assert "needs.probe.outputs.hosting_mode == \'github-pages\'" in bootstrap\n',
+              '    assert "needs.probe.outputs.hosting_mode == \'github-pages\'" in bootstrap\n    assert "needs.probe.outputs.pages_deployment_succeeded != \'true\'" in bootstrap\n    assert "needs.probe.outputs.pages_deployment_succeeded == \'true\'" in bootstrap\n',
+              'single publisher state assertions',
+          )
+          text = replace_once(
+              text,
+              '                "hostingAuthorityReceiptRequired": True,\n',
+              '                "hostingAuthorityReceiptRequired": True,\n                "firstPagesArtifactDeadlockClosed": True,\n                "invalidOriginCannotMarkSitesCurrent": True,\n',
+              'single publisher summary',
+          )
+          single.write_text(text, encoding='utf-8')
+
+          live_test = Path('alo186/tests/test_contextual_affiliate_live_v177.py')
+          text = live_test.read_text(encoding='utf-8')
+          text = replace_once(
+              text,
+              '        "actions: write",\n',
+              '        "actions: write",\n        "deployments: read",\n        "pages_deployment_succeeded",\n        "listDeployments",\n        "listDeploymentStatuses",\n        "origin_probe_ok",\n        "steps.origin_state.outputs.origin_probe_ok == \'true\'",\n        "needs.probe.outputs.pages_deployment_succeeded != \'true\'",\n        "needs.probe.outputs.pages_deployment_succeeded == \'true\'",\n',
+              'v177 workflow tokens',
+          )
+          text = replace_once(
+              text,
+              '                "dnsCutoverRedispatchLoopClosed": True,\n',
+              '                "dnsCutoverRedispatchLoopClosed": True,\n                "firstPagesArtifactDeadlockClosed": True,\n                "invalidOriginCannotMarkSitesCurrent": True,\n',
+              'v177 summary',
+          )
+          live_test.write_text(text, encoding='utf-8')
+          PY
+
+          python -m py_compile \
+            alo186/tests/test_pages_single_publisher.py \
+            alo186/tests/test_contextual_affiliate_live_v177.py
+          python alo186/tests/test_pages_single_publisher.py
+          python alo186/tests/test_contextual_affiliate_live_v177.py
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm '.github/workflows/alo186-patch-v219-bootstrap-review.yml'
+          git add \
+            '.github/workflows/alo186-pages-autobootstrap-live.yml' \
+            'alo186/tests/test_pages_single_publisher.py' \
+            'alo186/tests/test_contextual_affiliate_live_v177.py'
+          git commit -m 'fix: close Pages bootstrap and origin receipt review gaps'
+          git push origin HEAD:agent/alo186-v219-hosting-sitemap
