@@ -1,7 +1,7 @@
 {
-  "schemaVersion": 4,
+  "schemaVersion": 5,
   "release": "english-core-p0",
-  "generatedAt": "2026-07-30",
+  "generatedAt": "2026-08-02",
   "englishRouteCount": 10,
   "turkishSupportRouteCount": 8,
   "languagePairCount": 10,
@@ -19,6 +19,7 @@
     "fullAuditRequiresSite": true
   },
   "livePublicationSmoke": {
+    "version": 2,
     "workflow": "ALO186 English live publication smoke",
     "trigger": "ALO186 GitHub Pages — sunucusuz canlı yayın completed on main push",
     "origin": "https://alo186.com",
@@ -28,8 +29,32 @@
     "issue": 400,
     "singleUpdatableStatusComment": true,
     "acceptNewerDescendantDeployment": true,
+    "externalHostingContentAudit": true,
+    "allRouteFailuresCollected": true,
     "cacheBusting": true,
-    "maximumPollingMinutes": 9
+    "maximumPollingMinutes": 3
+  },
+  "hostingAuthority": {
+    "states": [
+      "pages-unavailable",
+      "chatgpt-sites-live",
+      "waiting-for-dns-cutover",
+      "github-pages-stale",
+      "github-pages-current"
+    ],
+    "sourceReceipt": "verify_live_origin.py",
+    "containsExpectedCommitField": "containsExpectedCommit",
+    "exactCommitReceiptField": "exactCommitReceiptAvailable",
+    "repeatedDeployWhileExternalDns": false,
+    "dnsCutoverRunbook": "/deployment/GITHUB_PAGES_CUTOVER.md"
+  },
+  "contextualAffiliateRoute": {
+    "path": "/amazon-elektrik-urunleri/konuya-gore-urun-haritasi/",
+    "version": 177,
+    "canonicalArtifactRequired": true,
+    "placementCount": 3,
+    "gateCount": 3,
+    "staticStoreLinksAllowed": false
   },
   "acceptance": [
     "self-canonical",
@@ -42,7 +67,11 @@
     "quick-test-discovery",
     "custom-domain-build",
     "sitemap-inclusion",
-    "post-deploy-live-smoke",
+    "hosting-aware-post-deploy-live-smoke",
+    "all-route-failure-observability",
+    "hosting-authority-state-machine",
+    "dns-cutover-redispatch-loop-closed",
+    "contextual-affiliate-route-in-artifact",
     "issue-status-observability"
   ]
 }
