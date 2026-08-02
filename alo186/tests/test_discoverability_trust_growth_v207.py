@@ -146,8 +146,8 @@ def test_robots_and_routing_publish_the_new_assets() -> None:
     assert {
         "/kesinti-cihaz-surekliligi-karar-merkezi/",
         "/amazon-elektrik-urunleri/",
-        "/sitemap-growth-v207.xml",
     }.issubset(paths)
+    assert all(route["source"].endswith("index.html") for route in routing["routes"])
     trust = routing["trust"]
     assert trust["officialImpersonation"] is False
     assert trust["directAffiliateLinkOnDecisionHub"] is False
