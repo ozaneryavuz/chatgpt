@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 5,
+  "schemaVersion": 6,
   "release": "english-core-p0",
   "generatedAt": "2026-08-02",
   "englishRouteCount": 10,
@@ -31,20 +31,26 @@
     "acceptNewerDescendantDeployment": true,
     "externalHostingContentAudit": true,
     "allRouteFailuresCollected": true,
+    "routeTransportFailuresAreLocal": true,
     "cacheBusting": true,
     "maximumPollingMinutes": 3
   },
   "hostingAuthority": {
     "states": [
       "pages-unavailable",
+      "first-pages-artifact-required",
       "chatgpt-sites-live",
       "waiting-for-dns-cutover",
+      "origin-receipt-invalid",
       "github-pages-stale",
       "github-pages-current"
     ],
     "sourceReceipt": "verify_live_origin.py",
     "containsExpectedCommitField": "containsExpectedCommit",
     "exactCommitReceiptField": "exactCommitReceiptAvailable",
+    "originProbeOkRequiredForSitesCurrent": true,
+    "pagesDeploymentHistoryChecked": true,
+    "firstPagesArtifactDeadlockClosed": true,
     "repeatedDeployWhileExternalDns": false,
     "dnsCutoverRunbook": "/deployment/GITHUB_PAGES_CUTOVER.md"
   },
@@ -69,7 +75,10 @@
     "sitemap-inclusion",
     "hosting-aware-post-deploy-live-smoke",
     "all-route-failure-observability",
+    "route-local-transport-errors",
     "hosting-authority-state-machine",
+    "first-pages-artifact-bootstrap",
+    "invalid-origin-receipt-cannot-mark-sites-current",
     "dns-cutover-redispatch-loop-closed",
     "contextual-affiliate-route-in-artifact",
     "issue-status-observability"
