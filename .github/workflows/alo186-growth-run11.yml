@@ -91,12 +91,14 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
+          from xml.etree import ElementTree as ET
 
           routes = {
               '/hesaplama/power-station-gunes-paneli-uygunluk/': 'calculator',
               '/hesaplama/duman-co-alarmi-bakim-gunlugu/': 'calculator',
               '/hesaplama/jenerator-ats-test-gunlugu/': 'business',
           }
+          namespace = {'sm': 'http://www.sitemaps.org/schemas/sitemap/0.9'}
           for root, prefix in [(Path('/tmp/alo186-growth11-custom'), ''), (Path('/tmp/alo186-growth11-project'), '/chatgpt')]:
               release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
               pages=json.loads((root/'pages-release.json').read_text(encoding='utf-8'))
@@ -113,6 +115,21 @@ jobs:
               assert contract['generatorAtsJournalTtlDays']==540
               assert pages['growthRun11']['directAffiliateLinksAdded']==0
               sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
+              sitemap_root=ET.fromstring(sitemap)
+              sitemap_urls={
+                  (node.text or '').strip()
+                  for node in sitemap_root.findall('sm:url/sm:loc', namespace)
+                  if (node.text or '').strip()
+              }
+              canonical_origin=str(release.get('canonicalHost') or 'https://alo186.com').rstrip('/')
+              if not canonical_origin.startswith(('http://', 'https://')):
+                  canonical_origin='https://' + canonical_origin.lstrip('/')
+              assert canonical_origin == 'https://alo186.com', (
+                  f'{root.name}: beklenmeyen canonical origin: {canonical_origin}'
+              )
+              assert not any(url.startswith('https://www.alo186.com/') for url in sitemap_urls), (
+                  f'{root.name}: legacy www sitemap URL kaldı'
+              )
               sw=(root/'sw.js').read_text(encoding='utf-8')
               for route,bucket in routes.items():
                   directory=root/route.strip('/')
@@ -121,7 +138,10 @@ jobs:
                   html=(directory/'index.html').read_text(encoding='utf-8')
                   assert 'application/ld+json' in html
                   assert 'amazon.com' not in html.lower() and 'amzn.' not in html.lower()
-                  assert f'https://www.alo186.com{route}' in sitemap
+                  expected_sitemap_url=f'{canonical_origin}{route}'
+                  assert expected_sitemap_url in sitemap_urls, (
+                      f'{root.name}: sitemap rotası eksik: {expected_sitemap_url}'
+                  )
                   assert route in index and index[route]['bucket']==bucket
                   assert index[route]['url']==(prefix+route if prefix else route)
                   assert not any(field in index[route] for field in ['price','stock','rating','seller','warranty','asin'])
