@@ -1,0 +1,51 @@
+name: ALO186 portal purchase checkpoint v213
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/deployment/inject_portal_purchase_checkpoint_v213.py'
+      - 'alo186/deployment/guard_commerce_routes_v3.py'
+      - 'alo186/tests/test_portal_purchase_checkpoint_v213.py'
+      - 'alo186/audits/portal-purchase-checkpoint-v213-2026-08-02.md'
+      - '.github/workflows/alo186-portal-purchase-checkpoint-v213.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/deployment/inject_portal_purchase_checkpoint_v213.py'
+      - 'alo186/deployment/guard_commerce_routes_v3.py'
+      - 'alo186/tests/test_portal_purchase_checkpoint_v213.py'
+      - 'alo186/audits/portal-purchase-checkpoint-v213-2026-08-02.md'
+      - '.github/workflows/alo186-portal-purchase-checkpoint-v213.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-portal-purchase-checkpoint-v213-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Sözdizimi ve fail-closed kullanıcı yolculuğu
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            alo186/deployment/inject_portal_purchase_checkpoint_v213.py \
+            alo186/deployment/guard_commerce_routes_v3.py \
+            alo186/tests/test_portal_purchase_checkpoint_v213.py
+          python alo186/tests/test_portal_purchase_checkpoint_v213.py
+      - name: Tek yayıncı entegrasyon sözleşmesi
+        run: |
+          set -euo pipefail
+          grep -q 'import inject_portal_purchase_checkpoint_v213 as portal_checkpoint' alo186/deployment/guard_commerce_routes_v3.py
+          grep -q 'portal_checkpoint.inject' alo186/deployment/guard_commerce_routes_v3.py
+          grep -q 'v2.validate_site = validate_site' alo186/deployment/guard_commerce_routes_v3.py
+          ! grep -Eq 'actions/(upload-pages-artifact|deploy-pages)' .github/workflows/alo186-portal-purchase-checkpoint-v213.yml
