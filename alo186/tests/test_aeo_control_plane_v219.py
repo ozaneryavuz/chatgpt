@@ -88,7 +88,7 @@ def main() -> None:
     assert "require_release_proof" in inspect.signature(aeo.validate).parameters
 
     forbidden_output = re.compile(
-        r'(?:ProfilePage|/uzman/|["\']@type["\']\s*:\s*["\']Person["\'])',
+        r'''(?:ProfilePage|/uzman/|["']@type["']\s*:\s*["']Person["'])''',
         re.I,
     )
     for path in (intent_path, benchmark_path, policy_path, routing_path, css_path):
@@ -96,8 +96,8 @@ def main() -> None:
         assert not forbidden_output.search(content), path
 
     assert aeo.PERSONAL_SCHEMA_RE.search('{"@type":"Person"}')
-    assert aeo.PERSONAL_SCHEMA_RE.search('ProfilePage')
-    assert aeo.PERSONAL_SCHEMA_RE.search('/uzman/ornek')
+    assert aeo.PERSONAL_SCHEMA_RE.search("ProfilePage")
+    assert aeo.PERSONAL_SCHEMA_RE.search("/uzman/ornek")
 
     policy_html = policy_path.read_text(encoding="utf-8")
     assert "kişisel isim" in policy_html
