@@ -85,13 +85,15 @@ jobs:
           assert release['articleCount']>=81, release
           assert release['routeCount']>=123, release
           assert 'content-authority-81-run12.json' in release['routingOverlays']
+          sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
+          assert 'https://www.alo186.com' not in sitemap, 'Legacy www canonical final sitemapte bulunamaz'
           for slug in (
               'topraklama-espotansiyel-kusaklama-farki',
               'k-faktorlu-trafo-harmonik-yuk-derating',
               'lifepo4-hucre-dengeleme-aktif-pasif-bms',
           ):
               assert (root/'haberler'/slug/'index.html').is_file(), slug
-              assert f'https://www.alo186.com/haberler/{slug}' in (root/'sitemap.xml').read_text(encoding='utf-8')
+              assert f'https://alo186.com/haberler/{slug}' in sitemap, slug
           PY
 
       - name: GitHub Pages custom-domain testi
