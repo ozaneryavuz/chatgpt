@@ -95,11 +95,19 @@ def test_current_manifest_builds_with_run123_and_v200_routes() -> None:
     assert manifest["version"] >= 200
 
 
-def test_run123_source_shape_remains_explicitly_detectable() -> None:
+def test_run123_dual_shape_remains_explicit_and_aligned() -> None:
     overlay = json.loads(
         (ROOT / "alo186" / "deployment" / "routing-overlays" / "content-authority-run123.json").read_text(
             encoding="utf-8"
         )
     )
     assert overlay["routes"]
-    assert all(set(route) == {"path", "file", "intent"} for route in overlay["routes"])
+    legacy_fields = {"path", "file", "intent"}
+    modern_fields = {"source", "canonicalPath", "type"}
+    for route in overlay["routes"]:
+        assert legacy_fields <= set(route)
+        assert modern_fields <= set(route)
+        assert route["canonicalPath"] == route["path"]
+        assert route["source"] == f"alo186/{route['file']}"
+        assert route["type"] == "article"
+        assert route["intent"].strip()
