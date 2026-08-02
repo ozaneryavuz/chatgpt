@@ -62,9 +62,9 @@ def _validate_route_with_legacy_article_bridge(route: dict, source_label: str) -
 
 _core.validate_route = _validate_route_with_legacy_article_bridge
 
-ACCESSIBILITY_MARKER = 'data-alo186-accessibility-v214="true"'
-ACCESSIBILITY_SOURCE = Path("alo186/assets/alo186-accessibility-v214.css")
-ACCESSIBILITY_TARGET = Path("assets/alo186-accessibility-v214.css")
+ACCESSIBILITY_MARKER = 'data-alo186-accessibility-v215="true"'
+ACCESSIBILITY_SOURCE = Path("alo186/assets/alo186-accessibility-v215.css")
+ACCESSIBILITY_TARGET = Path("assets/alo186-accessibility-v215.css")
 COMMERCIAL_HUB = Path("amazon-elektrik-urunleri/index.html")
 MALFORMED_COMMERCIAL_PREFIX = re.compile(
     r"(https://alo186\.com/amazon-elektrik-urunleri)(?=[a-z0-9])",
@@ -113,7 +113,7 @@ def normalize_commercial_hub_urls(output: Path) -> dict[str, object]:
 def install_accessibility_hardening(repo_root: Path, output: Path) -> dict[str, object]:
     source = repo_root / ACCESSIBILITY_SOURCE
     if not source.is_file():
-        raise FileNotFoundError(f"Erişilebilirlik v214 assetı eksik: {source}")
+        raise FileNotFoundError(f"Erişilebilirlik v215 assetı eksik: {source}")
     target = output / ACCESSIBILITY_TARGET
     target.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(source, target)
@@ -139,17 +139,19 @@ def install_accessibility_hardening(repo_root: Path, output: Path) -> dict[str, 
 
     if invalid_pages:
         raise RuntimeError(
-            "Erişilebilirlik v214 head alanı bulunamayan sayfalar: " + ", ".join(invalid_pages[:30])
+            "Erişilebilirlik v215 head alanı bulunamayan sayfalar: " + ", ".join(invalid_pages[:30])
         )
     if not injected and not already_present:
-        raise RuntimeError("Erişilebilirlik v214 için HTML sayfası bulunamadı.")
+        raise RuntimeError("Erişilebilirlik v215 için HTML sayfası bulunamadı.")
 
     return {
-        "version": 214,
+        "version": 215,
         "asset": f"/{ACCESSIBILITY_TARGET.as_posix()}",
         "injectedPages": injected,
         "alreadyInjectedPages": already_present,
         "minimumTouchTargetPx": 44,
+        "footerMinimumTouchTargetPx": 48,
+        "footerTouchTargetRoutes": ["/haberler", "/guvenlik-rehberleri"],
         "emergencyTelephoneTargets": ["112", "186"],
         "contentImageFallbackRatio": "16:9",
         "horizontalOverflowHidden": False,
@@ -165,7 +167,7 @@ def _build_with_platform_hardening(
     commercial_report = normalize_commercial_hub_urls(output)
     accessibility_report = install_accessibility_hardening(repo_root, output)
     release["commercialCanonicalV217"] = commercial_report
-    release["accessibilityHardeningV214"] = accessibility_report
+    release["accessibilityHardeningV215"] = accessibility_report
     release_path = output / "alo186-release.json"
     release_path.write_text(json.dumps(release, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     _recompute_checksums(output)
