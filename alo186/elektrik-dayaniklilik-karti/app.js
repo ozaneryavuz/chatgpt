@@ -145,6 +145,32 @@
   let lastPayload = null;
   let startEventSent = false;
 
+  function storageGet(key) {
+    try {
+      return window.localStorage.getItem(key);
+    } catch (_error) {
+      return null;
+    }
+  }
+
+  function storageSet(key, value) {
+    try {
+      window.localStorage.setItem(key, value);
+      return true;
+    } catch (_error) {
+      return false;
+    }
+  }
+
+  function storageRemove(key) {
+    try {
+      window.localStorage.removeItem(key);
+    } catch (_error) {
+      // Depolama engelliyse araç yine bellekte çalışmaya devam eder.
+    }
+  }
+
+  
   function emit(eventName, details = {}) {
     const allowed = {
       event: eventName,
@@ -307,22 +333,22 @@
 
   function savePayload(payload) {
     if (!rememberResult.checked) {
-      localStorage.removeItem(STORAGE_KEY);
+      storageRemove(STORAGE_KEY);
       savedPanel.hidden = true;
       return;
     }
     const record = { payload, expiresAt: Date.now() + STORAGE_DAYS * 24 * 60 * 60 * 1000 };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(record));
-    savedPanel.hidden = false;
+    const saved = storageSet(STORAGE_KEY, JSON.stringify(record));
+    savedPanel.hidden = !saved;
   }
 
   function readSaved() {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw = storageGet(STORAGE_KEY);
       if (!raw) return null;
       const record = JSON.parse(raw);
       if (!record || record.expiresAt < Date.now()) {
-        localStorage.removeItem(STORAGE_KEY);
+        storageRemove(STORAGE_KEY);
         return null;
       }
       const payload = record.payload;
@@ -330,7 +356,7 @@
       if (!LOCATION_TYPES.has(payload.t) || !BANDS.some((band) => band.key === payload.b)) return null;
       return payload;
     } catch (_error) {
-      localStorage.removeItem(STORAGE_KEY);
+      storageRemove(STORAGE_KEY);
       return null;
     }
   }
@@ -476,7 +502,7 @@
     }
   });
   document.getElementById("deleteSaved").addEventListener("click", () => {
-    localStorage.removeItem(STORAGE_KEY);
+    storageRemove(STORAGE_KEY);
     savedPanel.hidden = true;
   });
 
