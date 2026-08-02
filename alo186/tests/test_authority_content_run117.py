@@ -19,7 +19,7 @@ def between(pattern: str, html: str) -> str:
 
 def test_authority_content_run117() -> None:
     overlay = json.loads(OVERLAY.read_text(encoding="utf-8"))
-    assert overlay["version"] == 191
+    assert overlay["version"] == 192
     assert overlay["generatedAt"] == "2026-08-02"
     assert len(overlay["routes"]) == 3
     routes = {item["canonicalPath"]: item for item in overlay["routes"]}
