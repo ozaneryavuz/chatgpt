@@ -10,6 +10,7 @@ from pathlib import Path
 import guard_commerce_routes_v2 as v2
 import inject_affiliate_decision_funnel_v215 as affiliate_decision
 import inject_intent_tools_run135 as intent_tools
+import inject_live_quality_v218_compat as live_quality
 import inject_portal_purchase_checkpoint_v213 as portal_checkpoint
 
 # V2, bağlantının çevresindeki sabit 900 karakteri tarıyordu. Uzun hesaplayıcı
@@ -40,14 +41,8 @@ class Node:
     @property
     def marker(self) -> str:
         names = (
-            "class",
-            "id",
-            "role",
-            "data-product",
-            "data-product-card",
-            "data-result",
-            "data-recommendation",
-            "data-affiliate",
+            "class", "id", "role", "data-product", "data-product-card",
+            "data-result", "data-recommendation", "data-affiliate",
             "data-commercial-scope",
         )
         return " ".join(self.attrs.get(name, "") for name in names)
@@ -179,11 +174,7 @@ def validate_commercial_pages(site: Path) -> tuple[list[str], dict]:
 
 
 v2.validate_commercial_pages = validate_commercial_pages
-
-# V2'nin ticari sayfa, hizmet, katalog, canonical ve rapor sözleşmeleri aynen
-# korunur; yalnız yanlış pozitif üreten anchor bağlam çözümlemesi değiştirilir.
 v2.scan_affiliate_anchors = scan_affiliate_anchors
-
 _original_validate_site = v2.validate_site
 
 
@@ -196,7 +187,10 @@ def _checkpoint_base_path(site: Path) -> str:
         payload = json.loads(release_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         return ""
-    for key in ("affiliateDecisionFunnel", "affiliateIntentRouter", "homeAffiliateShowcase", "affiliateMeasurement"):
+    for key in (
+        "affiliateDecisionFunnel", "affiliateIntentRouter", "homeAffiliateShowcase",
+        "affiliateMeasurement",
+    ):
         value = payload.get(key)
         if isinstance(value, dict) and isinstance(value.get("basePath"), str):
             return value["basePath"]
@@ -205,16 +199,18 @@ def _checkpoint_base_path(site: Path) -> str:
 
 
 def validate_site(site: Path) -> dict:
-    """Son artifacta karar hunisi, portal kontrolü ve run135 keşfini ekler; sonra fail-closed tarar."""
+    """Bütün growth enjeksiyonlarından sonra commerce ve live quality'yi fail-closed doğrular."""
     resolved = site.resolve()
     base_path = _checkpoint_base_path(resolved)
     decision_result = affiliate_decision.inject(resolved, base_path)
     checkpoint_result = portal_checkpoint.inject(resolved, base_path)
     intent_result = intent_tools.inject(resolved, base_path)
     result = _original_validate_site(resolved)
+    quality_result = live_quality.run(resolved, base_path)
     result["affiliateDecisionFunnel"] = decision_result
     result["portalPurchaseCheckpoint"] = checkpoint_result
     result["intentToolsRun135"] = intent_result
+    result["liveQualityV218"] = quality_result
     return result
 
 
