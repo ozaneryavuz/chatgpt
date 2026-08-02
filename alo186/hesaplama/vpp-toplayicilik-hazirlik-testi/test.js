@@ -1,0 +1,10 @@
+'use strict';
+const fs=require('fs');const path=require('path');const vm=require('vm');const assert=require('assert');
+const html=fs.readFileSync(path.join(__dirname,'index.html'),'utf8');
+for(const text of ['WebApplication','FAQPage','BreadcrumbList','Talep Tarafı Katılımı','Telemetry Freshness','TEİAŞ','Kaynak doğrulama tarihi']) assert(html.includes(text),text);
+assert(!html.includes('"@type":"Product"'));assert(!html.includes('"@type":"Offer"'));assert(!/amazon\.(com|com\.tr)|amzn\.to/i.test(html));
+const match=html.match(/function assessVpp\(i\)\{[\s\S]*?\n\}/);assert(match,'assessVpp missing');const context={};vm.createContext(context);vm.runInContext(match[0]+';this.assessVpp=assessVpp;',context);
+let out=context.assessVpp({role:'asset',resource:'bess',telemetry:'realtime',control:'closed',baseline:'verified',contract:'aggregator_contract'});assert(out.score>=85);assert(out.level.includes('güçlü'));
+out=context.assessVpp({role:'aggregator',resource:'mixed',telemetry:'none',control:'none',baseline:'none',contract:'none'});assert(out.score<55);assert(out.gaps.length>=4);assert(out.next.some(x=>x.includes('EPDK')));
+out=context.assessVpp({role:'asset',resource:'generation',telemetry:'delayed',control:'partial',baseline:'pilot',contract:'none'});assert(out.next.some(x=>x.includes('Anti-islanding')));assert(out.gaps.some(x=>x.includes('telemetri')));
+console.log('VPP/toplayıcılık hazırlık aracı: PASS');
