@@ -1,0 +1,42 @@
+name: ALO186 intent consolidation v208
+
+on:
+  push:
+    paths:
+      - 'alo186/deployment/canonical-aliases.json'
+      - 'alo186/deployment/canonical_aliases.py'
+      - 'alo186/deployment/build_static_site.py'
+      - 'alo186/deployment/routing-overlays/208-intent-consolidation.json'
+      - 'alo186/tests/test_intent_consolidation_v208.py'
+      - 'alo186/audits/intent-consolidation-v208-2026-08-02.md'
+      - '.github/workflows/alo186-intent-consolidation-v208.yml'
+  pull_request:
+    paths:
+      - 'alo186/deployment/canonical-aliases.json'
+      - 'alo186/deployment/canonical_aliases.py'
+      - 'alo186/deployment/build_static_site.py'
+      - 'alo186/deployment/routing-overlays/208-intent-consolidation.json'
+      - 'alo186/tests/test_intent_consolidation_v208.py'
+      - 'alo186/audits/intent-consolidation-v208-2026-08-02.md'
+      - '.github/workflows/alo186-intent-consolidation-v208.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  canonical-intent-and-production-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Python syntax
+        run: python -m py_compile alo186/deployment/canonical_aliases.py alo186/deployment/build_static_site.py alo186/tests/test_intent_consolidation_v208.py
+      - name: JSON syntax
+        run: |
+          python -m json.tool alo186/deployment/canonical-aliases.json >/dev/null
+          python -m json.tool alo186/deployment/routing-overlays/208-intent-consolidation.json >/dev/null
+      - name: Fail-closed consolidation contract
+        run: python -m pytest alo186/tests/test_intent_consolidation_v208.py -q
