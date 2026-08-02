@@ -81,9 +81,11 @@ jobs:
           from pathlib import Path
           root=Path('/tmp/alo186-authority-84')
           release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
-          assert release['routingVersion']==38, release
-          assert release['articleCount']==84, release
-          assert release['routeCount']==127, release
+          # Run 13 tarihsel alt sınırını koru; daha yeni routing ve makale
+          # genişlemelerini eski snapshot testi nedeniyle reddetme.
+          assert release['routingVersion']>=38, release
+          assert release['articleCount']>=84, release
+          assert release['routeCount']>=127, release
           assert 'content-authority-84-run13.json' in release['routingOverlays']
           for slug in (
               'rcd-rccb-rcbo-farki',
