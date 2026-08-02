@@ -1,5 +1,5 @@
 {
-  "version": 8,
+  "version": 9,
   "generatedAt": "2026-08-02",
   "consolidations": [
     {
@@ -127,6 +127,13 @@
       "canonicalPath": "/haberler/jenerator-underfrequency-dusuk-frekans-governor-yuk-adimi-teshis",
       "label": "Jeneratör Underfrequency ve düşük frekans teşhisi",
       "reason": "Düşük frekans, governor/actuator, yakıt-hava yolu, yük adımı ve toparlanma süresini hedefleyen iki rehber güncel yük adımı teşhis rotasında birleştirildi."
+    },
+    {
+      "intentKey": "device-damage-edas-compensation-claim",
+      "aliasPath": "/haberler/elektrik-kesintisi-cihaz-hasari-edas-basvurusu",
+      "canonicalPath": "/haberler/elektrik-kesintisi-gerilim-dalgalanmasi-cihaz-hasari-edas-tazminat-basvurusu",
+      "label": "Elektrik kesintisi sonrası cihaz hasarı ve EDAŞ tazminat başvurusu",
+      "reason": "Eski rehber 10 iş gününü başvuru süresi olarak yansıtıyor ve aynı cihaz hasarı/EDAŞ tazminat niyetini karşılıyor. Yürürlükteki 30 günlük süreyi, apex canonical ve daha kapsamlı kanıt zincirini taşıyan güncel rota tek canonical kaynak olarak seçildi."
     }
   ]
 }
