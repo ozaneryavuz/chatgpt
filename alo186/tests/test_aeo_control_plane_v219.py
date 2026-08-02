@@ -76,8 +76,8 @@ def main() -> None:
     intent_path = root / "alo186/aeo/intent-registry-v219.json"
     benchmark_path = root / "alo186/aeo/ai-citation-benchmark-v219.json"
     policy_path = root / "alo186/yayin-politikasi/index.html"
-    control_path = root / "alo186/deployment/aeo_control_plane_v219.py"
-    workflow_path = root / ".github/workflows/alo186-aeo-control-plane-v219.yml"
+    routing_path = root / "alo186/deployment/routing-overlays/aeo-institutional-v219.json"
+    css_path = root / "alo186/deployment/aeo-institutional-v219.css"
 
     intents = json.loads(intent_path.read_text(encoding="utf-8"))["intents"]
     queries = json.loads(benchmark_path.read_text(encoding="utf-8"))["queries"]
@@ -87,10 +87,17 @@ def main() -> None:
     assert any(item["expectedPath"] == "/yayin-politikasi" for item in queries)
     assert "require_release_proof" in inspect.signature(aeo.validate).parameters
 
-    forbidden = re.compile(r'(?:ProfilePage|/uzman/|["\']@type["\']\s*:\s*["\']Person["\'])', re.I)
-    for path in (intent_path, benchmark_path, policy_path, control_path, workflow_path):
+    forbidden_output = re.compile(
+        r'(?:ProfilePage|/uzman/|["\']@type["\']\s*:\s*["\']Person["\'])',
+        re.I,
+    )
+    for path in (intent_path, benchmark_path, policy_path, routing_path, css_path):
         content = path.read_text(encoding="utf-8")
-        assert not forbidden.search(content), path
+        assert not forbidden_output.search(content), path
+
+    assert aeo.PERSONAL_SCHEMA_RE.search('{"@type":"Person"}')
+    assert aeo.PERSONAL_SCHEMA_RE.search('ProfilePage')
+    assert aeo.PERSONAL_SCHEMA_RE.search('/uzman/ornek')
 
     policy_html = policy_path.read_text(encoding="utf-8")
     assert "kişisel isim" in policy_html
