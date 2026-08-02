@@ -1,0 +1,23 @@
+{
+  "version": 208,
+  "generatedAt": "2026-08-02",
+  "source": "ALO186 content authority run130",
+  "routes": [
+    {
+      "path": "/haberler/kacak-akim-rolesi-tum-fisler-cekiliyken-atiyor-ortak-notr-n-pe-teshis",
+      "file": "haberler/kacak-akim-rolesi-tum-fisler-cekiliyken-atiyor-ortak-notr-n-pe-teshis/index.html",
+      "intent": "Tüm fişler çekiliyken süren RCD açmasını ortak nötr, N-PE teması, sabit tesisat ve kümülatif kaçak üzerinden ayırmak"
+    },
+    {
+      "path": "/haberler/ev-sarj-11-kw-yerine-7-kw-yavas-sarj-faz-akim-limiti-teshis",
+      "file": "haberler/ev-sarj-11-kw-yerine-7-kw-yavas-sarj-faz-akim-limiti-teshis/index.html",
+      "intent": "EV şarj noktasında etiket gücü ile gerçek AC gücü arasındaki farkı araç, faz, EVSE, kablo, yük yönetimi ve batarya koşullarıyla ayırmak"
+    },
+    {
+      "path": "/haberler/ges-uretim-var-fatura-yuksek-oz-tuketim-sayac-mahsuplasma-kontrolu",
+      "file": "haberler/ges-uretim-var-fatura-yuksek-oz-tuketim-sayac-mahsuplasma-kontrolu/index.html",
+      "intent": "GES üretimi mevcutken yüksek kalan faturayı öz tüketim, import-export sayaçları, çarpan, dönem ve mahsuplaşma verileriyle uzlaştırmak"
+    }
+  ],
+  "qualityGate": "alo186/tests/test_authority_content_run130.py"
+}
