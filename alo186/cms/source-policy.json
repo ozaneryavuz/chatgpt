@@ -1,0 +1,33 @@
+{
+  "version": 220,
+  "policyName": "ALO186 birincil kaynak ve kanıt politikası",
+  "officialDomains": [
+    "epdk.gov.tr",
+    "tedas.gov.tr",
+    "enerji.gov.tr",
+    "resmigazete.gov.tr",
+    "mevzuat.gov.tr"
+  ],
+  "officialDomainSuffixes": [
+    ".gov.tr",
+    ".bel.tr"
+  ],
+  "academicDomainSuffixes": [
+    ".edu.tr",
+    ".edu"
+  ],
+  "sourceTypes": [
+    "official",
+    "regulation",
+    "standard",
+    "manufacturer",
+    "academic"
+  ],
+  "rules": [
+    "Orta ve yüksek riskli içerikte en az bir resmî veya mevzuat kaynağı bulunur.",
+    "Pazar yeri, forum, sosyal medya ve affiliate URL'leri teknik kanıt olarak kullanılamaz.",
+    "Her kaynak hangi iddiayı desteklediğini supports alanında açıklar.",
+    "Takip parametreleri ve URL fragmentleri yayın öncesinde kaldırılır.",
+    "Kaynak tarihi ve kurumsal inceleme tarihi ayrı tutulur."
+  ]
+}
