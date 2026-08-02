@@ -44,7 +44,8 @@ def source_contracts() -> None:
     for token in (
         "const rawHours=input.value.trim()",
         "rawHours===''?Number.NaN:Number(rawHours)",
-        "rawHours===''||!Number.isFinite(hours)||hours<0||hours>8760",
+        "const valid=rawHours!==''&&Number.isFinite(hours)&&hours>=0&&hours<=8760",
+        "if(!valid)",
         "30 gün",
     ):
         assert token in outage, token
