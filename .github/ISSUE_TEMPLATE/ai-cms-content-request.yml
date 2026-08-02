@@ -1,0 +1,82 @@
+name: ALO186 AI CMS içerik isteği
+description: Kaynaklı, güvenli ve kurumsal onaylı yeni içerik için yapılandırılmış istek oluşturun.
+title: "[AI CMS] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Bu form içerik fikrini editoryal kuyruğa almak içindir. Kişisel isim, telefon, e-posta, açık adres veya müşteri verisi yazmayın. Form tek başına içerik üretmez ya da yayınlamaz.
+  - type: input
+    id: topic
+    attributes:
+      label: Konu başlığı
+      placeholder: Örnek: UPS bakım zamanı nasıl belirlenir?
+    validations:
+      required: true
+  - type: textarea
+    id: primary_question
+    attributes:
+      label: Kullanıcının ana sorusu
+      description: Arama motoruna veya AI asistanına yazılabilecek doğal soruyu belirtin.
+      placeholder: Bir UPS sisteminde bakım veya akü testi ne zaman yapılmalı?
+    validations:
+      required: true
+  - type: input
+    id: audience
+    attributes:
+      label: Hedef kullanıcı
+      placeholder: Ev kullanıcıları, tesis yöneticileri, elektrik profesyonelleri
+    validations:
+      required: true
+  - type: textarea
+    id: objective
+    attributes:
+      label: Kullanıcı sonucu
+      description: Kullanıcı sayfadan ayrıldığında hangi güvenli kararı verebilmeli?
+    validations:
+      required: true
+  - type: dropdown
+    id: risk_level
+    attributes:
+      label: Teknik risk seviyesi
+      options:
+        - low
+        - medium
+        - high
+      default: 1
+    validations:
+      required: true
+  - type: dropdown
+    id: commercial_intent
+    attributes:
+      label: Ticari niyet
+      options:
+        - none
+        - informational
+        - comparison
+      default: 1
+    validations:
+      required: true
+  - type: textarea
+    id: official_sources
+    attributes:
+      label: Bilinen resmî veya birincil kaynaklar
+      description: Yalnız kurum, mevzuat, standart veya üretici dokümanı bağlantıları ekleyin. Pazar yeri bağlantısı eklemeyin.
+      placeholder: Her satıra bir kaynak URL veya kaynak adı
+  - type: textarea
+    id: internal_links
+    attributes:
+      label: İlgili ALO186 sayfaları
+      placeholder: Her satıra bir canonical yol
+  - type: textarea
+    id: exclusions
+    attributes:
+      label: Özellikle kaçınılması gereken iddialar
+      placeholder: Kesin arıza teşhisi, doğrulanmamış süre, fiyat veya stok gibi
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Gizlilik onayı
+      options:
+        - label: Bu istekte kişisel bilgi, müşteri verisi veya gizli teknik belge bulunmadığını doğruluyorum.
+          required: true
