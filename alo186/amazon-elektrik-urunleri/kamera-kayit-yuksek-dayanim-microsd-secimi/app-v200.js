@@ -1,26 +1,11 @@
 (() => {
   'use strict';
 
-  const affiliateTag = 'alo186rehber-21';
-  const verifiedAt = '2026-08-02';
-  const maxAgeDays = 45;
+  const catalog = window.Alo186EnduranceMicroSDCatalogV200;
   const gateIds = ['gateNeed', 'gateCompatibility', 'gateAffiliate'];
   const status = document.getElementById('gateStatus');
   const panel = document.getElementById('gatePanel');
   const links = [...document.querySelectorAll('[data-affiliate-asin]')];
-
-  const dateOnly = value => {
-    const date = new Date(`${value}T00:00:00Z`);
-    return Number.isNaN(date.getTime()) ? null : date;
-  };
-
-  const verification = () => {
-    const checked = dateOnly(verifiedAt);
-    const now = dateOnly(new Date().toISOString().slice(0, 10));
-    if (!checked || !now) return { fresh: false, ageDays: null };
-    const ageDays = Math.max(0, Math.floor((now - checked) / 86400000));
-    return { fresh: ageDays <= maxAgeDays, ageDays };
-  };
 
   const gateOpen = () => gateIds.every(id => document.getElementById(id)?.checked);
 
@@ -40,14 +25,16 @@
   };
 
   const sync = () => {
-    const freshness = verification();
-    const open = gateOpen() && freshness.fresh;
+    const freshness = catalog?.verificationStatus(new Date()) || { fresh: false, ageDays: null };
+    const knownAsins = new Set(catalog?.products?.map(item => item.asin) || []);
+    const open = Boolean(catalog) && gateOpen() && freshness.fresh;
     panel.dataset.open = String(open);
 
     links.forEach(link => {
       const asin = link.dataset.affiliateAsin;
-      if (open) {
-        link.href = `https://www.amazon.com.tr/dp/${encodeURIComponent(asin)}?tag=${encodeURIComponent(affiliateTag)}`;
+      const permitted = open && knownAsins.has(asin);
+      if (permitted) {
+        link.href = catalog.amazonProductUrl(asin);
         link.classList.remove('locked');
         link.removeAttribute('aria-disabled');
         link.tabIndex = 0;
@@ -59,6 +46,10 @@
       }
     });
 
+    if (!catalog) {
+      status.textContent = 'Doğrulanmış model kataloğu yüklenemedi. Amazon bağlantıları güvenlik gereği kapalı.';
+      return;
+    }
     if (!freshness.fresh) {
       status.textContent = 'Model doğrulama tarihi 45 günü aştı. Amazon bağlantıları teknik kayıtlar yenilenene kadar kapalı.';
       return;
@@ -83,7 +74,8 @@
   });
 
   links.forEach(link => link.addEventListener('click', event => {
-    if (!gateOpen() || !verification().fresh) {
+    const fresh = catalog?.verificationStatus(new Date()).fresh;
+    if (!catalog || !gateOpen() || !fresh) {
       event.preventDefault();
       return;
     }
@@ -96,6 +88,7 @@
   sync();
   track('affiliate_endurance_microsd_viewed', {
     product_count: links.length,
-    verified_at: verifiedAt,
+    verified_at: catalog?.verifiedAt || null,
+    catalog_version: catalog?.version || null,
   });
 })();
