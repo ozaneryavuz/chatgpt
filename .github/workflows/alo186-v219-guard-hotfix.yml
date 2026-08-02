@@ -1,0 +1,93 @@
+name: ALO186 v219 release guard hotfix
+
+on:
+  push:
+    branches:
+      - 'agent/aeo-control-plane-anonymous-v219'
+    paths:
+      - '.github/workflows/alo186-v219-guard-hotfix.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: agent/aeo-control-plane-anonymous-v219
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: AEO yayın doğrulamasını commerce guard'a bağla
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          guard = Path('alo186/deployment/guard_commerce_routes_v3.py')
+          source = guard.read_text(encoding='utf-8')
+          old = '''    aeo_result = aeo_institutional.inject(resolved, base_path)
+          result = _original_validate_site(resolved)
+          quality_result = live_quality.run(resolved, base_path)
+          '''
+          old = '\n'.join(line[10:] if line.startswith('          ') else line for line in old.splitlines()) + '\n'
+          new = '''    aeo_result = aeo_institutional.inject(resolved, base_path)
+          aeo_validation = aeo_institutional.validate(
+              resolved,
+              Path(__file__).resolve().parents[2],
+              require_release_proof=True,
+          )
+          if not aeo_validation["ok"]:
+              raise RuntimeError(
+                  "AEO v219 release gate failed: "
+                  + "; ".join(aeo_validation.get("errors", []))
+              )
+          result = _original_validate_site(resolved)
+          quality_result = live_quality.run(resolved, base_path)
+          '''
+          new = '\n'.join(line[10:] if line.startswith('          ') else line for line in new.splitlines()) + '\n'
+          if 'aeo_institutional.validate(' not in source:
+              if old not in source:
+                  raise SystemExit('AEO guard patch anchor bulunamadı')
+              source = source.replace(old, new, 1)
+          proof_line = '    result["aeoInstitutionalV219"] = aeo_result\n'
+          validation_line = '    result["aeoInstitutionalV219Validation"] = aeo_validation\n'
+          if validation_line not in source:
+              if proof_line not in source:
+                  raise SystemExit('AEO guard report anchor bulunamadı')
+              source = source.replace(proof_line, proof_line + validation_line, 1)
+          guard.write_text(source, encoding='utf-8')
+
+          test = Path('alo186/tests/test_aeo_control_plane_v219.py')
+          contract = test.read_text(encoding='utf-8')
+          anchor = '    assert "require_release_proof" in inspect.signature(aeo.validate).parameters\n'
+          checks = '''    guard_source = (root / "alo186/deployment/guard_commerce_routes_v3.py").read_text(encoding="utf-8")
+          assert "aeo_institutional.validate(" in guard_source
+          assert "require_release_proof=True" in guard_source
+          assert "AEO v219 release gate failed" in guard_source
+          assert 'result["aeoInstitutionalV219Validation"] = aeo_validation' in guard_source
+          '''
+          checks = '\n'.join(line[10:] if line.startswith('          ') else line for line in checks.splitlines()) + '\n'
+          if 'assert "aeo_institutional.validate(" in guard_source' not in contract:
+              if anchor not in contract:
+                  raise SystemExit('AEO test patch anchor bulunamadı')
+              contract = contract.replace(anchor, anchor + '\n' + checks, 1)
+          test.write_text(contract, encoding='utf-8')
+          PY
+          python -m py_compile alo186/deployment/guard_commerce_routes_v3.py alo186/tests/test_aeo_control_plane_v219.py
+          python alo186/tests/test_aeo_control_plane_v219.py
+      - name: Hotfix commitini gönder ve geçici workflow'u kaldır
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'chatgpt-codex-connector[bot]'
+          git config user.email 'chatgpt-codex-connector[bot]@users.noreply.github.com'
+          git add alo186/deployment/guard_commerce_routes_v3.py alo186/tests/test_aeo_control_plane_v219.py
+          git rm .github/workflows/alo186-v219-guard-hotfix.yml
+          git commit -m 'fix(alo186): AEO v219 doğrulamasını yayın korumasına bağla'
+          git push origin HEAD:agent/aeo-control-plane-anonymous-v219
