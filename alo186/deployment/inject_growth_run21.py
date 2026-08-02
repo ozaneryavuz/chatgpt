@@ -179,4 +179,5 @@ def run(site: Path, base_path: str) -> dict:
     recompute(site)
     lighting = run_growth_run22(site, base_path)
     boiler = run_boiler_continuity(site, base_path)
+    ET.parse(site / "sitemap.xml")
     return {"ok": True, "route": public_url(base_path, ROUTE), "entries": entries, "riskGate": risk_gate, "offline": True, "lightingSuitability": lighting, "boilerContinuity": boiler}
