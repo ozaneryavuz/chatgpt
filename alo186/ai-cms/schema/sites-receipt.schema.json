@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://alo186.com/schemas/ai-cms-sites-receipt-v1.json",
+  "title": "ALO186 ChatGPT Sites yayın makbuzu",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "siteSlug",
+    "target",
+    "packageHash",
+    "sourceCommit",
+    "contentId",
+    "contentRecordSha256",
+    "canonicalHtmlSha256",
+    "canonicalUrl",
+    "deploymentUrl",
+    "publishedAt",
+    "liveVerified",
+    "verification"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "siteSlug": {"const": "alo186"},
+    "target": {"const": "chatgpt-sites"},
+    "packageHash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "sourceCommit": {"type": "string", "pattern": "^[0-9a-f]{7,40}$"},
+    "contentId": {"type": "string", "pattern": "^cms_[a-f0-9]{16}$"},
+    "contentRecordSha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "canonicalHtmlSha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "canonicalUrl": {"type": "string", "pattern": "^https://alo186\\.com/haberler/[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "deploymentUrl": {"type": "string", "format": "uri", "pattern": "^https://"},
+    "publishedAt": {"type": "string", "format": "date-time"},
+    "liveVerified": {"const": true},
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "httpStatus",
+        "canonicalMatched",
+        "titleMatched",
+        "h1Matched",
+        "structuredDataPresent",
+        "platformConfirmed"
+      ],
+      "properties": {
+        "httpStatus": {"const": 200},
+        "canonicalMatched": {"const": true},
+        "titleMatched": {"const": true},
+        "h1Matched": {"const": true},
+        "structuredDataPresent": {"const": true},
+        "platformConfirmed": {"const": true}
+      }
+    }
+  }
+}
