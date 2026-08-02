@@ -48,7 +48,8 @@ jobs:
           PY
           grep -Fq 'RewriteRule ^manifest\.webmanifest$ hesaplama/manifest.webmanifest [T=application/manifest+json,L]' alo186/deployment/apache-production.htaccess
           grep -Fq 'AddType application/manifest+json .webmanifest' alo186/deployment/apache-production.htaccess
-          grep -Fq 'Access-Control-Allow-Origin "https://www.alo186.com"' alo186/deployment/apache-production.htaccess
+          grep -Fq 'Access-Control-Allow-Origin "https://alo186.com"' alo186/deployment/apache-production.htaccess
+          ! grep -Fq 'Access-Control-Allow-Origin "https://www.alo186.com"' alo186/deployment/apache-production.htaccess
           grep -Fq 'Cross-Origin-Resource-Policy "cross-origin"' alo186/deployment/apache-production.htaccess
 
       - name: Canonical production bundle içinde manifest
@@ -67,7 +68,8 @@ jobs:
           json.loads(Path('/tmp/alo186-manifest-site/hesaplama/manifest.webmanifest').read_text(encoding='utf-8'))
           ht=Path('/tmp/alo186-manifest-site/.htaccess').read_text(encoding='utf-8')
           assert 'application/manifest+json' in ht
-          assert 'Access-Control-Allow-Origin "https://www.alo186.com"' in ht
+          assert 'Access-Control-Allow-Origin "https://alo186.com"' in ht
+          assert 'Access-Control-Allow-Origin "https://www.alo186.com"' not in ht
           PY
 
       - name: Doğrulanmış manifest artifactını sakla
