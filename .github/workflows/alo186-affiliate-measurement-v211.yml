@@ -29,6 +29,10 @@ jobs:
   build-and-validate:
     runs-on: ubuntu-latest
     timeout-minutes: 55
+    env:
+      SITE: /tmp/alo186-affiliate-measurement-v211
+      BASE: ''
+      GA4: ${{ vars.ALO186_GA4_MEASUREMENT_ID || 'G-639TVHL0LC' }}
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
@@ -38,6 +42,7 @@ jobs:
         with:
           node-version: '24'
           package-manager-cache: false
+
       - name: Birim ve sözdizimi testleri
         run: |
           set -euo pipefail
@@ -45,26 +50,39 @@ jobs:
             alo186/deployment/inject_affiliate_measurement_v211.py \
             alo186/tests/test_affiliate_measurement_v211.py
           python alo186/tests/test_affiliate_measurement_v211.py
-      - name: Tam üretim artifactı ve affiliate ölçüm kalite kapısı
-        env:
-          BASE: ''
-          GA4: ${{ vars.ALO186_GA4_MEASUREMENT_ID || 'G-639TVHL0LC' }}
+
+      - name: Canonical artifactı oluştur ve affiliate katmanlarını uygula
         run: |
           set -euo pipefail
-          SITE=/tmp/alo186-affiliate-measurement-v211
           rm -rf "$SITE"
           python alo186/deployment/build_static_site.py --output "$SITE" --commit "$GITHUB_SHA"
           python alo186/deployment/prepare_github_pages.py --site "$SITE" --base-path "$BASE" --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
           python alo186/deployment/inject_outcome_runtime.py --site "$SITE" --base-path "$BASE"
-          python alo186/deployment/inject_contextual_affiliate_v176.py --site "$SITE" --base-path "$BASE"
+          python alo186/deployment/inject_contextual_affiliate_growth_v177.py --site "$SITE" --base-path "$BASE"
           python alo186/deployment/inject_home_affiliate_banner_v209.py --site "$SITE" --base-path "$BASE"
           python alo186/deployment/inject_affiliate_intent_router_v210.py --site "$SITE" --base-path "$BASE" | tee /tmp/affiliate-intent-v210.json
           python alo186/deployment/inject_ga4_consent.py --site "$SITE" --base-path "$BASE" --measurement-id "$GA4"
           python alo186/deployment/inject_affiliate_measurement_v211.py --site "$SITE" --base-path "$BASE" | tee /tmp/affiliate-measurement-v211-receipt.json
-          node --check "$SITE/assets/affiliate-measurement-v211.js"
-          python alo186/deployment/smoke_github_pages.py --site "$SITE" --base-path "$BASE"
-          python alo186/deployment/guard_commerce_routes_v3.py --site "$SITE" | tee /tmp/affiliate-measurement-v211-guard.json
-          SITE="$SITE" python - <<'PY'
+
+      - name: v211 JavaScript sözdizimi
+        run: |
+          set -euo pipefail
+          node --check "$SITE/assets/affiliate-measurement-v211.js" 2>&1 | tee /tmp/affiliate-measurement-v211-node.log
+
+      - name: GitHub Pages smoke
+        run: |
+          set -euo pipefail
+          python alo186/deployment/smoke_github_pages.py --site "$SITE" --base-path "$BASE" 2>&1 | tee /tmp/affiliate-measurement-v211-smoke.log
+
+      - name: Ticari rota güvenlik kapısı
+        run: |
+          set -euo pipefail
+          python alo186/deployment/guard_commerce_routes_v3.py --site "$SITE" 2>&1 | tee /tmp/affiliate-measurement-v211-guard.log
+
+      - name: Ölçüm, gizlilik ve yayın sözleşmesi
+        run: |
+          set -euo pipefail
+          SITE="$SITE" python - <<'PY' 2>&1 | tee /tmp/affiliate-measurement-v211-contract.log
           import json
           import os
           from pathlib import Path
@@ -108,6 +126,7 @@ jobs:
           assert 'link_url' not in asset
           print(json.dumps(summary, ensure_ascii=False, indent=2))
           PY
+
       - if: always()
         uses: actions/upload-artifact@v5
         with:
@@ -115,7 +134,10 @@ jobs:
           path: |
             /tmp/affiliate-measurement-v211-receipt.json
             /tmp/affiliate-intent-v210.json
-            /tmp/affiliate-measurement-v211-guard.json
+            /tmp/affiliate-measurement-v211-node.log
+            /tmp/affiliate-measurement-v211-smoke.log
+            /tmp/affiliate-measurement-v211-guard.log
+            /tmp/affiliate-measurement-v211-contract.log
             /tmp/alo186-affiliate-measurement-v211/affiliate-measurement-v211.json
             /tmp/alo186-affiliate-measurement-v211/pages-release.json
           if-no-files-found: warn
