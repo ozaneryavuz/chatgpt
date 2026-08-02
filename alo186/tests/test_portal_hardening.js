@@ -115,7 +115,9 @@ for (const token of [
 assert(!/overflow\s*:\s*hidden/.test(css), 'Bilgi kartlarında metni kırpabilecek overflow:hidden kullanılmamalı.');
 assert(!/line-clamp/.test(css), 'Güvenlik ve hak bilgisi line-clamp ile gizlenmemeli.');
 
-assert(htaccess.includes('RewriteRule ^ https://www.alo186.com%{REQUEST_URI} [R=301,L,NE]'), 'www canonical yönlendirmesi eksik.');
+assert(htaccess.includes('RewriteCond %{HTTP_HOST} !^alo186\\.com$ [NC]'), 'Non-apex host koşulu eksik.');
+assert(htaccess.includes('RewriteRule ^ https://alo186.com%{REQUEST_URI} [R=301,L,NE]'), 'www → apex canonical yönlendirmesi eksik.');
+assert(!htaccess.includes('RewriteRule ^ https://www.alo186.com%{REQUEST_URI} [R=301,L,NE]'), 'Eski apex → www yönlendirmesi kalmamalı.');
 for (const header of [
   'Strict-Transport-Security',
   'X-Content-Type-Options',
