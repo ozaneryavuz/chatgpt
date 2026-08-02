@@ -17,12 +17,15 @@ assert(overlays.some(item=>item.name==='content-authority-81-run12.json'),'81 re
 assert(overlays.some(item=>item.name==='growth-proposal-scope-run12.json'),'Teknik teklif kapsamı büyüme overlay eksik.');
 const current=overlays.find(item=>item.name==='content-authority-84-run13.json');
 assert(current,'Run 13 içerik otoritesi overlay eksik.');
-assert.equal(current.version,38,'Etkili routing sürümü v38 olmalı.');
+assert.equal(current.version,38,'Run 13 routing sürümü v38 olmalı.');
 assert.equal(current.generatedAt,'2026-07-29');
 assert.equal(current.routes.length,3,'Run 13 overlay tam üç yeni rota taşımalı.');
 
+// This is a historical run-13 contract. Later independent overlays must not make
+// the old snapshot fail merely because the site has continued to grow.
+const historicalOverlays=overlays.filter(item=>item.version<=current.version);
 const effective=[...base.routes];
-for(const overlay of overlays) effective.push(...overlay.routes);
+for(const overlay of historicalOverlays) effective.push(...overlay.routes);
 const canonical=new Set();
 const sources=new Set();
 for(const route of effective){
@@ -31,9 +34,9 @@ for(const route of effective){
   canonical.add(route.canonicalPath);
   sources.add(route.source);
 }
-assert.equal(Math.max(...overlays.map(item=>item.version)),38,'En yüksek routing overlay sürümü v38 olmalı.');
-assert.equal(effective.filter(route=>route.type==='article').length,84,'Etkili routing 84 teknik makale taşımalı.');
-assert.equal(effective.length,127,'Etkili routing 127 canonical rota taşımalı.');
+assert.equal(Math.max(...historicalOverlays.map(item=>item.version)),38,'Run 13 tarihsel routing tepe sürümü v38 olmalı.');
+assert.equal(effective.filter(route=>route.type==='article').length,84,'Run 13 tarihsel routing 84 teknik makale taşımalı.');
+assert.equal(effective.length,127,'Run 13 tarihsel routing 127 canonical rota taşımalı.');
 
 const articles=[
   {
