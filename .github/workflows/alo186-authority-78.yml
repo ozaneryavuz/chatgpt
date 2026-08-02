@@ -83,13 +83,14 @@ jobs:
           assert release['articleCount']>=78
           assert release['routeCount']>=119
           assert 'content-authority-78.json' in release['routingOverlays']
+          sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
           for slug in (
               'ups-eco-modu-acik-olmali-mi',
               'ges-inverter-mppt-giris-akimi-isc-nasil-kontrol-edilir',
               'jenerator-start-akusu-neden-bosalir-sarj-olmaz',
           ):
               assert (root/'haberler'/slug/'index.html').is_file(), slug
-              assert f'https://www.alo186.com/haberler/{slug}' in (root/'sitemap.xml').read_text(encoding='utf-8')
+              assert f'https://alo186.com/haberler/{slug}' in sitemap
           PY
 
       - name: GitHub Pages custom-domain testi
