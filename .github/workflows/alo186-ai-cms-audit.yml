@@ -1,0 +1,111 @@
+name: ALO186 AI CMS — haftalık kaynak ve yayın denetimi
+
+on:
+  schedule:
+    - cron: '23 5 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: alo186-ai-cms-weekly-audit
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: İçerik, kaynak yaşı ve canonical bütünlük denetimi
+        id: audit
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p /tmp/alo186-ai-cms-audit
+          python alo186/ai-cms/cms.py validate \
+            > /tmp/alo186-ai-cms-audit/validation.json \
+            2> /tmp/alo186-ai-cms-audit/validation.err
+
+      - name: Dashboard üret
+        if: always()
+        run: python alo186/ai-cms/cms.py dashboard --output /tmp/alo186-ai-cms-audit/dashboard.html
+
+      - name: Denetim özeti
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo '## ALO186 AI CMS haftalık denetim'
+            echo
+            echo "- Sonuç: **${{ steps.audit.outcome }}**"
+            if [ -s /tmp/alo186-ai-cms-audit/validation.json ]; then
+              records=$(jq -r '.records // 0' /tmp/alo186-ai-cms-audit/validation.json)
+              echo "- İçerik kaydı: **$records**"
+            fi
+            echo '- Denetlenenler: kaynak erişim yaşı, primary source, kalite puanı, canonical çakışma, iç linkler, kanibalizasyon, kişisel veri ve risk/commerce sınırı.'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: alo186-ai-cms-weekly-audit-${{ github.run_id }}
+          path: /tmp/alo186-ai-cms-audit/
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Başarısızlık issue oluştur veya güncelle
+        if: steps.audit.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const title = '[AI CMS] Kaynak veya yayın denetimi başarısız';
+            const validation = fs.existsSync('/tmp/alo186-ai-cms-audit/validation.json')
+              ? fs.readFileSync('/tmp/alo186-ai-cms-audit/validation.json', 'utf8')
+              : '';
+            const stderr = fs.existsSync('/tmp/alo186-ai-cms-audit/validation.err')
+              ? fs.readFileSync('/tmp/alo186-ai-cms-audit/validation.err', 'utf8')
+              : '';
+            const {data: issues} = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 100
+            });
+            const existing = issues.find(issue => issue.title === title);
+            const body = `Haftalık AI CMS denetimi fail-closed durdu.\n\nRun: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}\n\n\`\`\`json\n${validation.slice(0, 10000)}\n\`\`\`\n\n\`\`\`text\n${stderr.slice(0, 3000)}\n\`\`\``;
+            if (existing) {
+              await github.rest.issues.createComment({owner: context.repo.owner, repo: context.repo.repo, issue_number: existing.number, body});
+            } else {
+              await github.rest.issues.create({owner: context.repo.owner, repo: context.repo.repo, title, body, labels: ['alo186', 'content']});
+            }
+
+      - name: İyileşince açık denetim issue'sunu kapat
+        if: steps.audit.outcome == 'success'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = '[AI CMS] Kaynak veya yayın denetimi başarısız';
+            const {data: issues} = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 100
+            });
+            const existing = issues.find(issue => issue.title === title);
+            if (existing) {
+              await github.rest.issues.createComment({owner: context.repo.owner, repo: context.repo.repo, issue_number: existing.number, body: `AI CMS haftalık denetimi yeniden sağlıklı. Recovery run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`});
+              await github.rest.issues.update({owner: context.repo.owner, repo: context.repo.repo, issue_number: existing.number, state: 'closed', state_reason: 'completed'});
+            }
+
+      - name: Denetim sonucunu job sonucuna yansıt
+        if: steps.audit.outcome == 'failure'
+        run: exit 1
