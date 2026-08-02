@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "release": "alo186-direct-live-integration-v212",
-  "requestedAt": "2026-08-02T16:30:00Z",
-  "purpose": "Affiliate measurement v211, commerce trust v212, content authority run133 and legacy growth injector fixes are integrated into the single GitHub Pages publisher.",
-  "integratedCommit": "5affc2a3f33c6aed26cad48a4e05938d4971d5f8",
+  "requestedAt": "2026-08-02T16:34:00Z",
+  "purpose": "Affiliate measurement v211, commerce trust v212, content authority run133, high-endurance microSD v200 and legacy growth/sitemap recovery are integrated into the single GitHub Pages publisher.",
+  "integratedThroughCommit": "30a6b2e94b19cfbfdda502bd80f41e6bd1aa97f0",
   "publisher": ".github/workflows/alo186-github-pages.yml",
-  "status": "integrated"
+  "status": "deploy-requested"
 }
