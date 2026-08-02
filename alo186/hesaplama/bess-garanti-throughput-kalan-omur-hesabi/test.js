@@ -1,0 +1,11 @@
+'use strict';
+const fs=require('fs');const path=require('path');const vm=require('vm');const assert=require('assert');
+const html=fs.readFileSync(path.join(__dirname,'index.html'),'utf8');
+for(const text of ['WebApplication','FAQPage','BreadcrumbList','Lifetime Energy Throughput','Equivalent Full Cycle','Throughput Warranty','Kaynak doğrulama tarihi']) assert(html.includes(text),text);
+assert(!html.includes('"@type":"Product"'));assert(!html.includes('"@type":"Offer"'));assert(!/amazon\.(com|com\.tr)|amzn\.to/i.test(html));
+const match=html.match(/function calculateBessWarranty\(i\)\{[\s\S]*?\n\}/);assert(match,'calculateBessWarranty missing');const context={};vm.createContext(context);vm.runInContext(match[0]+';this.calculateBessWarranty=calculateBessWarranty;',context);
+let out=context.calculateBessWarranty({nameplateMwh:10,warrantedMwh:30000,cumulativeMwh:12000,annualMwh:4000,ageYears:3,calendarYears:10,currentSoh:88,sohFloor:80});assert(Math.abs(out.remainingMwh-18000)<1e-9);assert(Math.abs(out.throughputYears-4.5)<1e-9);assert(Math.abs(out.calendarRemaining-7)<1e-9);assert(out.limitingFactor==='Throughput sınırı');assert(Math.abs(out.efc-1200)<1e-9);assert(Math.abs(out.sohMargin-8)<1e-9);
+out=context.calculateBessWarranty({nameplateMwh:5,warrantedMwh:10000,cumulativeMwh:2000,annualMwh:500,ageYears:9,calendarYears:10,currentSoh:82,sohFloor:80});assert(out.limitingFactor==='Takvim sınırı');assert(Math.abs(out.limitingYears-1)<1e-9);
+out=context.calculateBessWarranty({nameplateMwh:5,warrantedMwh:1000,cumulativeMwh:1500,annualMwh:500,ageYears:1,calendarYears:10,currentSoh:75,sohFloor:80});assert(out.remainingMwh===0);assert(out.sohMargin<0);
+assert.throws(()=>context.calculateBessWarranty({nameplateMwh:0,warrantedMwh:1,cumulativeMwh:0,annualMwh:1,ageYears:0,calendarYears:1,currentSoh:100,sohFloor:80}));
+console.log('BESS garanti throughput kalan ömür hesabı: PASS');
