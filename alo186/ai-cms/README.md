@@ -25,6 +25,9 @@ GitHub workflow_dispatch
 Brief JSON
         │
         ▼
+Prompt öncesi kişisel veri guardı
+        │
+        ▼
 OpenAI Responses API
 store=false + Structured Outputs
         │
@@ -59,8 +62,8 @@ Mevcut ALO186 production build ve Pages yayını
 1. **AI yayın yapamaz.** AI yalnız `review` durumunda taslak üretir.
 2. **İnsan onayı zorunludur.** `approvedBy`, `approvedAt` ve PR numarası olmadan canonical HTML üretilemez.
 3. **Kaynak özetleri zorunludur.** Model yalnız brief içindeki `factSummary` alanlarını kullanabilir.
-4. **Yüksek/hukukî riskte affiliate kapalıdır.** Yangın, pano, sabit tesisat, hukuk ve benzeri konularda ticari CTA fail-closed engellenir.
-5. **Kişisel veri girişi yapılmaz.** İsim, telefon, e-posta, açık adres, tesisat numarası veya kullanıcı profili prompta verilmez.
+4. **Prompt öncesi veri guardı zorunludur.** Kişisel e-posta, telefon, T.C. kimlik, IBAN ve tesisat/abonelik kimliği OpenAI çağrısından önce fail-closed engellenir.
+5. **Yüksek/hukukî riskte affiliate kapalıdır.** Yangın, pano, sabit tesisat, hukuk ve benzeri konularda ticari CTA fail-closed engellenir.
 6. **Fiyat/stok/puan/garanti üretilmez.** ALO186 satıcı değildir; `Product`, `Offer`, `Person` ve `ProfilePage` şemaları yasaktır.
 7. **Canonical çakışma ve kanibalizasyon engellenir.** Benzerlik eşiği `0.78` üzerindeyse onay durur.
 8. **Kaynak erişim yaşı risk sınıfına göre sınırlıdır.** Hukukî içerikte 90, yüksek riskte 180 gün.
@@ -88,7 +91,9 @@ alo186/ai-cms/
 ├── prompts/                  # sürümlü kurumsal AI talimatları
 ├── schema/                   # içerik ve Structured Output şemaları
 ├── policy.json               # kalite, risk ve yayın politikası
+├── input_guard.py            # prompt öncesi PII/müşteri verisi kapısı
 ├── cms.py                    # CLI ve yayın motoru
+├── SECURITY.md               # güvenlik ve olay müdahale sözleşmesi
 └── README.md
 ```
 
@@ -159,6 +164,13 @@ python alo186/ai-cms/cms.py new \
   --audience "Ev kullanıcıları,uzaktan çalışanlar" \
   --risk-class medium \
   --sources-json @/gizli-olmayan-kaynaklar.json
+```
+
+OpenAI çağrısından önce zorunlu veri kapısı:
+
+```bash
+python alo186/ai-cms/input_guard.py \
+  --brief alo186/ai-cms/briefs/modem-mini-ups-secimi.json
 ```
 
 AI taslağı:
@@ -237,6 +249,7 @@ Puan yalnız gösterge değildir. Canonical çakışma, yasak güvenlik iddiası
 ## AI ve veri koruma
 
 - Responses API çağrısı `store=false` kullanır.
+- Prompt öncesinde `input_guard.py` çalışır ve yalnız alan yolu/ihlal türü raporlar; yakalanan değer loga yazılmaz.
 - Prompt yalnız editoryal brief, kaynak özetleri ve mevcut başlık benzerliklerini taşır.
 - Kullanıcı sorgusu, form girdisi, tesisat numarası veya müşteri verisi CMS’e gönderilmez.
 - API çağrısı Structured Outputs JSON Schema ile sınırlandırılır.
