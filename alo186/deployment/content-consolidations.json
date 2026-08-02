@@ -1,5 +1,5 @@
 {
-  "version": 8,
+  "version": 9,
   "generatedAt": "2026-08-02",
   "consolidations": [
     {
@@ -127,6 +127,13 @@
       "canonicalPath": "/haberler/jenerator-underfrequency-dusuk-frekans-governor-yuk-adimi-teshis",
       "label": "Jeneratör Underfrequency ve düşük frekans teşhisi",
       "reason": "Düşük frekans, governor/actuator, yakıt-hava yolu, yük adımı ve toparlanma süresini hedefleyen iki rehber güncel yük adımı teşhis rotasında birleştirildi."
+    },
+    {
+      "intentKey": "device-damage-edas-claim-current-guide",
+      "aliasPath": "/haberler/elektrik-kesintisi-gerilim-dalgalanmasi-cihaz-hasari-edas-tazminat-basvurusu",
+      "canonicalPath": "/haberler/elektrik-kesintisi-cihaz-hasari-edas-basvurusu",
+      "label": "Elektrik kesintisi cihaz hasarı EDAŞ başvurusu",
+      "reason": "İki rehber aynı cihaz hasarı, dağıtım şirketi başvurusu, kanıt ve güncel 30 günlük süre niyetini hedefliyor. Daha kısa ve güncel rota canonical tutuldu."
     }
   ]
 }
