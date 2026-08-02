@@ -69,11 +69,11 @@ def amazon_links(html: str) -> list[str]:
 def hub_inventory_claim(html: str) -> tuple[int, bool, str]:
     """Return visible count, lower-bound semantics and the counted surface.
 
-    ``N özel rehber`` counts direct product-guide links. The current
-    ``N+ karar rotası`` headline counts unique actionable destinations in the
-    main content: tools, no-buy tests, professional gates and product guides.
-    Script/style payloads are ignored so JSON-LD cannot satisfy the visible-copy
-    contract accidentally.
+    ``N özel rehber`` counts distinct product-guide destinations. The current
+    ``N+ karar rotası`` headline counts visible actionable paths in the main
+    content; the same safe destination may intentionally appear in separate
+    decision contexts. Script/style payloads are ignored so JSON-LD cannot
+    satisfy the visible-copy contract accidentally.
     """
 
     visible = re.sub(r"<(?:script|style)\b[^>]*>.*?</(?:script|style)>", " ", html, flags=re.I | re.S)
@@ -81,15 +81,15 @@ def hub_inventory_claim(html: str) -> tuple[int, bool, str]:
     match = re.search(r"\b(\d+)\s*(\+)?\s+(özel rehber|karar rotası)\b", visible, re.I)
     if not match:
         raise AssertionError("Ürün merkezinde görünür rehber/karar rotası sayısı bulunamadı")
-    surface = "guides" if match.group(3).casefold() == "özel rehber" else "routes"
+    surface = "guides" if match.group(3).casefold() == "özel rehber" else "paths"
     return int(match.group(1)), bool(match.group(2)), surface
 
 
-def main_decision_routes(html: str) -> set[str]:
+def main_decision_paths(html: str) -> list[str]:
     main = re.search(r"<main\b[^>]*>(.*?)</main>", html, re.I | re.S)
     if not main:
         raise AssertionError("Ürün merkezinin main içeriği bulunamadı")
-    result: set[str] = set()
+    result: list[str] = []
     for href in re.findall(r'<a\b[^>]*href=["\']([^"\']+)["\']', main.group(1), re.I | re.S):
         parsed = urlsplit(unescape(href))
         if parsed.scheme or parsed.netloc or not parsed.path.startswith("/"):
@@ -97,7 +97,7 @@ def main_decision_routes(html: str) -> set[str]:
         path = parsed.path.rstrip("/") or "/"
         if path in {"/", "/amazon-elektrik-urunleri"}:
             continue
-        result.add(path)
+        result.append(path)
     return result
 
 
@@ -190,15 +190,15 @@ class CommercialCategoryExpansionTests(unittest.TestCase):
 
     def test_inventory_claim_parser_supports_exact_and_minimum_copy(self) -> None:
         self.assertEqual(hub_inventory_claim("<strong>7 özel rehber</strong>"), (7, False, "guides"))
-        self.assertEqual(hub_inventory_claim("<strong>18+ karar rotası</strong>"), (18, True, "routes"))
+        self.assertEqual(hub_inventory_claim("<strong>18+ karar rotası</strong>"), (18, True, "paths"))
         with self.assertRaisesRegex(AssertionError, "görünür"):
             hub_inventory_claim('<script type="application/ld+json">{"name":"99 özel rehber"}</script>')
 
-    def test_main_decision_routes_exclude_navigation_and_external_targets(self) -> None:
+    def test_main_decision_paths_exclude_navigation_and_external_targets(self) -> None:
         sample = '''<main><a href="/">Ana sayfa</a><a href="/amazon-elektrik-urunleri/">Bu sayfa</a>
         <a href="/hesaplama/test/?from=hub#result">Araç</a><a href="/hesaplama/test/">Aynı araç</a>
         <a href="https://example.com/x">Dış</a><a href="mailto:test@example.com">E-posta</a></main>'''
-        self.assertEqual(main_decision_routes(sample), {"/hesaplama/test"})
+        self.assertEqual(main_decision_paths(sample), ["/hesaplama/test", "/hesaplama/test"])
 
     def test_hub_inventory_matches_visible_count_and_grows_without_stale_fixture(self) -> None:
         hub = (SOURCE_ROOT / "index.html").read_text(encoding="utf-8")
@@ -208,11 +208,12 @@ class CommercialCategoryExpansionTests(unittest.TestCase):
             re.I,
         )
         unique = {urlsplit(value).path.rstrip("/") for value in guide_links}
-        decision_routes = main_decision_routes(hub)
+        decision_paths = main_decision_paths(hub)
+        decision_routes = set(decision_paths)
         declared_count, is_minimum, surface = hub_inventory_claim(hub)
-        observed_count = len(unique) if surface == "guides" else len(decision_routes)
+        observed_count = len(unique) if surface == "guides" else len(decision_paths)
         if is_minimum:
-            self.assertGreaterEqual(observed_count, declared_count, sorted(decision_routes))
+            self.assertGreaterEqual(observed_count, declared_count, decision_paths)
         else:
             self.assertEqual(observed_count, declared_count)
         self.assertGreaterEqual(len(unique), 7, sorted(unique))
