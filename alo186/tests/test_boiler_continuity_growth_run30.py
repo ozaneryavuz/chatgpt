@@ -38,9 +38,21 @@ assert "data-alo186-boiler-hub-card" in INJECT and "37 çekirdek araç" in INJEC
 assert 'Path("elektrik-portali/index.html")' in INJECT
 assert 'Path("akilli-urun-secimi/index.html")' in INJECT
 assert 'Path("amazon-elektrik-urunleri/index.html")' in INJECT
+assert 'CANONICAL = "https://alo186.com" + ROUTE' in INJECT
+assert 'entry = f"<url><loc>{CANONICAL}</loc></url>"' in INJECT
+assert 'f"<url><loc>{CANONICAL}</loc></urlset>"' not in INJECT
+assert "ET.fromstring(updated)" in INJECT
 assert "run_boiler_continuity" in CHAIN and "boilerContinuity" in CHAIN
+assert 'ET.parse(site / "sitemap.xml")' in CHAIN
 assert "min-inline-size:0" in CSS and "@media(max-width:640px)" in CSS
 assert not re.search(r"amazon\.(?:com|com\.tr)|amzn\.", HTML + JS, re.I)
 assert not re.search(r'"@type"\s*:\s*"(?:Product|Offer)"|priceCurrency|aggregateRating|availability', HTML, re.I)
 assert not re.search(r'type=["\'](?:email|tel|text|file)["\']|<textarea', HTML, re.I)
-print(json.dumps({"ok": True, "route": ROUTE, "actions": 3, "artifactToolCount": 37}, ensure_ascii=False))
+print(json.dumps({
+    "ok": True,
+    "route": ROUTE,
+    "actions": 3,
+    "artifactToolCount": 37,
+    "sitemapWriterWellFormed": True,
+    "finalChainParseRequired": True,
+}, ensure_ascii=False))

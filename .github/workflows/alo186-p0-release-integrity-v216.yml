@@ -1,0 +1,146 @@
+name: ALO186 P0 yayın bütünlüğü v216
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/deployment/inject_growth_run21.py'
+      - 'alo186/deployment/inject_boiler_continuity_growth.py'
+      - 'alo186/deployment/inject_intent_tools_run135.py'
+      - 'alo186/deployment/guard_commerce_routes_v3.py'
+      - 'alo186/deployment/routing-overlays/216-intent-tools-run135.json'
+      - 'alo186/hesaplama/elektrik-kesintisi-tazminat-kontrolu/**'
+      - 'alo186/hesaplama/ges-kesinti-yedekleme-mimarisi/**'
+      - 'alo186/hesaplama/ev-sarj-kacak-akim-koruma-secici/**'
+      - 'alo186/tests/test_growth_run21.py'
+      - 'alo186/tests/test_boiler_continuity_growth_run30.py'
+      - 'alo186/tests/test_p0_release_integrity_v216.py'
+      - '.github/workflows/alo186-p0-release-integrity-v216.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/deployment/inject_growth_run21.py'
+      - 'alo186/deployment/inject_boiler_continuity_growth.py'
+      - 'alo186/deployment/inject_intent_tools_run135.py'
+      - 'alo186/deployment/guard_commerce_routes_v3.py'
+      - 'alo186/deployment/routing-overlays/216-intent-tools-run135.json'
+      - 'alo186/hesaplama/elektrik-kesintisi-tazminat-kontrolu/**'
+      - 'alo186/hesaplama/ges-kesinti-yedekleme-mimarisi/**'
+      - 'alo186/hesaplama/ev-sarj-kacak-akim-koruma-secici/**'
+      - 'alo186/tests/test_growth_run21.py'
+      - 'alo186/tests/test_boiler_continuity_growth_run30.py'
+      - 'alo186/tests/test_p0_release_integrity_v216.py'
+      - '.github/workflows/alo186-p0-release-integrity-v216.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-p0-release-integrity-v216-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+
+      - name: Kaynak ve fail-closed sözleşmeleri
+        run: |
+          set -euo pipefail
+          node alo186/hesaplama/elektrik-kesintisi-tazminat-kontrolu/test.js
+          node alo186/hesaplama/ges-kesinti-yedekleme-mimarisi/test.js
+          node alo186/hesaplama/ev-sarj-kacak-akim-koruma-secici/test.js
+          python alo186/tests/test_growth_run21.py
+          python alo186/tests/test_boiler_continuity_growth_run30.py
+          python alo186/tests/test_p0_release_integrity_v216.py
+          python alo186/tests/device_damage_deadline_guard.py
+          python -m py_compile \
+            alo186/deployment/inject_growth_run21.py \
+            alo186/deployment/inject_boiler_continuity_growth.py \
+            alo186/deployment/inject_intent_tools_run135.py \
+            alo186/deployment/guard_commerce_routes_v3.py
+
+      - name: Canonical üretim paketi
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-p0-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-p0-canonical
+          python - <<'PY'
+          from xml.etree import ElementTree as ET
+          ET.parse('/tmp/alo186-p0-canonical/sitemap.xml')
+          print('canonical sitemap XML: PASS')
+          PY
+
+      - name: Custom-domain ve project-path final artifact kabulü
+        shell: bash
+        run: |
+          set -euo pipefail
+          for spec in 'custom|' 'project|/chatgpt'; do
+            name=${spec%%|*}
+            base=${spec#*|}
+            site="/tmp/alo186-p0-${name}"
+            rm -rf "$site"
+            cp -a /tmp/alo186-p0-canonical "$site"
+            python alo186/deployment/prepare_github_pages.py \
+              --site "$site" \
+              --base-path "$base" \
+              --repository "$GITHUB_REPOSITORY" \
+              --commit "$GITHUB_SHA"
+            python alo186/deployment/inject_outcome_runtime.py \
+              --site "$site" \
+              --base-path "$base"
+            python alo186/deployment/inject_contextual_affiliate_growth_v177.py \
+              --site "$site" \
+              --base-path "$base"
+            python alo186/deployment/inject_live_quality_hardening_v2.py \
+              --site "$site" \
+              --base-path "$base"
+            python alo186/deployment/inject_home_affiliate_banner_v209.py \
+              --site "$site" \
+              --base-path "$base"
+            python alo186/deployment/inject_affiliate_intent_router_v210.py \
+              --site "$site" \
+              --base-path "$base"
+            python alo186/deployment/inject_ga4_consent.py \
+              --site "$site" \
+              --base-path "$base" \
+              --measurement-id ''
+            python alo186/deployment/inject_affiliate_measurement_v211.py \
+              --site "$site" \
+              --base-path "$base"
+            node --check "$site/assets/affiliate-measurement-v211.js"
+            python alo186/deployment/guard_commerce_routes_v3.py \
+              --site "$site"
+            python alo186/deployment/smoke_github_pages.py \
+              --site "$site" \
+              --base-path "$base"
+            python alo186/tests/test_p0_release_integrity_v216.py \
+              --site "$site" \
+              --base-path "$base"
+            python - <<PY
+          from xml.etree import ElementTree as ET
+          ET.parse('$site/sitemap.xml')
+          print('$name final sitemap XML: PASS')
+          PY
+          done
+
+      - name: Doğrulanmış P0 artifactı
+        uses: actions/upload-artifact@v5
+        with:
+          name: alo186-p0-release-integrity-v216
+          path: /tmp/alo186-p0-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
