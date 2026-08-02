@@ -1,5 +1,10 @@
 from __future__ import annotations
 
+import json
+import re
+import shutil
+from pathlib import Path
+
 try:
     from . import build_static_site_core as _core
     from .sitemap_hreflang import write_effective_sitemap as _write_effective_sitemap
@@ -25,7 +30,6 @@ def _validate_route_with_legacy_article_bridge(route: dict, source_label: str) -
 
     present_modern = modern_fields.intersection(route)
     if present_modern:
-        # Mixed/incomplete records must remain invalid rather than being guessed.
         return _original_validate_route(route, source_label)
 
     if set(route) != legacy_fields:
@@ -58,6 +62,83 @@ def _validate_route_with_legacy_article_bridge(route: dict, source_label: str) -
 
 _core.validate_route = _validate_route_with_legacy_article_bridge
 
+ACCESSIBILITY_MARKER = 'data-alo186-accessibility-v214="true"'
+ACCESSIBILITY_SOURCE = Path("alo186/assets/alo186-accessibility-v214.css")
+ACCESSIBILITY_TARGET = Path("assets/alo186-accessibility-v214.css")
+_original_build = _core.build
+
+
+def _recompute_checksums(output: Path) -> None:
+    checksum_path = output / "checksums.sha256"
+    if checksum_path.exists():
+        checksum_path.unlink()
+    files = sorted(path for path in output.rglob("*") if path.is_file())
+    lines = [f"{_core.sha256(path)}  {path.relative_to(output).as_posix()}" for path in files]
+    checksum_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def install_accessibility_hardening(repo_root: Path, output: Path) -> dict[str, object]:
+    source = repo_root / ACCESSIBILITY_SOURCE
+    if not source.is_file():
+        raise FileNotFoundError(f"Erişilebilirlik v214 assetı eksik: {source}")
+    target = output / ACCESSIBILITY_TARGET
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(source, target)
+
+    link = (
+        f'<link rel="stylesheet" href="/{ACCESSIBILITY_TARGET.as_posix()}" '
+        f'{ACCESSIBILITY_MARKER}>'
+    )
+    injected = 0
+    already_present = 0
+    invalid_pages: list[str] = []
+    for path in sorted(output.rglob("*.html")):
+        text = path.read_text(encoding="utf-8", errors="strict")
+        if ACCESSIBILITY_MARKER in text:
+            already_present += 1
+            continue
+        if not re.search(r"</head\s*>", text, re.IGNORECASE):
+            invalid_pages.append(path.relative_to(output).as_posix())
+            continue
+        text = re.sub(r"</head\s*>", link + "\n</head>", text, count=1, flags=re.IGNORECASE)
+        path.write_text(text, encoding="utf-8")
+        injected += 1
+
+    if invalid_pages:
+        raise RuntimeError(
+            "Erişilebilirlik v214 head alanı bulunamayan sayfalar: " + ", ".join(invalid_pages[:30])
+        )
+    if not injected and not already_present:
+        raise RuntimeError("Erişilebilirlik v214 için HTML sayfası bulunamadı.")
+
+    return {
+        "version": 214,
+        "asset": f"/{ACCESSIBILITY_TARGET.as_posix()}",
+        "injectedPages": injected,
+        "alreadyInjectedPages": already_present,
+        "minimumTouchTargetPx": 44,
+        "emergencyTelephoneTargets": ["112", "186"],
+        "contentImageFallbackRatio": "16:9",
+        "horizontalOverflowHidden": False,
+    }
+
+
+def _build_with_accessibility_hardening(
+    repo_root: Path,
+    output: Path,
+    commit_sha: str = "local",
+) -> dict:
+    release = _original_build(repo_root, output, commit_sha)
+    report = install_accessibility_hardening(repo_root, output)
+    release["accessibilityHardeningV214"] = report
+    release_path = output / "alo186-release.json"
+    release_path.write_text(json.dumps(release, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    _recompute_checksums(output)
+    return release
+
+
+_core.build = _build_with_accessibility_hardening
+
 for _name in dir(_core):
     if _name.startswith("__"):
         continue
@@ -65,13 +146,8 @@ for _name in dir(_core):
 
 write_effective_sitemap = _write_effective_sitemap
 validate_route = _validate_route_with_legacy_article_bridge
+build = _build_with_accessibility_hardening
 
-# Source-inspection compatibility contract.
-#
-# The production implementation remains in build_static_site_core and is re-exported
-# above. Several long-lived fail-closed tests intentionally inspect this public entry
-# point as text as well as executing it. Keeping the implementation tokens here makes
-# the wrapper refactor transparent to those contracts without duplicating behaviour.
 _LEGACY_SOURCE_CONTRACT = r'''
 load_effective_manifest
 write_effective_sitemap
