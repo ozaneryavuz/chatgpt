@@ -1,0 +1,130 @@
+name: ALO186 ticari canonical ve hub URL kalite kontrolü v217
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/deployment/build_static_site.py'
+      - 'alo186/tests/test_commerce_governance_v2.py'
+      - 'alo186/tests/test_commercial_category_pages.py'
+      - 'alo186/tests/test_commercial_category_expansion.py'
+      - 'alo186/tests/test_commerce_canonical_v217.py'
+      - '.github/workflows/alo186-commerce-canonical-v217.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/deployment/build_static_site.py'
+      - 'alo186/tests/test_commerce_governance_v2.py'
+      - 'alo186/tests/test_commercial_category_pages.py'
+      - 'alo186/tests/test_commercial_category_expansion.py'
+      - 'alo186/tests/test_commerce_canonical_v217.py'
+      - '.github/workflows/alo186-commerce-canonical-v217.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-commerce-canonical-v217-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Kaynak ticari niyet ve güven sözleşmeleri
+        run: |
+          python alo186/tests/test_commerce_governance_v2.py
+          python alo186/tests/test_commercial_category_pages.py
+          python alo186/tests/test_commercial_category_expansion.py
+          python alo186/tests/test_commerce_canonical_v217.py
+
+      - name: Canonical production paketi
+        run: |
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-commerce-v217-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-commerce-v217-canonical
+          python alo186/deployment/guard_commerce_routes_v3.py \
+            --site /tmp/alo186-commerce-v217-canonical
+
+      - name: Custom-domain Pages kabulü
+        run: |
+          cp -a /tmp/alo186-commerce-v217-canonical /tmp/alo186-commerce-v217-custom
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-commerce-v217-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/guard_commerce_routes_v3.py \
+            --site /tmp/alo186-commerce-v217-custom
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-commerce-v217-custom \
+            --base-path ''
+
+      - name: Project-path Pages kabulü
+        run: |
+          cp -a /tmp/alo186-commerce-v217-canonical /tmp/alo186-commerce-v217-project
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-commerce-v217-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/guard_commerce_routes_v3.py \
+            --site /tmp/alo186-commerce-v217-project
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-commerce-v217-project \
+            --base-path '/chatgpt'
+
+      - name: Final artifact canonical sözleşmesi
+        run: |
+          python - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+          from urllib.parse import urlsplit
+
+          commercial = (
+              '/amazon-elektrik-urunleri',
+              '/amazon-elektrik-urunleri/powerbank-usb-c-secimi',
+              '/amazon-elektrik-urunleri/akim-korumali-grup-priz-secimi',
+              '/amazon-elektrik-urunleri/modem-mini-ups-secimi',
+              '/amazon-elektrik-urunleri/acil-aydinlatma-duman-alarmi',
+              '/amazon-elektrik-urunleri/tasinabilir-guc-istasyonu-secimi',
+              '/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi',
+              '/amazon-elektrik-urunleri/ges-malzemeleri-secimi',
+          )
+          pattern=re.compile(r'<link\s+rel="canonical"\s+href="([^"]+)"', re.I)
+          for root in (Path('/tmp/alo186-commerce-v217-custom'), Path('/tmp/alo186-commerce-v217-project')):
+              release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
+              report=release['commercialCanonicalV217']
+              assert report['version']==217
+              assert report['canonicalOrigin']=='https://alo186.com'
+              for route in commercial:
+                  page=(root/route.strip('/')/'index.html').read_text(encoding='utf-8')
+                  match=pattern.search(page)
+                  assert match, route
+                  parsed=urlsplit(match.group(1))
+                  assert parsed.hostname=='alo186.com', (route, match.group(1))
+                  assert parsed.path.rstrip('/')==route.rstrip('/'), (route, match.group(1))
+              hub=(root/'amazon-elektrik-urunleri/index.html').read_text(encoding='utf-8')
+              assert not re.search(r'https://alo186\.com/amazon-elektrik-urunleri(?=[a-z0-9])', hub, re.I)
+          PY
+
+      - name: Doğrulanmış ticari canonical artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-commerce-canonical-v217-pages
+          path: /tmp/alo186-commerce-v217-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
