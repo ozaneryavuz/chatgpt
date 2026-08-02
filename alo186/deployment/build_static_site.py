@@ -65,6 +65,11 @@ _core.validate_route = _validate_route_with_legacy_article_bridge
 ACCESSIBILITY_MARKER = 'data-alo186-accessibility-v214="true"'
 ACCESSIBILITY_SOURCE = Path("alo186/assets/alo186-accessibility-v214.css")
 ACCESSIBILITY_TARGET = Path("assets/alo186-accessibility-v214.css")
+COMMERCIAL_HUB = Path("amazon-elektrik-urunleri/index.html")
+MALFORMED_COMMERCIAL_PREFIX = re.compile(
+    r"(https://alo186\.com/amazon-elektrik-urunleri)(?=[a-z0-9])",
+    re.IGNORECASE,
+)
 _original_build = _core.build
 
 
@@ -75,6 +80,34 @@ def _recompute_checksums(output: Path) -> None:
     files = sorted(path for path in output.rglob("*") if path.is_file())
     lines = [f"{_core.sha256(path)}  {path.relative_to(output).as_posix()}" for path in files]
     checksum_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def normalize_commercial_hub_urls(output: Path) -> dict[str, object]:
+    """Repair missing separators in the product hub's machine-readable routes.
+
+    Historical ItemList generators joined the hub root and child slug without a
+    slash. The final artifact must never expose those malformed URLs to search or
+    answer engines. This layer changes URL integrity only; it does not add products,
+    ranking, price, stock, or affiliate links.
+    """
+
+    path = output / COMMERCIAL_HUB
+    if not path.is_file():
+        raise FileNotFoundError(f"Ticari ürün merkezi artifactta eksik: {path}")
+    html = path.read_text(encoding="utf-8", errors="strict")
+    fixed, replacements = MALFORMED_COMMERCIAL_PREFIX.subn(r"\1/", html)
+    if MALFORMED_COMMERCIAL_PREFIX.search(fixed):
+        raise RuntimeError("Ticari hub içinde slash eksik canonical alt rota kaldı.")
+    path.write_text(fixed, encoding="utf-8")
+    return {
+        "version": 217,
+        "route": "/amazon-elektrik-urunleri",
+        "malformedAbsoluteUrlsFixed": replacements,
+        "canonicalOrigin": "https://alo186.com",
+        "artifactLegacyWwwRejected": True,
+        "priceStockRatingAdded": False,
+        "affiliateLinksAdded": False,
+    }
 
 
 def install_accessibility_hardening(repo_root: Path, output: Path) -> dict[str, object]:
@@ -123,21 +156,23 @@ def install_accessibility_hardening(repo_root: Path, output: Path) -> dict[str, 
     }
 
 
-def _build_with_accessibility_hardening(
+def _build_with_platform_hardening(
     repo_root: Path,
     output: Path,
     commit_sha: str = "local",
 ) -> dict:
     release = _original_build(repo_root, output, commit_sha)
-    report = install_accessibility_hardening(repo_root, output)
-    release["accessibilityHardeningV214"] = report
+    commercial_report = normalize_commercial_hub_urls(output)
+    accessibility_report = install_accessibility_hardening(repo_root, output)
+    release["commercialCanonicalV217"] = commercial_report
+    release["accessibilityHardeningV214"] = accessibility_report
     release_path = output / "alo186-release.json"
     release_path.write_text(json.dumps(release, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     _recompute_checksums(output)
     return release
 
 
-_core.build = _build_with_accessibility_hardening
+_core.build = _build_with_platform_hardening
 
 for _name in dir(_core):
     if _name.startswith("__"):
@@ -146,7 +181,7 @@ for _name in dir(_core):
 
 write_effective_sitemap = _write_effective_sitemap
 validate_route = _validate_route_with_legacy_article_bridge
-build = _build_with_accessibility_hardening
+build = _build_with_platform_hardening
 
 _LEGACY_SOURCE_CONTRACT = r'''
 load_effective_manifest
