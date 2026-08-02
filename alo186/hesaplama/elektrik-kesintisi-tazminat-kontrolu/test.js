@@ -20,7 +20,9 @@ for(const token of [
   'outage_compensation_result',
   'outage_compensation_evidence_download',
   'Dosya yalnız bu cihazda oluşturulur',
-  "window.dataLayer.push({event:eventName,result_class:resultClass,tool:'outage_compensation',alo186_no_pii:true})"
+  "const consent=()=>window.alo186Analytics?.getConsent?.()==='granted'",
+  'if(!consent())return false',
+  "(window.dataLayer=window.dataLayer||[]).push({event:eventName,result_class:resultClass,tool:'outage_compensation',alo186_no_pii:true})"
 ]){
   if(!html.includes(token)) throw new Error(`Eksik sözleşme: ${token}`);
 }
@@ -29,5 +31,6 @@ for(const forbidden of ['on iş günü','"@type":"Offer"','"@type":"Product"','a
 }
 if(!/addEventListener\('submit'/.test(html)) throw new Error('Karar motoru submit olayı eksik');
 if(/dataLayer\.push\([^)]*(?:hours|rawHours|noticeText|causeText|repeatedText)/s.test(html)) throw new Error('Kullanıcı girdisi analitiğe gönderilemez');
+if(!/if\(!consent\(\)\)return false;\s*\(window\.dataLayer=/s.test(html)) throw new Error('Analitik açık rıza kapısı olmadan açılamaz');
 if(!/new Blob\(\[evidenceText\]/.test(html)) throw new Error('Yerel kanıt dosyası üretimi eksik');
 console.log('outage compensation evidence plan: PASS');
