@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "cmsVersion": "1.0.0",
+  "canonicalHost": "https://alo186.com",
+  "defaultLocale": "tr-TR",
+  "defaultModel": "gpt-5-mini",
+  "minimumQualityScore": 85,
+  "humanApprovalRequired": true,
+  "aiMayApprove": false,
+  "aiMayPublish": false,
+  "contentDirectory": "alo186/ai-cms/content",
+  "reviewDirectory": "alo186/ai-cms/reviews",
+  "publishedDirectory": "alo186/haberler",
+  "routingOverlayDirectory": "alo186/deployment/routing-overlays",
+  "allowedContentTypes": [
+    "article",
+    "guide"
+  ],
+  "allowedRiskClasses": [
+    "low",
+    "medium",
+    "high",
+    "legal"
+  ],
+  "allowedStates": [
+    "brief",
+    "review",
+    "approved",
+    "published",
+    "archived"
+  ],
+  "minimumSources": {
+    "low": 1,
+    "medium": 2,
+    "high": 3,
+    "legal": 2
+  },
+  "primarySourceRequired": [
+    "high",
+    "legal"
+  ],
+  "affiliateBlockedRiskClasses": [
+    "high",
+    "legal"
+  ],
+  "maximumSourceAgeDays": {
+    "low": 730,
+    "medium": 365,
+    "high": 180,
+    "legal": 90
+  },
+  "minimumSections": 4,
+  "minimumFaqs": 3,
+  "minimumInternalLinks": 2,
+  "maximumTitleCharacters": 68,
+  "maximumDescriptionCharacters": 170,
+  "minimumDescriptionCharacters": 110,
+  "maximumDirectAnswerCharacters": 650,
+  "similarityBlockThreshold": 0.78,
+  "forbiddenPublicSchemaTypes": [
+    "Person",
+    "ProfilePage",
+    "Product",
+    "Offer"
+  ],
+  "forbiddenClaims": [
+    "kesinlikle güvenlidir",
+    "her durumda güvenlidir",
+    "sonucu garanti eder",
+    "resmî başvuru kanalıdır",
+    "edaş kaydı alıyoruz",
+    "alo186 resmî kurumdur"
+  ],
+  "commercialSafetyTerms": [
+    "yangın",
+    "elektrik çarpması",
+    "ark",
+    "pano",
+    "sabit tesisat",
+    "yüksek gerilim",
+    "orta gerilim",
+    "ges string",
+    "jeneratör geri besleme"
+  ],
+  "requiredPublicDisclosures": [
+    "ALO186 bağımsız bilgilendirme platformudur",
+    "AI destekli taslak insan editör onayıyla yayımlanmıştır"
+  ],
+  "qualityWeights": {
+    "metadata": 12,
+    "directAnswer": 10,
+    "contentDepth": 18,
+    "sources": 20,
+    "safety": 15,
+    "internalLinks": 10,
+    "uniqueness": 10,
+    "structuredData": 5
+  }
+}
