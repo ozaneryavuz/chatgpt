@@ -1,0 +1,117 @@
+name: ALO186 üç yüksek niyetli karar aracı run135 tamamlama
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/elektrik-kesintisi-tazminat-kontrolu/**'
+      - 'alo186/hesaplama/ges-kesinti-yedekleme-mimarisi/**'
+      - 'alo186/hesaplama/ev-sarj-kacak-akim-koruma-secici/**'
+      - 'alo186/deployment/routing-overlays/214-intent-tools-run135.json'
+      - 'alo186/deployment/inject_intent_tools_run135.py'
+      - 'alo186/deployment/guard_commerce_routes_v3.py'
+      - 'alo186/tests/test_intent_tools_run135.py'
+      - '.github/workflows/alo186-intent-tools-run135.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/elektrik-kesintisi-tazminat-kontrolu/**'
+      - 'alo186/hesaplama/ges-kesinti-yedekleme-mimarisi/**'
+      - 'alo186/hesaplama/ev-sarj-kacak-akim-koruma-secici/**'
+      - 'alo186/deployment/routing-overlays/214-intent-tools-run135.json'
+      - 'alo186/deployment/inject_intent_tools_run135.py'
+      - 'alo186/deployment/guard_commerce_routes_v3.py'
+      - 'alo186/tests/test_intent_tools_run135.py'
+      - '.github/workflows/alo186-intent-tools-run135.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-intent-tools-run135-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+
+      - name: Kaynak, hukuk, şema ve karar mantığı sözleşmeleri
+        run: |
+          set -euo pipefail
+          node alo186/hesaplama/elektrik-kesintisi-tazminat-kontrolu/test.js
+          node alo186/hesaplama/ges-kesinti-yedekleme-mimarisi/test.js
+          node alo186/hesaplama/ev-sarj-kacak-akim-koruma-secici/test.js
+          python alo186/tests/test_intent_tools_run135.py
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Inline JavaScript ve Python sözdizimi
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import re
+          from pathlib import Path
+          sources = [
+              Path('alo186/hesaplama/elektrik-kesintisi-tazminat-kontrolu/index.html'),
+              Path('alo186/hesaplama/ges-kesinti-yedekleme-mimarisi/index.html'),
+              Path('alo186/hesaplama/ev-sarj-kacak-akim-koruma-secici/index.html'),
+          ]
+          output = Path('/tmp/alo186-intent-inline')
+          output.mkdir(parents=True, exist_ok=True)
+          count = 0
+          for source in sources:
+              html = source.read_text(encoding='utf-8')
+              scripts = re.findall(r'<script(?![^>]*application/ld\+json)(?![^>]*\bsrc=)[^>]*>(.*?)</script>', html, re.I | re.S)
+              assert scripts, source
+              for script in scripts:
+                  count += 1
+                  (output / f'script-{count}.js').write_text(script, encoding='utf-8')
+          PY
+          for file in /tmp/alo186-intent-inline/*.js; do node --check "$file"; done
+          python -m py_compile alo186/deployment/inject_intent_tools_run135.py
+          python -m py_compile alo186/deployment/guard_commerce_routes_v3.py
+
+      - name: Canonical üretim paketi
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-intent-run135-canonical --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-intent-run135-canonical
+
+      - name: Custom-domain keşif ve artifact kabulü
+        run: |
+          set -euo pipefail
+          cp -a /tmp/alo186-intent-run135-canonical /tmp/alo186-intent-run135-custom
+          python alo186/deployment/prepare_github_pages.py --site /tmp/alo186-intent-run135-custom --base-path '' --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py --site /tmp/alo186-intent-run135-custom --base-path ''
+          python alo186/deployment/inject_intent_tools_run135.py --site /tmp/alo186-intent-run135-custom --base-path ''
+          python alo186/deployment/smoke_github_pages.py --site /tmp/alo186-intent-run135-custom --base-path ''
+          python alo186/tests/test_intent_tools_run135.py --site /tmp/alo186-intent-run135-custom --base-path ''
+
+      - name: Project-path keşif ve artifact kabulü
+        run: |
+          set -euo pipefail
+          cp -a /tmp/alo186-intent-run135-canonical /tmp/alo186-intent-run135-project
+          python alo186/deployment/prepare_github_pages.py --site /tmp/alo186-intent-run135-project --base-path '/chatgpt' --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py --site /tmp/alo186-intent-run135-project --base-path '/chatgpt'
+          python alo186/deployment/inject_intent_tools_run135.py --site /tmp/alo186-intent-run135-project --base-path '/chatgpt'
+          python alo186/deployment/smoke_github_pages.py --site /tmp/alo186-intent-run135-project --base-path '/chatgpt'
+          python alo186/tests/test_intent_tools_run135.py --site /tmp/alo186-intent-run135-project --base-path '/chatgpt'
+
+      - name: Doğrulanmış karar araçları artifactı
+        uses: actions/upload-artifact@v5
+        with:
+          name: alo186-intent-tools-run135-pages
+          path: /tmp/alo186-intent-run135-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
