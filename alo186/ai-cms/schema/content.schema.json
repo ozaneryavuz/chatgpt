@@ -1,0 +1,203 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://alo186.com/schemas/ai-cms-content-v1.json",
+  "title": "ALO186 AI CMS Content Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "slug",
+    "contentType",
+    "state",
+    "locale",
+    "title",
+    "h1",
+    "description",
+    "intent",
+    "primaryKeyword",
+    "audience",
+    "riskClass",
+    "directAnswer",
+    "sections",
+    "faqs",
+    "sources",
+    "internalLinks",
+    "commerce",
+    "editorial",
+    "seo",
+    "quality"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "id": {"type": "string", "pattern": "^cms_[a-f0-9]{16}$"},
+    "slug": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$", "minLength": 6, "maxLength": 96},
+    "contentType": {"enum": ["article", "guide"]},
+    "state": {"enum": ["brief", "review", "approved", "published", "archived"]},
+    "locale": {"const": "tr-TR"},
+    "title": {"type": "string", "minLength": 20, "maxLength": 68},
+    "h1": {"type": "string", "minLength": 20, "maxLength": 110},
+    "description": {"type": "string", "minLength": 110, "maxLength": 170},
+    "intent": {"type": "string", "minLength": 20, "maxLength": 260},
+    "primaryKeyword": {"type": "string", "minLength": 3, "maxLength": 90},
+    "audience": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 6,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 3, "maxLength": 80}
+    },
+    "riskClass": {"enum": ["low", "medium", "high", "legal"]},
+    "directAnswer": {"type": "string", "minLength": 80, "maxLength": 650},
+    "sections": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 12,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "heading", "paragraphs", "bullets", "sourceRefs"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+          "heading": {"type": "string", "minLength": 8, "maxLength": 120},
+          "paragraphs": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 6,
+            "items": {"type": "string", "minLength": 40, "maxLength": 1200}
+          },
+          "bullets": {
+            "type": "array",
+            "maxItems": 12,
+            "items": {"type": "string", "minLength": 8, "maxLength": 260}
+          },
+          "sourceRefs": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 8,
+            "uniqueItems": true,
+            "items": {"type": "string", "pattern": "^S[1-9][0-9]*$"}
+          }
+        }
+      }
+    },
+    "faqs": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["question", "answer", "sourceRefs"],
+        "properties": {
+          "question": {"type": "string", "minLength": 12, "maxLength": 180},
+          "answer": {"type": "string", "minLength": 40, "maxLength": 900},
+          "sourceRefs": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 6,
+            "uniqueItems": true,
+            "items": {"type": "string", "pattern": "^S[1-9][0-9]*$"}
+          }
+        }
+      }
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "publisher", "title", "url", "accessedAt", "primary", "factSummary"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^S[1-9][0-9]*$"},
+          "publisher": {"type": "string", "minLength": 2, "maxLength": 120},
+          "title": {"type": "string", "minLength": 5, "maxLength": 240},
+          "url": {"type": "string", "format": "uri", "pattern": "^https://"},
+          "accessedAt": {"type": "string", "format": "date"},
+          "primary": {"type": "boolean"},
+          "factSummary": {"type": "string", "minLength": 30, "maxLength": 1500}
+        }
+      }
+    },
+    "internalLinks": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["label", "path", "reason"],
+        "properties": {
+          "label": {"type": "string", "minLength": 3, "maxLength": 100},
+          "path": {"type": "string", "pattern": "^/", "maxLength": 240},
+          "reason": {"type": "string", "minLength": 12, "maxLength": 220}
+        }
+      }
+    },
+    "commerce": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled", "policy", "category"],
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "policy": {"enum": ["none", "after_tool", "professional_only"]},
+        "category": {"type": ["string", "null"], "maxLength": 80}
+      }
+    },
+    "editorial": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["createdBy", "model", "humanReviewRequired", "approvedBy", "approvedAt", "publishedAt", "approvalPr"],
+      "properties": {
+        "createdBy": {"enum": ["human", "ai-assisted"]},
+        "model": {"type": ["string", "null"], "maxLength": 80},
+        "humanReviewRequired": {"const": true},
+        "approvedBy": {"type": ["string", "null"], "maxLength": 80},
+        "approvedAt": {"type": ["string", "null"], "format": "date-time"},
+        "publishedAt": {"type": ["string", "null"], "format": "date-time"},
+        "approvalPr": {"type": ["integer", "null"], "minimum": 1}
+      }
+    },
+    "seo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["canonicalPath", "robots", "lastModified", "topics"],
+      "properties": {
+        "canonicalPath": {"type": "string", "pattern": "^/haberler/[a-z0-9]+(?:-[a-z0-9]+)*$"},
+        "robots": {"const": "index,follow,max-image-preview:large"},
+        "lastModified": {"type": "string", "format": "date"},
+        "topics": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 12,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 2, "maxLength": 80}
+        }
+      }
+    },
+    "quality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["score", "minimumRequired", "checks", "similarity"],
+      "properties": {
+        "score": {"type": "integer", "minimum": 0, "maximum": 100},
+        "minimumRequired": {"type": "integer", "minimum": 0, "maximum": 100},
+        "checks": {
+          "type": "object",
+          "additionalProperties": {"type": "boolean"}
+        },
+        "similarity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["maximum", "closestPath"],
+          "properties": {
+            "maximum": {"type": "number", "minimum": 0, "maximum": 1},
+            "closestPath": {"type": ["string", "null"]}
+          }
+        }
+      }
+    }
+  }
+}
