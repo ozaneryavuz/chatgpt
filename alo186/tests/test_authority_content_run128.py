@@ -62,7 +62,7 @@ def test_topic_specific_fail_closed_guards() -> None:
     spd = PAGES["spd"].read_text(encoding="utf-8")
     assert all(term in spd for term in ["Parafudr alarm kontağını köprülemeyin", "enerjili panoda kartuş çekmeyin", "remote contact"])
     pv = PAGES["pv"].read_text(encoding="utf-8")
-    assert all(term in pv for term in ["Grid protection limitlerini", "PCC", "şebeke işletmecisi onayı"])
+    assert all(term in pv for term in ["Grid protection limitlerini", "PCC", "şebeke işletmecisinin onayıyla"])
     vpp = PAGES["vpp"].read_text(encoding="utf-8")
     assert all(term in vpp for term in ["BMS, inverter, EVSE", "ACK", "gelir sayacı"])
 
