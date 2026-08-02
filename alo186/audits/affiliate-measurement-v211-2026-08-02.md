@@ -100,14 +100,15 @@ Rapor; taranan ve enstrümante edilen sayfa sayısını, statik affiliate bağla
 
 ### 6. Tek yetkili canlı yayıncı
 
-v211’e özel workflow yalnız doğrulama yapar:
+v209, v210 ve v211’e özel hedefli workflow’lar yalnız doğrulama yapar:
 
 - `permissions: contents: read`
-- Pages yazma yetkisi yoktur
-- Pages artifactı yüklemez
-- `deploy-pages` çalıştırmaz
+- Pages yazma yetkileri yoktur
+- Pages artifactı yüklemezler
+- `deploy-pages` çalıştırmazlar
+- Her biri kendi paket testinin yanında canonical yayıncıya gerçekten bağlandığını doğrular
 
-v209 ana sayfa vitrini, v210 ihtiyaç yönlendiricisi, GA4 açık rıza katmanı ve v211 ölçüm/enventer katmanı tek yetkili `.github/workflows/alo186-github-pages.yml` artifactına bağlanmıştır.
+v209 ana sayfa vitrini, v210 ihtiyaç yönlendiricisi, GA4 açık rıza katmanı ve v211 ölçüm/envanter katmanı tek yetkili `.github/workflows/alo186-github-pages.yml` artifactına bağlanmıştır.
 
 Canonical yayın akışı hem custom-domain hem `/chatgpt` modunda şu zinciri doğrular:
 
@@ -140,7 +141,7 @@ Canlı dağıtımdan sonra `pages-release.json`, v211 envanteri ve JavaScript as
 - Teknik uygunluk, satın almama sonucu ve profesyonel kategori kapıları korunur.
 - Can güvenliği ve resmî yönlendirme sırası değiştirilmez.
 - Script/style içindeki runtime şablonları sunucu tarafında yeniden yazılmaz.
-- Ayrı ve yarışan yeni bir canlı Pages yayıncısı oluşturulmaz.
+- v209, v210 veya v211 için ayrı ve yarışan canlı Pages yayıncısı bırakılmaz.
 
 ## Test kapsamı
 
@@ -161,7 +162,7 @@ Canlı dağıtımdan sonra `pages-release.json`, v211 envanteri ve JavaScript as
 - `pages-release.json` ve checksum bütünlüğü
 - Tam site build, Pages smoke ve commerce guard
 - v209 ana sayfa vitrini, v210 ihtiyaç yönlendiricisi ve v211 ölçümünün aynı canonical artifactta korunması
-- Bağımsız v211 workflow’unda Pages yazma/deploy yetkisinin bulunmaması
+- v209, v210 ve v211 hedefli workflow’larında Pages yazma/deploy adımı bulunmaması
 - Canlı apex origin üzerinde v211 sürüm, envanter ve asset doğrulaması
 
 ## İlk başarı ölçütleri
@@ -171,5 +172,5 @@ Canlı dağıtımdan sonra `pages-release.json`, v211 envanteri ve JavaScript as
 - Ham hedef URL veya kişisel kimlik gönderimi: **0**
 - Envanter ile statik HTML link sayımı farkı: **0**
 - Acil/güvenlik rotasında yeni ticari yol: **0**
-- Yeni v211 bağımsız production publisher sayısı: **0**
+- v209–v211 için bağımsız production publisher sayısı: **0**
 - Canonical canlı artifactta v209 + v210 + v211 sürüm sürekliliği: **zorunlu**
