@@ -3,5 +3,7 @@
   "release": "alo186-direct-live-integration-v212",
   "requestedAt": "2026-08-02T16:30:00Z",
   "purpose": "Affiliate measurement v211, commerce trust v212, content authority run133 and legacy growth injector fixes are integrated into the single GitHub Pages publisher.",
-  "status": "preparing"
+  "integratedCommit": "5affc2a3f33c6aed26cad48a4e05938d4971d5f8",
+  "publisher": ".github/workflows/alo186-github-pages.yml",
+  "status": "integrated"
 }
