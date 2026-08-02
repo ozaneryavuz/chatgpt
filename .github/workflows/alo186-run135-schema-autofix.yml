@@ -1,0 +1,53 @@
+name: ALO186 run135 schema autofix
+
+on:
+  push:
+    branches: [alo186-intent-tools-run135]
+    paths:
+      - '.github/workflows/alo186-run135-schema-autofix.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: alo186-intent-tools-run135
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Remove commerce schema and strengthen tests
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          routes = [
+              Path('alo186/hesaplama/ges-kesinti-yedekleme-mimarisi/index.html'),
+              Path('alo186/hesaplama/ev-sarj-kacak-akim-koruma-secici/index.html'),
+          ]
+          offer = ',"offers":{"@type":"Offer","price":"0","priceCurrency":"TRY"}'
+          for path in routes:
+              text = path.read_text(encoding='utf-8')
+              text = text.replace(offer, '')
+              path.write_text(text, encoding='utf-8')
+          tests = [
+              Path('alo186/hesaplama/ges-kesinti-yedekleme-mimarisi/test.js'),
+              Path('alo186/hesaplama/ev-sarj-kacak-akim-koruma-secici/test.js'),
+          ]
+          for path in tests:
+              text = path.read_text(encoding='utf-8')
+              suffix = "if(html.includes('\\\"@type\\\":\\\"Offer\\\"'))throw new Error('Offer şeması kullanılmamalı');"
+              if 'Offer şeması kullanılmamalı' not in text:
+                  text = text.replace("console.log(", suffix + "console.log(")
+              path.write_text(text, encoding='utf-8')
+          PY
+          rm .github/workflows/alo186-run135-schema-autofix.yml
+          git config user.name 'alo186-release-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add alo186/hesaplama .github/workflows/alo186-run135-schema-autofix.yml
+          git commit -m 'fix(alo186): remove Offer schema from run135 tools'
+          git push origin HEAD:alo186-intent-tools-run135
