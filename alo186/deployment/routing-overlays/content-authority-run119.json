@@ -1,0 +1,21 @@
+{
+  "version": 194,
+  "generatedAt": "2026-08-02",
+  "routes": [
+    {
+      "canonicalPath": "/haberler/kacak-akim-rolesi-test-butonu-calismiyor-resetlenmiyor-rcd-teshis",
+      "source": "alo186/haberler/kacak-akim-rolesi-test-butonu-calismiyor-resetlenmiyor-rcd-teshis/index.html",
+      "type": "article"
+    },
+    {
+      "canonicalPath": "/haberler/frekans-inverteri-autotune-failed-tnf-motor-tanimlama-teshis",
+      "source": "alo186/haberler/frekans-inverteri-autotune-failed-tnf-motor-tanimlama-teshis/index.html",
+      "type": "article"
+    },
+    {
+      "canonicalPath": "/haberler/bess-off-gas-alarmi-termal-kacak-erken-uyari-hvac-teshis",
+      "source": "alo186/haberler/bess-off-gas-alarmi-termal-kacak-erken-uyari-hvac-teshis/index.html",
+      "type": "article"
+    }
+  ]
+}
