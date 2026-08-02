@@ -2,15 +2,20 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import sys
 from pathlib import Path
 
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
-ENTRY = ROOT / "alo186" / "deployment" / "build_static_site.py"
+DEPLOYMENT = ROOT / "alo186" / "deployment"
+ENTRY = DEPLOYMENT / "build_static_site.py"
 
 
 def load_builder():
+    deployment_path = str(DEPLOYMENT)
+    if deployment_path not in sys.path:
+        sys.path.insert(0, deployment_path)
     spec = importlib.util.spec_from_file_location("alo186_build_static_site_v200", ENTRY)
     assert spec and spec.loader
     module = importlib.util.module_from_spec(spec)
