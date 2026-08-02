@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "release": "alo186-direct-live-integration-v212",
-  "requestedAt": "2026-08-02T16:34:00Z",
-  "purpose": "Affiliate measurement v211, commerce trust v212, content authority run133, high-endurance microSD v200 and legacy growth/sitemap recovery are integrated into the single GitHub Pages publisher.",
-  "integratedThroughCommit": "30a6b2e94b19cfbfdda502bd80f41e6bd1aa97f0",
+  "release": "alo186-direct-live-integration-v214",
+  "requestedAt": "2026-08-02T18:08:00Z",
+  "purpose": "Run135 karar araçları, 30 günlük cihaz hasarı kuralı, affiliate measurement v211, commerce trust v212, sitemap recovery v214 ve Pages base-path executable-HTML doğrulaması tek GitHub Pages yayınında bütünleştirildi.",
+  "integratedThroughCommit": "000ac7ccc6636b8e3e46450d625a12aa208d60a2",
   "publisher": ".github/workflows/alo186-github-pages.yml",
   "status": "deploy-requested"
 }
