@@ -43,10 +43,16 @@ def test_authority_content_run120() -> None:
         titles.add(title)
         descriptions.add(desc.group(1))
         h1s.add(h1)
+
+        schemas = re.findall(r'<script type="application/ld\+json">(.*?)</script>', html, re.S)
+        assert schemas
+        for schema_payload in schemas:
+            json.loads(schema_payload)
         for schema in ('"@type":"Article"', '"@type":"FAQPage"', '"@type":"BreadcrumbList"'):
             assert schema in html
         assert html.count('"@type":"DefinedTerm"') >= 10
         assert html.count('"@type":"Question"') == 5
+        assert html.count('"acceptedAnswer"') == 5
         assert html.count("<details>") == 5
         assert "Son doğrulama: 2 Ağustos 2026" in html
         assert "Doğrudan cevap" in html
@@ -56,6 +62,8 @@ def test_authority_content_run120() -> None:
         assert "Bağımsızlık ve uygulama sınırı" in html
         assert html.count('href="/') >= 12
         assert "Kaynaklar" in html
+        assert "�" not in html
+        assert "accceptedAnswer" not in html
         assert routes[route]["source"] == f"alo186/haberler/{slug}/index.html"
         assert routes[route]["type"] == "article"
         for forbidden in ('"@type":"Product"', '"@type":"Offer"', "priceCurrency", "aggregateRating", "availability", "hemen satın al"):
