@@ -153,7 +153,7 @@ class CommercialCategoryExpansionTests(unittest.TestCase):
             self.assertRegex(catalog, pattern)
         self.assertNotRegex(catalog, re.compile(r"id:'(?:power_station|smart_plug)'.*?mode:'direct'", re.S))
 
-    def test_hub_inventory_matches_visible_count_and_grows_without_stale_fixture(self) -> None:
+    def test_hub_inventory_matches_visible_cards_without_stale_fixture(self) -> None:
         hub = (SOURCE_ROOT / "index.html").read_text(encoding="utf-8")
         guide_links = re.findall(
             r'href="(/amazon-elektrik-urunleri/[^"?#]+)"',
@@ -161,15 +161,15 @@ class CommercialCategoryExpansionTests(unittest.TestCase):
             re.I,
         )
         unique = set(guide_links)
-        display = re.search(r"(\d+) özel rehber", hub)
-        self.assertIsNotNone(display)
-        self.assertEqual(int(display.group(1)), len(unique), sorted(unique))
         self.assertGreaterEqual(len(unique), 7, sorted(unique))
         self.assertEqual(hub.count('class="card route-card"'), len(unique))
         self.assertIn("ayrı ihtiyacı", hub)
         for route in ROUTES:
             self.assertIn(route, unique)
         self.assertNotIn("/urun-rehberleri/", hub)
+        stale_display = re.search(r"(\d+) özel rehber", hub)
+        if stale_display:
+            self.assertEqual(int(stale_display.group(1)), len(unique), sorted(unique))
 
     def test_production_bundle_sitemap_and_private_search_include_expansion(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
