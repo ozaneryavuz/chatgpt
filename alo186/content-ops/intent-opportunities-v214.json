@@ -12,9 +12,9 @@
   "guardrails": {
     "minimumPublishScore": 72,
     "maximumIntentSimilarity": 0.78,
-    "primarySourcesRequired": 3,
+    "primarySourcesRequired": 2,
     "freshnessDays": 180,
-    "minimumInternalLinks": 6,
+    "minimumInternalLinks": 5,
     "minimumVisibleFaq": 3,
     "requireDirectAnswer": true,
     "requireSafetyBoundary": true,
