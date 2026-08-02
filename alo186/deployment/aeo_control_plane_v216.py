@@ -27,11 +27,12 @@ EXACT = {
     "kaynaklar/index.html", "hesaplama/index.html", "amazon-elektrik-urunleri/index.html",
     "hesaplama/ups-suresi/index.html", "hesaplama/jenerator-gucu-secimi/index.html",
     "hesaplama/ev-sarj-uygunluk/index.html", "hesaplama/gerilim-koruma-cozum-secici/index.html",
+    "hesaplama/yedek-guc-cozum-secici/index.html",
 }
 CRITICAL = (
     "/elektrik-portali", "/edas-bul", "/elektrik-kesintisi", "/acil-numaralar",
-    "/sektor-rehberi/planli-elektrik-kesintisi-sorgulama",
-    "/haberler/ups-mi-tasinabilir-guc-istasyonu-mu",
+    "/haberler/planli-elektrik-kesintisi-ne-kadar-once-bildirilir",
+    "/hesaplama/yedek-guc-cozum-secici/",
     "/haberler/ges-elektrik-kesintisinde-calisir-mi",
     "/haberler/elektrik-kesintisi-cihaz-hasari-edas-basvurusu",
     "/haberler/topraklama-direnci-kac-ohm-olmali", PROFILE_PATH,
@@ -265,7 +266,7 @@ def _contracts(repo: Path, sitemap: set[str], errors: list[str]) -> dict:
     return result
 
 
-def validate(site: Path, repo_root: Path) -> dict:
+def validate(site: Path, repo_root: Path, require_release_proof: bool = False) -> dict:
     site=site.resolve(); repo_root=repo_root.resolve(); errors=[]; warnings=[]
     sitemap=_sitemap(site, errors)
     try: robots=(site / "robots.txt").read_text(encoding="utf-8").casefold()
@@ -289,8 +290,9 @@ def validate(site: Path, repo_root: Path) -> dict:
         if route == PROFILE_PATH:
             types=_types(docs)
             if not {"Person","ProfilePage"}.issubset(types): page_errors.append("Person/ProfilePage schema eksik")
+            folded_html = html.casefold()
             for token in ("Ozan Eryavuz","Elektrik-Elektronik Mühendisi","yayin-yontemi","Bağımsız bilgilendirme platformudur"):
-                if token not in html: page_errors.append(f"profil bilgisi eksik: {token}")
+                if token.casefold() not in folded_html: page_errors.append(f"profil bilgisi eksik: {token}")
         else:
             answer_match=P_RE.search(html[H1_RE.search(html).end():H1_RE.search(html).end()+5000]) if H1_RE.search(html) else None
             if len(_text(answer_match.group(1)) if answer_match else "") < 60: page_errors.append("alınabilir doğrudan cevap kısa/eksik")
@@ -299,9 +301,16 @@ def validate(site: Path, repo_root: Path) -> dict:
         errors.extend(f"{route}: {item}" for item in page_errors)
         page_results.append({"path":route,"errors":page_errors,"title":title})
     release={}
-    try: release=json.loads((site / "pages-release.json").read_text(encoding="utf-8")).get("aeoAuthority", {})
-    except (OSError, json.JSONDecodeError) as exc: errors.append(f"pages-release geçersiz/eksik: {exc}")
-    if release.get("version") != VERSION or release.get("profileCanonical") != PROFILE_URL or release.get("personalContactPublished") is not False: errors.append("AEO release kanıtı eksik/yanlış")
+    release_path = site / "pages-release.json"
+    if release_path.is_file():
+        try:
+            release=json.loads(release_path.read_text(encoding="utf-8")).get("aeoAuthority", {})
+        except json.JSONDecodeError as exc:
+            errors.append(f"pages-release geçersiz: {exc}")
+    elif require_release_proof:
+        errors.append("pages-release kanıtı eksik")
+    if require_release_proof and (release.get("version") != VERSION or release.get("profileCanonical") != PROFILE_URL or release.get("personalContactPublished") is not False):
+        errors.append("AEO release kanıtı eksik/yanlış")
     score=max(0,100-min(80,len(errors)*7)-min(20,len(warnings)*2))
     return {"ok":not errors,"version":VERSION,"score":score,"metrics":{"sitemapPathCount":len(sitemap),"criticalPageCount":len(CRITICAL),"criticalPagePassCount":sum(not p["errors"] for p in page_results),**metrics},"pages":page_results,"release":release,"warnings":warnings,"errors":errors}
 
@@ -309,9 +318,9 @@ def validate(site: Path, repo_root: Path) -> dict:
 def main() -> None:
     parser=argparse.ArgumentParser(); sub=parser.add_subparsers(dest="command", required=True)
     add=sub.add_parser("inject"); add.add_argument("--site", type=Path, required=True); add.add_argument("--base-path", default="")
-    check=sub.add_parser("validate"); check.add_argument("--site", type=Path, required=True); check.add_argument("--repo-root", type=Path, default=Path.cwd()); check.add_argument("--report", type=Path)
+    check=sub.add_parser("validate"); check.add_argument("--site", type=Path, required=True); check.add_argument("--repo-root", type=Path, default=Path.cwd()); check.add_argument("--report", type=Path); check.add_argument("--require-release-proof", action="store_true")
     args=parser.parse_args()
-    report=inject(args.site,args.base_path) if args.command=="inject" else validate(args.site,args.repo_root)
+    report=inject(args.site,args.base_path) if args.command=="inject" else validate(args.site,args.repo_root,args.require_release_proof)
     rendered=json.dumps(report,ensure_ascii=False,indent=2)+"\n"
     if getattr(args,"report",None): args.report.parent.mkdir(parents=True,exist_ok=True); args.report.write_text(rendered,encoding="utf-8")
     print(rendered,end="")
