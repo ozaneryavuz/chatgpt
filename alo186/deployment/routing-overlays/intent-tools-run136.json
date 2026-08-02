@@ -1,0 +1,22 @@
+{
+  "version": 214,
+  "generatedAt": "2026-08-02",
+  "source": "ALO186 intent tools run136",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/ev-sarj-apartman-site-abonelik-karar/index.html",
+      "canonicalPath": "/hesaplama/ev-sarj-apartman-site-abonelik-karar/",
+      "type": "tool"
+    },
+    {
+      "source": "alo186/hesaplama/vpp-toplayicilik-hazirlik-testi/index.html",
+      "canonicalPath": "/hesaplama/vpp-toplayicilik-hazirlik-testi/",
+      "type": "business-tool"
+    },
+    {
+      "source": "alo186/hesaplama/jenerator-yakit-otonomi-hesabi/index.html",
+      "canonicalPath": "/hesaplama/jenerator-yakit-otonomi-hesabi/",
+      "type": "calculator"
+    }
+  ]
+}
