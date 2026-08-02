@@ -1,0 +1,91 @@
+{
+  "version": 214,
+  "generatedAt": "2026-08-02",
+  "scoringModel": {
+    "searchDemand": 0.24,
+    "taskUrgency": 0.18,
+    "commercialFit": 0.16,
+    "authorityFit": 0.16,
+    "answerability": 0.14,
+    "internalLinkFit": 0.12
+  },
+  "guardrails": {
+    "minimumPublishScore": 72,
+    "maximumIntentSimilarity": 0.78,
+    "primarySourcesRequired": 3,
+    "freshnessDays": 180,
+    "minimumInternalLinks": 6,
+    "minimumVisibleFaq": 3,
+    "requireDirectAnswer": true,
+    "requireSafetyBoundary": true,
+    "requireConversionEvent": true
+  },
+  "opportunities": [
+    {
+      "intentKey": "power-outage-compensation-evidence-pack",
+      "cluster": "edas-processes",
+      "title": "Elektrik kesintisi tazminatı kanıt planı",
+      "route": "/hesaplama/elektrik-kesintisi-tazminat-kontrolu/",
+      "task": "Kesinti süresi ve nedeni üzerinden tazminat yolunu ayırıp indirilebilir kanıt planı oluşturmak",
+      "scores": {"searchDemand": 90, "taskUrgency": 88, "commercialFit": 45, "authorityFit": 94, "answerability": 92, "internalLinkFit": 90},
+      "conversionEvents": ["outage_compensation_result", "outage_compensation_evidence_download"],
+      "sourceClass": "regulation",
+      "status": "published"
+    },
+    {
+      "intentKey": "pv-outage-backup-architecture",
+      "cluster": "solar-storage",
+      "title": "GES kesinti yedekleme mimarisi",
+      "route": "/hesaplama/ges-kesinti-yedekleme-mimarisi/",
+      "task": "Şebeke bağlantılı GES, batarya, EPS, kritik yük panosu ve jeneratör katmanlarını seçmek",
+      "scores": {"searchDemand": 82, "taskUrgency": 80, "commercialFit": 82, "authorityFit": 96, "answerability": 88, "internalLinkFit": 92},
+      "conversionEvents": ["pv_backup_architecture_result"],
+      "sourceClass": "standard",
+      "status": "published"
+    },
+    {
+      "intentKey": "evse-dc-residual-current-protection",
+      "cluster": "ev-charging",
+      "title": "EV şarj kaçak akım koruma seçici",
+      "route": "/hesaplama/ev-sarj-kacak-akim-koruma-secici/",
+      "task": "Tip A, Tip B ve doğrulanmış 6 mA DC RDC-DD kararını belgeye göre kurmak",
+      "scores": {"searchDemand": 84, "taskUrgency": 86, "commercialFit": 78, "authorityFit": 95, "answerability": 90, "internalLinkFit": 88},
+      "conversionEvents": ["ev_residual_protection_result"],
+      "sourceClass": "standard",
+      "status": "published"
+    },
+    {
+      "intentKey": "vpp-bess-revenue-readiness",
+      "cluster": "vpp-bess",
+      "title": "BESS ve VPP gelir hazırlığı kontrolü",
+      "route": "/hesaplama/bess-vpp-gelir-hazirligi/",
+      "task": "Telemetri, SoC rezervi, sayaç mutabakatı, dispatch takibi ve sözleşme uygunluğunu tek skorda değerlendirmek",
+      "scores": {"searchDemand": 60, "taskUrgency": 72, "commercialFit": 94, "authorityFit": 98, "answerability": 76, "internalLinkFit": 92},
+      "conversionEvents": ["vpp_readiness_result", "vpp_readiness_report_download"],
+      "sourceClass": "mixed",
+      "status": "candidate"
+    },
+    {
+      "intentKey": "hotel-power-quality-loss-estimator",
+      "cluster": "business-continuity",
+      "title": "Otel güç kalitesi kayıp hesaplayıcısı",
+      "route": "/hesaplama/otel-guc-kalitesi-kayip-hesabi/",
+      "task": "Kesinti, düşük-yüksek gerilim, harmonik ve plansız yeniden başlatma maliyetini yıllık kayba dönüştürmek",
+      "scores": {"searchDemand": 58, "taskUrgency": 85, "commercialFit": 96, "authorityFit": 99, "answerability": 88, "internalLinkFit": 94},
+      "conversionEvents": ["hotel_power_quality_loss_result", "business_assessment_click"],
+      "sourceClass": "engineering",
+      "status": "candidate"
+    },
+    {
+      "intentKey": "home-energy-storage-critical-load-plan",
+      "cluster": "solar-storage",
+      "title": "Ev enerji depolama kritik yük planı",
+      "route": "/hesaplama/ev-enerji-depolama-kritik-yuk-plani/",
+      "task": "Tüm evi yedeklemek yerine kritik yük, kalkış gücü, hedef süre ve SoC rezervi üzerinden doğru mimariyi belirlemek",
+      "scores": {"searchDemand": 86, "taskUrgency": 82, "commercialFit": 90, "authorityFit": 94, "answerability": 91, "internalLinkFit": 96},
+      "conversionEvents": ["home_storage_plan_result", "storage_selector_click"],
+      "sourceClass": "standard",
+      "status": "candidate"
+    }
+  ]
+}
