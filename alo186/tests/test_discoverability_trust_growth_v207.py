@@ -142,12 +142,10 @@ def test_robots_and_routing_publish_the_new_assets() -> None:
     assert "Sitemap: https://alo186.com/sitemap-growth-v207.xml" in robots
     routing = json.loads(read(ROUTING))
     assert routing["version"] == 207
-    paths = {route["canonicalPath"] for route in routing["routes"]}
-    assert {
-        "/kesinti-cihaz-surekliligi-karar-merkezi/",
-        "/amazon-elektrik-urunleri/",
-    }.issubset(paths)
-    assert all(route["source"].endswith("index.html") for route in routing["routes"])
+    routes = routing["routes"]
+    assert len(routes) == 1
+    assert routes[0]["source"] == "alo186/kesinti-cihaz-surekliligi-karar-merkezi/index.html"
+    assert routes[0]["canonicalPath"] == "/kesinti-cihaz-surekliligi-karar-merkezi/"
     trust = routing["trust"]
     assert trust["officialImpersonation"] is False
     assert trust["directAffiliateLinkOnDecisionHub"] is False
