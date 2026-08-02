@@ -1,0 +1,23 @@
+{
+  "version": 204,
+  "generatedAt": "2026-08-02",
+  "source": "ALO186 content authority run126",
+  "routes": [
+    {
+      "path": "/haberler/ups-aku-ic-direnc-conductance-kapasite-runtime-testi",
+      "file": "haberler/ups-aku-ic-direnc-conductance-kapasite-runtime-testi/index.html",
+      "intent": "UPS akü iç direnç ve conductance ölçümünü gerçek kapasite ve runtime kabulünden ayırmak"
+    },
+    {
+      "path": "/haberler/jenerator-coolant-heater-jacket-water-heater-soguk-start-teshis",
+      "file": "haberler/jenerator-coolant-heater-jacket-water-heater-soguk-start-teshis/index.html",
+      "intent": "Jeneratör ön ısıtma devresi arızasını ayırmak ve soğuk start hazır olmayı kanıtlamak"
+    },
+    {
+      "path": "/haberler/topraklama-pensi-kazikli-3-kutuplu-fall-of-potential-olcum-farki",
+      "file": "haberler/topraklama-pensi-kazikli-3-kutuplu-fall-of-potential-olcum-farki/index.html",
+      "intent": "Topraklama topolojisine göre pens, selektif veya kazıklı Fall-of-Potential ölçümünü seçmek"
+    }
+  ],
+  "qualityGate": "alo186/tests/test_authority_content_run126.py"
+}
