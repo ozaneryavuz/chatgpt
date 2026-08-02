@@ -1,0 +1,116 @@
+name: ALO186 erişilebilir hedefler ve medya rezervi v214
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/assets/alo186-accessibility-v214.css'
+      - 'alo186/deployment/build_static_site.py'
+      - 'alo186/tests/test_accessibility_v214.py'
+      - '.github/workflows/alo186-accessibility-v214.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/assets/alo186-accessibility-v214.css'
+      - 'alo186/deployment/build_static_site.py'
+      - 'alo186/tests/test_accessibility_v214.py'
+      - '.github/workflows/alo186-accessibility-v214.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-accessibility-v214-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Site geneli 44px hedef ve görsel rezerv sözleşmesi
+        run: python alo186/tests/test_accessibility_v214.py
+
+      - name: Mevcut yayın, hukuk ve kullanıcı güveni regresyonları
+        run: |
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+          python alo186/tests/test_content_intent_consolidation.py
+          python alo186/tests/test_private_technical_search.py
+
+      - name: Canonical production paketi
+        run: |
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-accessibility-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-accessibility-canonical
+
+      - name: Custom-domain Pages paketi
+        run: |
+          cp -a /tmp/alo186-accessibility-canonical /tmp/alo186-accessibility-custom
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-accessibility-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-accessibility-custom \
+            --base-path ''
+
+      - name: Project-path Pages paketi
+        run: |
+          cp -a /tmp/alo186-accessibility-canonical /tmp/alo186-accessibility-project
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-accessibility-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-accessibility-project \
+            --base-path '/chatgpt'
+
+      - name: 390px taşma ve hedef sözleşmesi statik kabulü
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          for root, prefix in [
+              (Path('/tmp/alo186-accessibility-custom'), ''),
+              (Path('/tmp/alo186-accessibility-project'), '/chatgpt'),
+          ]:
+              release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
+              report=release['accessibilityHardeningV214']
+              assert report['minimumTouchTargetPx'] == 44
+              assert report['horizontalOverflowHidden'] is False
+              assert report['contentImageFallbackRatio'] == '16:9'
+              css=(root/'assets/alo186-accessibility-v214.css').read_text(encoding='utf-8')
+              assert '@media(max-width:390px)' in css
+              assert 'overflow-x:hidden' not in css.replace(' ','').lower()
+              expected=(prefix+'/assets/alo186-accessibility-v214.css') if prefix else '/assets/alo186-accessibility-v214.css'
+              for route in ('elektrik-portali','elektrik-kesintisi','acil-numaralar','haberler'):
+                  page=(root/route/'index.html').read_text(encoding='utf-8')
+                  assert expected in page, (route, expected)
+                  assert page.count('data-alo186-accessibility-v214="true"') == 1
+          PY
+
+      - name: Doğrulanmış erişilebilir Pages artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-accessibility-v214-pages
+          path: /tmp/alo186-accessibility-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
