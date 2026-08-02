@@ -14,6 +14,8 @@ ROOT = Path(__file__).resolve().parents[2]
 SOURCE_ROOT = ROOT / "alo186/amazon-elektrik-urunleri"
 OVERLAY = ROOT / "alo186/deployment/routing-overlays/commercial-category-pages-v42.json"
 DEPLOYMENT = ROOT / "alo186/deployment"
+CANONICAL_ORIGIN = "https://alo186.com"
+LEGACY_ORIGIN = "https://www.alo186.com"
 sys.path.insert(0, str(DEPLOYMENT))
 
 from build_static_site import build  # noqa: E402
@@ -29,6 +31,20 @@ TOOLS = {
     "/amazon-elektrik-urunleri/tasinabilir-guc-istasyonu-secimi": "/hesaplama/power-station-kapasite-eps-uygunluk/",
     "/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi": "/hesaplama/akilli-priz-enerji-olcer-uygunluk/",
     "/amazon-elektrik-urunleri/ges-malzemeleri-secimi": "/hesaplama/gunes-paneli-power-station-uygunluk/",
+}
+VISIBLE_CONSUMER_ROUTES = {
+    "/amazon-elektrik-urunleri/modem-ont-mini-ups-yedekleme-secici/",
+    "/amazon-elektrik-urunleri/nas-ups-usb-snmp-uygunluk-secici/",
+    "/amazon-elektrik-urunleri/guvenlik-kamerasi-nvr-poe-ups-secici/",
+    "/amazon-elektrik-urunleri/alarm-paneli-aku-uygunluk-secici/",
+    "/amazon-elektrik-urunleri/cpap-yedek-guc-uygunluk-secici/",
+    "/amazon-elektrik-urunleri/mobil-hotspot-4g-5g-yedek-internet-secici/",
+    "/amazon-elektrik-urunleri/powerbank-usb-c-secimi",
+    "/amazon-elektrik-urunleri/akim-korumali-grup-priz-secimi",
+    "/amazon-elektrik-urunleri/tasinabilir-guc-istasyonu-secimi",
+    "/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi",
+    "/amazon-elektrik-urunleri/kombi-ups-power-station-secimi",
+    "/amazon-elektrik-urunleri/buzdolabi-dondurucu-kesinti-gida-guvenligi-secici/",
 }
 AMAZON_HOSTS = {"amazon.com.tr", "www.amazon.com.tr"}
 
@@ -97,7 +113,10 @@ class CommercialCategoryExpansionTests(unittest.TestCase):
             headings.add(h1)
             descriptions.add(description)
             self.assertGreaterEqual(len(description), 120, route)
-            self.assertIn(f'<link rel="canonical" href="https://www.alo186.com{route}">', html)
+            canonical = f'{CANONICAL_ORIGIN}{route}'
+            legacy = f'{LEGACY_ORIGIN}{route}'
+            self.assertIn(f'<link rel="canonical" href="{canonical}">', html)
+            self.assertNotIn(f'<link rel="canonical" href="{legacy}">', html)
             self.assertEqual(html.count("<h1>"), 1, route)
             self.assertGreaterEqual(len(re.findall(r"<h2>", html)), 6, route)
             self.assertGreaterEqual(html.count("<details>"), 3, route)
@@ -153,7 +172,7 @@ class CommercialCategoryExpansionTests(unittest.TestCase):
             self.assertRegex(catalog, pattern)
         self.assertNotRegex(catalog, re.compile(r"id:'(?:power_station|smart_plug)'.*?mode:'direct'", re.S))
 
-    def test_hub_inventory_matches_visible_count_and_grows_without_stale_fixture(self) -> None:
+    def test_hub_inventory_matches_current_consumer_decision_architecture(self) -> None:
         hub = (SOURCE_ROOT / "index.html").read_text(encoding="utf-8")
         guide_links = re.findall(
             r'href="(/amazon-elektrik-urunleri/[^"?#]+)"',
@@ -161,14 +180,15 @@ class CommercialCategoryExpansionTests(unittest.TestCase):
             re.I,
         )
         unique = set(guide_links)
-        display = re.search(r"(\d+) özel rehber", hub)
-        self.assertIsNotNone(display)
-        self.assertEqual(int(display.group(1)), len(unique), sorted(unique))
-        self.assertGreaterEqual(len(unique), 7, sorted(unique))
-        self.assertEqual(hub.count('class="card route-card"'), len(unique))
-        self.assertIn("ayrı ihtiyacı", hub)
-        for route in ROUTES:
-            self.assertIn(route, unique)
+        self.assertEqual(unique, VISIBLE_CONSUMER_ROUTES)
+        self.assertEqual(hub.count('class="card route-card"'), 12)
+        self.assertEqual(hub.count('data-commercial-route="priority-card"'), 6)
+        self.assertEqual(hub.count('data-commercial-route="core-card"'), 6)
+        self.assertIn("18+ karar rotası", hub)
+        self.assertIn("ayrı değerlendirin", hub)
+        self.assertIn("/amazon-elektrik-urunleri/tasinabilir-guc-istasyonu-secimi", unique)
+        self.assertIn("/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi", unique)
+        self.assertNotIn("/amazon-elektrik-urunleri/ges-malzemeleri-secimi", unique)
         self.assertNotIn("/urun-rehberleri/", hub)
 
     def test_production_bundle_sitemap_and_private_search_include_expansion(self) -> None:
@@ -181,7 +201,8 @@ class CommercialCategoryExpansionTests(unittest.TestCase):
             sitemap = (site / "sitemap.xml").read_text(encoding="utf-8")
             for route in ROUTES:
                 self.assertTrue((site / route.strip("/") / "index.html").is_file(), route)
-                self.assertIn(f"https://alo186.com{route}", sitemap)
+                self.assertIn(f"{CANONICAL_ORIGIN}{route}", sitemap)
+                self.assertNotIn(f"{LEGACY_ORIGIN}{route}", sitemap)
 
             result = inject_private_search(site, "")
             self.assertGreaterEqual(result["entryCount"], 90)
