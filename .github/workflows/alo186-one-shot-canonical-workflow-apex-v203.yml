@@ -1,0 +1,66 @@
+name: ALO186 one-shot canonical workflow apex v203
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/alo186-one-shot-canonical-workflow-apex-v203.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  PYTHONDONTWRITEBYTECODE: "1"
+
+jobs:
+  migrate-and-verify:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.ref == 'fix/alo186-apex-canonical-contract-v203'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/alo186-apex-canonical-contract-v203
+          fetch-depth: 0
+
+      - name: Align canonical workflow robots assertion to apex
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          old = "grep -q 'Sitemap: https://www.alo186.com/sitemap.xml' alo186/robots.txt"
+          new = "grep -q 'Sitemap: https://alo186.com/sitemap.xml' alo186/robots.txt\n          ! grep -q 'Sitemap: https://www.alo186.com/sitemap.xml' alo186/robots.txt"
+          matches = []
+          for path in sorted(Path('.github/workflows').glob('*.y*ml')):
+              text = path.read_text(encoding='utf-8')
+              if old in text:
+                  matches.append(path)
+          if len(matches) != 1:
+              raise SystemExit(f'Expected exactly one legacy robots assertion, found {len(matches)}: {matches}')
+          target = matches[0]
+          text = target.read_text(encoding='utf-8')
+          target.write_text(text.replace(old, new, 1), encoding='utf-8')
+          Path('.github/workflows/alo186-one-shot-canonical-workflow-apex-v203.yml').unlink()
+          print(f'Updated {target}')
+          PY
+
+      - name: Verify source robots contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'Sitemap: https://alo186.com/sitemap.xml' alo186/robots.txt
+          ! grep -q 'Sitemap: https://www.alo186.com/sitemap.xml' alo186/robots.txt
+
+      - name: Commit verified workflow migration
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --check
+          git commit -m "ci(alo186): validate apex sitemap in canonical workflow"
+          git push origin HEAD:fix/alo186-apex-canonical-contract-v203
