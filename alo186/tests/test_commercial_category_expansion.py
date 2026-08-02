@@ -25,6 +25,10 @@ ROUTES = {
     "/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi": SOURCE_ROOT / "akilli-priz-enerji-olcer-secimi/index.html",
     "/amazon-elektrik-urunleri/ges-malzemeleri-secimi": SOURCE_ROOT / "ges-malzemeleri-secimi/index.html",
 }
+CONSUMER_HUB_ROUTES = {
+    "/amazon-elektrik-urunleri/tasinabilir-guc-istasyonu-secimi",
+    "/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi",
+}
 TOOLS = {
     "/amazon-elektrik-urunleri/tasinabilir-guc-istasyonu-secimi": "/hesaplama/power-station-kapasite-eps-uygunluk/",
     "/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi": "/hesaplama/akilli-priz-enerji-olcer-uygunluk/",
@@ -165,8 +169,8 @@ class CommercialCategoryExpansionTests(unittest.TestCase):
         self.assertEqual(hub.count('class="card route-card"'), len(unique))
         self.assertIn("teknik açığı", hub)
         self.assertIn("mevcut güvenli sistem", hub)
-        for route in ROUTES:
-            self.assertIn(route, unique)
+        self.assertTrue(CONSUMER_HUB_ROUTES <= unique, sorted(unique))
+        self.assertNotIn("/amazon-elektrik-urunleri/ges-malzemeleri-secimi", unique)
         self.assertNotIn("/urun-rehberleri/", hub)
         stale_display = re.search(r"(\d+) özel rehber", hub)
         if stale_display:
