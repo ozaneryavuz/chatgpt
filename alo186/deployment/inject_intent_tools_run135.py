@@ -143,23 +143,33 @@ def inject_hub(path: Path, base_path: str) -> bool:
         raise FileNotFoundError(f"Hesaplama merkezi artifactı bulunamadı: {path}")
     text = path.read_text(encoding="utf-8", errors="strict")
     marker_count = text.count(MARKER)
-    if marker_count == len(ROUTES):
-        return False
-    if marker_count:
+    cards_added = False
+    if marker_count == 0:
+        anchor = '<section id="araclar" class="tool-grid">'
+        if anchor not in text:
+            raise RuntimeError("Hesaplama merkezi araç grid başlangıcı bulunamadı")
+        text = text.replace(anchor, anchor + "\n" + cards(base_path), 1)
+        cards_added = True
+    elif marker_count != len(ROUTES):
         raise RuntimeError(f"Run135 kartları kısmi durumda: {marker_count}/{len(ROUTES)}")
-    anchor = '<section id="araclar" class="tool-grid">'
-    if anchor not in text:
-        raise RuntimeError("Hesaplama merkezi araç grid başlangıcı bulunamadı")
-    text = text.replace(anchor, anchor + "\n" + cards(base_path), 1)
 
-    def raise_count(match: re.Match[str]) -> str:
-        return f"{int(match.group(1)) + len(ROUTES)} çekirdek araç"
-
-    text, replacements = re.subn(r"(\d+)\s+çekirdek araç", raise_count, text, count=1)
-    if replacements != 1:
+    actual_tool_count = text.count('class="tool-card"')
+    if actual_tool_count < len(ROUTES):
+        raise RuntimeError("Hesaplama merkezi gerçek araç kartı sayısı geçersiz")
+    counter_values = [int(value) for value in re.findall(r"(\d+)\s+çekirdek araç", text)]
+    if not counter_values:
         raise RuntimeError("Hesaplama merkezi araç sayacı bulunamadı")
+    if any(value != actual_tool_count for value in counter_values):
+        text, replacements = re.subn(
+            r"\d+\s+çekirdek araç",
+            f"{actual_tool_count} çekirdek araç",
+            text,
+        )
+        if replacements != len(counter_values):
+            raise RuntimeError("Hesaplama merkezi statik ve çalışma zamanı sayaçları birlikte güncellenemedi")
+
     path.write_text(text, encoding="utf-8")
-    return True
+    return cards_added
 
 
 def update_release(site: Path, base_path: str, added: bool, search_result: dict, product_hub_fixes: int) -> None:
@@ -252,6 +262,13 @@ def validate(site: Path, base_path: str) -> dict:
         expected = public_url(base_path, route)
         if f'href="{expected}"' not in hub:
             raise RuntimeError(f"Hesaplama Merkezi kartı eksik: {expected}")
+    actual_tool_count = hub.count('class="tool-card"')
+    counter_values = [int(value) for value in re.findall(r"(\d+)\s+çekirdek araç", hub)]
+    if not counter_values or any(value != actual_tool_count for value in counter_values):
+        raise RuntimeError(
+            f"Hesaplama Merkezi statik/çalışma zamanı sayaçları gerçek kart sayısıyla uyuşmuyor: "
+            f"kart={actual_tool_count}, sayaçlar={counter_values}"
+        )
 
     release = json.loads((site / "pages-release.json").read_text(encoding="utf-8"))
     contract = release.get("intentToolsRun135") or {}
@@ -269,6 +286,7 @@ def validate(site: Path, base_path: str) -> dict:
         "searchEntryCount": len(active),
         "sitemapWellFormed": True,
         "productHubJsonLdValid": True,
+        "hubToolCount": actual_tool_count,
     }
 
 
