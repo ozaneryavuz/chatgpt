@@ -1,0 +1,240 @@
+name: ALO186 AI CMS — kaynak bağlı taslak üret
+
+on:
+  workflow_dispatch:
+    inputs:
+      slug:
+        description: Küçük harf, sayı ve tire içeren canonical slug
+        required: true
+        type: string
+      title:
+        description: Başlık tohumu
+        required: true
+        type: string
+      topic:
+        description: Teknik konu
+        required: true
+        type: string
+      intent:
+        description: Kullanıcının tamamlamak istediği görev
+        required: true
+        type: string
+      primary_keyword:
+        description: Birincil arama ifadesi
+        required: true
+        type: string
+      audience:
+        description: Virgülle ayrılmış hedef kitle
+        required: true
+        type: string
+      risk_class:
+        description: Risk sınıfı
+        required: true
+        type: choice
+        options:
+          - low
+          - medium
+          - high
+          - legal
+      content_type:
+        description: İçerik türü
+        required: true
+        default: article
+        type: choice
+        options:
+          - article
+          - guide
+      sources_json:
+        description: Kaynak nesnelerinden oluşan JSON dizi
+        required: true
+        type: string
+      internal_links_json:
+        description: label/path/reason nesnelerinden oluşan JSON dizi; boşsa güvenli varsayılan kullanılır
+        required: false
+        default: '[]'
+        type: string
+      commerce_category:
+        description: Düşük/orta riskte after-tool kategori; boşsa ticari CTA kapalı
+        required: false
+        default: ''
+        type: string
+      model:
+        description: Boşsa ALO186_AI_CMS_MODEL veya policy varsayılanı
+        required: false
+        default: ''
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: alo186-ai-cms-draft-${{ inputs.slug }}
+  cancel-in-progress: false
+
+jobs:
+  draft:
+    if: github.ref_name == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      ALO186_AI_CMS_MODEL: ${{ vars.ALO186_AI_CMS_MODEL }}
+      CMS_SLUG: ${{ inputs.slug }}
+      CMS_TITLE: ${{ inputs.title }}
+      CMS_TOPIC: ${{ inputs.topic }}
+      CMS_INTENT: ${{ inputs.intent }}
+      CMS_PRIMARY_KEYWORD: ${{ inputs.primary_keyword }}
+      CMS_AUDIENCE: ${{ inputs.audience }}
+      CMS_RISK_CLASS: ${{ inputs.risk_class }}
+      CMS_CONTENT_TYPE: ${{ inputs.content_type }}
+      CMS_SOURCES_JSON: ${{ inputs.sources_json }}
+      CMS_INTERNAL_LINKS_JSON: ${{ inputs.internal_links_json }}
+      CMS_COMMERCE_CATEGORY: ${{ inputs.commerce_category }}
+      CMS_MODEL: ${{ inputs.model }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Secret ve girdi ön kontrolü
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$OPENAI_API_KEY" || { echo 'OPENAI_API_KEY repository secretı eksik.' >&2; exit 1; }
+          [[ "$CMS_SLUG" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]] || { echo 'Slug geçersiz.' >&2; exit 1; }
+          python - <<'PY'
+          import json, os
+          sources=json.loads(os.environ['CMS_SOURCES_JSON'])
+          links=json.loads(os.environ['CMS_INTERNAL_LINKS_JSON'])
+          assert isinstance(sources,list) and sources, 'sources_json boş olmayan dizi olmalı'
+          assert isinstance(links,list), 'internal_links_json dizi olmalı'
+          PY
+
+      - name: AI CMS birim ve güvenlik testleri
+        run: python -m unittest discover -s alo186/ai-cms/tests -p 'test_*.py' -v
+
+      - name: Brief, kişisel veri kapısı ve AI taslağı üret
+        shell: bash
+        run: |
+          set -euo pipefail
+          python alo186/ai-cms/cms.py new \
+            --slug "$CMS_SLUG" \
+            --title "$CMS_TITLE" \
+            --topic "$CMS_TOPIC" \
+            --intent "$CMS_INTENT" \
+            --primary-keyword "$CMS_PRIMARY_KEYWORD" \
+            --audience "$CMS_AUDIENCE" \
+            --risk-class "$CMS_RISK_CLASS" \
+            --content-type "$CMS_CONTENT_TYPE" \
+            --sources-json "$CMS_SOURCES_JSON" \
+            --internal-links-json "$CMS_INTERNAL_LINKS_JSON" \
+            --commerce-category "$CMS_COMMERCE_CATEGORY" \
+            --requested-by "$GITHUB_ACTOR"
+          python alo186/ai-cms/input_guard.py \
+            --brief "alo186/ai-cms/briefs/$CMS_SLUG.json" \
+            > /tmp/alo186-ai-cms-input-guard.json
+          args=(--slug "$CMS_SLUG")
+          if [ -n "$CMS_MODEL" ]; then args+=(--model "$CMS_MODEL"); fi
+          python alo186/ai-cms/cms.py ai-draft "${args[@]}"
+          python alo186/ai-cms/cms.py validate --slug "$CMS_SLUG" --write
+          python alo186/ai-cms/cms.py review-pack --slug "$CMS_SLUG" --write
+          python alo186/ai-cms/cms.py dashboard --output /tmp/alo186-ai-cms-dashboard.html
+
+      - name: Canonical yayının henüz oluşmadığını doğrula
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -f "alo186/haberler/$CMS_SLUG/index.html"
+          test ! -f "alo186/deployment/routing-overlays/ai-cms-$CMS_SLUG.json"
+          grep -q 'noindex,nofollow' "alo186/ai-cms/previews/$CMS_SLUG.html"
+          grep -q "/cms approve $CMS_SLUG" "alo186/ai-cms/reviews/$CMS_SLUG.md"
+          grep -q '"personalDataSent": false' /tmp/alo186-ai-cms-input-guard.json
+
+      - name: Dashboard artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-ai-cms-${{ inputs.slug }}-${{ github.run_id }}
+          path: |
+            /tmp/alo186-ai-cms-dashboard.html
+            /tmp/alo186-ai-cms-input-guard.json
+            alo186/ai-cms/reviews/${{ inputs.slug }}.md
+            alo186/ai-cms/previews/${{ inputs.slug }}.html
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Review branch ve commit
+        id: branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          branch="ai-cms/${CMS_SLUG}-${GITHUB_RUN_ID}"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git checkout -b "$branch"
+          git add \
+            "alo186/ai-cms/briefs/$CMS_SLUG.json" \
+            "alo186/ai-cms/content/$CMS_SLUG.json" \
+            "alo186/ai-cms/reviews/$CMS_SLUG.md" \
+            "alo186/ai-cms/previews/$CMS_SLUG.html"
+          git commit -m "cms(alo186): $CMS_SLUG için kaynak bağlı AI taslağı"
+          git push --set-upstream origin "$branch"
+          echo "name=$branch" >> "$GITHUB_OUTPUT"
+
+      - name: İnsan inceleme PR'ı oluştur
+        id: pr
+        shell: bash
+        run: |
+          set -euo pipefail
+          body=$(mktemp)
+          cat > "$body" <<EOF
+          ## ALO186 AI CMS taslağı
+
+          - Slug: \`$CMS_SLUG\`
+          - Risk: \`$CMS_RISK_CLASS\`
+          - İçerik türü: \`$CMS_CONTENT_TYPE\`
+          - AI modeli: \`${CMS_MODEL:-${ALO186_AI_CMS_MODEL:-policy default}}\`
+          - Kişisel veri input guardı: **başarılı**
+          - Durum: **review — canonical yayına dahil değil**
+
+          ### İnceleme
+
+          1. \`alo186/ai-cms/reviews/$CMS_SLUG.md\` dosyasındaki kaynak, kalite, benzerlik ve risk notlarını inceleyin.
+          2. İçerik JSON'unda iddiaların yalnız S1/S2 kaynak özetlerine dayandığını doğrulayın.
+          3. Gerekli düzenlemeleri aynı PR branch'inde yapın.
+          4. Yetkili insan editör hazır olduğunda şu yorumu eklesin:
+
+          \`/cms approve $CMS_SLUG\`
+
+          AI ve bot yorumları onay sayılmaz. Onay workflow'u canonical HTML ve routing overlay üretir; PR yine insan merge'i olmadan yayımlanmaz.
+
+          Workflow run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
+          EOF
+          url=$(gh pr create \
+            --base main \
+            --head "${{ steps.branch.outputs.name }}" \
+            --title "[AI CMS] $CMS_TITLE" \
+            --body-file "$body")
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "PR oluşturuldu: $url" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Sonuç özeti
+        run: |
+          cat <<EOF >> "$GITHUB_STEP_SUMMARY"
+
+          ## AI CMS taslağı hazır
+
+          - Kişisel veri input guardı: **başarılı**
+          - Canonical yayın: **hayır**
+          - İnsan onayı: **bekleniyor**
+          - PR: ${{ steps.pr.outputs.url }}
+          - Onay komutu: \`/cms approve $CMS_SLUG\`
+          EOF

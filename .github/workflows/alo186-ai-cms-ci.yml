@@ -1,0 +1,182 @@
+name: ALO186 AI CMS — kalite ve yayın kapısı
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/ai-cms/**'
+      - 'alo186/haberler/**'
+      - 'alo186/deployment/routing-overlays/ai-cms-*.json'
+      - '.github/workflows/alo186-ai-cms-*.yml'
+      - '.github/ISSUE_TEMPLATE/alo186-ai-cms-content.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/ai-cms/**'
+      - 'alo186/haberler/**'
+      - 'alo186/deployment/routing-overlays/ai-cms-*.json'
+      - '.github/workflows/alo186-ai-cms-*.yml'
+      - '.github/ISSUE_TEMPLATE/alo186-ai-cms-content.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-ai-cms-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Python compile ve AI CMS birim testleri
+        run: |
+          python -m py_compile \
+            alo186/ai-cms/cms.py \
+            alo186/ai-cms/input_guard.py
+          python -m unittest discover -s alo186/ai-cms/tests -p 'test_*.py' -v
+
+      - name: İçerik kayıtlarının fail-closed doğrulaması
+        run: python alo186/ai-cms/cms.py validate --write
+
+      - name: İnsan onayı ve canonical çıktı bütünlüğü
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root=Path('.')
+          content=root/'alo186/ai-cms/content'
+          for record_path in sorted(content.glob('*.json')) if content.is_dir() else []:
+              record=json.loads(record_path.read_text(encoding='utf-8'))
+              slug=record['slug']
+              html_path=root/f'alo186/haberler/{slug}/index.html'
+              overlay=root/f'alo186/deployment/routing-overlays/ai-cms-{slug}.json'
+              if record['state']=='review':
+                  assert not html_path.exists(), f'review kaydı canonical HTML üretemez: {slug}'
+                  assert not overlay.exists(), f'review kaydı routing overlay üretemez: {slug}'
+              if record['state']=='approved':
+                  assert record['editorial']['approvedBy'], slug
+                  assert record['editorial']['approvedAt'], slug
+                  assert record['editorial']['approvalPr'], slug
+              if record['state']=='published':
+                  assert html_path.is_file(), html_path
+                  assert overlay.is_file(), overlay
+                  html=html_path.read_text(encoding='utf-8')
+                  assert f'data-ai-cms-id="{record["id"]}"' in html
+                  assert 'AI destekli taslak insan editör onayıyla yayımlanmıştır' in html
+                  assert '"@type":"Person"' not in html
+                  assert '"@type":"Product"' not in html
+                  assert '"@type":"Offer"' not in html
+                  routing=json.loads(overlay.read_text(encoding='utf-8'))
+                  assert routing['aiCms']['humanApproved'] is True
+                  assert routing['aiCms']['approvalPr']==record['editorial']['approvalPr']
+          PY
+
+      - name: Workflow güvenlik sözleşmesi
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          draft=Path('.github/workflows/alo186-ai-cms-draft.yml').read_text(encoding='utf-8')
+          approve=Path('.github/workflows/alo186-ai-cms-approve.yml').read_text(encoding='utf-8')
+          core=Path('alo186/ai-cms/cms.py').read_text(encoding='utf-8')
+          input_guard=Path('alo186/ai-cms/input_guard.py').read_text(encoding='utf-8')
+          assert 'OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}' in draft
+          assert 'input_guard.py' in draft
+          assert draft.index('input_guard.py') < draft.index('cms.py ai-draft')
+          assert 'personalDataSent' in draft
+          assert 'store": False' in core
+          assert 'json_schema' in core and 'strict": True' in core
+          assert 'TCKN_CANDIDATE_RE' in input_guard
+          assert 'IBAN_RE' in input_guard
+          assert 'issue_comment:' in approve
+          assert 'AUTHOR_ASSOCIATION' in approve
+          assert 'OWNER|MEMBER|COLLABORATOR' in approve
+          assert 'head_repo" = "$GITHUB_REPOSITORY' in approve
+          assert 'gh pr merge' not in approve
+          assert 'pull_request_target:' not in approve
+          assert '/cms approve ' in approve
+          assert 'OPENAI_API_KEY' not in approve
+          PY
+
+      - name: Secret pattern ve kişisel veri guardı
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          roots=[Path('alo186/ai-cms'), Path('.github/workflows')]
+          files=[]
+          for root in roots:
+              if root.is_dir():
+                  files.extend(
+                      path for path in root.rglob('*')
+                      if path.is_file()
+                      and (root.name!='workflows' or path.name.startswith('alo186-ai-cms-'))
+                  )
+
+          secret_patterns={
+              'OpenAI anahtarı': re.compile(r'(?<![A-Za-z0-9_])' + 's' + r'k-(?:proj-)?[A-Za-z0-9_-]{20,}'),
+              'AWS access key': re.compile('A' + r'KIA[0-9A-Z]{16}'),
+              'Private key': re.compile('BEGIN ' + r'(?:RSA |EC |OPENSSH )?PRIVATE KEY'),
+          }
+          hits=[]
+          for path in files:
+              try:
+                  text=path.read_text(encoding='utf-8')
+              except UnicodeDecodeError:
+                  continue
+              for label,pattern in secret_patterns.items():
+                  if pattern.search(text):
+                      hits.append(f'{path}: {label}')
+          if hits:
+              raise SystemExit('Muhtemel secret bulundu:\n'+'\n'.join(hits))
+
+          phone=re.compile(r'(?<!\d)(?:\+?90\s*)?0?5\d{2}[\s.-]?\d{3}[\s.-]?\d{2}[\s.-]?\d{2}(?!\d)')
+          email=re.compile(r'\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b', re.I)
+          pii_hits=[]
+          for directory in (Path('alo186/ai-cms/content'),Path('alo186/ai-cms/briefs')):
+              if not directory.is_dir():
+                  continue
+              for path in directory.glob('*.json'):
+                  text=path.read_text(encoding='utf-8')
+                  if phone.search(text) or email.search(text):
+                      pii_hits.append(str(path))
+          if pii_hits:
+              raise SystemExit('AI CMS kaydında kişisel iletişim kalıbı bulundu:\n'+'\n'.join(pii_hits))
+          print(f'Secret/PII guard başarılı: {len(files)} dosya tarandı.')
+          PY
+
+      - name: Canonical production build ve smoke
+        run: |
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-ai-cms-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-ai-cms-canonical
+
+      - name: Özel dashboard artifactı
+        run: python alo186/ai-cms/cms.py dashboard --output /tmp/alo186-ai-cms-dashboard.html
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: alo186-ai-cms-ci-${{ github.run_id }}
+          path: |
+            /tmp/alo186-ai-cms-dashboard.html
+            /tmp/alo186-ai-cms-canonical/alo186-release.json
+            alo186/ai-cms/reviews/
+          if-no-files-found: ignore
+          retention-days: 30

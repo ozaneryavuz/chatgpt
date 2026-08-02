@@ -1,0 +1,92 @@
+name: ALO186 AI CMS içerik talebi
+description: Kaynak bağlı ve insan onaylı yeni teknik içerik briefi oluşturur.
+title: "[AI CMS] "
+labels:
+  - alo186
+  - content
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Bu form canlı içerik yayımlamaz. Önce kaynak bağlı brief, ardından AI taslağı, PR incelemesi ve insan onayı gerekir. Kişisel isim, telefon, e-posta, açık adres, tesisat numarası veya müşteri verisi yazmayın.
+  - type: input
+    id: slug
+    attributes:
+      label: Canonical slug
+      description: Küçük harf, sayı ve tire; örnek modem-mini-ups-uygunluk
+      placeholder: modem-mini-ups-uygunluk
+    validations:
+      required: true
+  - type: input
+    id: title
+    attributes:
+      label: Başlık tohumu
+      description: Nihai title değildir; AI ve editör tarafından daraltılır.
+      placeholder: Modem Mini UPS Uygunluk Rehberi
+    validations:
+      required: true
+  - type: textarea
+    id: intent
+    attributes:
+      label: Kullanıcı niyeti
+      description: Kullanıcı hangi sorunun cevabını veya hangi görevin tamamlanmasını istiyor?
+      placeholder: Kullanıcı satın almadan önce gerilim, polarite, jak ve çalışma süresi uygunluğunu doğrulamak istiyor.
+    validations:
+      required: true
+  - type: input
+    id: keyword
+    attributes:
+      label: Birincil anahtar kelime
+      placeholder: modem mini UPS
+    validations:
+      required: true
+  - type: input
+    id: audience
+    attributes:
+      label: Hedef kitle
+      description: Virgülle ayırın.
+      placeholder: Ev kullanıcıları, uzaktan çalışanlar
+    validations:
+      required: true
+  - type: dropdown
+    id: risk
+    attributes:
+      label: Risk sınıfı
+      options:
+        - low
+        - medium
+        - high
+        - legal
+    validations:
+      required: true
+  - type: textarea
+    id: sources
+    attributes:
+      label: Kaynaklar ve doğrulanan olgular
+      description: Her kaynak için kurum, başlık, HTTPS URL, erişim tarihi, birincil/ikincil ve yalnız doğrulanan factSummary yazın.
+      placeholder: |
+        S1 | EPDK | Belge başlığı | https://... | 2026-08-02 | birincil | Kaynakta doğrulanan olgular...
+        S2 | Üretici | Teknik kılavuz | https://... | 2026-08-02 | birincil | Kaynakta doğrulanan olgular...
+    validations:
+      required: true
+  - type: textarea
+    id: internal_links
+    attributes:
+      label: İlgili ALO186 rotaları
+      description: En az iki mevcut canonical rota ve bağlama gerekçesi.
+      placeholder: |
+        /hesaplama/modem-internet-yedekleme/ — süre hesabına bağlar
+        /elektrik-portali — ana işlem merkezine dönüş sağlar
+    validations:
+      required: true
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Güvenlik onayı
+      options:
+        - label: Bu talepte kişisel veya müşteri verisi bulunmuyor.
+          required: true
+        - label: Kaynak özetleri kaynakta gerçekten doğrulanan bilgileri içeriyor.
+          required: true
+        - label: AI taslağının insan onayı olmadan yayımlanamayacağını biliyorum.
+          required: true
