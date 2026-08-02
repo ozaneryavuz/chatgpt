@@ -47,5 +47,5 @@ jobs:
         run: |
           set -euo pipefail
           grep -q 'inject_home_affiliate_banner_v209.py' .github/workflows/alo186-github-pages.yml
-          ! grep -q 'actions/deploy-pages' .github/workflows/alo186-home-affiliate-banner-v209.yml
-          ! grep -q 'actions/upload-pages-artifact' .github/workflows/alo186-home-affiliate-banner-v209.yml
+          ! grep -Eq '^[[:space:]]*- uses:[[:space:]]+actions/deploy-pages' .github/workflows/alo186-home-affiliate-banner-v209.yml
+          ! grep -Eq '^[[:space:]]*- uses:[[:space:]]+actions/upload-pages-artifact' .github/workflows/alo186-home-affiliate-banner-v209.yml
