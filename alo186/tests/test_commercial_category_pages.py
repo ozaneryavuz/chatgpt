@@ -5,6 +5,7 @@ import re
 import unittest
 from html import unescape
 from pathlib import Path
+from urllib.parse import urlsplit
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -21,12 +22,22 @@ DIRECT_COMMERCIAL_ROUTES = {
     "/amazon-elektrik-urunleri",
     "/amazon-elektrik-urunleri/powerbank-usb-c-secimi",
 }
-EXPANSION_ROUTES = {
+# Ürün merkezi v174+ ile genel kategori listesinden görev odaklı 12 karar kartına
+# dönüştürüldü. Eski “9 özel rehber” ve yalnız power-station odaklı buzdolabı
+# rotası artık ana merkez sözleşmesi değildir.
+HUB_ROUTES = {
+    "/amazon-elektrik-urunleri/modem-ont-mini-ups-yedekleme-secici/",
+    "/amazon-elektrik-urunleri/nas-ups-usb-snmp-uygunluk-secici/",
+    "/amazon-elektrik-urunleri/guvenlik-kamerasi-nvr-poe-ups-secici/",
+    "/amazon-elektrik-urunleri/alarm-paneli-aku-uygunluk-secici/",
+    "/amazon-elektrik-urunleri/cpap-yedek-guc-uygunluk-secici/",
+    "/amazon-elektrik-urunleri/mobil-hotspot-4g-5g-yedek-internet-secici/",
+    "/amazon-elektrik-urunleri/powerbank-usb-c-secimi",
+    "/amazon-elektrik-urunleri/akim-korumali-grup-priz-secimi",
     "/amazon-elektrik-urunleri/tasinabilir-guc-istasyonu-secimi",
     "/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi",
-    "/amazon-elektrik-urunleri/ges-malzemeleri-secimi",
     "/amazon-elektrik-urunleri/kombi-ups-power-station-secimi",
-    "/amazon-elektrik-urunleri/buzdolabi-dondurucu-power-station-secimi",
+    "/amazon-elektrik-urunleri/buzdolabi-dondurucu-kesinti-gida-guvenligi-secici/",
 }
 
 
@@ -35,6 +46,29 @@ def text_of(html: str, tag: str) -> str:
     if not match:
         return ""
     return re.sub(r"\s+", " ", unescape(re.sub(r"<[^>]+>", " ", match.group(1)))).strip()
+
+
+def canonical_for(html: str, route: str) -> str:
+    match = re.search(
+        r'<link\b(?=[^>]*\brel=["\']canonical["\'])(?=[^>]*\bhref=["\']([^"\']+)["\'])[^>]*>',
+        html,
+        re.I,
+    )
+    if not match:
+        raise AssertionError(f"Canonical bulunamadı: {route}")
+    canonical = match.group(1)
+    parsed = urlsplit(canonical)
+    if parsed.scheme != "https" or parsed.netloc not in {"alo186.com", "www.alo186.com"}:
+        raise AssertionError(canonical)
+    if (parsed.path.rstrip("/") or "/") != (route.rstrip("/") or "/"):
+        raise AssertionError((canonical, route))
+    if parsed.query or parsed.fragment:
+        raise AssertionError(canonical)
+    return canonical
+
+
+def route_file(route: str) -> Path:
+    return ROOT / "alo186" / route.strip("/") / "index.html"
 
 
 class CommercialCategoryPagesTests(unittest.TestCase):
@@ -67,7 +101,7 @@ class CommercialCategoryPagesTests(unittest.TestCase):
             self.assertNotIn(h1, headings)
             titles.add(title)
             headings.add(h1)
-            self.assertIn(f'<link rel="canonical" href="https://www.alo186.com{route}">', html)
+            canonical_for(html, route)
             self.assertIn('meta name="description"', html)
             self.assertIn("Reklam / satış ortaklığı", html)
             self.assertIn("application/ld+json", html)
@@ -79,15 +113,16 @@ class CommercialCategoryPagesTests(unittest.TestCase):
                 self.assertIn("fiyat", lower)
                 self.assertIn("stok", lower)
 
-    def test_hub_links_to_every_dedicated_page(self) -> None:
+    def test_hub_links_to_current_task_focused_routes(self) -> None:
         html = ROUTES["/amazon-elektrik-urunleri"].read_text(encoding="utf-8")
-        for route in (set(ROUTES) - {"/amazon-elektrik-urunleri"}) | EXPANSION_ROUTES:
+        for route in HUB_ROUTES:
             self.assertIn(f'href="{route}"', html)
-        expected_guide_count = len((set(ROUTES) - {"/amazon-elektrik-urunleri"}) | EXPANSION_ROUTES)
-        self.assertIn(f"{expected_guide_count} özel rehber", html)
-        self.assertEqual(html.count('class="card route-card"'), expected_guide_count)
-        self.assertIn("Mevcut ürün yeterliyse satın alma yok", html)
+            self.assertTrue(route_file(route).is_file(), route)
+        self.assertGreaterEqual(html.count('class="card route-card"'), len(HUB_ROUTES))
+        self.assertIn("18+ karar rotası", html)
+        self.assertIn("Mevcut sistem yeterliyse satın alma yok", html)
         self.assertIn("Aktif tehlikede satış yolu kapalı", html)
+        self.assertNotIn("9 özel rehber", html)
 
     def test_direct_affiliate_links_are_freshness_gated_and_only_powerbank_is_direct(self) -> None:
         runtime = (SOURCE_ROOT / "commercial.js").read_text(encoding="utf-8")

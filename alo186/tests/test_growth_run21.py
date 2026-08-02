@@ -1,13 +1,21 @@
 from __future__ import annotations
 
+import importlib.util
 import json
 import re
+import sys
+import tempfile
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+DEPLOYMENT = ROOT / "alo186/deployment"
 HTML = (ROOT / "alo186/hesaplama/kesinti-hazirlik-envanteri/index.html").read_text(encoding="utf-8")
-INJECT = (ROOT / "alo186/deployment/inject_growth_run21.py").read_text(encoding="utf-8")
-OVERLAY = json.loads((ROOT / "alo186/deployment/routing-overlays/growth-trust-revenue-run21.json").read_text(encoding="utf-8"))
+INJECT_PATH = DEPLOYMENT / "inject_growth_run21.py"
+INJECT = INJECT_PATH.read_text(encoding="utf-8")
+BOILER_PATH = DEPLOYMENT / "inject_boiler_continuity_growth.py"
+BOILER_INJECT = BOILER_PATH.read_text(encoding="utf-8")
+OVERLAY = json.loads((DEPLOYMENT / "routing-overlays/growth-trust-revenue-run21.json").read_text(encoding="utf-8"))
 
 assert OVERLAY["version"] == 72
 assert OVERLAY["routes"][0]["canonicalPath"] == "/hesaplama/kesinti-hazirlik-envanteri/"
@@ -25,4 +33,62 @@ for token in ["pano", "rccb", "rcbo", "jeneratör", "inverter", "mppt", "ev şar
     assert token in INJECT.lower()
 assert "Önce teknik uygunluğu doğrula" in INJECT
 assert "directAffiliateLinksAdded\": 0" in INJECT
-print(json.dumps({"ok": True, "route": OVERLAY["routes"][0]["canonicalPath"], "actions": 3}, ensure_ascii=False))
+assert 'CANONICAL = "https://alo186.com" + ROUTE' in INJECT
+assert 'entry = f"<url><loc>{CANONICAL}</loc></url>"' in INJECT
+assert 'f"<url><loc>{CANONICAL}</loc></urlset>"' not in INJECT
+assert "ET.fromstring(updated)" in INJECT
+assert 'ET.parse(site / "sitemap.xml")' in INJECT
+
+assert 'CANONICAL = "https://alo186.com" + ROUTE' in BOILER_INJECT
+assert 'entry = f"<url><loc>{CANONICAL}</loc></url>"' in BOILER_INJECT
+assert 'f"<url><loc>{CANONICAL}</loc></urlset>"' not in BOILER_INJECT
+assert "ET.fromstring(updated)" in BOILER_INJECT
+
+sys.path.insert(0, str(DEPLOYMENT))
+spec = importlib.util.spec_from_file_location("inject_growth_run21_test", INJECT_PATH)
+assert spec and spec.loader
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+boiler_spec = importlib.util.spec_from_file_location("inject_boiler_continuity_test", BOILER_PATH)
+assert boiler_spec and boiler_spec.loader
+boiler_module = importlib.util.module_from_spec(boiler_spec)
+sys.modules[boiler_spec.name] = boiler_module
+boiler_spec.loader.exec_module(boiler_module)
+
+with tempfile.TemporaryDirectory() as temporary:
+    site = Path(temporary)
+    sitemap = site / "sitemap.xml"
+    sitemap.write_text(
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        '  <url><loc>https://alo186.com/</loc></url>\n'
+        '</urlset>\n',
+        encoding="utf-8",
+    )
+
+    module.append_sitemap(site)
+    boiler_module.append_sitemap(site)
+    ET.parse(sitemap)
+    first = sitemap.read_text(encoding="utf-8")
+    for canonical in (module.CANONICAL, boiler_module.CANONICAL):
+        assert first.count(canonical) == 1
+        assert f"<url><loc>{canonical}</loc></url>" in first
+
+    module.append_sitemap(site)
+    boiler_module.append_sitemap(site)
+    ET.parse(sitemap)
+    second = sitemap.read_text(encoding="utf-8")
+    for canonical in (module.CANONICAL, boiler_module.CANONICAL):
+        assert second.count(canonical) == 1
+
+print(json.dumps({
+    "ok": True,
+    "route": OVERLAY["routes"][0]["canonicalPath"],
+    "actions": 3,
+    "sitemapWellFormed": True,
+    "sitemapIdempotent": True,
+    "chainedWritersValidated": True,
+    "canonicalHost": "https://alo186.com",
+}, ensure_ascii=False))
