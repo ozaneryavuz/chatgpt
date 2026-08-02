@@ -11,6 +11,8 @@ COMMERCE = ROOT / "amazon-elektrik-urunleri" / "index.html"
 SITEMAP = ROOT / "sitemap-growth-v207.xml"
 ROBOTS = ROOT / "robots.txt"
 ROUTING = ROOT / "deployment" / "routing-overlays" / "207-discoverability-trust-hub.json"
+CANONICAL_ORIGIN = "https://alo186.com"
+LEGACY_ORIGIN = "https://www.alo186.com"
 
 
 def read(path: Path) -> str:
@@ -29,25 +31,31 @@ def json_ld_documents(html: str) -> list[dict]:
     return documents
 
 
+def graph_nodes(documents: list[dict]) -> list[dict]:
+    nodes: list[dict] = []
+    for document in documents:
+        raw = document.get("@graph", [document])
+        if isinstance(raw, dict):
+            raw = [raw]
+        nodes.extend(node for node in raw if isinstance(node, dict))
+    return nodes
+
+
 def graph_types(documents: list[dict]) -> set[str]:
     types: set[str] = set()
-    for document in documents:
-        nodes = document.get("@graph", [document])
-        if isinstance(nodes, dict):
-            nodes = [nodes]
-        for node in nodes:
-            value = node.get("@type")
-            if isinstance(value, list):
-                types.update(value)
-            elif isinstance(value, str):
-                types.add(value)
+    for node in graph_nodes(documents):
+        value = node.get("@type")
+        if isinstance(value, list):
+            types.update(value)
+        elif isinstance(value, str):
+            types.add(value)
     return types
 
 
 def test_decision_hub_is_apex_canonical_and_structured() -> None:
     html = read(HUB)
     assert '<link rel="canonical" href="https://alo186.com/kesinti-cihaz-surekliligi-karar-merkezi/">' in html
-    assert "https://www.alo186.com" not in html
+    assert LEGACY_ORIGIN not in html
     assert {"CollectionPage", "ItemList", "FAQPage", "BreadcrumbList"}.issubset(
         graph_types(json_ld_documents(html))
     )
@@ -99,19 +107,32 @@ def test_hub_routes_existing_calculators_selectors_and_repeat_tests() -> None:
         assert path in html, path
 
 
-def test_commerce_hub_uses_apex_and_discloses_before_visible_routes() -> None:
+def test_commerce_hub_uses_apex_discloses_first_and_matches_visible_schema() -> None:
     html = read(COMMERCE)
-    assert '<link rel="canonical" href="https://alo186.com/amazon-elektrik-urunleri/">' in html
-    assert "https://www.alo186.com" not in html
+    assert '<link rel="canonical" href="https://alo186.com/amazon-elektrik-urunleri">' in html
+    assert LEGACY_ORIGIN not in html
     assert "/kesinti-cihaz-surekliligi-karar-merkezi/" in html
     assert "Mevcut sistem yeterliyse satın alma yok" in html
     assert "Aktif tehlikede satış yolu kapalı" in html
     disclosure = html.index('<div class="affiliate-disclosure">')
     visible_priority_section = html.index('<section class="section" aria-labelledby="priorityTitle">')
     assert disclosure < visible_priority_section
+
+    documents = json_ld_documents(html)
     assert {"CollectionPage", "ItemList", "FAQPage", "BreadcrumbList"}.issubset(
-        graph_types(json_ld_documents(html))
+        graph_types(documents)
     )
+    item_lists = [node for node in graph_nodes(documents) if node.get("@type") == "ItemList"]
+    assert len(item_lists) == 1
+    item_list = item_lists[0]
+    elements = item_list.get("itemListElement")
+    assert item_list.get("numberOfItems") == 12
+    assert isinstance(elements, list) and len(elements) == 12
+    assert [item.get("position") for item in elements] == list(range(1, 13))
+    for item in elements:
+        url = str(item.get("item") or "")
+        assert url.startswith(f"{CANONICAL_ORIGIN}/amazon-elektrik-urunleri/"), url
+        assert not re.search(r"amazon-elektrik-urunleri(?!/)", url), url
 
 
 def test_growth_sitemap_is_valid_unique_and_resolves_to_sources() -> None:
@@ -120,12 +141,12 @@ def test_growth_sitemap_is_valid_unique_and_resolves_to_sources() -> None:
     locations = [node.text for node in root.findall("sm:url/sm:loc", namespace)]
     assert len(locations) >= 30
     assert len(locations) == len(set(locations))
-    assert all(location and location.startswith("https://alo186.com/") for location in locations)
+    assert all(location and location.startswith(f"{CANONICAL_ORIGIN}/") for location in locations)
     assert "https://alo186.com/kesinti-cihaz-surekliligi-karar-merkezi/" in locations
     assert "https://alo186.com/amazon-elektrik-urunleri/" in locations
 
     for location in locations:
-        relative = location.removeprefix("https://alo186.com/")
+        relative = location.removeprefix(f"{CANONICAL_ORIGIN}/")
         if not relative:
             source = ROOT / "index.html"
         elif relative.endswith(".xml"):
