@@ -133,10 +133,11 @@ def cluster_for_route(route: str, base_path: str) -> str:
     return re.sub(r"[^a-z0-9-]+", "-", parts[0].lower()).strip("-")[:56] or "other"
 
 
-def infer_placement(tag: str) -> str:
+def infer_placement(tag: str) -> str | None:
     explicit = get_attr(tag, "data-affiliate-placement") or get_attr(tag, "data-placement")
     if explicit:
-        return re.sub(r"[^a-z0-9_-]+", "-", explicit.lower()).strip("-")[:48] or "content"
+        normalized = re.sub(r"[^a-z0-9_-]+", "-", explicit.lower()).strip("-")[:48]
+        return normalized or None
     classes = (get_attr(tag, "class") or "").lower()
     for needle, placement in (
         ("sticky", "sticky"),
@@ -150,7 +151,7 @@ def infer_placement(tag: str) -> str:
     ):
         if needle in classes:
             return placement
-    return "content"
+    return None
 
 
 def _merge_rel(tag: str, required: set[str]) -> tuple[str, bool]:
@@ -171,14 +172,17 @@ def normalize_anchor(tag: str, cluster: str) -> tuple[str, dict[str, object]]:
     if affiliate:
         updated, rel_changed = _merge_rel(updated, {"sponsored", "nofollow", "noopener"})
         changed = changed or rel_changed
-        for name, value in (
+        attributes = [
             ("data-affiliate-network", "amazon_tr"),
             ("data-affiliate-content-cluster", cluster),
-            ("data-affiliate-placement", infer_placement(updated)),
             ("data-affiliate-link-type", classify_link_type(href)),
             ("data-affiliate-product-key", product_key(href)),
             ("data-affiliate-measurement-version", str(VERSION)),
-        ):
+        ]
+        inferred_placement = infer_placement(updated)
+        if inferred_placement:
+            attributes.insert(2, ("data-affiliate-placement", inferred_placement))
+        for name, value in attributes:
             if get_attr(updated, name) is None:
                 updated = set_attr(updated, name, value)
                 changed = True
@@ -191,16 +195,20 @@ def normalize_anchor(tag: str, cluster: str) -> tuple[str, dict[str, object]]:
         "changed": changed,
         "network": "amazon_tr" if affiliate else None,
         "productKey": get_attr(updated, "data-affiliate-product-key") if affiliate else None,
-        "placement": get_attr(updated, "data-affiliate-placement") if affiliate else None,
+        "placement": (get_attr(updated, "data-affiliate-placement") or "runtime_ancestor") if affiliate else None,
         "linkType": get_attr(updated, "data-affiliate-link-type") if affiliate else None,
         "targetBlank": target == "_blank" if affiliate else None,
     }
 
 
-def runtime_asset() -> str:
+def runtime_asset(base_path: str) -> str:
+    normalized_base_path = normalize_base_path(base_path)
+    base_path_json = json.dumps(normalized_base_path, ensure_ascii=False)
     return f'''(()=>{{
   'use strict';
   const VERSION='{VERSION}';
+  const BASE_PATH={base_path_json};
+  const BASE_PARTS=BASE_PATH.split('/').filter(Boolean);
   const AMAZON_HOST=(host)=>host==='amzn.to'||host==='amzn.eu'||host==='amazon.com.tr'||host.endsWith('.amazon.com.tr')||host==='amazon.com'||host.endsWith('.amazon.com');
   const safeUrl=(value)=>{{try{{return new URL(value,window.location.href);}}catch(_error){{return null;}}}};
   const isAffiliate=(link)=>{{
@@ -212,7 +220,7 @@ def runtime_asset() -> str:
   const hashKey=(value)=>{{let hash=2166136261;for(let index=0;index<value.length;index++){{hash^=value.charCodeAt(index);hash=Math.imul(hash,16777619);}}return (hash>>>0).toString(36);}};
   const cluster=()=>{{
     const parts=window.location.pathname.split('/').filter(Boolean);
-    if(parts[0]==='chatgpt')parts.shift();
+    if(BASE_PARTS.length&&BASE_PARTS.every((part,index)=>parts[index]===part))parts.splice(0,BASE_PARTS.length);
     if(!parts.length)return 'home';
     if(parts[0]==='amazon-elektrik-urunleri'&&parts[1])return ('affiliate-'+parts[1]).slice(0,56);
     return (parts[0]||'other').slice(0,56);
@@ -230,8 +238,9 @@ def runtime_asset() -> str:
   const placement=(link)=>link.dataset.affiliatePlacement||link.closest('[data-affiliate-placement]')?.dataset.affiliatePlacement||(link.closest('table')?'comparison':link.closest('[class*="result"]')?'result':link.closest('[class*="card"]')?'card':'content');
   const analyticsReady=()=>window.alo186Analytics?.getConsent?.()==='granted'&&typeof window.gtag==='function'&&Boolean(document.querySelector('[data-alo186-ga4-loader="true"]'));
   let suppressGenericAffiliate=false;
-  const originalGtag=window.gtag;
-  if(typeof originalGtag==='function'&&!originalGtag.__alo186AffiliateV211){{
+  const installGtagGuard=()=>{{
+    const originalGtag=window.gtag;
+    if(typeof originalGtag!=='function'||originalGtag.__alo186AffiliateV211)return;
     const wrapped=function(...args){{
       const params=args[2]||{{}};
       if(suppressGenericAffiliate&&args[0]==='event'&&args[1]==='affiliate_click'&&String(params.measurement_version||'')!==VERSION){{
@@ -242,8 +251,10 @@ def runtime_asset() -> str:
     }};
     wrapped.__alo186AffiliateV211=true;
     window.gtag=wrapped;
-  }}
+  }};
+  installGtagGuard();
   const send=(name,params)=>{{
+    installGtagGuard();
     if(!analyticsReady())return false;
     window.gtag('event',name,params);
     return true;
@@ -323,10 +334,11 @@ def inject_page(path: Path, site: Path, base_path: str) -> dict[str, object]:
         path.write_text(updated_text, encoding="utf-8")
 
     affiliate_records = [record for record in records if record["affiliate"]]
+    split_updated = EXCLUDED_BLOCK_RE.split(updated_text)
     blank_external_count = sum(
         1
-        for segment_index in range(0, len(EXCLUDED_BLOCK_RE.split(updated_text)), 2)
-        for match in ANCHOR_RE.finditer(EXCLUDED_BLOCK_RE.split(updated_text)[segment_index])
+        for segment_index in range(0, len(split_updated), 2)
+        for match in ANCHOR_RE.finditer(split_updated[segment_index])
         if (get_attr(match.group(0), "target") or "").lower() == "_blank"
         and is_external_http(get_attr(match.group(0), "href") or "")
         and "noopener" in set((get_attr(match.group(0), "rel") or "").split())
@@ -430,7 +442,7 @@ def inject(site: Path, base_path: str = "") -> dict[str, object]:
 
     asset_path = site / ASSET_RELATIVE
     asset_path.parent.mkdir(parents=True, exist_ok=True)
-    asset_path.write_text(runtime_asset(), encoding="utf-8")
+    asset_path.write_text(runtime_asset(base_path), encoding="utf-8")
 
     pages = [inject_page(path, site, base_path) for path in html_files]
     inventory = write_inventory(site, pages, base_path)
