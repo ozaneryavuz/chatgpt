@@ -1,0 +1,63 @@
+name: ALO186 alarm panel battery growth v206
+
+on:
+  push:
+    paths:
+      - 'alo186/hesaplama/alarm-paneli-aku-bekleme-suresi/**'
+      - 'alo186/amazon-elektrik-urunleri/alarm-paneli-aku-uygunluk-secici/**'
+      - 'alo186/sektor-rehberi/alarm-sistemi-elektrik-kesintisi-30-90-gun-test-merkezi/**'
+      - 'alo186/deployment/routing-overlays/206-alarm-panel-battery-growth.json'
+      - 'alo186/audits/alarm-panel-battery-growth-v206-2026-08-02.md'
+      - 'alo186/tests/test_alarm_panel_battery_growth_v206.py'
+      - '.github/workflows/alo186-alarm-panel-battery-growth-v206.yml'
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/alarm-paneli-aku-bekleme-suresi/**'
+      - 'alo186/amazon-elektrik-urunleri/alarm-paneli-aku-uygunluk-secici/**'
+      - 'alo186/sektor-rehberi/alarm-sistemi-elektrik-kesintisi-30-90-gun-test-merkezi/**'
+      - 'alo186/deployment/routing-overlays/206-alarm-panel-battery-growth.json'
+      - 'alo186/audits/alarm-panel-battery-growth-v206-2026-08-02.md'
+      - 'alo186/tests/test_alarm_panel_battery_growth_v206.py'
+      - '.github/workflows/alo186-alarm-panel-battery-growth-v206.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  trust-and-routing:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+      - name: Fail-closed growth contract
+        run: python alo186/tests/test_alarm_panel_battery_growth_v206.py
+      - name: Routing JSON syntax
+        run: python -m json.tool alo186/deployment/routing-overlays/206-alarm-panel-battery-growth.json >/dev/null
+      - name: Inline JavaScript syntax
+        shell: bash
+        run: |
+          python - <<'PY'
+          import re
+          from pathlib import Path
+          pages = [
+              Path('alo186/hesaplama/alarm-paneli-aku-bekleme-suresi/index.html'),
+              Path('alo186/amazon-elektrik-urunleri/alarm-paneli-aku-uygunluk-secici/index.html'),
+              Path('alo186/sektor-rehberi/alarm-sistemi-elektrik-kesintisi-30-90-gun-test-merkezi/index.html'),
+          ]
+          out = Path('/tmp/alo186-alarm-js')
+          out.mkdir(exist_ok=True)
+          for page in pages:
+              html = page.read_text(encoding='utf-8')
+              scripts = re.findall(r'<script(?![^>]*application/ld\+json)[^>]*>(.*?)</script>', html, flags=re.S|re.I)
+              assert scripts, page
+              target = out / (page.parent.name + '.js')
+              target.write_text('\n'.join(scripts), encoding='utf-8')
+              print(target)
+          PY
+          for file in /tmp/alo186-alarm-js/*.js; do node --check "$file"; done
