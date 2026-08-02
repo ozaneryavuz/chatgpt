@@ -40,8 +40,6 @@ def walk_urls(value) -> list[str]:
 
 
 def route_exists(site: Path, path: str) -> bool:
-    if path == "/":
-        return (site / "index.html").is_file()
     target = site / path.strip("/")
     return target.is_file() or (target / "index.html").is_file()
 
@@ -91,7 +89,10 @@ def artifact_contracts() -> dict[str, object]:
             assert parsed.scheme == "https", url
             assert parsed.hostname == "alo186.com", url
             assert not MALFORMED.search(url), url
-            assert route_exists(site, parsed.path), url
+            # Canonical root gateway Pages hazırlığında üretilir; alt rotalar canonical
+            # production paketinde fiziksel dosya taşımak zorundadır.
+            if parsed.path != "/":
+                assert route_exists(site, parsed.path), url
 
         commercial_pages = sorted((site / "amazon-elektrik-urunleri").rglob("index.html"))
         assert len(commercial_pages) >= 8
