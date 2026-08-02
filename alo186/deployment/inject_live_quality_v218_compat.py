@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 
@@ -13,27 +14,54 @@ SKIP_LINK_PATTERN = re.compile(
 MAIN_PATTERN = re.compile(r'<main\b(?P<attrs>[^>]*)>', re.I)
 BODY_PATTERN = re.compile(r'<body\b[^>]*>', re.I)
 ID_PATTERN = re.compile(r'\bid=["\']([^"\']+)["\']', re.I)
+QUALITY_LINK_PATTERN = re.compile(
+    r'(<link\b(?=[^>]*data-alo186-live-quality-v218=["\']true["\'])[^>]*\bhref=["\'])[^"\']*(["\'][^>]*>)',
+    re.I,
+)
+
+
+def artifact_base_path(site: Path) -> str:
+    release_path = site / "pages-release.json"
+    if not release_path.is_file():
+        return ""
+    try:
+        payload = json.loads(release_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return ""
+    value = payload.get("basePath")
+    return core.normalize_base_path(value) if isinstance(value, str) else ""
 
 
 def install_quality_css(site: Path) -> dict[str, object]:
-    """Inject v218 CSS even when a legacy growth page lost its head terminator.
+    """Inject v218 CSS with legacy-head repair and project-path awareness.
 
-    The canonical source remains valid, but some late route generators can emit a
-    `<head>...<body>` transition without `</head>`. Rather than silently omitting
-    the site-wide quality layer, the final artifact repairs that boundary and then
-    lets the normal critical-page audit decide whether the page is publishable.
+    GitHub Pages rewrites existing canonical asset references before this late
+    quality layer runs. The layer therefore derives the final base path from
+    `pages-release.json` and writes `/chatgpt/assets/...` in project mode rather
+    than leaking a root-only reference. Re-running the guard also repairs an
+    already injected marker whose href no longer matches the artifact base path.
     """
 
     target = site / core.ASSET_RELATIVE
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(core.QUALITY_CSS, encoding="utf-8")
-    link = f'<link rel="stylesheet" href="/{core.ASSET_RELATIVE.as_posix()}" {core.STYLE_MARKER}>'
-    injected = existing = repaired_head = created_head = 0
+    base_path = artifact_base_path(site)
+    asset_href = f"{base_path}/{core.ASSET_RELATIVE.as_posix()}" if base_path else f"/{core.ASSET_RELATIVE.as_posix()}"
+    link = f'<link rel="stylesheet" href="{asset_href}" {core.STYLE_MARKER}>'
+    injected = existing = repaired_head = created_head = base_path_adjusted = 0
     failures: list[str] = []
 
     for path in sorted(site.rglob("*.html")):
         html = path.read_text(encoding="utf-8", errors="strict")
         if core.STYLE_MARKER in html:
+            updated, count = QUALITY_LINK_PATTERN.subn(
+                lambda match: match.group(1) + asset_href + match.group(2),
+                html,
+                count=1,
+            )
+            if count == 1 and updated != html:
+                path.write_text(updated, encoding="utf-8")
+                base_path_adjusted += 1
             existing += 1
             continue
 
@@ -65,9 +93,11 @@ def install_quality_css(site: Path) -> dict[str, object]:
     if failures:
         raise RuntimeError("Live quality CSS için onarılamayan HTML: " + ", ".join(failures[:30]))
     return {
-        "asset": f"/{core.ASSET_RELATIVE.as_posix()}",
+        "asset": asset_href,
+        "basePath": base_path,
         "injectedPages": injected,
         "alreadyPresent": existing,
+        "basePathAdjustedPages": base_path_adjusted,
         "repairedHeadBoundaries": repaired_head,
         "createdHeadElements": created_head,
     }
