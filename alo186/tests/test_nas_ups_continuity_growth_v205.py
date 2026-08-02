@@ -73,6 +73,8 @@ def test_calculator_rejects_values_outside_declared_input_bounds() -> None:
     html = read(ROUTES["calculator"])
     for token in (
         "function readBoundedInput(id)",
+        "const raw = input.value.trim()",
+        "raw === '' ? NaN : Number(raw)",
         "input.min === '' ? -Infinity",
         "input.max === '' ? Infinity",
         "value >= min && value <= max",
@@ -82,6 +84,7 @@ def test_calculator_rejects_values_outside_declared_input_bounds() -> None:
     ):
         assert token in html, token
     assert "nums.some(value => value === null)" in html
+    assert "const value = Number(input.value)" not in html
     assert "nums.some(v=>!Number.isFinite(v)||v<0)" not in html
 
 
