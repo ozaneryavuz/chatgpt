@@ -196,6 +196,70 @@ def test_stale_source_fails() -> None:
         assert any(finding.code == "source_stale" for finding in findings)
 
 
+def test_invalid_draft_contract_is_rejected() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        fixture_repo(root)
+        draft_path = root / "invalid-draft.json"
+        draft = {
+            "id": "invalid-draft-proof",
+            "route": "/hesaplama/invalid-draft-proof/",
+            "title": "Geçersiz taslak sözleşmesi için kontrol başlığı",
+            "description": "Bu açıklama uzunluk sınırını karşılar ancak diğer zorunlu taslak alanları bilinçli olarak geçersiz bırakılmıştır.",
+            "h1": "X",
+            "directAnswer": "A" * 130,
+            "bodyHtml": "<p>" + ("B" * 850) + "</p>",
+            "faqs": [
+                {"question": "Bu test neden var?", "answer": "Taslak alanlarının yalnız anahtar varlığıyla kabul edilmesini engeller."},
+                {"question": "Hangi alanlar sınanır?", "answer": "Kaynak, olay, CTA, H1 ve yapılandırılmış veri sözleşmeleri birlikte sınanır."},
+                {"question": "Sonuç nasıl olmalı?", "answer": "Geçersiz alanların her biri fail-closed hata bulgusu üretmelidir."},
+            ],
+            "jsonLd": {},
+            "internalLinks": [
+                "/elektrik-portali",
+                "/hesaplama",
+                "/karar-motoru",
+                "/edas-bul",
+                "/hesaplama/yedek-guc",
+                "/kurumsal-elektrik-surekliligi-on-degerlendirme",
+            ],
+            "sourceCitations": [],
+            "cta": {},
+            "analyticsEvents": [],
+            "intentBoundary": "Bu taslak mevcut rotaları tekrar etmez; yalnız sözleşme doğrulamasının başarısızlık davranışını test eder.",
+            "safetyBoundary": "Enerjili tesisata kullanıcı müdahalesi önerilmez ve yetkin destek gerekir.",
+            "verifiedAt": "2026-08-02",
+        }
+        draft_path.write_text(json.dumps(draft, ensure_ascii=False), encoding="utf-8")
+        findings = validation.validate_draft(draft_path, load_config(), root, date(2026, 8, 2))
+        codes = {finding.code for finding in findings}
+        assert {
+            "draft_h1_length",
+            "draft_jsonld_empty",
+            "draft_source_citations_low",
+            "draft_cta_invalid",
+            "draft_analytics_events_invalid",
+        } <= codes, codes
+
+
+def test_invalid_deployment_url_is_rejected() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        receipt_path = Path(tmp) / "receipt.json"
+        receipt = {
+            "siteSlug": "alo186",
+            "sourceCommit": "abcdef1",
+            "contentId": "receipt-url-proof",
+            "contentHash": "a" * 64,
+            "canonicalUrl": "https://alo186.com/hesaplama/receipt-url-proof/",
+            "deploymentUrl": "not a url",
+            "publishedAt": "2026-08-02T20:00:00Z",
+            "liveVerified": True,
+        }
+        receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
+        findings = validation.validate_receipt(receipt_path, load_config())
+        assert any(finding.code == "receipt_deployment_url_invalid" for finding in findings), findings
+
+
 def test_sites_package_never_auto_publishes() -> None:
     config = load_config()
     brief = {"contentId": "safe-package-proof", "route": "/hesaplama/safe-package-proof/", "draftSchema": "draft.schema.json"}
@@ -244,6 +308,8 @@ def main() -> None:
         test_published_low_score_fails_closed,
         test_array_schema_bypass_is_blocked,
         test_stale_source_fails,
+        test_invalid_draft_contract_is_rejected,
+        test_invalid_deployment_url_is_rejected,
         test_sites_package_never_auto_publishes,
         test_cli_plan_outputs_private_artifact,
     ]
