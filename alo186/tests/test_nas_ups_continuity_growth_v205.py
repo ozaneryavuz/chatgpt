@@ -69,6 +69,25 @@ def test_calculator_prioritizes_safe_shutdown_over_runtime() -> None:
     assert "garanti etmez" in html.lower()
 
 
+def test_calculator_rejects_values_outside_declared_input_bounds() -> None:
+    html = read(ROUTES["calculator"])
+    for token in (
+        "function readBoundedInput(id)",
+        "const raw = input.value.trim()",
+        "raw === '' ? NaN : Number(raw)",
+        "input.min === '' ? -Infinity",
+        "input.max === '' ? Infinity",
+        "value >= min && value <= max",
+        "aria-invalid",
+        "Geçersiz veya sınır dışı değer",
+        "Alanları gösterilen alt ve üst sınırlar içinde düzeltmeden hesaplamaya devam etmeyin",
+    ):
+        assert token in html, token
+    assert "nums.some(value => value === null)" in html
+    assert "const value = Number(input.value)" not in html
+    assert "nums.some(v=>!Number.isFinite(v)||v<0)" not in html
+
+
 def test_selector_has_three_classes_three_gates_and_dynamic_links() -> None:
     html = read(ROUTES["selector"])
     assert len(re.findall(r'name="need" value="', html)) == 3

@@ -35,4 +35,66 @@
 <section class="panel"><h2>Doğrulanan birincil kaynaklar</h2><div class="sources"><article class="source"><a href="https://kb.synology.com/en-global/DSM/help/DSM/AdminCenter/system_hardware_ups" rel="noopener">Synology — DSM UPS desteği</a><p>UPS'in NAS'a veri kaybını azaltacak güvenli mod/standby süresi vermesi; USB, SNMP ve ağ UPS yöntemlerinde gerekli ağ cihazlarının da yedeklenmesi gerektiğini açıklar.</p></article><article class="source"><a href="https://www.qnap.com/en-uk/how-to/faq/article/how-to-avoid-sudden-shutdown-from-power-outage" rel="noopener">QNAP — Ani kapanmayı önleme</a><p>Uyumlu UPS, otomatik kapanma/koruma modu ve beklenmeyen kapanma sonrası dosya sistemi kontrolü yaklaşımını açıklar.</p></article><article class="source"><a href="https://www.apc.com/us/en/support/product-support/ups-buying-guide-for-selecting-a-battery-backup-system.jsp" rel="noopener">APC — UPS seçimi</a><p>W ve VA sınırlarının ayrı doğrulanmasını, kritik olmayan yüklerin batarya çıkışına eklenmemesini ve yük arttıkça sürenin azalmasını belirtir.</p></article></div><p class="fine">Kaynak kontrolü: 2 Ağustos 2026. Tam NAS işletim sistemi sürümü, UPS uyumluluk listesi ve üreticinin modele özgü runtime belgesi önceliklidir.</p></section>
 <section class="panel"><h2>Sonraki adım</h2><p><a class="cta" href="/amazon-elektrik-urunleri/nas-ups-usb-snmp-uygunluk-secici/">Yalnız gerçek kapasite veya iletişim açığı varsa ürün sınıfını değerlendir</a></p><p class="fine">Mevcut güvenli düzen hedefi karşılıyorsa yeni ürün almayın. ALO186 bağlantı üzerinden gelir elde edebilir; fiyat, stok, puan ve garanti yalnız mağazanın güncel sayfasında doğrulanır.</p></section>
 </main><footer>ALO186 bağımsız bilgilendirme platformudur; EDAŞ veya kamu kurumu değildir.</footer>
-<script>const $=id=>document.getElementById(id);function eventPush(name,detail={}){window.dataLayer=window.dataLayer||[];window.dataLayer.push({event:name,...detail})}$('calculate').addEventListener('click',()=>{const nums=['nasW','networkW','otherW','batteryWh','eff','reserve','shutdownDelay','shutdownReserve','upsW'].map(id=>Number($(id).value));if(nums.some(v=>!Number.isFinite(v)||v<0)){return}const[nasW,networkW,otherW,wh,eff,reserve,delay,closeReserve,upsW]=nums;const total=nasW+networkW+otherW;const hours=wh*(eff/100)*(1-reserve/100)/Math.max(total,.1);const minutes=hours*60;const need=delay+closeReserve;const r=$('result');r.hidden=false;r.className='result';eventPush('nas_runtime_calculated',{load_w:Math.round(total),runtime_min:Math.round(minutes)});if($('hazard').checked){r.classList.add('stop');r.innerHTML='<h2>Ticari yol kapalıdır</h2><p>Hasarlı, ıslak veya aşırı ısınan ekipmanı kullanmayın. Enerjiyi güvenli biçimde kestirin ve yetkin teknik destek alın; can güvenliği riski varsa 112.</p>';return}if($('existing').checked&&$('modelVerified').checked){r.classList.add('ok');r.innerHTML='<h2>Mevcut düzen hedefi karşılıyor — yeni ürün almayın.</h2><p>Prova kaydını saklayın; batarya yaşı, disk sayısı, ağ topolojisi veya NAS yazılımı değiştiğinde yeniden test edin.</p>';return}if(total>upsW){r.classList.add('stop');r.innerHTML='<h2>UPS sürekli W sınırı aşılıyor</h2><p>Yük bağlamayın. W ve VA sınırlarını tam model belgesinden yeniden doğrulayın; kritik olmayan yükleri ayırın.</p>';return}if($('loadBasis').value==='unknown'||$('signal').value==='none'||!$('modelVerified').checked||($('signal').value==='snmp'&&!$('networkBacked').checked)){r.classList.add('warn');r.innerHTML='<h2>Hesap tamamlanmadan mağaza yoluna geçmeyin</h2><p>Tam model uyumluluğu, gerçek/belgeli W ve kesinti bildirim zinciri doğrulanmadı. Önce NAS ve UPS üretici belgelerini tamamlayın.</p>';return}if($('diskState').value!=='included'){r.classList.add('warn');r.innerHTML='<h2>Yoğun disk yükü eksik olabilir</h2><p>Boşta tüketim yerine yedekleme, RAID yeniden oluşturma veya yoğun disk erişimi senaryosunu ölçmeden süreye güvenmeyin.</p>';return}const ok=minutes>=need;r.classList.add(ok?'ok':'warn');r.innerHTML=`<h2>${ok?'Güvenli kapatma penceresi teorik olarak karşılanıyor':'Kapatma penceresi yetersiz görünüyor'}</h2><div class="metrics"><div class="metric"><span>Toplam yük</span><strong>${total.toFixed(1)} W</strong></div><div class="metric"><span>Tahmini süre</span><strong>${Math.floor(hours)} sa ${Math.round(minutes%60)} dk</strong></div><div class="metric"><span>Gerekli pencere</span><strong>${need.toFixed(0)} dk</strong></div></div><p>${ok?'Şimdi güvenli bakım penceresinde gerçek kesinti provası yapın; sonucu garanti saymayın.':'Kapatma eşiğini düşürmek yerine gerçek yükü azaltın veya modele özgü daha yeterli çözümü doğrulayın.'}</p>`})</script></body></html>
+<script>
+const $ = id => document.getElementById(id);
+const numericIds = ['nasW', 'networkW', 'otherW', 'batteryWh', 'eff', 'reserve', 'shutdownDelay', 'shutdownReserve', 'upsW'];
+function eventPush(name, detail = {}) {
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({event: name, ...detail});
+}
+function readBoundedInput(id) {
+  const input = $(id);
+  const raw = input.value.trim();
+  const value = raw === '' ? NaN : Number(raw);
+  const min = input.min === '' ? -Infinity : Number(input.min);
+  const max = input.max === '' ? Infinity : Number(input.max);
+  const valid = Number.isFinite(value) && value >= min && value <= max;
+  input.setAttribute('aria-invalid', valid ? 'false' : 'true');
+  return valid ? value : null;
+}
+$('calculate').addEventListener('click', () => {
+  const nums = numericIds.map(readBoundedInput);
+  const r = $('result');
+  r.hidden = false;
+  r.className = 'result';
+  if (nums.some(value => value === null)) {
+    r.classList.add('stop');
+    r.innerHTML = '<h2>Geçersiz veya sınır dışı değer</h2><p>Alanları gösterilen alt ve üst sınırlar içinde düzeltmeden hesaplamaya devam etmeyin.</p>';
+    return;
+  }
+  const [nasW, networkW, otherW, wh, eff, reserve, delay, closeReserve, upsW] = nums;
+  const total = nasW + networkW + otherW;
+  const hours = wh * (eff / 100) * (1 - reserve / 100) / Math.max(total, .1);
+  const minutes = hours * 60;
+  const need = delay + closeReserve;
+  eventPush('nas_runtime_calculated', {load_w: Math.round(total), runtime_min: Math.round(minutes)});
+  if ($('hazard').checked) {
+    r.classList.add('stop');
+    r.innerHTML = '<h2>Ticari yol kapalıdır</h2><p>Hasarlı, ıslak veya aşırı ısınan ekipmanı kullanmayın. Enerjiyi güvenli biçimde kestirin ve yetkin teknik destek alın; can güvenliği riski varsa 112.</p>';
+    return;
+  }
+  if ($('existing').checked && $('modelVerified').checked) {
+    r.classList.add('ok');
+    r.innerHTML = '<h2>Mevcut düzen hedefi karşılıyor — yeni ürün almayın.</h2><p>Prova kaydını saklayın; batarya yaşı, disk sayısı, ağ topolojisi veya NAS yazılımı değiştiğinde yeniden test edin.</p>';
+    return;
+  }
+  if (total > upsW) {
+    r.classList.add('stop');
+    r.innerHTML = '<h2>UPS sürekli W sınırı aşılıyor</h2><p>Yük bağlamayın. W ve VA sınırlarını tam model belgesinden yeniden doğrulayın; kritik olmayan yükleri ayırın.</p>';
+    return;
+  }
+  if ($('loadBasis').value === 'unknown' || $('signal').value === 'none' || !$('modelVerified').checked || ($('signal').value === 'snmp' && !$('networkBacked').checked)) {
+    r.classList.add('warn');
+    r.innerHTML = '<h2>Hesap tamamlanmadan mağaza yoluna geçmeyin</h2><p>Tam model uyumluluğu, gerçek/belgeli W ve kesinti bildirim zinciri doğrulanmadı. Önce NAS ve UPS üretici belgelerini tamamlayın.</p>';
+    return;
+  }
+  if ($('diskState').value !== 'included') {
+    r.classList.add('warn');
+    r.innerHTML = '<h2>Yoğun disk yükü eksik olabilir</h2><p>Boşta tüketim yerine yedekleme, RAID yeniden oluşturma veya yoğun disk erişimi senaryosunu ölçmeden süreye güvenmeyin.</p>';
+    return;
+  }
+  const ok = minutes >= need;
+  r.classList.add(ok ? 'ok' : 'warn');
+  r.innerHTML = `<h2>${ok ? 'Güvenli kapatma penceresi teorik olarak karşılanıyor' : 'Kapatma penceresi yetersiz görünüyor'}</h2><div class="metrics"><div class="metric"><span>Toplam yük</span><strong>${total.toFixed(1)} W</strong></div><div class="metric"><span>Tahmini süre</span><strong>${Math.floor(hours)} sa ${Math.round(minutes % 60)} dk</strong></div><div class="metric"><span>Gerekli pencere</span><strong>${need.toFixed(0)} dk</strong></div></div><p>${ok ? 'Şimdi güvenli bakım penceresinde gerçek kesinti provası yapın; sonucu garanti saymayın.' : 'Kapatma eşiğini düşürmek yerine gerçek yükü azaltın veya modele özgü daha yeterli çözümü doğrulayın.'}</p>`;
+});
+</script></body></html>
