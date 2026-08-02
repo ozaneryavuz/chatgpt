@@ -1,6 +1,15 @@
 name: ALO186 v211 final validation
 
 on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/alo186-v211-final-validation.yml'
+      - 'alo186/haberler/elektrik-kesintisi-gerilim-dalgalanmasi-cihaz-hasari-edas-tazminat-basvurusu/index.html'
+      - 'alo186/tests/test_authority_content_run133.py'
+      - 'alo186/deployment/routing-overlays/content-authority-run133.json'
+      - 'alo186/deployment/inject_affiliate_measurement_v211.py'
+      - 'alo186/deployment/guard_commerce_routes_v3.py'
   push:
     branches:
       - agent/affiliate-measurement-v211
@@ -12,7 +21,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: alo186-v211-final-validation
+  group: alo186-v211-final-validation-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -24,8 +33,6 @@ jobs:
       GA4: ${{ vars.ALO186_GA4_MEASUREMENT_ID || 'G-639TVHL0LC' }}
     steps:
       - uses: actions/checkout@v6
-        with:
-          ref: agent/affiliate-measurement-v211
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
