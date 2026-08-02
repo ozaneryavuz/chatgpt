@@ -1,0 +1,23 @@
+{
+  "version": 210,
+  "generatedAt": "2026-08-02",
+  "source": "ALO186 content authority run132",
+  "routes": [
+    {
+      "path": "/haberler/elektrik-gerilimi-dusuk-180-200-volt-edas-teknik-kalite-olcum-basvurusu",
+      "file": "haberler/elektrik-gerilimi-dusuk-180-200-volt-edas-teknik-kalite-olcum-basvurusu/index.html",
+      "intent": "Tekrarlı düşük gerilimi bina içi bağlantı, gevşek nötr, yük ve dağıtım şebekesi teknik kalitesinden ayırıp EDAŞ ölçüm ve başvuru dosyasına dönüştürmek"
+    },
+    {
+      "path": "/haberler/ev-sarj-fisi-kablo-soket-isiniyor-temas-direnci-termal-teshis",
+      "file": "haberler/ev-sarj-fisi-kablo-soket-isiniyor-temas-direnci-termal-teshis/index.html",
+      "intent": "EV şarj bağlantısındaki sıcak noktayı araç girişi, konnektör, kablo, wallbox terminali ve bina beslemesi arasında ayırıp termal tekrar kabul yapmak"
+    },
+    {
+      "path": "/haberler/ups-bypass-unavailable-faz-sirasi-frekans-gerilim-teshis",
+      "file": "haberler/ups-bypass-unavailable-faz-sirasi-frekans-gerilim-teshis/index.html",
+      "intent": "UPS statik bypass kullanılamaz alarmını gerilim, frekans, faz sırası, eksik faz, nötr, THD ve senkron koşullarından ayırmak"
+    }
+  ],
+  "qualityGate": "alo186/tests/test_authority_content_run132.py"
+}
