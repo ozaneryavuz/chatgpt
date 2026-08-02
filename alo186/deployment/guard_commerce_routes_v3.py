@@ -10,7 +10,7 @@ from pathlib import Path
 import guard_commerce_routes_v2 as v2
 import inject_affiliate_decision_funnel_v215 as affiliate_decision
 import inject_intent_tools_run135 as intent_tools
-import inject_live_quality_v218 as live_quality
+import inject_live_quality_v218_compat as live_quality
 import inject_portal_purchase_checkpoint_v213 as portal_checkpoint
 
 # V2, bağlantının çevresindeki sabit 900 karakteri tarıyordu. Uzun hesaplayıcı
