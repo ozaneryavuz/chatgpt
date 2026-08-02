@@ -77,7 +77,7 @@ assert.doesNotMatch(html,/name="(?:address|phone|email|subscription|plate|serial
 assert.match(center,/[3-9][0-9]* çekirdek araç/);
 assert.match(center,/\.\/power-station-kapasite-eps-uygunluk\//);
 assert.match(manifest,/alo186\/hesaplama\/power-station-kapasite-eps-uygunluk\/index\.html/);
-assert.match(sitemap,/https:\/\/www\.alo186\.com\/hesaplama\/power-station-kapasite-eps-uygunluk\//);
+assert.match(sitemap,/https:\/\/alo186\.com\/hesaplama\/power-station-kapasite-eps-uygunluk\//);
 assert.match(catalog,/nextStepUrl:'https:\/\/www\.alo186\.com\/hesaplama\/power-station-kapasite-eps-uygunluk\/'/);
 
 console.log('Power station kapasite/EPS uygunluğu: hesap, no-buy, güvenlik, gizlilik, affiliate ve entegrasyon testleri başarılı.');
