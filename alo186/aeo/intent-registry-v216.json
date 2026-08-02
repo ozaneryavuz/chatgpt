@@ -1,0 +1,26 @@
+{
+  "version": 216,
+  "generatedAt": "2026-08-02",
+  "policy": {
+    "oneCanonicalAnswerPerIntent": true,
+    "supportingPagesMayNotReplaceCanonicalAnswer": true,
+    "newIntentRequiresRegistryEntry": true
+  },
+  "intents": [
+    {"intentId":"edas-discovery","question":"Bulunduğum bölgenin elektrik dağıtım şirketi hangisi?","canonicalPath":"/edas-bul","cluster":"official-routing"},
+    {"intentId":"outage-official-source","question":"Elektrik kesintisi nereden resmî olarak sorgulanır?","canonicalPath":"/elektrik-kesintisi","cluster":"official-routing"},
+    {"intentId":"emergency-number-choice","question":"112 mi, 186 mı, elektrikçi mi aranmalı?","canonicalPath":"/acil-numaralar","cluster":"safety"},
+    {"intentId":"planned-outage-query","question":"Planlı elektrik kesintisi nereden sorgulanır?","canonicalPath":"/sektor-rehberi/planli-elektrik-kesintisi-sorgulama","cluster":"official-routing"},
+    {"intentId":"ups-runtime","question":"UPS kaç saat çalışır?","canonicalPath":"/hesaplama/ups-suresi/","cluster":"backup-power"},
+    {"intentId":"backup-power-choice","question":"UPS, power station veya jeneratörden hangisi uygun?","canonicalPath":"/hesaplama/yedek-guc-cozum-secici/","cluster":"backup-power"},
+    {"intentId":"generator-sizing","question":"Jeneratör gücü nasıl seçilir?","canonicalPath":"/hesaplama/jenerator-gucu-secimi/","cluster":"backup-power"},
+    {"intentId":"ev-charging-suitability","question":"Ev tesisatı wallbox için uygun mu?","canonicalPath":"/hesaplama/ev-sarj-uygunluk/","cluster":"ev-charging"},
+    {"intentId":"surge-protection-choice","question":"SPD, gerilim rölesi veya regülatörden hangisi gerekir?","canonicalPath":"/hesaplama/gerilim-koruma-cozum-secici/","cluster":"protection"},
+    {"intentId":"solar-during-outage","question":"GES elektrik kesintisinde çalışır mı?","canonicalPath":"/haberler/ges-elektrik-kesintisinde-calisir-mi","cluster":"solar"},
+    {"intentId":"device-damage-application","question":"Elektrik kesintisinde cihaz hasarı için nereye başvurulur?","canonicalPath":"/haberler/elektrik-kesintisi-cihaz-hasari-edas-basvurusu","cluster":"consumer-rights"},
+    {"intentId":"grounding-resistance","question":"Topraklama direnci kaç ohm olmalı?","canonicalPath":"/haberler/topraklama-direnci-kac-ohm-olmali","cluster":"protection"},
+    {"intentId":"neutral-break","question":"Nötr kopması nasıl anlaşılır?","canonicalPath":"/haberler/notr-kopmasi-nasil-anlasilir","cluster":"protection"},
+    {"intentId":"rcd-tripping","question":"Kaçak akım rölesi neden sürekli atar?","canonicalPath":"/haberler/kacak-akim-rolesi-neden-surekli-atar","cluster":"protection"},
+    {"intentId":"editorial-accountability","question":"ALO186 teknik içeriklerinden kim sorumlu?","canonicalPath":"/uzman/ozan-eryavuz","cluster":"trust"}
+  ]
+}
