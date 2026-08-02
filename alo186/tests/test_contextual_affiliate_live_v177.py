@@ -74,21 +74,43 @@ def expect_js_failure(javascript: str, token: str) -> None:
 
 
 def validate_workflow_contract() -> None:
-    bootstrap = (ROOT / ".github/workflows/alo186-pages-autobootstrap-live.yml").read_text(encoding="utf-8")
-    publisher = (ROOT / ".github/workflows/alo186-github-pages.yml").read_text(encoding="utf-8")
+    bootstrap = (
+        ROOT / ".github/workflows/alo186-pages-autobootstrap-live.yml"
+    ).read_text(encoding="utf-8")
+    publisher = (ROOT / ".github/workflows/alo186-github-pages.yml").read_text(
+        encoding="utf-8"
+    )
+
     for token in (
         "ALO186_PAGES_ADMIN_TOKEN",
         "ADMIN_TOKEN_PRESENT",
         "verify_live_origin.py",
         "verify_contextual_affiliate_live_v177.py",
+        "hosting_mode",
+        "dns_cutover_required",
+        "containsExpectedCommit",
+        "exactCommitReceiptAvailable",
+        "origin_probe_ok",
+        "steps.origin_state.outputs.origin_probe_ok == 'true'",
         "sites_current",
         "already_live_on_sites",
+        "waiting_for_dns_cutover:",
+        "origin_probe_failed:",
+        "alo186-dns-cutover-required",
         "alo186-v177-live-blocker",
         "alo186-v177-live-receipt",
         "dispatch_pages:",
+        "needs.probe.outputs.hosting_mode == 'github-pages'",
+        "pages_deployment_succeeded",
+        "needs.probe.outputs.pages_deployment_succeeded != 'true'",
+        "needs.probe.outputs.pages_deployment_succeeded == 'true'",
+        "listDeployments",
+        "listDeploymentStatuses",
         "workflow_id: 'alo186-github-pages.yml'",
         "actions: write",
+        "deployments: read",
         "group: alo186-pages-production",
+        "Otomatik Pages yeniden-dispatch: **durduruldu**",
     ):
         assert token in bootstrap, token
     assert "actions/deploy-pages@" not in bootstrap
@@ -98,13 +120,17 @@ def validate_workflow_contract() -> None:
 
     for token in (
         "actions/deploy-pages@v4",
-        "Fail-closed Pages yayın sonucu",
+        "Pages deployment ve canlı origin yetkisini ayrıştır",
         "verify_live_origin.py",
         "verify_contextual_affiliate_live_v177.py",
+        "deferred-external-live-authority",
+        "hosting_mode",
         "alo186-full-live-receipt",
     ):
         assert token in publisher, token
     assert publisher.count("actions/deploy-pages@") == 1
+    assert "if [ \"$hosting_mode\" = 'github-pages' ]" in publisher
+    assert "--attempts 36" not in publisher
 
 
 def main() -> None:
@@ -139,15 +165,33 @@ def main() -> None:
 
     expect_page_failure(html.replace(verifier.MARKER, ""), "marker")
     expect_page_failure(html.replace(verifier.TAG, "yanlis-etiket", 1), "affiliate etiketi")
-    expect_page_failure(html.replace('class="alo186-contextual-product"', 'class="other"', 1), "yerleşim")
-    expect_page_failure(html.replace("data-affiliate-gate=", "data-other=", 1), "yerleşim/kapı")
     expect_page_failure(
-        html.replace("</main>", '<a href="https://www.amazon.com.tr/s?k=test">Kapısız mağaza</a></main>'),
+        html.replace('class="alo186-contextual-product"', 'class="other"', 1),
+        "yerleşim",
+    )
+    expect_page_failure(
+        html.replace("data-affiliate-gate=", "data-other=", 1),
+        "yerleşim/kapı",
+    )
+    expect_page_failure(
+        html.replace(
+            "</main>",
+            '<a href="https://www.amazon.com.tr/s?k=test">Kapısız mağaza</a></main>',
+        ),
         "kapısız mağaza",
     )
-    expect_page_failure(html.replace(verifier.ROUTE, "/yanlis-rota/", 1), "canonical yol")
-    expect_js_failure(javascript.replace(verifier.REQUIRED_REL, "noopener"), "javascript sözleşmesi")
-    expect_js_failure(javascript + "\nlocalStorage.setItem('x','y');", "localStorage")
+    expect_page_failure(
+        html.replace(verifier.ROUTE, "/yanlis-rota/", 1),
+        "canonical yol",
+    )
+    expect_js_failure(
+        javascript.replace(verifier.REQUIRED_REL, "noopener"),
+        "javascript sözleşmesi",
+    )
+    expect_js_failure(
+        javascript + "\nlocalStorage.setItem('x','y');",
+        "localStorage",
+    )
 
     try:
         verifier.validate_page(
@@ -165,15 +209,24 @@ def main() -> None:
         raise AssertionError("404 rota kabul edilmemeliydi")
 
     validate_workflow_contract()
-    print(json.dumps({
-        "ok": True,
-        "version": verifier.VERSION,
-        "route": verifier.ROUTE,
-        "placementCount": page["placementCount"],
-        "gateCount": page["gateCount"],
-        "failClosedCases": 9,
-        "hostingAwareScheduledWorkflow": True,
-    }, ensure_ascii=False))
+    print(
+        json.dumps(
+            {
+                "ok": True,
+                "version": verifier.VERSION,
+                "route": verifier.ROUTE,
+                "placementCount": page["placementCount"],
+                "gateCount": page["gateCount"],
+                "failClosedCases": 9,
+                "hostingAuthorityStateMachine": True,
+                "originReceiptSchemaLocked": True,
+                "dnsCutoverRedispatchLoopClosed": True,
+                "firstPagesArtifactDeadlockClosed": True,
+                "invalidOriginCannotMarkSitesCurrent": True,
+            },
+            ensure_ascii=False,
+        )
+    )
 
 
 if __name__ == "__main__":

@@ -4,8 +4,10 @@ on:
   pull_request:
     paths:
       - 'alo186/deployment/check_live_english.py'
+      - 'alo186/deployment/check_live_english_v2.py'
       - 'alo186/deployment/english-core-release.json'
       - 'alo186/tests/test_live_english_smoke.py'
+      - 'alo186/tests/test_live_english_smoke_v2.py'
       - '.github/workflows/alo186-english-live-smoke.yml'
   workflow_run:
     workflows:
@@ -25,20 +27,23 @@ jobs:
   contract:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Canlı yayın doğrulama sözleşmeleri
+      - name: Hosting-aware canlı yayın doğrulama sözleşmeleri
         run: |
           set -euo pipefail
           python alo186/tests/test_live_english_smoke.py
+          python alo186/tests/test_live_english_smoke_v2.py
           python -m py_compile \
             alo186/deployment/check_live_english.py \
-            alo186/tests/test_live_english_smoke.py
-          python alo186/deployment/check_live_english.py --help >/dev/null
+            alo186/deployment/check_live_english_v2.py \
+            alo186/tests/test_live_english_smoke.py \
+            alo186/tests/test_live_english_smoke_v2.py
+          python alo186/deployment/check_live_english_v2.py --help >/dev/null
 
   live:
     if: >-
@@ -49,7 +54,7 @@ jobs:
         github.event.workflow_run.head_branch == 'main'
       )
     runs-on: ubuntu-latest
-    timeout-minutes: 16
+    timeout-minutes: 12
     env:
       REPORT_PATH: /tmp/alo186-live-english-report.json
       ISSUE_NUMBER: '400'
@@ -83,7 +88,7 @@ jobs:
           echo "expected_sha=$expected_sha" >> "$GITHUB_OUTPUT"
           echo "pages_conclusion=$pages_conclusion" >> "$GITHUB_OUTPUT"
 
-      - name: Canlı İngilizce rotaları ve sitemap'i doğrula
+      - name: Canlı İngilizce rotaları, hosting modunu ve sitemap'i doğrula
         id: smoke
         continue-on-error: true
         shell: bash
@@ -104,12 +109,17 @@ jobs:
               "checked_at": datetime.now(timezone.utc).isoformat(),
               "origin": "https://alo186.com",
               "expected_commit": os.environ["EXPECTED_SHA"],
+              "hosting_mode": "pages-workflow-failed",
+              "release_marker_available": False,
               "live_commit": "",
               "live_commit_relation": "pages-workflow-failed",
               "attempts": 0,
               "route_count": 0,
+              "expected_route_count": 10,
+              "sitemap_ok": False,
               "sitemap_url_count": 0,
               "routes": [],
+              "warnings": [],
               "errors": [f"GitHub Pages workflow sonucu: {os.environ['PAGES_CONCLUSION']}"],
           }
           Path(os.environ["REPORT_PATH"]).write_text(
@@ -120,13 +130,13 @@ jobs:
             exit 1
           fi
 
-          python alo186/deployment/check_live_english.py \
+          python alo186/deployment/check_live_english_v2.py \
             --origin https://alo186.com \
             --repository "$GITHUB_REPOSITORY" \
             --expected-commit "$EXPECTED_SHA" \
-            --attempts 36 \
+            --attempts 12 \
             --interval 15 \
-            --timeout 25 \
+            --timeout 20 \
             --report "$REPORT_PATH"
 
       - name: Canlı doğrulama raporunu sakla
@@ -165,29 +175,51 @@ jobs:
           expected = str(report.get("expected_commit") or os.environ.get("EXPECTED_SHA", ""))
           live = str(report.get("live_commit", ""))
           relation = str(report.get("live_commit_relation", "unknown"))
+          hosting_mode = str(report.get("hosting_mode", "unknown"))
+          release_marker = bool(report.get("release_marker_available"))
+          warnings = report.get("warnings") or []
           errors = report.get("errors") or []
-          error_text = "\n".join(f"- `{item}`" for item in errors[:8]) if errors else "- Hata yok"
+          route_probes = report.get("routes") or []
+          failed_routes = [
+              f"{item.get('route')}: {item.get('error')}"
+              for item in route_probes
+              if not item.get("ok")
+          ]
+          warning_text = "\n".join(f"- `{item}`" for item in warnings[:6]) if warnings else "- Uyarı yok"
+          error_text = "\n".join(f"- `{item}`" for item in errors[:10]) if errors else "- Hata yok"
+          failed_route_text = "\n".join(f"- `{item}`" for item in failed_routes[:10]) if failed_routes else "- Başarısız rota yok"
           route_count = int(report.get("route_count") or 0)
+          expected_routes = int(report.get("expected_route_count") or 10)
           sitemap_count = int(report.get("sitemap_url_count") or 0)
+          sitemap_ok = bool(report.get("sitemap_ok"))
           checked_at = str(report.get("checked_at", ""))
           attempts = int(report.get("attempts") or 0)
 
           body = f"""{marker}
           ## İngilizce canlı yayın smoke testi — {status}
 
+          - Canlı hosting modu: **{hosting_mode}**
           - Beklenen Pages kaynağı: `{expected}`
+          - Exact release markerı: **{'var' if release_marker else 'yok'}**
           - Canlı release commit: `{live or 'okunamadı'}`
           - Commit ilişkisi: **{relation}**
-          - Doğrulanan İngilizce rota: **{route_count}/10**
+          - Doğrulanan İngilizce rota: **{route_count}/{expected_routes}**
+          - Sitemap sözleşmesi: **{'başarılı' if sitemap_ok else 'başarısız'}**
           - Sitemap URL sayısı: **{sitemap_count}**
           - Deneme sayısı: **{attempts}**
           - Kontrol zamanı: `{checked_at}`
           - [Workflow çalıştırmasını aç]({os.environ['RUN_URL']})
 
-          ### Son hata özeti
+          ### Başarısız rotalar
+          {failed_route_text}
+
+          ### Uyarılar
+          {warning_text}
+
+          ### Hata özeti
           {error_text}
 
-          Bu yorum yeni yayınlarda aynı kayıt üzerinde güncellenir; Issue #400 yorum akışını tekrarlarla doldurmaz.
+          Exact commit makbuzu bulunmayan dış hosting modunda içerik sözleşmesi ayrıca ölçülür; yayın başarı iddiası yalnız bütün İngilizce rotalar ve sitemap geçtiğinde verilir. Bu yorum sonraki yayınlarda aynı kayıt üzerinde güncellenir.
           """
 
           api = f"https://api.github.com/repos/{repository}"
@@ -195,7 +227,7 @@ jobs:
               "Authorization": f"Bearer {token}",
               "Accept": "application/vnd.github+json",
               "X-GitHub-Api-Version": "2022-11-28",
-              "User-Agent": "alo186-english-live-smoke",
+              "User-Agent": "alo186-english-live-smoke-v2",
           }
 
           def request_json(url: str, *, method: str = "GET", payload: dict | None = None):
@@ -218,10 +250,18 @@ jobs:
               page += 1
 
           if comment_id:
-              request_json(f"{api}/issues/comments/{comment_id}", method="PATCH", payload={"body": body})
+              request_json(
+                  f"{api}/issues/comments/{comment_id}",
+                  method="PATCH",
+                  payload={"body": body},
+              )
               action = "updated"
           else:
-              request_json(f"{api}/issues/{issue}/comments", method="POST", payload={"body": body})
+              request_json(
+                  f"{api}/issues/{issue}/comments",
+                  method="POST",
+                  payload={"body": body},
+              )
               action = "created"
           print(json.dumps({"ok": ok, "comment": action, "issue": int(issue)}, ensure_ascii=False))
           PY
