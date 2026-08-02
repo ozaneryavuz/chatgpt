@@ -9,6 +9,7 @@ from pathlib import Path
 
 import guard_commerce_routes_v2 as v2
 import inject_affiliate_decision_funnel_v215 as affiliate_decision
+import inject_live_quality_v218 as live_quality
 import inject_portal_purchase_checkpoint_v213 as portal_checkpoint
 
 # V2, bağlantının çevresindeki sabit 900 karakteri tarıyordu. Uzun hesaplayıcı
@@ -204,14 +205,16 @@ def _checkpoint_base_path(site: Path) -> str:
 
 
 def validate_site(site: Path) -> dict:
-    """Son artifacta karar hunisini ve portal kontrolünü ekler, ardından ticari yapıyı fail-closed tarar."""
+    """Karar hunisi ve portal kontrolünden sonra ticari ve final UX artifactını fail-closed doğrular."""
     resolved = site.resolve()
     base_path = _checkpoint_base_path(resolved)
     decision_result = affiliate_decision.inject(resolved, base_path)
     checkpoint_result = portal_checkpoint.inject(resolved, base_path)
     result = _original_validate_site(resolved)
+    quality_result = live_quality.run(resolved, base_path)
     result["affiliateDecisionFunnel"] = decision_result
     result["portalPurchaseCheckpoint"] = checkpoint_result
+    result["liveQualityV218"] = quality_result
     return result
 
 
