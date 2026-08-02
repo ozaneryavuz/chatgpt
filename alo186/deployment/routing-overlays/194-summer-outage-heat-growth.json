@@ -1,0 +1,21 @@
+{
+  "version": 194,
+  "generatedAt": "2026-08-02",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/elektrik-kesintisi-sicak-hava-usb-vantilator-calisma-suresi/index.html",
+      "canonicalPath": "/hesaplama/elektrik-kesintisi-sicak-hava-usb-vantilator-calisma-suresi/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/sarjli-vantilator-usb-fan-sicak-hava-secici/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/sarjli-vantilator-usb-fan-sicak-hava-secici/",
+      "type": "commerce-guide"
+    },
+    {
+      "source": "alo186/sektor-rehberi/yaz-elektrik-kesintisi-sicak-hava-30-90-gun-hazirlik-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/yaz-elektrik-kesintisi-sicak-hava-30-90-gun-hazirlik-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
