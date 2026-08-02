@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-02",
+  "canonicalHost": "https://alo186.com",
+  "clusters": [
+    {
+      "id": "generator-reverse-power",
+      "searchIntent": "Jeneratör Reverse Power / ANSI 32R / negatif kW / motoring alarmını ölçüm zinciri ve prime mover tork kaybından ayırmak",
+      "canonicalPath": "/haberler/jenerator-reverse-power-ansi-32r-motoring-ct-polarite-teshis",
+      "aliases": [
+        "/haberler/jenerator-ters-guc-reverse-power-alarmi-ansi-32",
+        "/haberler/jenerator-ters-guc-reverse-power-alarmi-ansi-32r",
+        "/haberler/jenerator-reverse-power-ters-guc-ansi-32r-motoring-koruma",
+        "/haberler/jenerator-reverse-power-ansi-32r-negatif-kw-ct-polarite-teshis"
+      ],
+      "reason": "Aynı teşhis niyetini karşılayan tarihsel içeriklerin bağlantı ve ölçüm sinyallerini en güncel, kapsamlı rotada birleştirmek"
+    },
+    {
+      "id": "ups-fan-overtemperature",
+      "searchIntent": "UPS Fan Failure ve Overtemperature alarmında fan, filtre, hava yolu, ortam, yük ve sensör ayrımı yapmak",
+      "canonicalPath": "/haberler/ups-fan-failure-overtemperature-hava-akisi-filtre-teshis",
+      "aliases": [
+        "/haberler/ups-fan-failure-overtemperature-yuksek-sicaklik-derating-teshis"
+      ],
+      "reason": "Aynı termal arıza niyetini tek kanıt zinciri ve tek teknik lead rotasında toplamak"
+    },
+    {
+      "id": "generator-underfrequency",
+      "searchIntent": "Jeneratör Underfrequency / düşük frekans olayında yük adımı, governor, yakıt-hava ve hız ölçüm zincirini ayırmak",
+      "canonicalPath": "/haberler/jenerator-underfrequency-dusuk-frekans-governor-yuk-adimi-teshis",
+      "aliases": [
+        "/haberler/jenerator-underfrequency-dusuk-frekans-governor-hunting-yuk-alma"
+      ],
+      "reason": "Düşük frekans arama niyetini en güncel yük adımı ve toparlanma kabul akışında birleştirmek"
+    }
+  ]
+}
