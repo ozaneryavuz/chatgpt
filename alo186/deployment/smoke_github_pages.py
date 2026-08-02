@@ -118,6 +118,15 @@ def public_url(base_path: str, route: str) -> str:
         return base_path + "/"
     return base_path + route
 
+
+def executable_html_text(text: str) -> str:
+    """Return inline script/style bodies while excluding logical data-* metadata."""
+    chunks: list[str] = []
+    for pattern in (r'<script\b[^>]*>(.*?)</script>', r'<style\b[^>]*>(.*?)</style>'):
+        chunks.extend(re.findall(pattern, text, re.I | re.S))
+    return "\n".join(chunks)
+
+
 def route_exists(site: Path, route: str) -> bool:
     clean = urlsplit(route).path or "/"
     if clean == "/":
@@ -339,16 +348,16 @@ def smoke(site: Path, manifest_path: Path, base_path: str) -> dict:
             if path.name in CANONICAL_METADATA_FILES:
                 continue
             relative_path = path.relative_to(site)
-            if path.suffix.lower() == ".html":
-                # HTML navigation and asset references are validated structurally
-                # through PageParser above. data-* route identifiers are metadata,
-                # not deployable URLs, and must not become false positives here.
-                continue
             if relative_path in base_path_aware_scripts:
                 # These runtimes either derive the public prefix dynamically or
                 # keep canonical route identifiers/path separators as data.
                 continue
             text = path.read_text(encoding="utf-8", errors="ignore")
+            if path.suffix.lower() == ".html":
+                # Structural attributes are already checked by PageParser. Keep
+                # scanning executable inline script/style content, but exclude
+                # logical data-* route identifiers that are not browser URLs.
+                text = executable_html_text(text)
             for match in unresolved.finditer(text):
                 rest = match.group("rest")
                 first = rest.split("/", 1)[0].split("?", 1)[0].split("#", 1)[0]
