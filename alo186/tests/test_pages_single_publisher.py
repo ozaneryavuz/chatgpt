@@ -1,12 +1,85 @@
 from __future__ import annotations
 
 import json
+import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 WORKFLOWS = ROOT / ".github/workflows"
 STANDARD = WORKFLOWS / "alo186-github-pages.yml"
 BOOTSTRAP = WORKFLOWS / "alo186-pages-autobootstrap-live.yml"
+DEPLOYMENT = ROOT / "alo186/deployment"
+sys.path.insert(0, str(DEPLOYMENT))
+
+import inject_live_quality_v218_compat as live_quality  # noqa: E402
+
+
+def validate_origin_normalization() -> dict[str, object]:
+    with tempfile.TemporaryDirectory(prefix="alo186-origin-normalization-") as folder:
+        site = Path(folder)
+        plan = site / "elektrik-planim/index.html"
+        kit = site / "urun-rehberleri/elektrik-kesintisi-kiti/index.html"
+        plan.parent.mkdir(parents=True)
+        kit.parent.mkdir(parents=True)
+
+        plan.write_text(
+            '''<!doctype html><html lang="tr"><head>
+            <link rel="canonical" href="https://www.alo186.com/elektrik-planim">
+            <link rel="alternate" hreflang="tr-TR" href="https://www.alo186.com/elektrik-planim">
+            <meta property="og:url" content="http://www.alo186.com/elektrik-planim">
+            </head><body><main id="main-content"><h1>Plan</h1></main></body></html>''',
+            encoding="utf-8",
+        )
+        kit.write_text(
+            '''<!doctype html><html lang="tr"><head>
+            <link rel="canonical" href="https://www.alo186.com/urun-rehberleri/elektrik-kesintisi-kiti">
+            </head><body><main id="main-content"><h1>Kit</h1></main></body></html>''',
+            encoding="utf-8",
+        )
+        (site / "sitemap.xml").write_text(
+            '''<?xml version="1.0" encoding="UTF-8"?>
+            <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+              <url><loc>https://www.alo186.com/elektrik-planim</loc></url>
+              <url><loc>http://www.alo186.com/urun-rehberleri/elektrik-kesintisi-kiti</loc></url>
+            </urlset>''',
+            encoding="utf-8",
+        )
+        (site / "robots.txt").write_text(
+            "User-agent: *\nSitemap: https://www.alo186.com/sitemap.xml\n",
+            encoding="utf-8",
+        )
+        asset = site / "assets/reference.js"
+        asset.parent.mkdir(parents=True)
+        asset.write_text(
+            'const documentationExample = "https://www.alo186.com/example";\n',
+            encoding="utf-8",
+        )
+
+        first = live_quality.normalize_canonical_origin(site)
+        assert first["filesChanged"] == 4, first
+        assert first["replacementCount"] == 7, first
+        assert sorted(first["changedFiles"]) == [
+            "elektrik-planim/index.html",
+            "robots.txt",
+            "sitemap.xml",
+            "urun-rehberleri/elektrik-kesintisi-kiti/index.html",
+        ]
+
+        for path in (plan, kit, site / "sitemap.xml", site / "robots.txt"):
+            text = path.read_text(encoding="utf-8")
+            assert "https://www.alo186.com" not in text
+            assert "http://www.alo186.com" not in text
+            assert "https://alo186.com" in text
+
+        assert "https://www.alo186.com/example" in asset.read_text(
+            encoding="utf-8"
+        )
+
+        second = live_quality.normalize_canonical_origin(site)
+        assert second["filesChanged"] == 0, second
+        assert second["replacementCount"] == 0, second
+        return first
 
 
 def main() -> None:
@@ -61,6 +134,8 @@ def main() -> None:
     assert "ref: 'main'" in bootstrap
     assert "first Pages artifact" in bootstrap or "İlk Pages artifact" in bootstrap
 
+    normalization = validate_origin_normalization()
+
     print(
         json.dumps(
             {
@@ -73,6 +148,10 @@ def main() -> None:
                 "hostingAuthorityReceiptRequired": True,
                 "firstPagesArtifactDeadlockClosed": True,
                 "invalidOriginCannotMarkSitesCurrent": True,
+                "lateGeneratedCanonicalOriginNormalized": True,
+                "originNormalizationReplacementCount": normalization[
+                    "replacementCount"
+                ],
             },
             ensure_ascii=False,
         )
