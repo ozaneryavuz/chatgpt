@@ -1,0 +1,23 @@
+{
+  "version": 213,
+  "generatedAt": "2026-08-02",
+  "source": "ALO186 content authority run134",
+  "routes": [
+    {
+      "path": "/haberler/komsularda-elektrik-var-benim-evde-yok-sigorta-sayac-faz-teshis",
+      "file": "haberler/komsularda-elektrik-var-benim-evde-yok-sigorta-sayac-faz-teshis/index.html",
+      "intent": "Komşularda elektrik varken yalnız konut veya bazı devreler enerjisiz olduğunda arızayı kullanıcı panosu, sayaç-servis sınırı, faz kaybı ve dağıtım şebekesi arasında ayırmak"
+    },
+    {
+      "path": "/haberler/jenerator-calisiyor-ama-yuk-almiyor-ats-transfer-failure-teshis",
+      "file": "haberler/jenerator-calisiyor-ama-yuk-almiyor-ats-transfer-failure-teshis/index.html",
+      "intent": "Jeneratör çalıştığı hâlde ATS/ATSE yük devralmıyorsa kaynak uygunluğu, AUTO modu, transfer komutu, interlock ve pozisyon geri bildirim zincirini doğrulamak"
+    },
+    {
+      "path": "/haberler/ups-overload-alarmi-yuk-dusukken-kva-kw-guc-faktoru-inrush-teshis",
+      "file": "haberler/ups-overload-alarmi-yuk-dusukken-kva-kw-guc-faktoru-inrush-teshis/index.html",
+      "intent": "UPS Overload alarmını kW, kVA, güç faktörü, faz akımı, ani akım, çıkış dağıtımı ve bypass davranışı arasında ayırmak"
+    }
+  ],
+  "qualityGate": "alo186/tests/test_authority_content_run134.py"
+}
