@@ -1,0 +1,112 @@
+name: ALO186 affiliate USB-C ses adaptörleri v224
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/usb-c-35mm-ses-adaptoru-secimi/**'
+      - 'alo186/deployment/routing-overlays/224-affiliate-usb-c-audio.json'
+      - 'alo186/tests/test_affiliate_usb_c_audio_v224.js'
+      - '.github/workflows/alo186-affiliate-usb-c-audio-v224.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/usb-c-35mm-ses-adaptoru-secimi/**'
+      - 'alo186/deployment/routing-overlays/224-affiliate-usb-c-audio.json'
+      - 'alo186/tests/test_affiliate_usb_c_audio_v224.js'
+      - '.github/workflows/alo186-affiliate-usb-c-audio-v224.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-affiliate-usb-c-audio-v224-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Exact ASIN, Knowledge Graph and stale gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check alo186/amazon-elektrik-urunleri/usb-c-35mm-ses-adaptoru-secimi/catalog-v224.js
+          node --check alo186/amazon-elektrik-urunleri/usb-c-35mm-ses-adaptoru-secimi/app-v224.js
+          node alo186/tests/test_affiliate_usb_c_audio_v224.js
+
+      - name: Existing affiliate and legal safety regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python alo186/tests/test_commerce_governance_v2.py
+          python alo186/tests/test_commerce_governance_v3.py
+          python alo186/tests/device_damage_deadline_guard.py
+          node alo186/tests/test_release_manifest.js
+
+      - name: Canonical production bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-usb-c-audio-v224 \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-usb-c-audio-v224
+          route=/tmp/alo186-usb-c-audio-v224/amazon-elektrik-urunleri/usb-c-35mm-ses-adaptoru-secimi
+          test -f "$route/index.html"
+          test -f "$route/catalog-v224.js"
+          test -f "$route/app-v224.js"
+          grep -Fq 'B0D7MN4W7H' "$route/index.html"
+          grep -Fq 'B082WG5VTK' "$route/index.html"
+          grep -Fq 'B01LYUKQ0L' "$route/index.html"
+          grep -Fq 'alo186rehber-21' "$route/catalog-v224.js"
+          ! grep -Eq 'href="https://www\.amazon\.com\.tr/(dp|s\?k=)' "$route/index.html"
+
+      - name: Custom-domain and project-path commerce acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          for spec in 'custom|' 'project|/chatgpt'; do
+            name="${spec%%|*}"
+            base="${spec#*|}"
+            target="/tmp/alo186-usb-c-audio-v224-${name}"
+            cp -a /tmp/alo186-usb-c-audio-v224 "$target"
+            python alo186/deployment/prepare_github_pages.py \
+              --site "$target" \
+              --base-path "$base" \
+              --repository "$GITHUB_REPOSITORY" \
+              --commit "$GITHUB_SHA"
+            python alo186/deployment/inject_outcome_runtime.py \
+              --site "$target" \
+              --base-path "$base"
+            python alo186/deployment/inject_shortlist_growth.py \
+              --site "$target" \
+              --base-path "$base" \
+              > "/tmp/alo186-usb-c-audio-v224-${name}-growth.json"
+            python alo186/deployment/smoke_github_pages.py \
+              --site "$target" \
+              --base-path "$base"
+            python alo186/deployment/guard_commerce_routes_v3.py \
+              --site "$target" \
+              | tee "/tmp/alo186-usb-c-audio-v224-${name}-guard.json"
+          done
+
+      - name: Verified artifact
+        if: success()
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-affiliate-usb-c-audio-v224
+          path: /tmp/alo186-usb-c-audio-v224-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
