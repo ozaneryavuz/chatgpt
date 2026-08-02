@@ -1,0 +1,71 @@
+name: ALO186 zero-traffic activation v224
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/elektrik-dayaniklilik-karti/**'
+      - 'alo186/deployment/routing-overlays/zero-traffic-activation-v224.json'
+      - 'alo186/tests/test_zero_traffic_activation_v224.py'
+      - 'alo186/audits/zero-traffic-pilot-v224.md'
+      - '.github/workflows/alo186-zero-traffic-activation-v224.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/elektrik-dayaniklilik-karti/**'
+      - 'alo186/deployment/routing-overlays/zero-traffic-activation-v224.json'
+      - 'alo186/tests/test_zero_traffic_activation_v224.py'
+      - '.github/workflows/alo186-zero-traffic-activation-v224.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-zero-traffic-v224-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          package-manager-cache: false
+
+      - name: Kaynak, gizlilik ve büyüme döngüsü sözleşmesi
+        run: |
+          set -euo pipefail
+          python -m py_compile alo186/tests/test_zero_traffic_activation_v224.py
+          node --check alo186/elektrik-dayaniklilik-karti/app.js
+          python alo186/tests/test_zero_traffic_activation_v224.py | tee /tmp/zero-traffic-source-v224.json
+
+      - name: Canonical production artifactını oluştur
+        run: |
+          set -euo pipefail
+          SITE=/tmp/alo186-zero-traffic-v224
+          python alo186/deployment/build_static_site.py --output "$SITE" --commit "$GITHUB_SHA" | tee /tmp/zero-traffic-build-v224.json
+          test -f "$SITE/elektrik-dayaniklilik-karti/index.html"
+          test -f "$SITE/elektrik-dayaniklilik-karti/styles.css"
+          test -f "$SITE/elektrik-dayaniklilik-karti/app.js"
+          grep -Fq 'https://alo186.com/elektrik-dayaniklilik-karti/' "$SITE/sitemap.xml"
+          grep -Fq 'data-alo186-zero-traffic-v224="true"' "$SITE/elektrik-dayaniklilik-karti/index.html"
+          grep -Fq 'resilience_card_share' "$SITE/elektrik-dayaniklilik-karti/app.js"
+          ! grep -Eiq 'amazon\.|amzn\.|affiliate|"@type"[[:space:]]*:[[:space:]]*"(Product|Offer|AggregateRating)"' "$SITE/elektrik-dayaniklilik-karti/index.html"
+          ! grep -Eiq 'fetch\(|XMLHttpRequest|sendBeacon|WebSocket\(|EventSource\(' "$SITE/elektrik-dayaniklilik-karti/app.js"
+
+      - name: Artifactı sakla
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-zero-traffic-activation-v224-${{ github.sha }}
+          path: |
+            /tmp/alo186-zero-traffic-v224
+            /tmp/zero-traffic-source-v224.json
+            /tmp/zero-traffic-build-v224.json
+          if-no-files-found: error
+          retention-days: 14
