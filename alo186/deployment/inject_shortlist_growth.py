@@ -242,16 +242,21 @@ def reconcile_sitemap_with_release(site: Path) -> dict:
             present.add(normalized_path(loc.text))
     added=[]
     canonical_host=str(release.get("canonicalHost") or "https://www.alo186.com").rstrip("/")
+    pages_release_path=site / "pages-release.json"
+    pages_release=json.loads(pages_release_path.read_text(encoding="utf-8")) if pages_release_path.is_file() else {}
+    release_base_path=normalize_base_path(str(pages_release.get("basePath") or ""))
     for route in release.get("routes",[]):
         canonical_path=str(route.get("canonicalPath") or "").strip()
         if not canonical_path:
             continue
         route_path=normalized_path(canonical_path)
+        if release_base_path and (route_path == release_base_path or route_path.startswith(release_base_path + "/")):
+            route_path=route_path[len(release_base_path):] or "/"
         if route_path in present:
             continue
         url=ET.SubElement(root,f"{ns}url")
         loc=ET.SubElement(url,f"{ns}loc")
-        loc.text=f"{canonical_host}{canonical_path}"
+        loc.text=f"{canonical_host}{route_path}"
         present.add(route_path)
         added.append(canonical_path)
     ET.register_namespace("",namespace)
