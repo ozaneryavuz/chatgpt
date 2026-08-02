@@ -8,12 +8,9 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 import guard_commerce_routes_v2 as v2
+import inject_intent_tools_run135 as intent_tools
 import inject_portal_purchase_checkpoint_v213 as portal_checkpoint
 
-# V2, bağlantının çevresindeki sabit 900 karakteri tarıyordu. Uzun hesaplayıcı
-# sayfalarında başka bir bölümde geçen "topraklama" gibi güvenlik metinleri,
-# düşük riskli tak-çalıştır ürün kartını yanlışlıkla yüksek riskli sayabiliyordu.
-# V3 yalnız bağlantının gerçek DOM bağlamını (ürün/sonuç/öneri kartını) tarar.
 CONTEXT_TAGS = {"article", "li", "td", "aside", "section", "div"}
 CONTEXT_MARKER = re.compile(
     r"(?:product|urun|ürün|card|kart|result|sonuc|sonuç|recommend|öner|oner|"
@@ -38,15 +35,8 @@ class Node:
     @property
     def marker(self) -> str:
         names = (
-            "class",
-            "id",
-            "role",
-            "data-product",
-            "data-product-card",
-            "data-result",
-            "data-recommendation",
-            "data-affiliate",
-            "data-commercial-scope",
+            "class", "id", "role", "data-product", "data-product-card",
+            "data-result", "data-recommendation", "data-affiliate", "data-commercial-scope",
         )
         return " ".join(self.attrs.get(name, "") for name in names)
 
@@ -59,21 +49,13 @@ class ContextParser(HTMLParser):
         self.anchors: list[Node] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        node = Node(
-            tag.casefold(),
-            {name.casefold(): unescape(value or "") for name, value in attrs},
-            self.stack[-1],
-        )
+        node = Node(tag.casefold(), {name.casefold(): unescape(value or "") for name, value in attrs}, self.stack[-1])
         self.stack.append(node)
         if node.tag == "a":
             self.anchors.append(node)
 
     def handle_startendtag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        node = Node(
-            tag.casefold(),
-            {name.casefold(): unescape(value or "") for name, value in attrs},
-            self.stack[-1],
-        )
+        node = Node(tag.casefold(), {name.casefold(): unescape(value or "") for name, value in attrs}, self.stack[-1])
         if node.tag == "a":
             self.anchors.append(node)
 
@@ -92,7 +74,6 @@ class ContextParser(HTMLParser):
 
 
 def product_context(anchor: Node) -> str:
-    """Return the nearest meaningful commercial DOM context for an anchor."""
     candidate = anchor.parent
     fallback = anchor.text
     while candidate and candidate.tag != "document":
@@ -114,11 +95,9 @@ def scan_affiliate_anchors(path: Path, site: Path) -> list[str]:
     errors: list[str] = []
     visible = v2.text_only(html)
     has_disclosure = bool(v2.DISCLOSURE_PATTERN.search(visible))
-
     parser = ContextParser()
     parser.feed(html)
     parser.close()
-
     for anchor in parser.anchors:
         href = anchor.attrs.get("href", "")
         if not v2.is_affiliate_url(href):
@@ -126,24 +105,16 @@ def scan_affiliate_anchors(path: Path, site: Path) -> list[str]:
         rel = {token.casefold() for token in anchor.attrs.get("rel", "").split() if token}
         missing = v2.REQUIRED_REL - rel
         if missing:
-            errors.append(
-                f"{relative}: affiliate bağlantısında eksik rel tokenları: {', '.join(sorted(missing))}"
-            )
+            errors.append(f"{relative}: affiliate bağlantısında eksik rel tokenları: {', '.join(sorted(missing))}")
         if not has_disclosure:
             errors.append(f"{relative}: affiliate bağlantısı var fakat görünür satış ortaklığı açıklaması yok")
         context = product_context(anchor)
         risky = v2.HIGH_RISK_PATTERN.search(context)
         if risky:
-            errors.append(
-                f"{relative}: yüksek riskli/sabit tesisat ürün bağlamında doğrudan mağaza bağlantısı yasak: {risky.group(0)}"
-            )
+            errors.append(f"{relative}: yüksek riskli/sabit tesisat ürün bağlamında doğrudan mağaza bağlantısı yasak: {risky.group(0)}")
     return errors
 
 
-# Ürün merkezindeki v210 yönlendiricisi kişisel veri istemeyen üç kapalı
-# seçimden oluşur. V2'nin bütün <form> etiketlerini kişisel veri formu sayan
-# eski kontrolü yalnız bu kesin sözleşme için daraltılır; serbest veya kişisel
-# veri alanı eklenirse kapı yeniden kapanır.
 _original_validate_commercial_pages = v2.validate_commercial_pages
 
 
@@ -177,16 +148,11 @@ def validate_commercial_pages(site: Path) -> tuple[list[str], dict]:
 
 
 v2.validate_commercial_pages = validate_commercial_pages
-
-# V2'nin ticari sayfa, hizmet, katalog, canonical ve rapor sözleşmeleri aynen
-# korunur; yalnız yanlış pozitif üreten anchor bağlam çözümlemesi değiştirilir.
 v2.scan_affiliate_anchors = scan_affiliate_anchors
-
 _original_validate_site = v2.validate_site
 
 
 def _checkpoint_base_path(site: Path) -> str:
-    """Mevcut CLI sözleşmesini değiştirmeden Pages base path değerini bulur."""
     release_path = site / "pages-release.json"
     if not release_path.is_file():
         return ""
@@ -203,11 +169,13 @@ def _checkpoint_base_path(site: Path) -> str:
 
 
 def validate_site(site: Path) -> dict:
-    """Son artifacta güven kontrolünü ekler ve ardından ticari yapıyı fail-closed tarar."""
     resolved = site.resolve()
-    checkpoint_result = portal_checkpoint.inject(resolved, _checkpoint_base_path(resolved))
+    base_path = _checkpoint_base_path(resolved)
+    checkpoint_result = portal_checkpoint.inject(resolved, base_path)
+    intent_tools_result = intent_tools.inject(resolved, base_path)
     result = _original_validate_site(resolved)
     result["portalPurchaseCheckpoint"] = checkpoint_result
+    result["intentToolsRun135"] = intent_tools_result
     return result
 
 
