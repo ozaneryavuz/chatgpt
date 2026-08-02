@@ -1,0 +1,98 @@
+name: ALO186 affiliate mobile Wi-Fi v221
+
+on:
+  pull_request:
+    paths:
+      - "alo186/amazon-elektrik-urunleri/tasinabilir-4g-mobil-wifi-secimi/**"
+      - "alo186/deployment/routing-overlays/221-affiliate-mobile-wifi.json"
+      - "alo186/tests/test_affiliate_mobile_wifi_v221.py"
+      - ".github/workflows/alo186-affiliate-mobile-wifi-v221.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alo186/amazon-elektrik-urunleri/tasinabilir-4g-mobil-wifi-secimi/**"
+      - "alo186/deployment/routing-overlays/221-affiliate-mobile-wifi.json"
+      - "alo186/tests/test_affiliate_mobile_wifi_v221.py"
+      - ".github/workflows/alo186-affiliate-mobile-wifi-v221.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-affiliate-mobile-wifi-v221-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Exact ASIN, Knowledge Graph and stale gate
+        run: |
+          set -euo pipefail
+          python alo186/tests/test_affiliate_mobile_wifi_v221.py
+
+      - name: Existing commerce and safety regressions
+        run: |
+          set -euo pipefail
+          python alo186/tests/test_commerce_governance_v2.py
+          python alo186/tests/test_commerce_governance_v3.py
+          python alo186/tests/device_damage_deadline_guard.py
+          python alo186/tests/test_active_production_contract.py
+
+      - name: Canonical production bundle
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-mobile-wifi-v221 \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-mobile-wifi-v221
+          route=/tmp/alo186-mobile-wifi-v221/amazon-elektrik-urunleri/tasinabilir-4g-mobil-wifi-secimi
+          test -f "$route/index.html"
+          test -f "$route/catalog-v221.js"
+          test -f "$route/app-v221.js"
+          grep -Fq 'https://alo186.com/amazon-elektrik-urunleri/tasinabilir-4g-mobil-wifi-secimi/' "$route/index.html"
+          grep -Fq 'alo186rehber-21' "$route/catalog-v221.js"
+          grep -Fq "affiliatePolicy: 'after_tool'" "$route/catalog-v221.js"
+          ! grep -Eq 'href=["'"']https://www\.amazon\.com\.tr/' "$route/index.html"
+
+      - name: Custom-domain and project-path acceptance
+        run: |
+          set -euo pipefail
+          cp -a /tmp/alo186-mobile-wifi-v221 /tmp/alo186-mobile-wifi-v221-custom
+          cp -a /tmp/alo186-mobile-wifi-v221 /tmp/alo186-mobile-wifi-v221-project
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-mobile-wifi-v221-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-mobile-wifi-v221-custom \
+            --base-path ''
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-mobile-wifi-v221-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-mobile-wifi-v221-project \
+            --base-path '/chatgpt'
+
+      - name: Verified production artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-affiliate-mobile-wifi-v221
+          path: /tmp/alo186-mobile-wifi-v221-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
