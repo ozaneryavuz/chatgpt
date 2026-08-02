@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
+from xml.etree import ElementTree
 
 import inject_live_quality_v218 as core
 
@@ -18,6 +19,8 @@ QUALITY_LINK_PATTERN = re.compile(
     r'(<link\b(?=[^>]*data-alo186-live-quality-v218=["\']true["\'])[^>]*\bhref=["\'])[^"\']*(["\'][^>]*>)',
     re.I,
 )
+LEGACY_ORIGIN = "https://www.alo186.com"
+CANONICAL_ORIGIN = "https://alo186.com"
 
 
 def artifact_base_path(site: Path) -> str:
@@ -32,16 +35,49 @@ def artifact_base_path(site: Path) -> str:
     return core.normalize_base_path(value) if isinstance(value, str) else ""
 
 
+def normalize_late_canonical_origin(site: Path) -> dict[str, object]:
+    """Normalize routes created after Pages preparation to the apex origin."""
+    changed_pages: list[str] = []
+    for relative in (
+        Path("hesaplama/elektrik-planim/index.html"),
+        Path("hesaplama/elektrik-kesintisi-kiti/index.html"),
+    ):
+        path = site / relative
+        if not path.is_file():
+            continue
+        text = path.read_text(encoding="utf-8", errors="strict")
+        updated = text.replace(LEGACY_ORIGIN, CANONICAL_ORIGIN)
+        if updated != text:
+            path.write_text(updated, encoding="utf-8")
+            changed_pages.append(relative.as_posix())
+
+    sitemap = site / "sitemap.xml"
+    changed_locations = 0
+    if sitemap.is_file():
+        try:
+            tree = ElementTree.parse(sitemap)
+        except ElementTree.ParseError as exc:
+            raise AssertionError(f"sitemap.xml parse edilemiyor: {exc}") from exc
+        for node in tree.getroot().findall(".//{*}loc"):
+            value = (node.text or "").strip()
+            if value.startswith(LEGACY_ORIGIN + "/"):
+                node.text = CANONICAL_ORIGIN + value[len(LEGACY_ORIGIN):]
+                changed_locations += 1
+        if changed_locations:
+            ElementTree.register_namespace("", "http://www.sitemaps.org/schemas/sitemap/0.9")
+            ElementTree.register_namespace("xhtml", "http://www.w3.org/1999/xhtml")
+            tree.write(sitemap, encoding="utf-8", xml_declaration=True)
+
+    return {
+        "changedPages": changed_pages,
+        "changedPageCount": len(changed_pages),
+        "changedSitemapLocations": changed_locations,
+        "canonicalOrigin": CANONICAL_ORIGIN,
+    }
+
+
 def install_quality_css(site: Path) -> dict[str, object]:
-    """Inject v218 CSS with legacy-head repair and project-path awareness.
-
-    GitHub Pages rewrites existing canonical asset references before this late
-    quality layer runs. The layer therefore derives the final base path from
-    `pages-release.json` and writes `/chatgpt/assets/...` in project mode rather
-    than leaking a root-only reference. Re-running the guard also repairs an
-    already injected marker whose href no longer matches the artifact base path.
-    """
-
+    """Inject v218 CSS with legacy-head repair and project-path awareness."""
     target = site / core.ASSET_RELATIVE
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(core.QUALITY_CSS, encoding="utf-8")
@@ -104,17 +140,7 @@ def install_quality_css(site: Path) -> dict[str, object]:
 
 
 def ensure_skip_links(site: Path, base_path: str) -> dict[str, int]:
-    """Repair the critical-page main/skip-link pair instead of trusting stale markup.
-
-    Some legacy pages already contain a skip link, but its fragment does not point
-    to an existing main id. The original v218 helper treated any skip link as valid
-    and returned early. This compatibility layer makes the pair atomic:
-
-    1. every critical page must have a `<main id>`;
-    2. an existing `.skip-link` must target that id;
-    3. a missing skip link is inserted immediately after `<body>`.
-    """
-
+    """Repair the critical-page main/skip-link pair instead of trusting stale markup."""
     injected = target_repaired = main_ids_added = already_valid = missing_main = 0
 
     for route in core.CRITICAL_ROUTES:
@@ -177,7 +203,16 @@ def ensure_skip_links(site: Path, base_path: str) -> dict[str, int]:
 
 core.install_quality_css = install_quality_css
 core.ensure_skip_links = ensure_skip_links
-run = core.run
+_original_run = core.run
+
+
+def run(site: Path, base_path: str = "") -> dict[str, object]:
+    normalization = normalize_late_canonical_origin(site.resolve())
+    report = _original_run(site, base_path)
+    report["lateCanonicalNormalization"] = normalization
+    return report
+
+
 main = core.main
 
 
