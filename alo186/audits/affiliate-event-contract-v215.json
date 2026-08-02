@@ -1,0 +1,55 @@
+{
+  "version": 215,
+  "name": "ALO186 affiliate decision funnel event contract",
+  "privacy": {
+    "requiresAnalyticsConsentForGa4": true,
+    "rawDestinationUrlAllowed": false,
+    "amazonSearchQueryAllowed": false,
+    "asinAllowed": false,
+    "freeTextAllowed": false,
+    "userOrDeviceIdentifierAllowed": false,
+    "numericElectricalInputsAllowed": false
+  },
+  "events": {
+    "affiliate_decision_view": {
+      "parameters": {
+        "version": {"type": "integer", "required": true, "allowed": [215]},
+        "flow": {"type": "enum", "required": true, "allowed": ["mini_ups", "ups_runtime", "power_station"]},
+        "placement": {"type": "enum", "required": true, "allowed": ["decision_intro", "decision_tier_card", "decision_result_cta", "decision_no_buy", "decision_blocked"]}
+      }
+    },
+    "affiliate_decision_result": {
+      "parameters": {
+        "version": {"type": "integer", "required": true, "allowed": [215]},
+        "flow": {"type": "enum", "required": true, "allowed": ["mini_ups", "ups_runtime", "power_station"]},
+        "placement": {"type": "enum", "required": true, "allowed": ["decision_intro", "decision_tier_card", "decision_result_cta", "decision_no_buy", "decision_blocked"]},
+        "state": {"type": "enum", "required": true, "allowed": ["eligible"]},
+        "tier": {"type": "enum", "required": true, "allowed": ["basic", "balanced", "long_runtime"]}
+      }
+    },
+    "affiliate_decision_select": {
+      "parameters": {
+        "version": {"type": "integer", "required": true, "allowed": [215]},
+        "flow": {"type": "enum", "required": true, "allowed": ["mini_ups", "ups_runtime", "power_station"]},
+        "placement": {"type": "enum", "required": true, "allowed": ["decision_intro", "decision_tier_card", "decision_result_cta", "decision_no_buy", "decision_blocked"]},
+        "tier": {"type": "enum", "required": true, "allowed": ["basic", "balanced", "long_runtime"]}
+      }
+    },
+    "no_buy_result": {
+      "parameters": {
+        "version": {"type": "integer", "required": true, "allowed": [215]},
+        "flow": {"type": "enum", "required": true, "allowed": ["mini_ups", "ups_runtime", "power_station"]},
+        "placement": {"type": "enum", "required": true, "allowed": ["decision_intro", "decision_tier_card", "decision_result_cta", "decision_no_buy", "decision_blocked"]},
+        "reason": {"type": "enum", "required": true, "allowed": ["existing_solution_sufficient"]}
+      }
+    },
+    "commerce_blocked": {
+      "parameters": {
+        "version": {"type": "integer", "required": true, "allowed": [215]},
+        "flow": {"type": "enum", "required": true, "allowed": ["mini_ups", "ups_runtime", "power_station"]},
+        "placement": {"type": "enum", "required": true, "allowed": ["decision_intro", "decision_tier_card", "decision_result_cta", "decision_no_buy", "decision_blocked"]},
+        "reason": {"type": "enum", "required": true, "allowed": ["insufficient_evidence", "professional_only", "unsafe_equipment", "medical_or_life_safety"]}
+      }
+    }
+  }
+}
