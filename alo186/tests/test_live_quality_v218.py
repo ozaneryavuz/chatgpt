@@ -43,8 +43,14 @@ def source_contracts() -> None:
     assert "overflow-x:clip" not in compact
     assert "prefers-reduced-motion" in source
     assert "min-height:44px" in source
-    assert "repairedHeadBoundaries" in compat
-    assert "createdHeadElements" in compat
+    for token in (
+        "repairedHeadBoundaries",
+        "createdHeadElements",
+        "mainIdsAdded",
+        "targetRepaired",
+        "core.ensure_skip_links = ensure_skip_links",
+    ):
+        assert token in compat, token
     assert "inject_live_quality_v218_compat as live_quality" in guard
     assert "quality_result = live_quality.run" in guard
     assert 'result["liveQualityV218"]' in guard
@@ -59,6 +65,8 @@ def assert_final_site(site: Path, base_path: str) -> dict:
     assert quality["personalDataCollectionAdded"] is False
     assert quality["officialInstitutionClaimed"] is False
     assert quality["newCommerceLinksAdded"] is False
+    assert quality["skipLinks"]["missingMain"] == 0
+    assert quality["skipLinks"]["injected"] + quality["skipLinks"]["targetRepaired"] + quality["skipLinks"]["alreadyValid"] == len(CRITICAL_ROUTES)
     audit = quality["audit"]
     assert audit["canonicalViolations"] == 0
     assert audit["criticalBrokenInternalLinkCount"] == 0
@@ -82,6 +90,7 @@ def assert_final_site(site: Path, base_path: str) -> dict:
         assert STYLE_MARKER in html, route
         assert expected_asset in html, (route, expected_asset)
         assert "skip-link" in html, route
+        assert "<main" in html and "id=" in html, route
         for forbidden in FORBIDDEN_VISIBLE_COPY:
             assert forbidden not in html.casefold(), (route, forbidden)
     checksums = (site / "checksums.sha256").read_text(encoding="utf-8")
