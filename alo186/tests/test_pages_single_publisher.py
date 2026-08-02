@@ -26,27 +26,45 @@ def main() -> None:
     assert "alo186-pages-pr-{0}" in standard
     assert "cancel-in-progress: false" in standard
     assert "python alo186/tests/test_pages_single_publisher.py" in standard
-    assert "Fail-closed Pages yayın sonucu" in standard
+    assert "Pages deployment ve canlı origin yetkisini ayrıştır" in standard
     assert "verify_live_origin.py" in standard
+    assert "containsExpectedCommit" not in standard
+    assert "hosting_mode" in standard
+    assert "if [ \"$hosting_mode\" = 'github-pages' ]" in standard
     assert "verify_contextual_affiliate_live_v177.py" in standard
+    assert "deferred-external-live-authority" in standard
     assert "alo186-full-live-receipt" in standard
+    assert "--attempts 36" not in standard
 
     bootstrap = BOOTSTRAP.read_text(encoding="utf-8")
     assert "actions/deploy-pages@" not in bootstrap
     assert "actions: write" in bootstrap
     assert "group: alo186-pages-production" in bootstrap
     assert "cancel-in-progress: false" in bootstrap
+    assert "containsExpectedCommit" in bootstrap
+    assert "exactCommitReceiptAvailable" in bootstrap
+    assert "waiting_for_dns_cutover:" in bootstrap
+    assert "alo186-dns-cutover-required" in bootstrap
+    assert "Otomatik Pages yeniden-dispatch: **durduruldu**" in bootstrap
     assert "dispatch_pages:" in bootstrap
+    assert "needs.probe.outputs.hosting_mode == 'github-pages'" in bootstrap
     assert "workflow_id: 'alo186-github-pages.yml'" in bootstrap
     assert "ref: 'main'" in bootstrap
 
-    print(json.dumps({
-        "ok": True,
-        "publisherCount": len(publishers),
-        "publisher": publishers[0],
-        "sharedProductionConcurrency": "alo186-pages-production",
-        "bootstrapRole": "probe-and-dispatch",
-    }, ensure_ascii=False))
+    print(
+        json.dumps(
+            {
+                "ok": True,
+                "publisherCount": len(publishers),
+                "publisher": publishers[0],
+                "sharedProductionConcurrency": "alo186-pages-production",
+                "bootstrapRole": "probe-state-machine-and-dispatch",
+                "externalDnsRedispatchLoopClosed": True,
+                "hostingAuthorityReceiptRequired": True,
+            },
+            ensure_ascii=False,
+        )
+    )
 
 
 if __name__ == "__main__":
