@@ -7,6 +7,7 @@ on:
       - 'alo186/tests/test_affiliate_measurement_v211.py'
       - 'alo186/audits/affiliate-measurement-v211-2026-08-02.md'
       - '.github/workflows/alo186-affiliate-measurement-v211.yml'
+      - '.github/workflows/alo186-github-pages.yml'
   push:
     branches: [main]
     paths:
@@ -14,15 +15,14 @@ on:
       - 'alo186/tests/test_affiliate_measurement_v211.py'
       - 'alo186/audits/affiliate-measurement-v211-2026-08-02.md'
       - '.github/workflows/alo186-affiliate-measurement-v211.yml'
+      - '.github/workflows/alo186-github-pages.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: alo186-affiliate-measurement-v211-${{ github.ref }}
+  group: alo186-affiliate-measurement-v211-validation-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -45,12 +45,9 @@ jobs:
             alo186/deployment/inject_affiliate_measurement_v211.py \
             alo186/tests/test_affiliate_measurement_v211.py
           python alo186/tests/test_affiliate_measurement_v211.py
-      - id: pages
-        if: github.event_name != 'pull_request'
-        uses: actions/configure-pages@v5
       - name: Tam üretim artifactı ve affiliate ölçüm kalite kapısı
         env:
-          BASE: ${{ steps.pages.outputs.base_path || '' }}
+          BASE: ''
           GA4: ${{ vars.ALO186_GA4_MEASUREMENT_ID || 'G-639TVHL0LC' }}
         run: |
           set -euo pipefail
@@ -123,19 +120,3 @@ jobs:
             /tmp/alo186-affiliate-measurement-v211/pages-release.json
           if-no-files-found: warn
           retention-days: 45
-      - if: github.event_name != 'pull_request'
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: /tmp/alo186-affiliate-measurement-v211
-
-  deploy:
-    if: github.event_name != 'pull_request'
-    needs: build-and-validate
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
