@@ -35,35 +35,6 @@
   padding-block:.45rem;
 }
 
-/*
- * Altbilgi bağlantıları farklı eski tema seçicileriyle yeniden inline veya dar
- * hale gelebiliyordu. Bu yüksek özgüllüklü katman, Lighthouse/axe hedef boyutu
- * denetiminde yalnız metnin değil bütün bağlantının 48 px dokunulabilir olmasını
- * ve komşu hedeflerden güvenli biçimde ayrılmasını sağlar.
- */
-body footer a[href]{
-  display:inline-flex;
-  min-inline-size:44px;
-  min-block-size:48px;
-  align-items:center;
-  padding:.625rem .5rem;
-  margin:.125rem .25rem .125rem 0;
-  line-height:1.35;
-  touch-action:manipulation;
-}
-body footer :where(nav,.footer-links,.footer-nav,[aria-label*="altbilgi" i],[aria-label*="footer" i]){
-  flex-wrap:wrap;
-  gap:8px;
-}
-/* Kullanıcının raporladığı iki rota için daha özgül bir fail-safe bırakılır. */
-body footer a[href$="/haberler"],
-body footer a[href$="/haberler/"],
-body footer a[href$="/guvenlik-rehberleri"],
-body footer a[href$="/guvenlik-rehberleri/"]{
-  min-block-size:48px!important;
-  padding-block:.625rem!important;
-}
-
 :where(
   .top nav,
   .site-header nav,
@@ -167,11 +138,6 @@ a[href^="tel:186"]:hover{filter:brightness(.9)}
   }
   :where(.top nav a,.site-header nav a,.nav a,.footer-links a,.site-footer a,footer nav a){
     max-inline-size:100%;
-    overflow-wrap:anywhere;
-  }
-  body footer a[href]{
-    max-inline-size:100%;
-    margin-block:.2rem;
     overflow-wrap:anywhere;
   }
   a[href^="tel:112"],a[href^="tel:186"]{inline-size:100%}
