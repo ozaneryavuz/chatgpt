@@ -30,6 +30,9 @@ def seed(site: Path) -> None:
     (page / 'index.html').write_text(
         '''<!doctype html><html><head><title>Mini UPS</title></head><body>
         <a class="comparison-card" href="https://www.amazon.com.tr/s?k=mini+ups&amp;tag=alo186rehber-21" rel="sponsored">Karşılaştır</a>
+        <article class="card">
+          <a class="shop" href="https://www.amazon.com.tr/dp/B099999999?tag=alo186rehber-21" target="_blank">Kart içi ürün</a>
+        </article>
         </body></html>''',
         encoding='utf-8',
     )
@@ -57,6 +60,7 @@ def assertions(site: Path, base_path: str = '') -> None:
     for text in (index, product, dynamic):
         assert text.count(module.SCRIPT_MARKER) == 1
         assert f'src="{expected_src}"' in text
+
     script_syntax(site)
     runtime = (site / module.ASSET_RELATIVE).read_text(encoding='utf-8')
     assert 'affiliate_page_view' in runtime
@@ -67,6 +71,12 @@ def assertions(site: Path, base_path: str = '') -> None:
     assert 'data-alo186-ga4-loader' in runtime
     assert "window.gtag('event',name,params)" in runtime
     assert 'suppressGenericAffiliate' in runtime
+    assert 'installGtagGuard' in runtime
+    assert "const BASE_PARTS=BASE_PATH.split('/').filter(Boolean);" in runtime
+    assert "parts.splice(0,BASE_PARTS.length)" in runtime
+    assert "parts[0]==='chatgpt'" not in runtime
+    assert f'const BASE_PATH={json.dumps(base_path)};' in runtime
+    assert "link.closest('[class*=\"card\"]')?'card'" in runtime
     for parameter in ('affiliate_network', 'page_path', 'content_cluster', 'link_placement', 'link_type', 'product_key', 'measurement_version'):
         assert parameter in runtime
 
@@ -76,7 +86,19 @@ def assertions(site: Path, base_path: str = '') -> None:
     assert {'sponsored', 'nofollow', 'noopener'} <= set((module.get_attr(direct_tag, 'rel') or '').split())
     assert module.get_attr(direct_tag, 'data-affiliate-network') == 'amazon_tr'
     assert module.get_attr(direct_tag, 'data-affiliate-link-type') == 'direct_product'
+    assert module.get_attr(direct_tag, 'data-affiliate-placement') == 'hero'
     assert len(module.get_attr(direct_tag, 'data-affiliate-product-key') or '') == 14
+
+    nested = re.search(r'<a[^>]+class="shop"[^>]+>', product, re.I)
+    assert nested
+    nested_tag = nested.group(0)
+    assert module.get_attr(nested_tag, 'data-affiliate-network') == 'amazon_tr'
+    assert module.get_attr(nested_tag, 'data-affiliate-placement') is None
+    assert module.get_attr(nested_tag, 'data-affiliate-link-type') == 'direct_product'
+
+    comparison = re.search(r'<a[^>]+class="comparison-card"[^>]+>', product, re.I)
+    assert comparison
+    assert module.get_attr(comparison.group(0), 'data-affiliate-placement') == 'comparison'
 
     external = re.search(r'<a[^>]+example\.com/source[^>]+>', index, re.I)
     assert external and 'noopener' in set((module.get_attr(external.group(0), 'rel') or '').split())
@@ -89,12 +111,16 @@ def assertions(site: Path, base_path: str = '') -> None:
     assert inventory['summary']['scannedPages'] == 3
     assert inventory['summary']['instrumentedPages'] == 3
     assert inventory['summary']['staticAffiliatePages'] == 2
-    assert inventory['summary']['staticAffiliateLinks'] == 2
-    assert inventory['summary']['directProductLinks'] == 1
+    assert inventory['summary']['staticAffiliateLinks'] == 3
+    assert inventory['summary']['directProductLinks'] == 2
     assert inventory['summary']['searchLinks'] == 1
     assert inventory['privacy']['rawDestinationUrlStored'] is False
     assert 'amazon.com' not in inventory_text.lower()
     assert 'alo186rehber-21' not in inventory_text
+    placements = [link['placement'] for page in inventory['pages'] for link in page['links']]
+    assert 'runtime_ancestor' in placements
+    assert 'comparison' in placements
+    assert 'hero' in placements
 
     routes = {page['route'] for page in inventory['pages']}
     expected_home = f'{base_path}/' if base_path else '/'
@@ -103,7 +129,7 @@ def assertions(site: Path, base_path: str = '') -> None:
 
     release = json.loads((site / 'pages-release.json').read_text(encoding='utf-8'))
     assert release['affiliateMeasurement']['version'] == 211
-    assert release['affiliateMeasurement']['staticAffiliateLinks'] == 2
+    assert release['affiliateMeasurement']['staticAffiliateLinks'] == 3
     assert release['affiliateMeasurement']['rawDestinationUrlInAnalytics'] is False
     checksums = (site / 'checksums.sha256').read_text(encoding='utf-8')
     assert module.INVENTORY_NAME in checksums
@@ -115,7 +141,7 @@ def test_custom_domain_and_idempotence() -> None:
         site = Path(tmp)
         seed(site)
         first = module.inject(site, '')
-        assert first['ok'] and first['staticAffiliateLinks'] == 2
+        assert first['ok'] and first['staticAffiliateLinks'] == 3
         assertions(site)
         snapshot = {path.relative_to(site).as_posix(): path.read_bytes() for path in site.rglob('*') if path.is_file()}
         second = module.inject(site, '')
@@ -134,7 +160,17 @@ def test_project_path_routes() -> None:
         assertions(site, '/chatgpt')
 
 
+def test_arbitrary_project_path_routes() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        site = Path(tmp)
+        seed(site)
+        result = module.inject(site, '/preview/alo186')
+        assert result['basePath'] == '/preview/alo186'
+        assertions(site, '/preview/alo186')
+
+
 if __name__ == '__main__':
     test_custom_domain_and_idempotence()
     test_project_path_routes()
+    test_arbitrary_project_path_routes()
     print('ALO186 affiliate measurement v211: PASS')
