@@ -1,0 +1,23 @@
+{
+  "version": 211,
+  "generatedAt": "2026-08-02",
+  "source": "ALO186 content authority run133",
+  "routes": [
+    {
+      "path": "/haberler/elektrik-kesintisi-gerilim-dalgalanmasi-cihaz-hasari-edas-tazminat-basvurusu",
+      "file": "haberler/elektrik-kesintisi-gerilim-dalgalanmasi-cihaz-hasari-edas-tazminat-basvurusu/index.html",
+      "intent": "Kesinti veya gerilim dalgalanması sonrası cihaz hasarı için 10 iş günlük EDAŞ başvuru, servis ve nedensellik kanıt dosyası hazırlamak"
+    },
+    {
+      "path": "/haberler/ges-inverter-low-insulation-resistance-riso-low-yagmur-toprak-kacagi-teshis",
+      "file": "haberler/ges-inverter-low-insulation-resistance-riso-low-yagmur-toprak-kacagi-teshis/index.html",
+      "intent": "GES Low Insulation Resistance alarmını nem, string, konnektör, kablo, modül ve toprak kaçağı arasında güvenli biçimde konumlandırmak"
+    },
+    {
+      "path": "/haberler/notr-toprak-arasi-gerilim-yuksek-kac-volt-normal-n-pe-teshis",
+      "file": "haberler/notr-toprak-arasi-gerilim-yuksek-kac-volt-normal-n-pe-teshis/index.html",
+      "intent": "Yük altında ölçülen nötr–toprak gerilimini nötr düşümü, harmonik, hatalı N–PE bağı ve PE sürekliliği arasında ayırmak"
+    }
+  ],
+  "qualityGate": "alo186/tests/test_authority_content_run133.py"
+}
