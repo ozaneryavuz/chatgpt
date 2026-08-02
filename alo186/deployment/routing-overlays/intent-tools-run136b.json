@@ -1,0 +1,22 @@
+{
+  "version": 215,
+  "generatedAt": "2026-08-02",
+  "source": "ALO186 intent tools run136b",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/apartman-site-ev-sarj-gider-paylasim-mutabakat/index.html",
+      "canonicalPath": "/hesaplama/apartman-site-ev-sarj-gider-paylasim-mutabakat/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/vpp-net-gelir-cevrim-maliyeti-on-hesap/index.html",
+      "canonicalPath": "/hesaplama/vpp-net-gelir-cevrim-maliyeti-on-hesap/",
+      "type": "business-tool"
+    },
+    {
+      "source": "alo186/hesaplama/bess-garanti-throughput-kalan-omur-hesabi/index.html",
+      "canonicalPath": "/hesaplama/bess-garanti-throughput-kalan-omur-hesabi/",
+      "type": "business-tool"
+    }
+  ]
+}
