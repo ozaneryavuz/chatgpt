@@ -34,9 +34,11 @@
   const downloadEvidence=document.getElementById('downloadEvidence');
   const downloadNote=document.getElementById('downloadNote');
   let evidenceText='';
+  const consent=()=>window.alo186Analytics?.getConsent?.()==='granted';
   const track=(eventName,resultClass)=>{
-    window.dataLayer=window.dataLayer||[];
-    window.dataLayer.push({event:eventName,result_class:resultClass,tool:'outage_compensation',alo186_no_pii:true});
+    if(!consent())return false;
+    (window.dataLayer=window.dataLayer||[]).push({event:eventName,result_class:resultClass,tool:'outage_compensation',alo186_no_pii:true});
+    return true;
   };
   form.addEventListener('submit',event=>{
     event.preventDefault();
