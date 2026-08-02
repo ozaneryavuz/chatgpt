@@ -108,6 +108,8 @@ jobs:
           import json
           from pathlib import Path
 
+          canonical_origin = 'https://alo186.com'
+          legacy_origin = 'https://www.alo186.com'
           routes = [
               '/amazon-elektrik-urunleri',
               '/amazon-elektrik-urunleri/powerbank-usb-c-secimi',
@@ -124,6 +126,7 @@ jobs:
               search=json.loads((root/'arama/search-index.json').read_text(encoding='utf-8'))
               sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
               entries={item['canonicalPath']: item for item in search['entries']}
+              assert release['canonicalHost'] == canonical_origin
               assert release['routingVersion'] >= 41
               assert release['routeCount'] == len(release['routes'])
               assert release['routeCount'] >= len(routes)
@@ -132,10 +135,13 @@ jobs:
                   file=root/route.strip('/')/'index.html'
                   assert file.is_file(), file
                   html=file.read_text(encoding='utf-8')
-                  canonical_hosts=(f'https://www.alo186.com{route}', f'https://alo186.com{route}')
-                  assert any(value in html for value in canonical_hosts), (root, route, 'canonical')
+                  canonical=f'{canonical_origin}{route}'
+                  legacy=f'{legacy_origin}{route}'
+                  assert canonical in html, (root, route, 'canonical')
+                  assert legacy not in html, (root, route, 'legacy-canonical')
                   assert 'Reklam / satış ortaklığı' in html
-                  assert any(value in sitemap for value in canonical_hosts), (root, route, 'sitemap')
+                  assert canonical in sitemap, (root, route, 'sitemap')
+                  assert legacy not in sitemap, (root, route, 'legacy-sitemap')
                   assert route in entries, route
                   expected=(prefix+route) if prefix else route
                   assert entries[route]['url'] == expected
