@@ -119,6 +119,14 @@ def public_url(base_path: str, route: str) -> str:
     return base_path + route
 
 
+def executable_html_text(text: str) -> str:
+    """Return inline script/style bodies while excluding logical data-* metadata."""
+    chunks: list[str] = []
+    for pattern in (r'<script\b[^>]*>(.*?)</script>', r'<style\b[^>]*>(.*?)</style>'):
+        chunks.extend(re.findall(pattern, text, re.I | re.S))
+    return "\n".join(chunks)
+
+
 def route_exists(site: Path, route: str) -> bool:
     clean = urlsplit(route).path or "/"
     if clean == "/":
@@ -331,6 +339,8 @@ def smoke(site: Path, manifest_path: Path, base_path: str) -> dict:
         known_top_levels = {path.name for path in site.iterdir()}
         base_path_aware_scripts = {
             Path("assets/alo186-ux.js"),
+            Path("assets/affiliate-measurement-v211.js"),
+            Path("assets/alo186-contextual-affiliate-v177.js"),
         }
         for path in sorted(site.rglob("*")):
             if not path.is_file() or path.suffix.lower() not in {".html", ".js", ".css", ".json", ".webmanifest"}:
@@ -339,10 +349,15 @@ def smoke(site: Path, manifest_path: Path, base_path: str) -> dict:
                 continue
             relative_path = path.relative_to(site)
             if relative_path in base_path_aware_scripts:
-                # The shared UX runtime intentionally keeps canonical root routes,
-                # then derives the public prefix from its own script URL.
+                # These runtimes either derive the public prefix dynamically or
+                # keep canonical route identifiers/path separators as data.
                 continue
             text = path.read_text(encoding="utf-8", errors="ignore")
+            if path.suffix.lower() == ".html":
+                # Structural attributes are already checked by PageParser. Keep
+                # scanning executable inline script/style content, but exclude
+                # logical data-* route identifiers that are not browser URLs.
+                text = executable_html_text(text)
             for match in unresolved.finditer(text):
                 rest = match.group("rest")
                 first = rest.split("/", 1)[0].split("?", 1)[0].split("#", 1)[0]
