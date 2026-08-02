@@ -10,27 +10,53 @@ except ImportError:
 # Keep every existing import/function contract while replacing only sitemap output.
 _core.write_effective_sitemap = _write_effective_sitemap
 
-# Compatibility for older content-authority overlays that used `file` and `path`
-# before the production manifest contract standardized on source/canonicalPath/type.
-# The normalized object is still passed through the fail-closed core validator.
+# Content-authority run123 was merged with the historical path/file/intent route
+# shape. Preserve a strict, narrowly-scoped compatibility bridge so the canonical
+# build can recover without weakening validation for other route types.
 _original_validate_route = _core.validate_route
 
 
-def _validate_route_compatible(route: dict, source_label: str) -> dict:
-    if {"source", "canonicalPath", "type"} <= set(route):
+def _validate_route_with_legacy_article_bridge(route: dict, source_label: str) -> dict:
+    modern_fields = {"source", "canonicalPath", "type"}
+    legacy_fields = {"path", "file", "intent"}
+
+    if modern_fields.issubset(route):
         return _original_validate_route(route, source_label)
-    legacy_file = str(route.get("file", "")).strip().lstrip("/")
-    legacy_path = str(route.get("path", "")).strip()
-    if legacy_file and legacy_path:
-        normalized = dict(route)
-        normalized["source"] = f"alo186/{legacy_file}"
-        normalized["canonicalPath"] = legacy_path
-        normalized["type"] = str(route.get("type") or ("article" if legacy_path.startswith("/haberler/") else "guide"))
-        return _original_validate_route(normalized, source_label)
-    return _original_validate_route(route, source_label)
+
+    present_modern = modern_fields.intersection(route)
+    if present_modern:
+        # Mixed/incomplete records must remain invalid rather than being guessed.
+        return _original_validate_route(route, source_label)
+
+    if set(route) != legacy_fields:
+        return _original_validate_route(route, source_label)
+
+    path = str(route["path"]).strip()
+    file_name = str(route["file"]).strip()
+    intent = str(route["intent"]).strip()
+    expected_file = f"{path.strip('/')}/index.html"
+
+    if (
+        not intent
+        or not path.startswith("/haberler/")
+        or path.endswith("/")
+        or "//" in path
+        or not file_name.startswith("haberler/")
+        or file_name != expected_file
+    ):
+        raise ValueError(f"Legacy haber routing kaydı geçersiz ({source_label}): {route!r}")
+
+    return _original_validate_route(
+        {
+            "canonicalPath": path,
+            "source": f"alo186/{file_name}",
+            "type": "article",
+        },
+        source_label,
+    )
 
 
-_core.validate_route = _validate_route_compatible
+_core.validate_route = _validate_route_with_legacy_article_bridge
 
 for _name in dir(_core):
     if _name.startswith("__"):
@@ -38,7 +64,7 @@ for _name in dir(_core):
     globals()[_name] = getattr(_core, _name)
 
 write_effective_sitemap = _write_effective_sitemap
-validate_route = _validate_route_compatible
+validate_route = _validate_route_with_legacy_article_bridge
 
 # Source-inspection compatibility contract.
 #
@@ -67,8 +93,8 @@ FORBIDDEN_PUBLIC_FILE_PATTERNS
 public_copy_ignore
 find_forbidden_public_files
 publicArtifactPolicy
-https://alo186.com
 https://www.alo186.com
+https://alo186.com
 '''
 
 
