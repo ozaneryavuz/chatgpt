@@ -1,0 +1,23 @@
+{
+  "version": 206,
+  "generatedAt": "2026-08-02",
+  "source": "ALO186 content authority run128",
+  "routes": [
+    {
+      "path": "/haberler/parafudr-kirmizi-gosterge-kartus-degisimi-remote-contact-teshis",
+      "file": "haberler/parafudr-kirmizi-gosterge-kartus-degisimi-remote-contact-teshis/index.html",
+      "intent": "Parafudr durum göstergesi, kartuş ömrü ve uzaktan alarm kontağını bakım kabulünde doğrulamak"
+    },
+    {
+      "path": "/haberler/ges-inverter-grid-overvoltage-sebeke-gerilimi-yuksek-ac-kablo-gerilim-yukselmesi-teshis",
+      "file": "haberler/ges-inverter-grid-overvoltage-sebeke-gerilimi-yuksek-ac-kablo-gerilim-yukselmesi-teshis/index.html",
+      "intent": "GES şebeke aşırı gerilim olayını PCC gerilimi, AC kablo yükselmesi ve grid ayarlarından ayırmak"
+    },
+    {
+      "path": "/haberler/vpp-dispatch-komutu-guc-teslim-edilmedi-setpoint-tracking-soc-rezerv-teshis",
+      "file": "haberler/vpp-dispatch-komutu-guc-teslim-edilmedi-setpoint-tracking-soc-rezerv-teshis/index.html",
+      "intent": "VPP dispatch komutunu kaynak uygunluğu, setpoint takibi ve PCC teslimatıyla uçtan uca doğrulamak"
+    }
+  ],
+  "qualityGate": "alo186/tests/test_authority_content_run128.py"
+}
