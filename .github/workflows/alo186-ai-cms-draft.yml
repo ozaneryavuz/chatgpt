@@ -122,7 +122,7 @@ jobs:
       - name: AI CMS birim ve güvenlik testleri
         run: python -m unittest discover -s alo186/ai-cms/tests -p 'test_*.py' -v
 
-      - name: Brief ve AI taslağı üret
+      - name: Brief, kişisel veri kapısı ve AI taslağı üret
         shell: bash
         run: |
           set -euo pipefail
@@ -139,6 +139,9 @@ jobs:
             --internal-links-json "$CMS_INTERNAL_LINKS_JSON" \
             --commerce-category "$CMS_COMMERCE_CATEGORY" \
             --requested-by "$GITHUB_ACTOR"
+          python alo186/ai-cms/input_guard.py \
+            --brief "alo186/ai-cms/briefs/$CMS_SLUG.json" \
+            > /tmp/alo186-ai-cms-input-guard.json
           args=(--slug "$CMS_SLUG")
           if [ -n "$CMS_MODEL" ]; then args+=(--model "$CMS_MODEL"); fi
           python alo186/ai-cms/cms.py ai-draft "${args[@]}"
@@ -154,6 +157,7 @@ jobs:
           test ! -f "alo186/deployment/routing-overlays/ai-cms-$CMS_SLUG.json"
           grep -q 'noindex,nofollow' "alo186/ai-cms/previews/$CMS_SLUG.html"
           grep -q "/cms approve $CMS_SLUG" "alo186/ai-cms/reviews/$CMS_SLUG.md"
+          grep -q '"personalDataSent": false' /tmp/alo186-ai-cms-input-guard.json
 
       - name: Dashboard artifactı
         uses: actions/upload-artifact@v4
@@ -161,6 +165,7 @@ jobs:
           name: alo186-ai-cms-${{ inputs.slug }}-${{ github.run_id }}
           path: |
             /tmp/alo186-ai-cms-dashboard.html
+            /tmp/alo186-ai-cms-input-guard.json
             alo186/ai-cms/reviews/${{ inputs.slug }}.md
             alo186/ai-cms/previews/${{ inputs.slug }}.html
           if-no-files-found: error
@@ -197,6 +202,7 @@ jobs:
           - Risk: \`$CMS_RISK_CLASS\`
           - İçerik türü: \`$CMS_CONTENT_TYPE\`
           - AI modeli: \`${CMS_MODEL:-${ALO186_AI_CMS_MODEL:-policy default}}\`
+          - Kişisel veri input guardı: **başarılı**
           - Durum: **review — canonical yayına dahil değil**
 
           ### İnceleme
@@ -226,6 +232,7 @@ jobs:
 
           ## AI CMS taslağı hazır
 
+          - Kişisel veri input guardı: **başarılı**
           - Canonical yayın: **hayır**
           - İnsan onayı: **bekleniyor**
           - PR: ${{ steps.pr.outputs.url }}
