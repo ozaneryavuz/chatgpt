@@ -37,7 +37,9 @@ jobs:
 
       - name: Python compile ve AI CMS birim testleri
         run: |
-          python -m py_compile alo186/ai-cms/cms.py
+          python -m py_compile \
+            alo186/ai-cms/cms.py \
+            alo186/ai-cms/input_guard.py
           python -m unittest discover -s alo186/ai-cms/tests -p 'test_*.py' -v
 
       - name: İçerik kayıtlarının fail-closed doğrulaması
@@ -88,9 +90,15 @@ jobs:
           draft=Path('.github/workflows/alo186-ai-cms-draft.yml').read_text(encoding='utf-8')
           approve=Path('.github/workflows/alo186-ai-cms-approve.yml').read_text(encoding='utf-8')
           core=Path('alo186/ai-cms/cms.py').read_text(encoding='utf-8')
+          input_guard=Path('alo186/ai-cms/input_guard.py').read_text(encoding='utf-8')
           assert 'OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}' in draft
+          assert 'input_guard.py' in draft
+          assert draft.index('input_guard.py') < draft.index('cms.py ai-draft')
+          assert 'personalDataSent' in draft
           assert 'store": False' in core
           assert 'json_schema' in core and 'strict": True' in core
+          assert 'TCKN_CANDIDATE_RE' in input_guard
+          assert 'IBAN_RE' in input_guard
           assert 'issue_comment:' in approve
           assert 'AUTHOR_ASSOCIATION' in approve
           assert 'OWNER|MEMBER|COLLABORATOR' in approve
