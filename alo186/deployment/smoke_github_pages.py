@@ -118,7 +118,6 @@ def public_url(base_path: str, route: str) -> str:
         return base_path + "/"
     return base_path + route
 
-
 def route_exists(site: Path, route: str) -> bool:
     clean = urlsplit(route).path or "/"
     if clean == "/":
@@ -331,6 +330,8 @@ def smoke(site: Path, manifest_path: Path, base_path: str) -> dict:
         known_top_levels = {path.name for path in site.iterdir()}
         base_path_aware_scripts = {
             Path("assets/alo186-ux.js"),
+            Path("assets/affiliate-measurement-v211.js"),
+            Path("assets/alo186-contextual-affiliate-v177.js"),
         }
         for path in sorted(site.rglob("*")):
             if not path.is_file() or path.suffix.lower() not in {".html", ".js", ".css", ".json", ".webmanifest"}:
@@ -338,9 +339,14 @@ def smoke(site: Path, manifest_path: Path, base_path: str) -> dict:
             if path.name in CANONICAL_METADATA_FILES:
                 continue
             relative_path = path.relative_to(site)
+            if path.suffix.lower() == ".html":
+                # HTML navigation and asset references are validated structurally
+                # through PageParser above. data-* route identifiers are metadata,
+                # not deployable URLs, and must not become false positives here.
+                continue
             if relative_path in base_path_aware_scripts:
-                # The shared UX runtime intentionally keeps canonical root routes,
-                # then derives the public prefix from its own script URL.
+                # These runtimes either derive the public prefix dynamically or
+                # keep canonical route identifiers/path separators as data.
                 continue
             text = path.read_text(encoding="utf-8", errors="ignore")
             for match in unresolved.finditer(text):
