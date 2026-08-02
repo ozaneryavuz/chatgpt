@@ -72,7 +72,7 @@ def test_calculator_prioritizes_safe_shutdown_over_runtime() -> None:
 def test_selector_has_three_classes_three_gates_and_dynamic_links() -> None:
     html = read(ROUTES["selector"])
     assert len(re.findall(r'name="need" value="', html)) == 3
-    assert len(re.findall(r'class="gatebox"', html)) == 4
+    assert len(re.findall(r'class="gatebox(?:\s+[^\"]*)?"', html)) == 4
     for token in (
         "Reklam · Amazon satış ortaklığı",
         "USB iletişimli UPS sınıfı",
