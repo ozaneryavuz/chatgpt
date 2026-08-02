@@ -123,6 +123,21 @@ def test_empty_queue_and_inventory() -> None:
         assert not [finding for finding in findings if finding.level == "error"], findings
 
 
+def test_noindex_redirect_alias_not_flagged_as_duplicate_canonical() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        fixture_repo(root)
+        alias = root / "alo186/legacy-yedek-guc/index.html"
+        alias_html = '<!doctype html><html lang="tr"><head><title>Yönlendirme</title><meta name="robots" content="noindex,follow"><link rel="canonical" href="https://alo186.com/hesaplama/yedek-guc"><meta http-equiv="refresh" content="0; url=/hesaplama/yedek-guc"></head><body><h1>Yönlendiriliyor</h1></body></html>'
+        write(alias, alias_html)
+        _, findings = cms_inventory.build_inventory(root)
+        assert not any(
+            finding.code == "duplicate_canonical_inventory"
+            and finding.subject == "/hesaplama/yedek-guc"
+            for finding in findings
+        ), findings
+
+
 def test_rank_top_three_with_cluster_diversity() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
@@ -223,6 +238,7 @@ def test_cli_plan_outputs_private_artifact() -> None:
 def main() -> None:
     tests = [
         test_empty_queue_and_inventory,
+        test_noindex_redirect_alias_not_flagged_as_duplicate_canonical,
         test_rank_top_three_with_cluster_diversity,
         test_exact_route_collision_fails,
         test_published_low_score_fails_closed,
