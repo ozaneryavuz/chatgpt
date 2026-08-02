@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import html
 import json
+import re
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 ROUTES = {
@@ -23,6 +26,8 @@ HUB_MARKER = 'data-alo186-growth-run10-hub="true"'
 CENTER_MARKER = 'data-alo186-growth-run10-center="true"'
 PORTAL_MARKER = 'data-alo186-growth-run10-journey="true"'
 CORPORATE_MARKER = 'data-alo186-growth-run10-service="true"'
+SITEMAP_NS = "http://www.sitemaps.org/schemas/sitemap/0.9"
+SITEMAP_TAGS = {"urlset", "url", "loc", "lastmod", "changefreq", "priority"}
 
 
 def normalize_base_path(value: str) -> str:
@@ -116,19 +121,71 @@ def inject_corporate(site: Path, base_path: str) -> int:
     return 1
 
 
+def _local_name(tag: str) -> str:
+    return tag.rsplit("}", 1)[-1]
+
+
+def _load_or_recover_sitemap(text: str) -> tuple[ET.Element, bool]:
+    try:
+        root = ET.fromstring(text)
+        if _local_name(root.tag) != "urlset":
+            raise ET.ParseError("Sitemap kökü urlset değil")
+        return root, False
+    except ET.ParseError:
+        # Eski büyüme betikleri XML'e metin eklediği için tek bir bozuk etiket
+        # tüm yayını durdurabiliyordu. Geçerli loc kayıtlarını kurtarıp güvenli
+        # ve ad alanı uyumlu bir sitemap ağacı kur.
+        root = ET.Element(f"{{{SITEMAP_NS}}}urlset")
+        seen: set[str] = set()
+        for raw_loc in re.findall(r"<loc\b[^>]*>(.*?)</loc>", text, re.I | re.S):
+            loc = html.unescape(re.sub(r"<[^>]+>", "", raw_loc)).strip()
+            loc = loc.replace("https://www.alo186.com", "https://alo186.com")
+            if not loc or loc in seen:
+                continue
+            url_node = ET.SubElement(root, f"{{{SITEMAP_NS}}}url")
+            loc_node = ET.SubElement(url_node, f"{{{SITEMAP_NS}}}loc")
+            loc_node.text = loc
+            seen.add(loc)
+        return root, True
+
+
 def append_sitemap(site: Path) -> None:
     path = site / "sitemap.xml"
     if not path.is_file():
         return
-    text = path.read_text(encoding="utf-8")
-    # Site genelindeki tercih edilen alan adı apex'tir. Eski koşunun www URL
-    # üretmesini ve canonical sinyallerini bölmesini engelle.
-    text = text.replace("https://www.alo186.com", "https://alo186.com")
+    root, _recovered = _load_or_recover_sitemap(path.read_text(encoding="utf-8"))
+    namespace = root.tag.split("}", 1)[0].lstrip("{") if "}" in root.tag else SITEMAP_NS
+    ns = f"{{{namespace}}}"
+
+    # Ad alanı taşımayan eski ekleri de tek ve standart sitemap ad alanına al.
+    for element in root.iter():
+        if isinstance(element.tag, str) and _local_name(element.tag) in SITEMAP_TAGS:
+            element.tag = f"{ns}{_local_name(element.tag)}"
+
+    present: set[str] = set()
+    for url_node in root.findall(f"{ns}url"):
+        loc_node = url_node.find(f"{ns}loc")
+        if loc_node is None or not loc_node.text:
+            continue
+        loc_node.text = loc_node.text.strip().replace("https://www.alo186.com", "https://alo186.com")
+        present.add(loc_node.text)
+
     for route in ROUTES.values():
         loc = f"https://alo186.com{route}"
-        if f"<loc>{loc}</loc>" not in text:
-            text = text.replace("</urlset>", f"<url><loc>{loc}</loc></url></urlset>", 1)
-    path.write_text(text, encoding="utf-8")
+        if loc in present:
+            continue
+        url_node = ET.SubElement(root, f"{ns}url")
+        loc_node = ET.SubElement(url_node, f"{ns}loc")
+        loc_node.text = loc
+        present.add(loc)
+
+    ET.register_namespace("", namespace)
+    tree = ET.ElementTree(root)
+    ET.indent(tree, space="  ")
+    tree.write(path, encoding="utf-8", xml_declaration=True)
+    # Yazılan dosyanın sonraki büyüme adımlarına geçmeden parse edilebilir
+    # olduğunu garanti et.
+    ET.parse(path)
 
 
 def append_search(site: Path, base_path: str) -> None:
