@@ -143,11 +143,14 @@ def test_project_path_completion() -> None:
 
 
 def test_live_copy_validator() -> None:
-    home = b'''<!doctype html><html lang="tr"><head><link rel="canonical" href="https://alo186.com/"></head><body><main><h1>60 saniyede doğru elektrik rotası</h1><p>ALO186 bağımsız bilgi platformudur.</p></main></body></html>'''
-    portal = b'''<!doctype html><html lang="tr"><head><link rel="canonical" href="https://alo186.com/elektrik-portali"></head><body><main><h1>Portal</h1><p>ALO186 bağımsız bilgi platformudur. Zararın ortaya çıktığı tarihten itibaren 30 gün içinde ilgili dağıtım şirketinin resmî kanalına başvurun.</p></main></body></html>'''
+    home = '''<!doctype html><html lang="tr"><head><link rel="canonical" href="https://alo186.com/"></head><body><main><h1>60 saniyede doğru elektrik rotası</h1><p>ALO186 bağımsız bilgi platformudur.</p></main></body></html>'''.encode("utf-8")
+    portal = '''<!doctype html><html lang="tr"><head><link rel="canonical" href="https://alo186.com/elektrik-portali"></head><body><main><h1>Portal</h1><p>ALO186 bağımsız bilgi platformudur. Zararın ortaya çıktığı tarihten itibaren 30 gün içinde ilgili dağıtım şirketinin resmî kanalına başvurun.</p></main></body></html>'''.encode("utf-8")
     assert validate_html("home", home, "https://alo186.com/", "/")["forbiddenCopyCount"] == 0
     assert validate_html("portal", portal, "https://alo186.com/elektrik-portali", "/elektrik-portali")["forbiddenCopyCount"] == 0
-    bad = home.replace(b"60 saniyede doğru elektrik rotası", b"Sorun sayfas\xc4\xb1 aramay\xc4\xb1n. Do\xc4\x9fru eylem yolunu se\xc3\xa7in.")
+    bad = home.replace(
+        "60 saniyede doğru elektrik rotası".encode("utf-8"),
+        "Sorun sayfası aramayın. Doğru eylem yolunu seçin.".encode("utf-8"),
+    )
     try:
         validate_html("home", bad, "https://alo186.com/", "/")
     except AssertionError:
