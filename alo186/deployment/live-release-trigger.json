@@ -1,14 +1,15 @@
 {
-  "schemaVersion": 4,
-  "release": "alo186-run135-complete-live-2026-08-02T20:58+03:00",
-  "requestedAt": "2026-08-02T17:58:00Z",
+  "schemaVersion": 5,
+  "release": "alo186-run136-deployment-integrity-live-2026-08-02T21:10+03:00",
+  "requestedAt": "2026-08-02T18:10:00Z",
   "requestedTimeZone": "Europe/Istanbul",
-  "includesMainThrough": "6029ff354c4f6b75e0d952bfff20349c77a923af",
-  "purpose": "Güncel ana daldaki bütün ALO186 içerik, karar aracı, canonical konsolidasyon, affiliate güven, UX ve kalite çalışmalarını tek üretim artifactında derle ve GitHub Pages özel alan adına dağıt.",
+  "includesMainThrough": "000ac7ccc6636b8e3e46450d625a12aa208d60a2",
+  "purpose": "Güncel ana daldaki karar araçlarını, affiliate güven katmanlarını ve içerik konsolidasyonlarını; bozuk sitemap kurtarma, hreflang koruması ve project-path URL denetimi tamamlanmış tek üretim artifactında derleyip GitHub Pages özel alan adına dağıt.",
   "deploymentWorkflow": ".github/workflows/alo186-pages-autobootstrap-live.yml",
   "verificationWorkflow": ".github/workflows/alo186-v177-hosting-aware-live.yml",
   "receiptTargets": [
-    "pull/694",
+    "pull/695",
+    "pull/697",
     "issues/21"
   ],
   "liveDomain": "https://alo186.com",
@@ -25,6 +26,14 @@
     "Bağımsız",
     "Mevcut"
   ],
+  "requiredDeploymentIntegrity": {
+    "malformedSitemapRecovery": true,
+    "sitemapHreflangPreserved": true,
+    "activeCanonicalRoutesOnly": true,
+    "projectBasePathStructuralLinksChecked": true,
+    "projectBasePathInlineExecutableUrlsChecked": true,
+    "logicalDataRouteMetadataExcluded": true
+  },
   "forbiddenPublicClaims": [
     "on iş günü",
     "Product",
