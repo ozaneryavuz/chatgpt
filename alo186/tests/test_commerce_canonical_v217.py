@@ -18,6 +18,7 @@ CANONICAL_ORIGIN = "https://alo186.com"
 LEGACY_ORIGIN = "https://www.alo186.com"
 CANONICAL_LINK = re.compile(r'<link\s+rel=["\']canonical["\']\s+href=["\']([^"\']+)["\']', re.I)
 MALFORMED_HUB_URL = re.compile(r"https://alo186\.com/amazon-elektrik-urunleri(?=[a-z0-9])", re.I)
+UX_MARKER = 'data-alo186-user-experience="true"'
 
 
 def normalized_path(value: str) -> str:
@@ -41,9 +42,14 @@ def artifact_contract() -> dict:
         site = Path(directory) / "site"
         release = build(ROOT, site, "commerce-canonical-v217-test")
         report = release["commercialCanonicalV217"]
+        ux_report = release["userExperiencePreflightV217"]
         assert report["version"] == 217
         assert report["canonicalOrigin"] == CANONICAL_ORIGIN
         assert report["artifactLegacyWwwRejected"] is True
+        assert ux_report["version"] == 217
+        assert ux_report["caseInsensitiveHeadInsertion"] is True
+        assert ux_report["formsResponsive"] is True
+        assert ux_report["injectedPages"] > 0
 
         for route in (*COMMERCIAL_ROUTES, *SERVICE_ROUTES):
             page = site / route.strip("/") / "index.html"
@@ -53,6 +59,11 @@ def artifact_contract() -> dict:
             legacy = f'rel="canonical" href="{LEGACY_ORIGIN}{route}"'
             assert expected in html, (route, expected)
             assert legacy not in html, (route, legacy)
+            assert UX_MARKER in html, route
+
+        power_station = site / "hesaplama/power-station-kapasite-eps-uygunluk/index.html"
+        assert power_station.is_file()
+        assert UX_MARKER in power_station.read_text(encoding="utf-8")
 
         hub = (site / "amazon-elektrik-urunleri/index.html").read_text(encoding="utf-8")
         assert not MALFORMED_HUB_URL.search(hub)
@@ -60,7 +71,8 @@ def artifact_contract() -> dict:
         assert "https://alo186.com/amazon-elektrik-urunleri/nas-ups-usb-snmp-uygunluk-secici/" in hub
         release_file = json.loads((site / "alo186-release.json").read_text(encoding="utf-8"))
         assert release_file["commercialCanonicalV217"] == report
-        return report
+        assert release_file["userExperiencePreflightV217"] == ux_report
+        return {**report, "userExperiencePreflight": ux_report}
 
 
 def main() -> None:
