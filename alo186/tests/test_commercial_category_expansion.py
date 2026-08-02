@@ -163,7 +163,8 @@ class CommercialCategoryExpansionTests(unittest.TestCase):
         unique = set(guide_links)
         self.assertGreaterEqual(len(unique), 7, sorted(unique))
         self.assertEqual(hub.count('class="card route-card"'), len(unique))
-        self.assertIn("ayrı ihtiyacı", hub)
+        self.assertIn("teknik açığı", hub)
+        self.assertIn("mevcut güvenli sistem", hub)
         for route in ROUTES:
             self.assertIn(route, unique)
         self.assertNotIn("/urun-rehberleri/", hub)
