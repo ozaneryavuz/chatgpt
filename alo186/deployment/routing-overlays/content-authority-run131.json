@@ -1,0 +1,23 @@
+{
+  "version": 209,
+  "generatedAt": "2026-08-02",
+  "source": "ALO186 content authority run131",
+  "routes": [
+    {
+      "path": "/haberler/elektrik-sayaci-fazla-yaziyor-fatura-aniden-artti-edas-sayac-kontrol-itiraz",
+      "file": "haberler/elektrik-sayaci-fazla-yaziyor-fatura-aniden-artti-edas-sayac-kontrol-itiraz/index.html",
+      "intent": "Ani fatura artışını gerçek tüketim, okuma dönemi, endeks, çarpan, tahakkuk ve sayaç ölçüm zinciri arasında ayırıp EDAŞ/GTŞ itiraz dosyasına dönüştürmek"
+    },
+    {
+      "path": "/haberler/bess-soc-yuzde-100-kullanilabilir-enerji-dusuk-kalibrasyon-teshis",
+      "file": "haberler/bess-soc-yuzde-100-kullanilabilir-enerji-dusuk-kalibrasyon-teshis/index.html",
+      "intent": "BESS yüzde 100 SoC gösterirken düşük kalan kullanılabilir enerjiyi tahmin sapması, SoH, rezerv, hücre sınırı, sıcaklık, yardımcı yük ve ölçüm noktasıyla ayırmak"
+    },
+    {
+      "path": "/haberler/parafudr-tip-1-tip-2-uc-up-iimp-in-yedek-sigorta-secimi",
+      "file": "haberler/parafudr-tip-1-tip-2-uc-up-iimp-in-yedek-sigorta-secimi/index.html",
+      "intent": "Parafudr Tip 1 ve Tip 2 görevini Uc, Up, Iimp, In/Imax, Isccr, topraklama sistemi, bağlantı yolu ve yedek koruma koordinasyonuyla seçmek"
+    }
+  ],
+  "qualityGate": "alo186/tests/test_authority_content_run131.py"
+}
