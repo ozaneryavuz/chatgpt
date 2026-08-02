@@ -1,0 +1,21 @@
+{
+  "version": 195,
+  "generatedAt": "2026-08-02",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/elektrik-kesintisi-buzdolabi-derin-dondurucu-gida-guvenligi/index.html",
+      "canonicalPath": "/hesaplama/elektrik-kesintisi-buzdolabi-derin-dondurucu-gida-guvenligi/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/buzdolabi-dondurucu-kesinti-gida-guvenligi-secici/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/buzdolabi-dondurucu-kesinti-gida-guvenligi-secici/",
+      "type": "commerce-guide"
+    },
+    {
+      "source": "alo186/sektor-rehberi/buzdolabi-dondurucu-kesinti-30-90-gun-gida-guvenligi-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/buzdolabi-dondurucu-kesinti-30-90-gun-gida-guvenligi-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
