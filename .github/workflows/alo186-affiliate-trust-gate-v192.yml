@@ -1,0 +1,39 @@
+name: ALO186 affiliate güven kapısı v192
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/**'
+      - 'alo186/tests/test_affiliate_trust_gate_v192.py'
+      - '.github/workflows/alo186-affiliate-trust-gate-v192.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/**'
+      - 'alo186/tests/test_affiliate_trust_gate_v192.py'
+      - '.github/workflows/alo186-affiliate-trust-gate-v192.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-affiliate-trust-v192-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript sözdizimi
+        run: node --check alo186/amazon-elektrik-urunleri/commercial.js
+      - name: Üçlü affiliate kapısı ve satın almama sözleşmesi
+        run: python alo186/tests/test_affiliate_trust_gate_v192.py
