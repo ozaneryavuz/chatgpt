@@ -47,12 +47,14 @@ for kind, path in PAGES.items():
     assert not re.search(r'<input[^>]+type="(?:text|email|tel)"', html, re.I)
     assert "<textarea" not in html.lower()
 
-assert "9 özel rehber" in HUB
-assert "dokuz ayrı ihtiyacı" in HUB
+assert "18+ karar rotası" in HUB
+assert "Kampanya için değil, kanıtı yenilemek için geri dönün." in HUB
 assert "/amazon-elektrik-urunleri/kombi-ups-power-station-secimi" in HUB
-assert "/amazon-elektrik-urunleri/buzdolabi-dondurucu-power-station-secimi" in HUB
-assert HUB.count('class="card route-card"') == 9
-assert "Fiyat, stok, satıcı, teslimat, puan ve garanti" in HUB
+assert "/amazon-elektrik-urunleri/buzdolabi-dondurucu-kesinti-gida-guvenligi-secici/" in HUB
+assert HUB.count('class="card route-card"') == 12
+assert HUB.count('data-commercial-route="priority-card"') == 6
+assert HUB.count('data-commercial-route="core-card"') == 6
+assert "fiyat, stok, satıcı, teslimat, puan, yorum ve garanti" in HUB.lower()
 
 for token in [
     "scenario.value === 'planning'",
@@ -81,7 +83,8 @@ subprocess.run(["node", "--check", str(ROOT / "amazon-elektrik-urunleri/applianc
 print(json.dumps({
     "ok": True,
     "guides": 2,
-    "hubGuideCount": 9,
+    "visibleHubDecisionCards": 12,
+    "hubDecisionRouteClaim": "18+",
     "affiliateTripleGate": True,
     "activeOutageCommerceClosed": True,
     "noBuyOutcome": True,
