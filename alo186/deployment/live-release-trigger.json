@@ -1,15 +1,16 @@
 {
   "schemaVersion": 3,
-  "release": "alo186-v177-hosting-aware-live-2026-08-01T23:58+03:00",
-  "requestedAt": "2026-08-01T20:58:00Z",
+  "release": "alo186-v213-full-live-2026-08-02T20:21+03:00",
+  "requestedAt": "2026-08-02T17:21:28Z",
   "requestedTimeZone": "Europe/Istanbul",
-  "includesMainThrough": "42debceca33d41e6cc0d62da3c9ca3e3cc036dbf",
-  "purpose": "Birleştirilmiş ALO186 içerik, UX, affiliate, routing ve kalite çalışmalarını gerçek canlı hosting modunda doğrula; Pages hazırsa tam deploy yap, hazır değilse ChatGPT Sites v177 yüzeyini fail-closed denetle.",
+  "includesMainThrough": "bc93c3282cf049b9ab490eadabfea3f9a3a7fbb6",
+  "purpose": "Main dalında birleşmiş tüm ALO186 içerik, portal satın alma kontrolü v213, UX, affiliate, routing, hukukî güvenlik ve kalite güncellemelerini alo186.com GitHub Pages üretim yüzeyine yayımla; canlı commit, canonical host, kritik rotalar ve v177 affiliate güven sözleşmesini fail-closed doğrula.",
   "deploymentWorkflow": ".github/workflows/alo186-pages-autobootstrap-live.yml",
   "verificationWorkflow": ".github/workflows/alo186-v177-hosting-aware-live.yml",
   "receiptTargets": [
     "pull/606",
-    "issues/21"
+    "issues/21",
+    "issues/613"
   ],
   "liveDomain": "https://alo186.com",
   "requiredLiveRoute": "/amazon-elektrik-urunleri/konuya-gore-urun-haritasi/",
