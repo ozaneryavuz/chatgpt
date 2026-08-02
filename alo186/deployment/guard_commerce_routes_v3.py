@@ -207,12 +207,23 @@ def validate_site(site: Path) -> dict:
     checkpoint_result = portal_checkpoint.inject(resolved, base_path)
     intent_result = intent_tools.inject(resolved, base_path)
     aeo_result = aeo_institutional.inject(resolved, base_path)
+    aeo_validation = aeo_institutional.validate(
+        resolved,
+        Path(__file__).resolve().parents[2],
+        require_release_proof=True,
+    )
+    if not aeo_validation["ok"]:
+        raise RuntimeError(
+            "AEO v219 release gate failed: "
+            + "; ".join(aeo_validation.get("errors", []))
+        )
     result = _original_validate_site(resolved)
     quality_result = live_quality.run(resolved, base_path)
     result["affiliateDecisionFunnel"] = decision_result
     result["portalPurchaseCheckpoint"] = checkpoint_result
     result["intentToolsRun135"] = intent_result
     result["aeoInstitutionalV219"] = aeo_result
+    result["aeoInstitutionalV219Validation"] = aeo_validation
     result["liveQualityV218"] = quality_result
     return result
 

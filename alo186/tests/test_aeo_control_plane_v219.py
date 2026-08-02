@@ -87,6 +87,12 @@ def main() -> None:
     assert any(item["expectedPath"] == "/yayin-politikasi" for item in queries)
     assert "require_release_proof" in inspect.signature(aeo.validate).parameters
 
+    guard_source = (root / "alo186/deployment/guard_commerce_routes_v3.py").read_text(encoding="utf-8")
+    assert "aeo_institutional.validate(" in guard_source
+    assert "require_release_proof=True" in guard_source
+    assert "AEO v219 release gate failed" in guard_source
+    assert 'result["aeoInstitutionalV219Validation"] = aeo_validation' in guard_source
+
     forbidden_output = re.compile(
         r'''(?:ProfilePage|/uzman/|["']@type["']\s*:\s*["']Person["'])''',
         re.I,
