@@ -1,0 +1,21 @@
+{
+  "version": 200,
+  "generatedAt": "2026-08-02",
+  "routes": [
+    {
+      "source": "alo186/sektor-rehberi/elektrik-projesine-baslangic-guc-ihtiyaci-yedek-enerji-sistem-cozumleri/index.html",
+      "canonicalPath": "/sektor-rehberi/elektrik-projesine-baslangic-guc-ihtiyaci-yedek-enerji-sistem-cozumleri/",
+      "type": "guide"
+    },
+    {
+      "source": "alo186/sektor-rehberi/elektrik-odasi-saft-pano-yerlesim-koordinasyonu/index.html",
+      "canonicalPath": "/sektor-rehberi/elektrik-odasi-saft-pano-yerlesim-koordinasyonu/",
+      "type": "guide"
+    },
+    {
+      "source": "alo186/sektor-rehberi/62-villa-22kw-ac-2x180kw-dc-arac-sarj-projesi/index.html",
+      "canonicalPath": "/sektor-rehberi/62-villa-22kw-ac-2x180kw-dc-arac-sarj-projesi/",
+      "type": "guide"
+    }
+  ]
+}
