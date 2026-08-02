@@ -8,6 +8,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 import guard_commerce_routes_v2 as v2
+import inject_affiliate_decision_funnel_v215 as affiliate_decision
 import inject_portal_purchase_checkpoint_v213 as portal_checkpoint
 
 # V2, bağlantının çevresindeki sabit 900 karakteri tarıyordu. Uzun hesaplayıcı
@@ -194,7 +195,7 @@ def _checkpoint_base_path(site: Path) -> str:
         payload = json.loads(release_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         return ""
-    for key in ("affiliateIntentRouter", "homeAffiliateShowcase", "affiliateMeasurement"):
+    for key in ("affiliateDecisionFunnel", "affiliateIntentRouter", "homeAffiliateShowcase", "affiliateMeasurement"):
         value = payload.get(key)
         if isinstance(value, dict) and isinstance(value.get("basePath"), str):
             return value["basePath"]
@@ -203,10 +204,13 @@ def _checkpoint_base_path(site: Path) -> str:
 
 
 def validate_site(site: Path) -> dict:
-    """Son artifacta güven kontrolünü ekler ve ardından ticari yapıyı fail-closed tarar."""
+    """Son artifacta karar hunisini ve portal kontrolünü ekler, ardından ticari yapıyı fail-closed tarar."""
     resolved = site.resolve()
-    checkpoint_result = portal_checkpoint.inject(resolved, _checkpoint_base_path(resolved))
+    base_path = _checkpoint_base_path(resolved)
+    decision_result = affiliate_decision.inject(resolved, base_path)
+    checkpoint_result = portal_checkpoint.inject(resolved, base_path)
     result = _original_validate_site(resolved)
+    result["affiliateDecisionFunnel"] = decision_result
     result["portalPurchaseCheckpoint"] = checkpoint_result
     return result
 
