@@ -8,6 +8,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 import guard_commerce_routes_v2 as v2
+import inject_portal_purchase_checkpoint_v213 as portal_checkpoint
 
 # V2, bağlantının çevresindeki sabit 900 karakteri tarıyordu. Uzun hesaplayıcı
 # sayfalarında başka bir bölümde geçen "topraklama" gibi güvenlik metinleri,
@@ -139,7 +140,6 @@ def scan_affiliate_anchors(path: Path, site: Path) -> list[str]:
     return errors
 
 
-
 # Ürün merkezindeki v210 yönlendiricisi kişisel veri istemeyen üç kapalı
 # seçimden oluşur. V2'nin bütün <form> etiketlerini kişisel veri formu sayan
 # eski kontrolü yalnız bu kesin sözleşme için daraltılır; serbest veya kişisel
@@ -182,7 +182,36 @@ v2.validate_commercial_pages = validate_commercial_pages
 # korunur; yalnız yanlış pozitif üreten anchor bağlam çözümlemesi değiştirilir.
 v2.scan_affiliate_anchors = scan_affiliate_anchors
 
-validate_site = v2.validate_site
+_original_validate_site = v2.validate_site
+
+
+def _checkpoint_base_path(site: Path) -> str:
+    """Mevcut CLI sözleşmesini değiştirmeden Pages base path değerini bulur."""
+    release_path = site / "pages-release.json"
+    if not release_path.is_file():
+        return ""
+    try:
+        payload = json.loads(release_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return ""
+    for key in ("affiliateIntentRouter", "homeAffiliateShowcase", "affiliateMeasurement"):
+        value = payload.get(key)
+        if isinstance(value, dict) and isinstance(value.get("basePath"), str):
+            return value["basePath"]
+    value = payload.get("basePath")
+    return value if isinstance(value, str) else ""
+
+
+def validate_site(site: Path) -> dict:
+    """Son artifacta güven kontrolünü ekler ve ardından ticari yapıyı fail-closed tarar."""
+    resolved = site.resolve()
+    checkpoint_result = portal_checkpoint.inject(resolved, _checkpoint_base_path(resolved))
+    result = _original_validate_site(resolved)
+    result["portalPurchaseCheckpoint"] = checkpoint_result
+    return result
+
+
+v2.validate_site = validate_site
 main = v2.main
 
 
