@@ -10,6 +10,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE_ROOT = ROOT / "alo186/amazon-elektrik-urunleri"
 OVERLAY = ROOT / "alo186/deployment/routing-overlays/commercial-category-pages-v41.json"
+CANONICAL_ORIGIN = "https://alo186.com"
+LEGACY_ORIGIN = "https://www.alo186.com"
 ROUTES = {
     "/amazon-elektrik-urunleri": SOURCE_ROOT / "index.html",
     "/amazon-elektrik-urunleri/powerbank-usb-c-secimi": SOURCE_ROOT / "powerbank-usb-c-secimi/index.html",
@@ -67,7 +69,8 @@ class CommercialCategoryPagesTests(unittest.TestCase):
             self.assertNotIn(h1, headings)
             titles.add(title)
             headings.add(h1)
-            self.assertIn(f'<link rel="canonical" href="https://www.alo186.com{route}">', html)
+            self.assertIn(f'<link rel="canonical" href="{CANONICAL_ORIGIN}{route}">', html)
+            self.assertNotIn(f'<link rel="canonical" href="{LEGACY_ORIGIN}{route}">', html)
             self.assertIn('meta name="description"', html)
             self.assertIn("Reklam / satış ortaklığı", html)
             self.assertIn("application/ld+json", html)
