@@ -1,0 +1,21 @@
+{
+  "version": 193,
+  "generatedAt": "2026-08-02",
+  "routes": [
+    {
+      "canonicalPath": "/haberler/ups-battery-breaker-open-battery-disconnected-aku-devresi-teshis",
+      "source": "alo186/haberler/ups-battery-breaker-open-battery-disconnected-aku-devresi-teshis/index.html",
+      "type": "article"
+    },
+    {
+      "canonicalPath": "/haberler/ucuncu-harmonik-notr-asiri-akim-kablo-pano-isinma-teshis",
+      "source": "alo186/haberler/ucuncu-harmonik-notr-asiri-akim-kablo-pano-isinma-teshis/index.html",
+      "type": "article"
+    },
+    {
+      "canonicalPath": "/haberler/edas-gerilim-kalitesi-olcum-talebi-dusuk-yuksek-voltaj-sikayet-dosyasi",
+      "source": "alo186/haberler/edas-gerilim-kalitesi-olcum-talebi-dusuk-yuksek-voltaj-sikayet-dosyasi/index.html",
+      "type": "article"
+    }
+  ]
+}
