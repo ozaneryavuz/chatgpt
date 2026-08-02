@@ -1,0 +1,144 @@
+name: ALO186 affiliate measurement v211
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/deployment/inject_affiliate_measurement_v211.py'
+      - 'alo186/tests/test_affiliate_measurement_v211.py'
+      - 'alo186/audits/affiliate-measurement-v211-2026-08-02.md'
+      - '.github/workflows/alo186-affiliate-measurement-v211.yml'
+      - '.github/workflows/alo186-github-pages.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/deployment/inject_affiliate_measurement_v211.py'
+      - 'alo186/tests/test_affiliate_measurement_v211.py'
+      - 'alo186/audits/affiliate-measurement-v211-2026-08-02.md'
+      - '.github/workflows/alo186-affiliate-measurement-v211.yml'
+      - '.github/workflows/alo186-github-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-affiliate-measurement-v211-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    env:
+      SITE: /tmp/alo186-affiliate-measurement-v211
+      BASE: ''
+      GA4: ${{ vars.ALO186_GA4_MEASUREMENT_ID || 'G-639TVHL0LC' }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+
+      - name: Birim ve sözdizimi testleri
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            alo186/deployment/inject_affiliate_measurement_v211.py \
+            alo186/tests/test_affiliate_measurement_v211.py
+          python alo186/tests/test_affiliate_measurement_v211.py
+
+      - name: Canonical artifactı oluştur ve affiliate katmanlarını uygula
+        run: |
+          set -euo pipefail
+          rm -rf "$SITE"
+          python alo186/deployment/build_static_site.py --output "$SITE" --commit "$GITHUB_SHA"
+          python alo186/deployment/prepare_github_pages.py --site "$SITE" --base-path "$BASE" --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py --site "$SITE" --base-path "$BASE"
+          python alo186/deployment/inject_contextual_affiliate_growth_v177.py --site "$SITE" --base-path "$BASE"
+          python alo186/deployment/inject_home_affiliate_banner_v209.py --site "$SITE" --base-path "$BASE"
+          python alo186/deployment/inject_affiliate_intent_router_v210.py --site "$SITE" --base-path "$BASE" | tee /tmp/affiliate-intent-v210.json
+          python alo186/deployment/inject_ga4_consent.py --site "$SITE" --base-path "$BASE" --measurement-id "$GA4"
+          python alo186/deployment/inject_affiliate_measurement_v211.py --site "$SITE" --base-path "$BASE" | tee /tmp/affiliate-measurement-v211-receipt.json
+
+      - name: v211 JavaScript sözdizimi
+        run: |
+          set -euo pipefail
+          node --check "$SITE/assets/affiliate-measurement-v211.js" 2>&1 | tee /tmp/affiliate-measurement-v211-node.log
+
+      - name: GitHub Pages smoke
+        run: |
+          set -euo pipefail
+          python alo186/deployment/smoke_github_pages.py --site "$SITE" --base-path "$BASE" 2>&1 | tee /tmp/affiliate-measurement-v211-smoke.log
+
+      - name: Ticari rota güvenlik kapısı
+        run: |
+          set -euo pipefail
+          python alo186/deployment/guard_commerce_routes_v3.py --site "$SITE" 2>&1 | tee /tmp/affiliate-measurement-v211-guard.log
+
+      - name: Ölçüm, gizlilik ve yayın sözleşmesi
+        run: |
+          set -euo pipefail
+          SITE="$SITE" python - <<'PY' 2>&1 | tee /tmp/affiliate-measurement-v211-contract.log
+          import json
+          import os
+          from pathlib import Path
+
+          site = Path(os.environ['SITE'])
+          inventory_path = site / 'affiliate-measurement-v211.json'
+          release_path = site / 'pages-release.json'
+          inventory_text = inventory_path.read_text(encoding='utf-8')
+          inventory = json.loads(inventory_text)
+          release = json.loads(release_path.read_text(encoding='utf-8'))
+          summary = inventory['summary']
+
+          assert inventory['version'] == 211
+          assert inventory['events'] == ['affiliate_page_view', 'affiliate_click']
+          assert summary['scannedPages'] > 0
+          assert summary['instrumentedPages'] == summary['scannedPages']
+          assert summary['normalizedAffiliateLinks'] == summary['staticAffiliateLinks']
+          assert inventory['privacy']['rawDestinationUrlStored'] is False
+          assert inventory['privacy']['rawSearchQueryStored'] is False
+          assert inventory['privacy']['userIdentifierStored'] is False
+          assert 'amazon.com' not in inventory_text.lower()
+          assert 'alo186rehber-21' not in inventory_text
+          assert release['affiliateMeasurement']['version'] == 211
+          assert release['affiliateMeasurement']['rawDestinationUrlInAnalytics'] is False
+          assert release['affiliateMeasurement']['personalIdentifiers'] is False
+
+          home = (site / 'index.html').read_text(encoding='utf-8')
+          assert home.count('data-alo186-affiliate-measurement-v211="true"') == 1
+          assert home.index('data-alo186-ga4-consent="true"') < home.index('data-alo186-affiliate-measurement-v211="true"')
+          asset = (site / 'assets/affiliate-measurement-v211.js').read_text(encoding='utf-8')
+          for event in ('affiliate_page_view', 'affiliate_click'):
+              assert event in asset
+          for field in (
+              'affiliate_network', 'page_path', 'content_cluster',
+              'link_placement', 'link_type', 'product_key', 'measurement_version',
+          ):
+              assert field in asset
+          assert "getConsent?.()==='granted'" in asset
+          assert '__alo186AffiliateV211' in asset
+          assert 'destination_url' not in asset
+          assert 'link_url' not in asset
+          print(json.dumps(summary, ensure_ascii=False, indent=2))
+          PY
+
+      - if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: alo186-affiliate-measurement-v211-receipt
+          path: |
+            /tmp/affiliate-measurement-v211-receipt.json
+            /tmp/affiliate-intent-v210.json
+            /tmp/affiliate-measurement-v211-node.log
+            /tmp/affiliate-measurement-v211-smoke.log
+            /tmp/affiliate-measurement-v211-guard.log
+            /tmp/affiliate-measurement-v211-contract.log
+            /tmp/alo186-affiliate-measurement-v211/affiliate-measurement-v211.json
+            /tmp/alo186-affiliate-measurement-v211/pages-release.json
+          if-no-files-found: warn
+          retention-days: 45

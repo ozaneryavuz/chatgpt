@@ -139,6 +139,45 @@ def scan_affiliate_anchors(path: Path, site: Path) -> list[str]:
     return errors
 
 
+
+# Ürün merkezindeki v210 yönlendiricisi kişisel veri istemeyen üç kapalı
+# seçimden oluşur. V2'nin bütün <form> etiketlerini kişisel veri formu sayan
+# eski kontrolü yalnız bu kesin sözleşme için daraltılır; serbest veya kişisel
+# veri alanı eklenirse kapı yeniden kapanır.
+_original_validate_commercial_pages = v2.validate_commercial_pages
+
+
+def _trusted_closed_choice_router(site: Path) -> bool:
+    path = v2.route_file(site, "/amazon-elektrik-urunleri")
+    if not path.is_file():
+        return False
+    html = path.read_text(encoding="utf-8", errors="ignore")
+    if 'data-alo186-affiliate-intent-v210="true"' not in html:
+        return False
+    forms = re.findall(r"<form\b(?P<attrs>[^>]*)>(?P<body>.*?)</form>", html, re.I | re.S)
+    if len(forms) != 1:
+        return False
+    attrs, body = forms[0]
+    if "data-affiliate-intent-form" not in attrs:
+        return False
+    if re.search(r"<(?:input|textarea)\b", body, re.I):
+        return False
+    if re.search(r"\b(?:email|tel|phone|address|surname|file|location|message)\b", body, re.I):
+        return False
+    names = re.findall(r"<select\b[^>]*\bname=[\"']([^\"']+)[\"']", body, re.I)
+    return names == ["need", "duration", "status"]
+
+
+def validate_commercial_pages(site: Path) -> tuple[list[str], dict]:
+    errors, stats = _original_validate_commercial_pages(site)
+    if _trusted_closed_choice_router(site):
+        blocked = "/amazon-elektrik-urunleri: ticari içerik sayfası kişisel veri formu içermemeli"
+        errors = [error for error in errors if error != blocked]
+    return errors, stats
+
+
+v2.validate_commercial_pages = validate_commercial_pages
+
 # V2'nin ticari sayfa, hizmet, katalog, canonical ve rapor sözleşmeleri aynen
 # korunur; yalnız yanlış pozitif üreten anchor bağlam çözümlemesi değiştirilir.
 v2.scan_affiliate_anchors = scan_affiliate_anchors

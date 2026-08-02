@@ -1,0 +1,69 @@
+name: ALO186 commerce trust v212
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/index.html'
+      - 'alo186/amazon-elektrik-urunleri/akim-korumali-grup-priz-secimi/index.html'
+      - 'alo186/amazon-elektrik-urunleri/modem-mini-ups-secimi/index.html'
+      - 'alo186/amazon-elektrik-urunleri/acil-aydinlatma-duman-alarmi/index.html'
+      - 'alo186/deployment/guard_commerce_routes_v3.py'
+      - 'alo186/tests/test_commerce_trust_v212.py'
+      - '.github/workflows/alo186-commerce-trust-v212.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/index.html'
+      - 'alo186/amazon-elektrik-urunleri/akim-korumali-grup-priz-secimi/index.html'
+      - 'alo186/amazon-elektrik-urunleri/modem-mini-ups-secimi/index.html'
+      - 'alo186/amazon-elektrik-urunleri/acil-aydinlatma-duman-alarmi/index.html'
+      - 'alo186/deployment/guard_commerce_routes_v3.py'
+      - 'alo186/tests/test_commerce_trust_v212.py'
+      - '.github/workflows/alo186-commerce-trust-v212.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-commerce-trust-v212-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    env:
+      SITE: /tmp/alo186-commerce-trust-v212
+      GA4: ${{ vars.ALO186_GA4_MEASUREMENT_ID || 'G-639TVHL0LC' }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Birim ve fail-closed sözleşmesi
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            alo186/deployment/guard_commerce_routes_v3.py \
+            alo186/tests/test_commerce_trust_v212.py
+          python alo186/tests/test_commerce_trust_v212.py
+      - name: Canonical üretim artifactı ve ticari güven kapısı
+        run: |
+          set -euo pipefail
+          rm -rf "$SITE"
+          python alo186/deployment/build_static_site.py --output "$SITE" --commit "$GITHUB_SHA"
+          python alo186/deployment/prepare_github_pages.py --site "$SITE" --base-path '' --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py --site "$SITE" --base-path ''
+          python alo186/deployment/inject_contextual_affiliate_v176.py --site "$SITE" --base-path ''
+          python alo186/deployment/inject_home_affiliate_banner_v209.py --site "$SITE" --base-path ''
+          python alo186/deployment/inject_affiliate_intent_router_v210.py --site "$SITE" --base-path ''
+          python alo186/deployment/inject_ga4_consent.py --site "$SITE" --base-path '' --measurement-id "$GA4"
+          python alo186/deployment/inject_affiliate_measurement_v211.py --site "$SITE" --base-path ''
+          node --check "$SITE/assets/affiliate-measurement-v211.js"
+          python alo186/deployment/smoke_github_pages.py --site "$SITE" --base-path ''
+          python alo186/deployment/guard_commerce_routes_v3.py --site "$SITE"

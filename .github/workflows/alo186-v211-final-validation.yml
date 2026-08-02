@@ -1,0 +1,68 @@
+name: ALO186 v211 final validation
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/alo186-v211-final-validation.yml'
+      - 'alo186/haberler/elektrik-kesintisi-gerilim-dalgalanmasi-cihaz-hasari-edas-tazminat-basvurusu/index.html'
+      - 'alo186/tests/test_authority_content_run133.py'
+      - 'alo186/deployment/routing-overlays/content-authority-run133.json'
+      - 'alo186/deployment/inject_affiliate_measurement_v211.py'
+      - 'alo186/deployment/guard_commerce_routes_v3.py'
+  push:
+    branches:
+      - agent/affiliate-measurement-v211
+    paths:
+      - '.github/workflows/alo186-v211-final-validation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-v211-final-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      SITE: /tmp/alo186-v211-final-validation
+      GA4: ${{ vars.ALO186_GA4_MEASUREMENT_ID || 'G-639TVHL0LC' }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Birim, mevzuat ve affiliate güven testleri
+        run: |
+          set -euo pipefail
+          python alo186/tests/test_authority_content_run133.py
+          python alo186/tests/test_commerce_trust_v212.py
+          python alo186/tests/test_affiliate_measurement_v211.py
+          python -m py_compile \
+            alo186/deployment/inject_affiliate_measurement_v211.py \
+            alo186/deployment/guard_commerce_routes_v3.py
+      - name: Canonical üretim artifactı
+        run: |
+          set -euo pipefail
+          rm -rf "$SITE"
+          python alo186/deployment/build_static_site.py --output "$SITE" --commit "$GITHUB_SHA"
+          python alo186/deployment/prepare_github_pages.py --site "$SITE" --base-path '' --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
+          python alo186/deployment/inject_outcome_runtime.py --site "$SITE" --base-path ''
+          python alo186/deployment/inject_contextual_affiliate_v176.py --site "$SITE" --base-path ''
+          python alo186/deployment/inject_home_affiliate_banner_v209.py --site "$SITE" --base-path ''
+          python alo186/deployment/inject_affiliate_intent_router_v210.py --site "$SITE" --base-path ''
+          python alo186/deployment/inject_ga4_consent.py --site "$SITE" --base-path '' --measurement-id "$GA4"
+          python alo186/deployment/inject_affiliate_measurement_v211.py --site "$SITE" --base-path ''
+          node --check "$SITE/assets/affiliate-measurement-v211.js"
+          python alo186/deployment/smoke_github_pages.py --site "$SITE" --base-path ''
+          python alo186/deployment/guard_commerce_routes_v3.py --site "$SITE"
+          grep -q 'zararın ortaya çıktığı tarihten itibaren 30 gün içinde' "$SITE/haberler/elektrik-kesintisi-gerilim-dalgalanmasi-cihaz-hasari-edas-tazminat-basvurusu/index.html"
+          ! grep -Eqi '10 iş günlük|on iş günü içinde dağıtım şirketine talep|Ten Business Days' "$SITE/haberler/elektrik-kesintisi-gerilim-dalgalanmasi-cihaz-hasari-edas-tazminat-basvurusu/index.html"

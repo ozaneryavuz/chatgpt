@@ -60,7 +60,8 @@ def test_aeo_schema_and_user_value_contract() -> None:
 
 def test_topic_specific_fail_closed_guards() -> None:
     damage = PAGES["damage"].read_text(encoding="utf-8")
-    assert all(term in damage for term in ["on iş günü", "Servis raporu", "sayaç mührüne", "cihaz hasarı kanıt"])
+    assert all(term in damage for term in ["30 gün", "Servis raporu", "sayaç mührüne", "cihaz hasarı kanıt"])
+    assert not re.search(r"10 iş günlük|on iş günü içinde dağıtım şirketine talep|Ten Business Days", damage, re.I)
     riso = PAGES["riso"].read_text(encoding="utf-8")
     assert all(term in riso for term in ["Riso Low", "konnektörleri yük altında ayırmayın", "megger", "GES yalıtım arızası"])
     npe = PAGES["npe"].read_text(encoding="utf-8")
@@ -75,6 +76,9 @@ def test_routing_overlay() -> None:
     for route in data["routes"]:
         assert route["path"].startswith("/haberler/")
         assert (ROOT / route["file"]).exists()
+    damage_route = next(route for route in data["routes"] if "cihaz-hasari" in route["path"])
+    assert "30 günlük" in damage_route["intent"]
+    assert "10 iş" not in damage_route["intent"]
     assert data["qualityGate"].endswith("test_authority_content_run133.py")
 
 
