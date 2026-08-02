@@ -1,0 +1,21 @@
+{
+  "version": 192,
+  "generatedAt": "2026-08-02",
+  "routes": [
+    {
+      "canonicalPath": "/haberler/jenerator-emergency-stop-active-acil-stop-devresi-kablo-kontak-teshis",
+      "source": "alo186/haberler/jenerator-emergency-stop-active-acil-stop-devresi-kablo-kontak-teshis/index.html",
+      "type": "article"
+    },
+    {
+      "canonicalPath": "/haberler/frekans-inverteri-overcurrent-hizlanmada-asiri-akim-motor-stall-teshis",
+      "source": "alo186/haberler/frekans-inverteri-overcurrent-hizlanmada-asiri-akim-motor-stall-teshis/index.html",
+      "type": "article"
+    },
+    {
+      "canonicalPath": "/haberler/ev-sarj-ocpp-offline-heartbeat-timeout-csms-baglanti-teshis",
+      "source": "alo186/haberler/ev-sarj-ocpp-offline-heartbeat-timeout-csms-baglanti-teshis/index.html",
+      "type": "article"
+    }
+  ]
+}
