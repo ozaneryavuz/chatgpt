@@ -1,0 +1,21 @@
+{
+  "version": 204,
+  "generatedAt": "2026-08-02",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/cpap-elektrik-kesintisi-batarya-calisma-suresi/index.html",
+      "canonicalPath": "/hesaplama/cpap-elektrik-kesintisi-batarya-calisma-suresi/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/cpap-yedek-guc-uygunluk-secici/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/cpap-yedek-guc-uygunluk-secici/",
+      "type": "commerce-guide"
+    },
+    {
+      "source": "alo186/sektor-rehberi/cpap-elektrik-kesintisi-30-90-gun-hazirlik-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/cpap-elektrik-kesintisi-30-90-gun-hazirlik-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
