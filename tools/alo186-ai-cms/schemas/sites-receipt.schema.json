@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://alo186.com/schemas/chatgpt-sites-receipt-v220.json",
+  "title": "ALO186 ChatGPT Sites yayın makbuzu",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "siteSlug",
+    "sourceCommit",
+    "contentId",
+    "contentHash",
+    "canonicalUrl",
+    "deploymentUrl",
+    "publishedAt",
+    "liveVerified"
+  ],
+  "properties": {
+    "siteSlug": {"const": "alo186"},
+    "sourceCommit": {"type": "string", "pattern": "^[0-9a-f]{7,40}$"},
+    "contentId": {"type": "string"},
+    "contentHash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "canonicalUrl": {"type": "string", "pattern": "^https://alo186\\.com/"},
+    "deploymentUrl": {"type": "string", "format": "uri"},
+    "publishedAt": {"type": "string", "format": "date-time"},
+    "liveVerified": {"type": "boolean"},
+    "verification": {
+      "type": "object",
+      "properties": {
+        "httpStatus": {"type": "integer"},
+        "canonicalMatched": {"type": "boolean"},
+        "titleMatched": {"type": "boolean"},
+        "structuredDataPresent": {"type": "boolean"}
+      }
+    }
+  }
+}
