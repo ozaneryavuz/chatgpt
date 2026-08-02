@@ -99,16 +99,16 @@ def test_hub_routes_existing_calculators_selectors_and_repeat_tests() -> None:
         assert path in html, path
 
 
-def test_commerce_hub_uses_apex_and_discloses_before_routes() -> None:
+def test_commerce_hub_uses_apex_and_discloses_before_visible_routes() -> None:
     html = read(COMMERCE)
     assert '<link rel="canonical" href="https://alo186.com/amazon-elektrik-urunleri/">' in html
     assert "https://www.alo186.com" not in html
     assert "/kesinti-cihaz-surekliligi-karar-merkezi/" in html
     assert "Mevcut sistem yeterliyse satın alma yok" in html
     assert "Aktif tehlikede satış yolu kapalı" in html
-    disclosure = html.index("Reklam / satış ortaklığı açıklaması")
-    first_priority_route = html.index("/amazon-elektrik-urunleri/modem-ont-mini-ups-yedekleme-secici/")
-    assert disclosure < first_priority_route
+    disclosure = html.index('<div class="affiliate-disclosure">')
+    visible_priority_section = html.index('<section class="section" aria-labelledby="priorityTitle">')
+    assert disclosure < visible_priority_section
     assert {"CollectionPage", "ItemList", "FAQPage", "BreadcrumbList"}.issubset(
         graph_types(json_ld_documents(html))
     )
