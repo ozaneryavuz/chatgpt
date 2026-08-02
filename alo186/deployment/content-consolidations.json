@@ -1,6 +1,6 @@
 {
-  "version": 7,
-  "generatedAt": "2026-08-01",
+  "version": 8,
+  "generatedAt": "2026-08-02",
   "consolidations": [
     {
       "intentKey": "lifepo4-low-temperature-charging",
@@ -85,6 +85,48 @@
       "canonicalPath": "/haberler/kacak-akim-rolesi-ramp-testi-acma-akimi-suresi",
       "label": "Kaçak akım rölesi ramp testi, açma akımı ve açma süresi",
       "reason": "İki rehber aynı RCD ramp testi, 0,5×/1×/5× IΔn, açma akımı ve açma süresi yorumlama niyetini hedefliyor. Arama sinyallerini bölmemek ve daha kısa, önce yayımlanan URL'yi korumak için tek canonical rotada birleştirildi."
+    },
+    {
+      "intentKey": "generator-reverse-power-ansi32-legacy",
+      "aliasPath": "/haberler/jenerator-ters-guc-reverse-power-alarmi-ansi-32",
+      "canonicalPath": "/haberler/jenerator-reverse-power-ansi-32r-motoring-ct-polarite-teshis",
+      "label": "Jeneratör Reverse Power ve ANSI 32R teşhisi",
+      "reason": "Negatif kW, motoring, prime mover tork kaybı, CT/VT faz eşleşmesi ve güç yönü ölçümünü hedefleyen tarihsel rehberler en güncel ve kapsamlı teşhis rotasında birleştirildi."
+    },
+    {
+      "intentKey": "generator-reverse-power-ansi32r-alarm",
+      "aliasPath": "/haberler/jenerator-ters-guc-reverse-power-alarmi-ansi-32r",
+      "canonicalPath": "/haberler/jenerator-reverse-power-ansi-32r-motoring-ct-polarite-teshis",
+      "label": "Jeneratör ters güç alarmı ve ANSI 32R",
+      "reason": "Aynı Reverse Power alarmı, motoring ve ölçüm zinciri niyetini karşılayan sayfa güncel CT polaritesi ve prime mover teşhis rehberinde birleştirildi."
+    },
+    {
+      "intentKey": "generator-reverse-power-motoring-protection",
+      "aliasPath": "/haberler/jenerator-reverse-power-ters-guc-ansi-32r-motoring-koruma",
+      "canonicalPath": "/haberler/jenerator-reverse-power-ansi-32r-motoring-ct-polarite-teshis",
+      "label": "Jeneratör Reverse Power motoring koruması",
+      "reason": "ANSI 32R, motoring, negatif aktif güç ve ölçüm polaritesi aynı kullanıcı görevini hedeflediği için tek canonical teşhis zincirinde toplandı."
+    },
+    {
+      "intentKey": "generator-reverse-power-negative-kw-ct",
+      "aliasPath": "/haberler/jenerator-reverse-power-ansi-32r-negatif-kw-ct-polarite-teshis",
+      "canonicalPath": "/haberler/jenerator-reverse-power-ansi-32r-motoring-ct-polarite-teshis",
+      "label": "Jeneratör negatif kW ve CT polaritesi teşhisi",
+      "reason": "Başlık, H1 ve teşhis zinciri aynı Reverse Power arama niyetini karşılıyor; ölçüm ve mekanik nedenleri birlikte ele alan güncel rota canonical seçildi."
+    },
+    {
+      "intentKey": "ups-fan-overtemperature-derating",
+      "aliasPath": "/haberler/ups-fan-failure-overtemperature-yuksek-sicaklik-derating-teshis",
+      "canonicalPath": "/haberler/ups-fan-failure-overtemperature-hava-akisi-filtre-teshis",
+      "label": "UPS Fan Failure ve Overtemperature teşhisi",
+      "reason": "Fan, filtre, hava yolu, ortam sıcaklığı, yük, sensör ve termal derating aynı arama görevini hedefliyor; en güncel fan tach ve yüklü termal kabul rehberinde birleştirildi."
+    },
+    {
+      "intentKey": "generator-underfrequency-governor-hunting",
+      "aliasPath": "/haberler/jenerator-underfrequency-dusuk-frekans-governor-hunting-yuk-alma",
+      "canonicalPath": "/haberler/jenerator-underfrequency-dusuk-frekans-governor-yuk-adimi-teshis",
+      "label": "Jeneratör Underfrequency ve düşük frekans teşhisi",
+      "reason": "Düşük frekans, governor/actuator, yakıt-hava yolu, yük adımı ve toparlanma süresini hedefleyen iki rehber güncel yük adımı teşhis rotasında birleştirildi."
     }
   ]
 }
