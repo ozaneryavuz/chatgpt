@@ -40,6 +40,23 @@ def test_source_contract_uses_apex_and_redirects_www() -> None:
     assert 'Access-Control-Allow-Origin "https://alo186.com"' in apache
 
 
+def test_no_test_hardcodes_legacy_www_for_sitemap() -> None:
+    legacy_literals = (LEGACY, r"https:\/\/www\.alo186\.com")
+    offenders: list[str] = []
+    candidates = list((ROOT / "alo186").glob("**/test.js"))
+    candidates.extend((ROOT / "alo186/tests").glob("test*.js"))
+    candidates.extend((ROOT / "alo186/tests").glob("test*.py"))
+
+    for candidate in sorted(set(candidates)):
+        for line_number, line in enumerate(candidate.read_text(encoding="utf-8").splitlines(), start=1):
+            if "sitemap" not in line.lower():
+                continue
+            if any(literal in line for literal in legacy_literals):
+                offenders.append(f"{candidate.relative_to(ROOT)}:{line_number}")
+
+    assert offenders == []
+
+
 def test_full_production_bundle_contains_only_apex_canonicals(tmp_path: Path) -> None:
     output = tmp_path / "site"
     release = build_static_site.build(ROOT, output, "apex-contract-test")
