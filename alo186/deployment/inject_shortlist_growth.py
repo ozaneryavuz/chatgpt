@@ -217,11 +217,21 @@ def reconcile_sitemap_with_release(site: Path) -> dict:
     release_path=site / "alo186-release.json"
     if not sitemap_path.is_file() or not release_path.is_file():
         raise FileNotFoundError("Sitemap veya release envanteri bulunamadı")
-    tree=ET.parse(sitemap_path)
-    root=tree.getroot()
-    namespace=root.tag.split("}")[0].strip("{") if "}" in root.tag else ""
-    ns=f"{{{namespace}}}" if namespace else ""
     release=json.loads(release_path.read_text(encoding="utf-8"))
+    recovered_malformed=False
+    try:
+        tree=ET.parse(sitemap_path)
+        root=tree.getroot()
+        namespace=root.tag.split("}")[0].strip("{") if "}" in root.tag else ""
+    except ET.ParseError:
+        # The release inventory is the fail-closed source of truth. A previous
+        # legacy growth injector may leave partially written XML; rebuild only
+        # from active canonical routes instead of publishing a broken sitemap.
+        namespace="http://www.sitemaps.org/schemas/sitemap/0.9"
+        root=ET.Element(f"{{{namespace}}}urlset")
+        tree=ET.ElementTree(root)
+        recovered_malformed=True
+    ns=f"{{{namespace}}}" if namespace else ""
     def normalized_path(value: str) -> str:
         parsed=urlsplit(str(value or "")).path or "/"
         return parsed.rstrip("/") or "/"
@@ -232,22 +242,27 @@ def reconcile_sitemap_with_release(site: Path) -> dict:
             present.add(normalized_path(loc.text))
     added=[]
     canonical_host=str(release.get("canonicalHost") or "https://www.alo186.com").rstrip("/")
+    pages_release_path=site / "pages-release.json"
+    pages_release=json.loads(pages_release_path.read_text(encoding="utf-8")) if pages_release_path.is_file() else {}
+    release_base_path=normalize_base_path(str(pages_release.get("basePath") or ""))
     for route in release.get("routes",[]):
         canonical_path=str(route.get("canonicalPath") or "").strip()
         if not canonical_path:
             continue
         route_path=normalized_path(canonical_path)
+        if release_base_path and (route_path == release_base_path or route_path.startswith(release_base_path + "/")):
+            route_path=route_path[len(release_base_path):] or "/"
         if route_path in present:
             continue
         url=ET.SubElement(root,f"{ns}url")
         loc=ET.SubElement(url,f"{ns}loc")
-        loc.text=f"{canonical_host}{canonical_path}"
+        loc.text=f"{canonical_host}{route_path}"
         present.add(route_path)
         added.append(canonical_path)
     ET.register_namespace("",namespace)
     ET.indent(tree,space="  ")
     tree.write(sitemap_path,encoding="utf-8",xml_declaration=True)
-    return {"activeRouteCount":len(release.get("routes",[])),"addedCount":len(added),"added":added,"policy":"active-release-routes-must-exist-in-sitemap"}
+    return {"activeRouteCount":len(release.get("routes",[])),"addedCount":len(added),"added":added,"recoveredMalformedSitemap":recovered_malformed,"policy":"active-release-routes-must-exist-in-sitemap"}
 
 
 def recompute(site: Path) -> None:
