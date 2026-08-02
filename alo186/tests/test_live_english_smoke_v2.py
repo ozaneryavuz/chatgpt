@@ -3,6 +3,8 @@ from __future__ import annotations
 import importlib.util
 import json
 import sys
+import urllib.error
+import urllib.parse
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -117,6 +119,54 @@ def main() -> None:
     assert any("/en/privacy/ HTTP 404" in error for error in broken.errors)
     assert any("/en/contact/ html lang" in error for error in broken.errors)
 
+    transport_routes = route_responses()
+    transport_routes["/en/privacy/"] = (
+        0,
+        "",
+        {MODULE.TRANSPORT_ERROR_HEADER: "URLError: DNS timeout"},
+    )
+    transport_routes["/en/contact/"] = (
+        0,
+        "",
+        {MODULE.TRANSPORT_ERROR_HEADER: "TimeoutError: read timeout"},
+    )
+    transport_report = evaluate(
+        release=(404, "<html>static-snapshot</html>", {"server": "cloudflare"}),
+        routes=transport_routes,
+    )
+    assert transport_report.ok is False
+    assert transport_report.route_count == 8
+    assert len(transport_report.routes) == 10
+    assert len([probe for probe in transport_report.routes if not probe.ok]) == 2
+    assert any("/en/privacy/ transport hatası" in error for error in transport_report.errors)
+    assert any("/en/contact/ transport hatası" in error for error in transport_report.errors)
+
+    def selective_fetch(url: str, _timeout: float):
+        path = urllib.parse.urlsplit(url).path
+        if path == "/en/privacy/":
+            raise urllib.error.URLError("privacy route DNS failure")
+        if path == "/pages-release.json":
+            return 404, "<html>static-snapshot</html>", {"server": "cloudflare"}
+        if path == "/sitemap.xml":
+            return 200, sitemap(), {}
+        if path in MODULE.contract.LANGUAGE_PAIRS:
+            return 200, valid_html(path), {}
+        raise AssertionError(path)
+
+    release_response, collected_routes, sitemap_response = MODULE.collect_snapshot(
+        origin=ORIGIN,
+        expected_commit=EXPECTED,
+        attempt=1,
+        timeout=1,
+        fetcher=selective_fetch,
+    )
+    assert release_response[0] == 404
+    assert len(collected_routes) == 10
+    assert collected_routes["/en/privacy/"][0] == 0
+    assert MODULE.transport_error(collected_routes["/en/privacy/"][2])
+    assert collected_routes["/en/contact/"][0] == 200
+    assert sitemap_response[0] == 200
+
     missing_sitemap = evaluate(
         release=(404, "external", {}),
         sitemap_response=(404, "", {}),
@@ -125,6 +175,18 @@ def main() -> None:
     assert missing_sitemap.route_count == 10
     assert missing_sitemap.sitemap_ok is False
     assert "sitemap.xml HTTP 404" in missing_sitemap.errors
+
+    sitemap_transport = evaluate(
+        release=(404, "external", {}),
+        sitemap_response=(
+            0,
+            "",
+            {MODULE.TRANSPORT_ERROR_HEADER: "URLError: sitemap DNS failure"},
+        ),
+    )
+    assert sitemap_transport.ok is False
+    assert sitemap_transport.route_count == 10
+    assert any("sitemap.xml transport hatası" in error for error in sitemap_transport.errors)
 
     original_compare = MODULE.contract.compare_commits
     MODULE.contract.compare_commits = lambda *_args, **_kwargs: "identical"
@@ -159,6 +221,7 @@ def main() -> None:
                 "routes": len(MODULE.contract.LANGUAGE_PAIRS),
                 "externalHostContentCanPassWithoutCommitReceipt": True,
                 "allRouteFailuresCollected": True,
+                "routeTransportFailuresAreLocal": True,
                 "sitemapRequired": True,
             },
             ensure_ascii=False,
