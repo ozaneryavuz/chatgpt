@@ -19,6 +19,7 @@ def build_inventory(repo: Path) -> tuple[list[InventoryItem], list[Finding]]:
         return [], [Finding("error", "alo186_root_missing", str(root), "alo186 kaynak klasörü yok")]
     findings: list[Finding] = []
     items: list[InventoryItem] = []
+    redirect_alias_sources: set[str] = set()
     for path in sorted(root.rglob("*.html")):
         if any(part.startswith(".") for part in path.relative_to(root).parts):
             continue
@@ -32,13 +33,18 @@ def build_inventory(repo: Path) -> tuple[list[InventoryItem], list[Finding]]:
         types: set[str] = set()
         for payload in extract_jsonld(text):
             types.update(collect_schema_types(payload))
+        source = path.relative_to(repo).as_posix()
+        robots = first_match(r'<meta\b[^>]*name=["\']robots["\'][^>]*content=["\']([^"\']+)', text).casefold()
+        is_refresh = bool(first_match(r'<meta\b[^>]*http-equiv=["\']refresh["\'][^>]*content=["\']([^"\']+)', text))
+        if "noindex" in robots or is_refresh:
+            redirect_alias_sources.add(source)
         items.append(InventoryItem(
             route=route,
             canonical=normalize_route(canonical_url) if canonical_url else route,
             title=first_match(r"<title>(.*?)</title>", text),
             h1=strip_markup(first_match(r"<h1\b[^>]*>(.*?)</h1>", text)),
             description=first_match(r'<meta\b[^>]*name=["\']description["\'][^>]*content=["\']([^"\']+)', text),
-            source=path.relative_to(repo).as_posix(),
+            source=source,
             schema_types=tuple(sorted(types)),
         ))
 
@@ -72,7 +78,7 @@ def build_inventory(repo: Path) -> tuple[list[InventoryItem], list[Finding]]:
 
     canonicals: dict[str, set[str]] = {}
     for item in items:
-        if item.canonical and item.source.endswith(".html"):
+        if item.canonical and item.source.endswith(".html") and item.source not in redirect_alias_sources:
             canonicals.setdefault(item.canonical, set()).add(item.source)
     for route, sources in canonicals.items():
         if len(sources) > 1:
