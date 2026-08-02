@@ -11,6 +11,7 @@ from typing import Any
 VERSION = 225
 CANONICAL_ORIGIN = "https://alo186.com"
 ROBOTS_TEXT = "User-agent: *\nAllow: /\n\nSitemap: https://alo186.com/sitemap.xml\n"
+ALIAS_MARKER = 'data-alo186-content-alias="true"'
 
 
 def normalize_base_path(value: str) -> str:
@@ -83,6 +84,8 @@ def persist_release_proof(site: Path, report: dict[str, Any]) -> None:
 
 def run(site: Path, base_path: str = "") -> dict[str, Any]:
     site = site.resolve()
+    normalized_base = normalize_base_path(base_path)
+    project_preview = bool(normalized_base)
     sitemap_path = site / "sitemap.xml"
     robots_path = site / "robots.txt"
     if not sitemap_path.is_file():
@@ -98,6 +101,7 @@ def run(site: Path, base_path: str = "") -> dict[str, Any]:
         raise RuntimeError("Final sitemap urlset olmalıdır")
 
     removed_noindex: list[str] = []
+    removed_alias: list[str] = []
     removed_noncanonical: list[str] = []
     removed_missing: list[str] = []
     removed_duplicate: list[str] = []
@@ -119,13 +123,19 @@ def run(site: Path, base_path: str = "") -> dict[str, Any]:
             root.remove(url_node)
             removed_duplicate.append(normalized)
             continue
-        path = route_file(site, normalized, base_path)
+        path = route_file(site, normalized, normalized_base)
         if path is None:
             root.remove(url_node)
             removed_missing.append(normalized)
             continue
         source = path.read_text(encoding="utf-8", errors="strict")
-        if "noindex" in meta_robots(source):
+        if ALIAS_MARKER in source:
+            root.remove(url_node)
+            removed_alias.append(normalized)
+            continue
+        # /chatgpt bütün HTML'yi bilinçli olarak noindex yapan bir preview alanıdır.
+        # Bu global preview etiketi canonical sitemap envanterini silmemelidir.
+        if not project_preview and "noindex" in meta_robots(source):
             root.remove(url_node)
             removed_noindex.append(normalized)
             continue
@@ -152,7 +162,8 @@ def run(site: Path, base_path: str = "") -> dict[str, Any]:
     homepage_added = False
     if homepage_file.is_file():
         source = homepage_file.read_text(encoding="utf-8", errors="strict")
-        if "noindex" not in meta_robots(source) and homepage not in seen:
+        home_indexable = project_preview or "noindex" not in meta_robots(source)
+        if ALIAS_MARKER not in source and home_indexable and homepage not in seen:
             url_node = ET.Element(f"{prefix}url")
             loc_node = ET.SubElement(url_node, f"{prefix}loc")
             loc_node.text = homepage
@@ -162,9 +173,9 @@ def run(site: Path, base_path: str = "") -> dict[str, Any]:
             homepage_added = True
 
     if not seen:
-        raise RuntimeError("Final sitemap hiçbir indexlenebilir canonical URL taşımıyor")
+        raise RuntimeError("Final sitemap hiçbir canonical URL taşımıyor")
     if homepage_file.is_file() and homepage not in seen:
-        raise RuntimeError("Indexlenebilir ana sayfa final sitemap içinde yok")
+        raise RuntimeError("Canonical ana sayfa final sitemap içinde yok")
 
     ET.register_namespace("", namespace or "http://www.sitemaps.org/schemas/sitemap/0.9")
     ET.indent(tree, space="  ")
@@ -174,15 +185,18 @@ def run(site: Path, base_path: str = "") -> dict[str, Any]:
     report = {
         "version": VERSION,
         "canonicalOrigin": CANONICAL_ORIGIN,
-        "basePath": normalize_base_path(base_path),
+        "basePath": normalized_base,
+        "projectPreviewNoindexIgnored": project_preview,
         "keptUrlCount": kept,
         "homepageAdded": homepage_added,
         "normalizedOriginCount": normalized_origin,
         "removedNoindexCount": len(removed_noindex),
+        "removedAliasCount": len(removed_alias),
         "removedNoncanonicalCount": len(removed_noncanonical),
         "removedMissingCount": len(removed_missing),
         "removedDuplicateCount": len(removed_duplicate),
         "removedNoindex": removed_noindex,
+        "removedAlias": removed_alias,
         "removedNoncanonical": removed_noncanonical,
         "removedMissing": removed_missing,
         "removedDuplicate": removed_duplicate,
