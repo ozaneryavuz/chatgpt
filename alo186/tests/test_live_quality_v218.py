@@ -24,6 +24,7 @@ from prepare_github_pages import prepare  # noqa: E402
 
 def source_contracts() -> None:
     source = (DEPLOYMENT / "inject_live_quality_v218.py").read_text(encoding="utf-8")
+    compat = (DEPLOYMENT / "inject_live_quality_v218_compat.py").read_text(encoding="utf-8")
     guard = (DEPLOYMENT / "guard_commerce_routes_v3.py").read_text(encoding="utf-8")
     for token in (
         "criticalBrokenInternalLinkCount",
@@ -42,7 +43,9 @@ def source_contracts() -> None:
     assert "overflow-x:clip" not in compact
     assert "prefers-reduced-motion" in source
     assert "min-height:44px" in source
-    assert "inject_live_quality_v218 as live_quality" in guard
+    assert "repairedHeadBoundaries" in compat
+    assert "createdHeadElements" in compat
+    assert "inject_live_quality_v218_compat as live_quality" in guard
     assert "quality_result = live_quality.run" in guard
     assert 'result["liveQualityV218"]' in guard
 
