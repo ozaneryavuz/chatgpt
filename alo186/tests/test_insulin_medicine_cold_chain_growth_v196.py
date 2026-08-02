@@ -56,14 +56,14 @@ def test_calculator_is_label_first_and_closes_commerce_on_risk() -> None:
         "2–8°C",
         "15–30°C",
         "28 güne kadar",
-        "İnsülin dışındaki ilaçlara insülin aralığı uygulanmaz",
+        "Başka soğukta saklanan ilaçlarda insülin için verilen süre ve sıcaklık aralıklarını kullanmayın",
         "Ticari yol kapalı",
         "dozu değiştirmeyin",
         "yeni ürün almayın",
         "CDC",
         "FDA",
     ):
-        assert token.lower() in html.lower()
+        assert token.lower() in html.lower(), token
     assert "kullanılabilirliğine, dozuna veya başka ürüne geçişe bu araç karar vermez" in html
 
 
@@ -79,7 +79,7 @@ def test_selector_has_three_classes_three_gates_and_no_static_store_link() -> No
         "doğrudan temas",
         "reçeteli ürün",
     ):
-        assert token in html
+        assert token in html, token
     assert 'href="https://www.amazon.com.tr' not in html
 
 
@@ -96,7 +96,7 @@ def test_center_exports_json_and_ics_without_personal_storage() -> None:
         "gerçek ilaç yerine su şişesi",
         "Hazırlık testi tamam — yeni ürün almayın",
     ):
-        assert token.lower() in html.lower()
+        assert token.lower() in html.lower(), token
 
 
 def test_no_unverified_commercial_claims_or_pressure_language() -> None:
