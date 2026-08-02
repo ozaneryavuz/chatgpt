@@ -1,3 +1,5 @@
+"""Canlı www→apex davranışı ile production builder sözleşmesinin ayrışmasını engeller."""
+
 from __future__ import annotations
 
 import json
