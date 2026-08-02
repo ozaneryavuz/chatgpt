@@ -1,0 +1,140 @@
+name: ALO186 tazminat kanıt planı autofix
+
+on:
+  push:
+    branches: [growth/alo186-tazminat-kanit-plani-v220]
+    paths:
+      - '.github/workflows/alo186-tazminat-kanit-plani-autofix.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: growth/alo186-tazminat-kanit-plani-v220
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Add local evidence download and anonymous outcome events
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          page = Path('alo186/hesaplama/elektrik-kesintisi-tazminat-kontrolu/index.html')
+          text = page.read_text(encoding='utf-8')
+
+          old_result = '<div class="result" id="result" aria-live="polite"></div></section>'
+          new_result = '''<div class="result" id="result" aria-live="polite"></div><div class="actions" id="resultActions" hidden><button class="btn" type="button" id="downloadEvidence">Kanıt planını indir</button></div><p class="note" id="downloadNote" hidden>Dosya yalnız bu cihazda oluşturulur; ALO186'e süre, kayıt numarası veya başka kişisel bilgi gönderilmez.</p></section>'''
+          if old_result not in text:
+              raise SystemExit('Sonuç bölümü sözleşmesi bulunamadı')
+          text = text.replace(old_result, new_result, 1)
+
+          old_vars = "  const result=document.getElementById('result');\n"
+          new_vars = """  const result=document.getElementById('result');
+  const resultActions=document.getElementById('resultActions');
+  const downloadEvidence=document.getElementById('downloadEvidence');
+  const downloadNote=document.getElementById('downloadNote');
+  let evidenceText='';
+  const track=(eventName,resultClass)=>{
+    window.dataLayer=window.dataLayer||[];
+    window.dataLayer.push({event:eventName,result_class:resultClass,tool:'outage_compensation'});
+  };
+"""
+          if old_vars not in text:
+              raise SystemExit('JS sonuç değişkeni bulunamadı')
+          text = text.replace(old_vars, new_vars, 1)
+
+          old_render = "    result.append(heading,paragraph,next,note);result.classList.add('show');result.scrollIntoView({behavior:'smooth',block:'nearest'});\n"
+          new_render = """    result.append(heading,paragraph,next,note);result.classList.add('show');result.scrollIntoView({behavior:'smooth',block:'nearest'});
+    const valid=rawHours!==''&&Number.isFinite(hours)&&hours>=0&&hours<=8760;
+    const resultClass=!valid?'invalid':(['force','external','safety'].includes(cause)?'exception_review':(hours>12?'long_outage':(repeated==='yes'?'annual_review':'no_visible_threshold')));
+    if(valid){
+      const noticeText=document.getElementById('notice').selectedOptions[0].textContent;
+      const causeText=document.getElementById('cause').selectedOptions[0].textContent;
+      const repeatedText=document.getElementById('repeated').selectedOptions[0].textContent;
+      evidenceText=[
+        'ALO186 Elektrik Kesintisi Tazminatı Kanıt Planı',
+        '',
+        `Ön değerlendirme: ${title}`,
+        `Kesinti süresi: ${rawHours} saat`,
+        `Önceden bildirim: ${noticeText}`,
+        `Bilinen neden: ${causeText}`,
+        `Yıl içinde tekrar: ${repeatedText}`,
+        '',
+        'Tamamlanacak kayıtlar:',
+        '[ ] Tesisat veya abone numarası',
+        '[ ] Kesintinin başlangıç ve bitiş saati',
+        '[ ] 186 / EDAŞ kayıt numarası',
+        '[ ] Planlı kesinti bildirimi ekran görüntüsü',
+        '[ ] Komşu ve ortak alan etkisi',
+        '[ ] Dağıtım şirketinin neden açıklaması',
+        '[ ] Takip eden faturada mahsup kontrolü',
+        '[ ] Yazılı başvuru ve yanıt tarihi',
+        '',
+        'Not: Bu dosya resmî uygunluk kararı değildir. ALO186 başvuru almaz.',
+        'Cihaz hasarı varsa zarar tarihinden itibaren 30 günlük ayrı başvuru süresini kontrol edin.'
+      ].join('\\n');
+      resultActions.hidden=false;
+      downloadNote.hidden=false;
+      track('outage_compensation_result',resultClass);
+    }else{
+      evidenceText='';
+      resultActions.hidden=true;
+      downloadNote.hidden=true;
+    }
+"""
+          if old_render not in text:
+              raise SystemExit('Sonuç render sözleşmesi bulunamadı')
+          text = text.replace(old_render, new_render, 1)
+
+          old_end = "  });\n})();\n</script>"
+          new_end = """  });
+  downloadEvidence.addEventListener('click',()=>{
+    if(!evidenceText)return;
+    const blob=new Blob([evidenceText],{type:'text/plain;charset=utf-8'});
+    const url=URL.createObjectURL(blob);
+    const link=document.createElement('a');
+    link.href=url;link.download='alo186-kesinti-tazminati-kanit-plani.txt';
+    document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);
+    track('outage_compensation_evidence_download','evidence_plan');
+  });
+})();
+</script>"""
+          if old_end not in text:
+              raise SystemExit('Script kapanışı bulunamadı')
+          text = text.replace(old_end, new_end, 1)
+          page.write_text(text, encoding='utf-8')
+
+          test = Path('alo186/hesaplama/elektrik-kesintisi-tazminat-kontrolu/test.js')
+          source = test.read_text(encoding='utf-8')
+          anchor = "  'aria-invalid'\n"
+          replacement = """  'aria-invalid',
+  'id=\"downloadEvidence\"',
+  'alo186-kesinti-tazminati-kanit-plani.txt',
+  'outage_compensation_result',
+  'outage_compensation_evidence_download',
+  'Dosya yalnız bu cihazda oluşturulur',
+  "window.dataLayer.push({event:eventName,result_class:resultClass,tool:'outage_compensation'})"
+"""
+          if anchor not in source:
+              raise SystemExit('Test token listesi bulunamadı')
+          source = source.replace(anchor, replacement, 1)
+          source += "\nif(/dataLayer\\.push\\([^)]*(?:hours|rawHours|noticeText|causeText)/s.test(html)) throw new Error('Sayısal veya serbest kullanıcı girdisi analitiğe gönderilemez');\n"
+          test.write_text(source, encoding='utf-8')
+          PY
+
+          node alo186/hesaplama/elektrik-kesintisi-tazminat-kontrolu/test.js
+          ! grep -Eqi 'amazon\.com\.tr|"@type"[[:space:]]*:[[:space:]]*"(Product|Offer)"|on iş günü' alo186/hesaplama/elektrik-kesintisi-tazminat-kontrolu/index.html
+
+          rm .github/workflows/alo186-tazminat-kanit-plani-autofix.yml
+          git config user.name 'alo186-release-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add alo186/hesaplama/elektrik-kesintisi-tazminat-kontrolu .github/workflows/alo186-tazminat-kanit-plani-autofix.yml
+          git commit -m 'feat(alo186): add local outage evidence plan'
+          git push origin HEAD:growth/alo186-tazminat-kanit-plani-v220
