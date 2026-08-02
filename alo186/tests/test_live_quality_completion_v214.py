@@ -28,13 +28,23 @@ def basic_page(title: str, canonical: str, root_href: str) -> str:
 def complete_seed(site: Path, base_path: str) -> None:
     seed(site, base_path)
     root = site / "index.html"
-    root_text = root.read_text(encoding="utf-8").replace(
+    root_text = root.read_text(encoding="utf-8")
+    root_text = root_text.replace(
+        "</head>",
+        '<meta name="description" content="ALO186 güvenli elektrik yönlendirme ana sayfası."></head>',
+        1,
+    ).replace(
         "<h1>ALO186</h1>",
         "<h1>Sorun sayfası aramayın. Doğru eylem yolunu seçin.</h1>",
     )
     root.write_text(root_text, encoding="utf-8")
     portal = site / "elektrik-portali/index.html"
-    portal_text = portal.read_text(encoding="utf-8").replace(
+    portal_text = portal.read_text(encoding="utf-8")
+    portal_text = portal_text.replace(
+        "</head>",
+        '<meta name="description" content="ALO186 bağımsız elektrik portalı."></head>',
+        1,
+    ).replace(
         "</main>",
         "<p>Zararın ortaya çıktığı tarihten itibaren 30 gün içinde EDAŞ kaydı açın.</p>"
         "<p>89 rehber · 25 rehber · 12 kaynaklı makale</p></main>",
@@ -137,7 +147,7 @@ def test_live_copy_validator() -> None:
     portal = b'''<!doctype html><html lang="tr"><head><link rel="canonical" href="https://alo186.com/elektrik-portali"></head><body><main><h1>Portal</h1><p>ALO186 bağımsız bilgi platformudur. Zararın ortaya çıktığı tarihten itibaren 30 gün içinde ilgili dağıtım şirketinin resmî kanalına başvurun.</p></main></body></html>'''
     assert validate_html("home", home, "https://alo186.com/", "/")["forbiddenCopyCount"] == 0
     assert validate_html("portal", portal, "https://alo186.com/elektrik-portali", "/elektrik-portali")["forbiddenCopyCount"] == 0
-    bad = home.replace(b"60 saniyede doğru elektrik rotası", b"Sorun sayfasÄSorun sayfas\xc4±Sorun sayfas\xc4\xb1 aramayÄSorun sayfas\xc4\xb1 aramay\xc4±Sorun sayfas\xc4\xb1 aramay\xc4\xb1n. DoÄSorun sayfas\xc4\xb1 aramay\xc4\xb1n. Do\xc4Sorun sayfas\xc4\xb1 aramay\xc4\xb1n. Do\xc4\x9fru eylem yolunu seÃSorun sayfas\xc4\xb1 aramay\xc4\xb1n. Do\xc4\x9fru eylem yolunu se\xc3§Sorun sayfas\xc4\xb1 aramay\xc4\xb1n. Do\xc4\x9fru eylem yolunu se\xc3\xa7in.")
+    bad = home.replace(b"60 saniyede doğru elektrik rotası", b"Sorun sayfas\xc4\xb1 aramay\xc4\xb1n. Do\xc4\x9fru eylem yolunu se\xc3\xa7in.")
     try:
         validate_html("home", bad, "https://alo186.com/", "/")
     except AssertionError:
@@ -149,7 +159,8 @@ def test_live_copy_validator() -> None:
 def test_lighthouse_budget_parser() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
-        mobile = root / "mobile.json"; desktop = root / "desktop.json"
+        mobile = root / "mobile.json"
+        desktop = root / "desktop.json"
         fake_lighthouse(mobile, mode="mobile", performance=0.90)
         fake_lighthouse(desktop, mode="desktop", performance=0.96)
         result = audit_lighthouse([("mobile-root", mobile), ("desktop-root", desktop)])
