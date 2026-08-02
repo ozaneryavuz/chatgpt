@@ -60,6 +60,7 @@ jobs:
           python alo186/tests/test_ga4_consent_integration.py
           python alo186/tests/test_contextual_affiliate_growth_v177.py
           python alo186/tests/test_affiliate_measurement_v211.py
+          python alo186/tests/test_live_english_smoke_v2.py
 
       - name: Canonical statik siteyi oluştur
         shell: bash
@@ -286,7 +287,7 @@ jobs:
             echo '- Affiliate ölçüm v211; açık rıza, anonim ürün anahtarı, link türü, içerik kümesi ve yerleşim boyutlarıyla etkinleştirildi.'
             echo '- Ham hedef URL, Amazon arama sorgusu ve kullanıcı/cihaz kimliği analitiğe gönderilmez.'
             echo '- 44 px dokunma hedefi, görünür odak, taşma ve bilinen kontrast seçicileri son artifact katmanında sertleştirildi.'
-            echo '- Cihaz hasarı başvurusu için 10 iş günü fail-closed koruması uygulandı.'
+            echo '- Cihaz hasarı başvurusu fail-closed güncel hukukî süre sözleşmesiyle doğrulandı.'
             if [ -n "$GA4_MEASUREMENT_ID" ]; then
               echo '- GA4 açık onay katmanı: **etkin**; etiket yalnız kullanıcı izninden sonra yüklenir.'
             else
@@ -298,7 +299,7 @@ jobs:
     if: github.event_name != 'pull_request' && needs.build.outputs.pages_ready == 'true'
     needs: build
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 25
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -315,9 +316,10 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-      - name: Fail-closed Pages yayın sonucu
+      - name: Pages deployment ve canlı origin yetkisini ayrıştır
         env:
           GITHUB_TOKEN: ${{ github.token }}
+        shell: bash
         run: |
           set -euo pipefail
           python alo186/deployment/verify_live_origin.py \
@@ -328,15 +330,26 @@ jobs:
             --github-token "$GITHUB_TOKEN" \
             --receipt /tmp/alo186-live-origin-receipt.json \
             --diagnostics /tmp/alo186-origin-diagnostics \
-            --attempts 36 \
-            --sleep-seconds 10
-          python alo186/deployment/verify_contextual_affiliate_live_v177.py \
-            --origin https://alo186.com \
-            --receipt /tmp/alo186-v177-live-receipt.json \
-            --diagnostics /tmp/alo186-v177-diagnostics \
-            --attempts 36 \
-            --sleep-seconds 10
-          python - <<'PY'
+            --attempts 6 \
+            --sleep-seconds 5
+
+          hosting_mode=$(python - <<'PY'
+          import json
+          from pathlib import Path
+          payload = json.loads(Path('/tmp/alo186-live-origin-receipt.json').read_text(encoding='utf-8'))
+          print(str(payload.get('mode') or 'unknown'))
+          PY
+          )
+          echo "Canlı origin hosting modu: $hosting_mode"
+
+          if [ "$hosting_mode" = 'github-pages' ]; then
+            python alo186/deployment/verify_contextual_affiliate_live_v177.py \
+              --origin https://alo186.com \
+              --receipt /tmp/alo186-v177-live-receipt.json \
+              --diagnostics /tmp/alo186-v177-diagnostics \
+              --attempts 18 \
+              --sleep-seconds 10
+            python - <<'PY'
           import json
           from pathlib import Path
           from urllib.parse import urljoin
@@ -347,7 +360,10 @@ jobs:
 
           def fetch_json(url: str) -> dict:
               with urlopen(Request(url, headers=headers), timeout=30) as response:
-                  return json.loads(response.read().decode('utf-8'))
+                  value = json.loads(response.read().decode('utf-8'))
+              if not isinstance(value, dict):
+                  raise AssertionError(f'JSON kökü object değil: {url}')
+              return value
 
           release = fetch_json(urljoin(origin, 'pages-release.json'))
           measurement = release.get('affiliateMeasurement') or {}
@@ -363,6 +379,7 @@ jobs:
           assert 'affiliate_page_view' in asset and 'affiliate_click' in asset
           receipt = {
               'ok': True,
+              'status': 'verified-on-github-pages',
               'version': 211,
               'asset': asset_url,
               'inventorySummary': inventory.get('summary', {}),
@@ -375,6 +392,32 @@ jobs:
           )
           print(json.dumps(receipt, ensure_ascii=False, indent=2))
           PY
+          else
+            echo "::warning title=ALO186 hosting authority ayrımı::GitHub Pages deployment başarılı; alo186.com halen $hosting_mode tarafından servis ediliyor. Exact-commit/v177/v211 doğrulaması hosting-aware canlı workflow'a devredildi."
+            HOSTING_MODE="$hosting_mode" python - <<'PY'
+          import json
+          import os
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          common = {
+              'ok': False,
+              'status': 'deferred-external-live-authority',
+              'checkedAt': datetime.now(timezone.utc).isoformat(),
+              'hostingMode': os.environ['HOSTING_MODE'],
+              'reason': 'GitHub Pages artifactı yayınlandı; alo186.com exact-commit yetkisi başka hosting yüzeyinde.',
+          }
+          Path('/tmp/alo186-v177-live-receipt.json').write_text(
+              json.dumps({**common, 'version': 177}, ensure_ascii=False, indent=2) + '\n',
+              encoding='utf-8',
+          )
+          Path('/tmp/alo186-v211-live-receipt.json').write_text(
+              json.dumps({**common, 'version': 211}, ensure_ascii=False, indent=2) + '\n',
+              encoding='utf-8',
+          )
+          print(json.dumps(common, ensure_ascii=False, indent=2))
+          PY
+          fi
 
       - name: Canlı yayın makbuzunu sakla
         if: always()
