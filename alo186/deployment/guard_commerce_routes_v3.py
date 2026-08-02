@@ -8,6 +8,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 import guard_commerce_routes_v2 as v2
+import aeo_control_plane_v216 as aeo_authority
 import inject_affiliate_decision_funnel_v215 as affiliate_decision
 import inject_portal_purchase_checkpoint_v213 as portal_checkpoint
 
@@ -204,14 +205,16 @@ def _checkpoint_base_path(site: Path) -> str:
 
 
 def validate_site(site: Path) -> dict:
-    """Son artifacta karar hunisini ve portal kontrolünü ekler, ardından ticari yapıyı fail-closed tarar."""
+    """Son artifacta karar hunisi, portal kontrolü ve AEO otoritesini ekler; ardından fail-closed tarar."""
     resolved = site.resolve()
     base_path = _checkpoint_base_path(resolved)
     decision_result = affiliate_decision.inject(resolved, base_path)
     checkpoint_result = portal_checkpoint.inject(resolved, base_path)
+    authority_result = aeo_authority.inject(resolved, base_path)
     result = _original_validate_site(resolved)
     result["affiliateDecisionFunnel"] = decision_result
     result["portalPurchaseCheckpoint"] = checkpoint_result
+    result["aeoAuthority"] = authority_result
     return result
 
 
