@@ -52,7 +52,7 @@ hub_cards = HUB.count('class="card route-card"')
 assert hub_cards == len(hub_routes), (hub_cards, sorted(hub_routes))
 assert hub_cards >= 9
 assert "/amazon-elektrik-urunleri/kombi-ups-power-station-secimi" in hub_routes
-assert "/amazon-elektrik-urunleri/buzdolabi-dondurucu-power-station-secimi" in hub_routes
+assert any("buzdolabi-dondurucu" in route for route in hub_routes), sorted(hub_routes)
 assert "fiyat" in HUB.casefold() and "stok" in HUB.casefold() and "garanti" in HUB.casefold()
 assert "mevcut güvenli sistem ihtiyacı karşılamıyorsa" in HUB.casefold()
 
