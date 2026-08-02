@@ -34,11 +34,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: '22'
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -79,6 +79,9 @@ jobs:
           from pathlib import Path
           root=Path('/tmp/alo186-authority-78')
           release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
+          canonical_origin=release['canonicalHost'].rstrip('/')
+          assert canonical_origin=='https://alo186.com'
+          sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
           assert release['routingVersion']>=35
           assert release['articleCount']>=78
           assert release['routeCount']>=119
@@ -89,7 +92,8 @@ jobs:
               'jenerator-start-akusu-neden-bosalir-sarj-olmaz',
           ):
               assert (root/'haberler'/slug/'index.html').is_file(), slug
-              assert f'https://www.alo186.com/haberler/{slug}' in (root/'sitemap.xml').read_text(encoding='utf-8')
+              expected=f'{canonical_origin}/haberler/{slug}'
+              assert expected in sitemap, (slug, expected)
           PY
 
       - name: GitHub Pages custom-domain testi
@@ -123,7 +127,7 @@ jobs:
             --base-path '/chatgpt'
 
       - name: Doğrulanmış 78+ rehber taban artifactı
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: alo186-authority-78-baseline-pages
           path: /tmp/alo186-authority-78-custom
