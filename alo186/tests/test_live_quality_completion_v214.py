@@ -52,7 +52,8 @@ def complete_seed(site: Path, base_path: str) -> None:
     portal.write_text(portal_text, encoding="utf-8")
 
     extra_routes = [route for route in CRITICAL_ROUTES if route not in {"/", "/elektrik-portali/"}]
-    for route in extra_routes:
+    support_routes = ["/karar-motoru/", "/kesintiye-hazirlik-atolyesi/", *extra_routes]
+    for route in support_routes:
         target = site / route.strip("/")
         target.mkdir(parents=True, exist_ok=True)
         title = route.strip("/").replace("-", " ").replace("/", " — ").title()
