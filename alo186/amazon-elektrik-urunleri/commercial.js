@@ -39,6 +39,78 @@
     track('affiliate_revenue_v177_entry_view', { placement: 'amazon_product_center' });
   }
 
+  function renderAffiliateGate(category, products, staleCount) {
+    const gateId = `affiliateGate-${category.id}`;
+    const cards = products.map((product) => {
+      const freshness = catalog.verificationStatus(product, new Date());
+      return `<article class="product-card"><span class="eyebrow">Doğrulanmış teknik liste</span><h3>${escapeHtml(product.name)}</h3><div class="product-meta">${escapeHtml(product.brand)} · ASIN ${escapeHtml(product.asin)}</div><h4>Güçlü yanlar</h4><ul>${product.strengths.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul><h4>Sınırlar</h4><ul>${product.limits.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul><div class="verification">Teknik liste kontrolü: ${escapeHtml(product.verifiedAt)} · ${Number.isFinite(freshness.ageDays) ? `${freshness.ageDays} gün önce` : 'tarih yeniden doğrulanmalı'}<br>${escapeHtml(product.sourceNote)}</div><a class="button primary" data-affiliate-product="${escapeAttr(product.id)}" data-asin="${escapeAttr(product.asin)}" data-affiliate-url="${escapeAttr(product.url)}" aria-disabled="true" tabindex="-1">Amazon ürün sayfasını aç</a></article>`;
+    }).join('');
+
+    return `<section class="affiliate-gate status-box" data-affiliate-gate aria-labelledby="${gateId}-title"><span class="eyebrow">Satın alma öncesi güven kapısı</span><h3 id="${gateId}-title">Ürün bağlantıları yalnız gerçek ihtiyaç ve teknik uygunluk doğrulandıktan sonra açılır.</h3><p>Bu adım kişisel veri toplamaz ve seçiminizi tarayıcıda saklamaz. Mevcut güvenli ürün görevi karşılıyorsa yeni ürün almayın.</p><fieldset><legend>Üç koşulu ayrı ayrı doğrulayın</legend><label><input type="checkbox" data-affiliate-confirm="need"> Mevcut güvenli ürün ihtiyacı karşılamıyor.</label><label><input type="checkbox" data-affiliate-confirm="fit"> Model, gerilim, güç, port, kablo ve kullanım sınırlarını yeniden kontrol edeceğim.</label><label><input type="checkbox" data-affiliate-confirm="disclosure"> Bağlantıların Amazon satış ortaklığı bağlantısı olduğunu ve fiyat, stok, puan ile garantinin yalnız mağazada doğrulanacağını anladım.</label></fieldset><div class="button-row"><button class="button primary" type="button" data-affiliate-unlock disabled>Ürün bağlantılarını aç</button><button class="button secondary" type="button" data-affiliate-no-buy>Mevcut ürünüm yeterli — satın alma yapmayacağım</button></div><p data-affiliate-gate-status role="status">Bağlantılar kapalı. Ücretsiz teknik kontrolü tamamlamadan mağazaya geçmeyin.</p></section><div class="product-grid" data-affiliate-product-grid>${cards}</div>${staleCount ? `<p class="verification">${staleCount} doğrulama süresi geçmiş kart ticari bağlantıdan çıkarıldı.</p>` : ''}`;
+  }
+
+  function activateAffiliateGate(container, category) {
+    const gate = container.querySelector('[data-affiliate-gate]');
+    if (!gate) return;
+    const checks = [...gate.querySelectorAll('[data-affiliate-confirm]')];
+    const unlock = gate.querySelector('[data-affiliate-unlock]');
+    const noBuy = gate.querySelector('[data-affiliate-no-buy]');
+    const status = gate.querySelector('[data-affiliate-gate-status]');
+    const links = [...container.querySelectorAll('[data-affiliate-product]')];
+
+    const updateGate = () => {
+      unlock.disabled = !checks.every((checkbox) => checkbox.checked);
+    };
+    checks.forEach((checkbox) => checkbox.addEventListener('change', updateGate));
+
+    unlock.addEventListener('click', () => {
+      if (!checks.every((checkbox) => checkbox.checked)) return;
+      links.forEach((link) => {
+        link.href = link.dataset.affiliateUrl;
+        link.target = '_blank';
+        link.rel = 'sponsored nofollow noopener';
+        link.removeAttribute('aria-disabled');
+        link.removeAttribute('tabindex');
+      });
+      status.textContent = 'Teknik ve ticari onay tamamlandı. Yalnız ihtiyacınıza uyan kartın mağaza sayfasını açın.';
+      unlock.disabled = true;
+      checks.forEach((checkbox) => { checkbox.disabled = true; });
+      track('affiliate_gate_passed', { category: category.id, product_count: links.length });
+    });
+
+    noBuy.addEventListener('click', () => {
+      links.forEach((link) => {
+        link.removeAttribute('href');
+        link.setAttribute('aria-disabled', 'true');
+        link.setAttribute('tabindex', '-1');
+      });
+      checks.forEach((checkbox) => {
+        checkbox.checked = false;
+        checkbox.disabled = true;
+      });
+      unlock.disabled = true;
+      noBuy.disabled = true;
+      status.textContent = 'Satın almama kararı kaydedilmedi; bağlantılar bu ziyaret için kapalı kaldı. Mevcut ürününüzü kullanın ve yalnız ihtiyaç değişirse yeniden değerlendirin.';
+      track('affiliate_no_buy_selected', { category: category.id, reason: 'existing_product_sufficient' });
+    });
+
+    links.forEach((link) => link.addEventListener('click', (event) => {
+      if (!link.getAttribute('href')) {
+        event.preventDefault();
+        status.textContent = 'Önce üç güven koşulunu doğrulayın veya mevcut ürününüz yeterliyse satın almama seçeneğini kullanın.';
+        return;
+      }
+      track('affiliate_product_clicked', {
+        category: category.id,
+        product_id: link.dataset.affiliateProduct,
+        asin: link.dataset.asin,
+        placement: 'commercial_category_page_after_gate'
+      });
+    }));
+
+    track('affiliate_gate_viewed', { category: category.id, product_count: links.length });
+  }
+
   function renderFreshProducts(container, category) {
     const products = catalog.productsFor(category.id, { freshOnly: true });
     const staleCount = catalog.productsFor(category.id).length - products.length;
@@ -47,18 +119,8 @@
       track('commercial_products_blocked', { category: category.id, reason: staleCount ? 'stale_catalog' : 'no_verified_product' });
       return;
     }
-    container.innerHTML = `<div class="product-grid">${products.map((product) => {
-      const freshness = catalog.verificationStatus(product, new Date());
-      return `<article class="product-card"><span class="eyebrow">Doğrulanmış teknik liste</span><h3>${escapeHtml(product.name)}</h3><div class="product-meta">${escapeHtml(product.brand)} · ASIN ${escapeHtml(product.asin)}</div><h4>Güçlü yanlar</h4><ul>${product.strengths.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul><h4>Sınırlar</h4><ul>${product.limits.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul><div class="verification">Teknik liste kontrolü: ${escapeHtml(product.verifiedAt)} · ${Number.isFinite(freshness.ageDays) ? `${freshness.ageDays} gün önce` : 'tarih yeniden doğrulanmalı'}<br>${escapeHtml(product.sourceNote)}</div><a class="button primary" data-affiliate-product="${escapeAttr(product.id)}" data-asin="${escapeAttr(product.asin)}" href="${escapeAttr(product.url)}" target="_blank" rel="sponsored nofollow noopener">Amazon ürün sayfasını aç</a></article>`;
-    }).join('')}</div>`;
-    container.querySelectorAll('[data-affiliate-product]').forEach((link) => link.addEventListener('click', () => {
-      track('affiliate_product_clicked', {
-        category: category.id,
-        product_id: link.dataset.affiliateProduct,
-        asin: link.dataset.asin,
-        placement: 'commercial_category_page'
-      });
-    }));
+    container.innerHTML = renderAffiliateGate(category, products, staleCount);
+    activateAffiliateGate(container, category);
   }
 
   function renderCategoryState() {
@@ -78,7 +140,7 @@
     const productCount = catalog.productsFor(category.id, { freshOnly: true }).length;
     if (category.mode === 'direct' && productCount > 0) {
       status.dataset.state = 'ready';
-      status.innerHTML = `<strong>${productCount} güncel teknik ürün kartı uygun.</strong><p>Fiyat, stok, satıcı, teslimat ve garanti yalnız Amazon sayfasında doğrulanır. Sıralama fiyat veya komisyona göre yapılmaz.</p>`;
+      status.innerHTML = `<strong>${productCount} güncel teknik ürün kartı bulundu.</strong><p>Mağaza bağlantıları üçlü güven kapısı tamamlanana kadar kapalıdır. Fiyat, stok, satıcı, teslimat ve garanti yalnız Amazon sayfasında doğrulanır.</p>`;
     } else {
       status.dataset.state = 'blocked';
       status.innerHTML = `<strong>Önce ücretsiz uygunluk kontrolü gerekli.</strong><p>${escapeHtml(category.description)} Doğrudan Amazon bağlantısı bu sayfada açılmaz.</p>`;
