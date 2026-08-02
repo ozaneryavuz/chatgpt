@@ -65,6 +65,16 @@ _core.validate_route = _validate_route_with_legacy_article_bridge
 ACCESSIBILITY_MARKER = 'data-alo186-accessibility-v214="true"'
 ACCESSIBILITY_SOURCE = Path("alo186/assets/alo186-accessibility-v214.css")
 ACCESSIBILITY_TARGET = Path("assets/alo186-accessibility-v214.css")
+USER_EXPERIENCE_MARKER = 'data-alo186-user-experience="true"'
+USER_EXPERIENCE_BLOCK = (
+    '<meta data-alo186-user-experience="true" content="site-wide-v1">'
+    '<style data-alo186-user-experience="true">'
+    'fieldset{min-inline-size:0}'
+    'legend{max-inline-size:100%;overflow-wrap:anywhere}'
+    'input,select,textarea{max-inline-size:100%}'
+    '@media(max-width:720px){form :where(input,select,textarea){inline-size:100%}}'
+    '</style>'
+)
 COMMERCIAL_HUB = Path("amazon-elektrik-urunleri/index.html")
 MALFORMED_COMMERCIAL_PREFIX = re.compile(
     r"(https://alo186\.com/amazon-elektrik-urunleri)(?=[a-z0-9])",
@@ -105,6 +115,53 @@ def normalize_commercial_hub_urls(output: Path) -> dict[str, object]:
         "canonicalOrigin": "https://alo186.com",
         "sourceOriginMigrationTolerated": True,
         "artifactLegacyWwwRejected": True,
+    }
+
+
+def install_user_experience_preflight(output: Path) -> dict[str, object]:
+    """Pages finalizer başlamadan önce bütün canonical HTML'leri aynı UX markerıyla hazırlar.
+
+    Finalizer kendi markerını tekrar eklemez, fakat diğer link, label, açıklama ve
+    güvenlik dönüşümlerini uygulamaya devam eder. Case-insensitive head kapanışı
+    desteği tek satırlı veya farklı biçimlendirilmiş sayfalardaki yanlış negatifleri
+    engeller.
+    """
+
+    injected = 0
+    already_present = 0
+    missing_head: list[str] = []
+    for path in sorted(output.rglob("*.html")):
+        html = path.read_text(encoding="utf-8", errors="strict")
+        if USER_EXPERIENCE_MARKER in html:
+            already_present += 1
+            continue
+        updated, count = re.subn(
+            r"</head\s*>",
+            USER_EXPERIENCE_BLOCK + "</head>",
+            html,
+            count=1,
+            flags=re.IGNORECASE,
+        )
+        if count != 1:
+            missing_head.append(path.relative_to(output).as_posix())
+            continue
+        path.write_text(updated, encoding="utf-8")
+        injected += 1
+
+    if missing_head:
+        raise RuntimeError(
+            "Kullanıcı deneyimi markerı için head kapanışı bulunamayan sayfalar: "
+            + ", ".join(missing_head[:30])
+        )
+    if not injected and not already_present:
+        raise RuntimeError("Kullanıcı deneyimi preflight için HTML sayfası bulunamadı.")
+    return {
+        "version": 217,
+        "marker": USER_EXPERIENCE_MARKER,
+        "injectedPages": injected,
+        "alreadyPresentPages": already_present,
+        "caseInsensitiveHeadInsertion": True,
+        "formsResponsive": True,
     }
 
 
@@ -161,8 +218,10 @@ def _build_with_platform_hardening(
 ) -> dict:
     release = _original_build(repo_root, output, commit_sha)
     commercial_report = normalize_commercial_hub_urls(output)
+    ux_report = install_user_experience_preflight(output)
     accessibility_report = install_accessibility_hardening(repo_root, output)
     release["commercialCanonicalV217"] = commercial_report
+    release["userExperiencePreflightV217"] = ux_report
     release["accessibilityHardeningV214"] = accessibility_report
     release_path = output / "alo186-release.json"
     release_path.write_text(json.dumps(release, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
