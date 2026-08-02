@@ -1,0 +1,60 @@
+name: ALO186 discoverability and trust growth v207
+
+on:
+  push:
+    paths:
+      - 'alo186/kesinti-cihaz-surekliligi-karar-merkezi/**'
+      - 'alo186/amazon-elektrik-urunleri/index.html'
+      - 'alo186/sitemap-growth-v207.xml'
+      - 'alo186/robots.txt'
+      - 'alo186/deployment/routing-overlays/207-discoverability-trust-hub.json'
+      - 'alo186/audits/discoverability-trust-growth-v207-2026-08-02.md'
+      - 'alo186/tests/test_discoverability_trust_growth_v207.py'
+      - '.github/workflows/alo186-discoverability-trust-growth-v207.yml'
+  pull_request:
+    paths:
+      - 'alo186/kesinti-cihaz-surekliligi-karar-merkezi/**'
+      - 'alo186/amazon-elektrik-urunleri/index.html'
+      - 'alo186/sitemap-growth-v207.xml'
+      - 'alo186/robots.txt'
+      - 'alo186/deployment/routing-overlays/207-discoverability-trust-hub.json'
+      - 'alo186/audits/discoverability-trust-growth-v207-2026-08-02.md'
+      - 'alo186/tests/test_discoverability_trust_growth_v207.py'
+      - '.github/workflows/alo186-discoverability-trust-growth-v207.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  trust-discoverability-and-routing:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+      - name: Fail-closed growth contract
+        run: python alo186/tests/test_discoverability_trust_growth_v207.py
+      - name: Routing JSON syntax
+        run: python -m json.tool alo186/deployment/routing-overlays/207-discoverability-trust-hub.json >/dev/null
+      - name: Growth sitemap XML syntax
+        run: python -c "import xml.etree.ElementTree as ET; ET.parse('alo186/sitemap-growth-v207.xml')"
+      - name: Inline JavaScript syntax
+        shell: bash
+        run: |
+          python - <<'PY'
+          import re
+          from pathlib import Path
+          page = Path('alo186/kesinti-cihaz-surekliligi-karar-merkezi/index.html')
+          html = page.read_text(encoding='utf-8')
+          scripts = re.findall(r'<script(?![^>]*application/ld\+json)[^>]*>(.*?)</script>', html, flags=re.S|re.I)
+          assert scripts, page
+          target = Path('/tmp/alo186-discoverability-trust-v207.js')
+          target.write_text('\n'.join(scripts), encoding='utf-8')
+          print(target)
+          PY
+          node --check /tmp/alo186-discoverability-trust-v207.js

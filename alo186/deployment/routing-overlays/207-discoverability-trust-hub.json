@@ -1,0 +1,20 @@
+{
+  "version": 207,
+  "generatedAt": "2026-08-02",
+  "routes": [
+    {
+      "source": "alo186/kesinti-cihaz-surekliligi-karar-merkezi/index.html",
+      "canonicalPath": "/kesinti-cihaz-surekliligi-karar-merkezi/",
+      "type": "interactive-guide"
+    }
+  ],
+  "trust": {
+    "officialImpersonation": false,
+    "directAffiliateLinkOnDecisionHub": false,
+    "priceStockRatingWarrantyClaims": false,
+    "affiliateDisclosureBeforeLink": true,
+    "hazardCommerceClosed": true,
+    "noBuyWhenAdequate": true,
+    "personalDataCollected": false
+  }
+}

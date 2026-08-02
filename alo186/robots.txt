@@ -3,3 +3,4 @@ Allow: /
 
 Sitemap: https://alo186.com/sitemap.xml
 Sitemap: https://alo186.com/sitemap-electric-project-v200.xml
+Sitemap: https://alo186.com/sitemap-growth-v207.xml
