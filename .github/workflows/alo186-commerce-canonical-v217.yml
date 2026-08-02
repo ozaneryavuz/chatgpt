@@ -1,0 +1,121 @@
+name: ALO186 ticari canonical ve JSON-LD rota bütünlüğü v217
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/deployment/build_static_site.py'
+      - 'alo186/tests/test_commerce_canonical_v217.py'
+      - '.github/workflows/alo186-commerce-canonical-v217.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/deployment/build_static_site.py'
+      - 'alo186/tests/test_commerce_canonical_v217.py'
+      - '.github/workflows/alo186-commerce-canonical-v217.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-commerce-canonical-v217-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Kaynak ve canonical build sözleşmeleri
+        run: |
+          python alo186/tests/test_commerce_canonical_v217.py
+          python alo186/tests/test_commerce_governance_v2.py
+          node alo186/tests/test_release_manifest.js
+
+      - name: Canonical production paketi
+        run: |
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-commerce-v217-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-commerce-v217-canonical
+          python - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+          root=Path('/tmp/alo186-commerce-v217-canonical')
+          release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
+          report=release['commercialCanonicalV217']
+          assert report['version']==217
+          assert report['canonicalOrigin']=='https://alo186.com'
+          assert report['priceStockRatingAdded'] is False
+          assert report['affiliateLinksAdded'] is False
+          hub=(root/'amazon-elektrik-urunleri/index.html').read_text(encoding='utf-8')
+          assert not re.search(r'https://alo186\.com/amazon-elektrik-urunleri(?=[a-z0-9])',hub,re.I)
+          PY
+
+      - name: Custom-domain final ticari artifact
+        run: |
+          cp -a /tmp/alo186-commerce-v217-canonical /tmp/alo186-commerce-v217-custom
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-commerce-v217-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/guard_commerce_routes_v3.py \
+            --site /tmp/alo186-commerce-v217-custom
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-commerce-v217-custom \
+            --base-path ''
+
+      - name: Project-path final ticari artifact
+        run: |
+          cp -a /tmp/alo186-commerce-v217-canonical /tmp/alo186-commerce-v217-project
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-commerce-v217-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/guard_commerce_routes_v3.py \
+            --site /tmp/alo186-commerce-v217-project
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-commerce-v217-project \
+            --base-path '/chatgpt'
+
+      - name: Final canonical ve URL kabulü
+        run: |
+          python - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+          from urllib.parse import urlsplit
+
+          canonical=re.compile(r'<link\b(?=[^>]*\brel=["\']canonical["\'])(?=[^>]*\bhref=["\']([^"\']+)["\'])[^>]*>',re.I)
+          for root in (Path('/tmp/alo186-commerce-v217-custom'),Path('/tmp/alo186-commerce-v217-project')):
+              release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
+              assert release['commercialCanonicalV217']['version']==217
+              hub=(root/'amazon-elektrik-urunleri/index.html').read_text(encoding='utf-8')
+              assert not re.search(r'https://alo186\.com/amazon-elektrik-urunleri(?=[a-z0-9])',hub,re.I)
+              for page in sorted((root/'amazon-elektrik-urunleri').rglob('index.html')):
+                  match=canonical.search(page.read_text(encoding='utf-8'))
+                  assert match,page
+                  parsed=urlsplit(match.group(1))
+                  assert parsed.hostname=='alo186.com',(page,match.group(1))
+          PY
+
+      - name: Doğrulanmış ticari canonical artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-commerce-canonical-v217-pages
+          path: /tmp/alo186-commerce-v217-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
