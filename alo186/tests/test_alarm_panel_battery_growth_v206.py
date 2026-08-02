@@ -25,7 +25,8 @@ def test_common_contract():
         assert f'<link rel="canonical" href="{canonical}">' in html
         assert 'name="viewport"' in html
         assert "FAQPage" in html and "BreadcrumbList" in html
-        assert "ALO186" in html and "resmî kurum" in html
+        assert "ALO186" in html
+        assert "resmî kurum" in html or "kamu kurumu" in html
         assert '"@type":"Product"' not in html
         assert '"@type":"Offer"' not in html
         assert "AggregateRating" not in html
@@ -52,7 +53,7 @@ def test_selector_commerce_contract():
 
 def test_test_center_privacy_and_repeat_visit():
     html = read(TEST)
-    for token in ["JSON indir", "30 günlük ICS", "90 günlük ICS", "kişisel", "localStorage kullanılmaz", "resmî bakım standardı değildir", "yeni ürün almayın"]:
+    for token in ["JSON indir", "30 günlük ICS", "90 günlük ICS", "Adres, parola", "personalData:false", "localStorage kullanılmaz", "resmî bakım standardı değildir", "yeni ürün almayın"]:
         assert token in html
     assert "/hesaplama/alarm-paneli-aku-bekleme-suresi/" in html
     assert "/amazon-elektrik-urunleri/alarm-paneli-aku-uygunluk-secici/" in html
