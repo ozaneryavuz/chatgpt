@@ -8,6 +8,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 import guard_commerce_routes_v2 as v2
+import inject_intent_tools_run135 as intent_tools
 import inject_portal_purchase_checkpoint_v213 as portal_checkpoint
 
 # V2, bağlantının çevresindeki sabit 900 karakteri tarıyordu. Uzun hesaplayıcı
@@ -203,11 +204,14 @@ def _checkpoint_base_path(site: Path) -> str:
 
 
 def validate_site(site: Path) -> dict:
-    """Son artifacta güven kontrolünü ekler ve ardından ticari yapıyı fail-closed tarar."""
+    """Son artifacta keşif ve güven katmanlarını ekler, sonra ticari yapıyı fail-closed tarar."""
     resolved = site.resolve()
-    checkpoint_result = portal_checkpoint.inject(resolved, _checkpoint_base_path(resolved))
+    base_path = _checkpoint_base_path(resolved)
+    checkpoint_result = portal_checkpoint.inject(resolved, base_path)
+    intent_tools_result = intent_tools.inject(resolved, base_path)
     result = _original_validate_site(resolved)
     result["portalPurchaseCheckpoint"] = checkpoint_result
+    result["intentToolsRun135"] = intent_tools_result
     return result
 
 
