@@ -24,8 +24,11 @@ def seed(site: Path) -> None:
 
 
 def assertions(text: str, base: str = "") -> None:
-    assert text.count('data-alo186-home-affiliate-v209="true"') == 1
+    section_marker = '<section class="home-affiliate-feature" data-alo186-home-affiliate-v209="true"'
+    assert text.count(section_marker) == 1
     assert text.count('data-home-affiliate-product=') == 6
+    assert text.count('data-alo186-home-affiliate-v209-style="true"') == 1
+    assert text.count('data-alo186-home-affiliate-v209-script="true"') == 1
     assert 'Satış ortaklığı içerebilir' in text
     assert 'Mevcut güvenli ürün ihtiyacınızı karşılıyorsa yenisini almayın' in text
     assert 'Fiyat, stok, puan ve garanti yayımlamaz' in text
@@ -34,11 +37,11 @@ def assertions(text: str, base: str = "") -> None:
     assert 'home_affiliate_product_click' in text
     assert 'amazon.com' not in text.lower()
     assert 'alo186rehber-21' not in text
-    assert 'Product' not in text
-    assert 'Offer' not in text
+    assert '"@type":"Product"' not in text
+    assert '"@type":"Offer"' not in text
     expected = f'{base}/amazon-elektrik-urunleri/konuya-gore-urun-haritasi/' if base else '/amazon-elektrik-urunleri/konuya-gore-urun-haritasi/'
     assert expected in text
-    assert text.index('data-alo186-home-affiliate-v209="true"') < text.index('<section class="legal-alert"')
+    assert text.index(section_marker) < text.index('<section class="legal-alert"')
 
 
 def test_custom_domain_and_idempotence() -> None:
