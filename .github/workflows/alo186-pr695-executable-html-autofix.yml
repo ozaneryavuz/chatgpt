@@ -1,0 +1,50 @@
+name: ALO186 PR695 executable HTML autofix
+
+on:
+  push:
+    branches: [fix/alo186-pages-basepath-guard-v212]
+    paths:
+      - '.github/workflows/alo186-pr695-executable-html-autofix.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/alo186-pages-basepath-guard-v212
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Preserve executable HTML scanning and remove helper
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('alo186/deployment/smoke_github_pages.py')
+          text = path.read_text(encoding='utf-8')
+          helper = '''\n\ndef executable_html_text(text: str) -> str:\n    """Return inline script/style bodies while excluding logical data-* metadata."""\n    chunks: list[str] = []\n    for pattern in (r'<script\\b[^>]*>(.*?)</script>', r'<style\\b[^>]*>(.*?)</style>'):\n        chunks.extend(re.findall(pattern, text, re.I | re.S))\n    return "\\n".join(chunks)\n'''
+          if 'def executable_html_text' not in text:
+              text = text.replace('\ndef route_exists(site: Path, route: str) -> bool:', helper + '\n\ndef route_exists(site: Path, route: str) -> bool:', 1)
+          old = '''            if path.suffix.lower() == ".html":\n                # HTML navigation and asset references are validated structurally\n                # through PageParser above. data-* route identifiers are metadata,\n                # not deployable URLs, and must not become false positives here.\n                continue\n            if relative_path in base_path_aware_scripts:\n                # These runtimes either derive the public prefix dynamically or\n                # keep canonical route identifiers/path separators as data.\n                continue\n            text = path.read_text(encoding="utf-8", errors="ignore")\n'''
+          new = '''            if relative_path in base_path_aware_scripts:\n                # These runtimes either derive the public prefix dynamically or\n                # keep canonical route identifiers/path separators as data.\n                continue\n            text = path.read_text(encoding="utf-8", errors="ignore")\n            if path.suffix.lower() == ".html":\n                # Structural attributes are already checked by PageParser. Keep\n                # scanning executable inline script/style content, but exclude\n                # logical data-* route identifiers that are not browser URLs.\n                text = executable_html_text(text)\n'''
+          if old not in text:
+              raise SystemExit('PR695 target block not found')
+          text = text.replace(old, new, 1)
+          path.write_text(text, encoding='utf-8')
+
+          test = Path('alo186/tests/test_pages_basepath_executable_html.py')
+          test.write_text('''from __future__ import annotations\n\nimport importlib.util\nfrom pathlib import Path\n\nROOT = Path(__file__).resolve().parents[2]\nMODULE = ROOT / "alo186/deployment/smoke_github_pages.py"\nspec = importlib.util.spec_from_file_location("smoke_pages", MODULE)\nmodule = importlib.util.module_from_spec(spec)\nassert spec and spec.loader\nspec.loader.exec_module(module)\n\nhtml = """<section data-route=\\"/hesaplama/\\"></section><script>fetch('/assets/app.js');location.href='/route';</script><style>.x{background:url('/assets/a.png')}</style>"""\nscan = module.executable_html_text(html)\nassert 'data-route' not in scan\nassert "fetch('/assets/app.js')" in scan\nassert "location.href='/route'" in scan\nassert "url('/assets/a.png')" in scan\nprint('Pages executable HTML base-path guard: PASS')\n''', encoding='utf-8')
+          PY
+          python -m py_compile alo186/deployment/smoke_github_pages.py alo186/tests/test_pages_basepath_executable_html.py
+          python alo186/tests/test_pages_basepath_executable_html.py
+          rm .github/workflows/alo186-pr695-executable-html-autofix.yml
+          git config user.name 'alo186-release-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add alo186/deployment/smoke_github_pages.py alo186/tests/test_pages_basepath_executable_html.py .github/workflows/alo186-pr695-executable-html-autofix.yml
+          git commit -m 'fix(pages): scan inline executable HTML without data metadata'
+          git push origin HEAD:fix/alo186-pages-basepath-guard-v212
