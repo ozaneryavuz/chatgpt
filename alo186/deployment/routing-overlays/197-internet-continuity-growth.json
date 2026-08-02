@@ -1,0 +1,21 @@
+{
+  "version": 197,
+  "generatedAt": "2026-08-02",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/fiber-internet-modem-ont-mini-ups-calisma-suresi/index.html",
+      "canonicalPath": "/hesaplama/fiber-internet-modem-ont-mini-ups-calisma-suresi/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/modem-ont-mini-ups-yedekleme-secici/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/modem-ont-mini-ups-yedekleme-secici/",
+      "type": "commerce-guide"
+    },
+    {
+      "source": "alo186/sektor-rehberi/internet-kesintisi-elektrik-mi-operator-mu-test-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/internet-kesintisi-elektrik-mi-operator-mu-test-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
