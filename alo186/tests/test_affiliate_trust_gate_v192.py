@@ -50,9 +50,11 @@ def main() -> None:
 
     # The commercial hub itself must stay technical-tool-first and non-coercive.
     hub_text = compact(hub)
-    assert "mevcut ürün yeterliyse satın alma yok" in hub_text
-    assert "fiyat ve stok kopyalanmaz" in hub_text
+    assert "mevcut sistem yeterliyse satın alma yok" in hub_text
+    assert "fiyat, stok ve puan kopyalanmaz" in hub_text
     assert "aktif tehlikede satış yolu kapalı" in hub_text
+    assert "18+ karar rotası" in hub_text
+    assert hub.count('class="card route-card"') == 12
     assert "/akilli-urun-secimi" in hub
     assert "amazon gelir ortağı" in hub_text
     for phrase in COERCIVE_PHRASES:
