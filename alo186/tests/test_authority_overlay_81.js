@@ -21,8 +21,24 @@ assert.equal(current.version,37,'Run 12 routing sürümü v37 olmalı.');
 assert.equal(current.generatedAt,'2026-07-29');
 assert.equal(current.routes.length,3,'Run 12 overlay tam üç yeni rota taşımalı.');
 
-const effective=[...base.routes];
-for(const overlay of overlays) effective.push(...overlay.routes);
+function normalizeRoute(route, sourceLabel){
+  const hasModern=Boolean(route&&route.canonicalPath&&route.source&&route.type);
+  if(hasModern){
+    if(route.path!==undefined) assert.equal(route.path,route.canonicalPath,`Dual rota canonical uyumsuz: ${sourceLabel}`);
+    if(route.file!==undefined) assert.equal(`alo186/${route.file}`,route.source,`Dual rota source uyumsuz: ${sourceLabel}`);
+    if(route.intent!==undefined) assert(String(route.intent).trim(),`Dual rota intent boş: ${sourceLabel}`);
+    return {canonicalPath:route.canonicalPath,source:route.source,type:route.type};
+  }
+  assert(route&&route.path&&route.file&&route.intent,`Rota şeması tanınmıyor: ${sourceLabel}`);
+  assert(route.path.startsWith('/haberler/'),`Legacy rota haber olmalı: ${sourceLabel}`);
+  assert.equal(route.file,`${route.path.slice(1)}/index.html`,`Legacy rota kaynak uyuşmuyor: ${sourceLabel}`);
+  return {canonicalPath:route.path,source:`alo186/${route.file}`,type:'article'};
+}
+
+const effective=base.routes.map((route,index)=>normalizeRoute(route,`routing-manifest.json#${index}`));
+for(const overlay of overlays){
+  overlay.routes.forEach((route,index)=>effective.push(normalizeRoute(route,`${overlay.name}#${index}`)));
+}
 const canonical=new Set();
 const sources=new Set();
 for(const route of effective){
