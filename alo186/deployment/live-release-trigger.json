@@ -1,24 +1,42 @@
 {
-  "schemaVersion": 3,
-  "release": "alo186-v177-hosting-aware-live-2026-08-01T23:58+03:00",
-  "requestedAt": "2026-08-01T20:58:00Z",
+  "schemaVersion": 4,
+  "release": "alo186-run135-complete-live-2026-08-02T20:58+03:00",
+  "requestedAt": "2026-08-02T17:58:00Z",
   "requestedTimeZone": "Europe/Istanbul",
-  "includesMainThrough": "42debceca33d41e6cc0d62da3c9ca3e3cc036dbf",
-  "purpose": "Birleştirilmiş ALO186 içerik, UX, affiliate, routing ve kalite çalışmalarını gerçek canlı hosting modunda doğrula; Pages hazırsa tam deploy yap, hazır değilse ChatGPT Sites v177 yüzeyini fail-closed denetle.",
+  "includesMainThrough": "6029ff354c4f6b75e0d952bfff20349c77a923af",
+  "purpose": "Güncel ana daldaki bütün ALO186 içerik, karar aracı, canonical konsolidasyon, affiliate güven, UX ve kalite çalışmalarını tek üretim artifactında derle ve GitHub Pages özel alan adına dağıt.",
   "deploymentWorkflow": ".github/workflows/alo186-pages-autobootstrap-live.yml",
   "verificationWorkflow": ".github/workflows/alo186-v177-hosting-aware-live.yml",
   "receiptTargets": [
-    "pull/606",
+    "pull/694",
     "issues/21"
   ],
   "liveDomain": "https://alo186.com",
-  "requiredLiveRoute": "/amazon-elektrik-urunleri/konuya-gore-urun-haritasi/",
-  "requiredMarkers": [
-    "data-alo186-contextual-affiliate-v177",
-    "alo186rehber-21"
+  "requiredLiveRoutes": [
+    "/hesaplama/elektrik-kesintisi-tazminat-kontrolu/",
+    "/hesaplama/ges-kesinti-yedekleme-mimarisi/",
+    "/hesaplama/ev-sarj-kacak-akim-koruma-secici/",
+    "/elektrik-portali/",
+    "/amazon-elektrik-urunleri/"
   ],
-  "expectedPlacementCount": 3,
-  "expectedGateCount": 3,
-  "staticStoreLinksAllowed": 0,
+  "requiredTrustMarkers": [
+    "30 gün",
+    "ALO186",
+    "Bağımsız",
+    "Mevcut"
+  ],
+  "forbiddenPublicClaims": [
+    "on iş günü",
+    "Product",
+    "Offer",
+    "AggregateRating"
+  ],
+  "affiliatePolicy": {
+    "disclosureVisible": true,
+    "unverifiedPriceStockRatingWarranty": false,
+    "officialInstitutionImpression": false,
+    "existingProductSufficientNoBuy": true,
+    "activeHazardCommerceClosed": true
+  },
   "status": "requested"
 }
