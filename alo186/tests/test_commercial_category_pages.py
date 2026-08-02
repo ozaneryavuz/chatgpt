@@ -21,10 +21,11 @@ DIRECT_COMMERCIAL_ROUTES = {
     "/amazon-elektrik-urunleri",
     "/amazon-elektrik-urunleri/powerbank-usb-c-secimi",
 }
-EXPANSION_ROUTES = {
+HUB_REQUIRED_ROUTES = {
+    "/amazon-elektrik-urunleri/powerbank-usb-c-secimi",
+    "/amazon-elektrik-urunleri/akim-korumali-grup-priz-secimi",
     "/amazon-elektrik-urunleri/tasinabilir-guc-istasyonu-secimi",
     "/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi",
-    "/amazon-elektrik-urunleri/ges-malzemeleri-secimi",
     "/amazon-elektrik-urunleri/kombi-ups-power-station-secimi",
     "/amazon-elektrik-urunleri/buzdolabi-dondurucu-kesinti-gida-guvenligi-secici",
 }
@@ -93,15 +94,17 @@ class CommercialCategoryPagesTests(unittest.TestCase):
                 self.assertIn("fiyat", lower)
                 self.assertIn("stok", lower)
 
-    def test_hub_links_to_current_dedicated_pages_without_stale_count_fixture(self) -> None:
+    def test_hub_links_to_active_consumer_routes_without_reintroducing_legacy_aliases(self) -> None:
         html = ROUTES["/amazon-elektrik-urunleri"].read_text(encoding="utf-8")
         hrefs = re.findall(r'href=["\']([^"\']+)["\']', html, re.I)
         linked = {normalized_path(value) for value in hrefs if normalized_path(value).startswith("/amazon-elektrik-urunleri/")}
-        required = {normalized_path(route) for route in (set(ROUTES) - {"/amazon-elektrik-urunleri"}) | EXPANSION_ROUTES}
+        required = {normalized_path(route) for route in HUB_REQUIRED_ROUTES}
         self.assertTrue(required <= linked, sorted(required - linked))
         self.assertGreaterEqual(html.count('class="card route-card"'), len(required))
         self.assertIn("Mevcut sistem yeterliyse satın alma yok", html)
         self.assertIn("Aktif tehlikede satış yolu kapalı", html)
+        self.assertNotIn("/amazon-elektrik-urunleri/modem-mini-ups-secimi", linked)
+        self.assertIn("/amazon-elektrik-urunleri/modem-ont-mini-ups-yedekleme-secici", linked)
 
     def test_direct_affiliate_links_are_freshness_gated_and_high_risk_categories_remain_closed(self) -> None:
         runtime = (SOURCE_ROOT / "commercial.js").read_text(encoding="utf-8")
