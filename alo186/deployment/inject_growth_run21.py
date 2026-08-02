@@ -3,13 +3,14 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 from inject_boiler_continuity_growth import run as run_boiler_continuity
 from inject_growth_run22 import run as run_growth_run22
 
 ROUTE = "/hesaplama/kesinti-hazirlik-envanteri/"
-CANONICAL = "https://www.alo186.com" + ROUTE
+CANONICAL = "https://alo186.com" + ROUTE
 SOURCE = "alo186/hesaplama/kesinti-hazirlik-envanteri/index.html"
 ENTRY_MARKER = 'data-alo186-growth-run21-entry="true"'
 GUARD_MARKER = 'data-alo186-risk-gate-run21="true"'
@@ -33,9 +34,18 @@ def public_url(base_path: str, route: str) -> str:
 def append_sitemap(site: Path) -> None:
     path = site / "sitemap.xml"
     text = path.read_text(encoding="utf-8")
-    if f"<loc>{CANONICAL}</loc>" not in text:
-        text = text.replace("</urlset>", f"<url><loc>{CANONICAL}</loc></urlset>", 1)
-        path.write_text(text, encoding="utf-8")
+    if f"<loc>{CANONICAL}</loc>" in text:
+        # Mevcut dosya da sonraki büyüme adımlarına geçmeden geçerli XML olmalı.
+        ET.fromstring(text)
+        return
+    entry = f"<url><loc>{CANONICAL}</loc></url>"
+    if "</urlset>" not in text:
+        raise RuntimeError("Sitemap kapanış etiketi bulunamadı")
+    updated = text.replace("</urlset>", entry + "</urlset>", 1)
+    # Eksik </url> gibi tek bir büyüme enjeksiyonunun bütün Pages yayınını
+    # bozmasını engelle; yalnız parse edilebilir çıktı diske yazılır.
+    ET.fromstring(updated)
+    path.write_text(updated, encoding="utf-8")
 
 
 def append_search(site: Path, base_path: str) -> None:
