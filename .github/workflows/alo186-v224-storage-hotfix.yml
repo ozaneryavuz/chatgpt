@@ -1,0 +1,105 @@
+name: ALO186 v224 storage fail-safe hotfix
+
+on:
+  push:
+    branches:
+      - 'agent/alo186-zero-traffic-activation-v224'
+    paths:
+      - '.github/workflows/alo186-v224-storage-hotfix.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: agent/alo186-zero-traffic-activation-v224
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Depolama erişimini fail-safe yap
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          app = Path('alo186/elektrik-dayaniklilik-karti/app.js')
+          source = app.read_text(encoding='utf-8')
+          if 'function storageGet(key)' not in source:
+              anchor = '  let lastPayload = null;\n  let startEventSent = false;\n\n'
+              wrappers = '''  let lastPayload = null;
+            let startEventSent = false;
+
+            function storageGet(key) {
+              try {
+                return window.localStorage.getItem(key);
+              } catch (_error) {
+                return null;
+              }
+            }
+
+            function storageSet(key, value) {
+              try {
+                window.localStorage.setItem(key, value);
+                return true;
+              } catch (_error) {
+                return false;
+              }
+            }
+
+            function storageRemove(key) {
+              try {
+                window.localStorage.removeItem(key);
+              } catch (_error) {
+                // Depolama engelliyse araç yine bellekte çalışmaya devam eder.
+              }
+            }
+
+            '''
+              wrappers = '\n'.join(line[10:] if line.startswith('          ') else line for line in wrappers.splitlines()) + '\n'
+              if anchor not in source:
+                  raise SystemExit('storage wrapper anchor bulunamadı')
+              source = source.replace(anchor, wrappers, 1)
+              source = source.replace(
+                  '      localStorage.removeItem(STORAGE_KEY);\n      savedPanel.hidden = true;\n      return;\n    }\n    const record = { payload, expiresAt: Date.now() + STORAGE_DAYS * 24 * 60 * 60 * 1000 };\n    localStorage.setItem(STORAGE_KEY, JSON.stringify(record));\n    savedPanel.hidden = false;\n',
+                  '      storageRemove(STORAGE_KEY);\n      savedPanel.hidden = true;\n      return;\n    }\n    const record = { payload, expiresAt: Date.now() + STORAGE_DAYS * 24 * 60 * 60 * 1000 };\n    const saved = storageSet(STORAGE_KEY, JSON.stringify(record));\n    savedPanel.hidden = !saved;\n',
+                  1,
+              )
+              source = source.replace('      const raw = localStorage.getItem(STORAGE_KEY);\n', '      const raw = storageGet(STORAGE_KEY);\n', 1)
+              source = source.replace('        localStorage.removeItem(STORAGE_KEY);\n', '        storageRemove(STORAGE_KEY);\n', 1)
+              source = source.replace('      localStorage.removeItem(STORAGE_KEY);\n      return null;\n', '      storageRemove(STORAGE_KEY);\n      return null;\n', 1)
+              source = source.replace('    localStorage.removeItem(STORAGE_KEY);\n    savedPanel.hidden = true;\n', '    storageRemove(STORAGE_KEY);\n    savedPanel.hidden = true;\n', 1)
+              app.write_text(source, encoding='utf-8')
+
+          test = Path('alo186/tests/test_zero_traffic_activation_v224.py')
+          contract = test.read_text(encoding='utf-8')
+          if '"storageGet",' not in contract:
+              contract = contract.replace(
+                  '        "localStorage",\n        "TextEncoder",\n',
+                  '        "localStorage",\n        "storageGet",\n        "storageSet",\n        "storageRemove",\n        "TextEncoder",\n',
+                  1,
+              )
+              test.write_text(contract, encoding='utf-8')
+          PY
+          node --check alo186/elektrik-dayaniklilik-karti/app.js
+          python alo186/tests/test_zero_traffic_activation_v224.py
+      - name: Hotfix commitini gönder ve geçici workflow'u kaldır
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'chatgpt-codex-connector[bot]'
+          git config user.email 'chatgpt-codex-connector[bot]@users.noreply.github.com'
+          git add alo186/elektrik-dayaniklilik-karti/app.js alo186/tests/test_zero_traffic_activation_v224.py
+          git rm .github/workflows/alo186-v224-storage-hotfix.yml
+          git commit -m 'fix(alo186): gizlilik modunda depolama erişimini fail-safe yap'
+          git push origin HEAD:agent/alo186-zero-traffic-activation-v224
