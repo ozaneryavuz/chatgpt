@@ -47,22 +47,31 @@ def inject_page(path: Path, target, base: str) -> bool:
     text = path.read_text(encoding="utf-8")
     if MARKER in text:
         return False
-    if not all(tag in text for tag in ("</head>", "</main>", "</body>")):
-        raise RuntimeError(f"HTML kapanışları eksik: {path}")
+    lowered = text.casefold()
+    if not all(tag in lowered for tag in ("<html", "<head", "<body")):
+        raise RuntimeError(f"HTML belge iskeleti eksik: {path}")
     stylesheet = public_url(base, "/" + ASSET_CSS.as_posix())
     script = public_url(base, "/" + ASSET_JS.as_posix())
-    text = text.replace(
-        "</head>",
-        f'<link rel="stylesheet" href="{stylesheet}" {STYLE_MARKER}>\n</head>',
-        1,
-    )
+    style_tag = f'<link rel="stylesheet" href="{stylesheet}" {STYLE_MARKER}>\n'
+    head_close = lowered.find("</head>")
+    if head_close >= 0:
+        text = text[:head_close] + style_tag + text[head_close:]
+    else:
+        body_start = lowered.find("<body")
+        text = text[:body_start] + style_tag + text[body_start:]
     point = insertion_point(text, target)
     text = text[:point] + funnel_section(target, base) + "\n" + text[point:]
-    text = text.replace(
-        "</body>",
-        f'<script defer src="{script}" {SCRIPT_MARKER}></script>\n</body>',
-        1,
-    )
+    lowered = text.casefold()
+    script_tag = f'<script defer src="{script}" {SCRIPT_MARKER}></script>\n'
+    body_close = lowered.find("</body>")
+    if body_close >= 0:
+        text = text[:body_close] + script_tag + text[body_close:]
+    else:
+        html_close = lowered.find("</html>")
+        if html_close >= 0:
+            text = text[:html_close] + script_tag + text[html_close:]
+        else:
+            text = text.rstrip() + "\n" + script_tag
     path.write_text(text, encoding="utf-8")
     return True
 
