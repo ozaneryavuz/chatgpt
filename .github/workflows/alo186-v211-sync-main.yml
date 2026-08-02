@@ -1,33 +1,33 @@
 name: ALO186 v211 sync main
 
 on:
-  pull_request:
-    branches: [main]
+  push:
+    branches:
+      - agent/affiliate-measurement-v211
     paths:
       - '.github/workflows/alo186-v211-sync-main.yml'
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 concurrency:
-  group: alo186-v211-sync-main-${{ github.event.pull_request.number }}
+  group: alo186-v211-sync-main
   cancel-in-progress: false
 
 jobs:
   merge-main:
-    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ github.head_ref }}
+          ref: agent/affiliate-measurement-v211
           fetch-depth: 0
       - name: Ana dalı birleştir ve doğrulanmış 30 günlük içeriği koru
-        env:
-          HEAD_REF: ${{ github.head_ref }}
         run: |
           set -euo pipefail
+          HEAD_REF='agent/affiliate-measurement-v211'
           TARGET='alo186/haberler/elektrik-kesintisi-gerilim-dalgalanmasi-cihaz-hasari-edas-tazminat-basvurusu/index.html'
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
