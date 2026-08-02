@@ -1,0 +1,221 @@
+name: ALO186 canlı-origin teknik kalite v225
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/deployment/audit_live_origin_v225.py'
+      - 'alo186/deployment/finalize_sitemap_v225.py'
+      - 'alo186/tests/test_live_origin_quality_v225.py'
+      - 'alo186/tests/test_sitemap_quality_v225.py'
+      - 'alo186/robots.txt'
+      - 'alo186/haberler/lifepo4-batarya-sogukta-sarj-edilir-mi/index.html'
+      - 'alo186/haberler/elektrik-gerilimi-dusuk-yuksek-edas-olcum-talebi/index.html'
+      - '.github/workflows/alo186-live-origin-quality-v225.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/**'
+      - '.github/workflows/alo186-live-origin-quality-v225.yml'
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-live-origin-quality-v225-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  artifact-quality:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+
+      - name: v225 kaynak testleri
+        run: |
+          python -m py_compile \
+            alo186/deployment/audit_live_origin_v225.py \
+            alo186/deployment/finalize_sitemap_v225.py
+          python alo186/tests/test_live_origin_quality_v225.py
+          python alo186/tests/test_sitemap_quality_v225.py
+
+      - name: Mevcut final-artifact regresyonları
+        run: |
+          python alo186/tests/test_live_quality_v218.py
+          python alo186/tests/test_commerce_canonical_v217.py
+          python alo186/tests/test_accessibility_v214.py
+          python alo186/tests/test_content_intent_consolidation.py
+          python alo186/tests/test_private_technical_search.py
+          python alo186/tests/device_damage_deadline_guard.py
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+
+      - name: Canonical production paketi
+        run: |
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-v225-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-v225-canonical
+
+      - name: Custom-domain ve project-path final artifactları
+        shell: bash
+        run: |
+          set -euo pipefail
+          for spec in 'custom|' 'project|/chatgpt'; do
+            name=${spec%%|*}
+            base=${spec#*|}
+            site="/tmp/alo186-v225-${name}"
+            cp -a /tmp/alo186-v225-canonical "$site"
+            python alo186/deployment/prepare_github_pages.py \
+              --site "$site" \
+              --base-path "$base" \
+              --repository "$GITHUB_REPOSITORY" \
+              --commit "$GITHUB_SHA"
+            python alo186/deployment/inject_outcome_runtime.py \
+              --site "$site" \
+              --base-path "$base"
+            python alo186/deployment/finalize_sitemap_v225.py \
+              --site "$site" \
+              --base-path "$base" \
+              > "/tmp/alo186-sitemap-v225-${name}.json"
+            python alo186/deployment/guard_commerce_routes_v3.py \
+              --site "$site" \
+              > "/tmp/alo186-commerce-v225-${name}.json"
+            python alo186/deployment/smoke_github_pages.py \
+              --site "$site" \
+              --base-path "$base"
+          done
+
+      - name: Final sitemap, robots, canonical ve alias kabulü
+        run: |
+          python - <<'PY'
+          import json
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+
+          aliases={
+              'https://alo186.com/haberler/lifepo4-batarya-sogukta-sarj-edilir-mi',
+              'https://alo186.com/haberler/elektrik-gerilimi-dusuk-yuksek-edas-olcum-talebi',
+          }
+          for root,base in [
+              (Path('/tmp/alo186-v225-custom'),''),
+              (Path('/tmp/alo186-v225-project'),'/chatgpt'),
+          ]:
+              receipt=json.loads((root/'sitemap-quality-v225.json').read_text(encoding='utf-8'))
+              assert receipt['version']==225
+              assert receipt['basePath']==base
+              assert receipt['robotsSingleCanonicalSitemap'] is True
+              assert receipt['legacyWwwRejected'] is True
+              assert receipt['keptUrlCount']>100
+              robots=(root/'robots.txt').read_text(encoding='utf-8')
+              assert robots=='User-agent: *\nAllow: /\n\nSitemap: https://alo186.com/sitemap.xml\n'
+              tree=ET.parse(root/'sitemap.xml')
+              ns={'s':'http://www.sitemaps.org/schemas/sitemap/0.9'}
+              urls=[node.text for node in tree.findall('s:url/s:loc',ns)]
+              assert urls[0]=='https://alo186.com/'
+              assert len(urls)==len(set(urls))
+              assert not aliases.intersection(urls)
+              assert all(url.startswith('https://alo186.com/') for url in urls)
+              for release_name in ('alo186-release.json','pages-release.json'):
+                  release=json.loads((root/release_name).read_text(encoding='utf-8'))
+                  assert release['sitemapQualityV225']==receipt
+              for route,target in [
+                  ('haberler/lifepo4-batarya-sogukta-sarj-edilir-mi/index.html','lifepo4-dusuk-sicaklikta-sarj-edilir-mi'),
+                  ('haberler/elektrik-gerilimi-dusuk-yuksek-edas-olcum-talebi/index.html','dusuk-yuksek-voltaj-edas-teknik-kalite-olcumu'),
+              ]:
+                  html=(root/route).read_text(encoding='utf-8')
+                  assert 'data-alo186-content-alias="true"' in html
+                  assert 'noindex,follow' in html
+                  assert target in html
+          PY
+
+      - name: Doğrulanmış v225 artifactı
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-live-origin-quality-v225-pages
+          path: |
+            /tmp/alo186-v225-custom
+            /tmp/alo186-sitemap-v225-custom.json
+            /tmp/alo186-commerce-v225-custom.json
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
+
+  live-origin:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+
+      - name: Chrome ve Lighthouse sürümü
+        run: |
+          google-chrome --version || chromium --version || chromium-browser --version
+          npx --yes lighthouse@13.4.1 --version
+
+      - name: Mobil Lighthouse laboratuvar ölçümü
+        run: |
+          npx --yes lighthouse@13.4.1 https://alo186.com/ \
+            --output=json \
+            --output-path=/tmp/alo186-lighthouse-mobile.json \
+            --chrome-flags='--headless --no-sandbox --disable-gpu --disable-dev-shm-usage' \
+            --quiet
+
+      - name: Masaüstü Lighthouse laboratuvar ölçümü
+        run: |
+          npx --yes lighthouse@13.4.1 https://alo186.com/ \
+            --preset=desktop \
+            --output=json \
+            --output-path=/tmp/alo186-lighthouse-desktop.json \
+            --chrome-flags='--headless --no-sandbox --disable-gpu --disable-dev-shm-usage' \
+            --quiet
+
+      - name: Canlı origin, robots, sitemap, bağlantı ve erişilebilirlik denetimi
+        id: live_audit
+        shell: bash
+        run: |
+          set +e
+          python alo186/deployment/audit_live_origin_v225.py \
+            --origin https://alo186.com \
+            --expected-commit "$GITHUB_SHA" \
+            --mobile-lighthouse /tmp/alo186-lighthouse-mobile.json \
+            --desktop-lighthouse /tmp/alo186-lighthouse-desktop.json \
+            --report /tmp/alo186-live-origin-v225.json \
+            --markdown /tmp/alo186-live-origin-v225.md \
+            --workers 8 \
+            --max-sitemap-urls 800
+          status=$?
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          cat /tmp/alo186-live-origin-v225.md >> "$GITHUB_STEP_SUMMARY"
+          exit "$status"
+
+      - name: Canlı-origin raporları
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-live-origin-quality-v225-${{ github.sha }}
+          path: |
+            /tmp/alo186-live-origin-v225.json
+            /tmp/alo186-live-origin-v225.md
+            /tmp/alo186-lighthouse-mobile.json
+            /tmp/alo186-lighthouse-desktop.json
+          if-no-files-found: warn
+          retention-days: 30
