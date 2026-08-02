@@ -59,6 +59,7 @@ def main() -> None:
     assert "needs.probe.outputs.pages_deployment_succeeded == 'true'" in bootstrap
     assert "workflow_id: 'alo186-github-pages.yml'" in bootstrap
     assert "ref: 'main'" in bootstrap
+    assert "first Pages artifact" in bootstrap or "İlk Pages artifact" in bootstrap
 
     print(
         json.dumps(
