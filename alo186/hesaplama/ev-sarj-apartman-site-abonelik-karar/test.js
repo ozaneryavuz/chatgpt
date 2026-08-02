@@ -1,0 +1,10 @@
+'use strict';
+const fs=require('fs');const path=require('path');const vm=require('vm');const assert=require('assert');
+const html=fs.readFileSync(path.join(__dirname,'index.html'),'utf8');
+for(const text of ['WebApplication','FAQPage','BreadcrumbList','Ayrı elektrik aboneliği','Mevcut iç tesisat','Ortak alan kurulum yolu','Kaynak doğrulama tarihi']) assert(html.includes(text),text);
+assert(!html.includes('"@type":"Product"'));assert(!html.includes('"@type":"Offer"'));assert(!/amazon\.(com|com\.tr)|amzn\.to/i.test(html));
+const match=html.match(/function decideEv\(input\)\{[\s\S]*?\n\}/);assert(match,'decideEv missing');const context={};vm.createContext(context);vm.runInContext(match[0]+';this.decideEv=decideEv;',context);
+let out=context.decideEv({parking:'common',supply:'existing',modification:'project',capacity:'insufficient'});assert(out.title.includes('Ortak alan'));assert(out.actions.some(x=>x.includes('yönetim')));assert(out.actions.some(x=>x.includes('Güç artışı')));
+out=context.decideEv({parking:'annex',supply:'separate',modification:'none',capacity:'verified'});assert(out.title.includes('Bireysel'));assert(out.actions.some(x=>x.includes('Dağıtım şirketine')));
+out=context.decideEv({parking:'unknown',supply:'unknown',modification:'unknown',capacity:'unknown'});assert(out.actions.some(x=>x.includes('yük etüdü')));
+console.log('EV apartman/site abonelik karar aracı: PASS');
