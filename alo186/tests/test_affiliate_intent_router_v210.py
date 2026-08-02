@@ -23,7 +23,8 @@ def seed(site: Path) -> None:
 
 
 def assertions(text: str, base: str = "") -> None:
-    assert text.count('data-alo186-affiliate-intent-v210="true"') == 1
+    section_marker = f'<section class="affiliate-intent-router" {module.MARKER}'
+    assert text.count(section_marker) == 1
     assert text.count('data-alo186-affiliate-intent-v210-style="true"') == 1
     assert text.count('data-alo186-affiliate-intent-v210-script="true"') == 1
     assert "30 saniyelik ihtiyaç yönlendiricisi" in text
@@ -46,7 +47,7 @@ def assertions(text: str, base: str = "") -> None:
     assert expected in text
     expected_fixed = f"{base}/kurumsal-elektrik-surekliligi-on-degerlendirme" if base else "/kurumsal-elektrik-surekliligi-on-degerlendirme"
     assert expected_fixed in text
-    assert text.index('data-alo186-affiliate-intent-v210="true"') < text.index('aria-labelledby="priorityTitle"')
+    assert text.index(section_marker) < text.index('aria-labelledby="priorityTitle"')
 
 
 def test_custom_domain_and_idempotence() -> None:
