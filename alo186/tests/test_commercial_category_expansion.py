@@ -66,6 +66,23 @@ def amazon_links(html: str) -> list[str]:
     return [value for value in links if urlsplit(value).hostname in AMAZON_HOSTS]
 
 
+def hub_inventory_claim(html: str) -> tuple[int, bool]:
+    """Return the visible inventory count and whether it is a lower bound.
+
+    The hub previously used an exact ``N özel rehber`` label. Its current UX uses
+    ``N+ karar rotası`` because the page can expose more cards than the compact
+    headline promises. Ignore script/style payloads so JSON-LD cannot satisfy the
+    visible-copy contract accidentally.
+    """
+
+    visible = re.sub(r"<(?:script|style)\b[^>]*>.*?</(?:script|style)>", " ", html, flags=re.I | re.S)
+    visible = re.sub(r"\s+", " ", unescape(re.sub(r"<[^>]+>", " ", visible))).strip()
+    match = re.search(r"\b(\d+)\s*(\+)?\s+(?:özel rehber|karar rotası)\b", visible, re.I)
+    if not match:
+        raise AssertionError("Ürün merkezinde görünür rehber/karar rotası sayısı bulunamadı")
+    return int(match.group(1)), bool(match.group(2))
+
+
 class CommercialCategoryExpansionTests(unittest.TestCase):
     def test_overlay_adds_three_unique_non_overlapping_intents(self) -> None:
         overlay = json.loads(OVERLAY.read_text(encoding="utf-8"))
@@ -153,6 +170,12 @@ class CommercialCategoryExpansionTests(unittest.TestCase):
             self.assertRegex(catalog, pattern)
         self.assertNotRegex(catalog, re.compile(r"id:'(?:power_station|smart_plug)'.*?mode:'direct'", re.S))
 
+    def test_inventory_claim_parser_supports_exact_and_minimum_copy(self) -> None:
+        self.assertEqual(hub_inventory_claim("<strong>7 özel rehber</strong>"), (7, False))
+        self.assertEqual(hub_inventory_claim("<strong>18+ karar rotası</strong>"), (18, True))
+        with self.assertRaisesRegex(AssertionError, "görünür"):
+            hub_inventory_claim('<script type="application/ld+json">{"name":"99 özel rehber"}</script>')
+
     def test_hub_inventory_matches_visible_count_and_grows_without_stale_fixture(self) -> None:
         hub = (SOURCE_ROOT / "index.html").read_text(encoding="utf-8")
         guide_links = re.findall(
@@ -161,9 +184,11 @@ class CommercialCategoryExpansionTests(unittest.TestCase):
             re.I,
         )
         unique = set(guide_links)
-        display = re.search(r"(\d+) özel rehber", hub)
-        self.assertIsNotNone(display)
-        self.assertEqual(int(display.group(1)), len(unique), sorted(unique))
+        declared_count, is_minimum = hub_inventory_claim(hub)
+        if is_minimum:
+            self.assertGreaterEqual(len(unique), declared_count, sorted(unique))
+        else:
+            self.assertEqual(len(unique), declared_count, sorted(unique))
         self.assertGreaterEqual(len(unique), 7, sorted(unique))
         self.assertEqual(hub.count('class="card route-card"'), len(unique))
         self.assertIn("ayrı ihtiyacı", hub)
