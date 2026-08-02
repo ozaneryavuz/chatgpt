@@ -133,7 +133,7 @@ def test_actual_source_contracts() -> None:
         assert path.is_file(), path
         html = path.read_text(encoding="utf-8")
         lower = html.casefold()
-        assert f'rel="canonical" href="https://www.alo186.com{route}"' in html
+        assert f'rel="canonical" href="https://alo186.com{route}"' in html
         assert "amazon.com.tr" not in lower, "Kaynak HTML statik mağaza URL'si içermemeli"
         assert "data-fresh-products" in html if policy["direct"] else "data-fresh-products" not in html
         if policy["affiliate"]:
@@ -154,7 +154,7 @@ def test_actual_source_contracts() -> None:
         assert path.is_file(), path
         html = path.read_text(encoding="utf-8")
         compact = html.replace(" ", "")
-        assert f'rel="canonical" href="https://www.alo186.com{route}"' in html
+        assert f'rel="canonical" href="https://alo186.com{route}"' in html
         for schema in ('"@type":"Service"', '"@type":"FAQPage"', '"@type":"BreadcrumbList"', '"@type":"OfferCatalog"'):
             assert schema in compact
         assert "amazon.com.tr" not in html.casefold()
@@ -202,6 +202,7 @@ def main() -> None:
         "unverifiedCommercialClaims": False,
         "affiliateRiskScope": "url-anchor-metadata-card-heading",
         "safetyWarningFalsePositives": False,
+        "canonicalOrigin": "https://alo186.com",
     }, ensure_ascii=False, indent=2))
 
 
