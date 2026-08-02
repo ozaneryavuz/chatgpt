@@ -6,17 +6,26 @@
     {
       "path": "/haberler/ges-inverter-afci-dc-arc-fault-seri-ark-alarmi-teshis",
       "file": "haberler/ges-inverter-afci-dc-arc-fault-seri-ark-alarmi-teshis/index.html",
-      "intent": "GES inverter AFCI DC Arc Fault seri ark alarmı teşhisi"
+      "intent": "GES inverter AFCI DC Arc Fault seri ark alarmı teşhisi",
+      "source": "alo186/haberler/ges-inverter-afci-dc-arc-fault-seri-ark-alarmi-teshis/index.html",
+      "canonicalPath": "/haberler/ges-inverter-afci-dc-arc-fault-seri-ark-alarmi-teshis",
+      "type": "article"
     },
     {
       "path": "/haberler/kompanzasyon-harmonik-rezonans-kondansator-reaktor-asiri-akim-teshis",
       "file": "haberler/kompanzasyon-harmonik-rezonans-kondansator-reaktor-asiri-akim-teshis/index.html",
-      "intent": "kompanzasyon harmonik rezonans kondansatör reaktör aşırı akım teşhisi"
+      "intent": "kompanzasyon harmonik rezonans kondansatör reaktör aşırı akım teşhisi",
+      "source": "alo186/haberler/kompanzasyon-harmonik-rezonans-kondansator-reaktor-asiri-akim-teshis/index.html",
+      "canonicalPath": "/haberler/kompanzasyon-harmonik-rezonans-kondansator-reaktor-asiri-akim-teshis",
+      "type": "article"
     },
     {
       "path": "/haberler/edas-12-saati-asan-elektrik-kesintisi-tazminati-odeme-kontrolu",
       "file": "haberler/edas-12-saati-asan-elektrik-kesintisi-tazminati-odeme-kontrolu/index.html",
-      "intent": "EDAŞ 12 saati aşan elektrik kesintisi tazminatı ödeme kontrolü"
+      "intent": "EDAŞ 12 saati aşan elektrik kesintisi tazminatı ödeme kontrolü",
+      "source": "alo186/haberler/edas-12-saati-asan-elektrik-kesintisi-tazminati-odeme-kontrolu/index.html",
+      "canonicalPath": "/haberler/edas-12-saati-asan-elektrik-kesintisi-tazminati-odeme-kontrolu",
+      "type": "article"
     }
   ],
   "qualityGate": "alo186/tests/test_authority_content_run123.py"

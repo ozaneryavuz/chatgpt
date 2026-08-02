@@ -10,12 +10,35 @@ except ImportError:
 # Keep every existing import/function contract while replacing only sitemap output.
 _core.write_effective_sitemap = _write_effective_sitemap
 
+# Compatibility for older content-authority overlays that used `file` and `path`
+# before the production manifest contract standardized on source/canonicalPath/type.
+# The normalized object is still passed through the fail-closed core validator.
+_original_validate_route = _core.validate_route
+
+
+def _validate_route_compatible(route: dict, source_label: str) -> dict:
+    if {"source", "canonicalPath", "type"} <= set(route):
+        return _original_validate_route(route, source_label)
+    legacy_file = str(route.get("file", "")).strip().lstrip("/")
+    legacy_path = str(route.get("path", "")).strip()
+    if legacy_file and legacy_path:
+        normalized = dict(route)
+        normalized["source"] = f"alo186/{legacy_file}"
+        normalized["canonicalPath"] = legacy_path
+        normalized["type"] = str(route.get("type") or ("article" if legacy_path.startswith("/haberler/") else "guide"))
+        return _original_validate_route(normalized, source_label)
+    return _original_validate_route(route, source_label)
+
+
+_core.validate_route = _validate_route_compatible
+
 for _name in dir(_core):
     if _name.startswith("__"):
         continue
     globals()[_name] = getattr(_core, _name)
 
 write_effective_sitemap = _write_effective_sitemap
+validate_route = _validate_route_compatible
 
 # Source-inspection compatibility contract.
 #

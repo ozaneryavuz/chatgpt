@@ -1,0 +1,76 @@
+name: ALO186 elektrik proje tasarım içerikleri v200
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/sektor-rehberi/elektrik-projesine-baslangic-guc-ihtiyaci-yedek-enerji-sistem-cozumleri/**'
+      - 'alo186/sektor-rehberi/elektrik-odasi-saft-pano-yerlesim-koordinasyonu/**'
+      - 'alo186/sektor-rehberi/62-villa-22kw-ac-2x180kw-dc-arac-sarj-projesi/**'
+      - 'alo186/sitemap-electric-project-v200.xml'
+      - 'alo186/robots.txt'
+      - 'alo186/audits/electrical-project-design-content-v200-2026-08-02.md'
+      - 'alo186/deployment/routing-overlays/200-electrical-project-design-content.json'
+      - 'alo186/tests/test_electrical_project_design_content_v200.py'
+      - '.github/workflows/alo186-electrical-project-content-v200.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/sektor-rehberi/elektrik-projesine-baslangic-guc-ihtiyaci-yedek-enerji-sistem-cozumleri/**'
+      - 'alo186/sektor-rehberi/elektrik-odasi-saft-pano-yerlesim-koordinasyonu/**'
+      - 'alo186/sektor-rehberi/62-villa-22kw-ac-2x180kw-dc-arac-sarj-projesi/**'
+      - 'alo186/sitemap-electric-project-v200.xml'
+      - 'alo186/robots.txt'
+      - 'alo186/audits/electrical-project-design-content-v200-2026-08-02.md'
+      - 'alo186/deployment/routing-overlays/200-electrical-project-design-content.json'
+      - 'alo186/tests/test_electrical_project_design_content_v200.py'
+      - '.github/workflows/alo186-electrical-project-content-v200.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Fail-closed içerik, güven ve rota sözleşmesi
+        run: |
+          set -euo pipefail
+          python -m py_compile alo186/tests/test_electrical_project_design_content_v200.py
+          python alo186/tests/test_electrical_project_design_content_v200.py
+      - name: JSON-LD ve routing doğrulaması
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+          pages = [
+              Path('alo186/sektor-rehberi/elektrik-projesine-baslangic-guc-ihtiyaci-yedek-enerji-sistem-cozumleri/index.html'),
+              Path('alo186/sektor-rehberi/elektrik-odasi-saft-pano-yerlesim-koordinasyonu/index.html'),
+              Path('alo186/sektor-rehberi/62-villa-22kw-ac-2x180kw-dc-arac-sarj-projesi/index.html'),
+          ]
+          for page in pages:
+              html = page.read_text(encoding='utf-8')
+              blocks = re.findall(r'<script type="application/ld\+json">(.*?)</script>', html, re.S | re.I)
+              assert len(blocks) == 1, f'expected one JSON-LD block: {page}'
+              data = json.loads(blocks[0])
+              types = {item.get('@type') for item in data['@graph']}
+              assert {'Article', 'FAQPage', 'BreadcrumbList'} <= types, (page, types)
+          json.load(open('alo186/deployment/routing-overlays/200-electrical-project-design-content.json', encoding='utf-8'))
+          PY
+      - name: Dedicated sitemap XML
+        run: |
+          python - <<'PY'
+          import xml.etree.ElementTree as ET
+          root = ET.parse('alo186/sitemap-electric-project-v200.xml').getroot()
+          ns = {'s': 'http://www.sitemaps.org/schemas/sitemap/0.9'}
+          urls = root.findall('s:url', ns)
+          assert len(urls) == 3
+          assert all(item.find('s:loc', ns) is not None for item in urls)
+          PY
