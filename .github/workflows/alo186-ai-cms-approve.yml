@@ -18,7 +18,7 @@ jobs:
     if: >-
       github.event.issue.pull_request &&
       startsWith(github.event.comment.body, '/cms approve ')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 35
     env:
       GH_TOKEN: ${{ github.token }}
@@ -55,13 +55,13 @@ jobs:
           echo "head_ref=$head_ref" >> "$GITHUB_OUTPUT"
 
       - name: PR branch checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ steps.request.outputs.head_ref }}
           fetch-depth: 0
 
       - name: Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -126,6 +126,7 @@ jobs:
           grep -q "https://alo186.com/haberler/$CMS_SLUG" /tmp/alo186-ai-cms-canonical/sitemap.xml
 
       - name: Onaylı dosyaları aynı PR branchine gönder
+        id: commit
         if: steps.state.outputs.changed == 'true'
         shell: bash
         env:
@@ -141,19 +142,49 @@ jobs:
             "alo186/deployment/routing-overlays/ai-cms-$CMS_SLUG.json"
           git add -u "alo186/ai-cms/previews/$CMS_SLUG.html" || true
           git commit -m "cms(alo186): $CMS_SLUG için insan onaylı canonical yayın"
+          source_commit=$(git rev-parse HEAD)
           git push origin "HEAD:${{ steps.request.outputs.head_ref }}"
+          echo "source_commit=$source_commit" >> "$GITHUB_OUTPUT"
 
-      - name: Dashboard artifactı
+      - name: ChatGPT Sites önizleme teslim paketi
         if: steps.state.outputs.changed == 'true'
-        uses: actions/upload-artifact@v4
+        shell: bash
+        env:
+          CMS_SLUG: ${{ steps.request.outputs.slug }}
+          SOURCE_COMMIT: ${{ steps.commit.outputs.source_commit }}
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-sites-handoff
+          python alo186/ai-cms/sites_bridge.py \
+            --repo . \
+            package \
+            --slug "$CMS_SLUG" \
+            --source-commit "$SOURCE_COMMIT" \
+            --out-dir /tmp/alo186-sites-handoff
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          package=json.loads(Path('/tmp/alo186-sites-handoff/sites-package.json').read_text(encoding='utf-8'))
+          assert package['siteSlug']=='alo186'
+          assert package['target']=='chatgpt-sites'
+          assert package['reviewPolicy']['humanPreviewRequired'] is True
+          assert package['reviewPolicy']['automaticDeployAllowed'] is False
+          assert package['operation']['publish'] is False
+          PY
+
+      - name: Dashboard ve ChatGPT Sites artifactı
+        if: steps.state.outputs.changed == 'true'
+        uses: actions/upload-artifact@v7
         with:
           name: alo186-ai-cms-approved-${{ steps.request.outputs.slug }}-${{ github.run_id }}
           path: |
             /tmp/alo186-ai-cms-dashboard.html
             /tmp/alo186-ai-cms-canonical/alo186-release.json
             /tmp/alo186-ai-cms-canonical/haberler/${{ steps.request.outputs.slug }}/index.html
+            /tmp/alo186-sites-handoff/
           if-no-files-found: error
           retention-days: 30
+          include-hidden-files: false
 
       - name: PR sonucunu bildir
         shell: bash
@@ -163,7 +194,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ "$CHANGED" = 'true' ]; then
-            gh pr comment "$PR_NUMBER" --body "✅ **AI CMS insan onayı kaydedildi.** \`$CMS_SLUG\` için canonical HTML ve routing overlay aynı PR branchine eklendi. Yeni commit üzerindeki zorunlu kontroller başarılı olmadan merge etmeyin. AI CMS otomatik merge yapmaz."
+            gh pr comment "$PR_NUMBER" --body "✅ **AI CMS insan onayı kaydedildi.** \`$CMS_SLUG\` için canonical HTML ve routing overlay aynı PR branchine eklendi. Artifact içinde ChatGPT Sites önizleme paketi ve \`@Sites\` talimatı da hazırlandı. Paket otomatik yayın yapmaz; önizleme ve açık yayın onayı gerekir. Yeni commit üzerindeki zorunlu kontroller başarılı olmadan merge etmeyin."
           else
             gh pr comment "$PR_NUMBER" --body "ℹ️ \`$CMS_SLUG\` zaten published durumda; duplicate onay işlemi yapılmadı."
           fi

@@ -1,0 +1,123 @@
+name: ALO186 AI CMS — ChatGPT Sites teslim paketi
+
+on:
+  workflow_dispatch:
+    inputs:
+      slug:
+        description: 'Published AI CMS içerik slugı'
+        required: true
+        type: string
+      source_ref:
+        description: 'İçeriğin bulunduğu branch, tag veya commit'
+        required: true
+        default: 'main'
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-ai-cms-sites-${{ inputs.slug }}-${{ inputs.source_ref }}
+  cancel-in-progress: true
+
+jobs:
+  package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Kaynak ref'i al
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.source_ref }}
+          fetch-depth: 1
+
+      - name: Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Slug ve kaynak commit doğrulaması
+        id: input
+        shell: bash
+        env:
+          CMS_SLUG: ${{ inputs.slug }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import os,re
+          slug=os.environ['CMS_SLUG']
+          if not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', slug):
+              raise SystemExit('Geçersiz AI CMS slugı')
+          PY
+          echo "source_commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: AI CMS ve Sites köprüsü testleri
+        run: |
+          python -m py_compile \
+            alo186/ai-cms/cms.py \
+            alo186/ai-cms/input_guard.py \
+            alo186/ai-cms/sites_bridge.py
+          python -m unittest discover -s alo186/ai-cms/tests -p 'test_*.py' -v
+
+      - name: Published kayıt kalite doğrulaması
+        env:
+          CMS_SLUG: ${{ inputs.slug }}
+        run: python alo186/ai-cms/cms.py validate --slug "$CMS_SLUG"
+
+      - name: ChatGPT Sites önizleme paketini üret
+        env:
+          CMS_SLUG: ${{ inputs.slug }}
+          SOURCE_COMMIT: ${{ steps.input.outputs.source_commit }}
+        run: |
+          rm -rf /tmp/alo186-sites-handoff
+          python alo186/ai-cms/sites_bridge.py \
+            --repo . \
+            package \
+            --slug "$CMS_SLUG" \
+            --source-commit "$SOURCE_COMMIT" \
+            --out-dir /tmp/alo186-sites-handoff
+
+      - name: Otomatik deploy yasağını doğrula
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          package=json.loads(Path('/tmp/alo186-sites-handoff/sites-package.json').read_text(encoding='utf-8'))
+          assert package['target']=='chatgpt-sites'
+          assert package['siteSlug']=='alo186'
+          assert package['reviewPolicy']['humanPreviewRequired'] is True
+          assert package['reviewPolicy']['automaticDeployAllowed'] is False
+          assert package['reviewPolicy']['undocumentedApiUseAllowed'] is False
+          assert package['operation']['publish'] is False
+          assert package['operation']['canonicalUrl'].startswith('https://alo186.com/haberler/')
+          PY
+
+      - name: ChatGPT Sites teslim artifactı
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-chatgpt-sites-${{ inputs.slug }}-${{ steps.input.outputs.source_commit }}
+          path: /tmp/alo186-sites-handoff
+          if-no-files-found: error
+          retention-days: 30
+          include-hidden-files: false
+
+      - name: Çalışma özeti
+        shell: bash
+        env:
+          CMS_SLUG: ${{ inputs.slug }}
+        run: |
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,os
+          from pathlib import Path
+          package=json.loads(Path('/tmp/alo186-sites-handoff/sites-package.json').read_text(encoding='utf-8'))
+          print('## ALO186 ChatGPT Sites teslim paketi')
+          print()
+          print(f"- İçerik: `{os.environ['CMS_SLUG']}`")
+          print(f"- Rota: `{package['operation']['route']}`")
+          print(f"- Paket hash: `{package['packageHash']}`")
+          print('- Önizleme zorunlu: **evet**')
+          print('- Otomatik yayın: **kapalı**')
+          print('- Kullanım: artifact içindeki `sites-preview-prompt.md` talimatını `@Sites` ile uygula.')
+          PY
