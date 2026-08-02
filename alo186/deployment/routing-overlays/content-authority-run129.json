@@ -1,0 +1,23 @@
+{
+  "version": 207,
+  "generatedAt": "2026-08-02",
+  "source": "ALO186 content authority run129",
+  "routes": [
+    {
+      "path": "/haberler/notr-iletken-asiri-akim-triplen-harmonik-led-ups-ofis-otel-teshis",
+      "file": "haberler/notr-iletken-asiri-akim-triplen-harmonik-led-ups-ofis-otel-teshis/index.html",
+      "intent": "Dengeli fazlara rağmen yüksek nötr akımını triplen harmonik, termal bağlantı ve iletken kapasitesiyle ayırmak"
+    },
+    {
+      "path": "/haberler/jenerator-wet-stacking-dusuk-yuk-siyah-duman-egzoz-yaglanma-teshis",
+      "file": "haberler/jenerator-wet-stacking-dusuk-yuk-siyah-duman-egzoz-yaglanma-teshis/index.html",
+      "intent": "Dizel jeneratörde wet stacking ve düşük yük etkisini turbo, enjektör, yağlama ve yük bankası verilerinden ayırmak"
+    },
+    {
+      "path": "/haberler/ev-sarj-tip-b-rcd-rdc-dd-6ma-dc-kacak-akim-koruma-secimi",
+      "file": "haberler/ev-sarj-tip-b-rcd-rdc-dd-6ma-dc-kacak-akim-koruma-secimi/index.html",
+      "intent": "EV şarjda Type B RCD ile Type A/F ve IEC 62955 RDC-DD koruma topolojisini doğru eşleştirmek"
+    }
+  ],
+  "qualityGate": "alo186/tests/test_authority_content_run129.py"
+}
