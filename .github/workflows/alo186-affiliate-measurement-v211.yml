@@ -62,9 +62,8 @@ jobs:
           python alo186/deployment/inject_contextual_affiliate_v176.py --site "$SITE" --base-path "$BASE"
           python alo186/deployment/inject_home_affiliate_banner_v209.py --site "$SITE" --base-path "$BASE"
           python alo186/deployment/inject_affiliate_intent_router_v210.py --site "$SITE" --base-path "$BASE" | tee /tmp/affiliate-intent-v210.json
-          python alo186/deployment/inject_live_quality_hardening_v2.py --site "$SITE" --base-path "$BASE"
-          python alo186/deployment/inject_affiliate_measurement_v211.py --site "$SITE" --base-path "$BASE" | tee /tmp/affiliate-measurement-v211-receipt.json
           python alo186/deployment/inject_ga4_consent.py --site "$SITE" --base-path "$BASE" --measurement-id "$GA4"
+          python alo186/deployment/inject_affiliate_measurement_v211.py --site "$SITE" --base-path "$BASE" | tee /tmp/affiliate-measurement-v211-receipt.json
           node --check "$SITE/assets/affiliate-measurement-v211.js"
           python alo186/deployment/smoke_github_pages.py --site "$SITE" --base-path "$BASE"
           python alo186/deployment/guard_commerce_routes_v3.py --site "$SITE" | tee /tmp/affiliate-measurement-v211-guard.json
@@ -97,6 +96,7 @@ jobs:
 
           home = (site / 'index.html').read_text(encoding='utf-8')
           assert home.count('data-alo186-affiliate-measurement-v211="true"') == 1
+          assert home.index('data-alo186-ga4-consent="true"') < home.index('data-alo186-affiliate-measurement-v211="true"')
           asset = (site / 'assets/affiliate-measurement-v211.js').read_text(encoding='utf-8')
           for event in ('affiliate_page_view', 'affiliate_click'):
               assert event in asset
@@ -106,6 +106,7 @@ jobs:
           ):
               assert field in asset
           assert "getConsent?.()==='granted'" in asset
+          assert '__alo186AffiliateV211' in asset
           assert 'destination_url' not in asset
           assert 'link_url' not in asset
           print(json.dumps(summary, ensure_ascii=False, indent=2))
