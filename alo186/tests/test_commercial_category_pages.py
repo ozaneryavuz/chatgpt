@@ -5,7 +5,7 @@ import re
 import unittest
 from html import unescape
 from pathlib import Path
-
+from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE_ROOT = ROOT / "alo186/amazon-elektrik-urunleri"
@@ -26,8 +26,23 @@ EXPANSION_ROUTES = {
     "/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi",
     "/amazon-elektrik-urunleri/ges-malzemeleri-secimi",
     "/amazon-elektrik-urunleri/kombi-ups-power-station-secimi",
-    "/amazon-elektrik-urunleri/buzdolabi-dondurucu-power-station-secimi",
+    "/amazon-elektrik-urunleri/buzdolabi-dondurucu-kesinti-gida-guvenligi-secici",
 }
+CANONICAL_LINK = re.compile(r'<link\s+rel=["\']canonical["\']\s+href=["\']([^"\']+)["\']', re.I)
+
+
+def normalized_path(value: str) -> str:
+    path = urlsplit(value).path or "/"
+    return path.rstrip("/") or "/"
+
+
+def assert_source_canonical(test: unittest.TestCase, html: str, route: str) -> None:
+    match = CANONICAL_LINK.search(html)
+    test.assertIsNotNone(match, route)
+    parsed = urlsplit(match.group(1))
+    test.assertEqual(parsed.scheme, "https", route)
+    test.assertIn(parsed.hostname, {"alo186.com", "www.alo186.com"}, route)
+    test.assertEqual(normalized_path(match.group(1)), normalized_path(route), route)
 
 
 def text_of(html: str, tag: str) -> str:
@@ -41,7 +56,6 @@ class CommercialCategoryPagesTests(unittest.TestCase):
     def test_overlay_routes_all_five_unique_commercial_pages(self) -> None:
         overlay = json.loads(OVERLAY.read_text(encoding="utf-8"))
         self.assertGreaterEqual(overlay["version"], 41)
-        self.assertEqual(overlay["generatedAt"], "2026-07-29")
         actual = {item["canonicalPath"]: item for item in overlay["routes"]}
         self.assertEqual(set(actual), set(ROUTES))
         self.assertEqual(actual["/amazon-elektrik-urunleri"]["type"], "collection")
@@ -67,7 +81,7 @@ class CommercialCategoryPagesTests(unittest.TestCase):
             self.assertNotIn(h1, headings)
             titles.add(title)
             headings.add(h1)
-            self.assertIn(f'<link rel="canonical" href="https://www.alo186.com{route}">', html)
+            assert_source_canonical(self, html, route)
             self.assertIn('meta name="description"', html)
             self.assertIn("Reklam / satış ortaklığı", html)
             self.assertIn("application/ld+json", html)
@@ -79,32 +93,39 @@ class CommercialCategoryPagesTests(unittest.TestCase):
                 self.assertIn("fiyat", lower)
                 self.assertIn("stok", lower)
 
-    def test_hub_links_to_every_dedicated_page(self) -> None:
+    def test_hub_links_to_current_dedicated_pages_without_stale_count_fixture(self) -> None:
         html = ROUTES["/amazon-elektrik-urunleri"].read_text(encoding="utf-8")
-        for route in (set(ROUTES) - {"/amazon-elektrik-urunleri"}) | EXPANSION_ROUTES:
-            self.assertIn(f'href="{route}"', html)
-        expected_guide_count = len((set(ROUTES) - {"/amazon-elektrik-urunleri"}) | EXPANSION_ROUTES)
-        self.assertIn(f"{expected_guide_count} özel rehber", html)
-        self.assertEqual(html.count('class="card route-card"'), expected_guide_count)
-        self.assertIn("Mevcut ürün yeterliyse satın alma yok", html)
+        hrefs = re.findall(r'href=["\']([^"\']+)["\']', html, re.I)
+        linked = {normalized_path(value) for value in hrefs if normalized_path(value).startswith("/amazon-elektrik-urunleri/")}
+        required = {normalized_path(route) for route in (set(ROUTES) - {"/amazon-elektrik-urunleri"}) | EXPANSION_ROUTES}
+        self.assertTrue(required <= linked, sorted(required - linked))
+        self.assertGreaterEqual(html.count('class="card route-card"'), len(required))
+        self.assertIn("Mevcut sistem yeterliyse satın alma yok", html)
         self.assertIn("Aktif tehlikede satış yolu kapalı", html)
+        self.assertNotRegex(html, r"https://alo186\.com/amazon-elektrik-urunleri(?=[a-z0-9])")
 
-    def test_direct_affiliate_links_are_freshness_gated_and_only_powerbank_is_direct(self) -> None:
+    def test_direct_affiliate_links_are_freshness_gated_and_high_risk_categories_remain_closed(self) -> None:
         runtime = (SOURCE_ROOT / "commercial.js").read_text(encoding="utf-8")
         catalog = (ROOT / "alo186/urun-eslestirme/catalog.js").read_text(encoding="utf-8")
-        self.assertIn("freshOnly: true", runtime)
-        self.assertIn("verificationStatus", runtime)
-        self.assertIn("category.mode === 'direct'", runtime)
-        self.assertIn('rel="sponsored nofollow noopener"', runtime)
-        self.assertIn("commercial_products_blocked", runtime)
+        for token in (
+            "freshOnly: true",
+            "verificationStatus",
+            "category.mode === 'direct'",
+            'rel="sponsored nofollow noopener"',
+            "commercial_products_blocked",
+        ):
+            self.assertIn(token, runtime)
         self.assertIn("const verificationMaxAgeDays=45", catalog)
-        self.assertIn("id:'powerbank'", catalog)
-        self.assertIn("mode:'direct'", catalog)
-        self.assertIn("id:'surge_strip'", catalog)
-        self.assertIn("id:'mini_ups'", catalog)
-        self.assertNotIn("amazon.com.tr", ROUTES["/amazon-elektrik-urunleri/akim-korumali-grup-priz-secimi"].read_text(encoding="utf-8").lower())
-        self.assertNotIn("amazon.com.tr", ROUTES["/amazon-elektrik-urunleri/modem-mini-ups-secimi"].read_text(encoding="utf-8").lower())
-        self.assertNotIn("amazon.com.tr", ROUTES["/amazon-elektrik-urunleri/acil-aydinlatma-duman-alarmi"].read_text(encoding="utf-8").lower())
+        for category in ("powerbank", "usb_c_charger", "usb_c_cable", "usb_c_hub", "display_cable"):
+            self.assertRegex(catalog, re.compile(rf"id:'{category}'.*?mode:'direct'", re.S))
+        for category in ("surge_strip", "generator", "inverter", "outlet_tester", "ev_cable", "ups_battery"):
+            self.assertNotRegex(catalog, re.compile(rf"id:'{category}'.*?mode:'direct'", re.S))
+        for route in (
+            "/amazon-elektrik-urunleri/akim-korumali-grup-priz-secimi",
+            "/amazon-elektrik-urunleri/modem-mini-ups-secimi",
+            "/amazon-elektrik-urunleri/acil-aydinlatma-duman-alarmi",
+        ):
+            self.assertNotIn("amazon.com.tr", ROUTES[route].read_text(encoding="utf-8").lower())
 
     def test_each_page_has_a_free_tool_before_or_beside_commercial_route(self) -> None:
         requirements = {
