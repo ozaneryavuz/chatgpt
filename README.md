@@ -3,6 +3,7 @@
 ## ALO186 geliştirmeleri
 
 - [ALO186 ücretsiz araçlar ve yayın merkezi](./alo186/)
+- [ALO186 AI CMS v220](./tools/alo186-ai-cms/)
 - [Tam Türkiye EDAŞ Arama Motoru](./alo186/turkiye-arama/)
 - [25 sorunlu 186 / 112 / elektrikçi karar motoru](./alo186/karar-motoru/)
 - [Elektrik Hesaplama Merkezi](./alo186/hesaplama/)
@@ -16,6 +17,10 @@
 - [Kesinti hazırlık planı](./alo186/hesaplama/kesinti-hazirlik-plani/)
 - [Detaylı Yedek Güç Hesaplayıcısı](./alo186/yedek-guc-hesaplayici/)
 - [Elektrik Kesintisi Maliyet Hesaplayıcısı](./alo186/kesinti-maliyet-hesaplayici/)
+
+### ALO186 AI CMS v220
+
+GitHub’ı içerik kuyruğu, sürüm, kanıt ve kalite kaynağı; ChatGPT Sites’i `alo186.com` canlı yayın katmanı olarak kullanan fail-closed headless CMS’tir. Canlı rota/canonical/H1 envanterini çıkarır, kullanıcı niyetlerini puanlar, çakışmayı ve kaynak tazeliğini denetler, cluster çeşitliliğiyle en yüksek potansiyelli en fazla üç brief üretir. ChatGPT Sites paketi yalnız önizleme oluşturur; açık yayın onayı olmadan otomatik deploy yapmaz.
 
 ### Tam Türkiye EDAŞ Arama Motoru
 
@@ -64,8 +69,12 @@ GitHub görevleri:
 - #6 Otel/site/işletme sürekliliği paneli — local-first pilot ve SaaS API v0.2 yayımlandı; üretim sertleştirmesi sürüyor
 - #7 Kullanıcı fayda hesaplayıcıları v1 — tamamlandı
 
-## Yayın
+## Yayın mimarisi
 
-`.github/workflows/alo186-fatura-pages.yml` ana daldaki `alo186/**` değişikliklerinde bütün statik ALO186 modüllerini GitHub Pages artifact'ına paketler.
+- **Canlı özel alan adı:** ChatGPT Sites üzerindeki `alo186.com`
+- **Kaynak, PR, test ve geri alma:** GitHub
+- **Canonical rota eşleştirmesi:** `alo186/deployment/routing-manifest.json` ve routing overlay dosyaları
+- **AI CMS:** `.github/workflows/alo186-ai-cms-v220.yml` ile kuyruk ve canlı envanteri denetler; özel artifactta brief, dashboard ve `@Sites` önizleme paketi üretir
+- **GitHub Pages:** kaynak artifactı, teknik önizleme ve geri alma hattı olarak korunur; canlı özel alan adı için birincil yayın katmanı değildir
 
-Canlı `alo186.com` entegrasyonunda kaynak klasörler ile canonical rotalar `alo186/deployment/routing-manifest.json` üzerinden eşleştirilmelidir.
+ChatGPT Sites’e aktarım paketlerinde `publish=false` varsayılandır. Önizleme kabulü ve açık insan onayı olmadan canlı yayın yapılmaz.
