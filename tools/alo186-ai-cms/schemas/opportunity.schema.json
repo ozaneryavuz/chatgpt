@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://alo186.com/schemas/ai-cms-opportunity-v220.json",
+  "title": "ALO186 AI CMS içerik fırsatı",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "status",
+    "topic",
+    "cluster",
+    "contentType",
+    "title",
+    "task",
+    "intentBoundary",
+    "proposedRoute",
+    "scores",
+    "sources",
+    "internalLinks",
+    "schemaTypes",
+    "conversion",
+    "safetyBoundary"
+  ],
+  "properties": {
+    "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{4,80}$"},
+    "status": {"enum": ["discovery", "research", "ready", "drafted", "validated", "sites-ready", "published", "hold", "rejected"]},
+    "topic": {"type": "string"},
+    "cluster": {"type": "string"},
+    "contentType": {"enum": ["article", "tool", "business-tool"]},
+    "title": {"type": "string", "minLength": 20, "maxLength": 140},
+    "task": {"type": "string", "minLength": 60, "maxLength": 600},
+    "intentBoundary": {"type": "string", "minLength": 60, "maxLength": 800},
+    "proposedRoute": {"type": "string", "pattern": "^/[a-z0-9/-]+/?$"},
+    "supportingOf": {"type": ["string", "null"]},
+    "audience": {"type": "string"},
+    "scores": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["searchDemand", "taskUrgency", "taskCompletionValue", "authorityFit", "contentGap", "commercialFit", "internalLinkFit", "sourceConfidence"],
+      "properties": {
+        "searchDemand": {"type": "number", "minimum": 0, "maximum": 100},
+        "taskUrgency": {"type": "number", "minimum": 0, "maximum": 100},
+        "taskCompletionValue": {"type": "number", "minimum": 0, "maximum": 100},
+        "authorityFit": {"type": "number", "minimum": 0, "maximum": 100},
+        "contentGap": {"type": "number", "minimum": 0, "maximum": 100},
+        "commercialFit": {"type": "number", "minimum": 0, "maximum": 100},
+        "internalLinkFit": {"type": "number", "minimum": 0, "maximum": 100},
+        "sourceConfidence": {"type": "number", "minimum": 0, "maximum": 100}
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["url", "publisher", "class", "primary", "verifiedAt", "claims"],
+        "properties": {
+          "url": {"type": "string", "format": "uri"},
+          "publisher": {"type": "string"},
+          "class": {"type": "string"},
+          "primary": {"type": "boolean"},
+          "verifiedAt": {"type": "string", "format": "date"},
+          "claims": {"type": "array", "minItems": 1, "items": {"type": "string"}}
+        }
+      }
+    },
+    "internalLinks": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+    "schemaTypes": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+    "conversion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["primaryCta", "secondaryCta", "events", "affiliateAllowed"],
+      "properties": {
+        "primaryCta": {"type": "string"},
+        "secondaryCta": {"type": "string"},
+        "events": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+        "affiliateAllowed": {"type": "boolean"}
+      }
+    },
+    "safetyBoundary": {"type": "string", "minLength": 30},
+    "draft": {"type": ["object", "null"]}
+  }
+}
