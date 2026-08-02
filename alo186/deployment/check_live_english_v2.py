@@ -10,12 +10,14 @@ import urllib.request
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 import check_live_english as contract
 
 DEFAULT_ORIGIN = contract.DEFAULT_ORIGIN
 DEFAULT_REPOSITORY = contract.DEFAULT_REPOSITORY
+TRANSPORT_ERROR_HEADER = "x-alo186-transport-error"
+HttpResponse = tuple[int, str, dict[str, str]]
 
 
 @dataclass
@@ -73,7 +75,7 @@ def cache_busted(url: str, expected_commit: str, attempt: int) -> str:
     )
 
 
-def fetch_text(url: str, timeout: float) -> tuple[int, str, dict[str, str]]:
+def fetch_text(url: str, timeout: float) -> HttpResponse:
     request = urllib.request.Request(
         url,
         headers={
@@ -91,6 +93,31 @@ def fetch_text(url: str, timeout: float) -> tuple[int, str, dict[str, str]]:
     except urllib.error.HTTPError as exc:
         body = exc.read().decode("utf-8", errors="replace")
         return int(exc.code), body, dict(exc.headers.items())
+
+
+def safe_fetch_text(
+    url: str,
+    timeout: float,
+    *,
+    fetcher: Callable[[str, float], HttpResponse] = fetch_text,
+) -> HttpResponse:
+    """Convert a transport exception into a route-local response.
+
+    A single DNS, TLS or timeout failure must not prevent the remaining English
+    routes from being inspected in the same snapshot.
+    """
+
+    try:
+        return fetcher(url, timeout)
+    except (urllib.error.URLError, TimeoutError, OSError) as exc:
+        return 0, "", {TRANSPORT_ERROR_HEADER: f"{type(exc).__name__}: {exc}"}
+
+
+def transport_error(headers: dict[str, str]) -> str:
+    for key, value in headers.items():
+        if key.casefold() == TRANSPORT_ERROR_HEADER:
+            return str(value).strip()
+    return ""
 
 
 def detect_hosting_mode(
@@ -115,6 +142,8 @@ def detect_hosting_mode(
         or "chatgpt" in body
     ):
         return "chatgpt-sites"
+    if transport_error(release_headers):
+        return "transport-unknown"
     return "external-host"
 
 
@@ -125,9 +154,9 @@ def evaluate_snapshot(
     expected_commit: str,
     github_token: str,
     attempt: int,
-    release_response: tuple[int, str, dict[str, str]],
-    route_responses: dict[str, tuple[int, str, dict[str, str]]],
-    sitemap_response: tuple[int, str, dict[str, str]],
+    release_response: HttpResponse,
+    route_responses: dict[str, HttpResponse],
+    sitemap_response: HttpResponse,
 ) -> SmokeReport:
     origin = origin.rstrip("/")
     release_status, release_text, release_headers = release_response
@@ -165,12 +194,27 @@ def evaluate_snapshot(
                 commit_contract_ok = False
     else:
         report.live_commit_relation = "unavailable-external-host"
-        report.warnings.append(
-            f"pages-release.json HTTP {release_status}; exact-commit kanıtı yok, içerik sözleşmesi ayrı doğrulanıyor"
-        )
+        release_transport_error = transport_error(release_headers)
+        if release_transport_error:
+            report.warnings.append(
+                "pages-release.json transport hatası; exact-commit kanıtı yok: "
+                + release_transport_error
+            )
+        else:
+            report.warnings.append(
+                f"pages-release.json HTTP {release_status}; exact-commit kanıtı yok, içerik sözleşmesi ayrı doğrulanıyor"
+            )
 
     for route in contract.LANGUAGE_PAIRS:
-        status, html, _headers = route_responses.get(route, (0, "", {}))
+        status, html, headers = route_responses.get(route, (0, "", {}))
+        route_transport_error = transport_error(headers)
+        if route_transport_error:
+            error = f"{route} transport hatası: {route_transport_error}"
+            probe = RouteProbe(route=route, ok=False, status=status, error=error)
+            report.errors.append(error)
+            report.routes.append(probe)
+            continue
+
         try:
             result = contract.validate_english_page(route, html, origin, status=status)
         except (contract.LiveValidationError, json.JSONDecodeError) as exc:
@@ -188,8 +232,11 @@ def evaluate_snapshot(
             report.route_count += 1
         report.routes.append(probe)
 
-    sitemap_status, sitemap_text, _sitemap_headers = sitemap_response
-    if sitemap_status != 200:
+    sitemap_status, sitemap_text, sitemap_headers = sitemap_response
+    sitemap_transport_error = transport_error(sitemap_headers)
+    if sitemap_transport_error:
+        report.errors.append(f"sitemap.xml transport hatası: {sitemap_transport_error}")
+    elif sitemap_status != 200:
         report.errors.append(f"sitemap.xml HTTP {sitemap_status}")
     else:
         try:
@@ -214,26 +261,27 @@ def collect_snapshot(
     expected_commit: str,
     attempt: int,
     timeout: float,
-) -> tuple[
-    tuple[int, str, dict[str, str]],
-    dict[str, tuple[int, str, dict[str, str]]],
-    tuple[int, str, dict[str, str]],
-]:
+    fetcher: Callable[[str, float], HttpResponse] = fetch_text,
+) -> tuple[HttpResponse, dict[str, HttpResponse], HttpResponse]:
     origin = origin.rstrip("/")
-    release = fetch_text(
+    release = safe_fetch_text(
         cache_busted(f"{origin}/pages-release.json", expected_commit, attempt),
         timeout,
+        fetcher=fetcher,
     )
-    routes = {
-        route: fetch_text(
+
+    routes: dict[str, HttpResponse] = {}
+    for route in contract.LANGUAGE_PAIRS:
+        routes[route] = safe_fetch_text(
             cache_busted(origin + route, expected_commit, attempt),
             timeout,
+            fetcher=fetcher,
         )
-        for route in contract.LANGUAGE_PAIRS
-    }
-    sitemap = fetch_text(
+
+    sitemap = safe_fetch_text(
         cache_busted(f"{origin}/sitemap.xml", expected_commit, attempt),
         timeout,
+        fetcher=fetcher,
     )
     return release, routes, sitemap
 
@@ -276,14 +324,14 @@ def run_live_smoke(
                 route_responses=routes,
                 sitemap_response=sitemap,
             )
-        except (urllib.error.URLError, TimeoutError, OSError) as exc:
+        except Exception as exc:  # Defensive: preserve a report for unexpected parser/runtime failures.
             latest = SmokeReport(
                 ok=False,
                 checked_at=now_iso(),
                 origin=origin.rstrip("/"),
                 expected_commit=expected_commit,
                 attempts=attempt,
-                errors=[f"Canlı HTTP toplama hatası: {exc}"],
+                errors=[f"Beklenmeyen canlı doğrulama hatası: {type(exc).__name__}: {exc}"],
             )
 
         write_report(report_path, latest)
