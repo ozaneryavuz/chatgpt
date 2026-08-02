@@ -1,0 +1,21 @@
+{
+  "version": 202,
+  "generatedAt": "2026-08-02",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/akvaryum-elektrik-kesintisi-hava-pompasi-batarya-suresi/index.html",
+      "canonicalPath": "/hesaplama/akvaryum-elektrik-kesintisi-hava-pompasi-batarya-suresi/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/akvaryum-kesinti-hava-pompasi-hazirlik-secici/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/akvaryum-kesinti-hava-pompasi-hazirlik-secici/",
+      "type": "commerce-guide"
+    },
+    {
+      "source": "alo186/sektor-rehberi/akvaryum-elektrik-kesintisi-30-90-gun-test-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/akvaryum-elektrik-kesintisi-30-90-gun-test-merkezi/",
+      "type": "guide"
+    }
+  ]
+}
