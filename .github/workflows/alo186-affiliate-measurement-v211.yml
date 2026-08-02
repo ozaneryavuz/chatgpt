@@ -59,7 +59,6 @@ jobs:
           python alo186/deployment/build_static_site.py --output "$SITE" --commit "$GITHUB_SHA"
           python alo186/deployment/prepare_github_pages.py --site "$SITE" --base-path "$BASE" --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
           python alo186/deployment/inject_outcome_runtime.py --site "$SITE" --base-path "$BASE"
-          python alo186/deployment/inject_shortlist_growth.py --site "$SITE" --base-path "$BASE"
           python alo186/deployment/inject_contextual_affiliate_v176.py --site "$SITE" --base-path "$BASE"
           python alo186/deployment/inject_home_affiliate_banner_v209.py --site "$SITE" --base-path "$BASE"
           python alo186/deployment/inject_affiliate_intent_router_v210.py --site "$SITE" --base-path "$BASE" | tee /tmp/affiliate-intent-v210.json
