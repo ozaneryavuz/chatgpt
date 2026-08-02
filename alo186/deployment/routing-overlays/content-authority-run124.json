@@ -1,0 +1,23 @@
+{
+  "version": 201,
+  "generatedAt": "2026-08-02",
+  "source": "ALO186 content authority run124",
+  "routes": [
+    {
+      "path": "/haberler/jenerator-charge-fail-aku-sarj-cihazi-alternator-d-plus-teshis",
+      "file": "haberler/jenerator-charge-fail-aku-sarj-cihazi-alternator-d-plus-teshis/index.html",
+      "intent": "jeneratör Charge Fail akü şarj cihazı alternatör D+ teşhisi"
+    },
+    {
+      "path": "/haberler/ups-backfeed-protection-active-kontaktor-shunt-trip-aux-teshis",
+      "file": "haberler/ups-backfeed-protection-active-kontaktor-shunt-trip-aux-teshis/index.html",
+      "intent": "UPS Backfeed Protection Active kontaktör shunt trip AUX teşhisi"
+    },
+    {
+      "path": "/haberler/ev-sarj-cp-fault-diode-check-failed-undefined-state-teshis",
+      "file": "haberler/ev-sarj-cp-fault-diode-check-failed-undefined-state-teshis/index.html",
+      "intent": "EV şarj CP Fault Diode Check Failed Undefined State teşhisi"
+    }
+  ],
+  "qualityGate": "alo186/tests/test_authority_content_run124.py"
+}
