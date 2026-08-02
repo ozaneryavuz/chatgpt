@@ -1,0 +1,30 @@
+{
+  "version": 207,
+  "generatedAt": "2026-08-02",
+  "routes": [
+    {
+      "source": "alo186/kesinti-cihaz-surekliligi-karar-merkezi/index.html",
+      "canonicalPath": "/kesinti-cihaz-surekliligi-karar-merkezi/",
+      "type": "interactive-guide"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/",
+      "type": "commerce-hub"
+    },
+    {
+      "source": "alo186/sitemap-growth-v207.xml",
+      "canonicalPath": "/sitemap-growth-v207.xml",
+      "type": "sitemap"
+    }
+  ],
+  "trust": {
+    "officialImpersonation": false,
+    "directAffiliateLinkOnDecisionHub": false,
+    "priceStockRatingWarrantyClaims": false,
+    "affiliateDisclosureBeforeLink": true,
+    "hazardCommerceClosed": true,
+    "noBuyWhenAdequate": true,
+    "personalDataCollected": false
+  }
+}
