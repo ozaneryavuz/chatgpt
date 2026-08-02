@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "cmsVersion": 220,
+  "name": "ALO186 AI CMS",
+  "site": {
+    "canonicalHost": "https://alo186.com",
+    "defaultLanguage": "tr-TR",
+    "contentRoot": "alo186/haberler",
+    "routingOverlayRoot": "alo186/deployment/routing-overlays"
+  },
+  "provider": {
+    "type": "openai-responses",
+    "endpoint": "https://api.openai.com/v1/responses",
+    "apiKeyEnv": "OPENAI_API_KEY",
+    "modelEnv": "ALO186_AI_CMS_MODEL",
+    "defaultModel": "gpt-5-mini",
+    "webSearch": true,
+    "structuredOutputs": true
+  },
+  "workflow": {
+    "autoPublish": false,
+    "draftPullRequest": true,
+    "requireInstitutionalApproval": true,
+    "maximumGeneratedArticlesPerRun": 1,
+    "allowedWriteRoots": [
+      "alo186/cms/drafts",
+      "alo186/cms/approved",
+      "alo186/cms/publication-log.json",
+      "alo186/haberler",
+      "alo186/deployment/routing-overlays"
+    ]
+  },
+  "privacy": {
+    "personalProfilesAllowed": false,
+    "personalContactAllowed": false,
+    "storeRawApiResponses": false,
+    "storeUserPrompts": false,
+    "storeIssueAuthor": false
+  },
+  "quality": {
+    "minimumSources": 2,
+    "requireOfficialSourceForMediumHighRisk": true,
+    "generateAffiliateLinks": false,
+    "forbiddenClaims": [
+      "kesin çözüm",
+      "garantili sonuç",
+      "en ucuz",
+      "stokta",
+      "bugünkü fiyat",
+      "resmî ALO 186 sitesi"
+    ]
+  }
+}
