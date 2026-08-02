@@ -64,7 +64,8 @@ jobs:
           grep -Fq 'https://alo186.com/amazon-elektrik-urunleri/tasinabilir-4g-mobil-wifi-secimi/' "$route/index.html"
           grep -Fq 'alo186rehber-21' "$route/catalog-v221.js"
           grep -Fq "affiliatePolicy: 'after_tool'" "$route/catalog-v221.js"
-          ! grep -Eq 'href=["'"']https://www\.amazon\.com\.tr/' "$route/index.html"
+          ! grep -Fq 'href="https://www.amazon.com.tr/' "$route/index.html"
+          ! grep -Fq "href='https://www.amazon.com.tr/" "$route/index.html"
 
       - name: Custom-domain and project-path acceptance
         run: |
