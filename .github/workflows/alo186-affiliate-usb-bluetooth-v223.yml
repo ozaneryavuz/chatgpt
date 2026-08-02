@@ -1,0 +1,103 @@
+name: ALO186 affiliate USB Bluetooth v223
+
+on:
+  pull_request:
+    paths:
+      - "alo186/amazon-elektrik-urunleri/bilgisayar-usb-bluetooth-adaptor-secimi/**"
+      - "alo186/deployment/routing-overlays/223-affiliate-usb-bluetooth.json"
+      - "alo186/tests/test_affiliate_usb_bluetooth_v223.js"
+      - ".github/workflows/alo186-affiliate-usb-bluetooth-v223.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alo186/amazon-elektrik-urunleri/bilgisayar-usb-bluetooth-adaptor-secimi/**"
+      - "alo186/deployment/routing-overlays/223-affiliate-usb-bluetooth.json"
+      - "alo186/tests/test_affiliate_usb_bluetooth_v223.js"
+      - ".github/workflows/alo186-affiliate-usb-bluetooth-v223.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-affiliate-usb-bluetooth-v223-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Exact products, Knowledge Graph, duplicate and stale gates
+        run: |
+          set -euo pipefail
+          node --check alo186/amazon-elektrik-urunleri/bilgisayar-usb-bluetooth-adaptor-secimi/catalog-v223.js
+          node --check alo186/amazon-elektrik-urunleri/bilgisayar-usb-bluetooth-adaptor-secimi/app-v223.js
+          node alo186/tests/test_affiliate_usb_bluetooth_v223.js
+
+      - name: Existing commerce and legal safety regressions
+        run: |
+          set -euo pipefail
+          python alo186/tests/test_commerce_governance_v2.py
+          python alo186/tests/test_commerce_governance_v3.py
+          python alo186/tests/device_damage_deadline_guard.py
+          python alo186/tests/test_active_production_contract.py
+
+      - name: Canonical production bundle
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-usb-bluetooth-v223
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-usb-bluetooth-v223 \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-usb-bluetooth-v223
+          route=/tmp/alo186-usb-bluetooth-v223/amazon-elektrik-urunleri/bilgisayar-usb-bluetooth-adaptor-secimi
+          test -f "$route/index.html"
+          test -f "$route/catalog-v223.js"
+          test -f "$route/app-v223.js"
+          grep -Fq 'https://alo186.com/amazon-elektrik-urunleri/bilgisayar-usb-bluetooth-adaptor-secimi/' "$route/index.html"
+          grep -Fq 'alo186rehber-21' "$route/catalog-v223.js"
+          if grep -Eq "href=['\"]https://www\.amazon\.com\.tr/" "$route/index.html"; then
+            echo 'Kapısız statik Amazon bağlantısı bulundu' >&2
+            exit 1
+          fi
+
+      - name: Custom-domain and project-path acceptance
+        run: |
+          set -euo pipefail
+          cp -a /tmp/alo186-usb-bluetooth-v223 /tmp/alo186-usb-bluetooth-v223-custom
+          cp -a /tmp/alo186-usb-bluetooth-v223 /tmp/alo186-usb-bluetooth-v223-project
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-usb-bluetooth-v223-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-usb-bluetooth-v223-custom \
+            --base-path ''
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-usb-bluetooth-v223-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-usb-bluetooth-v223-project \
+            --base-path '/chatgpt'
+
+      - name: Verified production artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-affiliate-usb-bluetooth-v223
+          path: /tmp/alo186-usb-bluetooth-v223-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
