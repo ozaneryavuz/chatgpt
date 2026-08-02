@@ -1,0 +1,165 @@
+name: ALO186 AI CMS v220
+
+on:
+  pull_request:
+    paths:
+      - 'tools/alo186-ai-cms/**'
+      - 'alo186/**/*.html'
+      - 'alo186/deployment/routing-manifest.json'
+      - 'alo186/deployment/routing-overlays/**'
+      - 'alo186/aeo/intent-registry-*.json'
+      - '.github/workflows/alo186-ai-cms-v220.yml'
+      - '.github/ISSUE_TEMPLATE/alo186-ai-cms-opportunity.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/alo186-ai-cms/**'
+      - 'alo186/**/*.html'
+      - 'alo186/deployment/routing-manifest.json'
+      - 'alo186/deployment/routing-overlays/**'
+      - 'alo186/aeo/intent-registry-*.json'
+      - '.github/workflows/alo186-ai-cms-v220.yml'
+      - '.github/ISSUE_TEMPLATE/alo186-ai-cms-opportunity.yml'
+  schedule:
+    - cron: '17 2 * * *'
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: 'Bu çalıştırmada hazırlanacak en fazla içerik sayısı'
+        required: false
+        default: '3'
+        type: choice
+        options: ['1', '2', '3']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-ai-cms-v220-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: '3.12'
+
+jobs:
+  audit-and-plan:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Depoyu al
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: AI CMS kaynak ve regresyon testleri
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            tools/alo186-ai-cms/core.py \
+            tools/alo186-ai-cms/inventory.py \
+            tools/alo186-ai-cms/validation.py \
+            tools/alo186-ai-cms/planning.py \
+            tools/alo186-ai-cms/cms.py \
+            tools/alo186-ai-cms/tests/test_cms.py
+          python tools/alo186-ai-cms/tests/test_cms.py
+          python - <<'PY'
+          from pathlib import Path
+          text = Path('.github/workflows/alo186-ai-cms-v220.yml').read_text(encoding='utf-8')
+          assert ('continue-' + 'on-error') not in text
+          PY
+          ! grep -R -E "OPENAI_API_KEY|api.openai.com" tools/alo186-ai-cms
+          test ! -e alo186/ai-cms
+
+      - name: Canlı kaynak envanteri ve fail-closed denetim
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-ai-cms
+          mkdir -p /tmp/alo186-ai-cms
+          python tools/alo186-ai-cms/cms.py \
+            --repo . \
+            audit \
+            --output /tmp/alo186-ai-cms/audit-report.json \
+            > /tmp/alo186-ai-cms/audit-console.json
+
+      - name: En yüksek potansiyelli en fazla üç briefi hazırla
+        shell: bash
+        env:
+          REQUESTED_LIMIT: ${{ inputs.limit || '3' }}
+        run: |
+          set -euo pipefail
+          case "$REQUESTED_LIMIT" in
+            1|2|3) ;;
+            *) echo "Geçersiz limit: $REQUESTED_LIMIT" >&2; exit 1 ;;
+          esac
+          python tools/alo186-ai-cms/cms.py \
+            --repo . \
+            plan \
+            --out-dir /tmp/alo186-ai-cms/plan \
+            --limit "$REQUESTED_LIMIT" \
+            --source-commit "$GITHUB_SHA" \
+            > /tmp/alo186-ai-cms/plan-console.json
+
+      - name: Rapor sözleşmesini doğrula
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path('/tmp/alo186-ai-cms')
+          audit = json.loads((root / 'audit-report.json').read_text(encoding='utf-8'))
+          summary = json.loads((root / 'plan/plan-summary.json').read_text(encoding='utf-8'))
+          package = json.loads((root / 'plan/sites-package.json').read_text(encoding='utf-8'))
+          assert audit['ok'] is True, audit
+          assert summary['ok'] is True, summary
+          assert 0 <= summary['selectedCount'] <= 3, summary
+          assert package['target'] == 'chatgpt-sites', package
+          assert package['siteSlug'] == 'alo186', package
+          assert package['reviewPolicy']['humanPreviewRequired'] is True, package
+          assert package['reviewPolicy']['automaticDeployAllowed'] is False, package
+          assert all(operation['publish'] is False for operation in package['operations']), package
+          print(json.dumps({
+              'inventory': audit['metrics']['inventoryCount'],
+              'queue': audit['metrics']['queueCount'],
+              'selected': summary['selectedCount'],
+              'errors': audit['metrics']['errorCount'],
+              'warnings': audit['metrics']['warningCount'],
+          }, ensure_ascii=False, indent=2))
+          PY
+
+      - name: GitHub çalışma özeti
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          from pathlib import Path
+          audit = json.loads(Path('/tmp/alo186-ai-cms/audit-report.json').read_text(encoding='utf-8'))
+          summary = json.loads(Path('/tmp/alo186-ai-cms/plan/plan-summary.json').read_text(encoding='utf-8'))
+          print('## ALO186 AI CMS v220')
+          print()
+          print(f"- Envanter: **{audit['metrics']['inventoryCount']}**")
+          print(f"- Kuyruk: **{audit['metrics']['queueCount']}**")
+          print(f"- Hazırlanan brief: **{summary['selectedCount']} / 3**")
+          print(f"- Hata: **{audit['metrics']['errorCount']}**")
+          print(f"- Uyarı: **{audit['metrics']['warningCount']}**")
+          print('- Canlı hedef: **ChatGPT Sites / alo186**')
+          print('- Deploy: **önizleme ve insan onayı gerekli**')
+          PY
+
+      - name: AI CMS özel artifactı
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-ai-cms-v220-${{ github.sha }}
+          path: /tmp/alo186-ai-cms
+          if-no-files-found: error
+          retention-days: 30
+          include-hidden-files: false
