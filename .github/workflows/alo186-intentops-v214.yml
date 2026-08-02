@@ -1,0 +1,50 @@
+name: ALO186 IntentOps v214
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/content-ops/**'
+      - 'alo186/tests/test_intentops_v214.py'
+      - '.github/workflows/alo186-intentops-v214.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/content-ops/**'
+      - 'alo186/tests/test_intentops_v214.py'
+      - '.github/workflows/alo186-intentops-v214.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-intentops-v214-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Sözdizimi ve fırsat sözleşmesi
+        run: |
+          set -euo pipefail
+          python -m py_compile alo186/content-ops/intentops_v214.py alo186/tests/test_intentops_v214.py
+          python alo186/tests/test_intentops_v214.py
+      - name: IntentOps raporu üret
+        continue-on-error: true
+        run: |
+          python alo186/content-ops/intentops_v214.py \
+            --today 2026-08-02 \
+            --output /tmp/alo186-intentops-v214-report.json
+      - if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: alo186-intentops-v214-report
+          path: /tmp/alo186-intentops-v214-report.json
+          if-no-files-found: warn
+          retention-days: 45
