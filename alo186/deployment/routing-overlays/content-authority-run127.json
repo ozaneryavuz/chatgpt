@@ -1,0 +1,23 @@
+{
+  "version": 205,
+  "generatedAt": "2026-08-02",
+  "source": "ALO186 content authority run127",
+  "routes": [
+    {
+      "path": "/haberler/jenerator-underfrequency-dusuk-frekans-governor-yuk-adimi-teshis",
+      "file": "haberler/jenerator-underfrequency-dusuk-frekans-governor-yuk-adimi-teshis/index.html",
+      "intent": "Jeneratör düşük frekans alarmını governor, yük adımı, hız geri bildirimi ve gerçek kapasiteyle ayırmak"
+    },
+    {
+      "path": "/haberler/ges-inverter-reverse-polarity-ters-kutup-string-polarite-teshis",
+      "file": "haberler/ges-inverter-reverse-polarity-ters-kutup-string-polarite-teshis/index.html",
+      "intent": "GES string ters polarite ve reverse current olayını string–MPPT, combiner ve devreye alma kanıtıyla ayırmak"
+    },
+    {
+      "path": "/haberler/ups-fan-failure-overtemperature-hava-akisi-filtre-teshis",
+      "file": "haberler/ups-fan-failure-overtemperature-hava-akisi-filtre-teshis/index.html",
+      "intent": "UPS fan arızası ve aşırı sıcaklığı hava akışı, yük, sensör ve fan geri bildirimiyle ayırmak"
+    }
+  ],
+  "qualityGate": "alo186/tests/test_authority_content_run127.py"
+}
