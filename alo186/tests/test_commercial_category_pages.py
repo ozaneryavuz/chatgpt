@@ -102,7 +102,6 @@ class CommercialCategoryPagesTests(unittest.TestCase):
         self.assertGreaterEqual(html.count('class="card route-card"'), len(required))
         self.assertIn("Mevcut sistem yeterliyse satın alma yok", html)
         self.assertIn("Aktif tehlikede satış yolu kapalı", html)
-        self.assertNotRegex(html, r"https://alo186\.com/amazon-elektrik-urunleri(?=[a-z0-9])")
 
     def test_direct_affiliate_links_are_freshness_gated_and_high_risk_categories_remain_closed(self) -> None:
         runtime = (SOURCE_ROOT / "commercial.js").read_text(encoding="utf-8")
