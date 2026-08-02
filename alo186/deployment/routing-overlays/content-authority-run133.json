@@ -6,7 +6,7 @@
     {
       "path": "/haberler/elektrik-kesintisi-gerilim-dalgalanmasi-cihaz-hasari-edas-tazminat-basvurusu",
       "file": "haberler/elektrik-kesintisi-gerilim-dalgalanmasi-cihaz-hasari-edas-tazminat-basvurusu/index.html",
-      "intent": "Kesinti veya gerilim dalgalanması sonrası cihaz hasarı için 10 iş günlük EDAŞ başvuru, servis ve nedensellik kanıt dosyası hazırlamak"
+      "intent": "Kesinti veya gerilim dalgalanması sonrası cihaz hasarı için 30 günlük dağıtım şirketi başvurusu, servis ve nedensellik kanıt dosyası hazırlamak"
     },
     {
       "path": "/haberler/ges-inverter-low-insulation-resistance-riso-low-yagmur-toprak-kacagi-teshis",
