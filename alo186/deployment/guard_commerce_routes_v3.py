@@ -10,6 +10,7 @@ from pathlib import Path
 import guard_commerce_routes_v2 as v2
 import inject_live_quality_completion_v214 as live_quality_v214
 import inject_portal_purchase_checkpoint_v213 as portal_checkpoint
+import normalize_legacy_project_links_v214 as legacy_links_v214
 
 # V2, bağlantının çevresindeki sabit 900 karakteri tarıyordu. Uzun hesaplayıcı
 # sayfalarında başka bir bölümde geçen "topraklama" gibi güvenlik metinleri,
@@ -204,19 +205,23 @@ def _checkpoint_base_path(site: Path) -> str:
 
 
 def validate_site(site: Path) -> dict:
-    """Portal kontrolünü ve v214 kalite katmanını son artifactta uygular, ardından ticareti fail-closed tarar."""
+    """Portal kontrolü, legacy URL normalizasyonu ve v214 kalite katmanını final artifactta uygular."""
     resolved = site.resolve()
     base_path = _checkpoint_base_path(resolved)
     checkpoint_result = portal_checkpoint.inject(resolved, base_path)
+    legacy_links_result = legacy_links_v214.run(resolved, base_path)
     quality_result = live_quality_v214.run(resolved, base_path)
     result = _original_validate_site(resolved)
     result["portalPurchaseCheckpoint"] = checkpoint_result
+    result["legacyProjectLinksV214"] = legacy_links_result
     result["liveQualityCompletionV214"] = {
         "version": quality_result["version"],
         "criticalPages": quality_result["criticalPages"]["criticalPageCount"],
         "brokenInternalLinks": quality_result["internalLinks"]["brokenInternalLinks"],
         "sitemapUrlCount": quality_result["searchDiscovery"].get("sitemapUrlCount"),
         "copyReplacements": quality_result["copyNormalization"]["replacementCount"],
+        "legacyProjectReferencesRewritten": legacy_links_result["rewrittenReferences"],
+        "residualLegacyProjectReferences": legacy_links_result["residualLegacyReferences"],
         "personalDataCollectionAdded": False,
         "officialInstitutionClaimed": False,
     }
