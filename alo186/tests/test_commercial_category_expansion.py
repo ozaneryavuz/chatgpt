@@ -28,6 +28,10 @@ TOOLS = {
     "/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi": "/hesaplama/akilli-priz-enerji-olcer-uygunluk/",
     "/amazon-elektrik-urunleri/ges-malzemeleri-secimi": "/hesaplama/gunes-paneli-power-station-uygunluk/",
 }
+CONSUMER_HUB_ROUTES = {
+    "/amazon-elektrik-urunleri/tasinabilir-guc-istasyonu-secimi",
+    "/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi",
+}
 AMAZON_HOSTS = {"amazon.com.tr", "www.amazon.com.tr"}
 CANONICAL_LINK = re.compile(r'<link\s+rel=["\']canonical["\']\s+href=["\']([^"\']+)["\']', re.I)
 
@@ -157,14 +161,14 @@ class CommercialCategoryExpansionTests(unittest.TestCase):
             self.assertRegex(catalog, re.compile(rf"\{{id:'{category}'.*?mode:'guide'.*?affiliatePolicy:'after_tool'", re.S))
         self.assertNotRegex(catalog, re.compile(r"id:'(?:power_station|smart_plug)'.*?mode:'direct'", re.S))
 
-    def test_hub_inventory_contains_expansion_without_stale_display_count(self) -> None:
+    def test_consumer_hub_exposes_consumer_guides_but_not_professional_ges_as_store_path(self) -> None:
         hub = (SOURCE_ROOT / "index.html").read_text(encoding="utf-8")
         guide_links = re.findall(r'href="(/amazon-elektrik-urunleri/[^"?#]+)"', hub, re.I)
         unique = {normalized_path(value) for value in guide_links}
         self.assertGreaterEqual(len(unique), 7, sorted(unique))
-        self.assertGreaterEqual(hub.count('class="card route-card"'), len(ROUTES))
-        for route in ROUTES:
+        for route in CONSUMER_HUB_ROUTES:
             self.assertIn(normalized_path(route), unique)
+        self.assertNotIn(normalized_path("/amazon-elektrik-urunleri/ges-malzemeleri-secimi"), unique)
         self.assertNotIn("/urun-rehberleri/", hub)
 
     def test_production_bundle_sitemap_private_search_and_apex_canonical(self) -> None:
