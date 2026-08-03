@@ -13,6 +13,23 @@ CANONICAL_ORIGIN = "https://alo186.com"
 ROBOTS_TEXT = "User-agent: *\nAllow: /\n\nSitemap: https://alo186.com/sitemap.xml\n"
 ALIAS_MARKER = 'data-alo186-content-alias="true"'
 
+# Eski içerik rotaları kullanıcıya ve arama motorlarına yalnız geçiş yüzeyi
+# olarak kalabilir; site içindeki bütün yeni yönlendirmeler doğrudan canonical
+# hedefe gitmelidir. Böylece alias sayfaları sitemap dışında tutulurken statik
+# smoke ve kullanıcı yolculuğu aynı kaynak gerçeğini kullanır.
+ALIAS_TARGETS = {
+    "/haberler/elektrik-gerilimi-dusuk-yuksek-edas-olcum-talebi": (
+        "/haberler/priz-gerilimi-neden-220-volttan-farkli-olabilir/"
+    ),
+    "/haberler/lifepo4-batarya-sogukta-sarj-edilir-mi": (
+        "/haberler/lifepo4-bataryalar-kisin-sarj-edilir-mi/"
+    ),
+}
+HREF_PATTERN = re.compile(
+    r"(?P<prefix>\bhref\s*=\s*)(?P<quote>[\"'])(?P<url>[^\"']+)(?P=quote)",
+    re.I,
+)
+
 
 def normalize_base_path(value: str) -> str:
     cleaned = str(value or "").strip()
@@ -72,6 +89,94 @@ def qualify_url(value: str) -> str:
     return urllib.parse.urlunsplit(("https", "alo186.com", path, "", ""))
 
 
+def _alias_target(value: str, base_path: str) -> str | None:
+    """Bir iç bağlantı alias ise canonical hedefini döndürür.
+
+    Sadece root-relative bağlantılar ile alo186.com / www.alo186.com mutlak
+    bağlantıları ele alınır. Haricî hostlara ve göreli dosya bağlantılarına
+    dokunulmaz. Query ve fragment korunur.
+    """
+
+    parsed = urllib.parse.urlsplit(value)
+    absolute = bool(parsed.scheme or parsed.netloc)
+    if absolute:
+        if parsed.scheme and parsed.scheme.casefold() not in {"http", "https"}:
+            return None
+        hostname = (parsed.hostname or "").casefold().removeprefix("www.")
+        if hostname != "alo186.com":
+            return None
+    elif not value.startswith("/"):
+        return None
+
+    path = urllib.parse.unquote(parsed.path or "/")
+    normalized_base = normalize_base_path(base_path)
+    had_base = bool(
+        normalized_base
+        and (path == normalized_base or path.startswith(normalized_base + "/"))
+    )
+    route = path[len(normalized_base):] or "/" if had_base else path
+    route = "/" + route.lstrip("/")
+    key = "/" if route == "/" else route.rstrip("/")
+    target = ALIAS_TARGETS.get(key)
+    if target is None:
+        return None
+
+    target_path = (normalized_base + target) if had_base else target
+    if absolute:
+        return urllib.parse.urlunsplit(
+            ("https", "alo186.com", target_path, parsed.query, parsed.fragment)
+        )
+    return urllib.parse.urlunsplit(("", "", target_path, parsed.query, parsed.fragment))
+
+
+def rewrite_alias_links(site: Path, base_path: str) -> dict[str, Any]:
+    """Final artifact içindeki alias href'leri canonical hedeflere taşır."""
+
+    rewrites: list[dict[str, str]] = []
+    touched_pages: set[str] = set()
+
+    for path in sorted(site.rglob("*.html")):
+        source = path.read_text(encoding="utf-8", errors="strict")
+
+        def replace(match: re.Match[str]) -> str:
+            current = match.group("url")
+            target = _alias_target(current, base_path)
+            if target is None or target == current:
+                return match.group(0)
+            relative = path.relative_to(site).as_posix()
+            touched_pages.add(relative)
+            rewrites.append({"page": relative, "from": current, "to": target})
+            return f'{match.group("prefix")}{match.group("quote")}{target}{match.group("quote")}'
+
+        updated = HREF_PATTERN.sub(replace, source)
+        if updated != source:
+            path.write_text(updated, encoding="utf-8")
+
+    # Fail closed: alias rotaları kendi geçiş sayfaları dışında hiçbir HTML
+    # href'inde kalmamalıdır. Alias sayfalarının canonical/refresh hedefleri
+    # zaten yeni rotadır; dolayısıyla bu kontrol güvenle bütün artifacta uygulanır.
+    remaining: list[str] = []
+    for path in sorted(site.rglob("*.html")):
+        source = path.read_text(encoding="utf-8", errors="strict")
+        for match in HREF_PATTERN.finditer(source):
+            if _alias_target(match.group("url"), base_path) is not None:
+                remaining.append(
+                    f'{path.relative_to(site).as_posix()} -> {match.group("url")}'
+                )
+    if remaining:
+        raise RuntimeError(
+            "Final artifact içinde canonical hedefe taşınmamış alias bağlantısı kaldı: "
+            + "; ".join(remaining[:20])
+        )
+
+    return {
+        "rewrittenLinkCount": len(rewrites),
+        "touchedPageCount": len(touched_pages),
+        "rewrites": rewrites[:50],
+        "remainingAliasHrefCount": 0,
+    }
+
+
 def persist_release_proof(site: Path, report: dict[str, Any]) -> None:
     for name in ("alo186-release.json", "pages-release.json"):
         path = site / name
@@ -90,6 +195,9 @@ def run(site: Path, base_path: str = "") -> dict[str, Any]:
     robots_path = site / "robots.txt"
     if not sitemap_path.is_file():
         raise FileNotFoundError(f"Sitemap bulunamadı: {sitemap_path}")
+
+    alias_link_report = rewrite_alias_links(site, normalized_base)
+
     try:
         tree = ET.parse(sitemap_path)
     except ET.ParseError as exc:
@@ -200,6 +308,10 @@ def run(site: Path, base_path: str = "") -> dict[str, Any]:
         "removedNoncanonical": removed_noncanonical,
         "removedMissing": removed_missing,
         "removedDuplicate": removed_duplicate,
+        "aliasLinkRewriteCount": alias_link_report["rewrittenLinkCount"],
+        "aliasLinkTouchedPageCount": alias_link_report["touchedPageCount"],
+        "aliasLinkRewrites": alias_link_report["rewrites"],
+        "remainingAliasHrefCount": alias_link_report["remainingAliasHrefCount"],
         "robotsSingleCanonicalSitemap": True,
         "legacyWwwRejected": True,
     }
