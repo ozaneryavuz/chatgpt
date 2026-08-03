@@ -22,9 +22,9 @@ DIRECT_COMMERCIAL_ROUTES = {
     "/amazon-elektrik-urunleri",
     "/amazon-elektrik-urunleri/powerbank-usb-c-secimi",
 }
-# Ürün merkezi v174+ ile genel kategori listesinden görev odaklı 12 karar kartına
-# dönüştürüldü. Eski “9 özel rehber” ve yalnız power-station odaklı buzdolabı
-# rotası artık ana merkez sözleşmesi değildir.
+# Ürün merkezi genel kategori listesinden görev odaklı karar kartlarına
+# dönüştürüldü. Hızla eskiyen sabit rota/rehber/model sayıları artık sözleşme
+# değildir; kullanıcı görevi ve güncel teknik uygunluk görünür kalmalıdır.
 HUB_ROUTES = {
     "/amazon-elektrik-urunleri/modem-ont-mini-ups-yedekleme-secici/",
     "/amazon-elektrik-urunleri/nas-ups-usb-snmp-uygunluk-secici/",
@@ -119,10 +119,11 @@ class CommercialCategoryPagesTests(unittest.TestCase):
             self.assertIn(f'href="{route}"', html)
             self.assertTrue(route_file(route).is_file(), route)
         self.assertGreaterEqual(html.count('class="card route-card"'), len(HUB_ROUTES))
-        self.assertIn("18+ karar rotası", html)
+        self.assertIn("Güncel karar rotaları", html)
         self.assertIn("Mevcut sistem yeterliyse satın alma yok", html)
         self.assertIn("Aktif tehlikede satış yolu kapalı", html)
-        self.assertNotIn("9 özel rehber", html)
+        for stale_claim in ("18+ karar rotası", "9 özel rehber", "25 rehber", "152 model", "67 ürün seçim yolu"):
+            self.assertNotIn(stale_claim, html)
 
     def test_direct_affiliate_links_are_freshness_gated_and_only_powerbank_is_direct(self) -> None:
         runtime = (SOURCE_ROOT / "commercial.js").read_text(encoding="utf-8")
