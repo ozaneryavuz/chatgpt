@@ -1,0 +1,18 @@
+{
+  "version": 237,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/ges-inverter-reaktif-guc-cos-phi-qv-kabul-testi/index.html",
+      "canonicalPath": "/haberler/ges-inverter-reaktif-guc-cos-phi-qv-kabul-testi",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_3e8b7a4d1c9f2650",
+    "humanApproved": true,
+    "approvalPr": 780,
+    "qualityScore": 88
+  }
+}
