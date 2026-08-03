@@ -32,6 +32,8 @@ FORBIDDEN = (
     "priceCurrency",
     "availability",
 )
+OUTAGE_INVALID_CONDITION = "rawHours===''||!Number.isFinite(hours)||hours<0||hours>8760"
+OUTAGE_VALID_CONDITION = "rawHours!==''&&Number.isFinite(hours)&&hours>=0&&hours<=8760"
 
 
 def normalize_base_path(value: str) -> str:
@@ -108,6 +110,15 @@ def normalize_product_hub_jsonld(site: Path) -> int:
     return count
 
 
+def normalize_javascript(text: str) -> str:
+    return re.sub(r"\s+", "", text)
+
+
+def has_fail_closed_outage_bounds(text: str) -> bool:
+    normalized = normalize_javascript(text)
+    return OUTAGE_INVALID_CONDITION in normalized or OUTAGE_VALID_CONDITION in normalized
+
+
 def harden_outage_input(site: Path) -> bool:
     path = site / ROUTES[0].strip("/") / "index.html"
     if not path.is_file():
@@ -115,23 +126,30 @@ def harden_outage_input(site: Path) -> bool:
     text = path.read_text(encoding="utf-8", errors="strict")
     changed = False
     if 'max="8760"' not in text:
-        text = text.replace('id="hours" type="number" min="0"', 'id="hours" type="number" min="0" max="8760"', 1)
+        text = text.replace(
+            'id="hours" type="number" min="0"',
+            'id="hours" type="number" min="0" max="8760"',
+            1,
+        )
         changed = True
     if "const rawHours=input.value.trim();" not in text:
         old = "const input=document.getElementById('hours');\n    const hours=Number(input.value);"
-        new = "const input=document.getElementById('hours');\n    const rawHours=input.value.trim();\n    const hours=rawHours===''?Number.NaN:Number(rawHours);"
+        new = (
+            "const input=document.getElementById('hours');\n"
+            "    const rawHours=input.value.trim();\n"
+            "    const hours=rawHours===''?Number.NaN:Number(rawHours);"
+        )
         if old not in text:
             raise RuntimeError("Kesinti süresi sayısal dönüşüm kalıbı bulunamadı")
         text = text.replace(old, new, 1)
         changed = True
-    secure_condition = "rawHours===''||!Number.isFinite(hours)||hours<0||hours>8760"
-    if secure_condition not in text:
+    if not has_fail_closed_outage_bounds(text):
         old_condition = "!Number.isFinite(hours)||hours<0||hours>8760"
         if old_condition not in text:
             old_condition = "!Number.isFinite(h)||h<0"
         if old_condition not in text:
             raise RuntimeError("Kesinti süresi doğrulama kalıbı bulunamadı")
-        text = text.replace(old_condition, secure_condition, 1)
+        text = text.replace(old_condition, OUTAGE_INVALID_CONDITION, 1)
         changed = True
     if changed:
         path.write_text(text, encoding="utf-8")
@@ -172,7 +190,13 @@ def inject_hub(path: Path, base_path: str) -> bool:
     return cards_added
 
 
-def update_release(site: Path, base_path: str, added: bool, search_result: dict, product_hub_fixes: int) -> None:
+def update_release(
+    site: Path,
+    base_path: str,
+    added: bool,
+    search_result: dict,
+    product_hub_fixes: int,
+) -> None:
     path = site / "pages-release.json"
     if not path.is_file():
         raise FileNotFoundError(f"Pages release kaydı bulunamadı: {path}")
@@ -193,7 +217,10 @@ def update_release(site: Path, base_path: str, added: bool, search_result: dict,
         "personalDataCollected": False,
         "failClosed": True,
     }
-    path.write_text(json.dumps(release, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(release, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
 
 
 def recompute_checksums(site: Path) -> None:
@@ -218,15 +245,18 @@ def validate(site: Path, base_path: str) -> dict:
             if forbidden in html:
                 raise RuntimeError(f"{route}: yasak ticari alan bulundu: {forbidden}")
 
-    outage = (site / ROUTES[0].strip("/") / "index.html").read_text(encoding="utf-8")
+    outage = (site / ROUTES[0].strip("/") / "index.html").read_text(
+        encoding="utf-8"
+    )
     for token in (
         "const rawHours=input.value.trim()",
         "rawHours===''?Number.NaN:Number(rawHours)",
-        "rawHours===''||!Number.isFinite(hours)||hours<0||hours>8760",
         "30 gün",
     ):
         if token not in outage:
             raise RuntimeError(f"Kesinti aracı fail-closed sözleşmesi eksik: {token}")
+    if not has_fail_closed_outage_bounds(outage):
+        raise RuntimeError("Kesinti aracı fail-closed 0–8760 saat sınırı eksik")
 
     product_hub = (site / PRODUCT_HUB).read_text(encoding="utf-8", errors="strict")
     if MALFORMED_PRODUCT_URL.search(product_hub):
@@ -236,7 +266,8 @@ def validate(site: Path, base_path: str) -> dict:
     sitemap_path = site / "sitemap.xml"
     sitemap_root = ET.parse(sitemap_path).getroot()
     sitemap_paths = {
-        (urlsplit((node.text or "").strip()).path.rstrip("/") or "/") + ("/" if urlsplit((node.text or "").strip()).path.rstrip("/") else "")
+        (urlsplit((node.text or "").strip()).path.rstrip("/") or "/")
+        + ("/" if urlsplit((node.text or "").strip()).path.rstrip("/") else "")
         for node in sitemap_root.findall(".//{*}loc")
         if (node.text or "").strip()
     }
@@ -263,11 +294,13 @@ def validate(site: Path, base_path: str) -> dict:
         if f'href="{expected}"' not in hub:
             raise RuntimeError(f"Hesaplama Merkezi kartı eksik: {expected}")
     actual_tool_count = hub.count('class="tool-card"')
-    counter_values = [int(value) for value in re.findall(r"(\d+)\s+çekirdek araç", hub)]
+    counter_values = [
+        int(value) for value in re.findall(r"(\d+)\s+çekirdek araç", hub)
+    ]
     if not counter_values or any(value != actual_tool_count for value in counter_values):
         raise RuntimeError(
-            f"Hesaplama Merkezi statik/çalışma zamanı sayaçları gerçek kart sayısıyla uyuşmuyor: "
-            f"kart={actual_tool_count}, sayaçlar={counter_values}"
+            "Hesaplama Merkezi statik/çalışma zamanı sayaçları gerçek kart "
+            f"sayısıyla uyuşmuyor: kart={actual_tool_count}, sayaçlar={counter_values}"
         )
 
     release = json.loads((site / "pages-release.json").read_text(encoding="utf-8"))
@@ -309,12 +342,18 @@ def inject(site: Path, base_path: str) -> dict:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="ALO186 run135 karar araçlarını keşif ve fail-closed yayın katmanına ekler.")
+    parser = argparse.ArgumentParser(
+        description="ALO186 run135 karar araçlarını keşif ve fail-closed yayın katmanına ekler."
+    )
     parser.add_argument("--site", type=Path, required=True)
     parser.add_argument("--base-path", default="")
     parser.add_argument("--validate-only", action="store_true")
     args = parser.parse_args()
-    result = validate(args.site.resolve(), args.base_path) if args.validate_only else inject(args.site.resolve(), args.base_path)
+    result = (
+        validate(args.site.resolve(), args.base_path)
+        if args.validate_only
+        else inject(args.site.resolve(), args.base_path)
+    )
     print(json.dumps(result, ensure_ascii=False, indent=2))
 
 

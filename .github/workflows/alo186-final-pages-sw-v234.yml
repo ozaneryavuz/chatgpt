@@ -1,0 +1,108 @@
+name: ALO186 final Pages service-worker v234
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/deployment/finalize_pages_service_worker.py'
+      - 'alo186/deployment/inject_live_quality_v218_compat.py'
+      - 'alo186/deployment/inject_intent_tools_run135.py'
+      - 'alo186/tests/test_finalize_pages_service_worker.py'
+      - 'alo186/tests/test_intent_tools_outage_idempotency_v234.py'
+      - '.github/workflows/alo186-final-pages-sw-v234.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/deployment/finalize_pages_service_worker.py'
+      - 'alo186/deployment/inject_live_quality_v218_compat.py'
+      - 'alo186/deployment/inject_intent_tools_run135.py'
+      - 'alo186/tests/test_finalize_pages_service_worker.py'
+      - 'alo186/tests/test_intent_tools_outage_idempotency_v234.py'
+      - '.github/workflows/alo186-final-pages-sw-v234.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-final-pages-sw-v234-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: custom-domain
+            base_path: ''
+          - name: project-path
+            base_path: '/chatgpt'
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Kaynak ve idempotency regresyonu
+        run: |
+          python -m py_compile alo186/deployment/finalize_pages_service_worker.py
+          python -m py_compile alo186/deployment/inject_live_quality_v218_compat.py
+          python -m py_compile alo186/deployment/inject_intent_tools_run135.py
+          python alo186/tests/test_finalize_pages_service_worker.py
+          python alo186/tests/test_intent_tools_outage_idempotency_v234.py
+      - name: Canonical paketi oluştur
+        run: |
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-final-sw-${{ matrix.name }} \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-final-sw-${{ matrix.name }}
+      - name: Pages artifactını hazırla ve son güven katmanını çalıştır
+        run: |
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-final-sw-${{ matrix.name }} \
+            --base-path '${{ matrix.base_path }}' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/guard_commerce_routes_v3.py \
+            --site /tmp/alo186-final-sw-${{ matrix.name }}
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-final-sw-${{ matrix.name }} \
+            --base-path '${{ matrix.base_path }}'
+      - name: Final servis-worker kabulü
+        env:
+          SITE: /tmp/alo186-final-sw-${{ matrix.name }}
+          BASE_PATH: ${{ matrix.base_path }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import sys
+          from pathlib import Path
+
+          sys.path.insert(0, 'alo186/deployment')
+          from finalize_pages_service_worker import registration_count
+
+          site = Path(os.environ['SITE'])
+          base_path = os.environ['BASE_PATH']
+          expected_sw = f'{base_path}/sw.js' if base_path else '/sw.js'
+          expected_scope = f'{base_path}/' if base_path else '/'
+          pages = sorted(site.rglob('*.html'))
+          assert pages
+          for path in pages:
+              html = path.read_text(encoding='utf-8')
+              assert registration_count(html) == 1, path
+          receipt = json.loads((site / 'pages-release.json').read_text(encoding='utf-8'))
+          report = receipt['serviceWorkerRegistrationFinalization']
+          assert report['checkedPages'] == len(pages)
+          assert report['serviceWorker'] == expected_sw
+          assert report['scope'] == expected_scope
+          assert (site / 'checksums.sha256').is_file()
+          print(json.dumps({
+              'ok': True,
+              'pages': len(pages),
+              'sw': expected_sw,
+              'phantomMarkerPagesRepaired': int(report.get('phantomMarkerPagesRepaired') or 0),
+          }, ensure_ascii=False))
+          PY
