@@ -1,0 +1,85 @@
+name: ALO186 affiliate monitör görüntü kabloları v229
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/monitor-goruntu-kablosu-secimi/**'
+      - 'alo186/deployment/routing-overlays/229-affiliate-display-cables.json'
+      - 'alo186/tests/test_affiliate_display_cables_v229.js'
+      - '.github/workflows/alo186-affiliate-display-cables-v229.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/monitor-goruntu-kablosu-secimi/**'
+      - 'alo186/deployment/routing-overlays/229-affiliate-display-cables.json'
+      - 'alo186/tests/test_affiliate_display_cables_v229.js'
+      - '.github/workflows/alo186-affiliate-display-cables-v229.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-affiliate-display-cables-v229-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Exact ASIN, Knowledge Graph and stale gate
+        run: |
+          set -euo pipefail
+          node --check alo186/amazon-elektrik-urunleri/monitor-goruntu-kablosu-secimi/catalog-v229.js
+          node --check alo186/amazon-elektrik-urunleri/monitor-goruntu-kablosu-secimi/app-v229.js
+          node alo186/tests/test_affiliate_display_cables_v229.js
+      - name: Existing affiliate and legal safety regressions
+        run: |
+          set -euo pipefail
+          python alo186/tests/test_commerce_governance_v2.py
+          python alo186/tests/test_commerce_governance_v3.py
+          python alo186/tests/device_damage_deadline_guard.py
+          node alo186/tests/test_release_manifest.js
+      - name: Canonical production bundle
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-display-cables-v229 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-display-cables-v229
+          route=/tmp/alo186-display-cables-v229/amazon-elektrik-urunleri/monitor-goruntu-kablosu-secimi
+          test -f "$route/index.html"
+          test -f "$route/catalog-v229.js"
+          test -f "$route/app-v229.js"
+          grep -Fq 'B088GQM9CV' "$route/index.html"
+          grep -Fq 'B0CFF9T3PS' "$route/index.html"
+          grep -Fq 'B0C4DB8MLL' "$route/index.html"
+          grep -Fq 'alo186rehber-21' "$route/catalog-v229.js"
+          ! grep -Eq 'href="https://www\.amazon\.com\.tr/(dp|s\?k=)' "$route/index.html"
+      - name: Custom-domain and project-path commerce acceptance
+        run: |
+          set -euo pipefail
+          for spec in 'custom|' 'project|/chatgpt'; do
+            name="${spec%%|*}"; base="${spec#*|}"; target="/tmp/alo186-display-cables-v229-${name}"
+            cp -a /tmp/alo186-display-cables-v229 "$target"
+            python alo186/deployment/prepare_github_pages.py --site "$target" --base-path "$base" --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
+            python alo186/deployment/inject_outcome_runtime.py --site "$target" --base-path "$base"
+            python alo186/deployment/inject_shortlist_growth.py --site "$target" --base-path "$base" > "/tmp/alo186-display-cables-v229-${name}-growth.json"
+            python alo186/deployment/smoke_github_pages.py --site "$target" --base-path "$base"
+            python alo186/deployment/guard_commerce_routes_v3.py --site "$target" | tee "/tmp/alo186-display-cables-v229-${name}-guard.json"
+          done
+      - name: Verified artifact
+        if: success()
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-affiliate-display-cables-v229
+          path: /tmp/alo186-display-cables-v229-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
