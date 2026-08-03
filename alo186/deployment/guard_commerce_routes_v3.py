@@ -8,8 +8,9 @@ from html.parser import HTMLParser
 from pathlib import Path
 from xml.etree import ElementTree
 
-import guard_commerce_routes_v2 as v2
 import aeo_control_plane_v219 as aeo_institutional
+import finalize_sitemap_v225 as sitemap_quality
+import guard_commerce_routes_v2 as v2
 import inject_affiliate_decision_funnel_v215 as affiliate_decision
 import inject_intent_tools_run135 as intent_tools
 import inject_live_quality_v218_compat as live_quality
@@ -139,10 +140,6 @@ def scan_affiliate_anchors(path: Path, site: Path) -> list[str]:
     return errors
 
 
-# Ürün merkezindeki v210 yönlendiricisi kişisel veri istemeyen üç kapalı
-# seçimden oluşur. V2'nin bütün <form> etiketlerini kişisel veri formu sayan
-# eski kontrolü yalnız bu kesin sözleşme için daraltılır; serbest veya kişisel
-# veri alanı eklenirse kapı yeniden kapanır.
 _original_validate_commercial_pages = v2.validate_commercial_pages
 
 
@@ -241,7 +238,7 @@ def _deduplicate_sitemap(site: Path) -> dict[str, object]:
 
 
 def validate_site(site: Path) -> dict:
-    """Bütün growth enjeksiyonlarından sonra commerce, anonim AEO ve live quality'yi doğrular."""
+    """Bütün growth enjeksiyonlarından sonra commerce, AEO, canonical sitemap ve live quality'yi doğrular."""
     resolved = site.resolve()
     base_path = _checkpoint_base_path(resolved)
     decision_result = affiliate_decision.inject(resolved, base_path)
@@ -260,6 +257,7 @@ def validate_site(site: Path) -> dict:
         )
     result = _original_validate_site(resolved)
     sitemap_deduplication = _deduplicate_sitemap(resolved)
+    sitemap_result = sitemap_quality.run(resolved, base_path)
     quality_result = live_quality.run(resolved, base_path)
     result["affiliateDecisionFunnel"] = decision_result
     result["portalPurchaseCheckpoint"] = checkpoint_result
@@ -267,6 +265,7 @@ def validate_site(site: Path) -> dict:
     result["aeoInstitutionalV219"] = aeo_result
     result["aeoInstitutionalV219Validation"] = aeo_validation
     result["sitemapDeduplication"] = sitemap_deduplication
+    result["sitemapQualityV225"] = sitemap_result
     result["liveQualityV218"] = quality_result
     return result
 
