@@ -1,0 +1,18 @@
+{
+  "version": 251,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/ups-aku-runtime-kalibrasyon-desarj-kapasite-kabul-testi/index.html",
+      "canonicalPath": "/haberler/ups-aku-runtime-kalibrasyon-desarj-kapasite-kabul-testi",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_8d9c08b6d3e0ec56",
+    "humanApproved": true,
+    "approvalPr": 807,
+    "qualityScore": 88
+  }
+}

@@ -3,7 +3,7 @@
   "id": "cms_a8653e71974543ff",
   "slug": "vpp-telemetri-setpoint-feedback-veri-boslugu-kabul",
   "contentType": "guide",
-  "state": "review",
+  "state": "published",
   "locale": "tr-TR",
   "title": "VPP Telemetri, Setpoint Geri Bildirimi ve Veri Boşluğu Kabulü",
   "h1": "VPP'de komut gönderildi demek neden yetmez, telemetri nasıl kabul edilir?",
@@ -252,10 +252,10 @@
     "createdBy": "ai-assisted",
     "model": "gpt-5.6-thinking",
     "humanReviewRequired": true,
-    "approvedBy": null,
-    "approvedAt": null,
-    "publishedAt": null,
-    "approvalPr": null
+    "approvedBy": "ozaneryavuz",
+    "approvedAt": "2026-08-03T18:59:08Z",
+    "publishedAt": "2026-08-03T18:59:09Z",
+    "approvalPr": 807
   },
   "seo": {
     "canonicalPath": "/haberler/vpp-telemetri-setpoint-feedback-veri-boslugu-kabul",
@@ -285,8 +285,8 @@
       "structuredData": true
     },
     "similarity": {
-      "maximum": 0.1364,
-      "closestPath": "https://alo186.com/haberler/vpp-toplayici-sozlesmesi-soc-telemetri-gelir-ceza-kontrol-listesi"
+      "maximum": 0.2083,
+      "closestPath": "https://alo186.com/haberler/ups-bakim-bypass-geri-besleme-kilitleme-kabul-testi"
     }
   }
 }

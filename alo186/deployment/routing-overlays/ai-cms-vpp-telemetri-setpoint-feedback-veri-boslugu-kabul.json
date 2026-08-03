@@ -1,0 +1,18 @@
+{
+  "version": 252,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/vpp-telemetri-setpoint-feedback-veri-boslugu-kabul/index.html",
+      "canonicalPath": "/haberler/vpp-telemetri-setpoint-feedback-veri-boslugu-kabul",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_a8653e71974543ff",
+    "humanApproved": true,
+    "approvalPr": 807,
+    "qualityScore": 88
+  }
+}
