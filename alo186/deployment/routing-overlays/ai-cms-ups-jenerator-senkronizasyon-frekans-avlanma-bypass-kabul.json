@@ -1,0 +1,18 @@
+{
+  "version": 253,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/ups-jenerator-senkronizasyon-frekans-avlanma-bypass-kabul/index.html",
+      "canonicalPath": "/haberler/ups-jenerator-senkronizasyon-frekans-avlanma-bypass-kabul",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_53e6dfcb09ca029d",
+    "humanApproved": true,
+    "approvalPr": 830,
+    "qualityScore": 100
+  }
+}

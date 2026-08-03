@@ -1,0 +1,298 @@
+{
+  "schemaVersion": 1,
+  "id": "cms_523beb51626f6437",
+  "slug": "aktif-harmonik-filtre-ct-yonu-kompanzasyon-kabul-testi",
+  "contentType": "guide",
+  "state": "published",
+  "locale": "tr-TR",
+  "title": "Aktif Harmonik Filtre CT Yönü Testi ve Kabulü",
+  "h1": "Aktif harmonik filtre CT yönü testi ve kompanzasyon performansı nasıl doğrulanır?",
+  "description": "AHF devreye almada CT yönü, faz eşleşmesi, PCC ölçümü, filtre akımı ve harmonik iyileşmesini yük seviyelerine göre kanıtlayın.",
+  "intent": "Aktif harmonik filtrenin CT ölçüm sınırı ve faz-yön bilgisini doğru kullandığını, hedef harmonikleri kararlı biçimde azalttığını ve tam yükte kapasite/termal sınırı aşmadığını kanıtlamak.",
+  "primaryKeyword": "aktif harmonik filtre CT yönü testi",
+  "audience": [
+    "Sanayi ve otel teknik yöneticileri",
+    "Güç kalitesi mühendisleri",
+    "Kompanzasyon ve AHF devreye alma ekipleri",
+    "Elektrik bakım firmaları"
+  ],
+  "riskClass": "high",
+  "directAnswer": "Aktif harmonik filtre yalnız HMI'da çalışıyor görünmesiyle kabul edilmez. CT'ler doğru faz, yön, oran ve ölçüm noktasında olmalı; filtre kapalı ve açık durumda aynı yük koşulunda tekil harmonikler, THDi/THDv, nötr akımı, güç faktörü ve filtre çıkış akımı karşılaştırılmalıdır. Haberleşme, paralel modül ve termal sınırlar da test edilmelidir. Enerjili CT ve pano bağlantıları yalnız yetkin ekipçe, üretici şeması ve ölçüm planıyla doğrulanmalıdır.",
+  "sections": [
+    {
+      "id": "olcum-siniri-ve-ct-konumu",
+      "heading": "Aktif harmonik filtre için CT ölçüm sınırı nasıl seçilmelidir?",
+      "paragraphs": [
+        "Aktif harmonik filtre, CT'lerin gördüğü yük akımındaki hedef bileşenleri ölçüp ters fazlı kompanzasyon akımı üretir. CT ana bağlantı noktasında, yalnız belirli bir yük grubunda veya filtrenin kaynak tarafında olabilir; her yerleşim farklı yükleri kapsar. Tek hat üzerinde CT konumu, yük tarafı, kaynak tarafı, filtre bağlantı noktası ve paralel kondansatör bankları açıkça işaretlenmeden performans kabulü yapılamaz.",
+        "Üretici devreye alma kılavuzları CT seçimi, bağlantısı, otomatik veya manuel CT yapılandırması ve sistem bütünlük testini temel adımlar olarak tanımlar. CT'lerin filtre akımını yanlışlıkla yeniden ölçmesi kontrol döngüsü oluşturabilir; filtre dışında kalan yük ise telafi edilmez. Bu nedenle ölçüm sınırı, hedef PCC ve raporlanan harmonik kriteri aynı noktayı temsil etmelidir."
+      ],
+      "bullets": [
+        "Tek hatta CT, AHF, yükler, kondansatör bankı ve PCC konumlarını gösterin.",
+        "Source-side ve load-side CT seçimini üretici şemasına göre doğrulayın.",
+        "Filtre çıkış akımının CT tarafından yanlış geri beslenmediğini kontrol edin.",
+        "CT sekonderine enerjili durumda kullanıcı müdahalesi önermeyin."
+      ],
+      "sourceRefs": [
+        "S3",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "id": "ct-yonu-faz-ve-oran",
+      "heading": "CT yönü, faz eşleşmesi ve oran hatası nasıl anlaşılır?",
+      "paragraphs": [
+        "Ters CT yönü veya yanlış faz eşleşmesi, filtrenin azaltması gereken harmonik akımı büyütmesine, reaktif gücü yanlış yönde sürmesine veya aşırı akım alarmı vermesine neden olabilir. Her CT'nin P1/P2 yönü, faz etiketi, sekonder oranı ve HMI kanal eşleşmesi kontrollü faz yükü ve analizör kaydıyla doğrulanmalıdır. Yalnız toplam THDi ekranına bakmak hatalı fazı gizleyebilir.",
+        "Otomatik CT algılama işlevi varsa sonuç fiziksel etiket ve bağımsız ölçümle karşılaştırılmalıdır. İthalat-ihracat işareti, kapasitif-endüktif yön ve nötr akımı dört iletkenli sistemlerde ayrıca kontrol edilir. CT oranı çok yüksek seçilirse düşük yükte çözünürlük yetersiz kalabilir; çok düşük seçilirse beklenen yükte doygunluk veya ölçüm sınırı sorunu oluşabilir."
+      ],
+      "bullets": [
+        "Her CT için faz, yön, oran ve terminal numarasını kabul tablosuna yazın.",
+        "Tek fazlı kontrollü yük değişimiyle doğru kanalın beklenen yönde tepki verdiğini doğrulayın.",
+        "Otomatik CT tanımasını fiziksel bağlantı ve bağımsız analizörle karşılaştırın.",
+        "Yanlış yönü yazılım işaretiyle örtmeden önce üretici prosedürünü izleyin."
+      ],
+      "sourceRefs": [
+        "S3",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "id": "oncesi-sonrasi-harmonik-olcum",
+      "heading": "AHF öncesi ve sonrası harmonik performans nasıl ölçülmelidir?",
+      "paragraphs": [
+        "Filtre kabulü yalnız THDi yüzdesinin bir an için düşmesiyle verilmez. Aynı yük ve işletme koşulunda filtre kapalı ve açık kayıtları; faz akımları, THDi, tekil harmonikler, THDv, güç faktörü, kW, kVAr, nötr akımı ve filtre çıkış akımıyla birlikte karşılaştırılmalıdır. Yük profili değişiyorsa sonuçlar eşdeğer zaman dilimleri veya kontrollü yük senaryolarıyla normalleştirilmelidir.",
+        "IEC 61000-4-7 harmonik ve interharmonik ölçüm cihazı ve gruplama yaklaşımını, IEC 61000-4-30:2025 ise saha güç kalitesi parametrelerinin tekrarlanabilir ölçüm yöntemlerini tanımlar. Bu standartlar tek başına tesis için kabul sınırı vermez; ölçüm yöntemini standardize eder. Geçti-kaldı hedefi proje, bağlantı noktası, ekipman dayanımı ve uygulanabilir şebeke şartlarıyla önceden yazılmalıdır."
+      ],
+      "bullets": [
+        "Filtre kapalı/açık kayıtlarını aynı yük koşulunda alın.",
+        "THDi yanında tekil harmonikler, THDv, nötr akımı ve güç faktörünü izleyin.",
+        "Ölçüm sınıfı, CT oranı, örnekleme ve agregasyon aralığını rapora ekleyin.",
+        "Standart ölçüm yöntemini evrensel emisyon limiti gibi sunmayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "id": "yuk-duzeyi-ve-kapasite",
+      "heading": "Düşük yükte iyi görünen filtre tam yükte neden yetersiz kalabilir?",
+      "paragraphs": [
+        "AHF'nin gerekli kompanzasyon akımı yük seviyesine ve harmonik spektruma bağlıdır. Düşük yükte filtre akımı küçükken THDi yüzdesi değişken olabilir; tam üretim veya yoğun işletmede cihaz akım limitine ulaşabilir, bazı harmonikleri önceliklendirebilir veya termal derating yaşayabilir. Bu nedenle yalnız gece ya da kısmi yük devreye alma sonucu bütün tesis için yeterli değildir.",
+        "Schneider Electric devreye alma açıklaması, mümkünse beklenen yükün en az yarısının bulunmasını ve tam sistem entegrasyonu için desteklenen yüklerin çalıştırılmasını önerir; filtre çıkış akımının da anlamlı bir seviyeye ulaşması gerekir. Bu üretici örneği evrensel yüzde değildir, fakat kabul testinin gerçek yük spektrumunu temsil etmesi gerektiğini gösterir. Paralel AHF modüllerinde akım paylaşımı ayrıca izlenmelidir."
+      ],
+      "bullets": [
+        "Düşük, tipik ve en yüksek makul yük seviyelerinde test yapın.",
+        "Filtre çıkış akımı, kapasite yüzdesi ve termal derating olaylarını kaydedin.",
+        "Paralel modüllerde akım paylaşımı ve bir modül kaybı davranışını doğrulayın.",
+        "Kısmi yük sonucunu tam yük performans garantisi saymayın."
+      ],
+      "sourceRefs": [
+        "S3",
+        "S4",
+        "S6"
+      ]
+    },
+    {
+      "id": "kabul-dosyasi",
+      "heading": "Aktif harmonik filtre kabul dosyası hangi verileri içermelidir?",
+      "paragraphs": [
+        "Teslim dosyasında tek hat, PCC ve CT konumu, CT faz-yön-oran matrisi, AHF tam model ve firmware, kompanzasyon modları, hedef harmonikler, akım limiti, paralel modül ayarları, filtre kapalı/açık güç kalitesi trendleri, termal kayıtlar, olay günlüğü ve geçti-kaldı kriterleri bulunmalıdır. Ölçüm cihazı ve CT kalibrasyon bilgileri de saklanmalıdır.",
+        "Geçti sonucu; doğru CT geri bildirimi, kararlı kontrol, tanımlı yük aralığında hedef harmonik ve güç faktörü iyileşmesi, filtre akımının kapasite/termal sınır içinde kalması ve kompanzasyon panosuyla rezonans oluşturmamasıyla verilmelidir. CTA: kişisel verisiz CT–PCC–harmonik–filtre akımı–termal kabul matrisi hazırlayın; kanıt yeterliyse gereksiz ek AHF kapasitesi veya kondansatör değişimi satın almayın."
+      ],
+      "bullets": [
+        "CT ve AHF parametre yedeğini teslim dosyasına ekleyin.",
+        "Öncesi-sonrası ölçümü ortak yük ve zaman koşuluyla karşılaştırın.",
+        "Alarm, kapasite sınırı ve termal sonuçları ayrı geçti-kaldı satırlarında gösterin.",
+        "Sistem hedefi sağlıyorsa yalnız THDi korkusuyla cihaz büyütmeyin."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S4",
+        "S5",
+        "S6"
+      ]
+    }
+  ],
+  "faqs": [
+    {
+      "question": "Aktif harmonik filtre açılınca THDi neden düşmeyebilir?",
+      "answer": "Yanlış CT yönü/fazı, hatalı ölçüm noktası, yetersiz yük, filtre akım limiti, yanlış hedef harmonikler veya rezonans etkisi olabilir. Filtre kapalı-açık kayıtları aynı yükte karşılaştırılmalıdır.",
+      "sourceRefs": [
+        "S3",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "question": "CT yönü tersse filtre zarar verir mi?",
+      "answer": "Yanlış geri bildirim kompanzasyonu yanlış yönde sürerek harmonikleri veya reaktif akımı artırabilir ve alarm oluşturabilir. Cihaz üretici prosedürüne göre güvenli biçimde durdurulup bağlantı doğrulanmalıdır.",
+      "sourceRefs": [
+        "S3",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "question": "AHF kabulünde yalnız THDi yeterli midir?",
+      "answer": "Hayır. Tekil harmonikler, THDv, nötr akımı, güç faktörü, yük seviyesi, filtre çıkış akımı, termal durum ve PCC hedefi birlikte değerlendirilmelidir.",
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "question": "Aktif filtre varsa detuned reaktör kaldırılır mı?",
+      "answer": "Otomatik olarak hayır. Kondansatör bankı, rezonans, reaktif güç ihtiyacı ve AHF kontrol modu birlikte mühendislik analizi gerektirir; mevcut koruma ve reaktörler kanıtsız sökülmemelidir.",
+      "sourceRefs": [
+        "S3",
+        "S4",
+        "S5"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "publisher": "IEC",
+      "title": "IEC 61000-4-7:2002+A1:2008 — Harmonics and interharmonics measurement",
+      "url": "https://webstore.iec.ch/en/publication/4228",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "50/60 Hz güç sistemlerinde harmonik ve interharmonik spektral bileşenleri ölçen cihazlar ve ölçüm yaklaşımı için genel rehber sağlar."
+    },
+    {
+      "id": "S2",
+      "publisher": "IEC",
+      "title": "IEC 61000-4-30:2025 — Power quality measurement methods",
+      "url": "https://webstore.iec.ch/en/publication/71611",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Gerilim ve akım harmonikleri dahil saha güç kalitesi parametreleri için güvenilir ve tekrarlanabilir ölçüm yöntemlerini tanımlar."
+    },
+    {
+      "id": "S3",
+      "publisher": "Schneider Electric",
+      "title": "PowerLogic AccuSine PCS+, PFV+, and PCSn User Manual",
+      "url": "https://www.se.com/uk/en/download/document/JYT20814EN/",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Aktif harmonik filtre işletimi, CT yapılandırması, paralel sistemler, kompanzasyon modları, teşhis ve devreye alma işlemlerini açıklar."
+    },
+    {
+      "id": "S4",
+      "publisher": "Schneider Electric",
+      "title": "PowerLogic AccuSine Firmware User Manual",
+      "url": "https://www.se.com/us/en/download/document/PKR30257EN/",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Manuel ve otomatik CT yapılandırması, sistem bütünlük testi, harmonik kompanzasyonu, olay günlüğü ve teşhis işlevlerini tanımlar."
+    },
+    {
+      "id": "S5",
+      "publisher": "Schneider Electric",
+      "title": "AccuSine+ User Manual",
+      "url": "https://www.se.com/us/en/download/document/13172409/",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "CT bağlantıları, haricî transformatörler, sistem bütünlük testi, harmonik azaltma ve güç faktörü düzeltme ayarlarını kapsar."
+    },
+    {
+      "id": "S6",
+      "publisher": "Schneider Electric",
+      "title": "Load required to commission an AccuSine unit",
+      "url": "https://www.se.com/us/en/faqs/FA361328/",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Devreye almada temsilî yük bulunmasının ve tam entegrasyon testinde desteklenen yükler ile anlamlı filtre çıkış akımının önemini açıklar."
+    }
+  ],
+  "internalLinks": [
+    {
+      "label": "Kompanzasyon harmonik rezonans kabulü",
+      "path": "/haberler/kompanzasyon-harmonik-rezonans-detuned-reaktor-kabul-testi",
+      "reason": "AHF görevini kondansatör bankı rezonansı ve detuned reaktör tasarımından ayırır."
+    },
+    {
+      "label": "Trafo K-faktörü ve harmonikli yük kabulü",
+      "path": "/haberler/harmonikli-yuk-trafo-k-faktoru-derating-notr-termal-kabul",
+      "reason": "Filtre performansını trafo ısıl kapasitesi ve nötr akımıyla ilişkilendirir."
+    },
+    {
+      "label": "Reaktif bedel ve kompanzasyon kabulü",
+      "path": "/haberler/reaktif-bedel-enduktif-kapasitif-sayac-kompanzasyon-kabul",
+      "reason": "Harmonik azaltmayı fatura, sayaç ve reaktif enerji görevinden ayırır."
+    },
+    {
+      "label": "Supraharmonik ölçüm ve kaynak ayrımı",
+      "path": "/haberler/supraharmonik-2-150-khz-olcum-kaynak-ayrimi",
+      "reason": "Klasik harmonik aralığını 2–150 kHz emisyonlardan ayırır."
+    },
+    {
+      "label": "Işık titremesi Pst/Plt ölçüm dosyası",
+      "path": "/haberler/isik-titremesi-flicker-pst-plt-edas-olcum-dosyasi",
+      "reason": "Harmonik performansını flicker ve hızlı gerilim değişimi görevinden ayırır."
+    },
+    {
+      "label": "VFD motor rulman akımı ve dv/dt kabulü",
+      "path": "/haberler/vfd-motor-rulman-akimi-dvdt-filtre-kabul",
+      "reason": "AHF'yi motor kablosu dv/dt ve common-mode koruma çözümünden ayırır."
+    },
+    {
+      "label": "Kurumsal elektrik sürekliliği ön değerlendirme",
+      "path": "/kurumsal-elektrik-surekliligi-on-degerlendirme",
+      "reason": "Çoklu yük ve güç kalitesi kabul kapsamını profesyonel ölçüm çalışmasına taşır."
+    }
+  ],
+  "commerce": {
+    "enabled": false,
+    "policy": "none",
+    "category": null
+  },
+  "editorial": {
+    "createdBy": "ai-assisted",
+    "model": "gpt-5.6-thinking",
+    "humanReviewRequired": true,
+    "approvedBy": "ozaneryavuz",
+    "approvedAt": "2026-08-03T19:43:35Z",
+    "publishedAt": "2026-08-03T19:43:35Z",
+    "approvalPr": 830
+  },
+  "seo": {
+    "canonicalPath": "/haberler/aktif-harmonik-filtre-ct-yonu-kompanzasyon-kabul-testi",
+    "robots": "index,follow,max-image-preview:large",
+    "lastModified": "2026-08-03",
+    "topics": [
+      "aktif harmonik filtre",
+      "AHF",
+      "CT yönü",
+      "harmonik ölçüm",
+      "THDi",
+      "güç faktörü",
+      "kompanzasyon"
+    ]
+  },
+  "quality": {
+    "score": 100,
+    "minimumRequired": 85,
+    "checks": {
+      "metadata": true,
+      "directAnswer": true,
+      "contentDepth": true,
+      "sources": true,
+      "safety": true,
+      "internalLinks": true,
+      "uniqueness": true,
+      "structuredData": true
+    },
+    "similarity": {
+      "maximum": 0.4167,
+      "closestPath": "https://alo186.com/haberler/aktif-harmonik-filtre-ct-yonu-faz-eslesmesi-devreye-alma"
+    }
+  }
+}
