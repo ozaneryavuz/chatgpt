@@ -106,8 +106,12 @@ class AssetParser(HTMLParser):
 
 
 def normalize_route_path(value: str) -> str:
-    raw = "/" + str(value or "").strip().strip("/")
-    return "/" if raw == "/" else raw
+    text = str(value or "").strip()
+    trailing_slash = text.endswith("/") and text != "/"
+    raw = "/" + text.strip("/")
+    if raw == "/":
+        return "/"
+    return raw + "/" if trailing_slash else raw
 
 
 def load_declared_alias_canonicals(repo_root: Path) -> dict[str, str]:
