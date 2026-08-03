@@ -9,9 +9,9 @@ from pathlib import Path
 from xml.etree import ElementTree
 
 import guard_commerce_routes_v2 as v2
-import aeo_control_plane_v219 as aeo_institutional
+import aeo_control_plane_v219_sitemap_compat as aeo_institutional
 import inject_affiliate_decision_funnel_v215 as affiliate_decision
-import inject_intent_tools_run135 as intent_tools
+import inject_intent_tools_run135_compat as intent_tools
 import inject_live_quality_v218_compat as live_quality
 import inject_portal_purchase_checkpoint_v213 as portal_checkpoint
 
@@ -167,10 +167,34 @@ def _trusted_closed_choice_router(site: Path) -> bool:
     return names == ["need", "duration", "status"]
 
 
+def _trusted_product_hub_terminal_slash_canonical(site: Path) -> bool:
+    """Accept the single canonical form used by the public product hub.
+
+    V2's route registry predates the terminal-slash canonical migration and
+    expects ``https://alo186.com/amazon-elektrik-urunleri``. The source and
+    final artifact now intentionally use the unique public canonical with a
+    trailing slash. Only that exact apex URL is accepted; www, query,
+    fragment or a different origin remains fail-closed.
+    """
+    path = v2.route_file(site, "/amazon-elektrik-urunleri")
+    if not path.is_file():
+        return False
+    html = path.read_text(encoding="utf-8", errors="ignore")
+    return (
+        'rel="canonical" href="https://alo186.com/amazon-elektrik-urunleri/"' in html
+        and 'rel="canonical" href="https://www.alo186.com/' not in html
+        and 'rel="canonical" href="https://alo186.com/amazon-elektrik-urunleri/?' not in html
+        and 'rel="canonical" href="https://alo186.com/amazon-elektrik-urunleri/#' not in html
+    )
+
+
 def validate_commercial_pages(site: Path) -> tuple[list[str], dict]:
     errors, stats = _original_validate_commercial_pages(site)
     if _trusted_closed_choice_router(site):
         blocked = "/amazon-elektrik-urunleri: ticari içerik sayfası kişisel veri formu içermemeli"
+        errors = [error for error in errors if error != blocked]
+    if _trusted_product_hub_terminal_slash_canonical(site):
+        blocked = "/amazon-elektrik-urunleri: canonical yanlış veya eksik"
         errors = [error for error in errors if error != blocked]
     return errors, stats
 
