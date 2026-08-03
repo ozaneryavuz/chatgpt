@@ -78,7 +78,11 @@ jobs:
           python - <<'PY'
           import json
           import os
+          import sys
           from pathlib import Path
+
+          sys.path.insert(0, 'alo186/deployment')
+          from finalize_pages_service_worker import registration_count
 
           site = Path(os.environ['SITE'])
           base_path = os.environ['BASE_PATH']
@@ -88,12 +92,17 @@ jobs:
           assert pages
           for path in pages:
               html = path.read_text(encoding='utf-8')
-              assert html.count('data-alo186-pages-sw') == 1, path
+              assert registration_count(html) == 1, path
           receipt = json.loads((site / 'pages-release.json').read_text(encoding='utf-8'))
           report = receipt['serviceWorkerRegistrationFinalization']
           assert report['checkedPages'] == len(pages)
           assert report['serviceWorker'] == expected_sw
           assert report['scope'] == expected_scope
           assert (site / 'checksums.sha256').is_file()
-          print(json.dumps({'ok': True, 'pages': len(pages), 'sw': expected_sw}, ensure_ascii=False))
+          print(json.dumps({
+              'ok': True,
+              'pages': len(pages),
+              'sw': expected_sw,
+              'phantomMarkerPagesRepaired': int(report.get('phantomMarkerPagesRepaired') or 0),
+          }, ensure_ascii=False))
           PY
