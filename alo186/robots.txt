@@ -1,5 +1,53 @@
+# ALO186 public crawling policy
+# Canonical public pages are crawlable; source-only, test and temporary paths are not.
+
 User-agent: *
 Allow: /
+Disallow: /.github/
+Disallow: /admin/
+Disallow: /artifacts/
+Disallow: /deployment/
+Disallow: /node_modules/
+Disallow: /preview/
+Disallow: /tests/
+Disallow: /tmp/
+Disallow: /_production_site/
+
+User-agent: Googlebot
+Allow: /
+Disallow: /.github/
+Disallow: /admin/
+Disallow: /artifacts/
+Disallow: /deployment/
+Disallow: /node_modules/
+Disallow: /preview/
+Disallow: /tests/
+Disallow: /tmp/
+Disallow: /_production_site/
+
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: ClaudeBot
+User-agent: Claude-SearchBot
+User-agent: Claude-User
+User-agent: Bytespider
+User-agent: Google-Extended
+Allow: /
+Allow: /sektor-rehberi/
+Allow: /amazon-elektrik-urunleri/
+Allow: /haberler/
+Allow: /hesaplama/
+Disallow: /.github/
+Disallow: /admin/
+Disallow: /artifacts/
+Disallow: /deployment/
+Disallow: /node_modules/
+Disallow: /preview/
+Disallow: /tests/
+Disallow: /tmp/
+Disallow: /_production_site/
 
 Sitemap: https://alo186.com/sitemap.xml
 Sitemap: https://alo186.com/sitemap-electric-project-v200.xml
