@@ -18,13 +18,13 @@
   });
   const products = Object.freeze([
     {
-      id: 'baseus-cafule-60w-1m', asin: 'B0144AE0V6', mpn: 'CATKLF-GG1', brand: 'Baseus',
-      name: 'Baseus Cafule USB-C–USB-C 60W 1 m Şarj ve Veri Kablosu', verifiedAt,
-      userNeed: 'USB-C dizüstü bilgisayar, tablet, telefon veya powerbank için 1 metrelik, 3 A / 60 W sınıfında günlük bir şarj kablosu gerektiğinde.',
-      strengths: ['USB-C–USB-C bağlantı ve 60 W (20 V / 3 A) sınıfı','Power Delivery 2.0 ve Quick Charge 3.0 desteği','480 Mbps veri aktarımı ve örgülü dış yapı'],
-      limitations: ['100 W veya 240 W isteyen cihazlarda tam güç vermez','480 Mbps, yüksek hızlı harici disk veya görüntü kablosu gereksinimini karşılamaz','Gerçek hız ve güç adaptör, cihaz ve protokol eşleşmesine bağlıdır'],
-      noBuyWhen: 'Mevcut kablo cihazın ölçülen gücünü kararlı veriyorsa, 60 W üstü güç gerekiyorsa veya yüksek hızlı veri/görüntü aktarımı bekliyorsanız satın alma yapmayın.',
-      technicalSource: 'https://cz.baseus.com/en/products/catklf-gg1'
+      id: 'spigen-aca08719-60w-2m', asin: 'B0F2ML9GYM', mpn: 'ACA08719', brand: 'Spigen',
+      name: 'Spigen ACA08719 USB-C–USB-C 60W 2 m Şarj Kablosu', verifiedAt,
+      userNeed: 'USB-C adaptör ile telefon, tablet veya 60 W’a kadar destekleyen dizüstü bilgisayarı daha uzak bir prizden şarj etmek için 2 metrelik kablo gerektiğinde.',
+      strengths: ['USB-C–USB-C bağlantı ve 60 W (20 V / 3 A) sınıfı','PPS 2.0 uyumlu cihazlarda protokol desteği','480 Mbps veri aktarımı ve 2 metre uzunluk'],
+      limitations: ['100 W veya 240 W isteyen cihazlarda tam güç vermez','480 Mbps yalnız USB 2.0 veri sınıfıdır; görüntü çıkışı sağlamaz','2 metre uzunluk kısa masaüstü kullanımında gereksiz kablo kalabalığı oluşturabilir'],
+      noBuyWhen: 'Mevcut USB-C kablonuz ölçümde gerekli gücü veriyorsa, 1 metre yeterliyse, cihazınız 60 W üstü istiyorsa veya görüntü/yüksek hızlı veri gerekiyorsa satın alma yapmayın.',
+      technicalSource: 'https://www.spigen.com.tr/urun/spigen-usb-c-to-usb-c-2-metre-kablo-60w-guc-pps-2-0-super-hizli-sarj-480-mbps-data-aktarim-hizi-type-c-ekstra-dayanikli-white'
     },
     {
       id: 'spigen-aca08717-60w', asin: 'B0F2MH3GFW', mpn: 'ACA08717', brand: 'Spigen',
