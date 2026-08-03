@@ -105,6 +105,42 @@ class AssetParser(HTMLParser):
             self.canonical = values.get("href")
 
 
+def normalize_route_path(value: str) -> str:
+    raw = "/" + str(value or "").strip().strip("/")
+    return "/" if raw == "/" else raw
+
+
+def load_declared_alias_canonicals(repo_root: Path) -> dict[str, str]:
+    """Return the only non-self canonical routes accepted by the smoke test.
+
+    Alias exceptions remain fail-closed: the declaration file must exist, parse as
+    JSON, contain unique alias paths and point to apex-host internal canonicals.
+    """
+    config_path = repo_root / "alo186/deployment/content-consolidations.json"
+    payload = json.loads(config_path.read_text(encoding="utf-8"))
+    items = payload.get("consolidations")
+    if not isinstance(items, list):
+        raise ValueError("İçerik konsolidasyon listesi geçersiz")
+
+    aliases: dict[str, str] = {}
+    for item in items:
+        if not isinstance(item, dict):
+            raise ValueError("İçerik konsolidasyon kaydı nesne olmalıdır")
+        alias = normalize_route_path(item.get("aliasPath", ""))
+        canonical = normalize_route_path(item.get("canonicalPath", ""))
+        if alias == "/" or canonical == "/" or alias == canonical:
+            raise ValueError(f"Geçersiz alias canonical çifti: {alias} → {canonical}")
+        if alias in aliases:
+            raise ValueError(f"Yinelenen alias canonical kaydı: {alias}")
+        aliases[alias] = f"{CANONICAL_HOST}{canonical}"
+    return aliases
+
+
+def expected_canonical_for_route(route_path: str, aliases: dict[str, str]) -> str:
+    normalized = normalize_route_path(route_path)
+    return aliases.get(normalized, f"{CANONICAL_HOST}{normalized}")
+
+
 def resolve_asset(bundle: Path, html_path: Path, reference: str) -> Path | None:
     parsed = urlparse(reference)
     if parsed.scheme or reference.startswith("//") or reference.startswith("data:"):
@@ -146,27 +182,32 @@ def stale_damage_application_contexts(text: str) -> list[str]:
 
 def smoke(bundle: Path, repo_root: Path) -> dict:
     manifest = json.loads((repo_root / "alo186/deployment/routing-manifest.json").read_text(encoding="utf-8"))
+    alias_canonicals = load_declared_alias_canonicals(repo_root)
     failures: list[str] = []
     checked_assets = 0
+    checked_aliases = 0
 
     if manifest.get("canonicalHost") != CANONICAL_HOST:
         failures.append(f"Manifest canonicalHost yanlış: {manifest.get('canonicalHost')!r}")
 
     for route in manifest["routes"]:
-        target = bundle / route["canonicalPath"].strip("/") / "index.html"
+        route_path = normalize_route_path(route["canonicalPath"])
+        target = bundle / "index.html" if route_path == "/" else bundle / route_path.strip("/") / "index.html"
         if not target.exists():
-            failures.append(f"Route index eksik: {route['canonicalPath']}")
+            failures.append(f"Route index eksik: {route_path}")
             continue
         html = target.read_text(encoding="utf-8")
         parser = AssetParser()
         parser.feed(html)
-        expected = f"{manifest['canonicalHost']}{route['canonicalPath']}"
+        expected = expected_canonical_for_route(route_path, alias_canonicals)
+        if route_path in alias_canonicals:
+            checked_aliases += 1
         if parser.canonical != expected:
-            failures.append(f"Canonical eşleşmiyor: {route['canonicalPath']} → {parser.canonical!r}")
+            failures.append(f"Canonical eşleşmiyor: {route_path} → {parser.canonical!r}; beklenen={expected!r}")
         if LEGACY_HOST in html:
-            failures.append(f"Eski www origin route HTML içinde kaldı: {route['canonicalPath']}")
+            failures.append(f"Eski www origin route HTML içinde kaldı: {route_path}")
         for context in stale_damage_application_contexts(html):
-            failures.append(f"{route['canonicalPath']}: eski cihaz hasarı başvuru süresi → {context}")
+            failures.append(f"{route_path}: eski cihaz hasarı başvuru süresi → {context}")
         for reference in parser.assets:
             asset = resolve_asset(bundle, target, reference)
             if asset is None:
@@ -178,7 +219,7 @@ def smoke(bundle: Path, repo_root: Path) -> dict:
                 failures.append(f"Asset bundle dışına çıkıyor: {target} → {reference}")
                 continue
             if not (bundle / inside).is_file():
-                failures.append(f"Asset eksik: {route['canonicalPath']} → {reference}")
+                failures.append(f"Asset eksik: {route_path} → {reference}")
 
     for required in REQUIRED_ROOT_FILES:
         if not (bundle / required).is_file():
@@ -249,6 +290,8 @@ def smoke(bundle: Path, repo_root: Path) -> dict:
         "ok": not failures,
         "routeCount": len(manifest["routes"]),
         "assetReferencesChecked": checked_assets,
+        "declaredAliasCanonicalCount": len(alias_canonicals),
+        "declaredAliasRoutesChecked": checked_aliases,
         "requiredRootFiles": list(REQUIRED_ROOT_FILES),
         "requiredSecurityHeaders": list(REQUIRED_SECURITY_HEADERS),
         "forbiddenPublicFileCount": len(forbidden_files),
