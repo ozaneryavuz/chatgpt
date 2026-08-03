@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[2]
 DEPLOYMENT = ROOT / "alo186/deployment"
 sys.path.insert(0, str(DEPLOYMENT))
 
-from export_chatgpt_sites_bundle_v2 import export_bundle  # noqa: E402
+from export_chatgpt_sites_bundle_v3 import export_bundle  # noqa: E402
 
 
 def main() -> None:
@@ -21,7 +21,12 @@ def main() -> None:
         assert manifest["targetSourceOfTruth"] == "chatgpt-sites"
         assert manifest["canonicalHost"] == "https://alo186.com"
         assert manifest["sourceCommit"] == "test-commit"
-        assert manifest["exporterVersion"] == 2
+        assert manifest["exporterVersion"] == 3
+        assert manifest["livePublishStatus"] == "prepared-not-published"
+        assert manifest["authority"]["livePresentationAndPublishing"] == "ChatGPT Sites"
+        assert manifest["authority"]["contentSourceQualityAndRollback"] == "GitHub"
+        assert manifest["transferStrategy"]["automaticPublishAllowed"] is False
+        assert manifest["transferStrategy"]["humanOrConnectedSitesWriteRequired"] is True
 
         stats = manifest["stats"]
         assert stats["effectiveRoutes"] >= 100, stats
@@ -66,6 +71,8 @@ def main() -> None:
             "sites-import.json",
             "SITE_BRIEF.md",
             "IMPORT_ORDER.md",
+            "SITES_TRANSFER_RECEIPT.json",
+            "data/sites-source-manifest.json",
             "data/navigation.json",
             "data/location-services.json",
             "data/redirects.json",
@@ -73,6 +80,12 @@ def main() -> None:
             "checksums.sha256",
         ):
             assert (output / required_file).is_file(), required_file
+
+        receipt = json.loads((output / "SITES_TRANSFER_RECEIPT.json").read_text(encoding="utf-8"))
+        assert receipt["status"] == "prepared-not-published"
+        assert receipt["automaticPublishAllowed"] is False
+        assert receipt["connectedSitesWriteRequired"] is True
+        assert receipt["githubPagesCustomDomainAllowed"] is False
 
         locations = json.loads((output / "data/location-services.json").read_text(encoding="utf-8"))
         province_records = [item for item in locations if item["category"] == "location-province"]
@@ -92,7 +105,7 @@ def main() -> None:
         ):
             assert token in brief, token
 
-        print(json.dumps({"ok": True, "stats": stats}, ensure_ascii=False, indent=2))
+        print(json.dumps({"ok": True, "stats": stats, "status": receipt["status"]}, ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":
