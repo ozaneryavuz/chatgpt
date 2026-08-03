@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "siteDomain": "alo186.com",
   "engine": "google",
   "googleDomain": "google.com.tr",
@@ -17,9 +17,9 @@
       "commercialMode": "closed"
     },
     {
-      "query": "elektrikler ne zaman gelecek",
-      "intent": "outage-status",
-      "targetRoute": "/elektrik-kesintisi",
+      "query": "elektrik kesintisine nasıl hazırlanılır",
+      "intent": "outage-readiness",
+      "targetRoute": "/hesaplama/kesinti-hazirlik-kontrolu/",
       "commercialMode": "closed"
     },
     {
@@ -31,7 +31,7 @@
     {
       "query": "elektrik geldikten sonra cihazlar nasıl açılır",
       "intent": "post-outage-recovery",
-      "targetRoute": "/hesaplama/elektrik-geldikten-sonra-guvenli-yeniden-baslatma/",
+      "targetRoute": "/hesaplama/kesinti-sonrasi-guvenli-yeniden-baslatma-plani/",
       "commercialMode": "technical-gate"
     },
     {
