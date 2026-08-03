@@ -64,8 +64,10 @@ _core.validate_route = _validate_route_with_legacy_article_bridge
 
 try:
     from .inject_competitor_gap_affiliate_v250 import apply as _apply_competitor_gap_v250
+    from .inject_competitor_gap_affiliate_v251 import apply as _apply_competitor_gap_v251
 except ImportError:
     from inject_competitor_gap_affiliate_v250 import apply as _apply_competitor_gap_v250
+    from inject_competitor_gap_affiliate_v251 import apply as _apply_competitor_gap_v251
 
 ACCESSIBILITY_MARKER = 'data-alo186-accessibility-v215="true"'
 ACCESSIBILITY_SOURCE = Path("alo186/assets/alo186-accessibility-v215.css")
@@ -170,11 +172,13 @@ def _build_with_platform_hardening(
 ) -> dict:
     release = _original_build(repo_root, output, commit_sha)
     competitor_gap_report = _apply_competitor_gap_v250(repo_root, output)
+    competitor_gap_v251_report = _apply_competitor_gap_v251(repo_root, output)
     commercial_report = normalize_commercial_hub_urls(output)
     accessibility_report = install_accessibility_hardening(repo_root, output)
     release["commercialCanonicalV217"] = commercial_report
     release["accessibilityHardeningV215"] = accessibility_report
     release["competitorGapAffiliateV250"] = competitor_gap_report
+    release["competitorGapAffiliateV251"] = competitor_gap_v251_report
     release_path = output / "alo186-release.json"
     release_path.write_text(json.dumps(release, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     _recompute_checksums(output)

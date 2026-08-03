@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "version": 251,
+  "generatedAt": "2026-08-03",
+  "validationPolicy": {
+    "schemaMarkupValidator": "All injected JSON-LD documents must parse as JSON and satisfy the required schema.org type/property contracts in CI.",
+    "googleRichResultsTest": "Google feature eligibility is assessed separately from schema.org validity. No result appearance is guaranteed.",
+    "visibleContentParity": "HowTo steps and product-class anchors must be visible to users and bots in the same static HTML.",
+    "noFalseCommerceClaims": "Generic Product entities must not include Offer, price, availability, aggregateRating or review claims without verified listing data."
+  },
+  "featureAssessment": {
+    "BreadcrumbList": "supported Google structured-data feature; existing page markup retained",
+    "FAQPage": "schema-valid; rich-result display remains Google-discretionary and eligibility is not claimed",
+    "HowTo": "schema.org-valid semantic answer structure; not claimed as a current Google rich-result feature",
+    "Product": "generic product-class entity only; product snippet or merchant-listing eligibility is not claimed",
+    "ItemList": "schema.org-valid AI-readable ordering; no special Google rich-result claim"
+  },
+  "safetyCorrections": {
+    "privateElectricityDistributors": "Service + Organization, not GovernmentService",
+    "governmentServiceUsage": "Reserved for actual public services such as 112 emergency call routing",
+    "emergencyAffiliatePolicy": "No affiliate links are exposed on emergency decision fallback blocks"
+  }
+}

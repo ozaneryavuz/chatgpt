@@ -1,0 +1,137 @@
+name: ALO186 competitor-gap ve AI arama v251
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/deployment/inject_competitor_gap_affiliate_v250.py'
+      - 'alo186/deployment/inject_competitor_gap_affiliate_v251.py'
+      - 'alo186/deployment/build_static_site.py'
+      - 'alo186/robots.txt'
+      - 'alo186/tests/test_competitor_gap_affiliate_v250.py'
+      - 'alo186/tests/test_competitor_gap_affiliate_v251.py'
+      - '.github/workflows/alo186-competitor-gap-v251.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/deployment/inject_competitor_gap_affiliate_v250.py'
+      - 'alo186/deployment/inject_competitor_gap_affiliate_v251.py'
+      - 'alo186/deployment/build_static_site.py'
+      - 'alo186/robots.txt'
+      - 'alo186/tests/test_competitor_gap_affiliate_v250.py'
+      - 'alo186/tests/test_competitor_gap_affiliate_v251.py'
+      - '.github/workflows/alo186-competitor-gap-v251.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-competitor-gap-v251-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
+      - name: V250 ve v251 semantik sözleşmeleri
+        run: |
+          set -euo pipefail
+          python alo186/tests/test_competitor_gap_affiliate_v250.py
+          python alo186/tests/test_competitor_gap_affiliate_v251.py
+          python -m py_compile \
+            alo186/deployment/inject_competitor_gap_affiliate_v250.py \
+            alo186/deployment/inject_competitor_gap_affiliate_v251.py \
+            alo186/deployment/build_static_site.py
+
+      - name: Canonical üretim paketi ve schema raporu
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-competitor-gap-v251 \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-competitor-gap-v251
+          test -f /tmp/alo186-competitor-gap-v251/alo186-schema-validation-v251.json
+
+      - name: Final artifactta HowTo, EDAŞ, SSR ve crawler kabulü
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+
+          root = Path('/tmp/alo186-competitor-gap-v251')
+          report = json.loads((root / 'alo186-schema-validation-v251.json').read_text(encoding='utf-8'))
+          assert report['version'] == 251
+          validation = report['validation']
+          assert validation['schemaOrgValidator']['status'] == 'pass'
+          assert validation['googleRichResultsAssessment']['status'] == 'pass-with-feature-boundaries'
+          assert validation['visibleContentParity'] == 'pass'
+          assert validation['howToSteps'] == 5
+          assert validation['ssrAffiliateLinks'] >= 3
+          assert validation['provinceServices'] == 81
+          assert validation['serviceChannels'] == 81
+          assert validation['servicePhone186'] == 81
+          assert validation['privateEdasGovernmentService'] == 0
+          assert validation['offerEntities'] == 0
+
+          kombi = (root / 'amazon-elektrik-urunleri/kombi-yedek-enerji-urun-secici/index.html').read_text(encoding='utf-8')
+          assert 'data-alo186-howto-visible-v251="true"' in kombi
+          assert 'data-alo186-ssr-affiliate-v250="true"' in kombi
+          assert kombi.count('rel="sponsored nofollow noopener"') >= 3
+          assert '"@type":"Offer"' not in kombi and 'aggregateRating' not in kombi
+
+          edas = (root / 'edas-bul/index.html').read_text(encoding='utf-8')
+          assert edas.count('"@type":"ServiceChannel"') == 81
+          assert edas.count('"telephone":"186"') == 81
+          assert '"@type":"GovernmentService"' not in edas
+
+          assert 'data-alo186-ssr-decision-v251="true"' in (root / 'karar-motoru/index.html').read_text(encoding='utf-8')
+          assert 'data-alo186-ssr-preparedness-v251="true"' in (root / 'hesaplama/kesinti-hazirlik-plani/index.html').read_text(encoding='utf-8')
+
+          robots = (root / 'robots.txt').read_text(encoding='utf-8')
+          for agent in ('GPTBot','OAI-SearchBot','ChatGPT-User','PerplexityBot','ClaudeBot','Bytespider','Google-Extended'):
+              assert re.search(rf'User-agent: {re.escape(agent)}\nAllow: /', robots)
+
+          release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
+          assert release['competitorGapAffiliateV250']['version'] == 250
+          assert release['competitorGapAffiliateV251']['version'] == 251
+          print(json.dumps({
+              'ok': True,
+              'schemaOrgSyntax': 'pass',
+              'visibleHowToParity': 'pass',
+              'provinceServices': 81,
+              'serviceChannels': 81,
+              'ssrAffiliateLinks': validation['ssrAffiliateLinks'],
+              'aiCrawlerRules': 7,
+              'googleRichResults': validation['googleRichResultsAssessment'],
+          }, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Mevcut release, portal ve güven regresyonları
+        run: |
+          set -euo pipefail
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Doğrulanmış competitor-gap artifactı
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-competitor-gap-v251-pages
+          path: /tmp/alo186-competitor-gap-v251
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
