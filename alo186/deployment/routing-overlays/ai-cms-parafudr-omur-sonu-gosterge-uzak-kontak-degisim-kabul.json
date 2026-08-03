@@ -1,0 +1,18 @@
+{
+  "version": 235,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/parafudr-omur-sonu-gosterge-uzak-kontak-degisim-kabul/index.html",
+      "canonicalPath": "/haberler/parafudr-omur-sonu-gosterge-uzak-kontak-degisim-kabul",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_95c2044e760173ff",
+    "humanApproved": true,
+    "approvalPr": 792,
+    "qualityScore": 88
+  }
+}
