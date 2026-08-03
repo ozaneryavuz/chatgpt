@@ -98,7 +98,14 @@ jobs:
           record_path = Path('alo186/ai-cms/content') / f"{os.environ['CMS_SLUG']}.json"
           record = json.loads(record_path.read_text(encoding='utf-8'))
           aliases = {
-              '/haberler/kacak-akim-rolesi-neden-atar': '/haberler/kacak-akim-rolesi-neden-surekli-atar',
+              '/haberler/kacak-akim-rolesi-neden-atar': {
+                  'path': '/haberler/kacak-akim-rolesi-neden-surekli-atar',
+              },
+              '/haberler/parafudr-tip-1-tip-2-tip-3-koordinasyon-secimi': {
+                  'path': '/haberler/parafudr-gostergesi-kirmizi-ne-demek',
+                  'label': 'Parafudr göstergesi kırmızı ne demek?',
+                  'reason': 'Genel gösterge yorumunu uzaktan alarm, SCPD ve değişim kabul dosyasından ayırır.',
+              },
           }
           replacements = []
           links = record.get('internalLinks', [])
@@ -108,9 +115,13 @@ jobs:
               if not isinstance(link, dict):
                   raise SystemExit(f'internalLinks[{index}] nesne değil')
               current = link.get('path')
-              if current in aliases:
-                  link['path'] = aliases[current]
+              replacement = aliases.get(current)
+              if replacement:
+                  link.update(replacement)
                   replacements.append((current, link['path']))
+          paths = [link.get('path') for link in links if isinstance(link, dict)]
+          if len(paths) != len(set(paths)):
+              raise SystemExit('Alias düzeltmesi yinelenen iç bağlantı üretti')
           if replacements:
               record_path.write_text(
                   json.dumps(record, ensure_ascii=False, separators=(',', ':')) + '\n',
