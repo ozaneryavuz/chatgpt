@@ -47,7 +47,8 @@
     const hours=rawHours===''?Number.NaN:Number(rawHours);
     const cause=document.getElementById('cause').value;
     const repeated=document.getElementById('repeated').value;
-    const valid=rawHours!==''&&Number.isFinite(hours)&&hours>=0&&hours<=8760;
+    const invalidHours=rawHours===''||!Number.isFinite(hours)||hours<0||hours>8760;
+    const valid=!invalidHours;
     let title='';let body='';
     if(!valid){title='Geçerli bir süre girin';body='Kesinti süresini 0 ile 8760 saat arasında yazın. Boş, sayısal olmayan veya sınır dışı giriş için sonuç üretilmedi.';input.setAttribute('aria-invalid','true');}
     else if(['force','external','safety'].includes(cause)){title='İstisna incelemesi gerekli';body='Kesinti mücbir sebep, güvenlik veya dışsal neden olarak kaydedildiyse tazminat kapsamı değişebilir. Kesinti neden kodunu dağıtım şirketinden yazılı isteyin.';input.removeAttribute('aria-invalid');}
