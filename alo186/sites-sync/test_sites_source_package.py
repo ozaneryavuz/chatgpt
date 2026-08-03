@@ -7,11 +7,11 @@ import tempfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-MODULE_PATH = HERE / "build_sites_source_package.py"
+MODULE_PATH = HERE / "build_sites_source_package_v255.py"
 
 
 def load_module():
-    spec = importlib.util.spec_from_file_location("alo186_sites_source_package", MODULE_PATH)
+    spec = importlib.util.spec_from_file_location("alo186_sites_source_package_v255", MODULE_PATH)
     if spec is None or spec.loader is None:
         raise RuntimeError("Sites package modülü yüklenemedi")
     module = importlib.util.module_from_spec(spec)
@@ -88,7 +88,8 @@ def main() -> None:
             json.dumps({"slug": "review-demo", "state": "review"}, ensure_ascii=False),
         )
 
-        write(bundle / "index.html", html_page())
+        # Canonical üretim paketinde /elektrik-portali vardır; Sites kök rotası ayrı
+        # bir routing kaydı değildir. V255 bu sayfayı kök içerik referansına dönüştürür.
         for route in ("elektrik-portali", "edas-bul", "karar-motoru", "hesaplama", "hesaplama/demo"):
             write(bundle / route / "index.html", html_page())
         write(bundle / "hesaplama/demo/app.js", "console.log('ok');")
@@ -114,12 +115,21 @@ def main() -> None:
         proof = json.loads((out / "source-integrity.json").read_text(encoding="utf-8"))
 
         assert result["ok"] is True
+        assert result["sitesSyncVersion"] == 255
+        assert result["rootRouteSource"] == "/elektrik-portali"
+        assert result["rootRouteCanonical"] == "https://alo186.com/"
         assert result["provincePages"] == 81
         assert result["distributionCompanyPages"] == 21
         assert result["publishedAiCmsRecords"] == 1
         assert result["amazonTurkeyLinks"] == 1
         assert inventory["affiliateValidation"]["invalidRelLinks"] == 0
         assert inventory["affiliateValidation"]["locationAffiliateLinks"] == 0
+        root_record = next(item for item in inventory["routes"] if item["route"] == "/")
+        assert root_record["status"] == "packaged"
+        assert root_record["packageEntry"] == "public/index.html"
+        root_html = (out / "public/index.html").read_text(encoding="utf-8")
+        assert '<link rel="canonical" href="https://alo186.com/">' in root_html
+        assert (out / "public/elektrik-portali/index.html").is_file()
         assert (out / "public/hesaplama/demo/app.js").is_file()
         assert not (out / "public/hesaplama/demo/test.js").exists()
         assert (out / "metadata/alo186/deployment/routing-manifest.json").is_file()
@@ -128,6 +138,8 @@ def main() -> None:
         assert proof["fileCount"] > 100
         print(json.dumps({
             "ok": True,
+            "sitesSyncVersion": result["sitesSyncVersion"],
+            "rootRouteSource": result["rootRouteSource"],
             "provincePages": result["provincePages"],
             "companyPages": result["distributionCompanyPages"],
             "publishedAiCmsRecords": result["publishedAiCmsRecords"],
