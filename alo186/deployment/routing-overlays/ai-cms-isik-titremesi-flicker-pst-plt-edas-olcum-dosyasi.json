@@ -1,0 +1,18 @@
+{
+  "version": 236,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/isik-titremesi-flicker-pst-plt-edas-olcum-dosyasi/index.html",
+      "canonicalPath": "/haberler/isik-titremesi-flicker-pst-plt-edas-olcum-dosyasi",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_bbeca8bdf4392d2e",
+    "humanApproved": true,
+    "approvalPr": 763,
+    "qualityScore": 100
+  }
+}

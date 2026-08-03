@@ -1,1 +1,277 @@
-{"schemaVersion":1,"id":"cms_4845571fde9d7929","slug":"ups-giris-thdi-jenerator-uyumluluk-kabul-testi","contentType":"guide","state":"review","locale":"tr-TR","title":"UPS Giriş THDi ve Jeneratör Uyumluluk Kabulü","h1":"UPS giriş THDi değeri jeneratör seçimini ve kararlı çalışmayı nasıl etkiler?","description":"UPS, jeneratör, akü şarjı, ramp-in, giriş THDi ve güç faktörünü gerçek yük testinde doğrulayarak kVA tahmini yerine kabul dosyası oluşturun.","intent":"Bir UPS ile jeneratörün yalnız nominal kVA üzerinden değil, giriş THDi, maksimum giriş akımı, akü şarjı, ramp-in, AVR ve frekans davranışıyla uyumlu olup olmadığını sahada kanıtlamak.","primaryKeyword":"UPS giriş THDi","audience":["Elektrik mühendisleri","Otel ve hastane teknik ekipleri","Veri merkezi işletmecileri","Jeneratör ve UPS devreye alma ekipleri","Tesis yöneticileri"],"riskClass":"high","directAnswer":"UPS ile jeneratör uyumu yalnız UPS çıkış kVA’sını bir katsayıyla büyütmek değildir. Jeneratör, UPS’nin gerçek maksimum giriş akımını, akü yeniden şarj gücünü, ramp-in süresini, giriş güç faktörünü ve THDi kaynaklı akım dalga biçimini; aynı baradaki motor ve diğer yüklerle birlikte kararlı taşımalıdır. Kabul testi jeneratör boşta çalışmadan başlayıp UPS doğrultucusunun devreye girmesi, yük basamakları, akü şarjı, transfer, bypass senkronu ve geri dönüş boyunca gerilim, frekans, akım, THDi ve olay loglarını kaydetmelidir. Evrensel bir aşırı boyutlandırma oranı yerine UPS ve jeneratör üretici verileri ile gerçek saha testi kullanılmalıdır.","sections":[{"id":"kva-disindaki-girdiler","heading":"Nominal kVA dışında hangi UPS giriş verileri gerekir?","paragraphs":["UPS çıkış gücü, jeneratör hesabının yalnız bir parçasıdır. Teknik dosyada nominal ve maksimum giriş akımı, doğrultucu akım limiti, akü şarj gücü, giriş güç faktörü, THDi, ramp-in süresi, bypass giriş şartları ve üreticinin jeneratör modu bulunmalıdır. IEC 62040-3, tamamlanmış UPS sisteminin performans ve test gereklerini tanımlayan temel çerçeveyi verir.","Üretici verileri model ve yük koşuluna göre değişebilir. Schneider Easy UPS örneklerinde düşük giriş THDi, yüksek giriş güç faktörü ve belirli ramp-in süreleri ayrı ayrı yayınlanır. Bu değerler, aynı kVA etiketi taşıyan iki UPS’nin jeneratöre aynı dinamik yükü uygulayacağı varsayımını geçersiz kılar."],"bullets":["UPS nominal ve maksimum giriş akımını ayrı kaydedin.","Akü şarj gücü ve doğrultucu akım limitini dosyaya ekleyin.","Giriş THDi, güç faktörü ve ramp-in süresini model belgesinden alın.","Normal giriş ile bypass girişinin bağlantı ve senkron şartlarını ayırın."],"sourceRefs":["S1","S2","S3"]},{"id":"thdi-ve-jenerator-empedansi","heading":"Giriş THDi jeneratör gerilimini ve AVR davranışını nasıl etkileyebilir?","paragraphs":["Doğrusal olmayan doğrultucu akımı sinüs biçiminden sapar ve jeneratörün iç empedansı üzerinde harmonik gerilim düşümleri oluşturabilir. Sonuç, yalnız akım THDi değeri değil; terminal gerilimi dalga biçimi, AVR tepkisi, ısınma, nötr akımı ve UPS’nin giriş toleransı içinde kalıp kalmadığıdır. Modern PFC girişli UPS’ler düşük THDi sağlayabilir, ancak gerçek değer yük oranı ve işletme moduyla doğrulanmalıdır.","Aynı baradaki motor yol verme, asansör, soğutma kompresörü veya VFD gibi yükler jeneratör gerilim ve frekansını ayrıca zorlar. Bu nedenle UPS’yi tek başına test etmek yeterli olmayabilir. Jeneratör alternatörü, AVR, motor governor, kısa devre gücü ve yük sıralaması ortak kabul senaryosunda değerlendirilmelidir."],"bullets":["Gerilim ve akım dalga biçimini jeneratör terminali ve UPS girişinde kaydedin.","THDi ile birlikte THDv, faz dengesizliği ve nötr akımını izleyin.","Motor yol verme ve büyük yük basamaklarını aynı senaryoya ekleyin.","AVR ve governor ayarlarını yetkisiz biçimde değiştirmeyin; üretici kabul sınırını kullanın."],"sourceRefs":["S2","S3","S4"]},{"id":"aku-sarji-ramp-in-ve-yuk-sirasi","heading":"Akü şarjı, ramp-in ve yük sıralaması neden kritik olur?","paragraphs":["Kesinti sonrasında jeneratör devreye girdiğinde UPS hem kritik yükü besler hem de boşalmış aküyü şarj etmeye çalışabilir. Maksimum şarj gücü sınırlandırılmamışsa jeneratör üzerindeki yük, yalnız çıkış yükünden belirgin biçimde yüksek olabilir. Ramp-in özelliği doğrultucunun giriş akımını zamana yayarak ani basamağı azaltır; ancak süre ve limit model ayarına bağlıdır.","Yük sıralaması jeneratör kararlı gerilim ve frekansa ulaştıktan sonra UPS doğrultucusunu, ardından diğer büyük yükleri kontrollü devreye almalıdır. Akü şarj limiti, kritik yük önceliği ve jeneratör modu üretici prosedürüyle belirlenmelidir. Yalnız UPS hassasiyetini gevşetmek veya geniş frekans penceresi seçmek kararsız jeneratörü güvenli hâle getirmez."],"bullets":["En kötü akü SoC durumunda şarj gücünü hesaba katın.","Ramp-in süresi ve giriş akım limitini test senaryosuna yazın.","UPS, motor ve HVAC yüklarını kademeli sıraya bağlayın.","Geniş tolerans ayarını ölçüm ve üretici onayı olmadan çözüm saymayın."],"sourceRefs":["S2","S3","S4"]},{"id":"saha-kabul-senaryolari","heading":"UPS–jeneratör saha kabul testi hangi adımları içermelidir?","paragraphs":["Test; jeneratörün boşta gerilim ve frekans kararlılığı, UPS girişinin kapanması, doğrultucu rampası, yüzde 25–50–75–100 yük basamakları, akü şarjı, ortak büyük yükler, UPS’nin jeneratör kaynağını kabulü, bypass senkronu ve şebekeye geri dönüş adımlarını kapsamalıdır. Her adımda RMS değerlerin yanında dalga biçimi ve olay logu tutulmalıdır.","UPS’nin sık bataryaya geçmesi, jeneratör alarmı, frekans avlanması, bypass senkron olamaması veya gerilim dalga biçimi bozulması fail kriteridir. Sorunun kaynağı UPS girişi, jeneratör kapasitesi, AVR/governor dinamiği, kablo/trafo empedansı veya yük sırası olabilir. Düzeltme sonrası aynı senaryo tekrarlanmalıdır."],"bullets":["Boşta, yük basamaklı ve akü şarjlı testleri ayrı kaydedin.","Gerilim, frekans, akım, THDi, THDv ve olay loglarını eşzamanlayın.","Bypass senkronu ile normal mod kabulünü ayrı doğrulayın.","Fail kriteri oluşursa ayar değişikliğinden önce kök nedeni belgeleyin."],"sourceRefs":["S1","S2","S3","S4"]},{"id":"boyutlandirma-ve-satin-almama","heading":"Boyutlandırma dosyası hangi kararı üretmelidir?","paragraphs":["Dosya; UPS giriş tablosu, akü şarj profili, gerçek kritik yük, eşzamanlı motorlar, jeneratör alternatör ve motor verileri, ortam/irtifa deratingi, kablo-trafo empedansı, yük sırası ve saha ölçümlerini içerir. Böylece “UPS kVA × sabit oran” yaklaşımı yerine, üretici verisine bağlı izlenebilir kapasite ve kontrol kararı çıkar.","Mevcut jeneratör; şarj limiti, ramp-in ve güvenli yük sırasıyla tüm kabul kriterlerini sağlıyorsa daha büyük jeneratör veya UPS satın almak gerekmeyebilir. Kapasite veya dinamik performans yetersizse seçenekler yalnız jeneratörü büyütmek değildir; akü şarj yönetimi, yük önceliği, alternatör/AVR seçimi ve kontrollü sekans da değerlendirilir. Güvenlik ve garantiyi etkileyen ayarlar yetkili servis sınırındadır."],"bullets":["Nominal kVA yerine maksimum gerçek giriş ve dinamik yük dosyası hazırlayın.","Ortam, irtifa, kablo, trafo ve ortak yük etkilerini ekleyin.","Kabul sağlanıyorsa gereksiz jeneratör veya UPS değişimini önleyin.","Ayar ve ekipman kararlarını üretici onayı ve tekrar testine bağlayın."],"sourceRefs":["S1","S2","S3","S4"]}],"faqs":[{"question":"UPS için jeneratör gücü kaç kat büyük olmalıdır?","answer":"Her sistem için geçerli tek bir katsayı yoktur. UPS’nin maksimum giriş akımı, akü şarj gücü, ramp-in, THDi, güç faktörü, jeneratör empedansı, ortak motor yükleri, ortam ve üretici şartları birlikte hesaplanıp saha testinde doğrulanmalıdır.","sourceRefs":["S1","S2","S3"]},{"question":"Düşük UPS giriş THDi değeri küçük jeneratörün yeterli olduğunu kanıtlar mı?","answer":"Hayır. Düşük THDi yararlı bir özelliktir; ancak maksimum giriş akımı, akü şarjı, dinamik yük basamağı, AVR/governor tepkisi, kısa devre gücü ve diğer yükler de kararlılığı belirler.","sourceRefs":["S2","S3"]},{"question":"UPS jeneratörde sürekli bataryaya geçiyorsa hassasiyeti düşürmeli miyim?","answer":"Önce jeneratör gerilim ve frekans kararlılığı, dalga biçimi, yük basamakları, ramp-in, şarj limiti ve kablo/trafo empedansı ölçülmelidir. Tolerans ayarını genişletmek kök nedeni gizleyebilir ve bypass veya yük uyumluluğunu etkileyebilir.","sourceRefs":["S1","S4"]},{"question":"Akü doluyken yapılan test yeterli midir?","answer":"Hayır. Akü doluyken şarj talebi düşük olabilir. En kötü makul SoC durumunda akü şarjı, kritik yük ve eşzamanlı büyük yüklerle kontrollü kabul testi yapılmalı; üretici sınırları aşılmamalıdır.","sourceRefs":["S2","S3"]}],"sources":[{"id":"S1","publisher":"IEC","title":"IEC 62040-3:2021 — UPS performans ve test gerekleri","url":"https://webstore.iec.ch/en/publication/60140","accessedAt":"2026-08-03","primary":true,"factSummary":"Tam UPS sistemi ve işlevsel birimleri için performans, test, çalışma modları, anahtarlar ve yük sürekliliğine ilişkin güncel standardı tanımlar."},{"id":"S2","publisher":"Schneider Electric","title":"Easy UPS 3L 250–400 kVA giriş ve bypass özellikleri","url":"https://productinfo.se.com/easyups3l/990-6289_master-easy-ups-3l-technical-specifications/English/990-6289%20Easy%20UPS%203L%20Technical%20Specifications_0000415605.xml/%24/FacilityPlanningfor250-400kVAUPSsforExternalBatteriesREF_0000493856","accessedAt":"2026-08-03","primary":true,"factSummary":"Model bazında nominal ve maksimum giriş akımı, giriş THDi, güç faktörü, ramp-in ve bypass frekans aralığı gibi boyutlandırma verilerini verir."},{"id":"S3","publisher":"Schneider Electric","title":"Easy UPS 3S 380/400/415 V teknik özellikleri","url":"https://productinfo.se.com/easyups3s/viewer?docidentity=REF_Specifications-B929255A&extension=xml&lang=en&manualidentity=InstallationEasyUPS3SWithInternalBa-984B85A2","accessedAt":"2026-08-03","primary":true,"factSummary":"10–30 kVA sınıfında giriş akımı, THDi, güç faktörü, akım limiti, ramp-in ve bypass özelliklerinin modelden modele doğrulanması gerektiğini gösterir."},{"id":"S4","publisher":"Schneider Electric","title":"Easy UPS 3L normal mod başlatma ve doğrultucu rampası","url":"https://productinfo.se.com/easyups3l/viewer?docidentity=StartUpASingleUPSInNormalModeWithSi-DD8CE505&extension=xml&lang=en&manualidentity=OperationEasyUPS3L500-600KVAInsertP-C1133F8E","accessedAt":"2026-08-03","primary":true,"factSummary":"Doğrultucunun ramp-up süreci, inverterin başlaması ve bypass ile senkron olup normal moda geçiş sırasını üretici prosedürüyle açıklar."}],"internalLinks":[{"label":"Jeneratör ve UPS birlikte çalışır mı?","path":"/haberler/jenerator-ups-birlikte-calisir-mi","reason":"Temel topoloji ve uyumluluk kavramını ayrıntılı kabul görevine bağlar."},{"label":"Jeneratör voltaj ve frekans dalgalanması","path":"/haberler/jenerator-voltaj-frekans-dalgalanmasi-neden-olur","reason":"AVR, governor ve yük basamağı belirtilerini açıklar."},{"label":"UPS şebeke varken bataryaya geçiyor","path":"/haberler/ups-sebeke-varken-bataryaya-geciyor","reason":"Giriş toleransı ve olay logu teşhisine bağlar."},{"label":"Online, line-interactive ve offline UPS farkı","path":"/haberler/ups-online-line-interactive-offline-farki","reason":"UPS topolojisinin jeneratör davranışına etkisini temellendirir."},{"label":"UPS aşırı yük alarmı","path":"/haberler/ups-overload-asiri-yuk-alarmi-neden-verir","reason":"Çıkış yükü ile giriş/jeneratör kapasitesini ayırır."},{"label":"Jeneratör gücü seçimi aracı","path":"/hesaplama/jenerator-gucu-secimi","reason":"Ön boyutlandırmayı teknik kabul dosyasına bağlar."},{"label":"Kurumsal elektrik sürekliliği ön değerlendirmesi","path":"/kurumsal-elektrik-surekliligi-on-degerlendirme","reason":"UPS ve jeneratör saha kabul kapsamını profesyonel çalışmaya taşır."}],"commerce":{"enabled":false,"policy":"none","category":null},"editorial":{"createdBy":"ai-assisted","model":"GPT-5.6 Thinking","humanReviewRequired":true,"approvedBy":null,"approvedAt":null,"publishedAt":null,"approvalPr":null},"seo":{"canonicalPath":"/haberler/ups-giris-thdi-jenerator-uyumluluk-kabul-testi","robots":"index,follow,max-image-preview:large","lastModified":"2026-08-03","topics":["UPS","jeneratör","THDi","ramp-in","akü şarjı","güç faktörü","kabul testi"]},"quality":{"score":100,"minimumRequired":85,"checks":{"metadata":true,"directAnswer":true,"contentDepth":true,"sources":true,"safety":true,"internalLinks":true,"uniqueness":true,"structuredData":true},"similarity":{"maximum":0.34,"closestPath":"/haberler/jenerator-ups-birlikte-calisir-mi"}}}
+{
+  "schemaVersion": 1,
+  "id": "cms_4845571fde9d7929",
+  "slug": "ups-giris-thdi-jenerator-uyumluluk-kabul-testi",
+  "contentType": "guide",
+  "state": "published",
+  "locale": "tr-TR",
+  "title": "UPS Giriş THDi ve Jeneratör Uyumluluk Kabulü",
+  "h1": "UPS giriş THDi değeri jeneratör seçimini ve kararlı çalışmayı nasıl etkiler?",
+  "description": "UPS, jeneratör, akü şarjı, ramp-in, giriş THDi ve güç faktörünü gerçek yük testinde doğrulayarak kVA tahmini yerine kabul dosyası oluşturun.",
+  "intent": "Bir UPS ile jeneratörün yalnız nominal kVA üzerinden değil, giriş THDi, maksimum giriş akımı, akü şarjı, ramp-in, AVR ve frekans davranışıyla uyumlu olup olmadığını sahada kanıtlamak.",
+  "primaryKeyword": "UPS giriş THDi",
+  "audience": [
+    "Elektrik mühendisleri",
+    "Otel ve hastane teknik ekipleri",
+    "Veri merkezi işletmecileri",
+    "Jeneratör ve UPS devreye alma ekipleri",
+    "Tesis yöneticileri"
+  ],
+  "riskClass": "high",
+  "directAnswer": "UPS ile jeneratör uyumu yalnız UPS çıkış kVA’sını bir katsayıyla büyütmek değildir. Jeneratör, UPS’nin gerçek maksimum giriş akımını, akü yeniden şarj gücünü, ramp-in süresini, giriş güç faktörünü ve THDi kaynaklı akım dalga biçimini; aynı baradaki motor ve diğer yüklerle birlikte kararlı taşımalıdır. Kabul testi jeneratör boşta çalışmadan başlayıp UPS doğrultucusunun devreye girmesi, yük basamakları, akü şarjı, transfer, bypass senkronu ve geri dönüş boyunca gerilim, frekans, akım, THDi ve olay loglarını kaydetmelidir. Evrensel bir aşırı boyutlandırma oranı yerine UPS ve jeneratör üretici verileri ile gerçek saha testi kullanılmalıdır.",
+  "sections": [
+    {
+      "id": "kva-disindaki-girdiler",
+      "heading": "Nominal kVA dışında hangi UPS giriş verileri gerekir?",
+      "paragraphs": [
+        "UPS çıkış gücü, jeneratör hesabının yalnız bir parçasıdır. Teknik dosyada nominal ve maksimum giriş akımı, doğrultucu akım limiti, akü şarj gücü, giriş güç faktörü, THDi, ramp-in süresi, bypass giriş şartları ve üreticinin jeneratör modu bulunmalıdır. IEC 62040-3, tamamlanmış UPS sisteminin performans ve test gereklerini tanımlayan temel çerçeveyi verir.",
+        "Üretici verileri model ve yük koşuluna göre değişebilir. Schneider Easy UPS örneklerinde düşük giriş THDi, yüksek giriş güç faktörü ve belirli ramp-in süreleri ayrı ayrı yayınlanır. Bu değerler, aynı kVA etiketi taşıyan iki UPS’nin jeneratöre aynı dinamik yükü uygulayacağı varsayımını geçersiz kılar."
+      ],
+      "bullets": [
+        "UPS nominal ve maksimum giriş akımını ayrı kaydedin.",
+        "Akü şarj gücü ve doğrultucu akım limitini dosyaya ekleyin.",
+        "Giriş THDi, güç faktörü ve ramp-in süresini model belgesinden alın.",
+        "Normal giriş ile bypass girişinin bağlantı ve senkron şartlarını ayırın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "id": "thdi-ve-jenerator-empedansi",
+      "heading": "Giriş THDi jeneratör gerilimini ve AVR davranışını nasıl etkileyebilir?",
+      "paragraphs": [
+        "Doğrusal olmayan doğrultucu akımı sinüs biçiminden sapar ve jeneratörün iç empedansı üzerinde harmonik gerilim düşümleri oluşturabilir. Sonuç, yalnız akım THDi değeri değil; terminal gerilimi dalga biçimi, AVR tepkisi, ısınma, nötr akımı ve UPS’nin giriş toleransı içinde kalıp kalmadığıdır. Modern PFC girişli UPS’ler düşük THDi sağlayabilir, ancak gerçek değer yük oranı ve işletme moduyla doğrulanmalıdır.",
+        "Aynı baradaki motor yol verme, asansör, soğutma kompresörü veya VFD gibi yükler jeneratör gerilim ve frekansını ayrıca zorlar. Bu nedenle UPS’yi tek başına test etmek yeterli olmayabilir. Jeneratör alternatörü, AVR, motor governor, kısa devre gücü ve yük sıralaması ortak kabul senaryosunda değerlendirilmelidir."
+      ],
+      "bullets": [
+        "Gerilim ve akım dalga biçimini jeneratör terminali ve UPS girişinde kaydedin.",
+        "THDi ile birlikte THDv, faz dengesizliği ve nötr akımını izleyin.",
+        "Motor yol verme ve büyük yük basamaklarını aynı senaryoya ekleyin.",
+        "AVR ve governor ayarlarını yetkisiz biçimde değiştirmeyin; üretici kabul sınırını kullanın."
+      ],
+      "sourceRefs": [
+        "S2",
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "id": "aku-sarji-ramp-in-ve-yuk-sirasi",
+      "heading": "Akü şarjı, ramp-in ve yük sıralaması neden kritik olur?",
+      "paragraphs": [
+        "Kesinti sonrasında jeneratör devreye girdiğinde UPS hem kritik yükü besler hem de boşalmış aküyü şarj etmeye çalışabilir. Maksimum şarj gücü sınırlandırılmamışsa jeneratör üzerindeki yük, yalnız çıkış yükünden belirgin biçimde yüksek olabilir. Ramp-in özelliği doğrultucunun giriş akımını zamana yayarak ani basamağı azaltır; ancak süre ve limit model ayarına bağlıdır.",
+        "Yük sıralaması jeneratör kararlı gerilim ve frekansa ulaştıktan sonra UPS doğrultucusunu, ardından diğer büyük yükleri kontrollü devreye almalıdır. Akü şarj limiti, kritik yük önceliği ve jeneratör modu üretici prosedürüyle belirlenmelidir. Yalnız UPS hassasiyetini gevşetmek veya geniş frekans penceresi seçmek kararsız jeneratörü güvenli hâle getirmez."
+      ],
+      "bullets": [
+        "En kötü akü SoC durumunda şarj gücünü hesaba katın.",
+        "Ramp-in süresi ve giriş akım limitini test senaryosuna yazın.",
+        "UPS, motor ve HVAC yüklarını kademeli sıraya bağlayın.",
+        "Geniş tolerans ayarını ölçüm ve üretici onayı olmadan çözüm saymayın."
+      ],
+      "sourceRefs": [
+        "S2",
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "id": "saha-kabul-senaryolari",
+      "heading": "UPS–jeneratör saha kabul testi hangi adımları içermelidir?",
+      "paragraphs": [
+        "Test; jeneratörün boşta gerilim ve frekans kararlılığı, UPS girişinin kapanması, doğrultucu rampası, yüzde 25–50–75–100 yük basamakları, akü şarjı, ortak büyük yükler, UPS’nin jeneratör kaynağını kabulü, bypass senkronu ve şebekeye geri dönüş adımlarını kapsamalıdır. Her adımda RMS değerlerin yanında dalga biçimi ve olay logu tutulmalıdır.",
+        "UPS’nin sık bataryaya geçmesi, jeneratör alarmı, frekans avlanması, bypass senkron olamaması veya gerilim dalga biçimi bozulması fail kriteridir. Sorunun kaynağı UPS girişi, jeneratör kapasitesi, AVR/governor dinamiği, kablo/trafo empedansı veya yük sırası olabilir. Düzeltme sonrası aynı senaryo tekrarlanmalıdır."
+      ],
+      "bullets": [
+        "Boşta, yük basamaklı ve akü şarjlı testleri ayrı kaydedin.",
+        "Gerilim, frekans, akım, THDi, THDv ve olay loglarını eşzamanlayın.",
+        "Bypass senkronu ile normal mod kabulünü ayrı doğrulayın.",
+        "Fail kriteri oluşursa ayar değişikliğinden önce kök nedeni belgeleyin."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "id": "boyutlandirma-ve-satin-almama",
+      "heading": "Boyutlandırma dosyası hangi kararı üretmelidir?",
+      "paragraphs": [
+        "Dosya; UPS giriş tablosu, akü şarj profili, gerçek kritik yük, eşzamanlı motorlar, jeneratör alternatör ve motor verileri, ortam/irtifa deratingi, kablo-trafo empedansı, yük sırası ve saha ölçümlerini içerir. Böylece “UPS kVA × sabit oran” yaklaşımı yerine, üretici verisine bağlı izlenebilir kapasite ve kontrol kararı çıkar.",
+        "Mevcut jeneratör; şarj limiti, ramp-in ve güvenli yük sırasıyla tüm kabul kriterlerini sağlıyorsa daha büyük jeneratör veya UPS satın almak gerekmeyebilir. Kapasite veya dinamik performans yetersizse seçenekler yalnız jeneratörü büyütmek değildir; akü şarj yönetimi, yük önceliği, alternatör/AVR seçimi ve kontrollü sekans da değerlendirilir. Güvenlik ve garantiyi etkileyen ayarlar yetkili servis sınırındadır."
+      ],
+      "bullets": [
+        "Nominal kVA yerine maksimum gerçek giriş ve dinamik yük dosyası hazırlayın.",
+        "Ortam, irtifa, kablo, trafo ve ortak yük etkilerini ekleyin.",
+        "Kabul sağlanıyorsa gereksiz jeneratör veya UPS değişimini önleyin.",
+        "Ayar ve ekipman kararlarını üretici onayı ve tekrar testine bağlayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S4"
+      ]
+    }
+  ],
+  "faqs": [
+    {
+      "question": "UPS için jeneratör gücü kaç kat büyük olmalıdır?",
+      "answer": "Her sistem için geçerli tek bir katsayı yoktur. UPS’nin maksimum giriş akımı, akü şarj gücü, ramp-in, THDi, güç faktörü, jeneratör empedansı, ortak motor yükleri, ortam ve üretici şartları birlikte hesaplanıp saha testinde doğrulanmalıdır.",
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "question": "Düşük UPS giriş THDi değeri küçük jeneratörün yeterli olduğunu kanıtlar mı?",
+      "answer": "Hayır. Düşük THDi yararlı bir özelliktir; ancak maksimum giriş akımı, akü şarjı, dinamik yük basamağı, AVR/governor tepkisi, kısa devre gücü ve diğer yükler de kararlılığı belirler.",
+      "sourceRefs": [
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "question": "UPS jeneratörde sürekli bataryaya geçiyorsa hassasiyeti düşürmeli miyim?",
+      "answer": "Önce jeneratör gerilim ve frekans kararlılığı, dalga biçimi, yük basamakları, ramp-in, şarj limiti ve kablo/trafo empedansı ölçülmelidir. Tolerans ayarını genişletmek kök nedeni gizleyebilir ve bypass veya yük uyumluluğunu etkileyebilir.",
+      "sourceRefs": [
+        "S1",
+        "S4"
+      ]
+    },
+    {
+      "question": "Akü doluyken yapılan test yeterli midir?",
+      "answer": "Hayır. Akü doluyken şarj talebi düşük olabilir. En kötü makul SoC durumunda akü şarjı, kritik yük ve eşzamanlı büyük yüklerle kontrollü kabul testi yapılmalı; üretici sınırları aşılmamalıdır.",
+      "sourceRefs": [
+        "S2",
+        "S3"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "publisher": "IEC",
+      "title": "IEC 62040-3:2021 — UPS performans ve test gerekleri",
+      "url": "https://webstore.iec.ch/en/publication/60140",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Tam UPS sistemi ve işlevsel birimleri için performans, test, çalışma modları, anahtarlar ve yük sürekliliğine ilişkin güncel standardı tanımlar."
+    },
+    {
+      "id": "S2",
+      "publisher": "Schneider Electric",
+      "title": "Easy UPS 3L 250–400 kVA giriş ve bypass özellikleri",
+      "url": "https://productinfo.se.com/easyups3l/990-6289_master-easy-ups-3l-technical-specifications/English/990-6289%20Easy%20UPS%203L%20Technical%20Specifications_0000415605.xml/%24/FacilityPlanningfor250-400kVAUPSsforExternalBatteriesREF_0000493856",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Model bazında nominal ve maksimum giriş akımı, giriş THDi, güç faktörü, ramp-in ve bypass frekans aralığı gibi boyutlandırma verilerini verir."
+    },
+    {
+      "id": "S3",
+      "publisher": "Schneider Electric",
+      "title": "Easy UPS 3S 380/400/415 V teknik özellikleri",
+      "url": "https://productinfo.se.com/easyups3s/viewer?docidentity=REF_Specifications-B929255A&extension=xml&lang=en&manualidentity=InstallationEasyUPS3SWithInternalBa-984B85A2",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "10–30 kVA sınıfında giriş akımı, THDi, güç faktörü, akım limiti, ramp-in ve bypass özelliklerinin modelden modele doğrulanması gerektiğini gösterir."
+    },
+    {
+      "id": "S4",
+      "publisher": "Schneider Electric",
+      "title": "Easy UPS 3L normal mod başlatma ve doğrultucu rampası",
+      "url": "https://productinfo.se.com/easyups3l/viewer?docidentity=StartUpASingleUPSInNormalModeWithSi-DD8CE505&extension=xml&lang=en&manualidentity=OperationEasyUPS3L500-600KVAInsertP-C1133F8E",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Doğrultucunun ramp-up süreci, inverterin başlaması ve bypass ile senkron olup normal moda geçiş sırasını üretici prosedürüyle açıklar."
+    }
+  ],
+  "internalLinks": [
+    {
+      "label": "Jeneratör ve UPS birlikte çalışır mı?",
+      "path": "/haberler/jenerator-ups-birlikte-calisir-mi",
+      "reason": "Temel topoloji ve uyumluluk kavramını ayrıntılı kabul görevine bağlar."
+    },
+    {
+      "label": "Jeneratör voltaj ve frekans dalgalanması",
+      "path": "/haberler/jenerator-voltaj-frekans-dalgalanmasi-neden-olur",
+      "reason": "AVR, governor ve yük basamağı belirtilerini açıklar."
+    },
+    {
+      "label": "UPS şebeke varken bataryaya geçiyor",
+      "path": "/haberler/ups-sebeke-varken-bataryaya-geciyor",
+      "reason": "Giriş toleransı ve olay logu teşhisine bağlar."
+    },
+    {
+      "label": "Online, line-interactive ve offline UPS farkı",
+      "path": "/haberler/ups-online-line-interactive-offline-farki",
+      "reason": "UPS topolojisinin jeneratör davranışına etkisini temellendirir."
+    },
+    {
+      "label": "UPS aşırı yük alarmı",
+      "path": "/haberler/ups-overload-asiri-yuk-alarmi-neden-verir",
+      "reason": "Çıkış yükü ile giriş/jeneratör kapasitesini ayırır."
+    },
+    {
+      "label": "Jeneratör gücü seçimi aracı",
+      "path": "/hesaplama/jenerator-gucu-secimi",
+      "reason": "Ön boyutlandırmayı teknik kabul dosyasına bağlar."
+    },
+    {
+      "label": "Kurumsal elektrik sürekliliği ön değerlendirmesi",
+      "path": "/kurumsal-elektrik-surekliligi-on-degerlendirme",
+      "reason": "UPS ve jeneratör saha kabul kapsamını profesyonel çalışmaya taşır."
+    }
+  ],
+  "commerce": {
+    "enabled": false,
+    "policy": "none",
+    "category": null
+  },
+  "editorial": {
+    "createdBy": "ai-assisted",
+    "model": "GPT-5.6 Thinking",
+    "humanReviewRequired": true,
+    "approvedBy": "ozaneryavuz",
+    "approvedAt": "2026-08-03T18:41:43Z",
+    "publishedAt": "2026-08-03T18:41:44Z",
+    "approvalPr": 763
+  },
+  "seo": {
+    "canonicalPath": "/haberler/ups-giris-thdi-jenerator-uyumluluk-kabul-testi",
+    "robots": "index,follow,max-image-preview:large",
+    "lastModified": "2026-08-03",
+    "topics": [
+      "UPS",
+      "jeneratör",
+      "THDi",
+      "ramp-in",
+      "akü şarjı",
+      "güç faktörü",
+      "kabul testi"
+    ]
+  },
+  "quality": {
+    "score": 100,
+    "minimumRequired": 85,
+    "checks": {
+      "metadata": true,
+      "directAnswer": true,
+      "contentDepth": true,
+      "sources": true,
+      "safety": true,
+      "internalLinks": true,
+      "uniqueness": true,
+      "structuredData": true
+    },
+    "similarity": {
+      "maximum": 0.1667,
+      "closestPath": "https://www.alo186.com/haberler/ups-jenerator-boyutlandirma-thdi-guc-faktoru"
+    }
+  }
+}
