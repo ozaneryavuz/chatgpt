@@ -9,6 +9,7 @@ from pathlib import Path
 from xml.etree import ElementTree
 
 import aeo_control_plane_v219 as aeo_institutional
+import finalize_pages_service_worker as sw_finalizer
 import finalize_sitemap_v225 as sitemap_quality
 import guard_commerce_routes_v2 as v2
 import inject_affiliate_decision_funnel_v215 as affiliate_decision
@@ -264,6 +265,7 @@ def validate_site(site: Path) -> dict:
     sitemap_deduplication = _deduplicate_sitemap(resolved)
     sitemap_result = sitemap_quality.run(resolved, base_path)
     quality_result = live_quality.run(resolved, base_path)
+    service_worker_result = sw_finalizer.finalize_and_record(resolved, base_path)
     result["affiliateDecisionFunnel"] = decision_result
     result["portalPurchaseCheckpoint"] = checkpoint_result
     result["intentToolsRun135"] = intent_result
@@ -273,6 +275,7 @@ def validate_site(site: Path) -> dict:
     result["sitemapDeduplication"] = sitemap_deduplication
     result["sitemapQualityV225"] = sitemap_result
     result["liveQualityV218"] = quality_result
+    result["serviceWorkerRegistrationFinalization"] = service_worker_result
     return result
 
 
