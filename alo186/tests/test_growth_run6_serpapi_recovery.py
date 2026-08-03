@@ -74,7 +74,8 @@ def main() -> None:
     recovery_types = set().union(*(schema_types(block) for block in jsonld_blocks(recovery)))
     assert "HowTo" in recovery_types
     assert recovery.count("HowToStep") >= 4
-    assert "data-state=\"danger\"" not in recovery  # state is produced by safe JS, not fake static result
+    assert '<section id="result" class="result" data-state="wait"' in recovery
+    assert '<section id="result" class="result" data-state="danger"' not in recovery
     assert "Ticari ve ürün yolları bu durumda kapalıdır" in recovery
     assert "/hesaplama/modem-internet-yedekleme/" in recovery
     assert "/hesaplama/kombi-kesinti-yedek-guc-uygunluk/" in recovery
@@ -108,8 +109,7 @@ def main() -> None:
 
     script = SERP_SCRIPT.read_text(encoding="utf-8")
     assert "SERPAPI_API_KEY" in script
-    assert "api_key" in script
-    assert "monthly" not in script.casefold() or True
+    assert '"api_key": api_key' in script
     assert "Fiyat, stok, puan veya garanti üretme" in script
     assert "1 <= len(specs) <= 8" in script
     assert "https://serpapi.com/search.json" in script
