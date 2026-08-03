@@ -1,26 +1,74 @@
+# ALO186 public electricity guidance is crawlable by search and answer engines.
+# Safety, privacy and commercial disclosure remain visible in the indexed HTML.
+
 User-agent: *
 Allow: /
-
-User-agent: GPTBot
-Allow: /
+Allow: /haberler/
+Allow: /hesaplama/
+Allow: /urun-rehberleri/
+Allow: /amazon-elektrik-urunleri/
+Allow: /rehber/
+Allow: /urunler/
 
 User-agent: OAI-SearchBot
 Allow: /
+Allow: /haberler/
+Allow: /hesaplama/
+Allow: /urun-rehberleri/
+Allow: /amazon-elektrik-urunleri/
+Allow: /rehber/
+Allow: /urunler/
+
+User-agent: GPTBot
+Allow: /
+Allow: /haberler/
+Allow: /hesaplama/
+Allow: /urun-rehberleri/
+Allow: /amazon-elektrik-urunleri/
+Allow: /rehber/
+Allow: /urunler/
 
 User-agent: ChatGPT-User
 Allow: /
 
 User-agent: PerplexityBot
 Allow: /
+Allow: /haberler/
+Allow: /hesaplama/
+Allow: /urun-rehberleri/
+Allow: /amazon-elektrik-urunleri/
+Allow: /rehber/
+Allow: /urunler/
 
 User-agent: ClaudeBot
+Allow: /
+Allow: /haberler/
+Allow: /hesaplama/
+Allow: /urun-rehberleri/
+Allow: /amazon-elektrik-urunleri/
+Allow: /rehber/
+Allow: /urunler/
+
+User-agent: Claude-SearchBot
 Allow: /
 
 User-agent: Bytespider
 Allow: /
+Allow: /haberler/
+Allow: /hesaplama/
+Allow: /urun-rehberleri/
+Allow: /amazon-elektrik-urunleri/
+Allow: /rehber/
+Allow: /urunler/
 
 User-agent: Google-Extended
 Allow: /
+Allow: /haberler/
+Allow: /hesaplama/
+Allow: /urun-rehberleri/
+Allow: /amazon-elektrik-urunleri/
+Allow: /rehber/
+Allow: /urunler/
 
 Sitemap: https://alo186.com/sitemap.xml
 Sitemap: https://alo186.com/sitemap-electric-project-v200.xml

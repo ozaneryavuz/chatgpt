@@ -1,0 +1,93 @@
+name: ALO186 AI commerce AEO v250
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/deployment/ai-commerce-aeo-v250.json'
+      - 'alo186/deployment/inject_ai_commerce_aeo_v250.py'
+      - 'alo186/deployment/AI_COMMERCE_SCHEMA_VALIDATION_V250.md'
+      - 'alo186/assets/ai-commerce-aeo-v250.css'
+      - 'alo186/llms.txt'
+      - 'alo186/robots.txt'
+      - 'alo186/deployment/build_static_site.py'
+      - 'alo186/tests/test_ai_commerce_aeo_v250.py'
+      - '.github/workflows/alo186-ai-commerce-aeo-v250.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/deployment/ai-commerce-aeo-v250.json'
+      - 'alo186/deployment/inject_ai_commerce_aeo_v250.py'
+      - 'alo186/assets/ai-commerce-aeo-v250.css'
+      - 'alo186/llms.txt'
+      - 'alo186/robots.txt'
+      - 'alo186/deployment/build_static_site.py'
+      - 'alo186/tests/test_ai_commerce_aeo_v250.py'
+      - '.github/workflows/alo186-ai-commerce-aeo-v250.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-ai-commerce-aeo-v250-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+
+      - name: Python syntax and manifest contracts
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            alo186/deployment/inject_ai_commerce_aeo_v250.py \
+            alo186/tests/test_ai_commerce_aeo_v250.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          payload = json.loads(Path('alo186/deployment/ai-commerce-aeo-v250.json').read_text(encoding='utf-8'))
+          assert payload['version'] == 250
+          assert payload['offerPolicy']['mode'] == 'fail-closed'
+          assert payload['offerPolicy']['verifiedOffers'] == []
+          assert len(payload['routes']) == 6
+          assert sum(len(route['products']) for route in payload['routes']) == 18
+          print(json.dumps({'ok': True, 'routes': 6, 'products': 18}, ensure_ascii=False))
+          PY
+
+      - name: Canonical, custom-domain and project-path acceptance
+        run: |
+          set -euo pipefail
+          python alo186/tests/test_ai_commerce_aeo_v250.py
+
+      - name: Existing canonical and commerce regressions
+        run: |
+          set -euo pipefail
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/test_contextual_affiliate_growth_v177.py
+          python alo186/tests/test_affiliate_measurement_v211.py
+          python alo186/tests/test_pages_single_publisher.py
+
+      - name: Upload schema validation sources
+        uses: actions/upload-artifact@v5
+        with:
+          name: alo186-ai-commerce-aeo-v250-validation
+          path: |
+            alo186/deployment/AI_COMMERCE_SCHEMA_VALIDATION_V250.md
+            alo186/deployment/ai-commerce-aeo-v250.json
+            alo186/llms.txt
+            alo186/robots.txt
+          if-no-files-found: error
+          retention-days: 45

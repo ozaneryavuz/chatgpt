@@ -14,9 +14,10 @@ sys.path.insert(0, str(DEPLOYMENT))
 from build_static_site import ACCESSIBILITY_MARKER, build  # noqa: E402
 from prepare_github_pages import prepare  # noqa: E402
 
-A11Y_ASSET = Path("assets/alo186-accessibility-v214.css")
+ACTIVE_VERSION = 215
+A11Y_ASSET = Path(f"assets/alo186-accessibility-v{ACTIVE_VERSION}.css")
 LINK_PATTERN = re.compile(
-    r'<link\s+rel=["\']stylesheet["\']\s+href=["\']([^"\']*alo186-accessibility-v214\.css)["\']\s+data-alo186-accessibility-v214=["\']true["\']>',
+    rf'<link\s+rel=["\']stylesheet["\']\s+href=["\']([^"\']*alo186-accessibility-v{ACTIVE_VERSION}\.css)["\']\s+data-alo186-accessibility-v{ACTIVE_VERSION}=["\']true["\']>',
     re.IGNORECASE,
 )
 IMG_PATTERN = re.compile(r"<img\b[^>]*>", re.IGNORECASE)
@@ -74,8 +75,9 @@ def count_media_fallback_candidates(site: Path) -> int:
 
 
 def assert_bundle(site: Path, release: dict) -> int:
-    report = release["accessibilityHardeningV214"]
-    assert report["version"] == 214
+    release_key = f"accessibilityHardeningV{ACTIVE_VERSION}"
+    report = release[release_key]
+    assert report["version"] == ACTIVE_VERSION
     assert report["minimumTouchTargetPx"] == 44
     assert report["emergencyTelephoneTargets"] == ["112", "186"]
     assert report["contentImageFallbackRatio"] == "16:9"
@@ -93,7 +95,7 @@ def assert_bundle(site: Path, release: dict) -> int:
         assert source.count(ACCESSIBILITY_MARKER) == 1, page.relative_to(site)
         match = LINK_PATTERN.search(source)
         assert match, page.relative_to(site)
-        assert match.group(1) == "/assets/alo186-accessibility-v214.css"
+        assert match.group(1) == f"/assets/alo186-accessibility-v{ACTIVE_VERSION}.css"
 
     for route in (
         "elektrik-portali/index.html",
@@ -105,20 +107,20 @@ def assert_bundle(site: Path, release: dict) -> int:
         assert ACCESSIBILITY_MARKER in (site / route).read_text(encoding="utf-8")
 
     release_file = json.loads((site / "alo186-release.json").read_text(encoding="utf-8"))
-    assert release_file["accessibilityHardeningV214"] == report
+    assert release_file[release_key] == report
     checksums = (site / "checksums.sha256").read_text(encoding="utf-8")
-    assert "assets/alo186-accessibility-v214.css" in checksums
+    assert A11Y_ASSET.as_posix() in checksums
     return count_media_fallback_candidates(site)
 
 
 def test_source_contract() -> None:
-    css = (ROOT / "alo186/assets/alo186-accessibility-v214.css").read_text(encoding="utf-8")
+    css = (ROOT / f"alo186/assets/alo186-accessibility-v{ACTIVE_VERSION}.css").read_text(encoding="utf-8")
     assert_css_contract(css)
     wrapper = (ROOT / "alo186/deployment/build_static_site.py").read_text(encoding="utf-8")
     for token in (
         "install_accessibility_hardening",
         "ACCESSIBILITY_MARKER",
-        "accessibilityHardeningV214",
+        f"accessibilityHardeningV{ACTIVE_VERSION}",
         "_recompute_checksums",
     ):
         assert token in wrapper
@@ -128,23 +130,23 @@ def test_canonical_and_pages_modes() -> int:
     with tempfile.TemporaryDirectory() as directory:
         base = Path(directory)
         canonical = base / "canonical"
-        release = build(ROOT, canonical, "accessibility-v214-test")
+        release = build(ROOT, canonical, f"accessibility-v{ACTIVE_VERSION}-test")
         media_candidates = assert_bundle(canonical, release)
 
         custom = base / "custom"
         shutil.copytree(canonical, custom)
-        custom_release = prepare(custom, "", "ozaneryavuz/chatgpt", "accessibility-v214-test")
+        custom_release = prepare(custom, "", "ozaneryavuz/chatgpt", f"accessibility-v{ACTIVE_VERSION}-test")
         assert custom_release["basePath"] == ""
         custom_page = (custom / "elektrik-kesintisi/index.html").read_text(encoding="utf-8")
-        assert 'href="/assets/alo186-accessibility-v214.css"' in custom_page
+        assert f'href="/assets/alo186-accessibility-v{ACTIVE_VERSION}.css"' in custom_page
         assert (custom / A11Y_ASSET).is_file()
 
         project = base / "project"
         shutil.copytree(canonical, project)
-        project_release = prepare(project, "/chatgpt", "ozaneryavuz/chatgpt", "accessibility-v214-test")
+        project_release = prepare(project, "/chatgpt", "ozaneryavuz/chatgpt", f"accessibility-v{ACTIVE_VERSION}-test")
         assert project_release["basePath"] == "/chatgpt"
         project_page = (project / "elektrik-kesintisi/index.html").read_text(encoding="utf-8")
-        assert 'href="/chatgpt/assets/alo186-accessibility-v214.css"' in project_page
+        assert f'href="/chatgpt/assets/alo186-accessibility-v{ACTIVE_VERSION}.css"' in project_page
         assert (project / A11Y_ASSET).is_file()
         return media_candidates
 
@@ -154,7 +156,7 @@ def main() -> None:
     media_candidates = test_canonical_and_pages_modes()
     print(json.dumps({
         "ok": True,
-        "version": 214,
+        "version": ACTIVE_VERSION,
         "minimumTouchTargetPx": 44,
         "mediaFallbackCandidates": media_candidates,
     }, ensure_ascii=False))
