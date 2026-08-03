@@ -1,1 +1,275 @@
-{"schemaVersion":1,"id":"cms_ada6037fd07a4565","slug":"topraklama-dokunma-adim-gerilimi-olcum-kabul-dosyasi","contentType":"guide","state":"review","locale":"tr-TR","title":"Topraklamada Dokunma ve Adım Gerilimi Ölçüm Kabul Dosyası","h1":"Topraklama direnci düşük olsa bile dokunma ve adım gerilimi neden ölçülmelidir?","description":"Trafo, jeneratör ve geniş tesislerde toprak direncinin ötesine geçin; dokunma-adım gerilimi, eşpotansiyel ve yüzey kabulünü kanıtlayın.","intent":"Trafo merkezi, jeneratör sahası, GES, EV şarj tesisi veya geniş işletmede topraklama direnci tek başına yeterli olmadığında dokunma ve adım gerilimi güvenliğini ölçüm ve proje verileriyle doğrulamak.","primaryKeyword":"dokunma gerilimi adım gerilimi ölçümü","audience":["Elektrik mühendisleri","Otel ve işletme yöneticileri","Trafo ve OG işletme ekipleri","GES ve EV şarj yatırımcıları","Topraklama ölçüm ekipleri"],"riskClass":"high","directAnswer":"Topraklama direncinin düşük çıkması, arıza anında her noktada güvenli dokunma ve adım gerilimi oluşacağını tek başına kanıtlamaz. Güvenlik; arıza akımının büyüklüğü ve süresi, akımın toprak ve metal yollar arasında bölünmesi, topraklama ağı geometrisi, yüzey özdirenci, eşpotansiyel bağlantılar ve kişinin aynı anda temas edebileceği noktalarla belirlenir. Kabul dosyası; toprak özdirenci, ağ empedansı, süreklilik, arıza süresi, dokunma-adım gerilimi ölçümü veya doğrulanmış hesap, yüzey tabakası ve kritik metal parçaların eşpotansiyel bağlantısını birlikte göstermelidir.","sections":[{"id":"direnc-tek-basina-yetmez","heading":"Neden yalnız topraklama direnci yeterli değildir?","paragraphs":["Tek bir ohm değeri elektrotun uzak toprağa karşı davranışını özetler; ancak kişinin dokunduğu metal gövde ile ayaklarının bulunduğu zemin arasındaki potansiyel farkını doğrudan göstermez. Büyük tesislerde arıza akımı toprak ağı, kablo ekranları, nötrler, borular ve diğer metal yollar arasında bölünür.","IEC 60364-4-41 elektrik çarpmasına karşı koruma ve otomatik ayırma önlemlerini; IEC 61936-1 ise 1 kV üzeri tesislerde güvenli tasarım ve topraklama kriterlerini kapsar. Bu çerçevede koruma cihazının açma süresi ile sahadaki potansiyel dağılımı birlikte değerlendirilmelidir."],"bullets":["Toprak direncini tek başına 'güvenli' etiketi olarak kullanmayın.","Arıza akımı ve koruma açma süresini hesap dosyasına ekleyin.","Metal boru, ekran, nötr ve yıldırımlık akım yollarını envantere alın.","Kritik dokunma noktalarını saha planında işaretleyin."],"sourceRefs":["S1","S2","S3"]},{"id":"olcum-ve-model","heading":"Dokunma ve adım gerilimi nasıl ölçülür veya hesaplanır?","paragraphs":["IEEE 81-2025; toprak özdirenci, toprak sistemi empedansı, yüzey potansiyelleri, dokunma ve adım gerilimleri ile topraklama bütünlüğünün ölçüm yöntemlerini kapsar. Test yöntemi tesis boyutu, erişilebilir uzak elektrot mesafesi, işletme durumu ve güvenlik kısıtlarına göre seçilmelidir.","Düşük akımlı enjeksiyon ölçümü veya hesap modeli kullanıldığında sonuçlar gerçek arıza akımı ve koruma süresine ölçeklenir. Kablo ekranları, havai toprak telleri ve bağlı nötrler gibi akım bölüşüm yolları modele alınmazsa sonuç gereğinden iyimser veya kötümser olabilir."],"bullets":["Toprak özdirenci ölçüm yöntemini ve mevsim koşulunu kaydedin.","Enjeksiyon akımı, frekans, elektrot mesafesi ve cihaz sınıfını belgeleyin.","Modelde akım bölüşüm yollarını ve yüzey tabakasını gösterin.","Ölçüm belirsizliğini ve erişilemeyen alanları raporlayın."],"sourceRefs":["S1","S3"]},{"id":"espotansiyel-ve-sureklilik","heading":"Eşpotansiyel bağlantı ve süreklilik nasıl doğrulanır?","paragraphs":["Eşpotansiyel bağlantı, aynı anda dokunulabilen metal parçalar arasındaki tehlikeli gerilim farkını azaltır. Trafo gövdesi, pano, çit, kapı, kablo tavası, jeneratör şasesi, borular ve yapı çeliği projedeki ana topraklama barasına beklenen yoldan bağlı olmalıdır.","Görsel bağlantı yeterli değildir; süreklilik ölçümü, bağlantı kesiti, korozyon, mekanik bütünlük ve paralel yollar incelenmelidir. Özellikle çit ve kapılarda, toprak ağı sınırında ve farklı topraklama bölgelerinin birleştiği noktalarda transfer potansiyeli ayrıca değerlendirilmelidir."],"bullets":["Aynı anda dokunulabilen metal parçaları çiftler halinde değerlendirin.","Çit, kapı ve haricî boru geçişlerini transfer potansiyeli açısından inceleyin.","Süreklilik değerini cihaz ve test akımıyla birlikte kaydedin.","Korozyonlu veya gizli bağlantıları yalnız gözle kabul etmeyin."],"sourceRefs":["S1","S2","S4"]},{"id":"yuzey-ve-kritik-noktalar","heading":"Yüzey malzemesi ve saha geometrisi güvenliği nasıl etkiler?","paragraphs":["Yüksek özdirençli kırmataş veya uygun yüzey tabakası, kişinin ayakları ile toprak arasındaki seri direnci artırarak vücuttan geçen akımı azaltabilir. Ancak tabakanın kalınlığı, nemi, kirliliği ve gerçek özdirenci zamanla değişebilir; yalnız proje notunda yazması yeterli değildir.","Trafo kapısı, hücre önü, jeneratör yakıt dolum noktası, EV şarj kaidesi, metal çit köşesi ve yağışla ıslanan geçişler kritik ölçüm noktalarıdır. Toprak ağı sınırında adım gerilimi ve dışarı taşınan metal hatlarda transfer gerilimi ayrıca ele alınmalıdır."],"bullets":["Kırmataş kalınlığı ve özdirencini saha kabulünde doğrulayın.","Yağışlı veya en olumsuz işletme koşulunu değerlendirin.","Ağ sınırı, kapı, çit ve metal boru çevresini ayrı ölçün.","Yüzey bakımını periyodik kontrol planına ekleyin."],"sourceRefs":["S1","S3","S4"]},{"id":"kabul-dosyasi","heading":"Kabul dosyası hangi belgeleri içermelidir?","paragraphs":["Dosyada topraklama planı, iletken kesitleri, kaynak ve ek noktaları, toprak özdirenci, ağ empedansı, arıza akımı ve açma süresi, akım bölüşümü, dokunma-adım gerilimi sonuçları, eşpotansiyel süreklilik, yüzey tabakası ve kritik nokta fotoğrafları bulunmalıdır. Ölçüm yöntemi ve cihaz kalibrasyonu açıkça yazılmalıdır.","Topraklama ağı enerjili OG/AG tesisin parçası olduğundan test tasarımı yetkin mühendis ve uygun iş güvenliği prosedürüyle yapılmalıdır. Sonuçlar kabul sınırlarını sağlıyorsa yalnız daha düşük ohm değeri elde etmek için gereksiz elektrot eklenmemelidir; iyileştirme dokunma-adım riskini gerçekten azaltan noktaya yönelmelidir."],"bullets":["Hesap, ölçüm ve saha çizimini tek revizyon altında birleştirin.","Her kritik noktanın kabul sonucu ve düzeltmesini yazın.","Cihaz kalibrasyonu ve test güvenlik planını ekleyin.","Mevcut sistem güvenliyse yalnız sayı düşürmek için gereksiz yatırım yapmayın."],"sourceRefs":["S1","S2","S3","S4"]}],"faqs":[{"question":"Topraklama 1 ohm ise dokunma gerilimi kesin güvenli midir?","answer":"Hayır. Arıza akımı, açma süresi, ağ geometrisi, yüzey ve akım bölüşümü dikkate alınmadan tek direnç değeri dokunma gerilimini kanıtlamaz.","sourceRefs":["S1","S2","S3"]},{"question":"Dokunma ve adım gerilimi her evde ölçülür mü?","answer":"Küçük alçak gerilim tesislerinde koruma ve çevrim empedansı kontrolleri çoğu durumda temel yöntemdir; trafo, OG, geniş ağ veya yüksek arıza akımlı tesislerde özel dokunma-adım değerlendirmesi daha kritik hale gelir.","sourceRefs":["S2","S3"]},{"question":"Kırmataş sermek topraklama sorununu çözer mi?","answer":"Yüzey tabakası vücut akımını azaltmaya yardımcı olabilir ancak ağ tasarımı, eşpotansiyel bağlantı ve koruma açma süresinin yerine geçmez. Malzeme özdirenci ve kalınlığı doğrulanmalıdır.","sourceRefs":["S1","S4"]},{"question":"Topraklama ölçümünü enerjili tesiste kim yapmalıdır?","answer":"Test yöntemi arıza akımı ve potansiyel riskleri içerdiğinden yetkin mühendis, uygun cihaz ve yazılı iş güvenliği planı gerekir. Kullanıcıya enerjili pano veya OG saha müdahalesi önerilmez.","sourceRefs":["S1","S3"]}],"sources":[{"id":"S1","publisher":"IEEE Standards Association","title":"IEEE 81-2025 — Ground resistivity, ground impedance and earth surface potential measurements","url":"https://standards.ieee.org/ieee/81/11218/","accessedAt":"2026-08-03","primary":true,"factSummary":"Toprak özdirenci, toprak sistemi empedansı, yüzey potansiyelleri, dokunma ve adım gerilimleri, bütünlük ve ölçüm güvenliği için güncel test yöntemlerini kapsar."},{"id":"S2","publisher":"IEC","title":"IEC 60364-4-41:2005+AMD1:2017 CSV — Protection against electric shock","url":"https://webstore.iec.ch/en/publication/60169","accessedAt":"2026-08-03","primary":true,"factSummary":"Alçak gerilim tesislerinde insan ve hayvanların elektrik çarpmasına karşı korunması ve koruma önlemlerinin koordinasyonu için temel gerekleri tanımlar."},{"id":"S3","publisher":"IEC","title":"IEC 61936-1:2021 CMV — Power installations exceeding 1 kV AC","url":"https://webstore.iec.ch/en/publication/69750","accessedAt":"2026-08-03","primary":true,"factSummary":"1 kV üzeri AC güç tesislerinin güvenli tasarım ve kurulumu için ortak kuralları, topraklama ve güvenli işlev çerçevesini kapsar."},{"id":"S4","publisher":"IEEE Power & Energy Society","title":"Testing and application of crushed aggregate for a resistive substation surface layer","url":"https://resourcecenter.ieee.org/publications/technical-reports/pes_tp_tr107_sub_040623","accessedAt":"2026-08-03","primary":true,"factSummary":"Yüksek özdirençli yüzey tabakasının dokunma ve adım gerilimi güvenliğine etkisini, laboratuvar-saha testini, kabul ve bakım yöntemlerini açıklar."}],"internalLinks":[{"label":"Topraklama direnci kaç ohm olmalı?","path":"/haberler/topraklama-direnci-kac-ohm-olmali","reason":"Tek direnç değerinin bağlamını ve temel ölçüm kavramını açıklar."},{"label":"Toprak direnci ve çevrim empedansı farkı","path":"/haberler/topraklama-direnci-ariza-cevrim-empedansi-farki","reason":"Elektrot ölçümü ile koruma açma yolunu ayırır."},{"label":"Prizde topraklama var mı?","path":"/haberler/prizde-topraklama-var-mi-priz-test-cihazi","reason":"Konut düzeyindeki basit kontrol ile profesyonel saha ölçümünü ayırır."},{"label":"Nötr-toprak gerilimi","path":"/haberler/notr-toprak-arasi-gerilim-kac-volt-olmali","reason":"N-PE potansiyel farkının ölçüm sınırlarını tamamlar."},{"label":"Faz kaybı ve dengesizlik","path":"/haberler/faz-dengesizligi-faz-kaybi-motoru-nasil-etkiler","reason":"Topraklama dışındaki gerilim ve motor risklerini ayırır."},{"label":"Elektrik panosunda termal kamera","path":"/haberler/elektrik-panosunda-termal-kamera-kontrolu","reason":"Bağlantı ve eşpotansiyel iletkenlerde termal bakım bağını destekler."},{"label":"Kurumsal ön değerlendirme","path":"/kurumsal-elektrik-surekliligi-on-degerlendirme","reason":"Trafo, GES ve geniş tesislerde ölçüm kapsamını profesyonel çalışmaya taşır."}],"commerce":{"enabled":false,"policy":"none","category":null},"editorial":{"createdBy":"ai-assisted","model":"gpt-5.6-thinking","humanReviewRequired":true,"approvedBy":null,"approvedAt":null,"publishedAt":null,"approvalPr":null},"seo":{"canonicalPath":"/haberler/topraklama-dokunma-adim-gerilimi-olcum-kabul-dosyasi","robots":"index,follow,max-image-preview:large","lastModified":"2026-08-03","topics":["topraklama","dokunma gerilimi","adım gerilimi","eşpotansiyel","toprak özdirenci","trafo merkezi","elektrik güvenliği"]},"quality":{"score":100,"minimumRequired":85,"checks":{"metadata":true,"directAnswer":true,"contentDepth":true,"sources":true,"safety":true,"internalLinks":true,"uniqueness":true,"structuredData":true},"similarity":{"maximum":0.43,"closestPath":"/haberler/topraklama-direnci-kac-ohm-olmali"}}}
+{
+  "schemaVersion": 1,
+  "id": "cms_ada6037fd07a4565",
+  "slug": "topraklama-dokunma-adim-gerilimi-olcum-kabul-dosyasi",
+  "contentType": "guide",
+  "state": "published",
+  "locale": "tr-TR",
+  "title": "Topraklamada Dokunma ve Adım Gerilimi Ölçüm Kabul Dosyası",
+  "h1": "Topraklama direnci düşük olsa bile dokunma ve adım gerilimi neden ölçülmelidir?",
+  "description": "Trafo, jeneratör ve geniş tesislerde toprak direncinin ötesine geçin; dokunma-adım gerilimi, eşpotansiyel ve yüzey kabulünü kanıtlayın.",
+  "intent": "Trafo merkezi, jeneratör sahası, GES, EV şarj tesisi veya geniş işletmede topraklama direnci tek başına yeterli olmadığında dokunma ve adım gerilimi güvenliğini ölçüm ve proje verileriyle doğrulamak.",
+  "primaryKeyword": "dokunma gerilimi adım gerilimi ölçümü",
+  "audience": [
+    "Elektrik mühendisleri",
+    "Otel ve işletme yöneticileri",
+    "Trafo ve OG işletme ekipleri",
+    "GES ve EV şarj yatırımcıları",
+    "Topraklama ölçüm ekipleri"
+  ],
+  "riskClass": "high",
+  "directAnswer": "Topraklama direncinin düşük çıkması, arıza anında her noktada güvenli dokunma ve adım gerilimi oluşacağını tek başına kanıtlamaz. Güvenlik; arıza akımının büyüklüğü ve süresi, akımın toprak ve metal yollar arasında bölünmesi, topraklama ağı geometrisi, yüzey özdirenci, eşpotansiyel bağlantılar ve kişinin aynı anda temas edebileceği noktalarla belirlenir. Kabul dosyası; toprak özdirenci, ağ empedansı, süreklilik, arıza süresi, dokunma-adım gerilimi ölçümü veya doğrulanmış hesap, yüzey tabakası ve kritik metal parçaların eşpotansiyel bağlantısını birlikte göstermelidir.",
+  "sections": [
+    {
+      "id": "direnc-tek-basina-yetmez",
+      "heading": "Neden yalnız topraklama direnci yeterli değildir?",
+      "paragraphs": [
+        "Tek bir ohm değeri elektrotun uzak toprağa karşı davranışını özetler; ancak kişinin dokunduğu metal gövde ile ayaklarının bulunduğu zemin arasındaki potansiyel farkını doğrudan göstermez. Büyük tesislerde arıza akımı toprak ağı, kablo ekranları, nötrler, borular ve diğer metal yollar arasında bölünür.",
+        "IEC 60364-4-41 elektrik çarpmasına karşı koruma ve otomatik ayırma önlemlerini; IEC 61936-1 ise 1 kV üzeri tesislerde güvenli tasarım ve topraklama kriterlerini kapsar. Bu çerçevede koruma cihazının açma süresi ile sahadaki potansiyel dağılımı birlikte değerlendirilmelidir."
+      ],
+      "bullets": [
+        "Toprak direncini tek başına 'güvenli' etiketi olarak kullanmayın.",
+        "Arıza akımı ve koruma açma süresini hesap dosyasına ekleyin.",
+        "Metal boru, ekran, nötr ve yıldırımlık akım yollarını envantere alın.",
+        "Kritik dokunma noktalarını saha planında işaretleyin."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "id": "olcum-ve-model",
+      "heading": "Dokunma ve adım gerilimi nasıl ölçülür veya hesaplanır?",
+      "paragraphs": [
+        "IEEE 81-2025; toprak özdirenci, toprak sistemi empedansı, yüzey potansiyelleri, dokunma ve adım gerilimleri ile topraklama bütünlüğünün ölçüm yöntemlerini kapsar. Test yöntemi tesis boyutu, erişilebilir uzak elektrot mesafesi, işletme durumu ve güvenlik kısıtlarına göre seçilmelidir.",
+        "Düşük akımlı enjeksiyon ölçümü veya hesap modeli kullanıldığında sonuçlar gerçek arıza akımı ve koruma süresine ölçeklenir. Kablo ekranları, havai toprak telleri ve bağlı nötrler gibi akım bölüşüm yolları modele alınmazsa sonuç gereğinden iyimser veya kötümser olabilir."
+      ],
+      "bullets": [
+        "Toprak özdirenci ölçüm yöntemini ve mevsim koşulunu kaydedin.",
+        "Enjeksiyon akımı, frekans, elektrot mesafesi ve cihaz sınıfını belgeleyin.",
+        "Modelde akım bölüşüm yollarını ve yüzey tabakasını gösterin.",
+        "Ölçüm belirsizliğini ve erişilemeyen alanları raporlayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S3"
+      ]
+    },
+    {
+      "id": "espotansiyel-ve-sureklilik",
+      "heading": "Eşpotansiyel bağlantı ve süreklilik nasıl doğrulanır?",
+      "paragraphs": [
+        "Eşpotansiyel bağlantı, aynı anda dokunulabilen metal parçalar arasındaki tehlikeli gerilim farkını azaltır. Trafo gövdesi, pano, çit, kapı, kablo tavası, jeneratör şasesi, borular ve yapı çeliği projedeki ana topraklama barasına beklenen yoldan bağlı olmalıdır.",
+        "Görsel bağlantı yeterli değildir; süreklilik ölçümü, bağlantı kesiti, korozyon, mekanik bütünlük ve paralel yollar incelenmelidir. Özellikle çit ve kapılarda, toprak ağı sınırında ve farklı topraklama bölgelerinin birleştiği noktalarda transfer potansiyeli ayrıca değerlendirilmelidir."
+      ],
+      "bullets": [
+        "Aynı anda dokunulabilen metal parçaları çiftler halinde değerlendirin.",
+        "Çit, kapı ve haricî boru geçişlerini transfer potansiyeli açısından inceleyin.",
+        "Süreklilik değerini cihaz ve test akımıyla birlikte kaydedin.",
+        "Korozyonlu veya gizli bağlantıları yalnız gözle kabul etmeyin."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S4"
+      ]
+    },
+    {
+      "id": "yuzey-ve-kritik-noktalar",
+      "heading": "Yüzey malzemesi ve saha geometrisi güvenliği nasıl etkiler?",
+      "paragraphs": [
+        "Yüksek özdirençli kırmataş veya uygun yüzey tabakası, kişinin ayakları ile toprak arasındaki seri direnci artırarak vücuttan geçen akımı azaltabilir. Ancak tabakanın kalınlığı, nemi, kirliliği ve gerçek özdirenci zamanla değişebilir; yalnız proje notunda yazması yeterli değildir.",
+        "Trafo kapısı, hücre önü, jeneratör yakıt dolum noktası, EV şarj kaidesi, metal çit köşesi ve yağışla ıslanan geçişler kritik ölçüm noktalarıdır. Toprak ağı sınırında adım gerilimi ve dışarı taşınan metal hatlarda transfer gerilimi ayrıca ele alınmalıdır."
+      ],
+      "bullets": [
+        "Kırmataş kalınlığı ve özdirencini saha kabulünde doğrulayın.",
+        "Yağışlı veya en olumsuz işletme koşulunu değerlendirin.",
+        "Ağ sınırı, kapı, çit ve metal boru çevresini ayrı ölçün.",
+        "Yüzey bakımını periyodik kontrol planına ekleyin."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "id": "kabul-dosyasi",
+      "heading": "Kabul dosyası hangi belgeleri içermelidir?",
+      "paragraphs": [
+        "Dosyada topraklama planı, iletken kesitleri, kaynak ve ek noktaları, toprak özdirenci, ağ empedansı, arıza akımı ve açma süresi, akım bölüşümü, dokunma-adım gerilimi sonuçları, eşpotansiyel süreklilik, yüzey tabakası ve kritik nokta fotoğrafları bulunmalıdır. Ölçüm yöntemi ve cihaz kalibrasyonu açıkça yazılmalıdır.",
+        "Topraklama ağı enerjili OG/AG tesisin parçası olduğundan test tasarımı yetkin mühendis ve uygun iş güvenliği prosedürüyle yapılmalıdır. Sonuçlar kabul sınırlarını sağlıyorsa yalnız daha düşük ohm değeri elde etmek için gereksiz elektrot eklenmemelidir; iyileştirme dokunma-adım riskini gerçekten azaltan noktaya yönelmelidir."
+      ],
+      "bullets": [
+        "Hesap, ölçüm ve saha çizimini tek revizyon altında birleştirin.",
+        "Her kritik noktanın kabul sonucu ve düzeltmesini yazın.",
+        "Cihaz kalibrasyonu ve test güvenlik planını ekleyin.",
+        "Mevcut sistem güvenliyse yalnız sayı düşürmek için gereksiz yatırım yapmayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S4"
+      ]
+    }
+  ],
+  "faqs": [
+    {
+      "question": "Topraklama 1 ohm ise dokunma gerilimi kesin güvenli midir?",
+      "answer": "Hayır. Arıza akımı, açma süresi, ağ geometrisi, yüzey ve akım bölüşümü dikkate alınmadan tek direnç değeri dokunma gerilimini kanıtlamaz.",
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "question": "Dokunma ve adım gerilimi her evde ölçülür mü?",
+      "answer": "Küçük alçak gerilim tesislerinde koruma ve çevrim empedansı kontrolleri çoğu durumda temel yöntemdir; trafo, OG, geniş ağ veya yüksek arıza akımlı tesislerde özel dokunma-adım değerlendirmesi daha kritik hale gelir.",
+      "sourceRefs": [
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "question": "Kırmataş sermek topraklama sorununu çözer mi?",
+      "answer": "Yüzey tabakası vücut akımını azaltmaya yardımcı olabilir ancak ağ tasarımı, eşpotansiyel bağlantı ve koruma açma süresinin yerine geçmez. Malzeme özdirenci ve kalınlığı doğrulanmalıdır.",
+      "sourceRefs": [
+        "S1",
+        "S4"
+      ]
+    },
+    {
+      "question": "Topraklama ölçümünü enerjili tesiste kim yapmalıdır?",
+      "answer": "Test yöntemi arıza akımı ve potansiyel riskleri içerdiğinden yetkin mühendis, uygun cihaz ve yazılı iş güvenliği planı gerekir. Kullanıcıya enerjili pano veya OG saha müdahalesi önerilmez.",
+      "sourceRefs": [
+        "S1",
+        "S3"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "publisher": "IEEE Standards Association",
+      "title": "IEEE 81-2025 — Ground resistivity, ground impedance and earth surface potential measurements",
+      "url": "https://standards.ieee.org/ieee/81/11218/",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Toprak özdirenci, toprak sistemi empedansı, yüzey potansiyelleri, dokunma ve adım gerilimleri, bütünlük ve ölçüm güvenliği için güncel test yöntemlerini kapsar."
+    },
+    {
+      "id": "S2",
+      "publisher": "IEC",
+      "title": "IEC 60364-4-41:2005+AMD1:2017 CSV — Protection against electric shock",
+      "url": "https://webstore.iec.ch/en/publication/60169",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Alçak gerilim tesislerinde insan ve hayvanların elektrik çarpmasına karşı korunması ve koruma önlemlerinin koordinasyonu için temel gerekleri tanımlar."
+    },
+    {
+      "id": "S3",
+      "publisher": "IEC",
+      "title": "IEC 61936-1:2021 CMV — Power installations exceeding 1 kV AC",
+      "url": "https://webstore.iec.ch/en/publication/69750",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "1 kV üzeri AC güç tesislerinin güvenli tasarım ve kurulumu için ortak kuralları, topraklama ve güvenli işlev çerçevesini kapsar."
+    },
+    {
+      "id": "S4",
+      "publisher": "IEEE Power & Energy Society",
+      "title": "Testing and application of crushed aggregate for a resistive substation surface layer",
+      "url": "https://resourcecenter.ieee.org/publications/technical-reports/pes_tp_tr107_sub_040623",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Yüksek özdirençli yüzey tabakasının dokunma ve adım gerilimi güvenliğine etkisini, laboratuvar-saha testini, kabul ve bakım yöntemlerini açıklar."
+    }
+  ],
+  "internalLinks": [
+    {
+      "label": "Topraklama direnci kaç ohm olmalı?",
+      "path": "/haberler/topraklama-direnci-kac-ohm-olmali",
+      "reason": "Tek direnç değerinin bağlamını ve temel ölçüm kavramını açıklar."
+    },
+    {
+      "label": "Toprak direnci ve çevrim empedansı farkı",
+      "path": "/haberler/topraklama-direnci-ariza-cevrim-empedansi-farki",
+      "reason": "Elektrot ölçümü ile koruma açma yolunu ayırır."
+    },
+    {
+      "label": "Prizde topraklama var mı?",
+      "path": "/haberler/prizde-topraklama-var-mi-priz-test-cihazi",
+      "reason": "Konut düzeyindeki basit kontrol ile profesyonel saha ölçümünü ayırır."
+    },
+    {
+      "label": "Nötr-toprak gerilimi",
+      "path": "/haberler/notr-toprak-arasi-gerilim-kac-volt-olmali",
+      "reason": "N-PE potansiyel farkının ölçüm sınırlarını tamamlar."
+    },
+    {
+      "label": "Faz kaybı ve dengesizlik",
+      "path": "/haberler/faz-dengesizligi-faz-kaybi-motoru-nasil-etkiler",
+      "reason": "Topraklama dışındaki gerilim ve motor risklerini ayırır."
+    },
+    {
+      "label": "Elektrik panosunda termal kamera",
+      "path": "/haberler/elektrik-panosunda-termal-kamera-kontrolu",
+      "reason": "Bağlantı ve eşpotansiyel iletkenlerde termal bakım bağını destekler."
+    },
+    {
+      "label": "Kurumsal ön değerlendirme",
+      "path": "/kurumsal-elektrik-surekliligi-on-degerlendirme",
+      "reason": "Trafo, GES ve geniş tesislerde ölçüm kapsamını profesyonel çalışmaya taşır."
+    }
+  ],
+  "commerce": {
+    "enabled": false,
+    "policy": "none",
+    "category": null
+  },
+  "editorial": {
+    "createdBy": "ai-assisted",
+    "model": "gpt-5.6-thinking",
+    "humanReviewRequired": true,
+    "approvedBy": "ozaneryavuz",
+    "approvedAt": "2026-08-03T18:45:31Z",
+    "publishedAt": "2026-08-03T18:45:32Z",
+    "approvalPr": 815
+  },
+  "seo": {
+    "canonicalPath": "/haberler/topraklama-dokunma-adim-gerilimi-olcum-kabul-dosyasi",
+    "robots": "index,follow,max-image-preview:large",
+    "lastModified": "2026-08-03",
+    "topics": [
+      "topraklama",
+      "dokunma gerilimi",
+      "adım gerilimi",
+      "eşpotansiyel",
+      "toprak özdirenci",
+      "trafo merkezi",
+      "elektrik güvenliği"
+    ]
+  },
+  "quality": {
+    "score": 88,
+    "minimumRequired": 85,
+    "checks": {
+      "metadata": false,
+      "directAnswer": true,
+      "contentDepth": true,
+      "sources": true,
+      "safety": true,
+      "internalLinks": true,
+      "uniqueness": true,
+      "structuredData": true
+    },
+    "similarity": {
+      "maximum": 0.2727,
+      "closestPath": "https://alo186.com/haberler/trafo-sahasinda-adim-dokunma-gerilimi-topraklama"
+    }
+  }
+}
