@@ -83,6 +83,45 @@ jobs:
           esac
           echo "record_state=$state" >> "$GITHUB_OUTPUT"
 
+      - name: Bilinen eski iç bağlantı aliaslarını canonical rotaya taşı
+        if: steps.state.outputs.changed == 'true'
+        shell: bash
+        env:
+          CMS_SLUG: ${{ steps.request.outputs.slug }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          record_path = Path('alo186/ai-cms/content') / f"{os.environ['CMS_SLUG']}.json"
+          record = json.loads(record_path.read_text(encoding='utf-8'))
+          aliases = {
+              '/haberler/kacak-akim-rolesi-neden-atar': '/haberler/kacak-akim-rolesi-neden-surekli-atar',
+          }
+          replacements = []
+          links = record.get('internalLinks', [])
+          if not isinstance(links, list):
+              raise SystemExit('internalLinks dizi değil')
+          for index, link in enumerate(links):
+              if not isinstance(link, dict):
+                  raise SystemExit(f'internalLinks[{index}] nesne değil')
+              current = link.get('path')
+              if current in aliases:
+                  link['path'] = aliases[current]
+                  replacements.append((current, link['path']))
+          if replacements:
+              record_path.write_text(
+                  json.dumps(record, ensure_ascii=False, separators=(',', ':')) + '\n',
+                  encoding='utf-8',
+              )
+              for old, new in replacements:
+                  print(f'Canonical alias düzeltildi: {old} -> {new}')
+          else:
+              print('Canonical alias düzeltmesi gerekmiyor.')
+          PY
+
       - name: AI CMS testleri
         if: steps.state.outputs.changed == 'true'
         run: |
