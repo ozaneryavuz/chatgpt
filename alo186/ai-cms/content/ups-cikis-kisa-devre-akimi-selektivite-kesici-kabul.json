@@ -1,0 +1,288 @@
+{
+  "schemaVersion": 1,
+  "id": "cms_e7640e8a433408fe",
+  "slug": "ups-cikis-kisa-devre-akimi-selektivite-kesici-kabul",
+  "contentType": "guide",
+  "state": "published",
+  "locale": "tr-TR",
+  "title": "UPS Çıkışı Kısa Devre Akımı ve Kesici Selektivite Kabulü",
+  "h1": "UPS çıkışında kısa devre koruması ve selektivite nasıl doğrulanır?",
+  "description": "UPS inverter, akü ve bypass modlarında kısa devre akımını kesici eğrileriyle eşleştirin; kritik yük selektivitesini kabul dosyasıyla kanıtlayın.",
+  "intent": "UPS çıkışındaki alt devre arızasında doğru kesicinin, UPS kapanmadan veya sağlıklı kritik yükleri kesmeden arızayı temizleyebildiğini bütün çalışma modlarında kanıtlamak.",
+  "primaryKeyword": "UPS kısa devre selektivite testi",
+  "audience": [
+    "Kritik tesis ve veri merkezi yöneticileri",
+    "Otel teknik ekipleri",
+    "Elektrik mühendisleri",
+    "UPS devreye alma firmaları",
+    "Pano ve koruma koordinasyon ekipleri"
+  ],
+  "riskClass": "high",
+  "directAnswer": "UPS çıkışındaki kısa devre koruması yalnız şebeke kısa devre hesabıyla seçilemez. İnverter ve akü modunda UPS akımı sınırlı ve zamana bağlı verir; statik veya bakım bypassında ise upstream kaynağın daha yüksek arıza akımı devreye girer. Alt kesicinin zaman-akım eğrisi, UPS’nin mod bazlı akım-zaman verisi, kablo empedansı ve üst kesiciyle birlikte değerlendirilmelidir. Kabul hedefi, arızaya en yakın kesicinin UPS kapanmadan veya sağlıklı yükleri kesmeden açmasıdır; kontrolsüz kısa devre testi yapılmaz.",
+  "sections": [
+    {
+      "id": "kaynak-modlari",
+      "heading": "UPS kısa devre akımı neden şebeke kısa devre akımı gibi ele alınamaz?",
+      "paragraphs": [
+        "UPS çıkışındaki arıza akımı kaynağa ve zamana bağlıdır. İnverter veya akü modunda güç elektroniği akımı sınırlayabilir ve belirli süre sonra çıkışı kapatabilir; statik bypass ya da bakım bypassında ise arıza akımı upstream şebeke, trafo ve kablo empedansıyla çok daha yüksek olabilir. Bu yüzden tek bir “kA” değeri bütün çalışma modlarını temsil etmez.",
+        "IEC 62040-3 tamamlanmış UPS ve onunla çalışan anahtarların performans ve test gereklerini tanımlar. Üretici tabloları modele özgü kısa devre davranışını verir: örneğin Galaxy PW 60 kVA için 60 ms’de 273 A çıkış kısa devre akımı belirtilirken aynı tabloda 10 kA maksimum kısa devre ratingi bulunur. Akım üretme kabiliyeti ile ekipmanın dayanım/rating değeri aynı kavram değildir."
+      ],
+      "bullets": [
+        "Normal, akü, statik bypass ve bakım bypass modlarını ayrı kaynak olarak çizin.",
+        "İnverter kısa devre akımını kA dayanım değeriyle karıştırmayın.",
+        "Üreticinin akım-zaman veya önerilen kesici tablosunu model bazında alın.",
+        "Tek hat üzerinde arıza noktasından kaynağa bütün empedansları gösterin."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "id": "kesici-ve-kablo",
+      "heading": "Alt kesici UPS’nin akım sınırlamasıyla nasıl koordine edilir?",
+      "paragraphs": [
+        "Alt devre kesicisinin manyetik veya elektronik açma eşiği, UPS’nin sağlayabildiği arıza akımına hiç ulaşmıyorsa kesici beklenen sürede açmayabilir; UPS akım limitine girip tüm çıkışı kapatabilir. Diğer uçta, bypass modundaki yüksek kısa devre akımı kesicinin kesme kapasitesi, kablo termik dayanımı ve pano kısa devre dayanımıyla uyumlu olmalıdır.",
+        "Kabul hesabı; beklenen minimum ve maksimum arıza akımı, arıza çevrim empedansı, iletken uzunluğu-kesiti, UPS’nin zamana bağlı akım limiti, alt ve üst kesicilerin zaman-akım eğrileri ve üretici koordinasyon tablolarını birlikte kullanmalıdır. Ayarlanabilir elektronik trip ünitesi varsa kısa zaman ve ani açma değerleri, upstream–downstream ayrımı bozulmadan belirlenmelidir."
+      ],
+      "bullets": [
+        "En uzak devrede minimum arıza akımını hesaplayın veya ölçümle doğrulayın.",
+        "Bypass kaynağında maksimum kısa devre akımını ve kesme kapasitesini karşılaştırın.",
+        "Kablo termik dayanımı ile kesicinin I²t davranışını birlikte inceleyin.",
+        "Kesici ayarını yalnız nominal UPS akımının katı olarak seçmeyin."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "id": "selektivite",
+      "heading": "UPS çıkışında selektivite hangi sonuçla kabul edilir?",
+      "paragraphs": [
+        "Selektivitenin hedefi, alt devredeki arızada yalnız arızaya en yakın koruma cihazının açması ve sağlıklı kritik yüklerin enerjili kalmasıdır. Eaton’ın tanımı da seçici koordinasyonu, downstream aşırı akım cihazının arızayı temizlemesi ve upstream cihazın kapalı kalması olarak açıklar. UPS tarafında buna, inverter akım limitinin ve statik bypass transfer mantığının etkisi eklenir.",
+        "Zaman-akım eğrileri yalnız şebeke modunda değil, inverter ve akü modundaki sınırlı akımla da karşılaştırılmalıdır. Alt kesici açmadan UPS çıkışı kapanıyor, statik bypassa transfer oluyor veya upstream kesici bütün barayı kesiyorsa hedeflenen süreklilik sağlanmıyordur. Tam selektivite mümkün değilse sınır akımı, süre ve etkilenen yükler raporda açıkça yazılmalıdır."
+      ],
+      "bullets": [
+        "Her alt devre için hedeflenen açacak cihazı tanımlayın.",
+        "İnverter ve bypass modlarında eğri/akım-zaman karşılaştırması yapın.",
+        "UPS kapanma veya transfer eşiğini kesici açma süresiyle karşılaştırın.",
+        "Kısmi selektivite varsa geçerli akım sınırını rapora yazın."
+      ],
+      "sourceRefs": [
+        "S3",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "id": "guvenli-fonksiyon-testi",
+      "heading": "Kısa devre ve selektivite nasıl güvenli test edilmelidir?",
+      "paragraphs": [
+        "Kontrolsüz biçimde iletkenleri kısa devre etmek kabul yöntemi değildir. Öncelik; üretici test raporu, doğrulanmış kısa devre hesabı, koruma yazılımı ve kesici koordinasyon tablolarıdır. Fonksiyon doğrulaması gerekiyorsa ikincil enjeksiyon, kesici trip testi, özel düşük enerjili test düzeni veya üreticinin onayladığı yük bankası/prosedür yetkin ekip ve risk analiziyle kullanılır.",
+        "Kayıtta arıza simülasyonu başlama anı, UPS modu, çıkış RMS ve tepe akımı, çıkış gerilimi, kesici açma süresi, statik bypass transferi, UPS alarmı ve upstream cihaz durumu aynı zaman tabanında gösterilmelidir. Test, kritik yükler ayrılmış veya kontrollü yedekleme sağlanmış durumda yapılmalı; koruma fonksiyonları geçici olarak devre dışı bırakılmamalıdır."
+      ],
+      "bullets": [
+        "Önce hesap, üretici eğrisi ve ikincil enjeksiyonla doğrulama yapın.",
+        "Canlı çıkışta kontrolsüz kısa devre oluşturmayın.",
+        "UPS olay kaydı ile kesici trip zamanını senkron kaydedin.",
+        "Kritik yük ve geri dönüş planı olmadan saha testi başlatmayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S4"
+      ]
+    },
+    {
+      "id": "kabul-dosyasi",
+      "heading": "UPS kısa devre–selektivite kabul dosyasında neler bulunmalıdır?",
+      "paragraphs": [
+        "Dosya; UPS modeli, güç ve firmware, tek/çift giriş mimarisi, inverter-akü-bypass kısa devre verileri, SCCR/dayanım değerleri, upstream ve downstream kesici modelleri/ayarları, kablo bilgileri, minimum-maksimum arıza hesabı, zaman-akım eğrileri, selektivite tablosu, test kayıtları ve geçti-kaldı sonucunu içermelidir. Paralel UPS sistemlerinde ortak bypass ve her modülün katkısı ayrıca incelenmelidir.",
+        "Sonuç yalnız “kesici açtı” olmamalıdır: hangi cihazın kaç milisaniyede açtığı, UPS’nin kapanıp kapanmadığı, diğer yüklerde gerilim çukuru oluşup oluşmadığı ve bypassa transfer sonucu yazılmalıdır. Mevcut kesiciler bütün modlarda hedefi kanıtla karşılıyorsa gereksiz kesici veya UPS büyütmesi yapılmamalıdır. CTA: kişisel verisiz UPS kaynak-modu–kesici–eğri kabul matrisini yetkin mühendislik ekibine iletin."
+      ],
+      "bullets": [
+        "Akım üretme kabiliyeti, SCCR ve kesme kapasitesini ayrı sütunlarda tutun.",
+        "Her çalışma modu için minimum ve maksimum arıza akımını yazın.",
+        "Kısmi selektivitenin sınırını ve etkilenen kritik yükleri belirtin.",
+        "Kanıt yeterliyse gereksiz kesici veya UPS değişimi satın almayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S4",
+        "S5"
+      ]
+    }
+  ],
+  "faqs": [
+    {
+      "question": "UPS çıkışında kısa devre olursa sigorta mutlaka hemen açar mı?",
+      "answer": "Hayır. İnverterin akım limiti kesicinin ani açma eşiğinin altında kalabilir; UPS önce kapanabilir veya bypassa transfer olabilir. Modelin akım-zaman verisi ile kesici eğrisi birlikte incelenmelidir.",
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "question": "UPS üzerindeki 10 kA değeri çıkışın 10 kA kısa devre akımı verdiği anlamına mı gelir?",
+      "answer": "Hayır. Bu değer çoğu tabloda kısa devre rating/dayanım bağlamındadır. İnverterin sağlayabildiği çıkış arıza akımı ayrı ve zamana bağlı bir değerdir; örneğin üretici 60 ms için amper cinsinden ayrıca veri verebilir.",
+      "sourceRefs": [
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "question": "UPS devresinde B eğrisi mi C eğrisi mi kullanılmalı?",
+      "answer": "Evrensel tek cevap yoktur. Yükün kalkış akımı, UPS’nin minimum arıza akımı, kesici açma eğrisi, kablo ve bypass modu birlikte hesaplanmalı; üretici koordinasyon tabloları esas alınmalıdır.",
+      "sourceRefs": [
+        "S1",
+        "S4"
+      ]
+    },
+    {
+      "question": "Selektivite testi için gerçek kısa devre yapılır mı?",
+      "answer": "Kontrolsüz kısa devre yapılmaz. Hesap, üretici tabloları, yazılım ve ikincil enjeksiyon önceliklidir; gerekiyorsa üretici onaylı kontrollü test düzeni risk analizi ve yetkin ekiple uygulanır.",
+      "sourceRefs": [
+        "S1",
+        "S4",
+        "S5"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "publisher": "IEC",
+      "title": "IEC 62040-3:2021 — UPS performance and test requirements",
+      "url": "https://webstore.iec.ch/en/publication/60140",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Tamamlanmış UPS ve sürekliliği sağlayan UPS anahtarları için performans, sınıflandırma ve test gereklerini tanımlar."
+    },
+    {
+      "id": "S2",
+      "publisher": "Schneider Electric",
+      "title": "Galaxy PW 60 kVA UPS technical specifications",
+      "url": "https://www.productinfo.schneider-electric.com/galaxypw/viewer?docidentity=SpecificationsFor60KVAUPS33-8A4EF122&extension=xml&lang=en&manualidentity=InstallationGalaxyPW2ndGen10-200KVA-89D560DB",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "60 kVA model için 60 ms çıkış kısa devre akımı, maksimum kısa devre ratingi, bypass ve aşırı yük verilerini ayrı olarak yayımlar."
+    },
+    {
+      "id": "S3",
+      "publisher": "Schneider Electric",
+      "title": "Galaxy VS 400 V technical specifications — short-circuit capability",
+      "url": "https://productinfo.se.com/galaxyvs_iec/viewer?docidentity=Bravo1.2_Specifications400V-7873864A&extension=xml&lang=en&manualidentity=TechnicalSpecificationsGalaxyVSUPSW-72242CF8",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "İnverter kısa devre kabiliyetinin süreye göre değiştiğini ve bypass davranışının ayrı değerlendirilmesi gerektiğini gösteren model verilerini sunar."
+    },
+    {
+      "id": "S4",
+      "publisher": "Schneider Electric",
+      "title": "Selectivity, Cascading and Coordination Guide 2025",
+      "url": "https://www.se.com/in/en/download/document/LVPED318033EN/",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Alçak gerilim kesicilerinde aşırı yük ve kısa devre için selektivite, cascading ve koordinasyon tablolarını sunar."
+    },
+    {
+      "id": "S5",
+      "publisher": "Eaton",
+      "title": "Low-voltage switchgear fundamentals — selective coordination",
+      "url": "https://www.eaton.com/us/en-us/products/low-voltage-power-distribution-control-systems/switchgear-lv/low-voltage-switchgear-fundamentals---eaton.html",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Seçici koordinasyonu, arızaya en yakın downstream cihazın açması ve upstream cihazın kapalı kalması hedefiyle açıklar."
+    }
+  ],
+  "internalLinks": [
+    {
+      "label": "UPS bypass modu nedir?",
+      "path": "/haberler/ups-bypass-modu-nedir-neden-gecer",
+      "reason": "İnverter ve bypass kaynaklarının kısa devre davranışını ayırır."
+    },
+    {
+      "label": "Online, line-interactive ve offline UPS farkı",
+      "path": "/haberler/ups-online-line-interactive-offline-farki",
+      "reason": "UPS topolojisinin akım sınırlama ve transfer davranışına etkisini açıklar."
+    },
+    {
+      "label": "Paralel UPS N+1 yedeklilik",
+      "path": "/haberler/paralel-ups-n-arti-1-yedeklilik-nedir",
+      "reason": "Birden fazla modülün arıza katkısı ve ortak bypass bağlamını tamamlar."
+    },
+    {
+      "label": "UPS şebeke varken bataryaya geçiyor",
+      "path": "/haberler/ups-sebeke-varken-bataryaya-geciyor",
+      "reason": "Koruma açmasını gerilim/frekans dışı transfer olaylarından ayırır."
+    },
+    {
+      "label": "UPS ve jeneratör birlikte çalışır mı?",
+      "path": "/haberler/jenerator-ups-birlikte-calisir-mi",
+      "reason": "Bypass kaynağı jeneratör olduğunda kısa devre ve selektivite sınırını tamamlar."
+    },
+    {
+      "label": "Elektrik sürekliliği pasaportu",
+      "path": "/hesaplama/elektrik-surekliligi-pasaportu/",
+      "reason": "Kesici, UPS ve test kanıtlarını kişisel verisiz dosyada toplar."
+    },
+    {
+      "label": "Kurumsal ön değerlendirme",
+      "path": "/kurumsal-elektrik-surekliligi-on-degerlendirme",
+      "reason": "Kritik yüklerde kısa devre hesabı ve saha kabulünü profesyonel çalışmaya taşır."
+    }
+  ],
+  "commerce": {
+    "enabled": false,
+    "policy": "none",
+    "category": null
+  },
+  "editorial": {
+    "createdBy": "ai-assisted",
+    "model": "gpt-5.6-thinking",
+    "humanReviewRequired": true,
+    "approvedBy": "ozaneryavuz",
+    "approvedAt": "2026-08-03T12:23:03Z",
+    "publishedAt": "2026-08-03T12:23:04Z",
+    "approvalPr": 792
+  },
+  "seo": {
+    "canonicalPath": "/haberler/ups-cikis-kisa-devre-akimi-selektivite-kesici-kabul",
+    "robots": "index,follow,max-image-preview:large",
+    "lastModified": "2026-08-03",
+    "topics": [
+      "UPS",
+      "kısa devre akımı",
+      "selektivite",
+      "kesici koordinasyonu",
+      "statik bypass",
+      "inverter akım limiti",
+      "kritik yük"
+    ]
+  },
+  "quality": {
+    "score": 88,
+    "minimumRequired": 85,
+    "checks": {
+      "metadata": false,
+      "directAnswer": true,
+      "contentDepth": true,
+      "sources": true,
+      "safety": true,
+      "internalLinks": true,
+      "uniqueness": true,
+      "structuredData": true
+    },
+    "similarity": {
+      "maximum": 0.4286,
+      "closestPath": "https://www.alo186.com/haberler/ups-cikis-kisa-devre-akimi-sigorta-selektivite"
+    }
+  }
+}
