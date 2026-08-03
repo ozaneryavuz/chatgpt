@@ -1,0 +1,48 @@
+name: ALO186 affiliate kapsam kapısı v229
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/**'
+      - 'alo186/deployment/routing-overlays/**'
+      - 'alo186/deployment/affiliate-scope-policy-v229.json'
+      - 'alo186/tests/test_affiliate_scope_policy_v229.py'
+      - '.github/workflows/alo186-affiliate-scope-v229.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/deployment/affiliate-scope-policy-v229.json'
+      - 'alo186/tests/test_affiliate_scope_policy_v229.py'
+      - '.github/workflows/alo186-affiliate-scope-v229.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-affiliate-scope-v229-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Politika öz testi
+        run: python alo186/tests/test_affiliate_scope_policy_v229.py --self-test
+      - name: Değişen affiliate rotalarını fail-closed doğrula
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin "${GITHUB_BASE_REF}" --depth=1
+          git diff --name-only "origin/${GITHUB_BASE_REF}...HEAD" > /tmp/alo186-affiliate-changed.txt
+          cat /tmp/alo186-affiliate-changed.txt
+          python alo186/tests/test_affiliate_scope_policy_v229.py \
+            --changed-files /tmp/alo186-affiliate-changed.txt
