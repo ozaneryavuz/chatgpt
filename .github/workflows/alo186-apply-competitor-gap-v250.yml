@@ -1,0 +1,116 @@
+name: ALO186 competitor-gap ve affiliate v250 uygula
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/alo186-apply-competitor-gap-v250.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: alo186-apply-competitor-gap-v250
+  cancel-in-progress: false
+
+jobs:
+  apply-and-validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Main dalını al
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: v250 postprocessorunu canonical build zincirine bağla
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          from alo186.deployment.inject_competitor_gap_affiliate_v250 import robots
+
+          path=Path('alo186/deployment/build_static_site.py')
+          text=path.read_text(encoding='utf-8')
+          import_block='''try:\n    from .inject_competitor_gap_affiliate_v250 import apply as _apply_competitor_gap_v250\nexcept ImportError:\n    from inject_competitor_gap_affiliate_v250 import apply as _apply_competitor_gap_v250\n\n'''
+          if '_apply_competitor_gap_v250' not in text:
+              anchor='ACCESSIBILITY_MARKER = '
+              if anchor not in text:
+                  raise SystemExit('build_static_site.py import ekleme noktası bulunamadı')
+              text=text.replace(anchor,import_block+anchor,1)
+
+          old='''    release = _original_build(repo_root, output, commit_sha)\n    commercial_report = normalize_commercial_hub_urls(output)\n'''
+          new='''    release = _original_build(repo_root, output, commit_sha)\n    competitor_gap_report = _apply_competitor_gap_v250(repo_root, output)\n    commercial_report = normalize_commercial_hub_urls(output)\n'''
+          if 'competitor_gap_report = _apply_competitor_gap_v250' not in text:
+              if old not in text:
+                  raise SystemExit('build_static_site.py build çağrısı bulunamadı')
+              text=text.replace(old,new,1)
+
+          old_keys='''    release["commercialCanonicalV217"] = commercial_report\n    release["accessibilityHardeningV215"] = accessibility_report\n'''
+          new_keys='''    release["commercialCanonicalV217"] = commercial_report\n    release["accessibilityHardeningV215"] = accessibility_report\n    release["competitorGapAffiliateV250"] = competitor_gap_report\n'''
+          if 'release["competitorGapAffiliateV250"]' not in text:
+              if old_keys not in text:
+                  raise SystemExit('build_static_site.py release kayıt noktası bulunamadı')
+              text=text.replace(old_keys,new_keys,1)
+
+          path.write_text(text,encoding='utf-8')
+          robots(Path('alo186'))
+          PY
+
+      - name: Schema, SSR, affiliate ve robots regresyonları
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            alo186/deployment/inject_competitor_gap_affiliate_v250.py \
+            alo186/deployment/build_static_site.py \
+            alo186/tests/test_competitor_gap_affiliate_v250.py
+          python -m alo186.tests.test_competitor_gap_affiliate_v250
+
+      - name: Canonical üretim ve smoke testi
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-v250
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-v250 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-v250
+          test -f /tmp/alo186-v250/alo186-competitor-gap-affiliate-v250.json
+          grep -q 'data-alo186-schema-v250="true"' /tmp/alo186-v250/amazon-elektrik-urunleri/kombi-yedek-enerji-urun-secici/index.html
+          grep -q 'data-alo186-service-catalog-v250="true"' /tmp/alo186-v250/edas-bul/index.html || grep -q 'data-alo186-service-catalog-v250="true"' /tmp/alo186-v250/elektrik-kesintisi/index.html
+          grep -q 'User-agent: GPTBot' /tmp/alo186-v250/robots.txt
+          grep -q 'User-agent: PerplexityBot' /tmp/alo186-v250/robots.txt
+          grep -q 'User-agent: ClaudeBot' /tmp/alo186-v250/robots.txt
+          grep -q 'User-agent: Bytespider' /tmp/alo186-v250/robots.txt
+          grep -q 'User-agent: Google-Extended' /tmp/alo186-v250/robots.txt
+
+      - name: Uyumlu kaynak değişikliklerini main dalına yaz
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add alo186/deployment/build_static_site.py alo186/robots.txt
+          if git diff --cached --quiet; then
+            echo 'v250 build entegrasyonu zaten güncel.'
+            exit 0
+          fi
+          git commit -m 'feat(alo186): competitor-gap v250 üretim zincirini etkinleştir'
+          git push origin HEAD:main
+
+      - name: Doğrulama özeti
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ## ALO186 competitor-gap & affiliate v250
+          - HowTo + ItemList + generic Product semantik grafı: doğrulandı
+          - 81 il Service + 21 Organization kataloğu: doğrulandı
+          - GovernmentService: yalnız gerçek 112 kamu hizmetinde kullanıldı
+          - SSR affiliate ankrajları: sponsored + nofollow + noopener
+          - Fiyat, stok, puan, garanti, Offer ve AggregateRating: eklenmedi
+          - GPTBot, PerplexityBot, ClaudeBot, Bytespider, Google-Extended: açık
+          - Canonical build ve smoke: başarılı
+          EOF
