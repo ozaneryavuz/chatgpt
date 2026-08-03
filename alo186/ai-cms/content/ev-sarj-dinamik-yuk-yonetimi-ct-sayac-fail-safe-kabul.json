@@ -1,0 +1,287 @@
+{
+  "schemaVersion": 1,
+  "id": "cms_3784c2eb7a08b5b8",
+  "slug": "ev-sarj-dinamik-yuk-yonetimi-ct-sayac-fail-safe-kabul",
+  "contentType": "guide",
+  "state": "published",
+  "locale": "tr-TR",
+  "title": "EV Şarj Dinamik Yük Yönetimi: CT ve Fail-Safe Kabulü",
+  "h1": "EV şarj dinamik yük yönetimi CT yönü ve fail-safe nasıl test edilir?",
+  "description": "EV şarj yük yönetiminde CT yönü, faz eşleşmesi, haberleşme kaybı ve güç sınırını gerçek yük adımlarıyla doğrulayan kabul rehberi.",
+  "intent": "Bir veya çoklu wallbox tesisinde dinamik yük yönetiminin ana bağlantı gücünü aşmadan çalıştığını; CT/sayaç faz-yön eşleşmesi, güç sınırı, iletişim kaybı ve güvenli fallback senaryolarıyla kanıtlamak.",
+  "primaryKeyword": "EV şarj dinamik yük yönetimi CT testi",
+  "audience": [
+    "Site ve otel teknik yöneticileri",
+    "EV şarj yatırımcıları",
+    "Elektrik mühendisleri",
+    "Wallbox ve CPMS devreye alma ekipleri",
+    "Enerji yönetimi uzmanları"
+  ],
+  "riskClass": "high",
+  "directAnswer": "Dinamik yük yönetimi yalnız ekranda bir amper sınırı görünmesiyle kabul edilmez. Ana giriş CT’leri veya sayacı doğru faz ve yönde okumalı, şarj gücü gerçek bina yüküyle birlikte tanımlı bağlantı sınırını aşmamalı ve ölçüm ya da haberleşme kaybında sistem güvenli bir yerel sınıra dönmelidir. Kabul; faz bazlı P/I, CT yönü, sayaç çarpanı, setpoint–gerçek güç, yük adımı tepkisi ve fail-safe olay kaydıyla yapılır. Enerjili CT ve pano testleri yalnız yetkin ekipçe yürütülmelidir.",
+  "sections": [
+    {
+      "id": "mimari-ve-olcum-noktasi",
+      "heading": "Dinamik yük yönetiminde hangi ölçüm noktası esas alınmalıdır?",
+      "paragraphs": [
+        "Dinamik yük yönetiminin amacı yalnız wallbox akımını azaltmak değil, tesisin bağlantı noktasındaki toplam yükü tanımlı kapasite içinde tutmaktır. Bu nedenle ana giriş, alt dağıtım veya yalnız şarj panosu ölçümü birbirinin yerine kullanılamaz. Ölçüm sınırı tek hat üzerinde işaretlenmeli; bina yükleri, GES üretimi, batarya, jeneratör ve tüm şarj noktalarının hangi tarafta kaldığı açıkça gösterilmelidir.",
+        "IEC 60364-7-722 EV besleme devrelerinin tesis gereklerini, IEC 61851-1 ise iletken şarj ekipmanının genel güvenlik ve çalışma çerçevesini tanımlar. OSCP, fiziksel şebeke kapasitesinin işletmeci arka ofisine bildirilip şarj profillerinin bu sınırlar içinde oluşturulması yaklaşımını açıklar. Saha kabulünde protokol adı kadar ölçüm noktasının gerçekten bağlantı sınırını temsil etmesi önemlidir."
+      ],
+      "bullets": [
+        "Ana bağlantı gücünü, sözleşme/koruma sınırını ve ölçüm noktasını tek hatta gösterin.",
+        "Ana giriş ile şarj panosu ölçümünü ayrı isimlendirin.",
+        "GES, BESS ve jeneratörün ölçüm sınırına göre işaretini doğrulayın.",
+        "Etiket gücünü gerçek kullanılabilir kapasite sanmayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "id": "ct-faz-yon-ve-sayac",
+      "heading": "CT yönü, faz sırası ve sayaç çarpanı nasıl doğrulanır?",
+      "paragraphs": [
+        "Ters takılmış bir CT, yanlış faz eşleştirmesi veya hatalı sayaç çarpanı tüketimi üretim gibi gösterebilir ve algoritmanın şarj gücünü artırması gereken anda azaltmasına ya da sınırı aşmasına neden olabilir. Her CT’nin P1/P2 veya ok yönü, bağlı olduğu faz, sekonder oranı ve sayaç kanal eşleşmesi fiziksel etiket ve kontrollü yük değişimiyle doğrulanmalıdır.",
+        "Doğrulama yalnız toplam üç faz kW değerine bakılarak yapılmamalıdır. Tek fazlı kontrollü bir yük adımı uygulandığında doğru fazın aktif gücü ve akımı beklenen yönde değişmeli; diğer fazlar yanlış tepki vermemelidir. İhracat/ithalat işareti, GES üretimi ve EV şarjı aynı anda varken ayrıca kontrol edilmelidir. CT sekonderine enerjili durumda gelişigüzel müdahale edilmez."
+      ],
+      "bullets": [
+        "Her CT’nin oranını, yönünü, fazını ve sayaç kanalını kaydedin.",
+        "Faz bazlı kontrollü yük adımıyla P ve I değişimini karşılaştırın.",
+        "İthalat ve ihracat işaretini GES açık ve kapalı senaryoda doğrulayın.",
+        "CT sekonderini açık devre bırakmayın veya kullanıcı işlemi olarak sunmayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "id": "setpoint-ve-yuk-adimi",
+      "heading": "Setpoint ile gerçek şarj gücü hangi testlerle karşılaştırılmalıdır?",
+      "paragraphs": [
+        "Kabul testi düşük, tipik ve yüksek bina yükünde yapılmalıdır. Bir klima grubu, pompa veya başka büyük yük devreye girdiğinde kontrolörün yeni kullanılabilir kapasiteyi hesaplama süresi, wallboxlara gönderdiği setpoint ve bağlantı noktasındaki gerçek P/I ortak zaman tabanında izlenmelidir. Sadece uygulamadaki komut değeri, aracın gerçekten o güçte şarj ettiğini kanıtlamaz.",
+        "OCPP 1.6 akıllı şarj profilleriyle yük dengeleme desteği sunar; OCPP 2.0.1 ve 2.1 daha gelişmiş akıllı şarj ve DER işlevleri sağlar. Ancak protokol desteği, saha limitinin doğru uygulandığı anlamına gelmez. Araç kabul sınırı, faz sayısı, minimum şarj akımı ve CPMS gecikmesi nedeniyle gerçek güç setpointten farklı olabilir; geçti-kaldı kriteri bağlantı noktası sınırına göre kurulmalıdır."
+      ],
+      "bullets": [
+        "En az üç bina yük düzeyinde test yapın.",
+        "Setpoint, wallbox ölçümü ve ana sayaç P/I değerlerini aynı zaman çizelgesine alın.",
+        "Tek ve çoklu araç senaryolarını ayrı sınayın.",
+        "Kısa süreli aşım, salınım ve kararlı hata için proje kriteri tanımlayın."
+      ],
+      "sourceRefs": [
+        "S3",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "id": "haberlesme-kaybi-fallback",
+      "heading": "Sayaç veya haberleşme kaybında fail-safe nasıl çalışmalıdır?",
+      "paragraphs": [
+        "Sayaç verisi donarsa, CT haberleşmesi kesilirse, CPMS erişilemez olursa veya zaman damgası bayatlarsa sistem son yüksek setpointte kontrolsüz kalmamalıdır. Tasarım, yerel güvenli akım sınırı, şarjın kontrollü durdurulması veya önceden doğrulanmış başka bir fallback davranışı tanımlamalıdır. Hangi davranışın doğru olduğu tesis kapasitesine ve ürün mimarisine bağlıdır.",
+        "OSCP 2.0 tüketim, üretim ve fallback tahminleri ile hata mesajlarını kapsayan daha genel bir kapasite iletişimi tanımlar. OCPP tarafında da cihaz yönetimi, izleme ve akıllı şarj işlevleri bulunur. Kabulde fiziksel haberleşme kablosu, ağ, sayaç beslemesi ve arka ofis ayrı ayrı kesinti senaryosuna alınmalı; alarm, yerel limit, yeniden bağlantı ve setpoint toparlanması kaydedilmelidir."
+      ],
+      "bullets": [
+        "Sayaç verisi bayatlık eşiğini ve alarmını doğrulayın.",
+        "Yerel fail-safe akımını proje kapasitesiyle eşleştirin.",
+        "CPMS, sayaç ve ağ kaybını ayrı senaryolarda sınayın.",
+        "Haberleşme geri geldiğinde ani güç sıçramasını engelleyin."
+      ],
+      "sourceRefs": [
+        "S3",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "id": "kabul-dosyasi",
+      "heading": "Dinamik yük yönetimi hangi kabul dosyasıyla teslim alınmalıdır?",
+      "paragraphs": [
+        "Teslim paketi; tek hat, bağlantı gücü ve koruma sınırı, CT/sayaç ürün kodu ve oranı, faz-yön matrisi, GES/BESS işaret mantığı, wallbox ve CPMS sürümleri, setpoint kayıtları, ana sayaç P/I trendi, yük adımı sonuçları, haberleşme kaybı ve fallback senaryoları ile geçti-kaldı kararını içermelidir. Her şarj noktası ve yazılım revizyonu ayrı izlenmelidir.",
+        "Ölçüm ve kontrol kanıtla doğru çalışıyorsa sırf daha yüksek akımlı wallbox veya daha büyük ana sigorta düşüncesiyle yatırım yapmak gerekmez. Buna karşılık yalnız toplam kW ekranı bulunan fakat CT yönü ve fail-safe davranışı kanıtlanmamış sistem kabul edilmemelidir. CTA: kişisel verisiz CT–sayaç–setpoint–yük adımı–fallback kabul matrisini yetkin elektrik mühendisine iletin."
+      ],
+      "bullets": [
+        "Tek hat ve yazılım parametrelerini aynı revizyon numarasıyla saklayın.",
+        "Test cihazı, sayaç oranı ve ortak zaman kaynağını rapora ekleyin.",
+        "Her araç/EVSE için gerçek güç ile komut farkını gösterin.",
+        "Kanıt yeterliyse gereksiz güç artırımı veya wallbox değişimi satın almayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S4",
+        "S5"
+      ]
+    }
+  ],
+  "faqs": [
+    {
+      "question": "Dinamik yük yönetimi varsa ana sigorta hiç açmaz mı?",
+      "answer": "Hayır. Doğru ölçüm, ayar ve fail-safe riski azaltır; ancak yanlış CT yönü, gecikme, haberleşme kaybı veya koruma koordinasyonu eksikliği yine açmaya yol açabilir.",
+      "sourceRefs": [
+        "S1",
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "question": "CT oku ters takılırsa ne olur?",
+      "answer": "Sistem tüketimi yanlış yönde okuyabilir ve kullanılabilir kapasiteyi hatalı hesaplayabilir. Faz-yön eşleşmesi kontrollü yük adımı ve ana sayaçla doğrulanmalıdır.",
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "question": "OCPP desteği dinamik yük yönetiminin çalıştığını kanıtlar mı?",
+      "answer": "Hayır. OCPP akıllı şarj işlevleri sağlar; gerçek CT/sayaç verisi, setpoint uygulaması ve bağlantı noktası sınırı saha testinde ayrıca doğrulanmalıdır.",
+      "sourceRefs": [
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "question": "İnternet kesilirse EV şarj tamamen durmalı mı?",
+      "answer": "Evrensel tek cevap yoktur. Tesis kapasitesine göre güvenli yerel limit, kontrollü duruş veya başka bir fallback tanımlanmalı ve test edilmelidir.",
+      "sourceRefs": [
+        "S3",
+        "S4"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "publisher": "IEC",
+      "title": "IEC 60364-7-722:2018 — Supplies for electric vehicles",
+      "url": "https://webstore.iec.ch/en/publication/29958",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "EV besleme ve geri besleme devrelerinin özel alçak gerilim tesis gereklerini tanımlar."
+    },
+    {
+      "id": "S2",
+      "publisher": "IEC",
+      "title": "IEC 61851-1:2017 — Electric vehicle conductive charging system, general requirements",
+      "url": "https://webstore.iec.ch/en/publication/33644",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "İletken EV şarj sistemi ekipmanlarının genel çalışma, bağlantı ve güvenlik gereklerini kapsar."
+    },
+    {
+      "id": "S3",
+      "publisher": "Open Charge Alliance",
+      "title": "OSCP — Open Smart Charging Protocol",
+      "url": "https://openchargealliance.org/protocols/open-smart-charging-protocol/",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "DSO veya tesis sahibinin fiziksel kapasiteyi bildirmesi ve şarj profillerinin bu kapasite içinde kurulması yaklaşımını açıklar."
+    },
+    {
+      "id": "S4",
+      "publisher": "Open Charge Alliance",
+      "title": "OCPP — Open Charge Point Protocol",
+      "url": "https://openchargealliance.org/protocols/open-charge-point-protocol/",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "OCPP 1.6, 2.0.1 ve 2.1 sürümlerinin akıllı şarj, cihaz yönetimi ve DER kontrol işlevlerini özetler."
+    },
+    {
+      "id": "S5",
+      "publisher": "Open Charge Alliance",
+      "title": "Certification OCPP 1.6",
+      "url": "https://openchargealliance.org/certificationocpp/certification-ocpp-1-6/",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "OCPP 1.6 Smart Charging sertifika profilinin bütün şarj profili türlerini ve stacking işlevini test ettiğini belirtir."
+    }
+  ],
+  "internalLinks": [
+    {
+      "label": "EV şarjında dinamik yük yönetimi",
+      "path": "/haberler/ev-sarjinda-dinamik-yuk-yonetimi",
+      "reason": "Temel kavramı ve ana güç sınırı mantığını kabul testinden önce açıklar."
+    },
+    {
+      "label": "EV şarj cihazı için ev tesisatı uygun mu?",
+      "path": "/haberler/ev-sarj-cihazi-icin-ev-tesisati-uygun-mu",
+      "reason": "Kablo, pano ve bağlantı gücü uygunluğunu yük yönetiminden ayırır."
+    },
+    {
+      "label": "EV şarj uygunluk aracı",
+      "path": "/hesaplama/ev-sarj-uygunluk",
+      "reason": "Kullanıcının temel güç ve tesisat girdilerini güvenli biçimde sınıflandırmasını sağlar."
+    },
+    {
+      "label": "EV şarj süresi hesaplama",
+      "path": "/hesaplama/ev-sarj-suresi",
+      "reason": "Gerçek araç gücü ile teorik süre ilişkisini açıklar."
+    },
+    {
+      "label": "EV şarj kaçak akım koruması",
+      "path": "/haberler/ev-sarj-kacak-akim-rcd-tip-b-rdc-dd-6ma-kabul",
+      "reason": "Yük yönetimini RCD/RDC-DD koruma görevinden ayırır."
+    },
+    {
+      "label": "GES fazlası ile EV şarjı",
+      "path": "/haberler/ges-fazlasi-ile-elektrikli-arac-sarji",
+      "reason": "İthalat-ihracat işareti ve üretim fazlası senaryosunu tamamlar."
+    },
+    {
+      "label": "Kurumsal elektrik sürekliliği ön değerlendirme",
+      "path": "/kurumsal-elektrik-surekliligi-on-degerlendirme",
+      "reason": "Çoklu EVSE ve tesis yüklerinin profesyonel kabul kapsamına taşınmasını sağlar."
+    }
+  ],
+  "commerce": {
+    "enabled": false,
+    "policy": "none",
+    "category": null
+  },
+  "editorial": {
+    "createdBy": "ai-assisted",
+    "model": "gpt-5.6-thinking",
+    "humanReviewRequired": true,
+    "approvedBy": "ozaneryavuz",
+    "approvedAt": "2026-08-03T18:43:31Z",
+    "publishedAt": "2026-08-03T18:43:31Z",
+    "approvalPr": 812
+  },
+  "seo": {
+    "canonicalPath": "/haberler/ev-sarj-dinamik-yuk-yonetimi-ct-sayac-fail-safe-kabul",
+    "robots": "index,follow,max-image-preview:large",
+    "lastModified": "2026-08-03",
+    "topics": [
+      "EV şarj",
+      "dinamik yük yönetimi",
+      "CT yönü",
+      "akıllı şarj",
+      "OCPP",
+      "fail-safe",
+      "yük dengeleme"
+    ]
+  },
+  "quality": {
+    "score": 88,
+    "minimumRequired": 85,
+    "checks": {
+      "metadata": false,
+      "directAnswer": true,
+      "contentDepth": true,
+      "sources": true,
+      "safety": true,
+      "internalLinks": true,
+      "uniqueness": true,
+      "structuredData": true
+    },
+    "similarity": {
+      "maximum": 0.3333,
+      "closestPath": "https://alo186.com/haberler/ev-sarj-dinamik-yuk-yonetimi-ct-sayac-faz-eslesmesi"
+    }
+  }
+}
