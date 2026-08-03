@@ -1,0 +1,169 @@
+name: ALO186 affiliate AEO and structured data v250
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/llms.txt'
+      - 'alo186/robots.txt'
+      - 'alo186/deployment/inject_affiliate_aeo_v250.py'
+      - 'alo186/deployment/validate_affiliate_aeo_v250.py'
+      - 'alo186/deployment/affiliate-aeo-v250.css'
+      - 'alo186/deployment/guard_commerce_routes_v3.py'
+      - 'alo186/tests/test_affiliate_aeo_v250.py'
+      - 'alo186/audits/affiliate-aeo-v250-2026-08-03.md'
+      - '.github/workflows/alo186-affiliate-aeo-v250.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/llms.txt'
+      - 'alo186/robots.txt'
+      - 'alo186/deployment/inject_affiliate_aeo_v250.py'
+      - 'alo186/deployment/validate_affiliate_aeo_v250.py'
+      - 'alo186/deployment/affiliate-aeo-v250.css'
+      - 'alo186/deployment/guard_commerce_routes_v3.py'
+      - 'alo186/tests/test_affiliate_aeo_v250.py'
+      - 'alo186/audits/affiliate-aeo-v250-2026-08-03.md'
+      - '.github/workflows/alo186-affiliate-aeo-v250.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-affiliate-aeo-v250-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+
+      - name: Kaynak sözleşmesi ve birim testleri
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            alo186/deployment/inject_affiliate_aeo_v250.py \
+            alo186/deployment/validate_affiliate_aeo_v250.py \
+            alo186/deployment/guard_commerce_routes_v3.py \
+            alo186/tests/test_affiliate_aeo_v250.py
+          python alo186/tests/test_affiliate_aeo_v250.py
+          grep -q 'import inject_affiliate_aeo_v250 as affiliate_aeo' alo186/deployment/guard_commerce_routes_v3.py
+          grep -q 'affiliate_aeo.inject' alo186/deployment/guard_commerce_routes_v3.py
+          grep -q 'User-agent: OAI-SearchBot' alo186/robots.txt
+          grep -q 'User-agent: GPTBot' alo186/robots.txt
+          grep -q '## Teknik çözüm ve ekipman rehberleri' alo186/llms.txt
+          ! grep -Eq 'actions/(upload-pages-artifact|deploy-pages)' .github/workflows/alo186-affiliate-aeo-v250.yml
+
+      - name: Canonical siteyi oluştur
+        shell: bash
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-v250-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-v250-canonical
+
+      - name: Custom domain ve project path doğrulaması
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/alo186-v250-reports
+          for spec in 'custom|' 'project|/chatgpt'; do
+            name=${spec%%|*}
+            base=${spec#*|}
+            site="/tmp/alo186-v250-${name}"
+            rm -rf "$site"
+            cp -a /tmp/alo186-v250-canonical "$site"
+            python alo186/deployment/prepare_github_pages.py \
+              --site "$site" \
+              --base-path "$base" \
+              --repository "$GITHUB_REPOSITORY" \
+              --commit "$GITHUB_SHA"
+            python alo186/deployment/inject_outcome_runtime.py \
+              --site "$site" \
+              --base-path "$base"
+            python alo186/deployment/smoke_github_pages.py \
+              --site "$site" \
+              --base-path "$base"
+            python alo186/deployment/inject_contextual_affiliate_growth_v177.py \
+              --site "$site" \
+              --base-path "$base"
+            python alo186/deployment/inject_live_quality_hardening_v2.py \
+              --site "$site" \
+              --base-path "$base"
+            python alo186/deployment/inject_home_affiliate_banner_v209.py \
+              --site "$site" \
+              --base-path "$base"
+            python alo186/deployment/inject_affiliate_intent_router_v210.py \
+              --site "$site" \
+              --base-path "$base"
+            python alo186/deployment/inject_ga4_consent.py \
+              --site "$site" \
+              --base-path "$base" \
+              --measurement-id ""
+            python alo186/deployment/inject_affiliate_measurement_v211.py \
+              --site "$site" \
+              --base-path "$base"
+            node --check "$site/assets/affiliate-measurement-v211.js"
+            python alo186/deployment/guard_commerce_routes_v3.py \
+              --site "$site" \
+              | tee "/tmp/alo186-v250-reports/${name}-commerce-guard.json"
+            python alo186/deployment/validate_affiliate_aeo_v250.py \
+              --site "$site" \
+              --base-path "$base" \
+              --report "/tmp/alo186-v250-reports/${name}-structured-data.json"
+            python alo186/deployment/smoke_github_pages.py \
+              --site "$site" \
+              --base-path "$base"
+            python - "$site" "$base" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          site = Path(sys.argv[1])
+          base = sys.argv[2]
+          release = json.loads((site / 'pages-release.json').read_text(encoding='utf-8'))
+          receipt = release.get('affiliateAeoV250') or {}
+          assert receipt.get('version') == 250, receipt
+          assert receipt.get('targetCount') == 8, receipt
+          assert receipt.get('ssrRecommendationCardCount') == 24, receipt
+          assert receipt.get('emittedOfferCount') == 0, receipt
+          assert receipt.get('fakePriceOrStockPublished') is False, receipt
+          assert (site / 'llms.txt').is_file()
+          assert (site / 'robots.txt').is_file()
+          expected = f'{base}/assets/affiliate-aeo-v250.css' if base else '/assets/affiliate-aeo-v250.css'
+          for relative in (
+              'amazon-elektrik-urunleri/tasinabilir-guc-istasyonu-secimi/index.html',
+              'hesaplama/ups-suresi/index.html',
+              'hesaplama/yedek-guc-cozum-secici/index.html',
+              'hesaplama/gerilim-koruma-cozum-secici/index.html',
+              'akilli-urun-secimi/index.html',
+          ):
+              html = (site / relative).read_text(encoding='utf-8')
+              assert html.count('data-alo186-affiliate-aeo-v250="true"') == 1, relative
+              assert expected in html, (relative, expected)
+          print(json.dumps({'ok': True, 'basePath': base, 'version': 250}, ensure_ascii=False))
+          PY
+          done
+
+      - name: Doğrulama raporlarını sakla
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: alo186-affiliate-aeo-v250-validation
+          path: /tmp/alo186-v250-reports
+          if-no-files-found: error
+          retention-days: 30
