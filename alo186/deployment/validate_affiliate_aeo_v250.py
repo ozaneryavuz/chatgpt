@@ -61,24 +61,84 @@ def schema_types(payload: object) -> set[str]:
     return result
 
 
+def parse_robots_groups(text: str) -> dict[str, dict[str, set[str]]]:
+    """Parse robots directives without substring or greedy-regex ambiguity.
+
+    A blank line closes the current group. Consecutive User-agent lines before
+    the first directive share a group, as allowed by the robots protocol.
+    Comments and directive casing are ignored, while path values remain exact.
+    """
+    groups: dict[str, dict[str, set[str]]] = {}
+    current_agents: list[str] = []
+    directives_started = False
+
+    for raw_line in text.splitlines():
+        line = raw_line.split("#", 1)[0].strip()
+        if not line:
+            current_agents = []
+            directives_started = False
+            continue
+
+        key, separator, value = line.partition(":")
+        if not separator:
+            continue
+        key = key.strip().casefold()
+        value = value.strip()
+
+        if key == "user-agent":
+            if directives_started:
+                current_agents = []
+                directives_started = False
+            agent = value.casefold()
+            if not agent:
+                continue
+            if agent not in current_agents:
+                current_agents.append(agent)
+            groups.setdefault(agent, {"allow": set(), "disallow": set()})
+            continue
+
+        if key not in {"allow", "disallow"} or not current_agents:
+            continue
+        directives_started = True
+        for agent in current_agents:
+            groups.setdefault(agent, {"allow": set(), "disallow": set()})[key].add(value)
+
+    return groups
+
+
 def validate_robots(text: str, errors: list[str]) -> None:
-    folded = text.casefold()
+    groups = parse_robots_groups(text)
+    required_paths = (
+        "/",
+        "/rehber/",
+        "/urunler/",
+        "/haberler/",
+        "/hesaplama/",
+        "/amazon-elektrik-urunleri/",
+        "/akilli-urun-secimi",
+    )
+
     for crawler in aeo.AI_CRAWLERS:
-        pattern = re.compile(
-            rf"user-agent:\s*{re.escape(crawler)}\s*(?P<body>.*?)(?=\nuser-agent:|\Z)",
-            re.I | re.S,
-        )
-        match = pattern.search(text)
-        if not match:
+        directives = groups.get(crawler.casefold())
+        if directives is None:
             errors.append(f"robots.txt: {crawler} bloğu eksik")
             continue
-        body = match.group("body").casefold()
-        for path in ("/", "/rehber/", "/urunler/", "/haberler/", "/amazon-elektrik-urunleri/"):
-            if f"allow: {path}" not in body:
+        for path in required_paths:
+            if path not in directives["allow"]:
                 errors.append(f"robots.txt: {crawler} için Allow {path} eksik")
-    if "disallow: /" in folded:
-        errors.append("robots.txt: kök taramayı kapatan Disallow / bulundu")
-    if "sitemap: https://alo186.com/sitemap.xml" not in folded:
+        if "/" in directives["disallow"]:
+            errors.append(f"robots.txt: {crawler} için kök Disallow / bulundu")
+
+    wildcard = groups.get("*")
+    if wildcard and "/" in wildcard["disallow"]:
+        errors.append("robots.txt: wildcard kök taramayı kapatan Disallow / bulundu")
+
+    sitemap_urls = {
+        line.partition(":")[2].strip()
+        for line in text.splitlines()
+        if line.partition(":")[0].strip().casefold() == "sitemap"
+    }
+    if "https://alo186.com/sitemap.xml" not in sitemap_urls:
         errors.append("robots.txt: canonical sitemap satırı eksik")
 
 
