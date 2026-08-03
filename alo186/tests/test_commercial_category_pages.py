@@ -119,9 +119,11 @@ class CommercialCategoryPagesTests(unittest.TestCase):
             self.assertIn(f'href="{route}"', html)
             self.assertTrue(route_file(route).is_file(), route)
         self.assertGreaterEqual(html.count('class="card route-card"'), len(HUB_ROUTES))
-        self.assertIn("18+ karar rotası", html)
+        self.assertIn("Güncel karar rotaları", html)
         self.assertIn("Mevcut sistem yeterliyse satın alma yok", html)
         self.assertIn("Aktif tehlikede satış yolu kapalı", html)
+        self.assertIn("Affiliate açıklaması bağlantıdan önce", html)
+        self.assertNotIn("18+ karar rotası", html)
         self.assertNotIn("9 özel rehber", html)
 
     def test_direct_affiliate_links_are_freshness_gated_and_only_powerbank_is_direct(self) -> None:
