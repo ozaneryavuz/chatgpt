@@ -20,6 +20,21 @@ def normalized(value: str) -> str:
     return value.casefold().replace("ı", "i").replace("ş", "s").replace("ğ", "g").replace("ü", "u").replace("ö", "o").replace("ç", "c")
 
 
+def compatibility_route_is_supported(slug_n: str, text_n: str, policy: dict) -> bool:
+    route_tokens = [normalized(item) for item in policy.get("approvedCompatibilityRouteTokens", [])]
+    if not any(token in slug_n for token in route_tokens):
+        return False
+
+    evidence_tokens = [normalized(item) for item in policy.get("compatibilityEvidenceTokens", [])]
+    evidence_count = sum(token in text_n for token in evidence_tokens)
+    minimum = int(policy.get("compatibilityRequiredEvidenceCount", len(evidence_tokens)))
+    if evidence_count < minimum:
+        return False
+
+    safety_tokens = [normalized(item) for item in policy.get("compatibilityRequiredSafetyTokens", [])]
+    return all(token in text_n for token in safety_tokens)
+
+
 def evaluate_route(slug: str, text: str, policy: dict) -> list[str]:
     slug_n = normalized(slug)
     text_n = normalized(text)
@@ -35,8 +50,12 @@ def evaluate_route(slug: str, text: str, policy: dict) -> list[str]:
     if matched_blocked:
         failures.append(f"genel aksesuar kapsamı yasak: {', '.join(matched_blocked)}")
 
-    if not any(token in slug_n for token in approved):
-        failures.append("rota elektrik güvenliği, enerji sürekliliği, ölçüm veya kritik cihaz görevi taşımıyor")
+    core_scope = any(token in slug_n for token in approved)
+    compatibility_scope = compatibility_route_is_supported(slug_n, text_n, policy)
+    if not core_scope and not compatibility_scope:
+        failures.append(
+            "rota elektrik güvenliği, enerji sürekliliği, ölçüm, kritik cihaz veya kanıtlı bağlantı uyumluluğu görevi taşımıyor"
+        )
 
     disclosure_ok = "affiliate" in text_n or "satis ortakligi" in text_n
     if not disclosure_ok:
@@ -80,7 +99,15 @@ def read_route_text(slug: str) -> str:
 
 def self_test(policy: dict) -> None:
     safe = "Affiliate satış ortaklığı açıklaması. Mevcut çözüm yeterliyse satın alma yapmayın."
+    compatibility = (
+        safe
+        + " USB-C görüntü çıkışı uyumluluk kontrolünde DP Alt Mode veya Thunderbolt desteğini, "
+        "kaynak ile ekran yönünü, hedef çözünürlük ve fiziksel port durumunu doğrulayın. "
+        "Hasarlı veya ısınan portta kullanmayın."
+    )
     assert not evaluate_route("modem-ont-mini-ups-secimi", safe, policy)
+    assert not evaluate_route("usb-c-goruntu-cikisi-displayport-hdmi-uyumluluk-secimi", compatibility, policy)
+    assert evaluate_route("usb-c-goruntu-cikisi-displayport-hdmi-uyumluluk-secimi", safe, policy)
     assert evaluate_route("usb-bellek-dosya-aktarim-secimi", safe, policy)
     assert evaluate_route("webcam-secimi", safe, policy)
     assert evaluate_route("enerji-olcer-secimi", "Mevcut çözüm yeterliyse satın alma yapmayın.", policy)
