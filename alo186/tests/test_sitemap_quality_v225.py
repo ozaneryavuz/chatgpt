@@ -155,13 +155,27 @@ class SitemapQualityTests(unittest.TestCase):
             self.assertEqual(report["removedNoncanonicalCount"], 1)
             self.assertIn("https://alo186.com/old/", report["removedNoncanonical"][0])
 
+    def test_registry_drives_alias_targets(self):
+        self.assertEqual(
+            sitemap_quality.ALIAS_TARGETS[
+                "/haberler/elektrik-gerilimi-dusuk-yuksek-edas-olcum-talebi"
+            ],
+            "/haberler/dusuk-yuksek-voltaj-edas-teknik-kalite-olcumu",
+        )
+        self.assertEqual(
+            sitemap_quality.ALIAS_TARGETS[
+                "/haberler/lifepo4-batarya-sogukta-sarj-edilir-mi"
+            ],
+            "/haberler/lifepo4-dusuk-sicaklikta-sarj-edilir-mi",
+        )
+
     def test_rewrites_internal_alias_hrefs_to_canonical_targets(self):
         with tempfile.TemporaryDirectory() as directory:
             site = Path(directory)
             voltage_alias = "/haberler/elektrik-gerilimi-dusuk-yuksek-edas-olcum-talebi/"
-            voltage_target = "/haberler/priz-gerilimi-neden-220-volttan-farkli-olabilir/"
+            voltage_target = "/haberler/dusuk-yuksek-voltaj-edas-teknik-kalite-olcumu"
             battery_alias = "/haberler/lifepo4-batarya-sogukta-sarj-edilir-mi/"
-            battery_target = "/haberler/lifepo4-bataryalar-kisin-sarj-edilir-mi/"
+            battery_target = "/haberler/lifepo4-dusuk-sicaklikta-sarj-edilir-mi"
 
             self.write_page(
                 site,
@@ -172,16 +186,8 @@ class SitemapQualityTests(unittest.TestCase):
                     f'<a href="https://www.alo186.com{voltage_alias}">Gerilim</a>'
                 ),
             )
-            self.write_page(
-                site,
-                voltage_target,
-                "https://alo186.com" + voltage_target,
-            )
-            self.write_page(
-                site,
-                battery_target,
-                "https://alo186.com" + battery_target,
-            )
+            self.write_page(site, voltage_target, "https://alo186.com" + voltage_target)
+            self.write_page(site, battery_target, "https://alo186.com" + battery_target)
             for alias, target in (
                 (voltage_alias, voltage_target),
                 (battery_alias, battery_target),
