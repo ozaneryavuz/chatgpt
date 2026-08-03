@@ -1,0 +1,18 @@
+{
+  "version": 237,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/kacak-akim-toplam-kacak-butcesi-istenmeyen-acma-teshisi/index.html",
+      "canonicalPath": "/haberler/kacak-akim-toplam-kacak-butcesi-istenmeyen-acma-teshisi",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_c5cda2b158d352af",
+    "humanApproved": true,
+    "approvalPr": 763,
+    "qualityScore": 100
+  }
+}

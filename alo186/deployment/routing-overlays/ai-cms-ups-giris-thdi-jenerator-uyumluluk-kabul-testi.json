@@ -1,0 +1,18 @@
+{
+  "version": 238,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/ups-giris-thdi-jenerator-uyumluluk-kabul-testi/index.html",
+      "canonicalPath": "/haberler/ups-giris-thdi-jenerator-uyumluluk-kabul-testi",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_4845571fde9d7929",
+    "humanApproved": true,
+    "approvalPr": 763,
+    "qualityScore": 100
+  }
+}
