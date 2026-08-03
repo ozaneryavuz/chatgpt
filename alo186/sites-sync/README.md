@@ -1,80 +1,110 @@
-# ALO186 GitHub → ChatGPT Sites kaynak paketi
+# ALO186 GitHub → ChatGPT Sites kaynak otoritesi
 
-Bu dizin, GitHub'daki ALO186 içerik ve yapılandırmasının **ChatGPT Sites'in canlı
-yayın otoritesine uygun** biçimde aktarılması için kontrol düzlemidir.
+Bu dizin, GitHub'daki doğrulanmış ALO186 içeriğinin **ChatGPT Sites canlı yayın
+otoritesine** uygun biçimde aktarılmasında kullanılacak kaynak manifestini ve doğrudan
+`@Sites` uygulama talimatını tutar.
 
-## Mimari
+## Tek mimari
 
 ```text
 GitHub
-  içerik kayıtları + rota envanteri + testler + sürüm + geri alma
-      ↓ doğrulanmış kaynak paketi
+  içerik + veri + rota + test + sürüm + geri alma
+      ↓ alo186-chatgpt-sites-import-<sha> artifactı
 ChatGPT Sites
-  canlı bileşenler + görsel tasarım + özel alan adı + yayın
+  canlı bileşenler + tasarım + özel alan adı + yayın
 ```
 
-GitHub Pages, Natro deploy dosyaları, Actions workflow'ları, testler, Python enjektörleri,
-secretlar ve tanı raporları Sites'e taşınmaz. Sites'e yalnız kullanıcıya değer veren
-canonical içerik, veri, yapılandırılmış veri, doğrulanmış araç mantığı ve yayın politikası gider.
+- Canlı ve görsel sunum otoritesi: **ChatGPT Sites**
+- İçerik, veri, kalite, sürüm ve rollback otoritesi: **GitHub**
+- Canonical origin: `https://alo186.com`
+- DNS: mevcut ChatGPT Sites kayıtları korunur
+- GitHub Pages: özel alan adına bağlanmaz
 
-## Dosyalar
+## Tek artifact üreticisi
 
-- `sites-source-manifest.json`: aktarım katmanları, kaynak otoritesi, güvenlik ve çakışma politikası
-- `sites-import-prompt.md`: Sites bağlantısı bulunan bir konuşmada doğrudan kullanılacak talimat
-- `build_sites_source_package.py`: canonical production bundle'dan güvenli Sites kaynak artifactı üretir
-- `test_sites_source_package.py`: paket kapsamı ve sızıntı korumaları için ağsız regresyon
-- `.github/workflows/alo186-chatgpt-sites-source.yml`: manuel, ilgili main değişiklikleri ve haftalık çalışma
-
-Üretilen artifact:
+Canonical exporter:
 
 ```text
-alo186-chatgpt-sites-source/
+alo186/deployment/export_chatgpt_sites_bundle_v2.py
+```
+
+Politika:
+
+```text
+alo186/deployment/chatgpt-sites-export-policy.json
+```
+
+Workflow:
+
+```text
+.github/workflows/alo186-chatgpt-sites-export.yml
+```
+
+Workflow; ilgili `main` değişikliklerinde, pull requestlerde, manuel çağrıda ve her
+pazartesi 10:20 Europe/Istanbul saatinde şu artifactı üretir:
+
+```text
+alo186-chatgpt-sites-import-<source-sha>
+```
+
+Artifact kapsamı:
+
+```text
+alo186-chatgpt-sites/
 ├── sites-source-manifest.json
 ├── sites-import-prompt.md
-├── route-inventory.json
-├── source-integrity.json
-├── metadata/
-└── public/
+├── SOURCE-AUTHORITY.md
+├── content/pages/           # Sites'e aktarılabilir Markdown içerikler
+├── review/                  # otomatik yayına kapalı inceleme kuyruğu
+├── source/                  # gerekli HTML/JS/CSS ve yerel asset referansları
+├── data/
+│   ├── page-manifest.json
+│   ├── export-stats.json
+│   ├── redirects.json
+│   ├── source-authority.json
+│   └── source-integrity.json
+└── ...
 ```
+
+## Bu dizindeki dosyalar
+
+- `sites-source-manifest.json`: aktarım katmanları, P0/P1/P2 sırası, güvenlik,
+  affiliate, structured data, gizlilik ve çakışma politikası
+- `sites-import-prompt.md`: Sites yazma bağlantısı bulunan konuşmada kullanılacak
+  doğrudan uygulama ve yayın talimatı
 
 ## Taşınan katmanlar
 
 1. Bağımsızlık, güvenlik, kaynak ve affiliate politikaları
 2. Ana karar ve resmî yönlendirme deneyimi
-3. 81 il ve 21 EDAŞ canonical sayfası
-4. Yalnız `published` AI CMS içerikleri
+3. 81 il ve 21 özel EDAŞ canonical sayfası
+4. Yalnız onaylanmış/yayımlanabilir teknik içerikler
 5. Hesaplayıcı ve karar araçlarının deterministik mantığı
 6. Güvenlik kapılı Amazon Türkiye ürün yolları
 7. Robots, sitemap, llms ve bilgi grafiği kaynakları
+8. Redirect ve canonical tekillik haritası
 
 ## Taşınmayan katmanlar
 
-- `.github/`, workflow ve Pages yayın altyapısı
-- `alo186/tests/`, fixture ve raporlar
-- `alo186/deployment/` kaynak kodu
-- API anahtarları, secrets ve hosting erişim bilgileri
-- eski/deprecated hukukî veya ticari iddialar
-- onaysız `review` durumundaki yüksek riskli AI CMS taslakları
+- GitHub Actions ve Pages/Natro deploy altyapısı
+- testler, fixture, rapor ve Python enjektör kaynakları
+- secrets, API anahtarları ve hosting erişimleri
+- eski veya onaysız hukukî/ticari iddialar
+- `review` durumundaki yüksek riskli içerikler
 
-## Üretim
+## Uygulama
 
-```bash
-python alo186/deployment/build_static_site.py \
-  --output /tmp/alo186-canonical \
-  --commit "$(git rev-parse HEAD)"
+Artifact içindeki `sites-import-prompt.md`, Sites bağlantısı bulunan bir konuşmada
+`@Sites` ile uygulanır. Sites'in doğal tasarımı korunur; GitHub'daki statik CSS canlı
+tasarımı körlemesine ezmez. Yeni ve doğrulanmış içerik, veri, schema ve güvenlik
+politikası mevcut Sites bileşenlerine birleştirilir.
 
-python alo186/sites-sync/build_sites_source_package.py \
-  --repo . \
-  --bundle /tmp/alo186-canonical \
-  --source-commit "$(git rev-parse HEAD)" \
-  --out /tmp/alo186-chatgpt-sites-source
-```
+## Tamamlanma ölçütü
 
-Sonra artifact içindeki `sites-import-prompt.md`, Sites yazma bağlantısının bulunduğu
-bir konuşmada `@Sites` ile uygulanır.
+Artifact üretimi canlı yayın değildir. Aktarım yalnız:
 
-## Güven sınırı
+1. `@Sites` değişikliği uyguladığında,
+2. canlı URL doğrulaması geçtiğinde,
+3. kaynak commit ve içerik fingerprint'i içeren `sites-receipt.json` oluştuğunda
 
-Bu paket belgelenmemiş Sites API'si kullanmaz ve kendi başına canlı yayın yapmaz.
-Canlı yayın yalnız kullanıcı tarafından açıkça çağrılan ChatGPT Sites yazma yüzeyinde yapılır.
-Yayın tamamlanmadan “Sites'e aktarıldı” iddiası üretilemez; makbuz ve canlı rota doğrulaması gerekir.
+başarılı kabul edilir. Belgelenmemiş Sites API'si kullanılmaz.
