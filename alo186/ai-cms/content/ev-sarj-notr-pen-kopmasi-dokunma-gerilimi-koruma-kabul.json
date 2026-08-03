@@ -1,0 +1,290 @@
+{
+  "schemaVersion": 1,
+  "id": "cms_05b9757f1c792cf6",
+  "slug": "ev-sarj-notr-pen-kopmasi-dokunma-gerilimi-koruma-kabul",
+  "contentType": "guide",
+  "state": "published",
+  "locale": "tr-TR",
+  "title": "EV Şarjda Nötr/PEN Kopması ve Dokunma Gerilimi Koruması",
+  "h1": "EV şarj noktasında nötr veya PEN kopması riski nasıl kabul edilir?",
+  "description": "EV şarjda nötr/PEN kopması riskini, topraklama sistemini, tam kutuplu ayırmayı ve dokunma gerilimi korumasını kanıta dayalı kabul edin.",
+  "intent": "Konut, site veya işletmedeki AC EV şarj noktasında nötr ya da birleşik PEN iletkeni arızasının araç gövdesinde tehlikeli dokunma gerilimi oluşturma riskini; şebeke sistemi, koruma yöntemi ve güvenli fonksiyon testiyle doğrulamak.",
+  "primaryKeyword": "EV şarj PEN kopması koruması",
+  "audience": [
+    "EV şarj yatırımcıları",
+    "Site ve apartman yöneticileri",
+    "Otel teknik ekipleri",
+    "Elektrik mühendisleri",
+    "Wallbox kurulum ve devreye alma ekipleri"
+  ],
+  "riskClass": "high",
+  "directAnswer": "EV şarj noktasında nötr veya PEN kopması koruması, yalnız wallbox üzerinde ‘PEN koruması var’ etiketi görülerek kabul edilmez. Önce tesisin TT, TN-S veya TN-C-S gibi topraklama ve besleme düzeni doğrulanır; ardından cihazın tam modeline ait koruma yöntemi, hangi iletkenleri ayırdığı, hata algılama sınırları, kontaktör geri bildirimi ve yeniden başlatma davranışı belgelenir. Birleşik PEN iletkeni bulunmayan tesislerde open PEN çözümü otomatik gereklilik değildir. Enerjili EVSE, dağıtım panosu ve ölçüm elektroduna yalnız yetkin ekip müdahale etmelidir.",
+  "sections": [
+    {
+      "id": "sistem-tipi",
+      "heading": "Önce TT, TN-S ve TN-C-S/PEN sistemi nasıl ayrılır?",
+      "paragraphs": [
+        "Open PEN arızası, koruma ile nötr işlevinin dağıtım tarafında aynı iletkende birleştiği düzenlerle ilişkilidir. Bu iletken açık devre olurken faz enerjili kalırsa koruma iletkenine bağlı araç gövdesi ve diğer erişilebilir metal bölümler gerçek toprağa göre tehlikeli bir potansiyele taşınabilir. IEC 60364-7-722 EV besleme devrelerinin özel tesis gereklerini, IEC 60364-4-41 ise TN, TT ve IT düzenlerinde elektrik çarpmasına karşı temel korumayı ele alır.",
+        "Türkiye’de her tesisin şebeke ve topraklama düzeni aynı değildir. Proje, tek hat, dağıtım şirketi bağlantı bilgisi, ana pano N–PE düzeni ve saha ölçümü birlikte okunmadan tesise ‘PEN var’ veya ‘TT’dir’ denmemelidir. Haricî elektrot bulunması tek başına TT sistemi kanıtlamaz; nötr ve koruma iletkenlerinin hangi noktada ayrıldığı izlenmelidir."
+      ],
+      "bullets": [
+        "Tek hat üzerinde şebeke, nötr, PE ve varsa PEN ayrım noktasını gösterin.",
+        "Ana pano ile EVSE arasındaki N ve PE sürekliliğini belgeleyin.",
+        "Toprak elektrodunu sistem tipinin tek kanıtı saymayın.",
+        "Dağıtım şirketi ekipmanına ve mühürlü bölümlere müdahale etmeyin."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "id": "koruma-yontemi",
+      "heading": "Koruma cihazının hangi arızayı algıladığı nasıl doğrulanır?",
+      "paragraphs": [
+        "IEC 61851-1, EVSE’nin çalışma koşulları ve elektriksel güvenlik gerekleri için genel çerçeve sağlar. Open PEN algılama cihazları birleşik koruma-nötr iletkenindeki kopmayı algılayıp aracın tehlikeli metal bölümlerini beslemeden ayırmayı amaçlar. IET 01:2024 bu cihazların üretici ve kurulum tarafındaki davranışına yönelik standartlaştırılmış test yaklaşımı sunar; ancak bu Birleşik Krallık kaynağı Türkiye’deki proje ve mevzuatın yerine geçmez.",
+        "Kabul dosyasında dahili PEN koruması ifadesinin hangi ölçüm yöntemine dayandığı, tek veya üç fazda geçerli olup olmadığı, haricî referans elektrodu gerektirip gerektirmediği, hata halinde faz ve nötrün birlikte ayrılıp ayrılmadığı ve koruma işlevinin hangi ürün varyantında bulunduğu yazılmalıdır. Aynı marka ailesindeki farklı model veya firmware davranışı varsayılamaz."
+      ],
+      "bullets": [
+        "Tam ürün kodu, donanım ve firmware sürümünü kaydedin.",
+        "Algılama yöntemini ve gerekli referans elektrodunu kılavuzdan doğrulayın.",
+        "Hata halinde açılan bütün kutupları ve kontaktör sayısını gösterin.",
+        "Tek faz için tasarlanmış yöntemi üç fazlı tesise genellemeyin."
+      ],
+      "sourceRefs": [
+        "S2",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "id": "fonksiyon-testi",
+      "heading": "Nötr/PEN arızası fonksiyon testi hangi sınırlarla yapılmalıdır?",
+      "paragraphs": [
+        "Gerçek şebeke PEN iletkenini açmak, nötrü sökmek veya koruma iletkenini kesmek güvenli bir kabul yöntemi değildir. Yetkin ekip, üreticinin tanımladığı test düzeneği veya uygun simülatörle algılama sınırlarını, ayırma süresini ve bütün kutupların durumunu doğrular. Test cihazı, yöntem, kalibrasyon, ölçüm noktası ve ortam koşulu rapora yazılmalıdır.",
+        "Senaryo; şarj başlamadan önceki hata, aktif şarj sırasında algılama, kontaktörün açması, CP durumunun sonlandırılması, olay kaydı, arıza devam ederken tekrar kapanmama ve güvenli koşullar döndükten sonraki manuel veya otomatik reset davranışını kapsar. RCD testi ayrıca yapılır; open PEN algılama ile artık akım koruması aynı görev değildir."
+      ],
+      "bullets": [
+        "Şebeke nötrünü veya PEN iletkenini sahada rastgele açmayın.",
+        "Üretici onaylı simülasyon ve ölçüm cihazı kullanın.",
+        "Faz, nötr, PE, kontaktör ve CP durumlarını ortak zaman çizelgesinde kaydedin.",
+        "Open PEN fonksiyon testini RCD açma testinin yerine saymayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "id": "yanlis-alarm",
+      "heading": "Gerilim düşümü veya şebeke dalgalanması yanlış PEN alarmı oluşturabilir mi?",
+      "paragraphs": [
+        "Gerilim tabanlı algılama kullanan bazı çözümler, uzun kablo, yüksek yük, faz dengesizliği veya normal şebeke sınırlarında ortaya çıkan gerilim düşümünden etkilenebilir. Bu nedenle kabul yalnız boşta yapılan tek ölçüme dayanmamalı; düşük, orta ve yüksek şarj gücünde faz-nötr gerilimi, PE’ye göre potansiyel, yük akımı ve alarm durumu birlikte kaydedilmelidir.",
+        "Tekrarlayan PEN veya toprak arızası alarmında koruma devre dışı bırakılmamalı ve eşikler deneme-yanılmayla değiştirilmemelidir. Önce besleme sistemi, kablo gerilim düşümü, gevşek nötr, EVSE bağlantısı, referans elektrodu ve ürün firmware’i ayrı ayrı incelenir. Aynı alarmın farklı araçlarla görülmesi tesis/EVSE katmanını araştırmaya yardımcı olabilir; bu karşılaştırma kesin teşhis değildir."
+      ],
+      "bullets": [
+        "Farklı şarj güçlerinde gerilim ve alarm trendini kaydedin.",
+        "Gevşek nötr ile gerçek open PEN olayını ayrı kök nedenler olarak inceleyin.",
+        "Koruma eşiklerini yetkisiz biçimde büyütmeyin.",
+        "Tek araç karşılaştırmasını kesin arıza kanıtı olarak sunmayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "id": "kabul-dosyasi",
+      "heading": "EV şarj nötr/PEN koruması hangi kabul dosyasıyla teslim alınmalıdır?",
+      "paragraphs": [
+        "Teslim dosyası; onaylı tek hat, topraklama sistemi, dağıtım besleme düzeni, EVSE tam ürün referansı, koruma standardı veya uygunluk belgesi, algılama yöntemi, haricî elektrot bilgisi, açılan kutuplar, kontaktör geri bildirimi, RCD testleri, hata simülasyonu, reset davranışı ve imzalı geçti-kaldı sonucunu içermelidir. Çoklu şarj noktalarında her çıkış ayrı satırda izlenmelidir.",
+        "Tesis TT veya TN-S düzeninde ise sırf piyasada PEN korumalı ürün öne çıkarılıyor diye gereksiz cihaz değişimi yapılmamalıdır. Buna karşılık birleşik PEN riski bulunan düzende yalnız yazılım etiketi veya satış açıklaması yeterli kabul edilmemelidir. CTA: kişisel verisiz şebeke sistemi–EVSE–ayırma–RCD kabul matrisini tamamlayıp yetkin elektrik mühendisine iletin."
+      ],
+      "bullets": [
+        "Her EVSE için sistem tipi ve koruma yöntemini ayrı yazın.",
+        "Ürün etiketi, kılavuz ve uygunluk belgesini aynı referansla eşleştirin.",
+        "Fonksiyon testini ölçüm cihazı ve zaman damgasıyla raporlayın.",
+        "Kanıt yeterliyse gereksiz OPDD, elektrot veya wallbox satın almayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S4",
+        "S5"
+      ]
+    }
+  ],
+  "faqs": [
+    {
+      "question": "Her EV şarj istasyonunda open PEN koruması gerekir mi?",
+      "answer": "Hayır. Gereklilik besleme ve topraklama düzenine, ulusal kurallara, proje tasarımına ve EVSE özelliklerine bağlıdır. Birleşik PEN bulunmayan TT veya TN-S düzeninde aynı çözüm otomatik olarak gerekli değildir.",
+      "sourceRefs": [
+        "S1",
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "question": "Wallbox üzerinde PEN koruması yazması kabul için yeterli mi?",
+      "answer": "Hayır. Tam ürün varyantı, algılama yöntemi, hangi kutupların ayrıldığı, uygunluk belgesi, firmware ve saha fonksiyon testi birlikte doğrulanmalıdır.",
+      "sourceRefs": [
+        "S2",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "question": "PEN testi için nötr kablosu sökülebilir mi?",
+      "answer": "Hayır. Gerçek nötr veya PEN iletkenini rastgele açmak tehlikelidir. Üretici tarafından tanımlanmış güvenli simülasyon düzeneği ve yetkin ekip kullanılmalıdır.",
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S4"
+      ]
+    },
+    {
+      "question": "Open PEN koruması varsa RCD’ye gerek kalmaz mı?",
+      "answer": "Hayır. Open PEN algılama ile artık akım koruması farklı arızalara karşı çalışır. RCD/RDC-DD mimarisi ve açma testleri ayrıca doğrulanmalıdır.",
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "publisher": "IEC",
+      "title": "IEC 60364-7-722:2018 — Supplies for electric vehicles",
+      "url": "https://webstore.iec.ch/en/publication/29958",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "EV besleme ve araçtan geri besleme devrelerinin özel alçak gerilim tesis gereklerini tanımlar."
+    },
+    {
+      "id": "S2",
+      "publisher": "IEC",
+      "title": "IEC 61851-1:2017 — Electric vehicle conductive charging system",
+      "url": "https://webstore.iec.ch/en/publication/33644",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "EVSE çalışma koşulları, araç bağlantısı ve elektriksel güvenlik için genel gerekleri kapsar."
+    },
+    {
+      "id": "S3",
+      "publisher": "IEC",
+      "title": "IEC 60364-4-41:2005+A1:2017 — Protection against electric shock",
+      "url": "https://webstore.iec.ch/en/publication/60169",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "TN, TT ve diğer sistemlerde elektrik çarpmasına karşı temel koruma ve koordinasyon gereklerini açıklar."
+    },
+    {
+      "id": "S4",
+      "publisher": "Institution of Engineering and Technology",
+      "title": "Open combined protective and neutral conductor detection devices — IET 01:2024",
+      "url": "https://electrical.theiet.org/guidance-and-codes-of-practice/publications-by-category/electric-vehicles/open-combined-protective-and-neutral-pen-conductor-detection-devices-opdds",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Open PEN algılama cihazları için standartlaştırılmış davranış ve güvenlik yaklaşımını açıklar."
+    },
+    {
+      "id": "S5",
+      "publisher": "Institution of Engineering and Technology",
+      "title": "New standard to ensure safety for electric vehicle charging equipment",
+      "url": "https://www.theiet.org/media/press-releases/press-releases-2024/press-releases-2024-october-december/1-october-2024-new-standard-to-ensure-safety-for-electric-vehicle-charging-equipment",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "IET 01:2024’ün kapsamını, hedef kullanıcılarını ve tehlikeli dokunma gerilimi riskini özetler."
+    }
+  ],
+  "internalLinks": [
+    {
+      "label": "EV şarj tesisat uygunluğu",
+      "path": "/haberler/ev-sarj-cihazi-icin-ev-tesisati-uygun-mu",
+      "reason": "PEN değerlendirmesinden önce kablo, pano, güç ve topraklama uygunluğunu tamamlar."
+    },
+    {
+      "label": "EV şarj Tip B RCD ve RDC-DD kabulü",
+      "path": "/haberler/ev-sarj-kacak-akim-rcd-tip-b-rdc-dd-6ma-kabul",
+      "reason": "Open PEN korumasını artık akım ve düzgün DC korumasından ayırır."
+    },
+    {
+      "label": "Nötr kopması nasıl anlaşılır?",
+      "path": "/haberler/notr-kopmasi-nasil-anlasilir",
+      "reason": "Genel nötr kopması belirtilerini EV’ye özgü koruma görevinden ayırır."
+    },
+    {
+      "label": "Nötr–toprak arası gerilim",
+      "path": "/haberler/notr-toprak-arasi-gerilim-kac-volt-olmali",
+      "reason": "Tek bir N–PE ölçümünün sınırlarını ve profesyonel teşhis ihtiyacını açıklar."
+    },
+    {
+      "label": "Wallbox neden başlamıyor?",
+      "path": "/haberler/elektrikli-arac-sarj-olmuyor-wallbox-neden-baslamiyor",
+      "reason": "PEN/toprak alarmını yetkilendirme ve besleme sorunlarından ayırır."
+    },
+    {
+      "label": "EV şarj uygunluk aracı",
+      "path": "/hesaplama/ev-sarj-uygunluk",
+      "reason": "Kurulum öncesi temel yük, tesisat ve kullanım kapsamını sınıflandırır."
+    },
+    {
+      "label": "Kurumsal elektrik sürekliliği ön değerlendirmesi",
+      "path": "/kurumsal-elektrik-surekliligi-on-degerlendirme",
+      "reason": "Çoklu şarj noktalarında proje ve kabul kapsamını profesyonel çalışmaya taşır."
+    }
+  ],
+  "commerce": {
+    "enabled": false,
+    "policy": "none",
+    "category": null
+  },
+  "editorial": {
+    "createdBy": "ai-assisted",
+    "model": "gpt-5.6-thinking",
+    "humanReviewRequired": true,
+    "approvedBy": "ozaneryavuz",
+    "approvedAt": "2026-08-03T18:42:56Z",
+    "publishedAt": "2026-08-03T18:42:56Z",
+    "approvalPr": 801
+  },
+  "seo": {
+    "canonicalPath": "/haberler/ev-sarj-notr-pen-kopmasi-dokunma-gerilimi-koruma-kabul",
+    "robots": "index,follow,max-image-preview:large",
+    "lastModified": "2026-08-03",
+    "topics": [
+      "EV şarj",
+      "PEN kopması",
+      "nötr kopması",
+      "dokunma gerilimi",
+      "OPDD",
+      "topraklama sistemi",
+      "wallbox güvenliği"
+    ]
+  },
+  "quality": {
+    "score": 88,
+    "minimumRequired": 85,
+    "checks": {
+      "metadata": false,
+      "directAnswer": true,
+      "contentDepth": true,
+      "sources": true,
+      "safety": true,
+      "internalLinks": true,
+      "uniqueness": true,
+      "structuredData": true
+    },
+    "similarity": {
+      "maximum": 0.4286,
+      "closestPath": "https://alo186.com/haberler/ev-sarj-open-pen-kopmasi-opdd-koruma-kabul"
+    }
+  }
+}
