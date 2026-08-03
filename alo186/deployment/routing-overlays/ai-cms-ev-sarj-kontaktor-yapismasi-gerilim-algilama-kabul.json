@@ -1,0 +1,18 @@
+{
+  "version": 254,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/ev-sarj-kontaktor-yapismasi-gerilim-algilama-kabul/index.html",
+      "canonicalPath": "/haberler/ev-sarj-kontaktor-yapismasi-gerilim-algilama-kabul",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_2f338b6918015383",
+    "humanApproved": true,
+    "approvalPr": 830,
+    "qualityScore": 100
+  }
+}
