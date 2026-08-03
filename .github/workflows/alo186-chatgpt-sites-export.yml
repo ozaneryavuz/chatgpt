@@ -1,0 +1,84 @@
+name: ALO186 ChatGPT Sites aktarım paketi
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/**'
+      - '.github/workflows/alo186-chatgpt-sites-export.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/**'
+      - '.github/workflows/alo186-chatgpt-sites-export.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-chatgpt-sites-export-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Kaynak ve politika doğrulaması
+        run: |
+          set -euo pipefail
+          python -m py_compile alo186/deployment/export_chatgpt_sites_bundle.py
+          python -m json.tool alo186/deployment/chatgpt-sites-export-policy.json >/dev/null
+          python alo186/tests/test_chatgpt_sites_export.py
+
+      - name: ChatGPT Sites aktarım paketini üret
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-chatgpt-sites /tmp/alo186-chatgpt-sites.zip
+          python alo186/deployment/export_chatgpt_sites_bundle.py \
+            --output /tmp/alo186-chatgpt-sites \
+            --commit "$GITHUB_SHA"
+          python - <<'PY'
+          from pathlib import Path
+          import shutil
+          shutil.make_archive('/tmp/alo186-chatgpt-sites', 'zip', '/tmp', 'alo186-chatgpt-sites')
+          assert Path('/tmp/alo186-chatgpt-sites.zip').is_file()
+          PY
+
+      - name: Paket özetini yaz
+        run: |
+          set -euo pipefail
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          from pathlib import Path
+          data=json.loads(Path('/tmp/alo186-chatgpt-sites/data/export-stats.json').read_text(encoding='utf-8'))
+          print('# ALO186 → ChatGPT Sites aktarım paketi')
+          print()
+          print(f"- Aktarıma hazır sayfa: **{data['importReady']}**")
+          print(f"- İnceleme kuyruğu: **{data['reviewOnly']}**")
+          print(f"- İl sayfası: **{data['provincePages']}**")
+          print(f"- Dağıtım şirketi sayfası: **{data['companyPages']}**")
+          print(f"- Interaktif araç: **{data['interactiveTools']}**")
+          print(f"- Teknik makale: **{data['technicalArticles']}**")
+          print(f"- Affiliate rehberi: **{data['affiliateGuides']}**")
+          print(f"- Redirect: **{data['redirectCount']}**")
+          print()
+          print('Paket; Sites brifi, import sırası, Markdown içerikler, kaynak HTML/JS/CSS, konum verisi, redirect haritası, güven politikası ve checksum içerir.')
+          PY
+
+      - name: ChatGPT Sites aktarım artifactını yükle
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-chatgpt-sites-import-${{ github.sha }}
+          path: |
+            /tmp/alo186-chatgpt-sites
+            /tmp/alo186-chatgpt-sites.zip
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 90
