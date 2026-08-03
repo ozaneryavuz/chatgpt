@@ -1,6 +1,6 @@
 {
-  "version": 9,
-  "generatedAt": "2026-08-02",
+  "version": 10,
+  "generatedAt": "2026-08-03",
   "consolidations": [
     {
       "intentKey": "lifepo4-low-temperature-charging",
@@ -134,6 +134,13 @@
       "canonicalPath": "/haberler/elektrik-kesintisi-cihaz-hasari-edas-basvurusu",
       "label": "Elektrik kesintisi cihaz hasarı EDAŞ başvurusu",
       "reason": "İki rehber aynı cihaz hasarı, dağıtım şirketi başvurusu, kanıt ve güncel 30 günlük süre niyetini hedefliyor. Daha kısa ve güncel rota canonical tutuldu."
+    },
+    {
+      "intentKey": "compensation-harmonic-resonance-detuned-reactor",
+      "aliasPath": "/haberler/kompanzasyon-harmonik-rezonans-detuned-reaktor-secimi",
+      "canonicalPath": "/haberler/kompanzasyon-harmonik-rezonans-detuned-reaktor-kabul-testi",
+      "label": "Kompanzasyon harmonik rezonans ve detuned reaktör kabulü",
+      "reason": "İki rehber aynı harmonik rezonans, detuned reaktör, tuning frekansı ve kompanzasyon güvenliği niyetini hedefliyor. Ölçüm, kademe zaman çizelgesi ve termal kabulü birlikte veren güncel kabul rotası canonical seçildi."
     }
   ]
 }
