@@ -20,13 +20,16 @@ on:
       - 'alo186/tests/test_competitor_gap_affiliate_v250.py'
       - 'alo186/tests/test_competitor_gap_affiliate_v251.py'
       - '.github/workflows/alo186-competitor-gap-v251.yml'
+  schedule:
+    # Türkiye UTC+3: her pazartesi 09:30 Europe/Istanbul.
+    - cron: '30 6 * * 1'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: alo186-competitor-gap-v251-${{ github.ref }}
+  group: alo186-competitor-gap-v251-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -64,7 +67,7 @@ jobs:
             --bundle /tmp/alo186-competitor-gap-v251
           test -f /tmp/alo186-competitor-gap-v251/alo186-schema-validation-v251.json
 
-      - name: Final artifactta HowTo, EDAŞ, SSR ve crawler kabulü
+      - name: Final artifactta semantik zincir, EDAŞ, SSR ve crawler kabulü
         run: |
           set -euo pipefail
           python - <<'PY'
@@ -75,10 +78,19 @@ jobs:
           root = Path('/tmp/alo186-competitor-gap-v251')
           report = json.loads((root / 'alo186-schema-validation-v251.json').read_text(encoding='utf-8'))
           assert report['version'] == 251
+          assert report['revision'] == 252
           validation = report['validation']
           assert validation['schemaOrgValidator']['status'] == 'pass'
           assert validation['googleRichResultsAssessment']['status'] == 'pass-with-feature-boundaries'
           assert validation['visibleContentParity'] == 'pass'
+          assert validation['questionProblemSolutionProductChain'] == 'pass'
+          assert validation['questionProblemSolutionProductItems'] == 4
+          assert validation['primaryAffiliateAnchor'] == 'urun-ups-3000va'
+          assert validation['primaryAffiliateAnchorStatus'] == 'pass'
+          assert validation['ssrNamedModules'] == [
+              'akilli-yol-ssr',
+              'kisisel-hazirlik-kontrolu-ssr',
+          ]
           assert validation['howToSteps'] == 5
           assert validation['ssrAffiliateLinks'] >= 3
           assert validation['provinceServices'] == 81
@@ -90,7 +102,18 @@ jobs:
           kombi = (root / 'amazon-elektrik-urunleri/kombi-yedek-enerji-urun-secici/index.html').read_text(encoding='utf-8')
           assert 'data-alo186-howto-visible-v251="true"' in kombi
           assert 'data-alo186-ssr-affiliate-v250="true"' in kombi
+          assert kombi.count('id="soru-sorun-cozum-urun"') == 1
+          assert kombi.count('id="urun-ups-3000va"') == 1
+          assert re.search(
+              r'<a\b(?=[^>]*\bid="urun-ups-3000va")(?=[^>]*\bhref="https://www\.amazon\.com\.tr/)[^>]*>',
+              kombi,
+              re.I,
+          )
           assert kombi.count('rel="sponsored nofollow noopener"') >= 3
+          for schema_type in ('Question', 'DefinedTerm', 'HowTo', 'ItemList', 'Product'):
+              assert f'"@type":"{schema_type}"' in kombi
+          assert 'Soru–Sorun–Çözüm–Ürün' in kombi
+          assert '"numberOfItems":4' in kombi
           assert '"@type":"Offer"' not in kombi and 'aggregateRating' not in kombi
 
           edas = (root / 'edas-bul/index.html').read_text(encoding='utf-8')
@@ -98,8 +121,14 @@ jobs:
           assert edas.count('"telephone":"186"') == 81
           assert '"@type":"GovernmentService"' not in edas
 
-          assert 'data-alo186-ssr-decision-v251="true"' in (root / 'karar-motoru/index.html').read_text(encoding='utf-8')
-          assert 'data-alo186-ssr-preparedness-v251="true"' in (root / 'hesaplama/kesinti-hazirlik-plani/index.html').read_text(encoding='utf-8')
+          decision = (root / 'karar-motoru/index.html').read_text(encoding='utf-8')
+          preparation = (root / 'hesaplama/kesinti-hazirlik-plani/index.html').read_text(encoding='utf-8')
+          assert 'data-alo186-ssr-decision-v251="true"' in decision
+          assert 'data-alo186-ssr-preparedness-v251="true"' in preparation
+          assert 'id="akilli-yol-ssr"' in decision
+          assert 'id="kisisel-hazirlik-kontrolu-ssr"' in preparation
+          assert 'amazon.com.tr' not in decision.lower()
+          assert 'amazon.com.tr' not in preparation.lower()
 
           robots = (root / 'robots.txt').read_text(encoding='utf-8')
           for agent in ('GPTBot','OAI-SearchBot','ChatGPT-User','PerplexityBot','ClaudeBot','Bytespider','Google-Extended'):
@@ -108,10 +137,16 @@ jobs:
           release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
           assert release['competitorGapAffiliateV250']['version'] == 250
           assert release['competitorGapAffiliateV251']['version'] == 251
+          assert release['competitorGapAffiliateV251']['revision'] == 252
           print(json.dumps({
               'ok': True,
+              'version': 251,
+              'revision': 252,
               'schemaOrgSyntax': 'pass',
+              'questionProblemSolutionProductItems': 4,
+              'primaryAffiliateAnchor': 'urun-ups-3000va',
               'visibleHowToParity': 'pass',
+              'namedSsrModules': validation['ssrNamedModules'],
               'provinceServices': 81,
               'serviceChannels': 81,
               'ssrAffiliateLinks': validation['ssrAffiliateLinks'],
@@ -134,4 +169,4 @@ jobs:
           path: /tmp/alo186-competitor-gap-v251
           if-no-files-found: error
           include-hidden-files: true
-          retention-days: 30
+          retention-days: 90
