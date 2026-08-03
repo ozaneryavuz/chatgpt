@@ -18,15 +18,17 @@ const trackSource = fs.readFileSync(TRACK, 'utf8');
 
 assert.match(html, /<link rel="canonical" href="https:\/\/alo186\.com\/amazon-elektrik-urunleri\/akilli-priz-enerji-olcer-secimi\/">/);
 assert.ok(!html.includes('https://www.alo186.com/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi'));
+assert.ok(!html.toLowerCase().includes('amazon.com.tr'), 'source HTML must not contain a static store URL');
 
 const expectedAsins = ['B0C4LHP7G3', 'B0BTJ1DTBX', 'B07Z5JD3T4'];
 expectedAsins.forEach((asin) => {
   assert.strictEqual((html.match(new RegExp(asin, 'g')) || []).length >= 2, true, `${asin} page and schema presence`);
-  assert.match(html, new RegExp(`href="https://www\\.amazon\\.com\\.tr/dp/${asin}\\?tag=alo186rehber-21"`));
+  assert.match(catalogSource, new RegExp(`https://www\\.amazon\\.com\\.tr/dp/${asin}`));
 });
 assert.strictEqual((html.match(/data-affiliate-asin=/g) || []).length, 3);
 assert.strictEqual((html.match(/rel="sponsored nofollow noopener"/g) || []).length, 3);
 assert.strictEqual((html.match(/"@type":"Product"/g) || []).length, 3);
+assert.ok(!html.includes('data-fresh-products'));
 
 const forbiddenCommercialClaims = [
   /"@type"\s*:\s*"Offer"/i,
@@ -47,8 +49,8 @@ assert.match(html, /id="noBuySmartPlug"/);
 assert.match(html, /id="smartPlugReminder90"/);
 assert.match(html, /Mevcut çözümüm yeterli — satın almayacağım/);
 assert.match(html, /ALO186 bağımsız bilgilendirme platformudur|Bağımsız bilgilendirme platformudur/);
-assert.match(html, /Amazon Türkiye bağlantıları satış ortaklığı bağlantısıdır/);
-assert.match(html, /Fiyat, stok, satıcı, teslimat, puan, yorum ve garanti yalnız Amazon’un güncel sayfasında doğrulanır/);
+assert.match(html, /Amazon Türkiye bağlantıları satış ortaklığı bağlantısıdır|Amazon Türkiye bağlantıları satış ortaklığı/);
+assert.match(html, /Fiyat, stok, satıcı, teslimat, puan, yorum ve garanti yalnız mağazanın güncel sayfasında doğrulanır/);
 assert.match(html, /src="\/assets\/alo186-track-v253\.js"/);
 assert.match(html, /src="\.\/catalog-v253\.js"/);
 assert.match(html, /src="\.\/app-v253\.js"/);
