@@ -1,0 +1,85 @@
+name: ALO186 competitor gap and affiliate SSR v250
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/deployment/competitor_gap_affiliate_v250.py'
+      - 'alo186/deployment/build_static_site.py'
+      - 'alo186/robots.txt'
+      - 'alo186/tests/test_competitor_gap_affiliate_v250.py'
+      - 'alo186/audits/competitor-gap-affiliate-v250-2026-08-03.md'
+      - 'alo186/index.html'
+      - 'alo186/turkiye-arama/**'
+      - 'alo186/amazon-elektrik-urunleri/kombi-yedek-enerji-urun-secici/**'
+      - 'alo186/hesaplama/kombi-elektrik-kesintisi-ups-guc-istasyonu-uygunlugu/**'
+      - 'alo186/haberler/ups-online-line-interactive-offline-farki/**'
+      - 'alo186/haberler/parafudr-gerilim-koruma-rolesi-farki/**'
+      - 'alo186/deployment/routing-manifest.json'
+      - 'alo186/deployment/routing-overlays/**'
+      - '.github/workflows/alo186-competitor-gap-affiliate-v250.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/deployment/competitor_gap_affiliate_v250.py'
+      - 'alo186/deployment/build_static_site.py'
+      - 'alo186/robots.txt'
+      - 'alo186/tests/test_competitor_gap_affiliate_v250.py'
+      - 'alo186/audits/competitor-gap-affiliate-v250-2026-08-03.md'
+      - 'alo186/index.html'
+      - 'alo186/turkiye-arama/**'
+      - 'alo186/amazon-elektrik-urunleri/kombi-yedek-enerji-urun-secici/**'
+      - 'alo186/hesaplama/kombi-elektrik-kesintisi-ups-guc-istasyonu-uygunlugu/**'
+      - 'alo186/haberler/ups-online-line-interactive-offline-farki/**'
+      - 'alo186/haberler/parafudr-gerilim-koruma-rolesi-farki/**'
+      - 'alo186/deployment/routing-manifest.json'
+      - 'alo186/deployment/routing-overlays/**'
+      - '.github/workflows/alo186-competitor-gap-affiliate-v250.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-competitor-gap-affiliate-v250-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Python syntax and source safety regressions
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            alo186/deployment/competitor_gap_affiliate_v250.py \
+            alo186/deployment/build_static_site.py \
+            alo186/tests/test_competitor_gap_affiliate_v250.py
+          python alo186/tests/test_kombi_yedek_enerji_growth_v191.py
+
+      - name: Build canonical artifact and validate v250 contracts
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-v250-site
+          python alo186/tests/test_competitor_gap_affiliate_v250.py \
+            --bundle /tmp/alo186-v250-site \
+            --report /tmp/alo186-v250-validation.json
+
+      - name: Publish machine-readable validation evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-competitor-gap-affiliate-v250-validation
+          path: |
+            /tmp/alo186-v250-validation.json
+            /tmp/alo186-v250-site/alo186-release.json
+            /tmp/alo186-v250-site/robots.txt
+            /tmp/alo186-v250-site/amazon-elektrik-urunleri/kombi-yedek-enerji-urun-secici/index.html
+            /tmp/alo186-v250-site/il/mugla/index.html
+          if-no-files-found: error
+          retention-days: 30
