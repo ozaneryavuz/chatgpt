@@ -3,10 +3,33 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+from html.parser import HTMLParser
 from pathlib import Path
 
 MARKER = "data-alo186-pages-sw"
 RECEIPT_KEY = "serviceWorkerRegistrationFinalization"
+
+
+class ServiceWorkerRegistrationParser(HTMLParser):
+    """Count only real script elements carrying the Pages SW marker."""
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.registration_count = 0
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag.casefold() != "script":
+            return
+        names = {name.casefold() for name, _ in attrs}
+        if MARKER in names:
+            self.registration_count += 1
+
+
+def registration_count(text: str) -> int:
+    parser = ServiceWorkerRegistrationParser()
+    parser.feed(text)
+    parser.close()
+    return parser.registration_count
 
 
 def normalize_base_path(value: str) -> str:
@@ -43,6 +66,7 @@ def finalize(site: Path, base_path: str) -> dict:
     registration = registration_html(normalized)
     injected = 0
     preserved = 0
+    phantom_markers = 0
 
     html_files = sorted(site.rglob("*.html"))
     if not html_files:
@@ -50,17 +74,26 @@ def finalize(site: Path, base_path: str) -> dict:
 
     for path in html_files:
         text = path.read_text(encoding="utf-8")
-        if MARKER in text:
+        count = registration_count(text)
+        if count > 1:
+            raise RuntimeError(
+                f"Birden fazla gerçek service worker kaydı bulundu: {path.relative_to(site)}"
+            )
+        if count == 1:
             preserved += 1
             continue
+        if MARKER in text:
+            phantom_markers += 1
         if "</body>" not in text:
             raise RuntimeError(
                 f"Service worker finalizasyonu için geçersiz HTML: {path.relative_to(site)}"
             )
-        path.write_text(
-            text.replace("</body>", registration + "\n</body>", 1),
-            encoding="utf-8",
-        )
+        updated = text.replace("</body>", registration + "\n</body>", 1)
+        if registration_count(updated) != 1:
+            raise RuntimeError(
+                f"Service worker kaydı HTML olarak eklenemedi: {path.relative_to(site)}"
+            )
+        path.write_text(updated, encoding="utf-8")
         injected += 1
 
     return {
@@ -68,6 +101,7 @@ def finalize(site: Path, base_path: str) -> dict:
         "basePath": normalized,
         "injectedPages": injected,
         "preservedPages": preserved,
+        "phantomMarkerPagesRepaired": phantom_markers,
         "checkedPages": len(html_files),
         "serviceWorker": public_url(normalized, "/sw.js"),
         "scope": public_url(normalized, "/"),
@@ -81,6 +115,9 @@ def _merge_receipt(existing: object, report: dict) -> dict:
     merged["injectedPages"] = int(existing.get("injectedPages") or 0) + int(
         report.get("injectedPages") or 0
     )
+    merged["phantomMarkerPagesRepaired"] = int(
+        existing.get("phantomMarkerPagesRepaired") or 0
+    ) + int(report.get("phantomMarkerPagesRepaired") or 0)
     merged["runs"] = int(existing.get("runs") or 1) + 1
     return merged
 
