@@ -1,0 +1,60 @@
+name: ALO186 güvenli soğutucu sıcaklık termometresi affiliate v238
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/buzdolabi-dondurucu-sicaklik-olcum-termometre-secimi/**'
+      - 'alo186/deployment/routing-overlays/238-affiliate-cold-temperature-thermometer.json'
+      - 'alo186/tests/test_affiliate_cold_temperature_thermometer_v238.js'
+      - '.github/workflows/alo186-affiliate-cold-temperature-thermometer-v238.yml'
+  pull_request:
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/buzdolabi-dondurucu-sicaklik-olcum-termometre-secimi/**'
+      - 'alo186/deployment/routing-overlays/238-affiliate-cold-temperature-thermometer.json'
+      - 'alo186/tests/test_affiliate_cold_temperature_thermometer_v238.js'
+      - '.github/workflows/alo186-affiliate-cold-temperature-thermometer-v238.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-affiliate-cold-temperature-thermometer-v238-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Ürün, Knowledge Graph ve affiliate güven regresyonu
+        run: |
+          node --check alo186/amazon-elektrik-urunleri/buzdolabi-dondurucu-sicaklik-olcum-termometre-secimi/catalog-v238.js
+          node --check alo186/amazon-elektrik-urunleri/buzdolabi-dondurucu-sicaklik-olcum-termometre-secimi/app-v238.js
+          node alo186/tests/test_affiliate_cold_temperature_thermometer_v238.js
+      - name: Affiliate kapsam ve ticari yönetişim
+        run: |
+          printf '%s\n' \
+            'alo186/amazon-elektrik-urunleri/buzdolabi-dondurucu-sicaklik-olcum-termometre-secimi/index.html' \
+            'alo186/amazon-elektrik-urunleri/buzdolabi-dondurucu-sicaklik-olcum-termometre-secimi/catalog-v238.js' \
+            'alo186/amazon-elektrik-urunleri/buzdolabi-dondurucu-sicaklik-olcum-termometre-secimi/app-v238.js' \
+            > /tmp/changed-affiliate-v238.txt
+          python alo186/tests/test_affiliate_scope_policy_v229.py --changed-files /tmp/changed-affiliate-v238.txt
+          node alo186/tests/test_release_manifest.js
+      - name: Canonical production paketi
+        run: |
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-affiliate-v238 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-affiliate-v238
+          test -f /tmp/alo186-affiliate-v238/amazon-elektrik-urunleri/buzdolabi-dondurucu-sicaklik-olcum-termometre-secimi/index.html
+          grep -Fq 'https://alo186.com/amazon-elektrik-urunleri/buzdolabi-dondurucu-sicaklik-olcum-termometre-secimi/' /tmp/alo186-affiliate-v238/amazon-elektrik-urunleri/buzdolabi-dondurucu-sicaklik-olcum-termometre-secimi/index.html
+          grep -Fq 'rel="sponsored nofollow noopener"' /tmp/alo186-affiliate-v238/amazon-elektrik-urunleri/buzdolabi-dondurucu-sicaklik-olcum-termometre-secimi/index.html
+          ! grep -Eqi '"@type"[[:space:]]*:[[:space:]]*"Offer"|priceCurrency|aggregateRating' /tmp/alo186-affiliate-v238/amazon-elektrik-urunleri/buzdolabi-dondurucu-sicaklik-olcum-termometre-secimi/index.html
