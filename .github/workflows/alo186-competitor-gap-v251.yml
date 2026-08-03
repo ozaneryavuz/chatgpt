@@ -5,20 +5,28 @@ on:
     paths:
       - 'alo186/deployment/inject_competitor_gap_affiliate_v250.py'
       - 'alo186/deployment/inject_competitor_gap_affiliate_v251.py'
+      - 'alo186/deployment/materialize_location_pages_v253.py'
+      - 'alo186/deployment/inject_location_schema_v253.py'
       - 'alo186/deployment/build_static_site.py'
+      - 'alo186/turkiye-arama/companies.js'
       - 'alo186/robots.txt'
       - 'alo186/tests/test_competitor_gap_affiliate_v250.py'
       - 'alo186/tests/test_competitor_gap_affiliate_v251.py'
+      - 'alo186/tests/test_location_pages_schema_v253.py'
       - '.github/workflows/alo186-competitor-gap-v251.yml'
   push:
     branches: [main]
     paths:
       - 'alo186/deployment/inject_competitor_gap_affiliate_v250.py'
       - 'alo186/deployment/inject_competitor_gap_affiliate_v251.py'
+      - 'alo186/deployment/materialize_location_pages_v253.py'
+      - 'alo186/deployment/inject_location_schema_v253.py'
       - 'alo186/deployment/build_static_site.py'
+      - 'alo186/turkiye-arama/companies.js'
       - 'alo186/robots.txt'
       - 'alo186/tests/test_competitor_gap_affiliate_v250.py'
       - 'alo186/tests/test_competitor_gap_affiliate_v251.py'
+      - 'alo186/tests/test_location_pages_schema_v253.py'
       - '.github/workflows/alo186-competitor-gap-v251.yml'
   schedule:
     # Türkiye UTC+3: her pazartesi 09:30 Europe/Istanbul.
@@ -29,13 +37,13 @@ permissions:
   contents: read
 
 concurrency:
-  group: alo186-competitor-gap-v251-${{ github.event_name }}-${{ github.ref }}
+  group: alo186-competitor-gap-v253-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   validate:
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 50
     env:
       PYTHONPATH: ${{ github.workspace }}
     steps:
@@ -47,27 +55,31 @@ jobs:
         with:
           node-version: '22'
 
-      - name: V250 ve v251 semantik sözleşmeleri
+      - name: V250-v253 semantik, konum ve SSR sözleşmeleri
         run: |
           set -euo pipefail
           python alo186/tests/test_competitor_gap_affiliate_v250.py
           python alo186/tests/test_competitor_gap_affiliate_v251.py
+          python alo186/tests/test_location_pages_schema_v253.py
           python -m py_compile \
             alo186/deployment/inject_competitor_gap_affiliate_v250.py \
             alo186/deployment/inject_competitor_gap_affiliate_v251.py \
+            alo186/deployment/materialize_location_pages_v253.py \
+            alo186/deployment/inject_location_schema_v253.py \
             alo186/deployment/build_static_site.py
 
-      - name: Canonical üretim paketi ve schema raporu
+      - name: Canonical üretim paketi ve schema raporları
         run: |
           set -euo pipefail
           python alo186/deployment/build_static_site.py \
-            --output /tmp/alo186-competitor-gap-v251 \
+            --output /tmp/alo186-competitor-gap-v253 \
             --commit "$GITHUB_SHA"
           python alo186/deployment/smoke_static_site.py \
-            --bundle /tmp/alo186-competitor-gap-v251
-          test -f /tmp/alo186-competitor-gap-v251/alo186-schema-validation-v251.json
+            --bundle /tmp/alo186-competitor-gap-v253
+          test -f /tmp/alo186-competitor-gap-v253/alo186-schema-validation-v251.json
+          test -f /tmp/alo186-competitor-gap-v253/alo186-location-schema-v253.json
 
-      - name: Final artifactta semantik zincir, EDAŞ, SSR ve crawler kabulü
+      - name: Final artifactta semantik zincir, 81 il, 21 EDAŞ, SSR ve crawler kabulü
         run: |
           set -euo pipefail
           python - <<'PY'
@@ -75,7 +87,7 @@ jobs:
           import re
           from pathlib import Path
 
-          root = Path('/tmp/alo186-competitor-gap-v251')
+          root = Path('/tmp/alo186-competitor-gap-v253')
           report = json.loads((root / 'alo186-schema-validation-v251.json').read_text(encoding='utf-8'))
           assert report['version'] == 251
           assert report['revision'] == 252
@@ -116,9 +128,46 @@ jobs:
           assert '"numberOfItems":4' in kombi
           assert '"@type":"Offer"' not in kombi and 'aggregateRating' not in kombi
 
+          location = json.loads((root / 'alo186-location-schema-v253.json').read_text(encoding='utf-8'))
+          assert location['version'] == 253
+          assert location['central'] == {
+              'services': 81,
+              'specificProvinceUrls': 81,
+              'serviceChannels': 81,
+          }
+          assert location['local'] == {
+              'provincePages': 81,
+              'companyPages': 21,
+              'governmentService112Pages': 102,
+              'questionPages': 102,
+              'privateEdasGovernmentServiceCount': 0,
+          }
+          assert location['sitemap'] == {'expected': 102, 'present': 102, 'duplicates': 0}
+          assert location['affiliateLinksOnLocationPages'] == 0
+          assert location['jsonLdSyntax'] == 'pass'
+          assert location['visibleContentParity'] == 'pass'
+
+          province_pages = list((root / 'il').glob('*/index.html'))
+          company_pages = list((root / 'dagitim-sirketleri').glob('*/index.html'))
+          assert len(province_pages) == 81
+          assert len(company_pages) == 21
+          for path in province_pages + company_pages:
+              html = path.read_text(encoding='utf-8')
+              assert 'data-alo186-location-page-v253="true"' in html
+              assert html.count('data-alo186-local-service-v251="true"') == 1
+              assert '"@type":"Question"' in html
+              assert '"@type":"Organization"' in html
+              assert '"@type":"Service"' in html
+              assert '"@type":"ServiceChannel"' in html
+              assert '"@type":"GovernmentService"' in html
+              assert '"telephone":"186"' in html
+              assert '"telephone":"112"' in html
+              assert 'amazon.com.tr' not in html.lower()
+
           edas = (root / 'edas-bul/index.html').read_text(encoding='utf-8')
           assert edas.count('"@type":"ServiceChannel"') == 81
           assert edas.count('"telephone":"186"') == 81
+          assert edas.count('"url":"https://alo186.com/il/') == 81
           assert '"@type":"GovernmentService"' not in edas
 
           decision = (root / 'karar-motoru/index.html').read_text(encoding='utf-8')
@@ -138,17 +187,25 @@ jobs:
           assert release['competitorGapAffiliateV250']['version'] == 250
           assert release['competitorGapAffiliateV251']['version'] == 251
           assert release['competitorGapAffiliateV251']['revision'] == 252
+          assert release['locationPagesV253']['provincePages'] == 81
+          assert release['locationPagesV253']['companyPages'] == 21
+          assert release['locationSchemaV253']['version'] == 253
           print(json.dumps({
               'ok': True,
-              'version': 251,
-              'revision': 252,
+              'competitorGapVersion': 251,
+              'competitorGapRevision': 252,
+              'locationSchemaVersion': 253,
               'schemaOrgSyntax': 'pass',
               'questionProblemSolutionProductItems': 4,
               'primaryAffiliateAnchor': 'urun-ups-3000va',
               'visibleHowToParity': 'pass',
               'namedSsrModules': validation['ssrNamedModules'],
+              'provincePages': 81,
+              'companyPages': 21,
               'provinceServices': 81,
               'serviceChannels': 81,
+              'governmentService112Pages': 102,
+              'privateEdasGovernmentService': 0,
               'ssrAffiliateLinks': validation['ssrAffiliateLinks'],
               'aiCrawlerRules': 7,
               'googleRichResults': validation['googleRichResultsAssessment'],
@@ -162,11 +219,11 @@ jobs:
           node alo186/tests/test_portal_hardening.js
           python alo186/tests/device_damage_deadline_guard.py
 
-      - name: Doğrulanmış competitor-gap artifactı
+      - name: Doğrulanmış competitor-gap ve 81 il artifactı
         uses: actions/upload-artifact@v7
         with:
-          name: alo186-competitor-gap-v251-pages
-          path: /tmp/alo186-competitor-gap-v251
+          name: alo186-competitor-gap-v253-pages
+          path: /tmp/alo186-competitor-gap-v253
           if-no-files-found: error
           include-hidden-files: true
           retention-days: 90
