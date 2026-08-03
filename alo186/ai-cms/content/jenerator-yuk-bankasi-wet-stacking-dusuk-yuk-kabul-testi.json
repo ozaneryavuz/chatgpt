@@ -1,0 +1,286 @@
+{
+  "schemaVersion": 1,
+  "id": "cms_f5da867551d64eed",
+  "slug": "jenerator-yuk-bankasi-wet-stacking-dusuk-yuk-kabul-testi",
+  "contentType": "guide",
+  "state": "published",
+  "locale": "tr-TR",
+  "title": "Jeneratör Yük Bankası, Wet Stacking ve Düşük Yük Kabul Testi",
+  "h1": "Jeneratör yük bankası testi ne zaman gerekir, wet stacking nasıl doğrulanır?",
+  "description": "Jeneratörü kademeli yük bankasıyla; kW/kVA, gerilim, frekans, sıcaklık, duman ve alarm kayıtları üzerinden güvenli biçimde kabul edin.",
+  "intent": "Standby dizel jeneratörün gerçek acil durumda yükü taşıyabildiğini kanıtlamak, uzun süreli düşük yükün wet stacking etkilerini diğer yakıt, yağlama, soğutma ve egzoz sorunlarından ayırmak.",
+  "primaryKeyword": "jeneratör yük bankası testi",
+  "audience": [
+    "Otel ve işletme teknik ekipleri",
+    "Hastane ve kritik tesis yöneticileri",
+    "Elektrik mühendisleri",
+    "Jeneratör bakım ve devreye alma firmaları",
+    "Tesis yönetimi ekipleri"
+  ],
+  "riskClass": "high",
+  "directAnswer": "Yük bankası testi, jeneratörü kritik bina yükünü riske atmadan kontrollü ve kademeli elektrik yükü altında sınar. Kabul yalnız motorun çalışmasına değil; her yük kademesinde kW, kVA, güç faktörü, gerilim, frekans, akım dengesi, yağ ve soğutma suyu sıcaklığı, egzoz davranışı, duman, kaçaklar, alarm ve koruma kayıtlarına dayanmalıdır. Wet stacking şüphesi yalnız siyah egzoz iziyle kesinleştirilmez; çalışma yükü, süre, sıcaklık ve üretici sınırları birlikte değerlendirilir. Geçici güç kabloları, sıcak egzoz ve hareketli parçalar nedeniyle test yalnız yetkin ekip ve onaylı risk planıyla yapılmalıdır.",
+  "sections": [
+    {
+      "id": "test-turlerini-ayirma",
+      "heading": "Yüksüz egzersiz, bina yükü testi ve yük bankası testi aynı mıdır?",
+      "paragraphs": [
+        "Hayır. Yüksüz egzersiz marş, yağlama, temel alarm ve kontrol zincirini gösterir; jeneratörün anma yüküne yakın koşullarda gerilim ve frekansını koruduğunu kanıtlamaz. Bina yüküyle test ATS, kablo ve gerçek yük davranışını doğrular; ancak kritik yükü riske atabilir ve tesisin o anda yeterli yük çekmemesi nedeniyle jeneratörü istenen kademelere ulaştıramayabilir.",
+        "Yük bankası, güç kaynağına kontrollü elektrik yükü bağlayarak yük oranını ve basamaklarını tekrarlanabilir biçimde oluşturur. ISO 8528-6 bütün jeneratör setinin karakterizasyonu için test yöntemleri tanımlar; kritik tesislerde proje, üretici ve işletme şartlarına göre ek kabul kriterleri gerekir. Test planında dirençli veya dirençli-reaktif bankanın seçimi, jeneratör kW/kVA değeri, güç faktörü ve bağlantı noktası açıkça yazılmalıdır."
+      ],
+      "bullets": [
+        "Yüksüz egzersizi performans testi olarak raporlamayın.",
+        "Bina yükü ve yük bankası sonuçlarını ayrı satırlarda izleyin.",
+        "Yük bankasının kW, kVA, gerilim ve frekans uygunluğunu doğrulayın.",
+        "Kritik tesis için üretici ve proje kabul sınırlarını testten önce dondurun."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2"
+      ]
+    },
+    {
+      "id": "wet-stacking-kaniti",
+      "heading": "Wet stacking hangi kanıtlarla düşük yükten ayrılır?",
+      "paragraphs": [
+        "Uzun süre düşük veya yüksüz çalışan dizel motor yeterli silindir ve egzoz sıcaklığına ulaşamayabilir; yanmamış yakıt, yağ ve karbon birikimi egzoz bağlantılarında koyu ve yağlı iz oluşturabilir. Caterpillar kaynakları, belirli dizel uygulamalarda uzun süre yüzde 30'un altındaki yükün wet stacking riskini artırabildiğini belirtir. Bu oran evrensel kabul sınırı değildir; motor modeli, emisyon sistemi, ortam, ceket suyu sıcaklığı ve üretici kılavuzu esas alınmalıdır.",
+        "Siyah sıvı veya duman tek başına motorun arızalı olduğunu kanıtlamaz. Yakıt kalitesi, enjektör, turbo, yağ seviyesi, düşük soğutma suyu sıcaklığı, egzoz kısıtı ve aşırı büyük jeneratör seçimi ayrı kök nedenlerdir. Olay dosyasında son çalışma saatleri, ortalama yük, yağ-yakıt tüketimi, egzoz izi, alarm geçmişi ve bakım bulguları aynı zaman çizelgesinde tutulmalıdır."
+      ],
+      "bullets": [
+        "Yük oranını tahmin yerine gerçek kW ölçümüyle kaydedin.",
+        "Yüzde 30 örneğini her motor için sabit sınır saymayın.",
+        "Yakıt, yağlama, soğutma ve egzoz kök nedenlerini ayrı kontrol edin.",
+        "Egzoz sızıntısı, yoğun duman veya yangın riski varsa testi durdurun."
+      ],
+      "sourceRefs": [
+        "S2",
+        "S3",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "id": "kademeli-test",
+      "heading": "Kademeli yük bankası kabulünde hangi değerler kaydedilmelidir?",
+      "paragraphs": [
+        "Test kademeleri üretici prosedürüne ve tesis riskine göre oluşturulur; örneğin düşük, orta, yüksek ve hedef yük noktaları belirli bekleme süreleriyle uygulanabilir. Her kademede faz akımları, kW, kVA, güç faktörü, gerilim, frekans, gerilim-frekans toparlanması, yağ basıncı, soğutma suyu ve egzoz sıcaklığı, yakıt seviyesi, duman ve sızıntılar kaydedilir. Reaktif yük gerekiyorsa dirençli bankanın tek başına alternatörün kVA ve güç faktörü davranışını temsil etmediği belirtilmelidir.",
+        "Yük adımında aşırı gerilim veya frekans çukuru, kararsız regülasyon, faz dengesizliği, aşırı sıcaklık, anormal titreşim, egzoz kaçağı ya da koruma açması varsa kademe yükseltilmez. Cummins, yük bankası testinin standby sistemini kritik tesis yükünü riske atmadan yük altında sınamaya ve sonuçları yazılı raporlamaya yaradığına dikkat çeker."
+      ],
+      "bullets": [
+        "Ölçüm cihazı, CT oranı ve zaman senkronunu rapora ekleyin.",
+        "Her kademede elektriksel ve motor parametrelerini birlikte kaydedin.",
+        "Dirençli testin reaktif yük davranışını kapsamadığını açıkça yazın.",
+        "Geçti-kaldı sınırlarını test sırasında değiştirmeyin."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2"
+      ]
+    },
+    {
+      "id": "ats-ve-kritik-yuk",
+      "heading": "Yük bankası testi ATS ve gerçek bina yükü testinin yerine geçer mi?",
+      "paragraphs": [
+        "Hayır. Yük bankası jeneratörün kontrollü yük performansını kanıtlar; ATS'nin şebeke kaybını algılaması, jeneratöre marş vermesi, gerilim-frekans uygunluğunu beklemesi, yükü aktarması ve şebeke geri dönüşünü yönetmesi ayrı bir uçtan uca görevdir. Kritik tesislerde uygun zamanda kontrollü ATS transfer testi ve seçilmiş bina yükü gözlemi ayrıca planlanmalıdır.",
+        "Yük bankası bağlantısı sırasında geçici kabloların kesiti, kısa devre dayanımı, faz sırası, koruma, topraklama, sıcak yüzeyden uzaklık ve havalandırma doğrulanır. Jeneratör odası kapıları, egzoz veya radyatör hava yolu test ekipmanıyla engellenmemelidir. Bina yükü ve yük bankası aynı anda kullanılacaksa toplam yük ve koruma koordinasyonu önceden hesaplanmalıdır."
+      ],
+      "bullets": [
+        "ATS transferini yük bankası raporundan ayrı kabul edin.",
+        "Geçici kablo ve bağlantıların koruma-topraklama planını hazırlayın.",
+        "Toplam bina ve yük bankası yükünü anma değerleriyle karşılaştırın.",
+        "Kritik yük üzerinde habersiz veya kontrolsüz transfer yapmayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2"
+      ]
+    },
+    {
+      "id": "kabul-dosyasi",
+      "heading": "Jeneratör yük bankası testi hangi kabul dosyasıyla kapatılmalıdır?",
+      "paragraphs": [
+        "Dosya; jeneratör modeli, seri ve rating sınıfı, yakıt türü, motor saati, bakım durumu, yük bankası kimliği, kalibrasyon, tek hat, bağlantı ve risk planı, yük kademeleri, süreler, kW-kVA-güç faktörü, faz değerleri, sıcaklıklar, duman-sızıntı gözlemi, alarm ve koruma olayları ile test öncesi-sonrası bulguları içermelidir. Ham trendler ve kontrol paneli olay kaydı özet tablodan ayrı saklanmalıdır.",
+        "Sonuç yalnız 'tam yükte çalıştı' şeklinde yazılmamalıdır. Hangi yükte ne kadar süre kararlı kaldığı, wet stacking belirtisinin azalıp azalmadığı, bakım veya tekrar test gereksinimi ve ATS/gerçek yük testindeki açık maddeler belirtilmelidir. Üretici sınırları sağlanıyor ve düşük yük sorunu işletme planıyla yönetiliyorsa sırf daha büyük jeneratör veya yeni motor satın almak gerekmez. CTA: kişisel verisiz jeneratör yük–sıcaklık–duman–gerilim/frekans kabul matrisini yetkin devreye alma ekibine iletin."
+      ],
+      "bullets": [
+        "Test öncesi ve sonrası fotoğraf, trend ve alarm kayıtlarını eşleştirin.",
+        "Düzeltici bakım ile yeniden test kriterini ayrı yazın.",
+        "Yük bankası ve ATS açık maddelerini tek sorumlu listesinde kapatın.",
+        "Kanıt yeterliyse gereksiz jeneratör büyütmesi veya değişimi yapmayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S4",
+        "S5"
+      ]
+    }
+  ],
+  "faqs": [
+    {
+      "question": "Jeneratör yük bankası testi kaç yüzde yükte yapılır?",
+      "answer": "Tek bir evrensel yüzde yoktur. Kademeler jeneratörün rating sınıfı, motor üreticisi, tesis yükü ve kabul amacına göre belirlenir; farklı yük noktalarında kararlılık ve sıcaklık kaydı gerekir.",
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "question": "Wet stacking varsa jeneratörü tam yükte çalıştırmak sorunu kesin çözer mi?",
+      "answer": "Hayır. Kontrollü ve üretici onaylı yükleme birikimi azaltabilir; fakat enjektör, yağ, soğutma, egzoz veya emisyon sistemi arızası varsa önce kök neden giderilmelidir.",
+      "sourceRefs": [
+        "S2",
+        "S3",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "question": "Yüksüz haftalık çalışma yük bankası testinin yerine geçer mi?",
+      "answer": "Hayır. Yüksüz egzersiz temel marş ve kontrol işlevlerini gösterir; jeneratörün yük altında gerilim, frekans, sıcaklık ve koruma performansını kanıtlamaz.",
+      "sourceRefs": [
+        "S1",
+        "S2"
+      ]
+    },
+    {
+      "question": "Yük bankası testi sırasında bina yükü kesilir mi?",
+      "answer": "Mimariye bağlıdır. Test jeneratörü bina yükünden ayrılmış biçimde veya kontrollü ortak yükle yapılabilir. ATS, geçici kablo ve toplam yük planı yetkin ekipçe hazırlanmalıdır.",
+      "sourceRefs": [
+        "S1",
+        "S2"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "publisher": "ISO",
+      "title": "ISO 8528-6:2023 — Generating sets, Part 6: Test methods",
+      "url": "https://www.iso.org/standard/71010.html",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Bütün jeneratör setinin karakterizasyonu için test yöntemlerini ve özel kritik uygulamalarda ek şart gereksinimini tanımlar."
+    },
+    {
+      "id": "S2",
+      "publisher": "Cummins",
+      "title": "Load Bank Performance Testing",
+      "url": "https://www.cummins.com/na/sales-and-service/load-bank-performance-testing",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Yük bankasının standby kaynağı kritik tesis yükünü riske atmadan yük altında sınadığını, wet stacking etkisini azaltmak için kademeli yüklemeyi ve yazılı raporu açıklar."
+    },
+    {
+      "id": "S3",
+      "publisher": "Caterpillar",
+      "title": "The Impact of Generator Set Underloading",
+      "url": "https://www.cat.com/en_US/by-industry/electric-power/Articles/White-papers/the-impact-of-generator-set-underloading.html",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Düşük yükün motor sıcaklığı, egzoz slobber/wet stacking, birikim ve bakım üzerindeki etkilerini rating ve yakıt türü bağlamında açıklar."
+    },
+    {
+      "id": "S4",
+      "publisher": "Caterpillar",
+      "title": "Wet Stacking Prevention Technologies for Cat 3500 Diesel Generator Sets",
+      "url": "https://www.cat.com/en_AU/by-industry/electric-power/Articles/White-papers/wet-stacking-prevention-technologies-for-cat-3500-diesel-generator-sets.html",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Uzun süreli düşük yük, siyah yağlı egzoz izi ve modele özgü wet stacking azaltma yöntemleri için güncel üretici örneği sunar."
+    },
+    {
+      "id": "S5",
+      "publisher": "Generac Industrial Energy",
+      "title": "A Matter of Time, Natural Gas",
+      "url": "https://www.generac.com/industrial/tools-resources/project-planning/fuel-selection/natural-gas/performance/matter-of-time/",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Dizel düşük yük/wet stacking ile gaz yakıtlı sistem davranışının ayrılması ve yük bankasının bakım rolü için üretici açıklaması sağlar."
+    }
+  ],
+  "internalLinks": [
+    {
+      "label": "Jeneratörde düşük yük ve wet stacking",
+      "path": "/haberler/jenerator-dusuk-yuk-wet-stacking-nedir",
+      "reason": "Temel wet stacking belirtilerini kabul testi görevinden önce açıklar."
+    },
+    {
+      "label": "Jeneratör voltaj ve frekans dalgalanması",
+      "path": "/haberler/jenerator-voltaj-frekans-dalgalanmasi-neden-olur",
+      "reason": "Yük adımındaki regülasyon sorunlarını kök neden akışına bağlar."
+    },
+    {
+      "label": "Jeneratör çalışıyor ama elektrik üretmiyor",
+      "path": "/haberler/jenerator-calisiyor-elektrik-uretmiyor-ne-yapilmali",
+      "reason": "Yük bankası öncesi alternatör ve çıkış arızalarını ayırır."
+    },
+    {
+      "label": "Jeneratör transfer şalteri neden gerekir?",
+      "path": "/haberler/jenerator-transfer-salteri-neden-gerekir",
+      "reason": "Yük testi ile ATS uçtan uca kabulünün farkını tamamlar."
+    },
+    {
+      "label": "Jeneratör saatte kaç litre yakar?",
+      "path": "/haberler/jenerator-saatte-kac-litre-yakar",
+      "reason": "Test yükü ve yakıt tüketimini normal işletme hesabıyla ilişkilendirir."
+    },
+    {
+      "label": "Jeneratör gücü seçim aracı",
+      "path": "/hesaplama/jenerator-gucu-secimi",
+      "reason": "Sürekli düşük yükün aşırı büyük jeneratör seçiminden kaynaklanıp kaynaklanmadığını kontrol eder."
+    },
+    {
+      "label": "Kurumsal elektrik sürekliliği ön değerlendirmesi",
+      "path": "/kurumsal-elektrik-surekliligi-on-degerlendirme",
+      "reason": "Kritik tesis yük bankası ve ATS kabul kapsamını profesyonel çalışmaya taşır."
+    }
+  ],
+  "commerce": {
+    "enabled": false,
+    "policy": "none",
+    "category": null
+  },
+  "editorial": {
+    "createdBy": "ai-assisted",
+    "model": "gpt-5.6-thinking",
+    "humanReviewRequired": true,
+    "approvedBy": "ozaneryavuz",
+    "approvedAt": "2026-08-03T18:59:06Z",
+    "publishedAt": "2026-08-03T18:59:07Z",
+    "approvalPr": 807
+  },
+  "seo": {
+    "canonicalPath": "/haberler/jenerator-yuk-bankasi-wet-stacking-dusuk-yuk-kabul-testi",
+    "robots": "index,follow,max-image-preview:large",
+    "lastModified": "2026-08-03",
+    "topics": [
+      "jeneratör",
+      "yük bankası",
+      "wet stacking",
+      "düşük yük",
+      "performans testi",
+      "ATS",
+      "acil güç"
+    ]
+  },
+  "quality": {
+    "score": 100,
+    "minimumRequired": 85,
+    "checks": {
+      "metadata": true,
+      "directAnswer": true,
+      "contentDepth": true,
+      "sources": true,
+      "safety": true,
+      "internalLinks": true,
+      "uniqueness": true,
+      "structuredData": true
+    },
+    "similarity": {
+      "maximum": 0.4375,
+      "closestPath": "https://www.alo186.com/haberler/jenerator-dusuk-yuk-wet-stacking-load-bank-testi"
+    }
+  }
+}

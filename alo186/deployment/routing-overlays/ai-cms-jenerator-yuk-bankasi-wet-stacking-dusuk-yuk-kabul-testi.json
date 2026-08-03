@@ -1,0 +1,18 @@
+{
+  "version": 250,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/jenerator-yuk-bankasi-wet-stacking-dusuk-yuk-kabul-testi/index.html",
+      "canonicalPath": "/haberler/jenerator-yuk-bankasi-wet-stacking-dusuk-yuk-kabul-testi",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_f5da867551d64eed",
+    "humanApproved": true,
+    "approvalPr": 807,
+    "qualityScore": 100
+  }
+}
