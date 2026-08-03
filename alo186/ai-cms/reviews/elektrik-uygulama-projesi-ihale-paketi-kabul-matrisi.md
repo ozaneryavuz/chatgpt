@@ -4,7 +4,7 @@
 
 - **Başlık:** Elektrik Uygulama Projesi ve İhale Paketi: Teslim ve Kabul Matrisi
 - **Canonical adayı:** `/haberler/elektrik-uygulama-projesi-ihale-paketi-kabul-matrisi`
-- **Birincil anahtar ifade:** `elektrik uygulama projesi ihale paketi teslim kabul matrisi`
+- **Birincil anahtar ifade:** `elektrik uygulama projesi ve ihale paketi`
 - **Risk sınıfı:** `legal`
 - **Fırsat puanı:** **98/100**
 - **AI CMS kalite hedefi:** **100/100**
