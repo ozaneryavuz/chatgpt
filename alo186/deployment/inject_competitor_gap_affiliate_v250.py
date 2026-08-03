@@ -119,6 +119,36 @@ def _ensure_portal_ssr(site: Path) -> dict[str, object]:
     }
 
 
+def _normalize_gate_selector(site: Path) -> dict[str, object]:
+    """Keep three real locked anchors while avoiding a fourth marker copy in JS text."""
+
+    path = Path(site) / "amazon-elektrik-urunleri/kombi-yedek-enerji-urun-secici/index.html"
+    if not path.is_file():
+        raise FileNotFoundError(f"Kombi ürün seçici bulunamadı: {path}")
+    source = path.read_text(encoding="utf-8", errors="strict")
+    old = "document.querySelectorAll('[data-affiliate-locked=\"true\"]')"
+    new = "document.querySelectorAll('[data-affiliate-locked]')"
+    replacements = source.count(old)
+    if replacements:
+        source = source.replace(old, new)
+        path.write_text(source, encoding="utf-8")
+    anchors = len(
+        re.findall(
+            r'<a\b(?=[^>]*\bdata-affiliate-locked=["\']true["\'])[^>]*>',
+            source,
+            flags=re.I | re.S,
+        )
+    )
+    if anchors != 3:
+        raise RuntimeError(f"Kombi güvenlik kilitli affiliate bağlantı sayısı 3 olmalı; bulunan={anchors}")
+    return {
+        "selector": "[data-affiliate-locked]",
+        "selectorCopiesNormalized": replacements,
+        "lockedAnchorCount": anchors,
+        "gateSemanticsChanged": False,
+    }
+
+
 def apply(repo: Path, site: Path, base_path: str = "") -> dict[str, object]:
     """Materialize SSR routes, then apply final-artifact schema and affiliate hardening."""
 
@@ -127,9 +157,11 @@ def apply(repo: Path, site: Path, base_path: str = "") -> dict[str, object]:
     materialization = _materialize_location_pages(repo, site)
     portal_ssr = _ensure_portal_ssr(site)
     report = _apply_competitor_gap_affiliate_v250(site)
+    gate_selector = _normalize_gate_selector(site)
     report["adapterVersion"] = VERSION
     report["locationPageMaterializationV251"] = materialization
     report["decisionPortalSsrV251"] = portal_ssr
+    report["affiliateGateSelectorV251"] = gate_selector
     return report
 
 
