@@ -8,9 +8,11 @@ from pathlib import Path
 try:
     from . import build_static_site_core as _core
     from .sitemap_hreflang import write_effective_sitemap as _write_effective_sitemap
+    from .inject_ai_commerce_aeo_v250 import apply_ai_commerce_aeo
 except ImportError:
     import build_static_site_core as _core
     from sitemap_hreflang import write_effective_sitemap as _write_effective_sitemap
+    from inject_ai_commerce_aeo_v250 import apply_ai_commerce_aeo
 
 # Keep every existing import/function contract while replacing only sitemap output.
 _core.write_effective_sitemap = _write_effective_sitemap
@@ -166,8 +168,10 @@ def _build_with_platform_hardening(
     release = _original_build(repo_root, output, commit_sha)
     commercial_report = normalize_commercial_hub_urls(output)
     accessibility_report = install_accessibility_hardening(repo_root, output)
+    ai_commerce_report = apply_ai_commerce_aeo(repo_root, output)
     release["commercialCanonicalV217"] = commercial_report
     release["accessibilityHardeningV215"] = accessibility_report
+    release["aiCommerceAeoV250"] = ai_commerce_report
     release_path = output / "alo186-release.json"
     release_path.write_text(json.dumps(release, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     _recompute_checksums(output)
