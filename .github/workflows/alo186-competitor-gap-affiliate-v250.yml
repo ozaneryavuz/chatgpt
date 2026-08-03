@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'alo186/deployment/competitor_gap_affiliate_v250.py'
+      - 'alo186/deployment/materialize_location_pages_v251.py'
       - 'alo186/deployment/inject_competitor_gap_affiliate_v250.py'
       - 'alo186/deployment/build_static_site.py'
       - 'alo186/robots.txt'
@@ -22,6 +23,7 @@ on:
     branches: [main]
     paths:
       - 'alo186/deployment/competitor_gap_affiliate_v250.py'
+      - 'alo186/deployment/materialize_location_pages_v251.py'
       - 'alo186/deployment/inject_competitor_gap_affiliate_v250.py'
       - 'alo186/deployment/build_static_site.py'
       - 'alo186/robots.txt'
@@ -61,6 +63,7 @@ jobs:
           set -euo pipefail
           python -m py_compile \
             alo186/deployment/competitor_gap_affiliate_v250.py \
+            alo186/deployment/materialize_location_pages_v251.py \
             alo186/deployment/inject_competitor_gap_affiliate_v250.py \
             alo186/deployment/build_static_site.py \
             alo186/tests/test_competitor_gap_affiliate_v250.py
@@ -82,7 +85,9 @@ jobs:
             /tmp/alo186-v250-validation.json
             /tmp/alo186-v250-site/alo186-release.json
             /tmp/alo186-v250-site/robots.txt
+            /tmp/alo186-v250-site/sitemap.xml
             /tmp/alo186-v250-site/amazon-elektrik-urunleri/kombi-yedek-enerji-urun-secici/index.html
             /tmp/alo186-v250-site/il/mugla/index.html
+            /tmp/alo186-v250-site/dagitim-sirketleri/adm-elektrik/index.html
           if-no-files-found: error
           retention-days: 30
