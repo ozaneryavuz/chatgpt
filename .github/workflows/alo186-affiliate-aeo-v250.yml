@@ -6,11 +6,13 @@ on:
       - 'alo186/llms.txt'
       - 'alo186/robots.txt'
       - 'alo186/deployment/inject_affiliate_aeo_v250.py'
+      - 'alo186/deployment/inject_affiliate_aeo_v250_isolated.py'
       - 'alo186/deployment/validate_affiliate_aeo_v250.py'
       - 'alo186/deployment/affiliate-aeo-v250.css'
       - 'alo186/deployment/guard_commerce_routes_v3.py'
       - 'alo186/deployment/inject_intent_tools_run135_compat.py'
       - 'alo186/tests/test_affiliate_aeo_v250.py'
+      - 'alo186/tests/test_affiliate_aeo_v250_isolation.py'
       - 'alo186/tests/test_intent_tools_run135_compat.py'
       - 'alo186/audits/affiliate-aeo-v250-2026-08-03.md'
       - '.github/workflows/alo186-affiliate-aeo-v250.yml'
@@ -20,11 +22,13 @@ on:
       - 'alo186/llms.txt'
       - 'alo186/robots.txt'
       - 'alo186/deployment/inject_affiliate_aeo_v250.py'
+      - 'alo186/deployment/inject_affiliate_aeo_v250_isolated.py'
       - 'alo186/deployment/validate_affiliate_aeo_v250.py'
       - 'alo186/deployment/affiliate-aeo-v250.css'
       - 'alo186/deployment/guard_commerce_routes_v3.py'
       - 'alo186/deployment/inject_intent_tools_run135_compat.py'
       - 'alo186/tests/test_affiliate_aeo_v250.py'
+      - 'alo186/tests/test_affiliate_aeo_v250_isolation.py'
       - 'alo186/tests/test_intent_tools_run135_compat.py'
       - 'alo186/audits/affiliate-aeo-v250-2026-08-03.md'
       - '.github/workflows/alo186-affiliate-aeo-v250.yml'
@@ -59,14 +63,17 @@ jobs:
           set -euo pipefail
           python -m py_compile \
             alo186/deployment/inject_affiliate_aeo_v250.py \
+            alo186/deployment/inject_affiliate_aeo_v250_isolated.py \
             alo186/deployment/validate_affiliate_aeo_v250.py \
             alo186/deployment/guard_commerce_routes_v3.py \
             alo186/deployment/inject_intent_tools_run135_compat.py \
             alo186/tests/test_affiliate_aeo_v250.py \
+            alo186/tests/test_affiliate_aeo_v250_isolation.py \
             alo186/tests/test_intent_tools_run135_compat.py
           python alo186/tests/test_affiliate_aeo_v250.py
+          python alo186/tests/test_affiliate_aeo_v250_isolation.py
           python alo186/tests/test_intent_tools_run135_compat.py
-          grep -q 'import inject_affiliate_aeo_v250 as affiliate_aeo' alo186/deployment/guard_commerce_routes_v3.py
+          grep -q 'import inject_affiliate_aeo_v250_isolated as affiliate_aeo' alo186/deployment/guard_commerce_routes_v3.py
           grep -q 'affiliate_aeo.inject' alo186/deployment/guard_commerce_routes_v3.py
           grep -q 'User-agent: OAI-SearchBot' alo186/robots.txt
           grep -q 'User-agent: GPTBot' alo186/robots.txt
@@ -149,6 +156,9 @@ jobs:
           assert receipt.get('ssrRecommendationCardCount') == 24, receipt
           assert receipt.get('emittedOfferCount') == 0, receipt
           assert receipt.get('fakePriceOrStockPublished') is False, receipt
+          isolation = receipt.get('targetFileIsolation') or {}
+          assert (isolation.get('validation') or {}).get('ok') is True, isolation
+          assert (isolation.get('validation') or {}).get('targetCount') == 8, isolation
           assert (site / 'llms.txt').is_file()
           assert (site / 'robots.txt').is_file()
           expected = f'{base}/assets/affiliate-aeo-v250.css' if base else '/assets/affiliate-aeo-v250.css'
