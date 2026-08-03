@@ -1,0 +1,87 @@
+name: ALO186 — yayın hattı tanısı
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/deployment/release-diagnostics-trigger.json'
+      - '.github/workflows/alo186-release-diagnostics.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+  issues: write
+
+concurrency:
+  group: alo186-release-diagnostics
+  cancel-in-progress: true
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Güncel ana dalı al
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - name: Son ALO186 workflow koşularını çıkar
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/alo186-release-diagnostics
+          gh run list \
+            --repo "$GITHUB_REPOSITORY" \
+            --limit 100 \
+            --json databaseId,workflowName,status,conclusion,headSha,event,url,createdAt,updatedAt \
+            > /tmp/alo186-release-diagnostics/all-runs.json
+          jq '[.[] | select(.workflowName | startswith("ALO186") or contains("ALO186"))] | sort_by(.createdAt) | reverse | .[:30]' \
+            /tmp/alo186-release-diagnostics/all-runs.json \
+            > /tmp/alo186-release-diagnostics/alo186-runs.json
+          jq -r '.[] | [.databaseId,.workflowName,.status,(.conclusion // ""),.headSha,.event,.url] | @tsv' \
+            /tmp/alo186-release-diagnostics/alo186-runs.json
+
+      - name: Issue 21 tanı kaydını güncelle
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          runs=json.loads(Path('/tmp/alo186-release-diagnostics/alo186-runs.json').read_text(encoding='utf-8'))
+          lines=[
+              '<!-- alo186-release-diagnostics -->',
+              '## ALO186 yayın hattı tanısı',
+              '',
+              '| Run | Workflow | Durum | Sonuç | SHA |',
+              '|---:|---|---|---|---|',
+          ]
+          for run in runs[:20]:
+              name=str(run.get('workflowName') or '').replace('|','\\|')
+              sha=str(run.get('headSha') or '')[:12]
+              lines.append(f"| [{run['databaseId']}]({run['url']}) | {name} | {run.get('status')} | {run.get('conclusion') or '-'} | `{sha}` |")
+          Path('/tmp/alo186-release-diagnostics/comment.md').write_text('\n'.join(lines)+'\n', encoding='utf-8')
+          PY
+          body=$(cat /tmp/alo186-release-diagnostics/comment.md)
+          marker='<!-- alo186-release-diagnostics -->'
+          existing=$(gh api "repos/$GITHUB_REPOSITORY/issues/21/comments?per_page=100" --paginate --jq ".[] | select(.body | contains(\"$marker\")) | .id" | tail -n 1)
+          if [ -n "$existing" ]; then
+            gh api --method PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$existing" -f body="$body" >/dev/null
+          else
+            gh issue comment 21 --body "$body" >/dev/null
+          fi
+
+      - name: Tanı artifactı
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-release-diagnostics-${{ github.run_id }}
+          path: /tmp/alo186-release-diagnostics/
+          if-no-files-found: error
+          retention-days: 30
+          include-hidden-files: false
