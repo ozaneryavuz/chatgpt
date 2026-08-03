@@ -15,7 +15,7 @@ for(const token of [
   'const rawHours=input.value.trim()',
   "rawHours===''?Number.NaN:Number(rawHours)",
   "const invalidHours=rawHours===''||!Number.isFinite(hours)||hours<0||hours>8760",
-  'const valid=!invalidHours',
+  "const valid=rawHours!==''&&Number.isFinite(hours)&&hours>=0&&hours<=8760",
   'aria-invalid',
   'alo186-kesinti-tazminati-kanit-plani.txt',
   'outage_compensation_result',
