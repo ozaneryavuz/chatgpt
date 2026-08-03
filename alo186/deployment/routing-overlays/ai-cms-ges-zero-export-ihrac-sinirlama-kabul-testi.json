@@ -1,0 +1,18 @@
+{
+  "version": 237,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/ges-zero-export-ihrac-sinirlama-kabul-testi/index.html",
+      "canonicalPath": "/haberler/ges-zero-export-ihrac-sinirlama-kabul-testi",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_885c3a442880c279",
+    "humanApproved": true,
+    "approvalPr": 764,
+    "qualityScore": 88
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "version": 238,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/parafudr-tip-1-tip-2-tip-3-koordinasyon-secimi/index.html",
+      "canonicalPath": "/haberler/parafudr-tip-1-tip-2-tip-3-koordinasyon-secimi",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_6d0b8ce142cfdb48",
+    "humanApproved": true,
+    "approvalPr": 764,
+    "qualityScore": 88
+  }
+}
