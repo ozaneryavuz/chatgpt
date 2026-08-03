@@ -1,0 +1,302 @@
+{
+  "schemaVersion": 1,
+  "sitesSyncVersion": 254,
+  "target": "chatgpt-sites",
+  "siteSlug": "alo186",
+  "canonicalHost": "https://alo186.com",
+  "sourceRepository": "ozaneryavuz/chatgpt",
+  "minimumSourceCommit": "1ebb04fdfbf85d99ae2f9b770cff8d58b7a9936c",
+  "authority": {
+    "livePresentationAndPublishing": "ChatGPT Sites",
+    "contentSourceQualityAndRollback": "GitHub",
+    "analyticsSource": "ChatGPT Sites analytics and explicitly consented analytics only",
+    "dnsAuthority": "Keep the existing ChatGPT Sites custom-domain records",
+    "githubPagesCustomDomainAllowed": false,
+    "undocumentedSitesApiAllowed": false
+  },
+  "transferStrategy": {
+    "mode": "content-data-policy-and-approved-runtime",
+    "preserveNativeSitesDesignSystem": true,
+    "blindHtmlOrCssOverwriteAllowed": false,
+    "existingSitesRouteConflict": "merge the newer verified content, schema and safety policy into the native Sites component",
+    "newCanonicalRoute": "create in ChatGPT Sites with the exact canonical path",
+    "interactiveTool": "port the deterministic business logic and accessible UI; do not import GitHub-only build or test code",
+    "generatedLocationPage": "materialize as indexable HTML with visible answer and matching JSON-LD",
+    "publishOrder": [
+      "P0",
+      "P1",
+      "P2"
+    ],
+    "automaticPublishAllowed": false,
+    "humanOrConnectedSitesWriteRequired": true
+  },
+  "transferLayers": [
+    {
+      "id": "trust-safety-and-editorial-policy",
+      "priority": "P0",
+      "mode": "merge-policy-sitewide",
+      "sources": [
+        "alo186/ai-cms/policy.json",
+        "alo186/robots.txt",
+        "alo186/yayin-ilkeleri/**",
+        "alo186/kaynaklar/**"
+      ]
+    },
+    {
+      "id": "core-navigation-and-decision-routes",
+      "priority": "P0",
+      "mode": "merge-content-into-native-sites-design",
+      "routes": [
+        "/",
+        "/elektrik-portali",
+        "/edas-bul",
+        "/karar-motoru",
+        "/hesaplama/",
+        "/acil-numaralar/",
+        "/planli-kesintiler/",
+        "/urun-rehberleri/",
+        "/amazon-elektrik-urunleri/"
+      ]
+    },
+    {
+      "id": "province-and-distribution-company-graph",
+      "priority": "P0",
+      "mode": "create-or-update-canonical-pages",
+      "sourceData": "alo186/turkiye-arama/companies.js",
+      "sourceGenerators": [
+        "alo186/deployment/materialize_location_pages_v253.py",
+        "alo186/deployment/inject_location_schema_v253.py"
+      ],
+      "expected": {
+        "provincePages": 81,
+        "distributionCompanyPages": 21,
+        "locationSitemapRoutes": 102,
+        "telephone186ServiceChannels": 81,
+        "governmentService112Pages": 102,
+        "privateEdasGovernmentServiceCount": 0
+      },
+      "targetPatterns": [
+        "/il/{province-slug}/",
+        "/dagitim-sirketleri/{company-slug}/"
+      ]
+    },
+    {
+      "id": "published-ai-cms-content",
+      "priority": "P1",
+      "mode": "create-or-update-canonical-pages",
+      "recordPattern": "alo186/ai-cms/content/*.json",
+      "stateFilter": "published",
+      "canonicalPattern": "/haberler/{slug}",
+      "requiredSchema": [
+        "Article",
+        "FAQPage",
+        "BreadcrumbList"
+      ]
+    },
+    {
+      "id": "calculators-and-decision-tools",
+      "priority": "P1",
+      "mode": "port-component-and-deterministic-logic",
+      "routeTypes": [
+        "tool",
+        "calculator",
+        "business-tool"
+      ],
+      "privacy": {
+        "rawPersonalDataCollected": false,
+        "serverSubmissionRequired": false,
+        "localFirstWhereApplicable": true
+      }
+    },
+    {
+      "id": "amazon-turkey-affiliate-routes",
+      "priority": "P1",
+      "mode": "merge-only-after-safety-and-need-gates",
+      "store": "Amazon.com.tr",
+      "affiliateTag": "alo186rehber-21",
+      "linkRel": [
+        "sponsored",
+        "nofollow",
+        "noopener"
+      ],
+      "directCommerceAllowedOnlyFor": "low-risk, technically verified and non-emergency user journeys",
+      "emergencyCommerceClosed": true,
+      "existingSolutionSufficientNoBuy": true
+    },
+    {
+      "id": "machine-readable-discovery",
+      "priority": "P1",
+      "mode": "publish-as-public-resources",
+      "resources": [
+        "/robots.txt",
+        "/sitemap.xml",
+        "/llms.txt",
+        "/llms-full.txt",
+        "/knowledge-graph.jsonld",
+        "/knowledge-graph-products.jsonld",
+        "/knowledge-graph-inventory.json",
+        "/knowledge-graph-ontology.jsonld"
+      ]
+    },
+    {
+      "id": "english-experience",
+      "priority": "P2",
+      "mode": "publish-only-when-route-parity-and-human-quality-pass",
+      "routeRoot": "/en/",
+      "doNotMassTranslateThinPages": true,
+      "required": [
+        "self-canonical",
+        "reciprocal-hreflang",
+        "visible-language-switcher",
+        "112-186-context"
+      ]
+    }
+  ],
+  "routeSelection": {
+    "includeRoutingManifestTypes": [
+      "collection",
+      "tool",
+      "calculator",
+      "business-tool",
+      "article",
+      "commerce-guide",
+      "service",
+      "partnership"
+    ],
+    "requiredRoutes": [
+      "/",
+      "/elektrik-portali",
+      "/edas-bul",
+      "/karar-motoru",
+      "/hesaplama/",
+      "/il/mugla/",
+      "/dagitim-sirketleri/adm-elektrik/"
+    ],
+    "extraRoutePrefixes": [
+      "/il/",
+      "/dagitim-sirketleri/",
+      "/haberler/",
+      "/hesaplama/",
+      "/amazon-elektrik-urunleri/",
+      "/urun-rehberleri/",
+      "/en/"
+    ]
+  },
+  "metadataSourcePatterns": [
+    "alo186/deployment/routing-manifest.json",
+    "alo186/turkiye-arama/companies.js",
+    "alo186/ai-cms/policy.json",
+    "alo186/robots.txt",
+    "alo186/sitemap*.xml",
+    "alo186/urun-eslestirme/catalog*.js",
+    "alo186/amazon-elektrik-urunleri/**/*.json",
+    "alo186/amazon-elektrik-urunleri/**/*catalog*.js"
+  ],
+  "doNotTransfer": [
+    ".github/**",
+    "alo186/tests/**",
+    "alo186/deployment/**",
+    "alo186/ai-cms/tests/**",
+    "alo186/ai-cms/schema/**",
+    "tools/**",
+    "**/__pycache__/**",
+    "**/*.pyc",
+    "**/*test*",
+    "**/*spec*",
+    "**/node_modules/**",
+    "**/fixtures/**",
+    "**/reports/**",
+    "**/.htaccess",
+    "**/pages-release.json",
+    "**/alo186-release.json",
+    "**/checksums.sha256",
+    "**/SHA256SUMS"
+  ],
+  "requiredPolicies": {
+    "independenceDisclosure": "ALO186 bağımsız bilgilendirme platformudur; EDAŞ veya kamu kurumu değildir.",
+    "emergencyRouting": {
+      "112": [
+        "elektrik çarpması",
+        "yangın",
+        "duman",
+        "kıvılcım",
+        "kopmuş iletken",
+        "can güvenliği riski"
+      ],
+      "186": [
+        "şebeke kesintisi",
+        "dağıtım şebekesi arızası"
+      ],
+      "commercialPathInActiveDanger": "closed"
+    },
+    "affiliate": {
+      "merchantScope": "Amazon Türkiye only",
+      "visibleDisclosureRequired": true,
+      "requiredRel": [
+        "sponsored",
+        "nofollow",
+        "noopener"
+      ],
+      "priceStockRatingWarrantyClaimsAllowed": false,
+      "offerSchemaWithoutCurrentVerifiedMerchantDataAllowed": false,
+      "existingProductSufficientNoBuyRequired": true
+    },
+    "structuredData": {
+      "visibleContentParityRequired": true,
+      "privateEdasTypes": [
+        "Organization",
+        "Service",
+        "ServiceChannel"
+      ],
+      "governmentServiceReservedFor": "112 Acil Çağrı Hizmeti",
+      "forbiddenUnverifiedTypes": [
+        "Offer",
+        "AggregateRating"
+      ],
+      "canonicalHost": "https://alo186.com"
+    },
+    "privacy": {
+      "openAddressRequested": false,
+      "turkishIdentityNumberRequested": false,
+      "installationNumberRequested": false,
+      "rawFreeTextAnalyticsAllowed": false
+    },
+    "accessibility": {
+      "minimumTouchTargetCssPx": 44,
+      "keyboardFocusVisible": true,
+      "singleH1": true,
+      "mobileWidths": [
+        320,
+        360,
+        390,
+        768,
+        1280
+      ]
+    }
+  },
+  "conflictResolution": [
+    "Keep the current native ChatGPT Sites design when it is newer or more usable than repository static CSS.",
+    "Replace or merge content only when the GitHub source is human-approved, canonical and newer in substance.",
+    "Never restore a deprecated URL, legal deadline, price, stock, rating or institutional claim from old Git history.",
+    "Use the apex https://alo186.com canonical host; do not introduce www/apex duplication.",
+    "Do not connect the custom domain to GitHub Pages.",
+    "When a high-risk technical article is not published/approved, keep it out of the live Sites route inventory."
+  ],
+  "acceptance": {
+    "locationPages": {
+      "provincePages": 81,
+      "companyPages": 21
+    },
+    "aiCrawlerRulesPreserved": true,
+    "sourceVisibleCoreAnswers": true,
+    "javascriptDisabledCoreNavigation": true,
+    "affiliateLinksCompliant": true,
+    "activeDangerAffiliateLinks": 0,
+    "locationPageAffiliateLinks": 0,
+    "canonicalDuplicates": 0,
+    "brokenInternalLinks": 0,
+    "unknownGovernmentServiceForPrivateEdas": 0,
+    "exactSourceCommitRecordedInPackage": true,
+    "liveSitesReceiptRequiredBeforeClaimingPublished": true
+  }
+}
