@@ -36,6 +36,14 @@ class SitemapQualityTests(unittest.TestCase):
             encoding="utf-8",
         )
 
+    def test_smoke_preserves_manifest_terminal_slash(self):
+        self.assertEqual(static_smoke.normalize_route_path("/hesaplama/"), "/hesaplama/")
+        self.assertEqual(static_smoke.normalize_route_path("/hesaplama"), "/hesaplama")
+        self.assertEqual(
+            static_smoke.expected_canonical_for_route("/hesaplama/", {}),
+            "https://alo186.com/hesaplama/",
+        )
+
     def test_smoke_accepts_only_declared_alias_canonicals(self):
         with tempfile.TemporaryDirectory() as directory:
             repo = Path(directory)
