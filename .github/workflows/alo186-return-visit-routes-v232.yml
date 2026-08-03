@@ -66,7 +66,9 @@ jobs:
           import json
           import sys
           from pathlib import Path
-          from alo186.deployment.finalize_pages_service_worker import finalize
+
+          sys.path.insert(0, 'alo186/deployment')
+          from finalize_pages_service_worker import finalize
 
           site = Path(sys.argv[1])
           result = finalize(site, sys.argv[2])
