@@ -3,7 +3,7 @@
   "id": "cms_ad1abdf4c11adecc",
   "slug": "elektrik-kesintisi-sonrasi-otomatik-yeniden-baslatma",
   "contentType": "guide",
-  "state": "review",
+  "state": "published",
   "locale": "tr-TR",
   "title": "Kesinti Sonrası Otomatik Yeniden Başlatma Güvenliği",
   "h1": "Elektrik gelince makine neden kendiliğinden başlamamalı? Kabul planı",
@@ -174,17 +174,17 @@
   "internalLinks": [
     {
       "label": "Elektrik kesintisi tatbikatı",
-      "path": "/hesaplama/elektrik-kesintisi-tatbikati/",
+      "path": "/hesaplama/elektrik-kesintisi-tatbikati",
       "reason": "Yeniden başlatma senaryolarını kişisel verisiz tatbikat planına dönüştürür."
     },
     {
       "label": "Ekipman bakım planı",
-      "path": "/hesaplama/ekipman-bakim-plani/",
+      "path": "/hesaplama/ekipman-bakim-plani",
       "reason": "Interlock, kontaktör ve kontrol sistemlerinin dönemsel test görevlerini planlar."
     },
     {
       "label": "Kesinti hazırlık planı",
-      "path": "/hesaplama/kesinti-hazirlik-plani/",
+      "path": "/hesaplama/kesinti-hazirlik-plani",
       "reason": "Şebeke kaybı öncesi operasyon ve sorumluluk hazırlığını tamamlar."
     },
     {
@@ -217,10 +217,10 @@
     "createdBy": "ai-assisted",
     "model": "gpt-5.6-thinking",
     "humanReviewRequired": true,
-    "approvedBy": null,
-    "approvedAt": null,
-    "publishedAt": null,
-    "approvalPr": null
+    "approvedBy": "ozaneryavuz",
+    "approvedAt": "2026-08-03T18:41:23Z",
+    "publishedAt": "2026-08-03T18:41:23Z",
+    "approvalPr": 755
   },
   "seo": {
     "canonicalPath": "/haberler/elektrik-kesintisi-sonrasi-otomatik-yeniden-baslatma",
@@ -251,8 +251,8 @@
       "structuredData": true
     },
     "similarity": {
-      "maximum": 0.0,
-      "closestPath": null
+      "maximum": 0.1818,
+      "closestPath": "https://alo186.com/hesaplama/kombi-elektrik-kesintisi-sonrasi-guvenli-yeniden-baslatma/"
     }
   }
 }

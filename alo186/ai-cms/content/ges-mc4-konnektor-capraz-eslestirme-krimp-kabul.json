@@ -3,7 +3,7 @@
   "id": "cms_0b1ae0210cf7f255",
   "slug": "ges-mc4-konnektor-capraz-eslestirme-krimp-kabul",
   "contentType": "guide",
-  "state": "review",
+  "state": "published",
   "locale": "tr-TR",
   "title": "GES MC4 Konnektör Eşleşmesi ve Krimp Kabulü",
   "h1": "Farklı marka MC4 tipi konnektör bağlanır mı? GES DC kabul planı",
@@ -208,7 +208,7 @@
     },
     {
       "label": "Güneş paneli ve power station uygunluğu",
-      "path": "/hesaplama/gunes-paneli-power-station-uygunluk/",
+      "path": "/hesaplama/gunes-paneli-power-station-uygunluk",
       "reason": "Düşük gerilimli taşınabilir panel bağlantılarında ayrı teknik uyum aracına yönlendirir."
     },
     {
@@ -231,10 +231,10 @@
     "createdBy": "ai-assisted",
     "model": "gpt-5.6-thinking",
     "humanReviewRequired": true,
-    "approvedBy": null,
-    "approvedAt": null,
-    "publishedAt": null,
-    "approvalPr": null
+    "approvedBy": "ozaneryavuz",
+    "approvedAt": "2026-08-03T18:41:24Z",
+    "publishedAt": "2026-08-03T18:41:24Z",
+    "approvalPr": 755
   },
   "seo": {
     "canonicalPath": "/haberler/ges-mc4-konnektor-capraz-eslestirme-krimp-kabul",
@@ -265,8 +265,8 @@
       "structuredData": true
     },
     "similarity": {
-      "maximum": 0.0,
-      "closestPath": null
+      "maximum": 0.3529,
+      "closestPath": "https://alo186.com/haberler/ges-mc4-konnektor-isinma-farkli-marka-krimp"
     }
   }
 }

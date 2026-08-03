@@ -3,7 +3,7 @@
   "id": "cms_b9b5af059009c6eb",
   "slug": "supraharmonik-2-150-khz-olcum-kaynak-ayrimi",
   "contentType": "guide",
-  "state": "review",
+  "state": "published",
   "locale": "tr-TR",
   "title": "Supraharmonik 2–150 kHz Ölçüm ve Kaynak Ayrımı",
   "h1": "THD normalken cihazlar neden etkilenir? Supraharmonik kanıt planı",
@@ -233,10 +233,10 @@
     "createdBy": "ai-assisted",
     "model": "gpt-5.6-thinking",
     "humanReviewRequired": true,
-    "approvedBy": null,
-    "approvedAt": null,
-    "publishedAt": null,
-    "approvalPr": null
+    "approvedBy": "ozaneryavuz",
+    "approvedAt": "2026-08-03T18:41:24Z",
+    "publishedAt": "2026-08-03T18:41:25Z",
+    "approvalPr": 755
   },
   "seo": {
     "canonicalPath": "/haberler/supraharmonik-2-150-khz-olcum-kaynak-ayrimi",
@@ -267,8 +267,8 @@
       "structuredData": true
     },
     "similarity": {
-      "maximum": 0.0,
-      "closestPath": null
+      "maximum": 0.1111,
+      "closestPath": "https://www.alo186.com/haberler/notr-toprak-gerilimi-yuksek-nedenleri-olcum"
     }
   }
 }

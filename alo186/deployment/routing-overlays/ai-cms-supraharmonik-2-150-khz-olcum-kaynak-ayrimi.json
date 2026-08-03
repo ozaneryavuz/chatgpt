@@ -1,0 +1,18 @@
+{
+  "version": 238,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/supraharmonik-2-150-khz-olcum-kaynak-ayrimi/index.html",
+      "canonicalPath": "/haberler/supraharmonik-2-150-khz-olcum-kaynak-ayrimi",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_b9b5af059009c6eb",
+    "humanApproved": true,
+    "approvalPr": 755,
+    "qualityScore": 100
+  }
+}
