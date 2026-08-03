@@ -2,6 +2,25 @@ name: ALO186 — ChatGPT Sites kaynak paketi
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/sites-sync/**'
+      - 'alo186/ai-cms/content/**'
+      - 'alo186/ai-cms/policy.json'
+      - 'alo186/deployment/routing-manifest.json'
+      - 'alo186/deployment/build_static_site.py'
+      - 'alo186/turkiye-arama/**'
+      - 'alo186/robots.txt'
+      - 'alo186/sitemap*.xml'
+      - 'alo186/index.html'
+      - 'alo186/elektrik-portali/**'
+      - 'alo186/karar-motoru/**'
+      - 'alo186/hesaplama/**'
+      - 'alo186/haberler/**'
+      - 'alo186/amazon-elektrik-urunleri/**'
+      - 'alo186/urun-rehberleri/**'
+      - 'alo186/en/**'
+      - '.github/workflows/alo186-chatgpt-sites-source.yml'
   push:
     branches: [main]
     paths:
@@ -59,6 +78,7 @@ jobs:
           set -euo pipefail
           python -m py_compile \
             alo186/sites-sync/build_sites_source_package.py \
+            alo186/sites-sync/build_sites_source_package_v255.py \
             alo186/sites-sync/test_sites_source_package.py
           python alo186/sites-sync/test_sites_source_package.py
           python -m json.tool alo186/sites-sync/sites-source-manifest.json >/dev/null
@@ -77,7 +97,7 @@ jobs:
         run: |
           set -euo pipefail
           rm -rf /tmp/alo186-chatgpt-sites-source
-          python alo186/sites-sync/build_sites_source_package.py \
+          python alo186/sites-sync/build_sites_source_package_v255.py \
             --repo . \
             --bundle /tmp/alo186-canonical \
             --source-commit "$GITHUB_SHA" \
@@ -106,6 +126,15 @@ jobs:
           assert manifest['transferStrategy']['preserveNativeSitesDesignSystem'] is True
           assert manifest['transferStrategy']['blindHtmlOrCssOverwriteAllowed'] is False
 
+          assert result['sitesSyncVersion'] == 255
+          assert result['rootRouteSource'] in {'canonical-bundle-root', '/elektrik-portali'}
+          assert result['rootRouteCanonical'] == 'https://alo186.com/'
+          root_record = next(item for item in inventory['routes'] if item['route'] == '/')
+          assert root_record['status'] == 'packaged'
+          assert root_record['packageEntry'] == 'public/index.html'
+          assert (root / 'public/index.html').is_file()
+          assert 'https://alo186.com/' in (root / 'public/index.html').read_text(encoding='utf-8')
+
           assert inventory['provincePages'] == 81
           assert inventory['distributionCompanyPages'] == 21
           assert inventory['affiliateValidation']['invalidRelLinks'] == 0
@@ -124,6 +153,8 @@ jobs:
           assert not list((root / 'public').rglob('.htaccess'))
           print(json.dumps({
               'ok': True,
+              'sitesSyncVersion': result['sitesSyncVersion'],
+              'rootRouteSource': result['rootRouteSource'],
               'sourceCommit': result['sourceCommit'],
               'packageHash': result['packageHash'],
               'integrityDigest': proof['packageDigest'],
@@ -154,6 +185,8 @@ jobs:
           proof = json.loads((root / 'source-integrity.json').read_text(encoding='utf-8'))
           print('## ALO186 → ChatGPT Sites kaynak paketi')
           print()
+          print(f"- Sites senkron sürümü: **{result['sitesSyncVersion']}**")
+          print(f"- Kök içerik kaynağı: **{result['rootRouteSource']}**")
           print(f"- Kaynak commit: `{result['sourceCommit']}`")
           print(f"- Paket hash: `{result['packageHash']}`")
           print(f"- Bütünlük digest: `{proof['packageDigest']}`")
