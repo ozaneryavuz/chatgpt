@@ -11,6 +11,7 @@ DEPLOYMENT = Path(__file__).resolve().parents[1] / "deployment"
 sys.path.insert(0, str(DEPLOYMENT))
 
 import finalize_sitemap_v225 as sitemap_quality  # noqa: E402
+import smoke_static_site as static_smoke  # noqa: E402
 
 
 PAGE = """<!doctype html><html lang="tr"><head>
@@ -34,6 +35,57 @@ class SitemapQualityTests(unittest.TestCase):
             PAGE.format(robots=robots, canonical=canonical, body=body),
             encoding="utf-8",
         )
+
+    def test_smoke_accepts_only_declared_alias_canonicals(self):
+        with tempfile.TemporaryDirectory() as directory:
+            repo = Path(directory)
+            deployment = repo / "alo186/deployment"
+            deployment.mkdir(parents=True)
+            (deployment / "content-consolidations.json").write_text(
+                json.dumps(
+                    {
+                        "version": 1,
+                        "consolidations": [
+                            {
+                                "intentKey": "declared-alias",
+                                "aliasPath": "/haberler/eski-rehber",
+                                "canonicalPath": "/haberler/guncel-rehber",
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            aliases = static_smoke.load_declared_alias_canonicals(repo)
+            self.assertEqual(
+                aliases,
+                {"/haberler/eski-rehber": "https://alo186.com/haberler/guncel-rehber"},
+            )
+            self.assertEqual(
+                static_smoke.expected_canonical_for_route("/haberler/eski-rehber", aliases),
+                "https://alo186.com/haberler/guncel-rehber",
+            )
+            self.assertEqual(
+                static_smoke.expected_canonical_for_route("/haberler/baska-rehber", aliases),
+                "https://alo186.com/haberler/baska-rehber",
+            )
+
+    def test_smoke_rejects_duplicate_alias_declarations(self):
+        with tempfile.TemporaryDirectory() as directory:
+            repo = Path(directory)
+            deployment = repo / "alo186/deployment"
+            deployment.mkdir(parents=True)
+            item = {
+                "intentKey": "declared-alias",
+                "aliasPath": "/haberler/eski-rehber",
+                "canonicalPath": "/haberler/guncel-rehber",
+            }
+            (deployment / "content-consolidations.json").write_text(
+                json.dumps({"version": 1, "consolidations": [item, item]}),
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(ValueError, "Yinelenen alias"):
+                static_smoke.load_declared_alias_canonicals(repo)
 
     def test_removes_alias_missing_duplicate_and_adds_home(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -159,7 +211,6 @@ class SitemapQualityTests(unittest.TestCase):
             self.assertEqual(report["remainingAliasHrefCount"], 0)
             self.assertEqual(report["removedAliasCount"], 2)
 
-            # İkinci çalıştırma link düzeyinde idempotent olmalıdır.
             second = sitemap_quality.run(site)
             self.assertEqual(second["aliasLinkRewriteCount"], 0)
             self.assertEqual(second["remainingAliasHrefCount"], 0)
