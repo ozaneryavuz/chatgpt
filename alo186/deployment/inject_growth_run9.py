@@ -6,6 +6,8 @@ import json
 import re
 from pathlib import Path
 
+from sitemap_routes import ensure_canonical_routes
+
 ROUTES = {
     "damage": "/hesaplama/cihaz-hasari-basvuru-takibi/",
     "home": "/hesaplama/ev-elektrik-guvenligi-kontrolu/",
@@ -82,12 +84,7 @@ def append_sitemap(site: Path) -> None:
     path = site / "sitemap.xml"
     if not path.is_file():
         return
-    text = path.read_text(encoding="utf-8")
-    for route in ROUTES.values():
-        loc = f"https://www.alo186.com{route}"
-        if f"<loc>{loc}</loc>" not in text:
-            text = text.replace("</urlset>", f"<url><loc>{loc}</loc></url></urlset>", 1)
-    path.write_text(text, encoding="utf-8")
+    ensure_canonical_routes(path, ROUTES.values())
 
 
 def add_offline(site: Path, base_path: str) -> list[str]:

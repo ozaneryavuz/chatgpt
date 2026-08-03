@@ -39,8 +39,12 @@ jobs:
           python -m py_compile \
             alo186/deployment/prepare_github_pages.py \
             alo186/deployment/finalize_live_quality.py \
+            alo186/deployment/finalize_sitemap_uniqueness.py \
             alo186/deployment/repair_live_html_defects.py \
             alo186/deployment/inject_growth_run24.py \
+            alo186/deployment/sitemap_routes.py \
+            alo186/tests/test_sitemap_writer_canonical_dedup.py \
+            alo186/tests/test_final_sitemap_uniqueness.py \
             alo186/tests/test_live_technical_quality.py \
             alo186/tests/live_http_audit.py \
             alo186/tests/audit_lighthouse_reports.py
@@ -52,6 +56,8 @@ jobs:
           node alo186/tests/test_portal_hardening.js
           python alo186/tests/test_content_intent_consolidation.py
           python alo186/tests/device_damage_deadline_guard.py
+          python alo186/tests/test_sitemap_writer_canonical_dedup.py
+          python alo186/tests/test_final_sitemap_uniqueness.py
 
       - name: Canonical üretim paketini oluştur
         run: |
@@ -85,6 +91,9 @@ jobs:
             --site /tmp/alo186-quality-custom \
             --base-path '' \
             > /tmp/alo186-quality-custom-finalize.json
+          python alo186/deployment/finalize_sitemap_uniqueness.py \
+            --site /tmp/alo186-quality-custom \
+            > /tmp/alo186-quality-custom-sitemap.json
           python alo186/tests/test_live_technical_quality.py \
             --site /tmp/alo186-quality-custom \
             --base-path '' \
@@ -112,6 +121,9 @@ jobs:
             --site /tmp/alo186-quality-project \
             --base-path '/chatgpt' \
             > /tmp/alo186-quality-project-finalize.json
+          python alo186/deployment/finalize_sitemap_uniqueness.py \
+            --site /tmp/alo186-quality-project \
+            > /tmp/alo186-quality-project-sitemap.json
           python alo186/tests/test_live_technical_quality.py \
             --site /tmp/alo186-quality-project \
             --base-path '/chatgpt' \
@@ -186,6 +198,8 @@ jobs:
             /tmp/alo186-quality-static-project.json
             /tmp/alo186-quality-custom-finalize.json
             /tmp/alo186-quality-project-finalize.json
+            /tmp/alo186-quality-custom-sitemap.json
+            /tmp/alo186-quality-project-sitemap.json
             /tmp/alo186-quality-custom-growth.json
             /tmp/alo186-quality-project-growth.json
             /tmp/alo186-visual-quality

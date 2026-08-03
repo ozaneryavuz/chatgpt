@@ -1,0 +1,254 @@
+name: ALO186 AI CMS — güvenli canlı yayın komutu
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: alo186-ai-cms-manual-publish-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: >-
+      github.event.issue.pull_request &&
+      startsWith(github.event.comment.body, '/cms publish ')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      GH_TOKEN: ${{ github.token }}
+      COMMENT_BODY: ${{ github.event.comment.body }}
+      AUTHOR_ASSOCIATION: ${{ github.event.comment.author_association }}
+      PR_NUMBER: ${{ github.event.issue.number }}
+    steps:
+      - name: Yetki, komut ve PR branch doğrulaması
+        id: request
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "$AUTHOR_ASSOCIATION" in
+            OWNER|MEMBER|COLLABORATOR) ;;
+            *) echo 'Yalnız repository yetkilisi AI CMS içeriğini yayımlayabilir.' >&2; exit 1 ;;
+          esac
+          slug=$(python - <<'PY'
+          import os,re
+          body=os.environ['COMMENT_BODY'].strip()
+          match=re.fullmatch(r'/cms publish ([a-z0-9]+(?:-[a-z0-9]+)*)', body)
+          if not match:
+              raise SystemExit('Komut tam olarak /cms publish <slug> biçiminde olmalıdır.')
+          print(match.group(1))
+          PY
+          )
+          metadata=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER")
+          state=$(jq -r '.state' <<<"$metadata")
+          head_repo=$(jq -r '.head.repo.full_name' <<<"$metadata")
+          head_ref=$(jq -r '.head.ref' <<<"$metadata")
+          test "$state" = 'open' || { echo 'PR açık değil.' >&2; exit 1; }
+          test "$head_repo" = "$GITHUB_REPOSITORY" || { echo 'Fork PR üzerinde write-token yayın kapalıdır.' >&2; exit 1; }
+          [[ "$head_ref" == ai-cms/* ]] || { echo 'PR branch adı ai-cms/ ile başlamıyor.' >&2; exit 1; }
+          echo "slug=$slug" >> "$GITHUB_OUTPUT"
+          echo "head_ref=$head_ref" >> "$GITHUB_OUTPUT"
+
+      - name: PR branch checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ steps.request.outputs.head_ref }}
+          fetch-depth: 0
+
+      - name: Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Kayıt sözleşmesini doğrula
+        id: state
+        shell: bash
+        env:
+          CMS_SLUG: ${{ steps.request.outputs.slug }}
+        run: |
+          set -euo pipefail
+          record="alo186/ai-cms/content/$CMS_SLUG.json"
+          test -f "$record" || { echo 'CMS içerik kaydı yok.' >&2; exit 1; }
+          test "$(jq -r '.slug' "$record")" = "$CMS_SLUG" || { echo 'Slug uyuşmuyor.' >&2; exit 1; }
+          state=$(jq -r '.state' "$record")
+          case "$state" in
+            review|approved) echo "changed=true" >> "$GITHUB_OUTPUT" ;;
+            published) echo "changed=false" >> "$GITHUB_OUTPUT" ;;
+            *) echo "Yayınlanabilir state bekleniyordu; görülen: $state" >&2; exit 1 ;;
+          esac
+          echo "record_state=$state" >> "$GITHUB_OUTPUT"
+
+      - name: Bilinen eski iç bağlantı aliaslarını canonical rotaya taşı
+        if: steps.state.outputs.changed == 'true'
+        shell: bash
+        env:
+          CMS_SLUG: ${{ steps.request.outputs.slug }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          record_path = Path('alo186/ai-cms/content') / f"{os.environ['CMS_SLUG']}.json"
+          record = json.loads(record_path.read_text(encoding='utf-8'))
+          aliases = {
+              '/haberler/kacak-akim-rolesi-neden-atar': {
+                  'path': '/haberler/kacak-akim-rolesi-neden-surekli-atar',
+              },
+              '/haberler/parafudr-tip-1-tip-2-tip-3-koordinasyon-secimi': {
+                  'path': '/haberler/parafudr-gostergesi-kirmizi-ne-demek',
+                  'label': 'Parafudr göstergesi kırmızı ne demek?',
+                  'reason': 'Genel gösterge yorumunu uzaktan alarm, SCPD ve değişim kabul dosyasından ayırır.',
+              },
+          }
+          replacements = []
+          links = record.get('internalLinks', [])
+          if not isinstance(links, list):
+              raise SystemExit('internalLinks dizi değil')
+          for index, link in enumerate(links):
+              if not isinstance(link, dict):
+                  raise SystemExit(f'internalLinks[{index}] nesne değil')
+              current = link.get('path')
+              replacement = aliases.get(current)
+              if replacement:
+                  link.update(replacement)
+                  replacements.append((current, link['path']))
+          paths = [link.get('path') for link in links if isinstance(link, dict)]
+          if len(paths) != len(set(paths)):
+              raise SystemExit('Alias düzeltmesi yinelenen iç bağlantı üretti')
+          if replacements:
+              record_path.write_text(
+                  json.dumps(record, ensure_ascii=False, separators=(',', ':')) + '\n',
+                  encoding='utf-8',
+              )
+              for old, new in replacements:
+                  print(f'Canonical alias düzeltildi: {old} -> {new}')
+          else:
+              print('Canonical alias düzeltmesi gerekmiyor.')
+          PY
+
+      - name: AI CMS testleri
+        if: steps.state.outputs.changed == 'true'
+        run: |
+          python -m py_compile \
+            alo186/ai-cms/cms.py \
+            alo186/ai-cms/input_guard.py \
+            alo186/ai-cms/sites_bridge.py
+          python -m unittest discover -s alo186/ai-cms/tests -p 'test_*.py' -v
+
+      - name: İnsan onayı, canonical ve routing üret
+        if: steps.state.outputs.changed == 'true'
+        shell: bash
+        env:
+          CMS_SLUG: ${{ steps.request.outputs.slug }}
+        run: |
+          set -euo pipefail
+          state=$(jq -r '.state' "alo186/ai-cms/content/$CMS_SLUG.json")
+          if [ "$state" = 'review' ]; then
+            python alo186/ai-cms/cms.py approve \
+              --slug "$CMS_SLUG" \
+              --reviewer "$GITHUB_ACTOR" \
+              --pr "$PR_NUMBER"
+          fi
+          python alo186/ai-cms/cms.py publish --slug "$CMS_SLUG"
+          python alo186/ai-cms/cms.py validate --slug "$CMS_SLUG" --write
+          test -f "alo186/haberler/$CMS_SLUG/index.html"
+          test -f "alo186/deployment/routing-overlays/ai-cms-$CMS_SLUG.json"
+          grep -q 'data-ai-cms-id' "alo186/haberler/$CMS_SLUG/index.html"
+          grep -q '"humanApproved": true' "alo186/deployment/routing-overlays/ai-cms-$CMS_SLUG.json"
+
+      - name: Canonical production build ve smoke
+        if: steps.state.outputs.changed == 'true'
+        shell: bash
+        env:
+          CMS_SLUG: ${{ steps.request.outputs.slug }}
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-ai-cms-canonical
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-ai-cms-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-ai-cms-canonical
+          test -f "/tmp/alo186-ai-cms-canonical/haberler/$CMS_SLUG/index.html"
+          grep -q "https://alo186.com/haberler/$CMS_SLUG" /tmp/alo186-ai-cms-canonical/sitemap.xml
+
+      - name: Onaylı dosyaları aynı PR branchine gönder
+        id: commit
+        if: steps.state.outputs.changed == 'true'
+        shell: bash
+        env:
+          CMS_SLUG: ${{ steps.request.outputs.slug }}
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add \
+            "alo186/ai-cms/content/$CMS_SLUG.json" \
+            "alo186/ai-cms/reviews/$CMS_SLUG.md" \
+            "alo186/haberler/$CMS_SLUG/index.html" \
+            "alo186/deployment/routing-overlays/ai-cms-$CMS_SLUG.json"
+          git add -u "alo186/ai-cms/previews/$CMS_SLUG.html" || true
+          git commit -m "cms(alo186): $CMS_SLUG için insan onaylı canonical yayın"
+          source_commit=$(git rev-parse HEAD)
+          git push origin "HEAD:${{ steps.request.outputs.head_ref }}"
+          echo "source_commit=$source_commit" >> "$GITHUB_OUTPUT"
+
+      - name: ChatGPT Sites önizleme paketini üret
+        if: steps.state.outputs.changed == 'true'
+        shell: bash
+        env:
+          CMS_SLUG: ${{ steps.request.outputs.slug }}
+          SOURCE_COMMIT: ${{ steps.commit.outputs.source_commit }}
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-sites-handoff
+          python alo186/ai-cms/sites_bridge.py \
+            --repo . \
+            package \
+            --slug "$CMS_SLUG" \
+            --source-commit "$SOURCE_COMMIT" \
+            --out-dir /tmp/alo186-sites-handoff
+          jq -e '.reviewPolicy.humanPreviewRequired == true and .reviewPolicy.automaticDeployAllowed == false and .operation.publish == false' \
+            /tmp/alo186-sites-handoff/sites-package.json >/dev/null
+
+      - name: Canlı yayın artifactı
+        if: steps.state.outputs.changed == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-ai-cms-live-${{ steps.request.outputs.slug }}-${{ github.run_id }}
+          path: |
+            /tmp/alo186-ai-cms-canonical/alo186-release.json
+            /tmp/alo186-ai-cms-canonical/haberler/${{ steps.request.outputs.slug }}/index.html
+            /tmp/alo186-sites-handoff/
+          if-no-files-found: error
+          retention-days: 30
+          include-hidden-files: false
+
+      - name: Başarı yorumunu ekle
+        if: success()
+        shell: bash
+        env:
+          CMS_SLUG: ${{ steps.request.outputs.slug }}
+          CHANGED: ${{ steps.state.outputs.changed }}
+        run: |
+          set -euo pipefail
+          if [ "$CHANGED" = 'true' ]; then
+            gh pr comment "$PR_NUMBER" --body "✅ **AI CMS canlı yayın adımı tamamlandı.** \`$CMS_SLUG\` canonical HTML ve routing overlay olarak PR branchine eklendi; production build/smoke geçti ve ChatGPT Sites önizleme artifactı hazırlandı. Yeni commit üzerindeki PR kontrollerini doğruladıktan sonra merge edin."
+          else
+            gh pr comment "$PR_NUMBER" --body "ℹ️ \`$CMS_SLUG\` zaten published durumda; duplicate yayın yapılmadı."
+          fi
+
+      - name: Hata yorumunu ekle
+        if: failure()
+        shell: bash
+        env:
+          CMS_SLUG: ${{ steps.request.outputs.slug }}
+        run: |
+          gh pr comment "$PR_NUMBER" --body "❌ **AI CMS canlı yayın adımı başarısız.** İçerik: \`$CMS_SLUG\`. Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID — hata düzeltilmeden merge/yayın yapılmadı."
