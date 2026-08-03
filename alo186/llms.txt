@@ -1,0 +1,45 @@
+# ALO186
+
+> ALO186, Türkiye için bağımsız elektrik kesintisi, dağıtım şirketi yönlendirmesi, teknik karar ve güvenli ekipman seçimi platformudur. EDAŞ veya kamu kurumu değildir; arıza kaydı, açık adres, T.C. kimlik numarası ya da tesisat numarası toplamaz.
+
+## Resmî ve acil kanallar
+
+- [112 Acil durum ayrımı](https://alo186.com/acil-numaralar/): Yangın, duman, elektrik çarpması, ciddi sağlık riski ve can güvenliği olaylarında önce 112.
+- [186 elektrik arıza yönlendirmesi](https://alo186.com/elektrik-kesintisi): Bölgesel elektrik kesintisi ve dağıtım arızası için 186 ile resmî dağıtım kanallarını ayırır.
+- [EDAŞ bulucu](https://alo186.com/edas-bul): İl ve bölgeye göre yetkili elektrik dağıtım şirketinin resmî iletişim ve kesinti sayfasını bulur.
+- [Planlı kesinti rehberi](https://alo186.com/haberler/planli-elektrik-kesintisi-ne-kadar-once-bildirilir): Planlı kesinti bildirimi, kayıt ve doğrulama adımları.
+
+## Teknik çözüm ve ekipman rehberleri
+
+### Ev ve ofis kesinti hazırlığı
+
+- [Yedek güç çözüm seçici](https://alo186.com/hesaplama/yedek-guc-cozum-secici/#rehber-ups-mi-power-station-mi): UPS, mini UPS ve taşınabilir güç istasyonu görev ayrımı.
+- [UPS çalışma süresi hesabı](https://alo186.com/hesaplama/ups-suresi/#rehber-ups-calisma-suresi-secimi): Watt, Wh, verim ve hedef süreye göre teknik kapasite sınıfı.
+- [Taşınabilir güç istasyonu rehberi](https://alo186.com/amazon-elektrik-urunleri/tasinabilir-guc-istasyonu-secimi#rehber-buzdolabi-icin-power-station-secimi): Kullanılabilir Wh, sürekli güç, kalkış gücü, saf sinüs ve EPS kontrolü.
+- [Power station kapasite ve EPS testi](https://alo186.com/hesaplama/power-station-kapasite-eps-uygunluk/#rehber-power-station-kapasite-eps-secimi): Dinamik hesap sonucunun JS olmadan da okunabilen teknik öneri özeti.
+- [Kesinti hazırlık planı](https://alo186.com/hesaplama/kesinti-hazirlik-plani/#rehber-ev-ofis-kesinti-hazirlik-ekipmanlari): İnternet, iletişim, aydınlatma ve düşük riskli tak-çalıştır ekipmanları.
+
+### Cihaz ve pano koruma ekipmanları
+
+- [Gerilim koruma çözüm seçici](https://alo186.com/hesaplama/gerilim-koruma-cozum-secici/#rehber-gerilim-dalgalanmasinda-cihaz-koruma): Akım korumalı priz, gerilim rölesi ve pano tipi SPD görev ayrımı.
+- [Akım korumalı grup priz uygunluğu](https://alo186.com/hesaplama/akim-korumali-grup-priz-uygunluk/#rehber-akim-korumali-priz-secimi): Joule, topraklama, yük tipi ve kullanım sınırı kontrolü.
+- [Parafudr, gerilim rölesi ve korumalı priz farkı](https://alo186.com/haberler/parafudr-gerilim-koruma-rolesi-farki): Sabit tesisat koruması ile tak-çalıştır ürünlerin görevlerini ayırır.
+- [Ürün seçim kartları](https://alo186.com/akilli-urun-secimi#urun-secim-kartlari-ssr): Botların JavaScript çalıştırmadan okuyabildiği temel ürün sınıfları ve teknik eşikler.
+
+### GES ve yedek enerji sistemleri
+
+- [GES elektrik kesintisinde çalışır mı?](https://alo186.com/haberler/ges-elektrik-kesintisinde-calisir-mi): Anti-islanding, EPS/backup çıkışı ve ada çalışma sınırları.
+- [Power station güneş paneli seçimi](https://alo186.com/haberler/power-station-gunes-paneli-nasil-secilir): Voc, MPPT, akım, konnektör ve polarite kontrolü.
+- [Güneş paneli–power station uygunluk testi](https://alo186.com/hesaplama/gunes-paneli-power-station-uygunluk/): Panel ile taşınabilir güç istasyonu teknik eşleşmesi.
+- [Jeneratör ve UPS birlikte çalışır mı?](https://alo186.com/haberler/jenerator-ups-birlikte-calisir-mi): Frekans, gerilim, bypass ve transfer koordinasyonu.
+
+## Yayın, kaynak ve ticari şeffaflık
+
+- [Yayın politikası](https://alo186.com/yayin-politikasi): Kaynak, güncellik, düzeltme, güvenlik ve insan editör denetimi.
+- [Kaynaklar](https://alo186.com/kaynaklar): Birincil kurum, standart ve üretici dokümanlarına erişim.
+- [Amazon satış ortaklığı açıklaması](https://alo186.com/yasal/amazon-satis-ortakligi): Bazı düşük riskli teknik seçim yolları satış ortaklığı bağlantısı içerebilir; kullanıcıya ek maliyet yansımaz.
+- [Sitemap](https://alo186.com/sitemap.xml): Canonical sayfa envanteri.
+
+## Alıntılama ilkesi
+
+ALO186 içeriği alıntılanırken doğrudan ilgili başlık kimliğine bağlanmalıdır. Ürün sınıfları teknik uygunluk önerisidir; fiyat, stok, satıcı, puan ve garanti beyanı değildir. Acil veya yüksek riskli durumda ürün yönlendirmesinden önce 112, 186, yetkili EDAŞ ve yetkili elektrikçi ayrımı korunmalıdır.
