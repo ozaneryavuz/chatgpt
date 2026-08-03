@@ -17,7 +17,8 @@ WRITER_MODULES = [
     importlib.import_module("inject_growth_run15"),
 ]
 SITEMAP_NS = "http://www.sitemaps.org/schemas/sitemap/0.9"
-ORIGINS = ("https://www.alo186.com", "https://alo186.com")
+WRITER_ORIGIN = "https://www.alo186.com"
+LIVE_ORIGIN = "https://alo186.com"
 AFFECTED_ROUTES = tuple(
     dict.fromkeys(route for module in WRITER_MODULES for route in module.ROUTES.values())
 )
@@ -37,21 +38,22 @@ assert {
 }.issubset(AFFECTED_ROUTES)
 
 
-def seed_sitemap(path: Path, preferred_origin: str) -> None:
-    alternate_origin = next(origin for origin in ORIGINS if origin != preferred_origin)
+def seed_root_cause(path: Path) -> None:
+    """Reproduce apex-first entries followed by legacy www writer entries."""
+
     ET.register_namespace("", SITEMAP_NS)
     root = ET.Element(f"{{{SITEMAP_NS}}}urlset")
     home = ET.SubElement(root, f"{{{SITEMAP_NS}}}url")
-    ET.SubElement(home, f"{{{SITEMAP_NS}}}loc").text = f"{preferred_origin}/"
+    ET.SubElement(home, f"{{{SITEMAP_NS}}}loc").text = f"{LIVE_ORIGIN}/"
 
     for index, route in enumerate(AFFECTED_ROUTES):
-        preferred = ET.SubElement(root, f"{{{SITEMAP_NS}}}url")
-        ET.SubElement(preferred, f"{{{SITEMAP_NS}}}loc").text = f"{preferred_origin}{route}"
-        ET.SubElement(preferred, f"{{{SITEMAP_NS}}}lastmod").text = f"2026-08-{index + 1:02d}"
+        apex = ET.SubElement(root, f"{{{SITEMAP_NS}}}url")
+        ET.SubElement(apex, f"{{{SITEMAP_NS}}}loc").text = f"{LIVE_ORIGIN}{route}"
+        ET.SubElement(apex, f"{{{SITEMAP_NS}}}lastmod").text = f"2026-08-{index + 1:02d}"
 
-        duplicate = ET.SubElement(root, f"{{{SITEMAP_NS}}}url")
-        ET.SubElement(duplicate, f"{{{SITEMAP_NS}}}loc").text = f"{alternate_origin}{route}"
-        ET.SubElement(duplicate, f"{{{SITEMAP_NS}}}priority").text = "0.1"
+        legacy = ET.SubElement(root, f"{{{SITEMAP_NS}}}url")
+        ET.SubElement(legacy, f"{{{SITEMAP_NS}}}loc").text = f"{WRITER_ORIGIN}{route}"
+        ET.SubElement(legacy, f"{{{SITEMAP_NS}}}priority").text = "0.1"
 
     tree = ET.ElementTree(root)
     ET.indent(tree, space="  ")
@@ -63,10 +65,9 @@ def sitemap_rows(path: Path) -> list[tuple[str, str | None, str | None]]:
     ns = {"sm": SITEMAP_NS}
     rows = []
     for node in root.findall("sm:url", ns):
-        loc = node.findtext("sm:loc", namespaces=ns)
         rows.append(
             (
-                loc or "",
+                node.findtext("sm:loc", default="", namespaces=ns),
                 node.findtext("sm:lastmod", namespaces=ns),
                 node.findtext("sm:priority", namespaces=ns),
             )
@@ -74,38 +75,49 @@ def sitemap_rows(path: Path) -> list[tuple[str, str | None, str | None]]:
     return rows
 
 
-for stage_name, preferred_origin in (
-    ("pages-pre-finalize", "https://www.alo186.com"),
-    ("live-finalized", "https://alo186.com"),
-):
-    alternate_origin = next(origin for origin in ORIGINS if origin != preferred_origin)
-    with tempfile.TemporaryDirectory(prefix=f"alo186-{stage_name}-") as temporary:
-        site = Path(temporary)
-        sitemap = site / "sitemap.xml"
-        seed_sitemap(sitemap, preferred_origin)
+def normalize_like_finalizer(path: Path) -> None:
+    tree = ET.parse(path)
+    root = tree.getroot()
+    ns = {"sm": SITEMAP_NS}
+    for loc_node in root.findall("sm:url/sm:loc", ns):
+        if loc_node.text:
+            loc_node.text = loc_node.text.replace(WRITER_ORIGIN, LIVE_ORIGIN)
+    ET.indent(tree, space="  ")
+    tree.write(path, encoding="utf-8", xml_declaration=True)
 
-        for writer in WRITER_MODULES:
-            writer.append_sitemap(site)
 
-        first_bytes = sitemap.read_bytes()
-        ET.parse(sitemap)
-        rows = sitemap_rows(sitemap)
-        locations = [row[0] for row in rows]
+with tempfile.TemporaryDirectory(prefix="alo186-sitemap-writer-") as temporary:
+    site = Path(temporary)
+    sitemap = site / "sitemap.xml"
+    seed_root_cause(sitemap)
 
-        assert not any(location.startswith(alternate_origin) for location in locations)
-        assert not any("/chatgpt/" in location for location in locations)
-        for index, route in enumerate(AFFECTED_ROUTES):
-            canonical = f"{preferred_origin}{route}"
-            assert locations.count(canonical) == 1, (stage_name, canonical)
-            row = next(item for item in rows if item[0] == canonical)
-            assert row[1] == f"2026-08-{index + 1:02d}"
-            assert row[2] is None
+    for writer in WRITER_MODULES:
+        writer.append_sitemap(site)
 
-        for writer in WRITER_MODULES:
-            writer.append_sitemap(site)
+    pre_finalize_bytes = sitemap.read_bytes()
+    ET.parse(sitemap)
+    rows = sitemap_rows(sitemap)
+    locations = [row[0] for row in rows]
 
-        assert sitemap.read_bytes() == first_bytes
-        ET.parse(sitemap)
+    assert not any(location.startswith(LIVE_ORIGIN) for location in locations)
+    assert not any("/chatgpt/" in location for location in locations)
+    for index, route in enumerate(AFFECTED_ROUTES):
+        canonical = f"{WRITER_ORIGIN}{route}"
+        assert locations.count(canonical) == 1, canonical
+        row = next(item for item in rows if item[0] == canonical)
+        assert row[1] == f"2026-08-{index + 1:02d}"
+        assert row[2] is None
+
+    for writer in WRITER_MODULES:
+        writer.append_sitemap(site)
+    assert sitemap.read_bytes() == pre_finalize_bytes
+
+    normalize_like_finalizer(sitemap)
+    ET.parse(sitemap)
+    live_locations = [row[0] for row in sitemap_rows(sitemap)]
+    assert not any(location.startswith(WRITER_ORIGIN) for location in live_locations)
+    for route in AFFECTED_ROUTES:
+        assert live_locations.count(f"{LIVE_ORIGIN}{route}") == 1
 
 with tempfile.TemporaryDirectory(prefix="alo186-invalid-sitemap-") as temporary:
     path = Path(temporary) / "sitemap.xml"
@@ -121,10 +133,11 @@ print(
     {
         "ok": True,
         "writers": [module.__name__ for module in WRITER_MODULES],
-        "preferredOrigins": list(ORIGINS),
+        "writerOrigin": WRITER_ORIGIN,
+        "liveOrigin": LIVE_ORIGIN,
         "routeCount": len(AFFECTED_ROUTES),
-        "pagesStageHostPreserved": True,
-        "liveApexPreserved": True,
+        "legacyPagesContractPreserved": True,
+        "liveApexUniqueAfterFinalizer": True,
         "hostCollapsedDuplicatesRemoved": True,
         "idempotent": True,
         "malformedXmlFailsClosed": True,
