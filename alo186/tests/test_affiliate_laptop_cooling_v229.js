@@ -5,7 +5,7 @@ const path = require('path');
 const assert = require('assert');
 
 const ROOT = path.resolve(__dirname, '..');
-const ROUTE = path.join(ROOT, 'amazon-elektrik-urunleri', 'laptop-sogutucu-stand-secimi');
+const ROUTE = path.join(ROOT, 'amazon-elektrik-urunleri', 'laptop-sicaklik-olcum-sogutucu-stand-secimi');
 const HTML = fs.readFileSync(path.join(ROUTE, 'index.html'), 'utf8');
 const APP = fs.readFileSync(path.join(ROUTE, 'app-v229.js'), 'utf8');
 const catalog = require(path.join(ROUTE, 'catalog-v229.js'));
@@ -18,8 +18,7 @@ const EXPECTED = new Map([
 function walk(dir) {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) return walk(full);
-    return [full];
+    return entry.isDirectory() ? walk(full) : [full];
   });
 }
 
@@ -37,9 +36,7 @@ assert.strictEqual(new Set(catalog.products.map((item) => item.asin)).size, 3);
 
 for (const product of catalog.products) {
   assert.strictEqual(EXPECTED.get(product.asin), product.mpn, `ASIN/MPN mismatch: ${product.asin}`);
-  for (const field of ['userNeed', 'strengths', 'limitations', 'noBuyWhen', 'technicalSource', 'verifiedAt']) {
-    assert.ok(product[field], `${product.asin} missing ${field}`);
-  }
+  for (const field of ['userNeed', 'strengths', 'limitations', 'noBuyWhen', 'technicalSource', 'verifiedAt']) assert.ok(product[field], `${product.asin} missing ${field}`);
   assert.ok(product.strengths.length >= 3);
   assert.ok(product.limitations.length >= 3);
   assert.ok(/^https:\/\/(havitsmart\.com|classonestore\.com|b2b\.gunes\.net)\//.test(product.technicalSource));
@@ -48,21 +45,14 @@ for (const product of catalog.products) {
   assert.ok(url.includes('tag=alo186rehber-21'));
 }
 
-assert.strictEqual(catalog.verificationStatus(new Date('2026-09-17T12:00:00Z')).fresh, true, '45th day must remain fresh');
-assert.strictEqual(catalog.verificationStatus(new Date('2026-09-18T12:00:00Z')).fresh, false, '46th day must fail closed');
+assert.strictEqual(catalog.verificationStatus(new Date('2026-09-17T12:00:00Z')).fresh, true);
+assert.strictEqual(catalog.verificationStatus(new Date('2026-09-18T12:00:00Z')).fresh, false);
 
-const canonical = 'https://alo186.com/amazon-elektrik-urunleri/laptop-sogutucu-stand-secimi/';
+const canonical = 'https://alo186.com/amazon-elektrik-urunleri/laptop-sicaklik-olcum-sogutucu-stand-secimi/';
 assert.strictEqual((HTML.match(new RegExp(`<link rel="canonical" href="${canonical}">`, 'g')) || []).length, 1);
-assert.ok(HTML.includes('data-commercial-scope="after-tool"'));
-assert.ok(HTML.includes('data-risk="consumer-low"'));
-assert.ok(HTML.includes('Reklam / satış ortaklığı açıklaması'));
-assert.ok(HTML.includes('Satın almama koşulu'));
-assert.ok(HTML.includes('rel="sponsored nofollow noopener"'));
-assert.ok(!/href="https:\/\/www\.amazon\.com\.tr\/(?:dp|s\?k=)/i.test(HTML), 'Initial HTML must not contain an enabled Amazon href');
-assert.ok(APP.includes("affiliatePolicy === 'after_tool'"));
-assert.ok(APP.includes('professionalOnly === false'));
-assert.ok(APP.includes('verificationStatus(new Date())'));
-assert.ok(APP.includes("link.removeAttribute('href')"));
+for (const token of ['data-commercial-scope="after-tool"', 'data-risk="consumer-low"', 'Reklam / satış ortaklığı açıklaması', 'Satın almama koşulu', 'rel="sponsored nofollow noopener"']) assert.ok(HTML.includes(token), token);
+assert.ok(!/href="https:\/\/www\.amazon\.com\.tr\/(?:dp|s\?k=)/i.test(HTML));
+for (const token of ["affiliatePolicy === 'after_tool'", 'professionalOnly === false', 'verificationStatus(new Date())', "link.removeAttribute('href')"]) assert.ok(APP.includes(token), token);
 
 const jsonLd = [...HTML.matchAll(/<script type="application\/ld\+json">\s*(.*?)\s*<\/script>/gs)];
 assert.strictEqual(jsonLd.length, 1);
@@ -74,35 +64,20 @@ assert.strictEqual(itemLists.length, 1);
 assert.strictEqual(itemLists[0].numberOfItems, 3);
 for (const product of products) {
   assert.strictEqual(product.brand['@type'], 'Brand');
-  assert.ok(Array.isArray(product.identifier) && product.identifier.length >= 2);
-  assert.ok(Array.isArray(product.additionalProperty) && product.additionalProperty.length >= 3);
+  assert.ok(product.identifier.length >= 2);
+  assert.ok(product.additionalProperty.length >= 3);
   assert.ok(!Object.prototype.hasOwnProperty.call(product, 'offers'));
 }
 const serialized = JSON.stringify(graph);
-for (const forbidden of ['"Offer"', 'aggregateRating', 'priceCurrency', 'availability', 'seller', 'review', 'warranty']) {
-  assert.ok(!serialized.includes(forbidden), `Forbidden structured field: ${forbidden}`);
-}
+for (const forbidden of ['"Offer"', 'aggregateRating', 'priceCurrency', 'availability', 'seller', 'review', 'warranty']) assert.ok(!serialized.includes(forbidden), forbidden);
 
-const sourceExtensions = new Set(['.html', '.js', '.json']);
 const duplicateHits = [];
 for (const file of walk(ROOT)) {
-  if (!sourceExtensions.has(path.extname(file))) continue;
-  if (file.startsWith(path.join(ROOT, 'tests'))) continue;
-  if (file.startsWith(ROUTE)) continue;
+  if (!['.html', '.js', '.json'].includes(path.extname(file))) continue;
+  if (file.startsWith(path.join(ROOT, 'tests')) || file.startsWith(ROUTE)) continue;
   const text = fs.readFileSync(file, 'utf8');
-  for (const asin of EXPECTED.keys()) {
-    if (text.includes(asin)) duplicateHits.push(`${asin}:${path.relative(ROOT, file)}`);
-  }
+  for (const asin of EXPECTED.keys()) if (text.includes(asin)) duplicateHits.push(`${asin}:${path.relative(ROOT, file)}`);
 }
 assert.deepStrictEqual(duplicateHits, [], `Duplicate ASIN outside route: ${duplicateHits.join(', ')}`);
 
-console.log(JSON.stringify({
-  ok: true,
-  route: '/amazon-elektrik-urunleri/laptop-sogutucu-stand-secimi/',
-  products: [...EXPECTED.keys()],
-  knowledgeGraph: ['Product', 'Brand', 'ItemList', 'identifier', 'additionalProperty'],
-  affiliatePolicy: 'after_tool',
-  professionalOnlyBypass: false,
-  staleBoundary: '45-open-46-closed',
-  duplicateAsin: false,
-}));
+console.log(JSON.stringify({ok:true,route:'/amazon-elektrik-urunleri/laptop-sicaklik-olcum-sogutucu-stand-secimi/',products:[...EXPECTED.keys()],knowledgeGraph:['Product','Brand','ItemList','identifier','additionalProperty'],affiliatePolicy:'after_tool',professionalOnlyBypass:false,staleBoundary:'45-open-46-closed',duplicateAsin:false}));
