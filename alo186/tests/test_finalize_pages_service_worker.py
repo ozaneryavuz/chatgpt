@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+import sys
 import tempfile
 from pathlib import Path
 
-from alo186.deployment.finalize_pages_service_worker import MARKER, finalize
+DEPLOYMENT = Path(__file__).resolve().parents[1] / "deployment"
+sys.path.insert(0, str(DEPLOYMENT))
+
+from finalize_pages_service_worker import MARKER, finalize  # noqa: E402
 
 
 def page(body: str = "<main>ok</main>") -> str:
