@@ -1,0 +1,65 @@
+name: ALO186 Affiliate Webcam v232
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/usb-web-kamerasi-secimi/**'
+      - 'alo186/deployment/routing-overlays/232-affiliate-webcam.json'
+      - 'alo186/tests/test_affiliate_webcam_v232.js'
+      - '.github/workflows/alo186-affiliate-webcam-v232.yml'
+  pull_request:
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/usb-web-kamerasi-secimi/**'
+      - 'alo186/deployment/routing-overlays/232-affiliate-webcam.json'
+      - 'alo186/tests/test_affiliate_webcam_v232.js'
+      - '.github/workflows/alo186-affiliate-webcam-v232.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-affiliate-webcam-v232-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Ürün, Knowledge Graph ve güven kapısı regresyonları
+        run: |
+          node --check alo186/amazon-elektrik-urunleri/usb-web-kamerasi-secimi/catalog-v232.js
+          node --check alo186/amazon-elektrik-urunleri/usb-web-kamerasi-secimi/app-v232.js
+          node --check alo186/tests/test_affiliate_webcam_v232.js
+          node alo186/tests/test_affiliate_webcam_v232.js
+      - name: Ortak affiliate ve yayın sözleşmeleri
+        run: |
+          python alo186/tests/test_affiliate_scope_policy_v229.py
+          python alo186/tests/test_commerce_governance_v2.py
+          python alo186/tests/test_commerce_governance_v3.py
+          python alo186/tests/device_damage_deadline_guard.py
+          node alo186/tests/test_release_manifest.js
+      - name: Canonical production paketi
+        run: |
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-affiliate-webcam-v232 \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-affiliate-webcam-v232
+          test -f /tmp/alo186-affiliate-webcam-v232/amazon-elektrik-urunleri/usb-web-kamerasi-secimi/index.html
+          grep -Fq 'https://alo186.com/amazon-elektrik-urunleri/usb-web-kamerasi-secimi/' \
+            /tmp/alo186-affiliate-webcam-v232/amazon-elektrik-urunleri/usb-web-kamerasi-secimi/index.html
+          grep -Fq 'rel="sponsored nofollow noopener"' \
+            /tmp/alo186-affiliate-webcam-v232/amazon-elektrik-urunleri/usb-web-kamerasi-secimi/index.html
+          ! grep -Eqi '"@type"[[:space:]]*:[[:space:]]*"Offer"|priceCurrency|aggregateRating|availability|seller|warranty' \
+            /tmp/alo186-affiliate-webcam-v232/amazon-elektrik-urunleri/usb-web-kamerasi-secimi/index.html
