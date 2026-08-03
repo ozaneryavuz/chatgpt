@@ -6,6 +6,7 @@ import re
 from pathlib import Path
 
 from finalize_live_quality import run as finalize_live_quality
+from finalize_sitemap_uniqueness import run as finalize_sitemap_uniqueness
 from repair_live_html_defects import run as repair_live_html_defects
 
 ROUTE = "/hesaplama/home-office-internet-sureklilik-plani/"
@@ -162,6 +163,7 @@ def run(site: Path, base_path: str) -> dict:
     update_release(site, base_path, entries, offline)
     html_shell_repairs = repair_live_html_defects(site, base_path)
     recompute(site)
+    sitemap_uniqueness = finalize_sitemap_uniqueness(site)
     technical_quality = finalize_live_quality(site, base_path)
     return {
         "ok": True,
@@ -169,5 +171,6 @@ def run(site: Path, base_path: str) -> dict:
         "entries": entries,
         "offline": True,
         "htmlShellRepairs": html_shell_repairs,
+        "sitemapUniqueness": sitemap_uniqueness,
         "technicalQuality": technical_quality,
     }
