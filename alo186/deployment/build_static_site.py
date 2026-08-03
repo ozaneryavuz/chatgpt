@@ -12,6 +12,15 @@ except ImportError:
     import build_static_site_core as _core
     from sitemap_hreflang import write_effective_sitemap as _write_effective_sitemap
 
+try:
+    from .competitor_gap_affiliate_v250 import (
+        apply_competitor_gap_affiliate_v250 as _apply_competitor_gap_affiliate_v250,
+    )
+except ImportError:
+    from competitor_gap_affiliate_v250 import (
+        apply_competitor_gap_affiliate_v250 as _apply_competitor_gap_affiliate_v250,
+    )
+
 # Keep every existing import/function contract while replacing only sitemap output.
 _core.write_effective_sitemap = _write_effective_sitemap
 
@@ -164,8 +173,10 @@ def _build_with_platform_hardening(
     commit_sha: str = "local",
 ) -> dict:
     release = _original_build(repo_root, output, commit_sha)
+    competitor_report = _apply_competitor_gap_affiliate_v250(output)
     commercial_report = normalize_commercial_hub_urls(output)
     accessibility_report = install_accessibility_hardening(repo_root, output)
+    release["competitorGapAffiliateV250"] = competitor_report
     release["commercialCanonicalV217"] = commercial_report
     release["accessibilityHardeningV215"] = accessibility_report
     release_path = output / "alo186-release.json"
