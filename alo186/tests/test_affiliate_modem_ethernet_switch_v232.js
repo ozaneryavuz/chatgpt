@@ -39,6 +39,12 @@ assert.ok(APP.includes("affiliatePolicy === 'after_tool'"));
 assert.ok(APP.includes('professionalOnly === false'));
 assert.ok(APP.includes('verificationStatus(new Date())'));
 assert.ok(APP.includes("link.removeAttribute('href')"));
+assert.ok(APP.includes("type:'text/calendar;charset=utf-8'"));
+assert.ok(APP.includes('90 * 24 * 60 * 60 * 1000'));
+assert.ok(APP.includes('Mevcut çözüm yeterliyse yeni ürün almayın'));
+assert.ok(APP.includes('ad, e-posta, adres veya seri numarası istenmez'));
+assert.ok(!APP.includes('localStorage'));
+assert.ok(!APP.includes('fetch('));
 const jsonLd=[...HTML.matchAll(/<script type="application\/ld\+json">\s*(.*?)\s*<\/script>/gs)];
 assert.strictEqual(jsonLd.length,1);
 const graph=JSON.parse(jsonLd[0][1])['@graph'];
@@ -60,4 +66,4 @@ for(const file of walk(ROOT)){
   for(const asin of EXPECTED.keys()) if(text.includes(asin)) hits.push(`${asin}:${path.relative(ROOT,file)}`);
 }
 assert.deepStrictEqual(hits,[],`Duplicate ASIN outside route: ${hits.join(', ')}`);
-console.log(JSON.stringify({ok:true,route:'/amazon-elektrik-urunleri/modem-ethernet-switch-port-hiz-olcum-secimi/',products:[...EXPECTED.keys()],knowledgeGraph:['Product','Brand','ItemList','identifier','additionalProperty'],affiliatePolicy:'after_tool',professionalOnlyBypass:false,staleBoundary:'45-open-46-closed',duplicateAsin:false}));
+console.log(JSON.stringify({ok:true,route:'/amazon-elektrik-urunleri/modem-ethernet-switch-port-hiz-olcum-secimi/',products:[...EXPECTED.keys()],knowledgeGraph:['Product','Brand','ItemList','identifier','additionalProperty'],affiliatePolicy:'after_tool',professionalOnlyBypass:false,staleBoundary:'45-open-46-closed',duplicateAsin:false,revisitReason:'private-90-day-ics'}));
