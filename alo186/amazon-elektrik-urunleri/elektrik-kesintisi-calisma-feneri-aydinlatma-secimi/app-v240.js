@@ -11,6 +11,12 @@
       'toolBattery',
       'toolIdentity'
     ];
+    const safetyChecks = [
+      'toolNoEmergency',
+      'toolNoLiveWork',
+      'toolEnvironment',
+      'toolBattery'
+    ];
     const commerceChecks = ['gateNeed', 'gateAffiliate'];
     const toolButton = document.getElementById('runCompatibilityTool');
     const toolResult = document.getElementById('toolResult');
@@ -22,6 +28,24 @@
     if (!catalog || !toolButton || !toolResult || !gatePanel || !gateStatus) return;
 
     const checked = (ids) => ids.every((id) => document.getElementById(id)?.checked === true);
+
+    const retestLink = document.createElement('a');
+    retestLink.id = 'portableWorkLightRetestV240';
+    retestLink.href = '/hesaplama/elektrik-ekipmani-tekrar-test-takvimi/';
+    retestLink.className = 'shop';
+    retestLink.hidden = true;
+    retestLink.textContent = '90 günlük yeniden testi planla';
+    retestLink.setAttribute('aria-label', 'Çalışma feneri için 90 günlük kişisel verisiz yeniden test takvimi oluştur');
+    toolResult.insertAdjacentElement('afterend', retestLink);
+
+    const syncRetest = () => {
+      const safeForRetest = checked(safetyChecks);
+      retestLink.hidden = !safeForRetest;
+      if (!safeForRetest) return;
+      retestLink.textContent = document.getElementById('toolNeed')?.checked
+        ? 'Satın alma veya bakım sonrası 90 günlük yeniden testi planla'
+        : 'Mevcut fener yeterliyse 90 günlük yeniden testi planla';
+    };
 
     const sync = () => {
       const freshness = catalog.verificationStatus(new Date());
@@ -59,6 +83,7 @@
       } else {
         gateStatus.textContent = 'Koşullar tamamlandı. Amazon kaydında ASIN, MPN, ışık gücü ve IP sınıfını yeniden doğrulayın.';
       }
+      syncRetest();
     };
 
     toolButton.addEventListener('click', () => {
