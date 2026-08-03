@@ -7,6 +7,13 @@ expression. The original injector only recognised an older negative spelling.
 This shim normalises that equivalent expression, delegates to the strict base
 injector, then applies the v250 AI-commerce layer after the private search index
 and final route discovery exist.
+
+The final Pages smoke test intentionally rejects root-relative values found in
+inline executable/style content. The v250 SSR choices do not require bespoke
+CSS to remain visible or crawlable, so this compatibility layer emits the
+semantic server-rendered HTML without adding an inline style block. Existing
+site CSS and native block layout provide the presentation while preserving the
+stricter project-path guard.
 """
 
 from pathlib import Path
@@ -45,6 +52,19 @@ def harden_outage_input(site: Path) -> bool:
     return _ORIGINAL_HARDEN(site) or changed
 
 
+def inject_ssr_baseline_without_inline_css(html: str, base_path: str) -> tuple[str, bool]:
+    """Emit crawlable SSR choice cards without an inline CSS false positive."""
+    if 'data-alo186-ssr-products-v250="true"' in html:
+        return html, False
+    if "</main>" not in html:
+        raise RuntimeError("SSR baseline için </main> yok")
+    return html.replace(
+        "</main>",
+        _ai_commerce.ssr_baseline(base_path) + "</main>",
+        1,
+    ), True
+
+
 def inject(site: Path, base_path: str) -> dict:
     """Run route/search discovery first, then attach the AI commerce semantics."""
     run135_result = _ORIGINAL_INJECT(site, base_path)
@@ -65,6 +85,7 @@ def validate(site: Path, base_path: str) -> dict:
 
 
 _base.harden_outage_input = harden_outage_input
+_ai_commerce.inject_ssr_baseline = inject_ssr_baseline_without_inline_css
 
 VERSION = max(_base.VERSION, _ai_commerce.VERSION)
 ROUTES = _base.ROUTES
