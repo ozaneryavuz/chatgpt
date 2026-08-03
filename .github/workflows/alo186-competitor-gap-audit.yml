@@ -1,0 +1,80 @@
+name: ALO186 rakip boşluğu, SSR ve affiliate şema denetimi
+
+on:
+  pull_request:
+    paths:
+      - "alo186/deployment/install_competitor_gap_v220.py"
+      - "alo186/deployment/build_static_site.py"
+      - "alo186/turkiye-arama/**"
+      - "alo186/urun-eslestirme/**"
+      - "alo186/robots.txt"
+      - "alo186/tests/test_competitor_gap_affiliate_v220.py"
+      - ".github/workflows/alo186-competitor-gap-audit.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alo186/deployment/install_competitor_gap_v220.py"
+      - "alo186/deployment/build_static_site.py"
+      - "alo186/turkiye-arama/**"
+      - "alo186/urun-eslestirme/**"
+      - "alo186/robots.txt"
+      - "alo186/tests/test_competitor_gap_affiliate_v220.py"
+      - ".github/workflows/alo186-competitor-gap-audit.yml"
+  schedule:
+    # Türkiye yıl boyunca UTC+3: her pazartesi 09:30 Europe/Istanbul.
+    - cron: "30 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-competitor-gap-v220-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: JSON-LD, SSR, affiliate ve AI crawler sözleşmelerini doğrula
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/alo186-v220-audit
+          python alo186/tests/test_competitor_gap_affiliate_v220.py \
+            | tee /tmp/alo186-v220-audit/result.json
+          python -m json.tool /tmp/alo186-v220-audit/result.json >/dev/null
+
+      - name: Denetim özetini yayımla
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## ALO186 competitor-gap v220"
+            echo
+            if [ -f /tmp/alo186-v220-audit/result.json ]; then
+              echo '```json'
+              cat /tmp/alo186-v220-audit/result.json
+              echo '```'
+            else
+              echo "Denetim sonucu üretilemedi; önceki adımın hata günlüğünü inceleyin."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Denetim kanıtını sakla
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: alo186-competitor-gap-v220-audit
+          path: /tmp/alo186-v220-audit
+          if-no-files-found: warn
+          retention-days: 30
