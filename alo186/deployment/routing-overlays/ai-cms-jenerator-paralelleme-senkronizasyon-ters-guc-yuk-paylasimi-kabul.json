@@ -1,0 +1,18 @@
+{
+  "version": 236,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/jenerator-paralelleme-senkronizasyon-ters-guc-yuk-paylasimi-kabul/index.html",
+      "canonicalPath": "/haberler/jenerator-paralelleme-senkronizasyon-ters-guc-yuk-paylasimi-kabul",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_f24e8b6c1d903a57",
+    "humanApproved": true,
+    "approvalPr": 776,
+    "qualityScore": 88
+  }
+}

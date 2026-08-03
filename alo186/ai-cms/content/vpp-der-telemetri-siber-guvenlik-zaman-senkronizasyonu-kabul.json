@@ -1,1 +1,277 @@
-{"schemaVersion":1,"id":"cms_6d91a4c7e2b85f30","slug":"vpp-der-telemetri-siber-guvenlik-zaman-senkronizasyonu-kabul","contentType":"guide","state":"review","locale":"tr-TR","title":"VPP Telemetri Siber Güvenliği: TLS, RBAC ve Zaman Senkronu","h1":"VPP ve DER telemetrisi TLS, rol tabanlı erişim ve zaman senkronuyla nasıl kabul edilir?","description":"VPP ve DER telemetrisini TLS, sertifika yönetimi, RBAC, olay izleme, PTP/NTP zaman senkronu ve güvenli arıza senaryolarıyla kabul edin.","intent":"VPP, toplayıcı ve DER arasındaki telemetri-kontrol zincirinin; karşılıklı kimlik doğrulama, TLS, sertifika yaşam döngüsü, en az ayrıcalık, güvenilir zaman, güvenlik olayları, yedekleme ve iletişim kaybında yerel güvenli davranışla kabul edilmesi.","primaryKeyword":"VPP DER telemetri siber güvenlik zaman senkronizasyonu","audience":["VPP ve toplayıcı teknik ekipleri","GES ve enerji depolama işletmecileri","OT/SCADA siber güvenlik ekipleri","Elektrik mühendisleri","Enerji yazılımı ve entegrasyon ekipleri"],"riskClass":"legal","directAnswer":"VPP veya DER telemetrisi, merkez ekranında değer görünmesiyle güvenli kabul edilmiş olmaz. Kabul dosyası; cihazdan toplayıcıya kadar veri akışını, TLS 1.2/1.3 profilini ve sertifika doğrulamasını, rol tabanlı en az ayrıcalıklı erişimi, ortak zaman kaynağını ve saat sapması alarmlarını, güvenlik olaylarını, yedekleme-geri yükleme sürecini ve iletişim kaybında yerel güvenli kontrolü kanıtlamalıdır. Komut, ölçüm ve olay kayıtları aynı güvenilir zaman tabanında eşleştirilmeli; başarısız kimlik doğrulama, süresi dolmuş sertifika, yetkisiz rol, zaman kaybı ve bağlantı kesintisi senaryoları canlı işletmeden önce test edilmelidir.","sections":[{"id":"varlik-ve-veri-akisi","heading":"VPP siber güvenlik kabulü hangi varlık ve veri akışı envanteriyle başlamalıdır?","paragraphs":["İlk adım; sayaç, inverter, BMS, EVSE, RTU, gateway, VPN, bulut servisleri, toplayıcı platformu ve piyasa/şebeke arayüzlerini tek veri akışı üzerinde göstermektir. Her bağlantıda protokol, yön, port, veri sınıfı, komut yetkisi, güven sınırı, sahiplik ve hizmet sağlayıcı sorumluluğu kaydedilmelidir.","Yalnız IP listesi yeterli değildir. Hangi veri noktasının ölçüm, alarm, ayar veya kontrol komutu olduğu; komutun fiziksel tesiste ne değiştirdiği ve iletişim kesildiğinde yerel kontrolün hangi güvenli değeri koruyacağı açıkça tanımlanmalıdır. NIST OT yaklaşımı güvenlik önlemlerinin performans, güvenilirlik ve emniyet gereksinimleriyle birlikte ele alınmasını ister."],"bullets":["Cihazdan toplayıcıya bütün ağ ve güven sınırlarını çizin.","Her veri noktasını ölçüm, olay, ayar veya kontrol olarak sınıflandırın.","Üçüncü taraf bulut ve uzaktan bakım bağlantılarını ayrı gösterin.","İletişim kaybında yerel emniyet ve işletme önceliğini tanımlayın."],"sourceRefs":["S4","S5"]},{"id":"tls-ve-sertifika","heading":"TLS ve sertifika yaşam döngüsü nasıl doğrulanmalıdır?","paragraphs":["IEC 62351-3, TCP/IP kullanan güç sistemi protokollerinde gizlilik, bütünlük ve mesaj düzeyi kimlik doğrulaması için TLS 1.2 ve TLS 1.3 profilleri tanımlar. Kabulde yalnız trafik şifreli mi sorusu değil; sunucu ve gerekiyorsa istemci kimliği, sertifika zinciri, güven kökü, izin verilen protokol/suite, oturum davranışı ve güvenlik olayı kaydı doğrulanmalıdır.","Sertifika süresi dolması, iptal listesi veya OCSP erişilememesi, yanlış cihaz kimliği ve güven kökü değişimi senaryoları planlı test edilmelidir. Anahtar ve sertifika yenilemesi üretim kesintisine yol açmadan yapılabilmeli; özel anahtarlar log, yedek veya destek dosyalarına düz metin olarak girmemelidir."],"bullets":["TLS sürümü ve kimlik doğrulama yönünü arayüz bazında kaydedin.","Sertifika zinciri, ad eşleşmesi ve iptal kontrolünü test edin.","Süre dolumu yaklaşırken alarm ve kontrollü yenileme senaryosu uygulayın.","Özel anahtarın dışa aktarım ve yedekleme politikasını doğrulayın."],"sourceRefs":["S1"]},{"id":"rbac-ve-en-az-ayricalik","heading":"Rol tabanlı erişim hangi yetki matrisiyle kabul edilmelidir?","paragraphs":["IEC 62351-8, insan kullanıcılar, otomatik sistemler ve yazılım uygulamaları için rol tabanlı erişimi ve en az ayrıcalık ilkesini ele alır. VPP’de izleme, dispatch onayı, setpoint gönderme, firmware, sertifika, kullanıcı yönetimi ve acil durum işlemleri aynı süper kullanıcı hesabında toplanmamalıdır.","Kabul testi her rol için izin verilen ve reddedilen işlemleri içermelidir. Ortak hesap, varsayılan parola, süresiz servis hesabı ve ayrılan personelin açık yetkisi kapanış maddesi olmalıdır. Kritik komutlarda iki kişi onayı, süreli yetki veya ayrı kontrol kanalı risk değerlendirmesine göre uygulanabilir."],"bullets":["İzleme, işletme, mühendislik, siber güvenlik ve yönetici rollerini ayırın.","Her rol için okuma, yazma, kontrol ve yönetim izinlerini test edin.","Ortak ve varsayılan hesapları kapatın veya belgeli istisnaya bağlayın.","Yetki verme, gözden geçirme ve geri alma kayıtlarını saklayın."],"sourceRefs":["S2","S5"]},{"id":"zaman-ve-olay-butunlugu","heading":"Zaman senkronizasyonu neden dispatch ve olay kanıtının parçasıdır?","paragraphs":["VPP’de setpoint, ölçüm, sayaç, piyasa olayı ve cihaz alarmı farklı saatlerdeyse gerçek tepki süresi ve baseline sapması yanlış yorumlanabilir. IEC/IEEE 61850-9-3, güç otomasyonu için PTP profilini ve yüksek senkronizasyon sınıflarını tanımlar. Her tesis aynı hassasiyeti gerektirmese de ihtiyaç duyulan zaman doğruluğu işlev ve sözleşmeye göre belirlenmelidir.","Birincil zaman kaynağı, yedek kaynak, holdover davranışı, saat sapması alarmı, zaman dilimi ve yaz/kış saati işleme kuralları test edilmelidir. Zaman kaynağı kaybolduğunda eski veya gelecekteki zaman damgasıyla komut kabul edilmemeli; olay kayıtları monoton ve değiştirilemez bir sıra sunmalıdır."],"bullets":["Her arayüz için gerekli zaman doğruluğu ve toleransı tanımlayın.","PTP/NTP kaynağı, yedek ve holdover davranışını test edin.","Saat sıçraması ve zaman kaybında alarm/komut politikasını doğrulayın.","Dispatch, ölçüm ve olay kaydını ortak zaman çizelgesinde karşılaştırın."],"sourceRefs":["S3","S4"]},{"id":"izleme-ve-guvenli-ariza","heading":"Güvenlik izleme ve güvenli arıza senaryosu nasıl teslim alınmalıdır?","paragraphs":["IEC 62351-7; IED, RTU ve DER sistemlerinin sağlık, performans ve olası güvenlik ihlallerini izlemek için NSM veri nesneleri tanımlar. Kabul dosyasında başarısız giriş, sertifika hatası, bağlantı kesintisi, beklenmeyen konfigürasyon değişikliği, zaman senkron kaybı, servis yeniden başlatma ve komut reddi gibi olayların merkezi izleme sistemine doğru önem ve zamanla ulaştığı gösterilmelidir.","İletişim veya merkez platformu kaybolduğunda tesis güvenli yerel moda geçmeli; son komutu sınırsız süre körü körüne sürdürmemelidir. Yedekleme ve geri yükleme testi, temiz konfigürasyon, sertifika ve rol bilgilerini geri getirmeli; canlı dispatch öncesi izole ortamda test edilmelidir. Mevcut sistem bütün kapıları kanıtla geçiyorsa yalnız moda olduğu için yeni siber güvenlik ürünü alınmamalıdır."],"bullets":["NSM ve güvenlik olaylarını merkezi alarm listesine eşleyin.","Bağlantı, kimlik, zaman ve konfigürasyon arızalarını senaryolu test edin.","Yerel fail-safe/fail-operational davranışı süre ve sınırlarıyla doğrulayın.","Yedekleme-geri yükleme ve rollback testini canlıdan önce tamamlayın."],"sourceRefs":["S4","S5"]}],"faqs":[{"question":"VPP bağlantısında VPN varsa TLS yine gerekli midir?","answer":"VPN ağ katmanında koruma sağlar ancak uygulama uçlarının kimliği, sertifika yaşam döngüsü, mesaj bütünlüğü ve güvenlik olayları ayrıca yönetilmelidir. Gereksinim, protokol ve güven sınırına göre katmanlı biçimde belirlenir.","sourceRefs":["S1","S5"]},{"question":"VPP’de tek yönetici hesabı kullanmak neden risklidir?","answer":"Ortak süper kullanıcı hesabı yetkinin kime ait olduğunu ve hangi işlemin kim tarafından yapıldığını belirsizleştirir. RBAC, kullanıcı ve otomatik ajanları yalnız görevleri için gerekli izinlerle sınırlar.","sourceRefs":["S2"]},{"question":"Saat birkaç saniye saparsa ne olur?","answer":"İzin verilen sapma kullanım amacına bağlıdır. Dispatch tepki süresi, sayaç mutabakatı, olay sırası ve arıza kök neden analizi etkilenebilir. Bu nedenle tolerans, zaman kaynağı ve kayıp alarmı sözleşmede açık olmalıdır.","sourceRefs":["S3"]},{"question":"İletişim kesilince DER son setpointte kalmalı mı?","answer":"Her tesis için tek cevap yoktur. Güvenli yerel davranış; ekipman sınırları, şebeke gereksinimleri, sözleşme ve emniyet analizine göre zaman sınırlı hold, yerel kontrol veya güvenli setpoint olabilir ve kabul testinde doğrulanmalıdır.","sourceRefs":["S4","S5"]}],"sources":[{"id":"S1","publisher":"IEC","title":"IEC 62351-3:2023 — TCP/IP Security Profiles Including TLS","url":"https://webstore.iec.ch/en/publication/68410","accessedAt":"2026-08-03","primary":true,"factSummary":"Güç sistemi TCP/IP protokolleri için TLS 1.2 ve 1.3 profillerini, gizlilik, bütünlük, kimlik doğrulama, iptal kontrolü ve güvenlik olaylarını tanımlar."},{"id":"S2","publisher":"IEC","title":"IEC 62351-8:2020 — Role-Based Access Control for Power System Management","url":"https://webstore.iec.ch/en/publication/61822","accessedAt":"2026-08-03","primary":true,"factSummary":"İnsanlar, otomatik sistemler ve uygulamalar için rol tabanlı erişim ve en az ayrıcalık ilkesini açıklar; sayfa güncel 2026 baskısıyla değiştirildiğini belirtir."},{"id":"S3","publisher":"IEC / IEEE","title":"IEC/IEEE 61850-9-3:2016 — Precision Time Protocol Profile","url":"https://webstore.iec.ch/en/publication/24998","accessedAt":"2026-08-03","primary":true,"factSummary":"Güç otomasyonu için PTP profilini ve yüksek senkronizasyon sınıflarını karşılayan ortak zaman dağıtımını tanımlar."},{"id":"S4","publisher":"IEC","title":"IEC 62351-7:2025 — Network and System Management Data Object Models","url":"https://webstore.iec.ch/en/publication/76108","accessedAt":"2026-08-03","primary":true,"factSummary":"IED, RTU, DER ve diğer güç sistemi bileşenlerinin sağlık, performans ve olası güvenlik ihlallerini izlemek için NSM nesnelerini tanımlar."},{"id":"S5","publisher":"NIST","title":"NIST SP 800-82 Rev. 3 — Guide to Operational Technology Security","url":"https://csrc.nist.gov/pubs/sp/800/82/r3/final","accessedAt":"2026-08-03","primary":true,"factSummary":"OT güvenlik mimarisi, tehditler ve karşı önlemleri; performans, güvenilirlik ve emniyet gereksinimleriyle birlikte ele alan resmî rehberdir."}],"internalLinks":[{"label":"VPP sanal güç santrali nedir?","path":"/haberler/vpp-sanal-guc-santrali-nedir","reason":"VPP rol ve veri akışı temelini siber kabul görevinden ayırır."},{"label":"VPP batarya çevrim, rezerv ve garanti sözleşmesi","path":"/haberler/vpp-batarya-cevrim-rezerv-garanti-sozlesmesi","reason":"Teknik telemetri kanıtını batarya ve sözleşme sınırlarıyla bağlar."},{"label":"Ev tipi enerji depolama kaç kWh olmalı?","path":"/haberler/ev-tipi-enerji-depolama-kac-kwh-olmali","reason":"DER varlığının kapasite ve kullanım amacını tamamlar."},{"label":"Batarya SoC ve SoH farkı","path":"/haberler/batarya-soc-soh-farki-kapasite-saglik-nasil-anlasilir","reason":"Telemetri veri noktalarının fiziksel anlamını açıklar."},{"label":"V2L, V2H ve V2G farkı","path":"/haberler/v2l-v2h-v2g-farki-cift-yonlu-sarj","reason":"Çift yönlü EV kaynaklarının kontrol ve güven sınırlarını tamamlar."},{"label":"Elektrik sürekliliği pasaportu","path":"/hesaplama/elektrik-surekliligi-pasaportu/","reason":"Kişisel verisiz test ve kanıt envanteri oluşturur."},{"label":"Kurumsal elektrik sürekliliği ön değerlendirme","path":"/kurumsal-elektrik-surekliligi-on-degerlendirme","reason":"OT, SCADA ve DER entegrasyonunda yetkin teknik değerlendirmeye geçiş sağlar."}],"commerce":{"enabled":false,"policy":"none","category":null},"editorial":{"createdBy":"ai-assisted","model":"gpt-5.6-thinking","humanReviewRequired":true,"approvedBy":null,"approvedAt":null,"publishedAt":null,"approvalPr":null},"seo":{"canonicalPath":"/haberler/vpp-der-telemetri-siber-guvenlik-zaman-senkronizasyonu-kabul","robots":"index,follow,max-image-preview:large","lastModified":"2026-08-03","topics":["VPP","DER","telemetri","siber güvenlik","IEC 62351","TLS","RBAC","PTP","OT güvenliği"]},"quality":{"score":100,"minimumRequired":85,"checks":{"metadata":true,"directAnswer":true,"contentDepth":true,"sources":true,"safety":true,"internalLinks":true,"uniqueness":true,"structuredData":true},"similarity":{"maximum":0.42,"closestPath":"/haberler/vpp-batarya-cevrim-rezerv-garanti-sozlesmesi"}}}
+{
+  "schemaVersion": 1,
+  "id": "cms_6d91a4c7e2b85f30",
+  "slug": "vpp-der-telemetri-siber-guvenlik-zaman-senkronizasyonu-kabul",
+  "contentType": "guide",
+  "state": "published",
+  "locale": "tr-TR",
+  "title": "VPP Telemetri Siber Güvenliği: TLS, RBAC ve Zaman Senkronu",
+  "h1": "VPP ve DER telemetrisi TLS, rol tabanlı erişim ve zaman senkronuyla nasıl kabul edilir?",
+  "description": "VPP ve DER telemetrisini TLS, sertifika yönetimi, RBAC, olay izleme, PTP/NTP zaman senkronu ve güvenli arıza senaryolarıyla kabul edin.",
+  "intent": "VPP, toplayıcı ve DER arasındaki telemetri-kontrol zincirinin; karşılıklı kimlik doğrulama, TLS, sertifika yaşam döngüsü, en az ayrıcalık, güvenilir zaman, güvenlik olayları, yedekleme ve iletişim kaybında yerel güvenli davranışla kabul edilmesi.",
+  "primaryKeyword": "VPP DER telemetri siber güvenlik zaman senkronizasyonu",
+  "audience": [
+    "VPP ve toplayıcı teknik ekipleri",
+    "GES ve enerji depolama işletmecileri",
+    "OT/SCADA siber güvenlik ekipleri",
+    "Elektrik mühendisleri",
+    "Enerji yazılımı ve entegrasyon ekipleri"
+  ],
+  "riskClass": "legal",
+  "directAnswer": "VPP veya DER telemetrisi, merkez ekranında değer görünmesiyle güvenli kabul edilmiş olmaz. Kabul dosyası; cihazdan toplayıcıya kadar veri akışını, TLS 1.2/1.3 profilini ve sertifika doğrulamasını, rol tabanlı en az ayrıcalıklı erişimi, ortak zaman kaynağını ve saat sapması alarmlarını, güvenlik olaylarını, yedekleme-geri yükleme sürecini ve iletişim kaybında yerel güvenli kontrolü kanıtlamalıdır. Komut, ölçüm ve olay kayıtları aynı güvenilir zaman tabanında eşleştirilmeli; başarısız kimlik doğrulama, süresi dolmuş sertifika, yetkisiz rol, zaman kaybı ve bağlantı kesintisi senaryoları canlı işletmeden önce test edilmelidir.",
+  "sections": [
+    {
+      "id": "varlik-ve-veri-akisi",
+      "heading": "VPP siber güvenlik kabulü hangi varlık ve veri akışı envanteriyle başlamalıdır?",
+      "paragraphs": [
+        "İlk adım; sayaç, inverter, BMS, EVSE, RTU, gateway, VPN, bulut servisleri, toplayıcı platformu ve piyasa/şebeke arayüzlerini tek veri akışı üzerinde göstermektir. Her bağlantıda protokol, yön, port, veri sınıfı, komut yetkisi, güven sınırı, sahiplik ve hizmet sağlayıcı sorumluluğu kaydedilmelidir.",
+        "Yalnız IP listesi yeterli değildir. Hangi veri noktasının ölçüm, alarm, ayar veya kontrol komutu olduğu; komutun fiziksel tesiste ne değiştirdiği ve iletişim kesildiğinde yerel kontrolün hangi güvenli değeri koruyacağı açıkça tanımlanmalıdır. NIST OT yaklaşımı güvenlik önlemlerinin performans, güvenilirlik ve emniyet gereksinimleriyle birlikte ele alınmasını ister."
+      ],
+      "bullets": [
+        "Cihazdan toplayıcıya bütün ağ ve güven sınırlarını çizin.",
+        "Her veri noktasını ölçüm, olay, ayar veya kontrol olarak sınıflandırın.",
+        "Üçüncü taraf bulut ve uzaktan bakım bağlantılarını ayrı gösterin.",
+        "İletişim kaybında yerel emniyet ve işletme önceliğini tanımlayın."
+      ],
+      "sourceRefs": [
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "id": "tls-ve-sertifika",
+      "heading": "TLS ve sertifika yaşam döngüsü nasıl doğrulanmalıdır?",
+      "paragraphs": [
+        "IEC 62351-3, TCP/IP kullanan güç sistemi protokollerinde gizlilik, bütünlük ve mesaj düzeyi kimlik doğrulaması için TLS 1.2 ve TLS 1.3 profilleri tanımlar. Kabulde yalnız trafik şifreli mi sorusu değil; sunucu ve gerekiyorsa istemci kimliği, sertifika zinciri, güven kökü, izin verilen protokol/suite, oturum davranışı ve güvenlik olayı kaydı doğrulanmalıdır.",
+        "Sertifika süresi dolması, iptal listesi veya OCSP erişilememesi, yanlış cihaz kimliği ve güven kökü değişimi senaryoları planlı test edilmelidir. Anahtar ve sertifika yenilemesi üretim kesintisine yol açmadan yapılabilmeli; özel anahtarlar log, yedek veya destek dosyalarına düz metin olarak girmemelidir."
+      ],
+      "bullets": [
+        "TLS sürümü ve kimlik doğrulama yönünü arayüz bazında kaydedin.",
+        "Sertifika zinciri, ad eşleşmesi ve iptal kontrolünü test edin.",
+        "Süre dolumu yaklaşırken alarm ve kontrollü yenileme senaryosu uygulayın.",
+        "Özel anahtarın dışa aktarım ve yedekleme politikasını doğrulayın."
+      ],
+      "sourceRefs": [
+        "S1"
+      ]
+    },
+    {
+      "id": "rbac-ve-en-az-ayricalik",
+      "heading": "Rol tabanlı erişim hangi yetki matrisiyle kabul edilmelidir?",
+      "paragraphs": [
+        "IEC 62351-8, insan kullanıcılar, otomatik sistemler ve yazılım uygulamaları için rol tabanlı erişimi ve en az ayrıcalık ilkesini ele alır. VPP’de izleme, dispatch onayı, setpoint gönderme, firmware, sertifika, kullanıcı yönetimi ve acil durum işlemleri aynı süper kullanıcı hesabında toplanmamalıdır.",
+        "Kabul testi her rol için izin verilen ve reddedilen işlemleri içermelidir. Ortak hesap, varsayılan parola, süresiz servis hesabı ve ayrılan personelin açık yetkisi kapanış maddesi olmalıdır. Kritik komutlarda iki kişi onayı, süreli yetki veya ayrı kontrol kanalı risk değerlendirmesine göre uygulanabilir."
+      ],
+      "bullets": [
+        "İzleme, işletme, mühendislik, siber güvenlik ve yönetici rollerini ayırın.",
+        "Her rol için okuma, yazma, kontrol ve yönetim izinlerini test edin.",
+        "Ortak ve varsayılan hesapları kapatın veya belgeli istisnaya bağlayın.",
+        "Yetki verme, gözden geçirme ve geri alma kayıtlarını saklayın."
+      ],
+      "sourceRefs": [
+        "S2",
+        "S5"
+      ]
+    },
+    {
+      "id": "zaman-ve-olay-butunlugu",
+      "heading": "Zaman senkronizasyonu neden dispatch ve olay kanıtının parçasıdır?",
+      "paragraphs": [
+        "VPP’de setpoint, ölçüm, sayaç, piyasa olayı ve cihaz alarmı farklı saatlerdeyse gerçek tepki süresi ve baseline sapması yanlış yorumlanabilir. IEC/IEEE 61850-9-3, güç otomasyonu için PTP profilini ve yüksek senkronizasyon sınıflarını tanımlar. Her tesis aynı hassasiyeti gerektirmese de ihtiyaç duyulan zaman doğruluğu işlev ve sözleşmeye göre belirlenmelidir.",
+        "Birincil zaman kaynağı, yedek kaynak, holdover davranışı, saat sapması alarmı, zaman dilimi ve yaz/kış saati işleme kuralları test edilmelidir. Zaman kaynağı kaybolduğunda eski veya gelecekteki zaman damgasıyla komut kabul edilmemeli; olay kayıtları monoton ve değiştirilemez bir sıra sunmalıdır."
+      ],
+      "bullets": [
+        "Her arayüz için gerekli zaman doğruluğu ve toleransı tanımlayın.",
+        "PTP/NTP kaynağı, yedek ve holdover davranışını test edin.",
+        "Saat sıçraması ve zaman kaybında alarm/komut politikasını doğrulayın.",
+        "Dispatch, ölçüm ve olay kaydını ortak zaman çizelgesinde karşılaştırın."
+      ],
+      "sourceRefs": [
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "id": "izleme-ve-guvenli-ariza",
+      "heading": "Güvenlik izleme ve güvenli arıza senaryosu nasıl teslim alınmalıdır?",
+      "paragraphs": [
+        "IEC 62351-7; IED, RTU ve DER sistemlerinin sağlık, performans ve olası güvenlik ihlallerini izlemek için NSM veri nesneleri tanımlar. Kabul dosyasında başarısız giriş, sertifika hatası, bağlantı kesintisi, beklenmeyen konfigürasyon değişikliği, zaman senkron kaybı, servis yeniden başlatma ve komut reddi gibi olayların merkezi izleme sistemine doğru önem ve zamanla ulaştığı gösterilmelidir.",
+        "İletişim veya merkez platformu kaybolduğunda tesis güvenli yerel moda geçmeli; son komutu sınırsız süre körü körüne sürdürmemelidir. Yedekleme ve geri yükleme testi, temiz konfigürasyon, sertifika ve rol bilgilerini geri getirmeli; canlı dispatch öncesi izole ortamda test edilmelidir. Mevcut sistem bütün kapıları kanıtla geçiyorsa yalnız moda olduğu için yeni siber güvenlik ürünü alınmamalıdır."
+      ],
+      "bullets": [
+        "NSM ve güvenlik olaylarını merkezi alarm listesine eşleyin.",
+        "Bağlantı, kimlik, zaman ve konfigürasyon arızalarını senaryolu test edin.",
+        "Yerel fail-safe/fail-operational davranışı süre ve sınırlarıyla doğrulayın.",
+        "Yedekleme-geri yükleme ve rollback testini canlıdan önce tamamlayın."
+      ],
+      "sourceRefs": [
+        "S4",
+        "S5"
+      ]
+    }
+  ],
+  "faqs": [
+    {
+      "question": "VPP bağlantısında VPN varsa TLS yine gerekli midir?",
+      "answer": "VPN ağ katmanında koruma sağlar ancak uygulama uçlarının kimliği, sertifika yaşam döngüsü, mesaj bütünlüğü ve güvenlik olayları ayrıca yönetilmelidir. Gereksinim, protokol ve güven sınırına göre katmanlı biçimde belirlenir.",
+      "sourceRefs": [
+        "S1",
+        "S5"
+      ]
+    },
+    {
+      "question": "VPP’de tek yönetici hesabı kullanmak neden risklidir?",
+      "answer": "Ortak süper kullanıcı hesabı yetkinin kime ait olduğunu ve hangi işlemin kim tarafından yapıldığını belirsizleştirir. RBAC, kullanıcı ve otomatik ajanları yalnız görevleri için gerekli izinlerle sınırlar.",
+      "sourceRefs": [
+        "S2"
+      ]
+    },
+    {
+      "question": "Saat birkaç saniye saparsa ne olur?",
+      "answer": "İzin verilen sapma kullanım amacına bağlıdır. Dispatch tepki süresi, sayaç mutabakatı, olay sırası ve arıza kök neden analizi etkilenebilir. Bu nedenle tolerans, zaman kaynağı ve kayıp alarmı sözleşmede açık olmalıdır.",
+      "sourceRefs": [
+        "S3"
+      ]
+    },
+    {
+      "question": "İletişim kesilince DER son setpointte kalmalı mı?",
+      "answer": "Her tesis için tek cevap yoktur. Güvenli yerel davranış; ekipman sınırları, şebeke gereksinimleri, sözleşme ve emniyet analizine göre zaman sınırlı hold, yerel kontrol veya güvenli setpoint olabilir ve kabul testinde doğrulanmalıdır.",
+      "sourceRefs": [
+        "S4",
+        "S5"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "publisher": "IEC",
+      "title": "IEC 62351-3:2023 — TCP/IP Security Profiles Including TLS",
+      "url": "https://webstore.iec.ch/en/publication/68410",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Güç sistemi TCP/IP protokolleri için TLS 1.2 ve 1.3 profillerini, gizlilik, bütünlük, kimlik doğrulama, iptal kontrolü ve güvenlik olaylarını tanımlar."
+    },
+    {
+      "id": "S2",
+      "publisher": "IEC",
+      "title": "IEC 62351-8:2020 — Role-Based Access Control for Power System Management",
+      "url": "https://webstore.iec.ch/en/publication/61822",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "İnsanlar, otomatik sistemler ve uygulamalar için rol tabanlı erişim ve en az ayrıcalık ilkesini açıklar; sayfa güncel 2026 baskısıyla değiştirildiğini belirtir."
+    },
+    {
+      "id": "S3",
+      "publisher": "IEC / IEEE",
+      "title": "IEC/IEEE 61850-9-3:2016 — Precision Time Protocol Profile",
+      "url": "https://webstore.iec.ch/en/publication/24998",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Güç otomasyonu için PTP profilini ve yüksek senkronizasyon sınıflarını karşılayan ortak zaman dağıtımını tanımlar."
+    },
+    {
+      "id": "S4",
+      "publisher": "IEC",
+      "title": "IEC 62351-7:2025 — Network and System Management Data Object Models",
+      "url": "https://webstore.iec.ch/en/publication/76108",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "IED, RTU, DER ve diğer güç sistemi bileşenlerinin sağlık, performans ve olası güvenlik ihlallerini izlemek için NSM nesnelerini tanımlar."
+    },
+    {
+      "id": "S5",
+      "publisher": "NIST",
+      "title": "NIST SP 800-82 Rev. 3 — Guide to Operational Technology Security",
+      "url": "https://csrc.nist.gov/pubs/sp/800/82/r3/final",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "OT güvenlik mimarisi, tehditler ve karşı önlemleri; performans, güvenilirlik ve emniyet gereksinimleriyle birlikte ele alan resmî rehberdir."
+    }
+  ],
+  "internalLinks": [
+    {
+      "label": "VPP sanal güç santrali nedir?",
+      "path": "/haberler/vpp-sanal-guc-santrali-nedir",
+      "reason": "VPP rol ve veri akışı temelini siber kabul görevinden ayırır."
+    },
+    {
+      "label": "VPP batarya çevrim, rezerv ve garanti sözleşmesi",
+      "path": "/haberler/vpp-batarya-cevrim-rezerv-garanti-sozlesmesi",
+      "reason": "Teknik telemetri kanıtını batarya ve sözleşme sınırlarıyla bağlar."
+    },
+    {
+      "label": "Ev tipi enerji depolama kaç kWh olmalı?",
+      "path": "/haberler/ev-tipi-enerji-depolama-kac-kwh-olmali",
+      "reason": "DER varlığının kapasite ve kullanım amacını tamamlar."
+    },
+    {
+      "label": "Batarya SoC ve SoH farkı",
+      "path": "/haberler/batarya-soc-soh-farki-kapasite-saglik-nasil-anlasilir",
+      "reason": "Telemetri veri noktalarının fiziksel anlamını açıklar."
+    },
+    {
+      "label": "V2L, V2H ve V2G farkı",
+      "path": "/haberler/v2l-v2h-v2g-farki-cift-yonlu-sarj",
+      "reason": "Çift yönlü EV kaynaklarının kontrol ve güven sınırlarını tamamlar."
+    },
+    {
+      "label": "Elektrik sürekliliği pasaportu",
+      "path": "/hesaplama/elektrik-surekliligi-pasaportu",
+      "reason": "Kişisel verisiz test ve kanıt envanteri oluşturur."
+    },
+    {
+      "label": "Kurumsal elektrik sürekliliği ön değerlendirme",
+      "path": "/kurumsal-elektrik-surekliligi-on-degerlendirme",
+      "reason": "OT, SCADA ve DER entegrasyonunda yetkin teknik değerlendirmeye geçiş sağlar."
+    }
+  ],
+  "commerce": {
+    "enabled": false,
+    "policy": "none",
+    "category": null
+  },
+  "editorial": {
+    "createdBy": "ai-assisted",
+    "model": "gpt-5.6-thinking",
+    "humanReviewRequired": true,
+    "approvedBy": "ozaneryavuz",
+    "approvedAt": "2026-08-03T18:42:12Z",
+    "publishedAt": "2026-08-03T18:42:12Z",
+    "approvalPr": 776
+  },
+  "seo": {
+    "canonicalPath": "/haberler/vpp-der-telemetri-siber-guvenlik-zaman-senkronizasyonu-kabul",
+    "robots": "index,follow,max-image-preview:large",
+    "lastModified": "2026-08-03",
+    "topics": [
+      "VPP",
+      "DER",
+      "telemetri",
+      "siber güvenlik",
+      "IEC 62351",
+      "TLS",
+      "RBAC",
+      "PTP",
+      "OT güvenliği"
+    ]
+  },
+  "quality": {
+    "score": 88,
+    "minimumRequired": 85,
+    "checks": {
+      "metadata": false,
+      "directAnswer": true,
+      "contentDepth": true,
+      "sources": true,
+      "safety": true,
+      "internalLinks": true,
+      "uniqueness": true,
+      "structuredData": true
+    },
+    "similarity": {
+      "maximum": 0.125,
+      "closestPath": "https://alo186.com/haberler/vpp-telemetri-stale-data-zaman-damgasi-sayac-mutabakat-teshis"
+    }
+  }
+}
