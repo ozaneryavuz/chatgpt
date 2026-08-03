@@ -8,6 +8,19 @@ on:
   pull_request:
     paths:
       - 'alo186/growth/serpapi/**'
+      - 'alo186/hesaplama/elektrik-geldikten-sonra-guvenli-yeniden-baslatma/**'
+      - 'alo186/hesaplama/kesinti-hazirlik-kontrolu/**'
+      - 'alo186/deployment/routing-overlays/growth-run6-v257.json'
+      - 'alo186/tests/test_growth_run6_serpapi_recovery.py'
+      - '.github/workflows/alo186-serpapi-intent-gap.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/growth/serpapi/**'
+      - 'alo186/hesaplama/elektrik-geldikten-sonra-guvenli-yeniden-baslatma/**'
+      - 'alo186/hesaplama/kesinti-hazirlik-kontrolu/**'
+      - 'alo186/deployment/routing-overlays/growth-run6-v257.json'
+      - 'alo186/tests/test_growth_run6_serpapi_recovery.py'
       - '.github/workflows/alo186-serpapi-intent-gap.yml'
 
 permissions:
@@ -25,11 +38,15 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Kod ve bütçe sözleşmesini doğrula
+      - name: Kod, sayfa ve bütçe sözleşmesini doğrula
         run: |
           set -euo pipefail
-          python -m py_compile alo186/growth/serpapi/serpapi_intent_gap.py
+          python -m py_compile \
+            alo186/growth/serpapi/serpapi_intent_gap.py \
+            alo186/tests/test_growth_run6_serpapi_recovery.py
           python -m json.tool alo186/growth/serpapi/intent-watch.json >/dev/null
+          python -m json.tool alo186/deployment/routing-overlays/growth-run6-v257.json >/dev/null
+          python alo186/tests/test_growth_run6_serpapi_recovery.py
           python - <<'PY'
           import json
           from pathlib import Path
