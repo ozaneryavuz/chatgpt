@@ -8,7 +8,7 @@ on:
   pull_request:
     paths:
       - 'alo186/growth/serpapi/**'
-      - 'alo186/hesaplama/elektrik-geldikten-sonra-guvenli-yeniden-baslatma/**'
+      - 'alo186/hesaplama/kesinti-sonrasi-guvenli-yeniden-baslatma-plani/**'
       - 'alo186/hesaplama/kesinti-hazirlik-kontrolu/**'
       - 'alo186/deployment/routing-overlays/growth-run6-v257.json'
       - 'alo186/tests/test_growth_run6_serpapi_recovery.py'
@@ -17,7 +17,7 @@ on:
     branches: [main]
     paths:
       - 'alo186/growth/serpapi/**'
-      - 'alo186/hesaplama/elektrik-geldikten-sonra-guvenli-yeniden-baslatma/**'
+      - 'alo186/hesaplama/kesinti-sonrasi-guvenli-yeniden-baslatma-plani/**'
       - 'alo186/hesaplama/kesinti-hazirlik-kontrolu/**'
       - 'alo186/deployment/routing-overlays/growth-run6-v257.json'
       - 'alo186/tests/test_growth_run6_serpapi_recovery.py'
