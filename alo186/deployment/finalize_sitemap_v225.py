@@ -12,19 +12,7 @@ VERSION = 225
 CANONICAL_ORIGIN = "https://alo186.com"
 ROBOTS_TEXT = "User-agent: *\nAllow: /\n\nSitemap: https://alo186.com/sitemap.xml\n"
 ALIAS_MARKER = 'data-alo186-content-alias="true"'
-
-# Eski içerik rotaları kullanıcıya ve arama motorlarına yalnız geçiş yüzeyi
-# olarak kalabilir; site içindeki bütün yeni yönlendirmeler doğrudan canonical
-# hedefe gitmelidir. Böylece alias sayfaları sitemap dışında tutulurken statik
-# smoke ve kullanıcı yolculuğu aynı kaynak gerçeğini kullanır.
-ALIAS_TARGETS = {
-    "/haberler/elektrik-gerilimi-dusuk-yuksek-edas-olcum-talebi": (
-        "/haberler/priz-gerilimi-neden-220-volttan-farkli-olabilir/"
-    ),
-    "/haberler/lifepo4-batarya-sogukta-sarj-edilir-mi": (
-        "/haberler/lifepo4-bataryalar-kisin-sarj-edilir-mi/"
-    ),
-}
+CONFIG_PATH = Path(__file__).with_name("content-consolidations.json")
 HREF_PATTERN = re.compile(
     r"(?P<prefix>\bhref\s*=\s*)(?P<quote>[\"'])(?P<url>[^\"']+)(?P=quote)",
     re.I,
@@ -36,12 +24,36 @@ def normalize_base_path(value: str) -> str:
     return "" if not cleaned or cleaned == "/" else "/" + cleaned.strip("/")
 
 
+def normalize_route(value: str) -> str:
+    path = urllib.parse.unquote(urllib.parse.urlsplit(str(value or "")).path or "/")
+    path = "/" + path.lstrip("/")
+    return "/" if path == "/" else path.rstrip("/")
+
+
+def load_alias_targets(path: Path = CONFIG_PATH) -> dict[str, str]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    items = payload.get("consolidations")
+    if not isinstance(items, list) or not items:
+        raise RuntimeError("İçerik konsolidasyon listesi boş veya geçersiz")
+    aliases: dict[str, str] = {}
+    for item in items:
+        if not isinstance(item, dict):
+            raise RuntimeError("İçerik konsolidasyon kaydı nesne olmalıdır")
+        alias = normalize_route(item.get("aliasPath", ""))
+        target = normalize_route(item.get("canonicalPath", ""))
+        if alias == "/" or target == "/" or alias == target:
+            raise RuntimeError(f"Geçersiz alias canonical çifti: {alias} → {target}")
+        if alias in aliases:
+            raise RuntimeError(f"Yinelenen alias canonical kaydı: {alias}")
+        aliases[alias] = target
+    return aliases
+
+
+ALIAS_TARGETS = load_alias_targets()
+
+
 def equivalent_path(left: str, right: str) -> bool:
-    def clean(value: str) -> str:
-        path = urllib.parse.unquote(urllib.parse.urlsplit(value).path or "/")
-        path = "/" + path.lstrip("/")
-        return "/" if path == "/" else path.rstrip("/")
-    return clean(left) == clean(right)
+    return normalize_route(left) == normalize_route(right)
 
 
 def route_file(site: Path, url: str, base_path: str) -> Path | None:
@@ -90,13 +102,7 @@ def qualify_url(value: str) -> str:
 
 
 def _alias_target(value: str, base_path: str) -> str | None:
-    """Bir iç bağlantı alias ise canonical hedefini döndürür.
-
-    Sadece root-relative bağlantılar ile alo186.com / www.alo186.com mutlak
-    bağlantıları ele alınır. Haricî hostlara ve göreli dosya bağlantılarına
-    dokunulmaz. Query ve fragment korunur.
-    """
-
+    """Bir iç bağlantı ilan edilmiş alias ise canonical hedefini döndürür."""
     parsed = urllib.parse.urlsplit(value)
     absolute = bool(parsed.scheme or parsed.netloc)
     if absolute:
@@ -115,9 +121,7 @@ def _alias_target(value: str, base_path: str) -> str | None:
         and (path == normalized_base or path.startswith(normalized_base + "/"))
     )
     route = path[len(normalized_base):] or "/" if had_base else path
-    route = "/" + route.lstrip("/")
-    key = "/" if route == "/" else route.rstrip("/")
-    target = ALIAS_TARGETS.get(key)
+    target = ALIAS_TARGETS.get(normalize_route(route))
     if target is None:
         return None
 
@@ -130,8 +134,6 @@ def _alias_target(value: str, base_path: str) -> str | None:
 
 
 def rewrite_alias_links(site: Path, base_path: str) -> dict[str, Any]:
-    """Final artifact içindeki alias href'leri canonical hedeflere taşır."""
-
     rewrites: list[dict[str, str]] = []
     touched_pages: set[str] = set()
 
@@ -152,9 +154,6 @@ def rewrite_alias_links(site: Path, base_path: str) -> dict[str, Any]:
         if updated != source:
             path.write_text(updated, encoding="utf-8")
 
-    # Fail closed: alias rotaları kendi geçiş sayfaları dışında hiçbir HTML
-    # href'inde kalmamalıdır. Alias sayfalarının canonical/refresh hedefleri
-    # zaten yeni rotadır; dolayısıyla bu kontrol güvenle bütün artifacta uygulanır.
     remaining: list[str] = []
     for path in sorted(site.rglob("*.html")):
         source = path.read_text(encoding="utf-8", errors="strict")
@@ -170,6 +169,7 @@ def rewrite_alias_links(site: Path, base_path: str) -> dict[str, Any]:
         )
 
     return {
+        "declaredAliasCount": len(ALIAS_TARGETS),
         "rewrittenLinkCount": len(rewrites),
         "touchedPageCount": len(touched_pages),
         "rewrites": rewrites[:50],
@@ -241,8 +241,6 @@ def run(site: Path, base_path: str = "") -> dict[str, Any]:
             root.remove(url_node)
             removed_alias.append(normalized)
             continue
-        # /chatgpt bütün HTML'yi bilinçli olarak noindex yapan bir preview alanıdır.
-        # Bu global preview etiketi canonical sitemap envanterini silmemelidir.
         if not project_preview and "noindex" in meta_robots(source):
             root.remove(url_node)
             removed_noindex.append(normalized)
@@ -308,6 +306,7 @@ def run(site: Path, base_path: str = "") -> dict[str, Any]:
         "removedNoncanonical": removed_noncanonical,
         "removedMissing": removed_missing,
         "removedDuplicate": removed_duplicate,
+        "declaredAliasCount": alias_link_report["declaredAliasCount"],
         "aliasLinkRewriteCount": alias_link_report["rewrittenLinkCount"],
         "aliasLinkTouchedPageCount": alias_link_report["touchedPageCount"],
         "aliasLinkRewrites": alias_link_report["rewrites"],
