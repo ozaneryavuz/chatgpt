@@ -1,0 +1,84 @@
+name: ALO186 tekrar ziyaret rotaları v232
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/elektrik-dayaniklilik-karti/**'
+      - 'alo186/hesaplama/elektrik-ekipmani-tekrar-test-takvimi/**'
+      - 'alo186/deployment/finalize_pages_service_worker.py'
+      - 'alo186/deployment/prepare_github_pages.py'
+      - 'alo186/tests/test_return_visit_routes_v232.py'
+      - '.github/workflows/alo186-return-visit-routes-v232.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/elektrik-dayaniklilik-karti/**'
+      - 'alo186/hesaplama/elektrik-ekipmani-tekrar-test-takvimi/**'
+      - 'alo186/deployment/finalize_pages_service_worker.py'
+      - 'alo186/deployment/prepare_github_pages.py'
+      - 'alo186/tests/test_return_visit_routes_v232.py'
+      - '.github/workflows/alo186-return-visit-routes-v232.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Kaynak güven ve tekrar ziyaret sözleşmeleri
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            alo186/deployment/finalize_pages_service_worker.py \
+            alo186/tests/test_finalize_pages_service_worker.py \
+            alo186/tests/test_return_visit_routes_v232.py
+          python alo186/tests/test_finalize_pages_service_worker.py
+          python alo186/tests/test_return_visit_routes_v232.py
+      - name: Canonical paket
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-return-v232-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-return-v232-canonical
+      - name: Custom-domain ve project-path kabulü
+        run: |
+          set -euo pipefail
+          for spec in 'custom|' 'project|/chatgpt'; do
+            name="${spec%%|*}"
+            base="${spec#*|}"
+            site="/tmp/alo186-return-v232-${name}"
+            cp -a /tmp/alo186-return-v232-canonical "$site"
+            python alo186/deployment/prepare_github_pages.py \
+              --site "$site" \
+              --base-path "$base" \
+              --repository "$GITHUB_REPOSITORY" \
+              --commit "$GITHUB_SHA"
+            python - "$site" "$base" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+          from alo186.deployment.finalize_pages_service_worker import finalize
+
+          site = Path(sys.argv[1])
+          result = finalize(site, sys.argv[2])
+          release_path = site / 'pages-release.json'
+          release = json.loads(release_path.read_text(encoding='utf-8'))
+          release['serviceWorkerRegistrationFinalization'] = result
+          release_path.write_text(json.dumps(release, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          PY
+            python alo186/deployment/smoke_github_pages.py \
+              --site "$site" \
+              --base-path "$base"
+            python alo186/tests/test_return_visit_routes_v232.py \
+              --site "$site" \
+              --base-path "$base"
+          done
