@@ -25,9 +25,18 @@
       name: 'Spigen ACH08448 30W USB-C GaN Pro PD/PPS Güç Adaptörü', verifiedAt,
       userNeed: 'Tek bir telefon, tablet veya düşük güç isteyen USB-C dizüstünü; cihazın gerçek watt ve protokol ihtiyacına uygun kompakt bir adaptörle şarj etmek.',
       strengths: ['Tek USB-C porttan 30W’a kadar çıkış','USB Power Delivery 3.0 ve PPS desteği','GaN Pro tabanlı kompakt gövde ve çoklu şarj protokolü desteği'],
-      limitations: ['Kutuda USB-C kablo bulunmaz','İki cihazı aynı anda şarj etmez','45W, 65W veya daha yüksek isteyen dizüstülerde tam performans sağlamaz'],
+      limitations: ['Kutuda USB-C kablo bulunmaz','İki cihazı aynı anda şarj etmez','45W veya daha yüksek isteyen dizüstülerde tam performans sağlamaz'],
       noBuyWhen: 'Mevcut adaptör cihazın istediği watt ve protokolü güvenle sağlıyorsa, birden fazla port gerekiyorsa veya cihaz 30W’tan fazla güç istiyorsa satın alma yapmayın.',
       technicalSource: 'https://www.spigen.com.tr/urun/spigen-30w-usb-c-mini-adaptor-samsung-pps-destekli-hizli-sarj-aleti-iphone-android-ipad-macbook-type-c-ee301-black-ach08448'
+    },
+    {
+      id: 'spigen-ach03714-35w', asin: 'B0B4DL9XSV', mpn: 'ACH03714', brand: 'Spigen',
+      name: 'Spigen ACH03714 35W Çift USB-C GaN PD/PPS Güç Adaptörü', verifiedAt,
+      userNeed: 'Telefon ve ikinci düşük güçlü USB-C cihazı tek adaptörde toplarken, tek port kullanımında 35W’a kadar güç elde etmek.',
+      strengths: ['İki USB-C port ve tek port kullanımında 35W’a kadar çıkış','USB PD 3.0 ve Samsung PPS desteği','GaN tabanlı kompakt tasarım ve akıllı güç dağıtımı'],
+      limitations: ['Kablo kutuya dahil değildir','İki port birlikte kullanıldığında güç cihazlar arasında bölüşülür','45W veya üzeri sürekli güç isteyen dizüstüler için uygun değildir'],
+      noBuyWhen: 'Tek 30W port yeterliyse, 45W üstü dizüstü gücü gerekiyorsa veya iki USB-C porta ihtiyaç yoksa satın alma yapmayın.',
+      technicalSource: 'https://www.spigen.com.tr/urun/spigen-powerarc-arcstation-35w-hizli-sarj-cihazi-2-port-gallium-nitride-gan-usb-c-pd-3-0-30w-pps-30w-samsung-hizli-sarj-destekli-iphone-android-sarj-adaptoru-pe2104-white'
     },
     {
       id: 'spigen-ach03717-45w', asin: 'B0B4K26Z58', mpn: 'ACH03717', brand: 'Spigen',
@@ -35,17 +44,8 @@
       userNeed: 'Telefon, tablet veya uyumlu USB-C dizüstü için 45W’a kadar güç ile iki USB-C portu tek adaptörde toplamak.',
       strengths: ['İki USB-C port ve tek port kullanımında 45W’a kadar çıkış','PD 3.0 ile Samsung PPS 2.0 desteği','GaN tabanlı kompakt tasarım ve akıllı güç dağıtımı'],
       limitations: ['Kablo kutuya dahil değildir','İki port birlikte kullanıldığında güç cihazlar arasında bölüşülür','65W ve üzeri sürekli güç isteyen dizüstüler için uygun değildir'],
-      noBuyWhen: 'Tek 30W port yeterliyse, 65W üstü dizüstü gücü gerekiyorsa veya uygun e-marker/PPS kablosu yoksa satın alma yapmayın.',
+      noBuyWhen: '35W yeterliyse, 65W üstü dizüstü gücü gerekiyorsa veya uygun e-marker/PPS kablosu yoksa satın alma yapmayın.',
       technicalSource: 'https://www.spigen.com.tr/urun/spigen-powerarc-arcstation-45w-hizli-sarj-cihazi-2-port-gallium-nitride-gan-usb-c-pd-3-0-45w-pps-45w-samsung-hizli-sarj-destekli-iphone-android-sarj-adaptoru-pe2105-white'
-    },
-    {
-      id: 'samsung-ep-t6530-65w', asin: 'B09W2HP21R', mpn: 'EP-T6530NBEGWW', brand: 'Samsung',
-      name: 'Samsung EP-T6530 65W Üçlü Güç Adaptörü Trio', verifiedAt,
-      userNeed: 'USB-C dizüstü, telefon ve düşük güçlü bir USB-A cihazı tek duvar adaptöründen, port güç sınırlarını bilerek şarj etmek.',
-      strengths: ['İki USB-C ve bir USB-A olmak üzere üç çıkış','Birincil USB-C portta 65W’a kadar güç desteği','PD ve Super Fast Charging/PPS uyumlu çoklu cihaz kullanımı'],
-      limitations: ['Kablolar ayrıca seçilmelidir','Birden fazla port kullanıldığında toplam güç portlar arasında bölüşülür','Her dizüstü veya hızlı şarj protokolüyle 65W sonucu garanti edilmez'],
-      noBuyWhen: 'Cihazınız özel üretici adaptörü istiyorsa, mevcut adaptör yeterliyse, kablo akım değeri doğrulanamıyorsa veya üç porta ihtiyacınız yoksa satın alma yapmayın.',
-      technicalSource: 'https://www.samsung.com/tr/mobile-accessories/65w-power-adapter-trio-black-ep-t6530nbegww/'
     }
   ].map((item) => Object.freeze({...item, strengths: Object.freeze(item.strengths), limitations: Object.freeze(item.limitations)})));
   function amazonProductUrl(asin) {
