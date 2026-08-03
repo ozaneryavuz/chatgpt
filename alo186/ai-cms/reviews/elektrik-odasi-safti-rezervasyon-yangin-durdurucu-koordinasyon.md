@@ -2,9 +2,9 @@
 
 ## İçerik
 
-- **Başlık:** Elektrik Odası ve Şaft Rezervasyonu: Koordinasyon ve Yangın Geçişleri
+- **Başlık:** Elektrik Odası ve Şaft Koordinasyonu: Yangın Geçişleri
 - **Canonical adayı:** `/haberler/elektrik-odasi-safti-rezervasyon-yangin-durdurucu-koordinasyon`
-- **Birincil anahtar ifade:** `elektrik odası şaft rezervasyon planı yangın durdurucu koordinasyon`
+- **Birincil anahtar ifade:** `elektrik odası ve şaft koordinasyonu`
 - **Risk sınıfı:** `high`
 - **Fırsat puanı:** **97/100**
 - **AI CMS kalite hedefi:** **100/100**
