@@ -8,9 +8,11 @@ on:
       - 'alo186/deployment/finalize_sitemap_v225.py'
       - 'alo186/deployment/guard_commerce_routes_v3.py'
       - 'alo186/deployment/inject_intent_tools_run135.py'
+      - 'alo186/deployment/smoke_static_site.py'
       - 'alo186/tests/test_live_origin_quality_v225.py'
       - 'alo186/tests/test_live_origin_quality_v225_compat.py'
       - 'alo186/tests/test_sitemap_quality_v225.py'
+      - 'alo186/tests/test_commercial_category_pages.py'
       - 'alo186/robots.txt'
       - 'alo186/haberler/lifepo4-batarya-sogukta-sarj-edilir-mi/index.html'
       - 'alo186/haberler/elektrik-gerilimi-dusuk-yuksek-edas-olcum-talebi/index.html'
@@ -51,10 +53,12 @@ jobs:
             alo186/deployment/audit_live_origin_v225.py \
             alo186/deployment/audit_live_origin_v225_compat.py \
             alo186/deployment/finalize_sitemap_v225.py \
-            alo186/deployment/inject_intent_tools_run135.py
+            alo186/deployment/inject_intent_tools_run135.py \
+            alo186/deployment/smoke_static_site.py
           python alo186/tests/test_live_origin_quality_v225.py
           python alo186/tests/test_live_origin_quality_v225_compat.py
           python alo186/tests/test_sitemap_quality_v225.py
+          python alo186/tests/test_commercial_category_pages.py
 
       - name: Mevcut final-artifact regresyonları
         run: |
@@ -173,6 +177,66 @@ jobs:
         with:
           node-version: '24'
           package-manager-cache: false
+
+      - name: Beklenen Pages sürümünü doğrula
+        env:
+          EXPECTED_COMMIT: ${{ github.sha }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import time
+          import urllib.error
+          import urllib.request
+
+          expected=os.environ['EXPECTED_COMMIT']
+          url='https://alo186.com/pages-release.json'
+          last=''
+          for _ in range(24):
+              try:
+                  request=urllib.request.Request(url,headers={'User-Agent':'ALO186-Live-Origin-Quality/225'})
+                  with urllib.request.urlopen(request,timeout=15) as response:
+                      payload=json.loads(response.read().decode('utf-8'))
+                  live=str(payload.get('commit') or payload.get('sourceCommit') or payload.get('sha') or '')
+                  last=live
+                  if live and (live.startswith(expected) or expected.startswith(live)):
+                      print(json.dumps({'ok':True,'live':live,'expected':expected}))
+                      raise SystemExit(0)
+              except (OSError, ValueError, urllib.error.URLError) as exc:
+                  last=str(exc)
+              time.sleep(15)
+          raise SystemExit(f'Canlı Pages beklenen commit ile eşleşmedi: live={last}; expected={expected}')
+          PY
+
+      - name: Canlı güven, kapsam ve affiliate sözleşmesi
+        run: |
+          python - <<'PY'
+          import urllib.request
+
+          def read(path):
+              request=urllib.request.Request('https://alo186.com'+path,headers={'User-Agent':'ALO186-Live-Origin-Quality/225'})
+              with urllib.request.urlopen(request,timeout=20) as response:
+                  return response.read().decode('utf-8','replace')
+
+          home=read('/')
+          commerce=read('/amazon-elektrik-urunleri/')
+          combined=home+'\n'+commerce
+          forbidden=(
+              '25 rehber',
+              '152 model',
+              '67 ürün seçim yolu',
+              '67 ürün karşılaştırma seçeneği',
+              '18+ karar rotası',
+              'USB-C hub ve çoklayıcı',
+          )
+          found=[item for item in forbidden if item.casefold() in combined.casefold()]
+          assert not found, f'Eski sayaç veya kapsam dışı kategori canlıda kaldı: {found}'
+          assert 'Bağımsız' in home and 'kamu kurumu değildir' in home
+          assert 'Amazon' in commerce and 'satış ortaklığı' in commerce
+          assert 'Mevcut sistem yeterliyse satın alma yok' in commerce
+          assert 'Fiyat, stok' in commerce
+          print({'ok':True,'forbiddenClaims':0,'affiliateDisclosure':True,'noBuyOutcome':True})
+          PY
 
       - name: Chrome ve Lighthouse sürümü
         run: |
