@@ -10,7 +10,7 @@ const HTML = fs.readFileSync(path.join(ROUTE, 'index.html'), 'utf8');
 const APP = fs.readFileSync(path.join(ROUTE, 'app-v231.js'), 'utf8');
 const catalog = require(path.join(ROUTE, 'catalog-v231.js'));
 const EXPECTED = new Map([
-  ['B0859MDSFX', 'TL-PA7017P KIT'],
+  ['B07GBK9CQL', 'TL-PA8033P KIT'],
   ['B08XNLZLJ3', 'TL-WPA7617 KIT'],
   ['B00C2ICYPC', 'TL-WPA4220 KIT'],
 ]);
