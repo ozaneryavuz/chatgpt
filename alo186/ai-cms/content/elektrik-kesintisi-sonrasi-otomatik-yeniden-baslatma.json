@@ -1,0 +1,258 @@
+{
+  "schemaVersion": 1,
+  "id": "cms_ad1abdf4c11adecc",
+  "slug": "elektrik-kesintisi-sonrasi-otomatik-yeniden-baslatma",
+  "contentType": "guide",
+  "state": "published",
+  "locale": "tr-TR",
+  "title": "Kesinti Sonrası Otomatik Yeniden Başlatma Güvenliği",
+  "h1": "Elektrik gelince makine neden kendiliğinden başlamamalı? Kabul planı",
+  "description": "Kesinti sonrası makinenin beklenmedik başlamasını; PLC hafızası, auto-restart, interlock, depolanmış enerji ve kademeli yük testleriyle önleyin.",
+  "intent": "Elektrik kesintisi sonrasında makine ve proseslerin beklenmedik hareketini önlemek için güç, kontrol, interlock ve depolanmış enerji zincirini ölçümlü kabul dosyasına dönüştürmek.",
+  "primaryKeyword": "kesinti sonrası otomatik yeniden başlatma",
+  "audience": [
+    "Elektrik ve otomasyon mühendisleri",
+    "Otel ve tesis teknik ekipleri",
+    "Makine bakım ekipleri",
+    "İş sağlığı ve güvenliği uzmanları"
+  ],
+  "riskClass": "high",
+  "directAnswer": "Elektriğin geri gelmesi makine için tek başına start komutu olmamalıdır. PLC’de kalıcı talep, sürücü auto-restart ayarı, iki telli kumanda, uzaktan otomasyon, farklı kontrol beslemeleri veya depolanmış mekanik enerji beklenmedik hareket oluşturabilir. Güvenli sonuç; risk değerlendirmesi, interlock matrisi, manuel reset/start ayrımı ve şebeke-jeneratör-UPS senaryolarında ölçümlü yeniden başlatma testiyle kanıtlanır.",
+  "sections": [
+    {
+      "id": "enerji-geldi-komutu-degildir",
+      "heading": "Elektriğin geri gelmesi neden otomatik çalışma komutu değildir?",
+      "paragraphs": [
+        "Bir kesinti sona erdiğinde besleme geriliminin geri gelmesi, makinenin hareket etmesi için tek başına yeterli ve güvenli bir komut olmamalıdır. Kesinti sırasında operatör tehlike bölgesine girmiş, malzeme sıkışmış, pnömatik veya hidrolik enerji kalmış ya da uzaktaki otomasyon yeniden başlama talebi tutmuş olabilir. Bu nedenle güç dönüşü ile üretim yeniden başlatma kararı birbirinden ayrılmalıdır.",
+        "ISO 14118, beklenmeyen çalışmayı yalnız elektrik enerjisiyle sınırlamaz; hidrolik, pnömatik, yerçekimi, yaylar ve dış etkiler dâhil tüm enerji kaynaklarından doğan hareketi ele alır. IEC 60204-1 de makine elektrik ekipmanı, kontrol devreleri, sürücüler, acil durdurma ve teknik dokümantasyonu bütün olarak değerlendirir. Kabul dosyasının ilk sorusu “enerji geldi mi?” değil, “güvenli yeniden başlatma koşullarının tümü doğrulandı mı?” olmalıdır."
+      ],
+      "bullets": [
+        "Şebeke, jeneratör, UPS ve manuel bypass modlarında güç dönüş senaryolarını ayrı tanımlayın.",
+        "Kesinti anında hareket eden ekipman, proses ve tehlike bölgesinde kalabilecek kişileri belirleyin.",
+        "Elektrik dışındaki depolanmış enerji kaynaklarını yeniden başlatma analizine ekleyin."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2"
+      ]
+    },
+    {
+      "id": "kontrol-devresi-ve-hafiza",
+      "heading": "Kontrol devresi, kontaktör ve PLC hafızası nasıl incelenir?",
+      "paragraphs": [
+        "Klasik üç telli start-stop devresinde kontaktör bobininin enerjisi kesilince tutma devresi düşer ve besleme geri geldiğinde yeni bir start komutu gerekir. Ancak iki telli sürekli komut, PLC’de kalıcı bit, uzaktan otomasyon talebi, frekans inverterinde auto-restart parametresi veya bina otomasyonunun son durumu geri yüklemesi makineyi kendiliğinden başlatabilir. Her kontrol kaynağı ve öncelik sırası belgelenmelidir.",
+        "Yalnız kontaktör eklemek veya bir parametreyi kapatmak bütün sistemi güvenli yapmaz. Sürücünün STO işlevi, güvenlik rölesi, kapı interlockları, acil stop zinciri, proses izinleri ve mekanik durum birlikte değerlendirilir. Kontrol gücü UPS’ten, motor gücü jeneratörden veya farklı panolardan geliyorsa kaynakların farklı zamanlarda dönmesi beklenmedik komut sırası oluşturabilir."
+      ],
+      "bullets": [
+        "Start talebinin kaynağını: buton, PLC, BMS, SCADA, zaman saati veya uzak erişim olarak kaydedin.",
+        "Kalıcı PLC bitleri ve sürücü auto-restart parametrelerini tam program/yedek sürümüyle doğrulayın.",
+        "Kontrol ve güç beslemelerinin şebeke, UPS ve jeneratör üzerindeki dönüş zamanlarını ölçün."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "id": "koruyucu-interlocklar",
+      "heading": "Koruyucu kapı ve interlocklar yeniden başlatmada hangi görevi yapar?",
+      "paragraphs": [
+        "Koruyucu kapı interlocku açıldığında tehlikeli hareketin durması gerekir; fakat kapının tekrar kapanması tek başına makineyi başlatma komutu sayılmamalıdır. ISO 14119, koruyucularla ilişkili interlocking cihazlarının tasarım ve seçimini ve öngörülebilir biçimde devre dışı bırakılmalarını azaltan önlemleri ele alır. Sinyalin işlenmesi ve beklenmeyen çalışmanın önlenmesi, ISO 14118 ve ilgili fonksiyonel güvenlik standartlarıyla birlikte değerlendirilir.",
+        "Kesintiden sonra reset işlevi, tehlike bölgesinin görülebilirliği, operatörün kontrol konumu ve prosesin durumu risk değerlendirmesine göre tasarlanmalıdır. Reset butonunun güvenlik fonksiyonunu köprülemesi, interlock girişinin yazılımla zorlanması veya acil stopun normal durdurma aracı gibi kullanılması kabul edilmez. Her koruma işlevi gerçek arıza ve güç dönüş senaryosunda test edilmelidir."
+      ],
+      "bullets": [
+        "Kapı kapanması, acil stop reseti ve makine start komutunu ayrı olaylar olarak kaydedin.",
+        "Interlockların mekanik montajını, kodlama tipini ve kaçınma/yenilgi riskini inceleyin.",
+        "Tehlike bölgesi görünmüyorsa ilave reset, uyarı veya bölgesel kontrol ihtiyacını risk analiziyle belirleyin."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S3"
+      ]
+    },
+    {
+      "id": "kademeli-yeniden-baslatma",
+      "heading": "Tesis genelinde kademeli yeniden başlatma planı nasıl kurulur?",
+      "paragraphs": [
+        "Bir tesisin bütün pompaları, fanları, kompresörleri ve proses hatları aynı anda dönerse yüksek kalkış akımı, basınç darbesi, proses taşması veya jeneratör aşırı yükü oluşabilir. Güvenli plan; can güvenliği ve kritik yardımcı sistemleri önce, proses yüklerini ise doğrulanan sıra ve gecikmelerle devreye alır. Ancak zaman gecikmesi tek başına güvenlik fonksiyonu değildir; her ekipmanın yerel izin ve interlockları sağlanmalıdır.",
+        "Şebeke dönüşü, ATS yeniden transferi, UPS bypass geçişi ve jeneratör cooldown süreci ayrı test senaryolarıdır. Her senaryoda besleme gerilimi, kontrol gücü, haberleşme, güvenlik zinciri, motor akımı, proses geri bildirimi ve operatör onayı zaman damgasıyla kaydedilir. Yeniden başlatma sırası mevcut elektrik kapasitesi kadar proses güvenliğine de göre tasarlanır."
+      ],
+      "bullets": [
+        "Kritik emniyet yardımcılarını, proses ön koşullarını ve normal üretim yüklerini sınıflandırın.",
+        "Her yük için manuel onay, otomatik izin, gecikme ve başarısızlık davranışını tabloya yazın.",
+        "Jeneratör ve şebeke modunda kademeli yük alma testini ayrı gerçekleştirin.",
+        "Başarısız ekipmanın sıradaki diğer ekipmanları nasıl etkilediğini doğrulayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2"
+      ]
+    },
+    {
+      "id": "kabul-dosyasi-ve-kullanici-siniri",
+      "heading": "Yeniden başlatma kabul dosyasında neler bulunmalıdır?",
+      "paragraphs": [
+        "Kabul dosyası tek hat şeması, kontrol mimarisi, enerji kaynakları, risk değerlendirmesi, PLC/sürücü sürümleri, interlock matrisi ve test kayıtlarını bir araya getirmelidir. Test; kısa kesinti, uzun kesinti, kontrol gücünün önce veya sonra dönmesi, uzak komutun aktif kalması, kapı açık olması, acil stop aktif olması ve proses geri bildiriminin kaybolması gibi senaryoları kapsar. Beklenen güvenli durum ve gerçek sonuç yan yana kaydedilir.",
+        "Kullanıcı enerjili panoda kontaktör köprülememeli, PLC bitlerini zorlamamalı, güvenlik rölesini bypass etmemeli veya sürücü auto-restart ayarını deneme amacıyla değiştirmemelidir. Ekipman kesintiden sonra kendiliğinden hareket ettiyse olay saati, hangi kaynakta olduğu, aktif alarm ve operatör konumu kaydedilip makine güvenli biçimde devre dışı bırakılmalıdır. Mevcut kontrol tasarımı bütün senaryolarda doğrulanıyorsa gereksiz donanım değişimi yapılmaması geçerli sonuçtur."
+      ],
+      "bullets": [
+        "Test cihazı, yazılım sürümü, senaryo, beklenen durum, gerçek sonuç ve sorumluyu kaydedin.",
+        "Her değişiklikten sonra bütün ilgili güvenlik fonksiyonlarını yeniden test edin.",
+        "Yakın kaza veya beklenmedik hareketi yalnız ‘elektrik gidip geldi’ notuyla kapatmayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3"
+      ]
+    }
+  ],
+  "faqs": [
+    {
+      "question": "Elektrik geldiğinde motorun kendiliğinden başlaması her zaman arıza mıdır?",
+      "answer": "Bazı süreçler kontrollü otomatik yeniden başlatma için tasarlanabilir; ancak bu davranış risk değerlendirmesi, izinler, interlocklar, uyarılar ve testlerle kanıtlanmalıdır. Güç dönüşünün tek başına start komutu olması güvenli varsayım değildir.",
+      "sourceRefs": [
+        "S1",
+        "S2"
+      ]
+    },
+    {
+      "question": "Sürücüde auto-restart kapatılırsa sorun tamamen çözülür mü?",
+      "answer": "Hayır. PLC hafızası, iki telli komut, uzak otomasyon, kontaktör devresi, farklı kontrol beslemeleri ve mekanik depolanmış enerji de beklenmedik hareket oluşturabilir. Bütün komut ve enerji zinciri değerlendirilmelidir.",
+      "sourceRefs": [
+        "S1",
+        "S2"
+      ]
+    },
+    {
+      "question": "Koruyucu kapıyı kapatmak makineyi tekrar başlatabilir mi?",
+      "answer": "Kapının kapanması koruma koşulunun geri geldiğini gösterebilir; fakat tek başına başlatma komutu olmamalıdır. Reset ve start işlevleri risk değerlendirmesine göre ayrılmalı, interlockların yenilgiye karşı tasarımı doğrulanmalıdır.",
+      "sourceRefs": [
+        "S1",
+        "S3"
+      ]
+    },
+    {
+      "question": "Jeneratör devreye girince bütün yükler aynı anda başlayabilir mi?",
+      "answer": "Bu, elektrik kapasitesi ve proses güvenliği açısından risk oluşturabilir. Kritik yardımcılar ve proses yükleri tanımlı sırayla alınmalı; her ekipmanın yerel izinleri ve başarısızlık davranışı şebeke ve jeneratör modunda test edilmelidir.",
+      "sourceRefs": [
+        "S1",
+        "S2"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "publisher": "ISO",
+      "title": "ISO 14118:2017 — Safety of machinery, prevention of unexpected start-up",
+      "url": "https://www.iso.org/standard/66460.html",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Elektrik, hidrolik, pnömatik, depolanmış enerji ve dış etkiler dâhil tüm enerji kaynaklarından beklenmedik makine çalışmasının önlenmesine yönelik tasarım gereklerini tanımlar."
+    },
+    {
+      "id": "S2",
+      "publisher": "IEC",
+      "title": "IEC 60204-1:2016+A1:2021 — Electrical equipment of machines",
+      "url": "https://webstore.iec.ch/en/publication/71256",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Makine elektrik, elektronik ve programlanabilir ekipmanında kontrol devreleri, sürücüler, koruyucu bonding, acil durdurma, dokümantasyon ve güvenlik gereklerini kapsar."
+    },
+    {
+      "id": "S3",
+      "publisher": "ISO",
+      "title": "ISO 14119:2024 — Interlocking devices associated with guards",
+      "url": "https://www.iso.org/standard/75942.html",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Koruyucularla ilişkili interlocking cihazlarının tasarım ve seçimini, yenilgi olasılığını azaltan önlemleri ve beklenmedik startın önlenmesiyle ilişkisini açıklar."
+    }
+  ],
+  "internalLinks": [
+    {
+      "label": "Elektrik kesintisi tatbikatı",
+      "path": "/hesaplama/elektrik-kesintisi-tatbikati",
+      "reason": "Yeniden başlatma senaryolarını kişisel verisiz tatbikat planına dönüştürür."
+    },
+    {
+      "label": "Ekipman bakım planı",
+      "path": "/hesaplama/ekipman-bakim-plani",
+      "reason": "Interlock, kontaktör ve kontrol sistemlerinin dönemsel test görevlerini planlar."
+    },
+    {
+      "label": "Kesinti hazırlık planı",
+      "path": "/hesaplama/kesinti-hazirlik-plani",
+      "reason": "Şebeke kaybı öncesi operasyon ve sorumluluk hazırlığını tamamlar."
+    },
+    {
+      "label": "İşletme sürekliliği",
+      "path": "/isletme-surekliligi",
+      "reason": "Kritik yük ve proses sıralamasını işletme ölçeğinde ele alır."
+    },
+    {
+      "label": "Jeneratör transfer şalteri neden gerekir?",
+      "path": "/haberler/jenerator-transfer-salteri-neden-gerekir",
+      "reason": "Kaynak transferinin geri besleme ve ayırma temelini açıklar."
+    },
+    {
+      "label": "UPS bypass modu nedir?",
+      "path": "/haberler/ups-bypass-modu-nedir-neden-gecer",
+      "reason": "UPS normal, batarya ve bypass modlarında kontrol beslemesi ayrımını destekler."
+    },
+    {
+      "label": "Kurumsal elektrik sürekliliği ön değerlendirme",
+      "path": "/kurumsal-elektrik-surekliligi-on-degerlendirme",
+      "reason": "Makine restart matrisi ve saha kabul kapsamını profesyonel değerlendirmeye bağlar."
+    }
+  ],
+  "commerce": {
+    "enabled": false,
+    "policy": "none",
+    "category": null
+  },
+  "editorial": {
+    "createdBy": "ai-assisted",
+    "model": "gpt-5.6-thinking",
+    "humanReviewRequired": true,
+    "approvedBy": "ozaneryavuz",
+    "approvedAt": "2026-08-03T18:41:23Z",
+    "publishedAt": "2026-08-03T18:41:23Z",
+    "approvalPr": 755
+  },
+  "seo": {
+    "canonicalPath": "/haberler/elektrik-kesintisi-sonrasi-otomatik-yeniden-baslatma",
+    "robots": "index,follow,max-image-preview:large",
+    "lastModified": "2026-08-03",
+    "topics": [
+      "elektrik kesintisi",
+      "beklenmedik start",
+      "makine güvenliği",
+      "PLC",
+      "auto-restart",
+      "interlock",
+      "jeneratör",
+      "UPS"
+    ]
+  },
+  "quality": {
+    "score": 100,
+    "minimumRequired": 85,
+    "checks": {
+      "metadata": true,
+      "directAnswer": true,
+      "contentDepth": true,
+      "sources": true,
+      "safety": true,
+      "internalLinks": true,
+      "uniqueness": true,
+      "structuredData": true
+    },
+    "similarity": {
+      "maximum": 0.1818,
+      "closestPath": "https://alo186.com/hesaplama/kombi-elektrik-kesintisi-sonrasi-guvenli-yeniden-baslatma/"
+    }
+  }
+}
