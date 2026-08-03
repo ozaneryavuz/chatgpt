@@ -1,0 +1,345 @@
+{
+  "version": 250,
+  "generatedAt": "2026-08-03",
+  "canonicalHost": "https://alo186.com",
+  "affiliateTag": "alo186rehber-21",
+  "offerPolicy": {
+    "mode": "fail-closed",
+    "description": "Product Offer yalnız tam ürün URL'si, görsel, marka/model veya ürün kimliği, satıcı, fiyat, para birimi, stok durumu, priceValidUntil ve verifiedAt birlikte doğrulandığında üretilir.",
+    "verifiedOffers": []
+  },
+  "routes": [
+    {
+      "path": "/hesaplama/yedek-guc-cozum-secici/",
+      "file": "hesaplama/yedek-guc-cozum-secici/index.html",
+      "title": "UPS, taşınabilir güç istasyonu ve jeneratör çözüm haritası",
+      "intro": "Yük tipi, kesinti süresi, transfer beklentisi ve kalkış gücüne göre ürün sınıfını karşılaştırın. Kartlar genel alışveriş listesi değil, önce teknik uygunluğu doğrulayan karar ankrajlarıdır.",
+      "products": [
+        {
+          "id": "rehber-buzdolabi-icin-yedek-guc-secimi",
+          "name": "Saf sinüs taşınabilir güç istasyonu",
+          "category": "Taşınabilir enerji depolama",
+          "bestFor": "Buzdolabı, kombi ve değişken ev yüklerinde birkaç saatlik enerji",
+          "technicalCheck": "Sürekli W, kalkış W, saf sinüs, Wh ve EPS geçiş davranışı",
+          "limit": "Kalkış gücü veya topraklama/nötr düzeni doğrulanmadan bağlanmamalı",
+          "useWhen": "Yükün sürekli ve kalkış gücü ölçüldü, hedef süre hesaplandı ve cihazın çıkış yapısı üretici kılavuzuyla eşleştiyse.",
+          "skipWhen": "Yalnız milisaniyesiz bilgisayar sürekliliği gerekiyorsa veya mevcut UPS hedef süreyi karşılıyorsa yeni ürün almayın.",
+          "guideUrl": "/hesaplama/power-station-kapasite-eps-uygunluk/",
+          "guideLabel": "Power station kapasite ve EPS uygunluğunu hesaplayın"
+        },
+        {
+          "id": "urun-bilgisayar-icin-ups-secimi",
+          "name": "Line-interactive veya online UPS",
+          "category": "Kesintisiz güç kaynağı",
+          "bestFor": "Bilgisayar, modem, kayıt cihazı ve hassas elektronik",
+          "technicalCheck": "W/VA sınırı, transfer süresi, çıkış dalga şekli ve runtime",
+          "limit": "Sadece VA etiketine bakılarak seçilmemeli; akü süresi ayrıca hesaplanmalı",
+          "useWhen": "Kesintide yeniden başlama kabul edilmiyor ve bağlı yükün gerçek W değeri ölçüldüyse.",
+          "skipWhen": "Uzun süreli yüksek enerji ihtiyacı varsa küçük UPS'i aşırı büyütmek yerine farklı çözüm sınıfını değerlendirin.",
+          "guideUrl": "/hesaplama/ups-suresi/",
+          "guideLabel": "UPS çalışma süresini hesaplayın"
+        },
+        {
+          "id": "urun-jenerator-uzun-kesinti-secimi",
+          "name": "Uygun transferli jeneratör sistemi",
+          "category": "Uzun süreli yedek güç",
+          "bestFor": "Uzun kesinti, yüksek güç ve işletme kritik yükleri",
+          "technicalCheck": "Prime/standby kVA, motor kalkışı, ATS, nötr, topraklama ve yakıt",
+          "limit": "İç mekânda veya prizden geri besleme ile kullanılamaz; proje ve yetkin kurulum gerekir",
+          "useWhen": "Saatler süren yüksek güçlü yük, güvenli dış konum ve uygun transfer sistemi birlikte sağlanabiliyorsa.",
+          "skipWhen": "Düşük güçlü kısa kesinti için yakıtlı sistem gereksiz risk ve işletme yükü oluşturuyorsa almayın.",
+          "guideUrl": "/hesaplama/jenerator-gucu-secimi/",
+          "guideLabel": "Jeneratör gücü ön seçimini yapın"
+        }
+      ],
+      "faq": [
+        {
+          "id": "sss-ups-mi-power-station-mi",
+          "question": "UPS mi, taşınabilir güç istasyonu mu seçilmeli?",
+          "answer": "Bilgisayar gibi kesintisiz transfer isteyen düşük ve orta güçlü yüklerde UPS; birkaç saatlik enerji, taşınabilirlik ve farklı cihazlar için power station daha uygun olabilir. Karar W, kalkış W, Wh ve transfer beklentisiyle verilmelidir.",
+          "linkText": "Yedek güç maliyet karşılaştırmasını inceleyin",
+          "linkUrl": "/hesaplama/yedek-guc-maliyet-karsilastirma/"
+        },
+        {
+          "id": "sss-buzdolabi-ups-secimi",
+          "question": "Buzdolabı için hangi yedek güç cihazı alınmalı?",
+          "answer": "Etiket wattı tek başına yeterli değildir. Kompresör kalkış gücü, saf sinüs gereksinimi, hedef saat ve kullanılabilir enerji birlikte doğrulanmalıdır.",
+          "linkText": "Buzdolabı için teknik çözüm ankrajını açın",
+          "linkUrl": "#rehber-buzdolabi-icin-yedek-guc-secimi"
+        }
+      ]
+    },
+    {
+      "path": "/hesaplama/yedek-guc-maliyet-karsilastirma/",
+      "file": "hesaplama/yedek-guc-maliyet-karsilastirma/index.html",
+      "title": "Yedek güç ürün sınıfları maliyet ve kullanım karşılaştırması",
+      "intro": "Satın alma fiyatından önce kullanım görevi, transfer süresi, enerji kapasitesi, bakım ve güvenlik yükünü karşılaştırın.",
+      "products": [
+        {
+          "id": "karsilastirma-mini-ups",
+          "name": "Modem mini UPS",
+          "category": "Düşük voltajlı internet yedekleme",
+          "bestFor": "Modem ve ONT gibi 5/9/12 V düşük güçlü cihazlar",
+          "technicalCheck": "Voltaj, polarite, konnektör, toplam W ve hedef süre",
+          "limit": "220 V cihazları beslemez ve yanlış polarite ekipmana zarar verebilir",
+          "useWhen": "Cihazların DC girişleri ve toplam güçleri doğrulandıysa.",
+          "skipWhen": "Modem veya ONT PoE/özel adaptör kullanıyor ve uyum kanıtlanamıyorsa almayın.",
+          "guideUrl": "/hesaplama/modem-internet-yedekleme/",
+          "guideLabel": "Modem ve ONT yedekleme hesabını açın"
+        },
+        {
+          "id": "karsilastirma-ups",
+          "name": "UPS",
+          "category": "Kesintisiz elektronik yük koruması",
+          "bestFor": "Transfer kesintisine duyarlı elektronik ve kontrollü kapatma",
+          "technicalCheck": "W/VA, transfer, dalga şekli, akü ve bypass",
+          "limit": "Yüksek güçlü ısıtıcı veya uzun süreli enerji için ekonomik olmayabilir",
+          "useWhen": "Kesintisiz transfer ve kontrollü kapanma satın alma kararının ana gerekçesiyse.",
+          "skipWhen": "Yalnız uzun enerji süresi gerekiyorsa topoloji ve toplam sahip olma maliyetini yeniden karşılaştırın.",
+          "guideUrl": "/haberler/ups-online-line-interactive-offline-farki",
+          "guideLabel": "UPS topolojilerini karşılaştırın"
+        },
+        {
+          "id": "karsilastirma-power-station",
+          "name": "Taşınabilir güç istasyonu",
+          "category": "Bataryalı taşınabilir AC/DC enerji",
+          "bestFor": "Birden fazla düşük/orta güçlü cihaz ve güneş paneliyle şarj",
+          "technicalCheck": "Wh, inverter W, tepe W, EPS ve PV giriş sınırları",
+          "limit": "Sabit tesisat veya transfer panosu yerine kullanılamaz",
+          "useWhen": "Taşınabilirlik ve birkaç saatlik enerji aynı anda gerekiyorsa.",
+          "skipWhen": "Yalnız anlık kesintisiz transfer gerekiyorsa EPS gecikmesi doğrulanmadan almayın.",
+          "guideUrl": "/haberler/power-station-gunes-paneli-nasil-secilir",
+          "guideLabel": "Power station panel uyumunu inceleyin"
+        }
+      ],
+      "faq": [
+        {
+          "id": "sss-en-ucuz-yedek-guc",
+          "question": "En ucuz yedek güç çözümü hangisidir?",
+          "answer": "Tek bir en ucuz çözüm yoktur. Mini UPS düşük voltajlı internet yüklerinde, UPS kesintisiz elektronikte, power station ise daha uzun ve taşınabilir enerji ihtiyacında avantajlı olabilir.",
+          "linkText": "Göreve göre çözüm seçiciyi açın",
+          "linkUrl": "/hesaplama/yedek-guc-cozum-secici/"
+        }
+      ]
+    },
+    {
+      "path": "/hesaplama/modem-internet-yedekleme/",
+      "file": "hesaplama/modem-internet-yedekleme/index.html",
+      "title": "Modem ve ONT için ürün çözüm ankrajları",
+      "intro": "İnternet sürekliliğinde ürün adı değil voltaj, polarite, konnektör, güç ve hedef süre belirleyicidir.",
+      "products": [
+        {
+          "id": "urun-modem-mini-ups-12v",
+          "name": "5/9/12 V çıkışlı modem mini UPS",
+          "category": "DC mini UPS",
+          "bestFor": "Modem ve ONT'yi düşük kayıpla doğrudan DC besleme",
+          "technicalCheck": "Her cihazın voltajı, polaritesi, konnektörü ve toplam W değeri",
+          "limit": "Yanlış voltaj veya polarite cihaz arızasına neden olabilir",
+          "useWhen": "Modem ve ONT adaptör etiketleri ayrı ayrı doğrulandıysa.",
+          "skipWhen": "Cihazlardan biri 24/48 V PoE veya özel haberleşmeli adaptör kullanıyorsa doğrudan uyarlamayın.",
+          "guideUrl": "/amazon-elektrik-urunleri/modem-mini-ups-secimi/",
+          "guideLabel": "Mini UPS seçim rehberini açın"
+        },
+        {
+          "id": "urun-modem-powerbank-pd-donusturucu",
+          "name": "USB-C PD powerbank ve doğrulanmış tetikleyici",
+          "category": "Taşınabilir DC yedekleme",
+          "bestFor": "PD profili, kablo ve çıkış voltajı ölçülmüş taşınabilir kurulum",
+          "technicalCheck": "PD profil desteği, tetikleyici voltajı, polarite ve otomatik yeniden başlama",
+          "limit": "Uyumsuz tetikleyici veya kablo ile kritik internet yükünde kullanılmamalı",
+          "useWhen": "Powerbank ve dönüştürücü çıkışı yük altında ölçüldüyse.",
+          "skipWhen": "Tak-çalıştır mini UPS daha güvenli ve doğrulanabilir bir çözüm sunuyorsa karmaşık dönüşüm kurmayın.",
+          "guideUrl": "/hesaplama/powerbank-usb-c-uygunluk/",
+          "guideLabel": "Powerbank ve USB-C uygunluğunu test edin"
+        },
+        {
+          "id": "urun-modem-220v-ups",
+          "name": "Küçük line-interactive UPS",
+          "category": "AC internet yedekleme",
+          "bestFor": "Modem, ONT ve ek ağ cihazlarını mevcut adaptörleriyle besleme",
+          "technicalCheck": "Toplam W, runtime, AVR, çıkış dalga şekli ve boşta tüketim",
+          "limit": "DC mini UPS'e göre dönüşüm kaybı ve daha büyük akü maliyeti olabilir",
+          "useWhen": "Birden fazla AC adaptör aynı noktada ve kesintisiz transfer gerekiyorsa.",
+          "skipWhen": "Sadece tek düşük güçlü modem için gereksiz büyük ve verimsizse almayın.",
+          "guideUrl": "/hesaplama/ups-suresi/",
+          "guideLabel": "UPS çalışma süresini hesaplayın"
+        }
+      ],
+      "faq": [
+        {
+          "id": "sss-modem-mini-ups-alinir-mi",
+          "question": "Modem için mini UPS alınmalı mı?",
+          "answer": "Elektrik kesildiğinde saha dolabı veya operatör altyapısı çalışmaya devam ediyor ve modem/ONT voltaj-polarite uyumu doğrulanıyorsa mini UPS yararlı olabilir.",
+          "linkText": "12 V mini UPS çözüm kartına gidin",
+          "linkUrl": "#urun-modem-mini-ups-12v"
+        }
+      ]
+    },
+    {
+      "path": "/hesaplama/akim-korumali-grup-priz-uygunluk/",
+      "file": "hesaplama/akim-korumali-grup-priz-uygunluk/index.html",
+      "title": "Akım korumalı priz ve katmanlı aşırı gerilim çözüm haritası",
+      "intro": "Joule etiketi tek başına koruma kanıtı değildir. Topraklama, SPD katmanı, yük akımı ve ürün standardı birlikte değerlendirilmelidir.",
+      "products": [
+        {
+          "id": "urun-akim-korumali-priz-joule-degeri",
+          "name": "Aşırı gerilim korumalı grup priz",
+          "category": "Tip 3 son cihaz koruması",
+          "bestFor": "Topraklaması doğrulanmış hatta hassas elektronik için son koruma katmanı",
+          "technicalCheck": "Toplam akım, kablo kesiti, joule/VPR-UP değeri, durum göstergesi ve standardı",
+          "limit": "Pano tipi SPD'nin veya düzgün topraklamanın yerine geçmez",
+          "useWhen": "Pano koruması ve PE sürekliliği doğrulandıktan sonra son cihaz katmanı gerekiyorsa.",
+          "skipWhen": "Topraklama belirsiz, priz hasarlı veya toplam yük ürün sınırını aşıyorsa almayın.",
+          "guideUrl": "/amazon-elektrik-urunleri/akim-korumali-grup-priz-secimi/",
+          "guideLabel": "Akım korumalı grup priz seçim rehberini açın"
+        },
+        {
+          "id": "urun-parafudr-tip2-pano-korumasi",
+          "name": "Tip 2 pano parafudru",
+          "category": "Dağıtım panosu SPD",
+          "bestFor": "Geçici aşırı gerilimi panoda sınırlayan ana koruma katmanı",
+          "technicalCheck": "Şebeke sistemi, Uc/Up, Imax/In, ön koruma, bağlantı boyu ve PE",
+          "limit": "Enerjili panoda tüketici tarafından takılamaz; yetkin tasarım ve montaj gerekir",
+          "useWhen": "Risk testi ve pano topolojisi Tip 2 SPD gereksinimini gösteriyorsa.",
+          "skipWhen": "Ürün tipi ve bağlantı düzeni proje ile doğrulanmadan internetten rastgele SPD almayın.",
+          "guideUrl": "/hesaplama/parafudr-risk-testi/",
+          "guideLabel": "Parafudr risk testini açın"
+        },
+        {
+          "id": "urun-toprakli-grup-priz-yuk-siniri",
+          "name": "Uygun kesitli topraklı grup priz",
+          "category": "Güvenli yük dağıtımı",
+          "bestFor": "Düşük güçlü cihazları tek noktada güvenli düzenleme",
+          "technicalCheck": "Toplam A/W, kablo kesiti, anahtar ve fiş standardı, çocuk koruması",
+          "limit": "Isıtıcı, kettle veya motor gibi yüksek yükleri zincirleme prizlerle beslemeyin",
+          "useWhen": "Toplam yük ve priz hattı kapasitesi hesaplandıysa.",
+          "skipWhen": "Daha fazla priz ihtiyacı kalıcı tesisat eksikliğinden kaynaklanıyorsa elektrikçi çağırın.",
+          "guideUrl": "/hesaplama/akim-korumali-grup-priz-uygunluk/",
+          "guideLabel": "Grup priz uygunluk sonucunu yeniden kontrol edin"
+        }
+      ],
+      "faq": [
+        {
+          "id": "sss-voltaj-dalgalanmasinda-cihaz-koruma",
+          "question": "Voltaj dalgalanmasında cihazlar nasıl korunur?",
+          "answer": "Ani darbe için SPD, uzun süreli yüksek/düşük gerilim için gerilim rölesi veya regülatör, kesintisiz hassas yük için uygun UPS farklı görevler üstlenir. Tek grup priz bütün sorunları çözmez.",
+          "linkText": "İlgili koruma ekipmanını inceleyin",
+          "linkUrl": "/hesaplama/gerilim-koruma-cozum-secici/"
+        },
+        {
+          "id": "sss-prizlerin-bir-kismi-calismiyor",
+          "question": "Evde elektrik var ama bazı prizler çalışmıyorsa ne yapılmalı?",
+          "answer": "Yeni grup priz satın almadan önce devre sigortası, kaçak akım koruması, gevşek bağlantı ve yerel tesisat arızası yetkin elektrikçi tarafından kontrol edilmelidir.",
+          "linkText": "Priz ve koruma çözüm sınırlarını inceleyin",
+          "linkUrl": "#urun-toprakli-grup-priz-yuk-siniri"
+        }
+      ]
+    },
+    {
+      "path": "/hesaplama/gerilim-koruma-cozum-secici/",
+      "file": "hesaplama/gerilim-koruma-cozum-secici/index.html",
+      "title": "SPD, gerilim rölesi, regülatör ve UPS karar ankrajları",
+      "intro": "Koruma ekipmanları aynı arızayı çözmez. Olayın geçici darbe, sürekli düşük/yüksek gerilim, nötr riski veya kesinti olup olmadığını ayırın.",
+      "products": [
+        {
+          "id": "urun-spd-gecici-asiri-gerilim",
+          "name": "Tip 1/Tip 2/Tip 3 SPD katmanı",
+          "category": "Geçici aşırı gerilim koruması",
+          "bestFor": "Yıldırım ve anahtarlama kaynaklı kısa süreli darbeler",
+          "technicalCheck": "Risk, pano seviyesi, şebeke sistemi, Up/Uc ve koordinasyon",
+          "limit": "Sürekli yüksek gerilimi regüle etmez ve nötr kopmasını tek başına çözmez",
+          "useWhen": "Geçici darbe riski ve SPD seviyesi proje ile doğrulandıysa.",
+          "skipWhen": "Sorun saatler süren düşük/yüksek gerilim veya gevşek nötr ise yalnız SPD almayın.",
+          "guideUrl": "/haberler/parafudr-gerilim-koruma-rolesi-farki",
+          "guideLabel": "Parafudr ve gerilim rölesi farkını inceleyin"
+        },
+        {
+          "id": "urun-gerilim-koruma-rolesi",
+          "name": "Ayarlanabilir gerilim koruma rölesi",
+          "category": "Sürekli gerilim sınırı izleme",
+          "bestFor": "Uzun süreli yüksek/düşük gerilimde kontaktör üzerinden ayırma",
+          "technicalCheck": "Faz sayısı, eşik, gecikme, kontaktör ve nötr izleme ihtiyacı",
+          "limit": "Darbeyi sönümlemez; pano uygulaması yetkin elektrikçi gerektirir",
+          "useWhen": "Ölçüm, şebeke geriliminin kabul sınırları dışında kalıcı şekilde dolaştığını gösteriyorsa.",
+          "skipWhen": "Sorun yalnız tek cihaz veya gevşek iç bağlantıysa şebeke ürünü satın almadan arıza tespiti yapın.",
+          "guideUrl": "/hesaplama/gerilim-koruma-cozum-secici/",
+          "guideLabel": "Gerilim olay türünü tekrar doğrulayın"
+        },
+        {
+          "id": "urun-ups-avr-hassas-elektronik",
+          "name": "AVR'li UPS",
+          "category": "Hassas yük sürekliliği",
+          "bestFor": "Bilgisayar ve ağ cihazlarında kısa kesinti ile sınırlı gerilim düzeltme",
+          "technicalCheck": "UPS topolojisi, giriş aralığı, çıkış W, transfer ve akü",
+          "limit": "Bina genelindeki şebeke veya nötr arızasını düzeltmez",
+          "useWhen": "Korunacak hassas yük ve UPS'in giriş toleransı birlikte doğrulandıysa.",
+          "skipWhen": "Tüm binada ciddi gerilim sapması veya nötr belirtisi varsa ürün almadan 186/elektrikçi ayrımını yapın.",
+          "guideUrl": "/haberler/ups-online-line-interactive-offline-farki",
+          "guideLabel": "UPS topolojilerini karşılaştırın"
+        }
+      ],
+      "faq": [
+        {
+          "id": "sss-spd-mi-gerilim-rolesi-mi",
+          "question": "Parafudr mu, gerilim koruma rölesi mi gerekir?",
+          "answer": "Parafudr çok kısa süreli darbeyi sınırlar; gerilim rölesi uzun süreli düşük/yüksek gerilimde yükü ayırır. Birçok tesiste ikisi farklı katmanlarda birlikte gerekebilir.",
+          "linkText": "SPD çözüm kartını açın",
+          "linkUrl": "#urun-spd-gecici-asiri-gerilim"
+        }
+      ]
+    },
+    {
+      "path": "/kesintiye-hazirlik-atolyesi",
+      "file": "kesintiye-hazirlik-atolyesi/index.html",
+      "title": "Kesinti hazırlık ekipmanları için görev bazlı SSR seçim katmanı",
+      "intro": "Hazırlık listesini cihaz isimleriyle değil, korunacak görev ve süreyle oluşturun. Her kart satın almadan önce mevcut ekipmanı test etme kapısı taşır.",
+      "products": [
+        {
+          "id": "urun-kesinti-aydinlatma-fener",
+          "name": "Şarjlı el feneri veya kafa lambası",
+          "category": "Kesinti aydınlatması",
+          "bestFor": "Karanlıkta güvenli hareket ve eller serbest kontrol",
+          "technicalCheck": "Lümen, düşük mod çalışma süresi, pil göstergesi ve USB-C şarj",
+          "limit": "Sabit acil yönlendirme armatürü yerine geçmez",
+          "useWhen": "Tahliye ve kontrol noktası için mevcut ışık yetersizse.",
+          "skipWhen": "Mevcut fener düzenli testte gereken süreyi karşılıyorsa yenisini almayın.",
+          "guideUrl": "/amazon-elektrik-urunleri/acil-aydinlatma-duman-alarmi/",
+          "guideLabel": "Acil aydınlatma ürün sınıflarını inceleyin"
+        },
+        {
+          "id": "urun-kesinti-powerbank-usbc",
+          "name": "USB-C PD powerbank",
+          "category": "Telefon ve düşük güçlü cihaz enerjisi",
+          "bestFor": "Telefon, küçük USB cihaz ve doğrulanmış modem senaryosu",
+          "technicalCheck": "Gerçek Wh, port W, PD profili, kablo ve hedef şarj sayısı",
+          "limit": "220 V ev cihazlarını veya yüksek güçlü medikal ekipmanı beslemez",
+          "useWhen": "Cihaz ve port güç profilleri eşleşiyorsa.",
+          "skipWhen": "Mevcut powerbank kapasite testini geçiyorsa yenisini almayın.",
+          "guideUrl": "/hesaplama/powerbank-usb-c-uygunluk/",
+          "guideLabel": "Powerbank uygunluğunu hesaplayın"
+        },
+        {
+          "id": "urun-kesinti-sicaklik-olcer",
+          "name": "Buzdolabı/dondurucu termometresi",
+          "category": "Gıda sıcaklık takibi",
+          "bestFor": "Kesintide kapak açma ve gıda kararı için ölçüm",
+          "technicalCheck": "Ölçüm aralığı, alarm, prob konumu ve kayıt",
+          "limit": "Soğutma sağlamaz; yalnız sıcaklığı görünür kılar",
+          "useWhen": "Gıda güvenliği kararını varsayım yerine ölçümle vermek gerekiyorsa.",
+          "skipWhen": "Cihazın kalibre edilmiş sıcaklık kaydı zaten varsa ikinci ürün almayın.",
+          "guideUrl": "/haberler/elektrik-kesintisinde-buzdolabi-dondurucu-kac-saat-dayanir",
+          "guideLabel": "Buzdolabı kesinti süresi rehberini açın"
+        }
+      ],
+      "faq": [
+        {
+          "id": "sss-kesinti-hazirlik-urunleri",
+          "question": "Elektrik kesintisi için önce hangi ürünler hazırlanmalı?",
+          "answer": "Öncelik güvenli ışık, iletişim enerjisi, kritik ilaç/gıda sıcaklık takibi ve yalnız doğrulanmış kritik yüklerdir. Her ev için aynı paket doğru değildir.",
+          "linkText": "Görev bazlı ürün ankrajlarını inceleyin",
+          "linkUrl": "#urun-kesinti-aydinlatma-fener"
+        }
+      ]
+    }
+  ]
+}
