@@ -1,6 +1,6 @@
 {
   "version": 229,
-  "mission": "ALO186 affiliate kapsamını elektrik güvenliği, enerji sürekliliği, ölçüm, erken uyarı ve düşük gerilimli kritik cihaz sürekliliğiyle sınırla.",
+  "mission": "ALO186 affiliate kapsamını elektrik güvenliği, enerji sürekliliği, ölçüm, erken uyarı, düşük gerilimli kritik cihaz sürekliliği ve yanlış satın almayı önleyen doğrulanabilir cihaz bağlantı uyumluluğu görevleriyle sınırla.",
   "approvedRouteTokens": [
     "elektrik",
     "enerji",
@@ -35,6 +35,27 @@
     "solar",
     "sarj",
     "wallbox"
+  ],
+  "approvedCompatibilityRouteTokens": [
+    "goruntu-cikisi",
+    "displayport",
+    "hdmi"
+  ],
+  "compatibilityEvidenceTokens": [
+    "uyumluluk",
+    "dp alt mode",
+    "thunderbolt",
+    "kaynak",
+    "ekran",
+    "cozunurluk",
+    "port"
+  ],
+  "compatibilityRequiredEvidenceCount": 4,
+  "compatibilityRequiredSafetyTokens": [
+    "hasarli",
+    "isinan",
+    "mevcut",
+    "satin alma"
   ],
   "blockedGenericRouteTokens": [
     "usb-bellek",
