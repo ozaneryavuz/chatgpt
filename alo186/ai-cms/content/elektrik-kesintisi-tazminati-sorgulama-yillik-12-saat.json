@@ -1,0 +1,269 @@
+{
+  "schemaVersion": 1,
+  "id": "cms_8d6f2e4a91c7b305",
+  "slug": "elektrik-kesintisi-tazminati-sorgulama-yillik-12-saat",
+  "contentType": "guide",
+  "state": "published",
+  "locale": "tr-TR",
+  "title": "Elektrik Kesintisi Tazminatı Sorgulama Rehberi",
+  "h1": "Elektrik kesintisi tazminatı nasıl sorgulanır ve kanıtlanır?",
+  "description": "Yıllık kesinti sınırı veya 12 saati aşan kesintiler için EDAŞ kayıtlarını, ödeme kontrolünü ve EPDK başvuru dosyasını doğru sırayla hazırlayın.",
+  "intent": "Kullanıcının yıllık veya 12 saati aşan elektrik kesintisi tazminatını cihaz hasarı talebiyle karıştırmadan sorgulaması, kayıtları doğrulaması ve eksik ödeme için kanıtlı başvuru yapması.",
+  "primaryKeyword": "elektrik kesintisi tazminatı sorgulama",
+  "audience": [
+    "Mesken aboneleri",
+    "Küçük işletmeler",
+    "Apartman ve site yöneticileri",
+    "Tesis yöneticileri"
+  ],
+  "riskClass": "legal",
+  "directAnswer": "Elektrik kesintisi tazminatı, cihaz hasarı başvurusundan farklı bir süreçtir. EPDK’nın yayımladığı çerçevede yıllık süre veya kesinti sayısı sınırları aşıldığında ödeme kural olarak başvuru aranmadan hesaplanır; ayrıca bildirimli ya da bildirimsiz 12 saati aşan kesintiler için uzun süreli kesinti tazminatı gündeme gelebilir. Kullanıcı önce kendi dağıtım şirketini, kesinti tarih-saatlerini ve ödeme/mahsup kaydını doğrulamalı; sonuç yoksa dağıtım şirketine yazılı başvuru yapıp yanıt ve belgelerle EPDK’ya ilerlemelidir.",
+  "sections": [
+    {
+      "id": "hangi-tazminat-turu",
+      "heading": "Yıllık tazminat, 12 saat tazminatı ve cihaz hasarı nasıl ayrılır?",
+      "paragraphs": [
+        "Kesinti nedeniyle doğan her hak aynı başvuruya girmez. Yıllık tazminat, bir takvim yılında kalite mevzuatındaki süre veya kesinti sayısı sınırlarının aşılmasıyla ilgilidir. Uzun süreli kesinti tazminatı ise bildirimli veya bildirimsiz tek bir kesintinin 12 saati aşması halinde değerlendirilir. Cihaz hasarı talebi ise bu iki haktan ayrı olarak, belirli bir elektriksel olay ile cihazdaki zarar arasındaki nedensellik ve belge zincirine dayanır.",
+        "İlk adım, sorunu doğru sütuna koymaktır: kesintinin süresi ve sayısı için tedarik sürekliliği kaydı; cihaz arızası için servis raporu, olay zamanı ve zarar belgesi; fatura veya sayaç sorunu için ayrı tüketici hizmetleri süreci kullanılır. Aynı olay birden fazla hak doğurabilir, ancak belgeler ve karar ölçütleri birbirine karıştırılmamalıdır."
+      ],
+      "bullets": [
+        "Kesintinin başlangıç ve bitiş saatini ayrı kaydedin.",
+        "Planlı/bildirimli veya bildirimsiz niteliğini dağıtım şirketi kaydından doğrulayın.",
+        "Cihaz hasarı varsa tazminat dosyasından ayrı servis ve zarar dosyası açın.",
+        "Tedarikçi ile dağıtım şirketinin görevlerini karıştırmayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2"
+      ]
+    },
+    {
+      "id": "otomatik-odeme-ve-sorgu",
+      "heading": "Başvurusuz hesaplanan ödeme nereden ve ne zaman kontrol edilir?",
+      "paragraphs": [
+        "EPDK tüketici bilgilendirmesine göre yıllık tazminat, koşullar oluştuğunda ayrıca kullanıcı başvurusu aranmadan dağıtım şirketi tarafından hesaplanır. Ödemeler takip eden yılın nisan ayından itibaren başlayabilir ve dağıtım bedeli borçlarına mahsup edilebilir. Bu nedenle yalnız banka hesabını değil, fatura üzerindeki mahsup satırlarını ve dağıtım şirketinin çevrimiçi tazminat sorgu ekranını da kontrol etmek gerekir.",
+        "Dağıtım şirketlerinin ekran ve menü adları farklı olabilir. Kullanıcı, faturasındaki dağıtım şirketini belirleyip o şirketin resmî sorgu kanalına girmeli; tesisat veya sözleşme hesabına ait sonucu, ödeme tarihi, mahsup bilgisi ve açıklama koduyla birlikte saklamalıdır. ALO186 açık adres, T.C. kimlik numarası veya tesisat numarası toplamaz; bu bilgiler yalnız resmî şirket kanalında kullanılmalıdır."
+      ],
+      "bullets": [
+        "Faturadaki dağıtım şirketini EDAŞ bulucu ile doğrulayın.",
+        "Nisan sonrasındaki faturaları mahsup açıklaması bakımından kontrol edin.",
+        "Resmî sorgu ekranının sonuç görüntüsünü tarih bilgisiyle saklayın.",
+        "Kişisel abonelik verilerini ALO186’e veya üçüncü taraf formlara yazmayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "id": "kanit-dosyasi",
+      "heading": "Kesinti kayıtları uyuşmuyorsa kanıt dosyası nasıl hazırlanır?",
+      "paragraphs": [
+        "Kesinti günlüğü; tarih, başlangıç, bitiş, toplam süre, planlılık durumu, 186 kayıt numarası, komşu abonelerdeki gözlem ve dağıtım şirketi duyurusunu aynı satırda birleştirmelidir. Modem, UPS veya otomasyon logları yardımcı olabilir; ancak resmî kesinti kaydının yerine tek başına geçmez. Yıllık hak için olaylar takvim yılı bazında toplanmalı, tek kesinti için 12 saat eşiği ayrı gösterilmelidir.",
+        "Kanıt dosyasının amacı tazminat tutarını kullanıcı tarafından kesin hesaplamak değil, dağıtım şirketinin kayıt ve ödeme sonucunu denetlenebilir hale getirmektir. Kesintiler birbirine eklenirken aynı olayın iki kez sayılması, planlı bakımın bildirimsiz gösterilmesi veya yalnız sosyal medya paylaşımına dayanılması başvuruyu zayıflatır. Dosyada resmî sorgu sonucu, faturalar ve başvuru yazışmaları bulunmalıdır."
+      ],
+      "bullets": [
+        "Takvim yılına göre tekilleştirilmiş kesinti tablosu oluşturun.",
+        "Her olayda 186 veya çevrimiçi başvuru numarasını ekleyin.",
+        "Planlı kesinti duyurusunun tarihini ve bildirim zamanını kaydedin.",
+        "Fatura mahsuplarını ve ödeme sonucunu ayrı sütunda izleyin."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S4"
+      ]
+    },
+    {
+      "id": "dagitim-sirketine-basvuru",
+      "heading": "Dağıtım şirketine başvuru hangi sırayla yapılmalıdır?",
+      "paragraphs": [
+        "Ödeme görünmüyorsa veya kayıtlar uyuşmuyorsa önce ilgili dağıtım şirketinin tüketici hizmetleri kanalına yazılı ve izlenebilir başvuru yapılmalıdır. Başvuruda kullanıcı bilgileri yalnız resmî kanalda paylaşılmalı; talep açık biçimde yıllık tazminat, 12 saati aşan kesinti tazminatı veya her ikisinin kayıt incelemesi olarak adlandırılmalıdır. Cihaz hasarı, fatura itirazı veya tedarik sözleşmesi şikâyeti aynı metne yığılmamalıdır.",
+        "Başvuru metni; dönem, tesisatın bulunduğu il/ilçe, olay listesi, resmî kayıt numaraları, sorgu sonucu ve istenen işlemi içermelidir. Yanıt süresi ve şirket cevabı saklanmalı, telefon görüşmesi yapıldıysa tarih ve görüşme numarası yazılı dosyaya eklenmelidir. Enerjisa Online gibi resmî hizmet sayfaları kullanıcıyı ilgili dağıtım şirketinin ticari kalite tazminatı sorgusuna yönlendirebilir; başka bölgelerde ilgili EDAŞ’ın kendi kanalı kullanılmalıdır."
+      ],
+      "bullets": [
+        "Talep başlığında tazminat türünü açıkça yazın.",
+        "Kesinti tablosunu ve sorgu ekranını ekleyin.",
+        "Başvuru numarası ile yanıt tarihini saklayın.",
+        "Kimlik ve tesisat bilgilerini yalnız resmî şirket kanalında kullanın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S3"
+      ]
+    },
+    {
+      "id": "epdk-eskalasyon",
+      "heading": "Dağıtım şirketi sonucu çözmezse EPDK dosyası nasıl kurulur?",
+      "paragraphs": [
+        "EPDK’nın tüketici şikâyeti yaklaşımında ilk muhatap ilgili şirket olmalıdır. Şirket başvurusu sonuçsuz kalır, süresinde yanıtlanmaz veya cevap belgelerle çelişirse; ilk başvuru, yanıt, kesinti tablosu, faturalar ve ödeme sorgu sonucu birlikte sunularak EPDK’ya başvurulabilir. Bu aşama dağıtım şirketine hiç başvurmadan yapılan genel bir şikâyetten daha güçlü bir denetim izi oluşturur.",
+        "Mevzuat ve parasal tutarlar zamanla güncellenebileceği için başvuru günündeki EPDK düzenlemeleri esas alınmalıdır. ALO186 hak sahipliği veya kesin ödeme tutarı garantisi vermez; kullanıcıya belge sırasını ve resmî kanalı gösterir. Ödeme yapılmışsa aynı dönem için mükerrer talep açılmamalı; sistemde doğru mahsup görünüyorsa yeni ürün veya ücretli hizmet satın almak gerekmez."
+      ],
+      "bullets": [
+        "Dağıtım şirketi başvuru ve yanıtını ekleyin.",
+        "Talebi dönem, tazminat türü ve uyuşmazlık noktasıyla sınırlandırın.",
+        "Başvuru tarihindeki güncel EPDK mevzuatını kontrol edin.",
+        "Ödeme/mahsup doğrulanmışsa mükerrer başvuru yapmayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2"
+      ]
+    }
+  ],
+  "faqs": [
+    {
+      "question": "Elektrik kesintisi tazminatı için mutlaka başvuru yapmak gerekir mi?",
+      "answer": "Yıllık kalite tazminatı, koşullar oluştuğunda dağıtım şirketi tarafından kural olarak başvuru aranmadan hesaplanır. Kullanıcı yine de ödeme veya mahsup görünmüyorsa resmî sorgu sonucuyla şirkete yazılı kayıt açmalıdır.",
+      "sourceRefs": [
+        "S1"
+      ]
+    },
+    {
+      "question": "12 saatten uzun her elektrik kesintisi otomatik ödeme doğurur mu?",
+      "answer": "EPDK bilgilendirmesi bildirimli veya bildirimsiz 12 saati aşan kesintiler için uzun süreli kesinti tazminatı öngörür; ancak istisnalar, kullanıcı grubu ve güncel mevzuat koşulları resmî kayıt üzerinden değerlendirilmelidir.",
+      "sourceRefs": [
+        "S1",
+        "S2"
+      ]
+    },
+    {
+      "question": "Kesinti tazminatı ile yanan cihaz bedeli aynı şey midir?",
+      "answer": "Hayır. Kesinti süresi veya sayısına bağlı kalite tazminatı ile cihaz hasarının olay ve servis belgeleriyle talep edilmesi ayrı süreçlerdir. Aynı olayda iki dosya gerekebilir.",
+      "sourceRefs": [
+        "S1",
+        "S2"
+      ]
+    },
+    {
+      "question": "Tazminat görünmüyorsa doğrudan EPDK’ya mı başvurmalıyım?",
+      "answer": "Önce ilgili dağıtım şirketine izlenebilir başvuru yapmanız, yanıtı ve belgeleri saklamanız gerekir. Çözüm olmazsa bu dosyayla EPDK’ya başvurmak denetlenebilir bir işlem zinciri sağlar.",
+      "sourceRefs": [
+        "S1",
+        "S3"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "publisher": "EPDK",
+      "title": "Elektrik tüketicileri için tedarik sürekliliği ve şikâyetler hakkında sık sorulan sorular",
+      "url": "https://www.epdk.gov.tr/Detay/Icerik/12-3/12-faturayi-zamaninda-odemezsem-gecikme-zammi-od",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Yıllık tazminatın başvurusuz hesaplanması, takip eden yıl ödeme/mahsup süreci, 12 saati aşan kesintiler ve önce şirkete başvuru yaklaşımını açıklar."
+    },
+    {
+      "id": "S2",
+      "publisher": "EPDK",
+      "title": "Elektrik piyasası yürürlükteki yönetmelikler",
+      "url": "https://www.epdk.gov.tr/Detay/Icerik/3-0-159/yonetmelikler",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Elektrik Piyasasında Dağıtım ve Perakende Satış Faaliyetlerine İlişkin Kalite Yönetmeliğini ve ilgili güncel mevzuat listesini yayımlar."
+    },
+    {
+      "id": "S3",
+      "publisher": "Enerjisa Online",
+      "title": "Başvuru işlemleri ve ticari kalite tazminatı sorgusu",
+      "url": "https://online.enerjisa.com.tr/basvuru-islemleri",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Kullanıcıyı ilgili dağıtım şirketinin ticari kalite tazminatı sorgulama kanalına ve dağıtım hizmetleri için 186 yönüne bağlar."
+    },
+    {
+      "id": "S4",
+      "publisher": "Enerjisa Online",
+      "title": "Elektrik kesintileri sorgulama",
+      "url": "https://online.enerjisa.com.tr/elektrik-kesintileri",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Planlı ve güncel kesinti bilgisinin resmî dağıtım kanalı üzerinden sorgulanmasına örnek sağlar."
+    }
+  ],
+  "internalLinks": [
+    {
+      "label": "EDAŞ bul",
+      "path": "/edas-bul",
+      "reason": "Faturadaki bölgeye göre doğru dağıtım şirketi ve resmî kanalı buldurur."
+    },
+    {
+      "label": "Planlı kesinti ne kadar önce bildirilir?",
+      "path": "/haberler/planli-elektrik-kesintisi-ne-kadar-once-bildirilir",
+      "reason": "Bildirimli ve bildirimsiz kesinti ayrımını açıklar."
+    },
+    {
+      "label": "Kesintide cihaz hasarı EDAŞ başvurusu",
+      "path": "/haberler/elektrik-kesintisi-cihaz-hasari-edas-basvurusu",
+      "reason": "Cihaz zararını kalite tazminatından ayrı dosyada yönetir."
+    },
+    {
+      "label": "EDAŞ mı tedarikçi mi aranır?",
+      "path": "/haberler/elektrik-arizasinda-edas-mi-tedarikci-mi-aranir",
+      "reason": "Dağıtım ve tedarik görev ayrımını netleştirir."
+    },
+    {
+      "label": "Kesinti günlüğü",
+      "path": "/hesaplama/kesinti-gunlugu",
+      "reason": "Olay tarih ve sürelerini kişisel verisiz kaydetmeye yardım eder."
+    },
+    {
+      "label": "Kesinti maliyeti hesabı",
+      "path": "/hesaplama/kesinti-maliyeti",
+      "reason": "Tazminattan bağımsız işletme etkisini ölçer."
+    },
+    {
+      "label": "Elektrik karar motoru",
+      "path": "/karar-motoru",
+      "reason": "Acil tehlike, 186 ve teknik destek ayrımını yapar."
+    }
+  ],
+  "commerce": {
+    "enabled": false,
+    "policy": "none",
+    "category": null
+  },
+  "editorial": {
+    "createdBy": "ai-assisted",
+    "model": "gpt-5.6-thinking",
+    "humanReviewRequired": true,
+    "approvedBy": "ozaneryavuz",
+    "approvedAt": "2026-08-03T18:41:30Z",
+    "publishedAt": "2026-08-03T18:41:30Z",
+    "approvalPr": 759
+  },
+  "seo": {
+    "canonicalPath": "/haberler/elektrik-kesintisi-tazminati-sorgulama-yillik-12-saat",
+    "robots": "index,follow,max-image-preview:large",
+    "lastModified": "2026-08-03",
+    "topics": [
+      "elektrik kesintisi tazminatı",
+      "EDAŞ",
+      "12 saat kesinti",
+      "yıllık tazminat",
+      "EPDK",
+      "kesinti günlüğü",
+      "ticari kalite"
+    ]
+  },
+  "quality": {
+    "score": 100,
+    "minimumRequired": 85,
+    "checks": {
+      "metadata": true,
+      "directAnswer": true,
+      "contentDepth": true,
+      "sources": true,
+      "safety": true,
+      "internalLinks": true,
+      "uniqueness": true,
+      "structuredData": true
+    },
+    "similarity": {
+      "maximum": 0.375,
+      "closestPath": "https://alo186.com/haberler/elektrik-kesintisi-tazminati-12-saat-yillik-esure-esayi-sorgulama"
+    }
+  }
+}

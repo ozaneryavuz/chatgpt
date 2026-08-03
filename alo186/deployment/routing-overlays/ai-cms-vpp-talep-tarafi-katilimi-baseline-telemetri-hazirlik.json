@@ -1,0 +1,18 @@
+{
+  "version": 238,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/vpp-talep-tarafi-katilimi-baseline-telemetri-hazirlik/index.html",
+      "canonicalPath": "/haberler/vpp-talep-tarafi-katilimi-baseline-telemetri-hazirlik",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_4c7a9e1d5b83f260",
+    "humanApproved": true,
+    "approvalPr": 759,
+    "qualityScore": 100
+  }
+}
