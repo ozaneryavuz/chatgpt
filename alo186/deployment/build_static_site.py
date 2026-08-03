@@ -67,11 +67,13 @@ try:
     from .inject_competitor_gap_affiliate_v251 import apply as _apply_competitor_gap_v251
     from .inject_ai_commerce_aeo_v250 import apply_ai_commerce_aeo
     from .inject_ai_commerce_breadcrumb_v250 import apply as _apply_ai_commerce_breadcrumb_v250
+    from .materialize_location_pages_v253 import materialize as _materialize_location_pages_v253
 except ImportError:
     from inject_competitor_gap_affiliate_v250 import apply as _apply_competitor_gap_v250
     from inject_competitor_gap_affiliate_v251 import apply as _apply_competitor_gap_v251
     from inject_ai_commerce_aeo_v250 import apply_ai_commerce_aeo
     from inject_ai_commerce_breadcrumb_v250 import apply as _apply_ai_commerce_breadcrumb_v250
+    from materialize_location_pages_v253 import materialize as _materialize_location_pages_v253
 
 ACCESSIBILITY_MARKER = 'data-alo186-accessibility-v215="true"'
 ACCESSIBILITY_SOURCE = Path("alo186/assets/alo186-accessibility-v215.css")
@@ -175,12 +177,14 @@ def _build_with_platform_hardening(
     commit_sha: str = "local",
 ) -> dict:
     release = _original_build(repo_root, output, commit_sha)
+    location_pages_report = _materialize_location_pages_v253(repo_root, output)
     competitor_gap_report = _apply_competitor_gap_v250(repo_root, output)
     competitor_gap_v251_report = _apply_competitor_gap_v251(repo_root, output)
     commercial_report = normalize_commercial_hub_urls(output)
     accessibility_report = install_accessibility_hardening(repo_root, output)
     ai_commerce_report = apply_ai_commerce_aeo(repo_root, output)
     ai_commerce_breadcrumb_report = _apply_ai_commerce_breadcrumb_v250(output)
+    release["locationPagesV253"] = location_pages_report
     release["commercialCanonicalV217"] = commercial_report
     release["accessibilityHardeningV215"] = accessibility_report
     release["competitorGapAffiliateV250"] = competitor_gap_report
