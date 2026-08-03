@@ -101,7 +101,7 @@ def test_hub_routes_existing_calculators_selectors_and_repeat_tests() -> None:
 
 def test_commerce_hub_uses_apex_and_discloses_before_visible_routes() -> None:
     html = read(COMMERCE)
-    assert '<link rel="canonical" href="https://alo186.com/amazon-elektrik-urunleri/">' in html
+    assert '<link rel="canonical" href="https://alo186.com/amazon-elektrik-urunleri">' in html
     assert "https://www.alo186.com" not in html
     assert "/kesinti-cihaz-surekliligi-karar-merkezi/" in html
     assert "Mevcut sistem yeterliyse satın alma yok" in html
