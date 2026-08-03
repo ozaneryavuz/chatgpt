@@ -1,6 +1,21 @@
 User-agent: *
 Allow: /
 
+User-agent: GPTBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
 Sitemap: https://alo186.com/sitemap.xml
 Sitemap: https://alo186.com/sitemap-electric-project-v200.xml
 Sitemap: https://alo186.com/sitemap-growth-v207.xml
