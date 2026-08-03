@@ -1,0 +1,18 @@
+{
+  "version": 238,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/ups-aku-kapasite-testi-ic-direnc-runtime-kabul/index.html",
+      "canonicalPath": "/haberler/ups-aku-kapasite-testi-ic-direnc-runtime-kabul",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_15dc0d660edc4711",
+    "humanApproved": true,
+    "approvalPr": 771,
+    "qualityScore": 88
+  }
+}
