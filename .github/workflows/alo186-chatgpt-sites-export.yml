@@ -11,6 +11,9 @@ on:
     paths:
       - 'alo186/**'
       - '.github/workflows/alo186-chatgpt-sites-export.yml'
+  schedule:
+    # Europe/Istanbul UTC+3: her pazartesi 10:20.
+    - cron: '20 7 * * 1'
 
 permissions:
   contents: read
@@ -21,22 +24,28 @@ concurrency:
 
 jobs:
   build-export:
-    runs-on: ubuntu-latest
-    timeout-minutes: 35
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
+      - name: Kaynak kodu al
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
 
-      - uses: actions/setup-python@v5
+      - name: Python 3.12
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
-      - name: Kaynak ve politika doğrulaması
+      - name: Kaynak, manifest ve politika doğrulaması
         run: |
           set -euo pipefail
           python -m py_compile \
             alo186/deployment/export_chatgpt_sites_bundle.py \
             alo186/deployment/export_chatgpt_sites_bundle_v2.py
           python -m json.tool alo186/deployment/chatgpt-sites-export-policy.json >/dev/null
+          python -m json.tool alo186/sites-sync/sites-source-manifest.json >/dev/null
+          test -s alo186/sites-sync/sites-import-prompt.md
           python alo186/tests/test_chatgpt_sites_export.py
 
       - name: ChatGPT Sites aktarım paketini üret
@@ -46,11 +55,91 @@ jobs:
           python alo186/deployment/export_chatgpt_sites_bundle_v2.py \
             --output /tmp/alo186-chatgpt-sites \
             --commit "$GITHUB_SHA"
+
+      - name: Sites kaynak otoritesini ve bütünlük makbuzunu ekle
+        run: |
+          set -euo pipefail
+          cp alo186/sites-sync/sites-source-manifest.json \
+            /tmp/alo186-chatgpt-sites/sites-source-manifest.json
+          cp alo186/sites-sync/sites-import-prompt.md \
+            /tmp/alo186-chatgpt-sites/sites-import-prompt.md
+          cp alo186/sites-sync/README.md \
+            /tmp/alo186-chatgpt-sites/SOURCE-AUTHORITY.md
+          python - <<'PY'
+          from pathlib import Path
+          from datetime import datetime, timezone
+          import hashlib
+          import json
+
+          root = Path('/tmp/alo186-chatgpt-sites')
+          stats = json.loads((root / 'data/export-stats.json').read_text(encoding='utf-8'))
+          manifest = json.loads((root / 'sites-source-manifest.json').read_text(encoding='utf-8'))
+          policy = json.loads(Path('alo186/deployment/chatgpt-sites-export-policy.json').read_text(encoding='utf-8'))
+
+          assert stats['provincePages'] == 81
+          assert stats['companyPages'] == 21
+          assert manifest['target'] == 'chatgpt-sites'
+          assert manifest['siteSlug'] == 'alo186'
+          assert manifest['canonicalHost'] == 'https://alo186.com'
+          assert policy['targetPlatform'] == 'ChatGPT Sites'
+          assert policy['sourceAuthorityManifest'] == 'alo186/sites-sync/sites-source-manifest.json'
+          assert policy['migrationRules']['doNotChangeDns'] is True
+          assert policy['migrationRules']['doNotAttachCustomDomainToGitHubPages'] is True
+          assert policy['migrationRules']['undocumentedSitesApiAllowed'] is False
+
+          files = []
+          for path in sorted(root.rglob('*')):
+              if not path.is_file() or path.name in {'source-integrity.json', 'source-authority.json'}:
+                  continue
+              files.append({
+                  'path': path.relative_to(root).as_posix(),
+                  'sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
+                  'bytes': path.stat().st_size,
+              })
+          digest = hashlib.sha256(
+              json.dumps(files, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')
+          ).hexdigest()
+          integrity = {
+              'schemaVersion': 1,
+              'algorithm': 'SHA-256',
+              'sourceCommit': '${{ github.sha }}',
+              'fileCount': len(files),
+              'packageDigest': digest,
+              'files': files,
+          }
+          authority = {
+              'schemaVersion': 1,
+              'target': 'chatgpt-sites',
+              'siteSlug': 'alo186',
+              'canonicalHost': 'https://alo186.com',
+              'sourceCommit': '${{ github.sha }}',
+              'generatedAt': datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z'),
+              'packageDigest': digest,
+              'livePresentationAndPublishing': 'ChatGPT Sites',
+              'contentSourceQualityAndRollback': 'GitHub',
+              'dnsChanged': False,
+              'githubPagesCustomDomainEnabled': False,
+              'liveSitesMutationPerformedByWorkflow': False,
+              'applyWith': 'sites-import-prompt.md in an explicitly connected @Sites session',
+          }
+          (root / 'data/source-integrity.json').write_text(
+              json.dumps(integrity, ensure_ascii=False, indent=2) + '\n', encoding='utf-8'
+          )
+          (root / 'data/source-authority.json').write_text(
+              json.dumps(authority, ensure_ascii=False, indent=2) + '\n', encoding='utf-8'
+          )
+          print(json.dumps(authority, ensure_ascii=False, indent=2))
+          PY
+
+      - name: ZIP paketini oluştur
+        run: |
+          set -euo pipefail
           python - <<'PY'
           from pathlib import Path
           import shutil
           shutil.make_archive('/tmp/alo186-chatgpt-sites', 'zip', '/tmp', 'alo186-chatgpt-sites')
-          assert Path('/tmp/alo186-chatgpt-sites.zip').is_file()
+          archive = Path('/tmp/alo186-chatgpt-sites.zip')
+          assert archive.is_file() and archive.stat().st_size > 0
           PY
 
       - name: Paket özetini yaz
@@ -59,9 +148,13 @@ jobs:
           python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
           import json
           from pathlib import Path
-          data=json.loads(Path('/tmp/alo186-chatgpt-sites/data/export-stats.json').read_text(encoding='utf-8'))
+          root = Path('/tmp/alo186-chatgpt-sites')
+          data = json.loads((root / 'data/export-stats.json').read_text(encoding='utf-8'))
+          authority = json.loads((root / 'data/source-authority.json').read_text(encoding='utf-8'))
           print('# ALO186 → ChatGPT Sites aktarım paketi')
           print()
+          print(f"- Kaynak commit: `{authority['sourceCommit']}`")
+          print(f"- Paket digest: `{authority['packageDigest']}`")
           print(f"- Aktarıma hazır sayfa: **{data['importReady']}**")
           print(f"- İnceleme kuyruğu: **{data['reviewOnly']}**")
           print(f"- İl sayfası: **{data['provincePages']}**")
@@ -71,16 +164,19 @@ jobs:
           print(f"- Affiliate rehberi: **{data['affiliateGuides']}**")
           print(f"- Redirect: **{data['redirectCount']}**")
           print()
-          print('Paket; Sites brifi, import sırası, Markdown içerikler, kaynak HTML/JS/CSS, konum verisi, redirect haritası, güven politikası ve checksum içerir.')
+          print('- Canlı otorite: **ChatGPT Sites**')
+          print('- DNS / GitHub Pages özel alan adı değişikliği: **yok**')
+          print('- Artifact içi uygulama talimatı: `sites-import-prompt.md`')
+          print('- Paket kendi başına canlı mutasyon yapmaz; yayın makbuzu @Sites uygulamasından sonra oluşur.')
           PY
 
       - name: ChatGPT Sites aktarım artifactını yükle
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: alo186-chatgpt-sites-import-${{ github.sha }}
           path: |
             /tmp/alo186-chatgpt-sites
             /tmp/alo186-chatgpt-sites.zip
           if-no-files-found: error
-          include-hidden-files: true
+          include-hidden-files: false
           retention-days: 90
