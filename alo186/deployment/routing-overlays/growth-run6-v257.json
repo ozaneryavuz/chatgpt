@@ -1,0 +1,16 @@
+{
+  "version": 257,
+  "description": "Kullanıcı güvenini bozmadan kesinti sonrası güvenli yeniden başlatma ve 30/90 günlük hazırlık döngüsü için iki yeni canonical araç.",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/elektrik-geldikten-sonra-guvenli-yeniden-baslatma/index.html",
+      "canonicalPath": "/hesaplama/elektrik-geldikten-sonra-guvenli-yeniden-baslatma/",
+      "type": "tool"
+    },
+    {
+      "source": "alo186/hesaplama/kesinti-hazirlik-kontrolu/index.html",
+      "canonicalPath": "/hesaplama/kesinti-hazirlik-kontrolu/",
+      "type": "tool"
+    }
+  ]
+}
