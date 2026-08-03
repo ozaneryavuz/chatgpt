@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import html as html_lib
 import json
+import os
 import re
 from pathlib import Path
 from urllib.parse import urlparse
 
-ROOT = Path(__file__).resolve().parents[2]
-HUB_PATH = ROOT / "alo186/amazon-elektrik-urunleri/index.html"
+REPO_ROOT = Path(__file__).resolve().parents[2]
 ORIGIN = "https://alo186.com"
 ROUTE_PREFIX = "/amazon-elektrik-urunleri/"
 EXPECTED_PATHS = {
@@ -18,6 +18,35 @@ EXPECTED_PATHS = {
     "/amazon-elektrik-urunleri/cpap-yedek-guc-uygunluk-secici/",
     "/amazon-elektrik-urunleri/mobil-hotspot-4g-5g-yedek-internet-secici/",
 }
+GENERIC_ACCESSORY_PATTERN = re.compile(
+    r"(?:usb-c hub|hafıza kartı|sd kart|webcam|kulaklık|bluetooth hoparlör|"
+    r"hdmi|displayport|ses adaptörü|audio interface|mouse|klavye|"
+    r"yazıcı sarf|laptop soğutucu)",
+    re.IGNORECASE,
+)
+
+
+def resolve_site_root() -> Path:
+    configured = os.environ.get("ALO186_SITE_ROOT", "").strip()
+    candidates = []
+    if configured:
+        configured_path = Path(configured).resolve()
+        candidates.extend((configured_path, configured_path / "alo186"))
+    candidates.extend((REPO_ROOT / "alo186", REPO_ROOT))
+
+    for candidate in candidates:
+        if (candidate / "amazon-elektrik-urunleri/index.html").is_file():
+            return candidate
+    raise AssertionError("ALO186 site kökü bulunamadı")
+
+
+SITE_ROOT = resolve_site_root()
+HUB_PATH = SITE_ROOT / "amazon-elektrik-urunleri/index.html"
+
+
+def normalize_route(path: str) -> str:
+    normalized = "/" + path.strip("/") + "/"
+    return normalized if normalized != "//" else "/"
 
 
 def load_item_list_urls() -> tuple[str, set[str]]:
@@ -54,8 +83,41 @@ def load_item_list_urls() -> tuple[str, set[str]]:
 
 
 def route_document(path: str) -> Path:
-    relative = path.strip("/")
-    return ROOT / "alo186" / relative / "index.html"
+    relative = normalize_route(path).strip("/")
+    return SITE_ROOT / relative / "index.html"
+
+
+def visible_product_routes(source: str) -> set[str]:
+    routes: set[str] = set()
+    for href in re.findall(r'href=["\']([^"\']+)["\']', source, flags=re.IGNORECASE):
+        parsed = urlparse(html_lib.unescape(href).strip())
+        if parsed.scheme or parsed.netloc:
+            continue
+        if parsed.query or parsed.fragment:
+            continue
+        if not parsed.path.startswith(ROUTE_PREFIX):
+            continue
+        route = normalize_route(parsed.path)
+        if route == ROUTE_PREFIX:
+            continue
+        routes.add(route)
+    return routes
+
+
+def canonical_url(source: str) -> str:
+    match = re.search(
+        r'<link\b[^>]*\brel=["\']canonical["\'][^>]*\bhref=["\']([^"\']+)["\']',
+        source,
+        flags=re.IGNORECASE,
+    )
+    if not match:
+        match = re.search(
+            r'<link\b[^>]*\bhref=["\']([^"\']+)["\'][^>]*\brel=["\']canonical["\']',
+            source,
+            flags=re.IGNORECASE,
+        )
+    assert match, "Canonical bağlantı bulunamadı"
+    return html_lib.unescape(match.group(1)).strip()
 
 
 def test_product_hub_jsonld_routes_are_canonical_clickable_and_published() -> None:
@@ -73,7 +135,7 @@ def test_product_hub_jsonld_routes_are_canonical_clickable_and_published() -> No
         document = route_document(parsed.path)
         assert document.is_file(), f"JSON-LD rotası yayın kaynağında yok: {parsed.path}"
         route_source = document.read_text(encoding="utf-8")
-        assert f'rel="canonical" href="{url}"' in route_source, f"Hedef canonical eşleşmiyor: {url}"
+        assert canonical_url(route_source) == url, f"Hedef canonical eşleşmiyor: {url}"
         assert "Amazon Gelir Ortağı" in route_source or "Amazon satış ortaklığı" in route_source, (
             f"Affiliate açıklaması görünür değil: {url}"
         )
@@ -95,6 +157,64 @@ def test_product_hub_jsonld_routes_are_canonical_clickable_and_published() -> No
     assert "https://alo186.com/amazon-elektrik-urunlerimobil" not in source
 
 
+def test_every_visible_product_route_exists_and_self_canonicalizes() -> None:
+    source = HUB_PATH.read_text(encoding="utf-8")
+    routes = visible_product_routes(source)
+    assert routes, "Ürün merkezinde görünür ürün rotası bulunamadı"
+
+    missing: list[str] = []
+    canonical_errors: list[str] = []
+    for route in sorted(routes):
+        document = route_document(route)
+        if not document.is_file():
+            missing.append(route)
+            continue
+        target_source = document.read_text(encoding="utf-8", errors="ignore")
+        target_canonical = urlparse(canonical_url(target_source))
+        if f"{target_canonical.scheme}://{target_canonical.netloc}" != ORIGIN:
+            canonical_errors.append(f"{route} -> {target_canonical.geturl()}")
+            continue
+        if normalize_route(target_canonical.path) != route or target_canonical.query or target_canonical.fragment:
+            canonical_errors.append(f"{route} -> {target_canonical.geturl()}")
+
+    assert not missing, "Ürün merkezinde 404 üretecek görünür rotalar: " + ", ".join(missing)
+    assert not canonical_errors, "Görünür rota canonical sapmaları: " + ", ".join(canonical_errors)
+
+
+def test_task_first_priority_precedes_catalog_and_excludes_generic_accessories() -> None:
+    source = HUB_PATH.read_text(encoding="utf-8")
+    disclosure_index = source.find("affiliate-disclosure")
+    priority_index = source.find('aria-labelledby="priorityTitle"')
+    core_index = source.find('aria-labelledby="coreTitle"')
+    assert -1 not in (disclosure_index, priority_index, core_index), "Görev öncelikli ürün merkezi bölümleri eksik"
+    assert disclosure_index < priority_index < core_index, (
+        "Affiliate açıklaması ve görev öncelikli rotalar genel katalogdan önce gelmeli"
+    )
+
+    priority_section = source[priority_index:core_index]
+    generic_match = GENERIC_ACCESSORY_PATTERN.search(html_lib.unescape(priority_section))
+    assert generic_match is None, (
+        "Genel teknoloji aksesuarı yüksek öncelikli elektrik görevlerine sızmış: "
+        + (generic_match.group(0) if generic_match else "")
+    )
+    assert EXPECTED_PATHS.issubset(visible_product_routes(priority_section)), (
+        "Yüksek niyetli altı güvenli rota görev öncelikli bölümde görünür değil"
+    )
+
+
 if __name__ == "__main__":
     test_product_hub_jsonld_routes_are_canonical_clickable_and_published()
-    print(json.dumps({"ok": True, "routes": len(EXPECTED_PATHS), "origin": ORIGIN}))
+    test_every_visible_product_route_exists_and_self_canonicalizes()
+    test_task_first_priority_precedes_catalog_and_excludes_generic_accessories()
+    print(
+        json.dumps(
+            {
+                "ok": True,
+                "priorityRoutes": len(EXPECTED_PATHS),
+                "visibleRoutes": len(visible_product_routes(HUB_PATH.read_text(encoding="utf-8"))),
+                "origin": ORIGIN,
+                "siteRoot": str(SITE_ROOT),
+            },
+            ensure_ascii=False,
+        )
+    )
