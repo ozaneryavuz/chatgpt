@@ -1,5 +1,68 @@
+# ALO186 bağımsız bilgi ve teknik rehber platformu
+# Statik sayfalar, teknik rehberler ve güvenli ürün seçim rotaları taranabilir.
+
+User-agent: OAI-SearchBot
+Allow: /
+Allow: /rehber/
+Allow: /urunler/
+Allow: /haberler/
+Allow: /hesaplama/
+Allow: /amazon-elektrik-urunleri/
+Allow: /akilli-urun-secimi
+
+User-agent: GPTBot
+Allow: /
+Allow: /rehber/
+Allow: /urunler/
+Allow: /haberler/
+Allow: /hesaplama/
+Allow: /amazon-elektrik-urunleri/
+Allow: /akilli-urun-secimi
+
+User-agent: PerplexityBot
+Allow: /
+Allow: /rehber/
+Allow: /urunler/
+Allow: /haberler/
+Allow: /hesaplama/
+Allow: /amazon-elektrik-urunleri/
+Allow: /akilli-urun-secimi
+
+User-agent: ClaudeBot
+Allow: /
+Allow: /rehber/
+Allow: /urunler/
+Allow: /haberler/
+Allow: /hesaplama/
+Allow: /amazon-elektrik-urunleri/
+Allow: /akilli-urun-secimi
+
+User-agent: Bytespider
+Allow: /
+Allow: /rehber/
+Allow: /urunler/
+Allow: /haberler/
+Allow: /hesaplama/
+Allow: /amazon-elektrik-urunleri/
+Allow: /akilli-urun-secimi
+
+User-agent: Google-Extended
+Allow: /
+Allow: /rehber/
+Allow: /urunler/
+Allow: /haberler/
+Allow: /hesaplama/
+Allow: /amazon-elektrik-urunleri/
+Allow: /akilli-urun-secimi
+
 User-agent: *
 Allow: /
+Allow: /rehber/
+Allow: /urunler/
+Allow: /haberler/
+Allow: /hesaplama/
+Allow: /amazon-elektrik-urunleri/
+Allow: /akilli-urun-secimi
 
 Sitemap: https://alo186.com/sitemap.xml
 Sitemap: https://alo186.com/sitemap-electric-project-v200.xml
