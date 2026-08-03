@@ -1,1 +1,295 @@
-{"schemaVersion":1,"id":"cms_578732fdb2291fa3","slug":"gerilim-dengesizligi-vuf-edas-teknik-kalite-olcum-dosyasi","contentType":"guide","state":"review","locale":"tr-TR","title":"Gerilim Dengesizliği VUF ve EDAŞ Ölçüm Dosyası","h1":"Gerilim dengesizliği VUF nasıl ölçülür ve EDAŞ dosyası nasıl hazırlanır?","description":"Gerilim dengesizliğini VUF, negatif sıra, faz akımı, motor sıcaklığı ve bir haftalık Class A kayıtla kanıtlayıp EDAŞ teknik kalite dosyası hazırlayın.","intent":"Üç fazlı tesiste motor ısınması veya koruma açması yaşandığında gerilim dengesizliğini VUF, pozitif-negatif sıra, faz akımı, yük korelasyonu ve bir haftalık teknik kalite kaydıyla kaynağına göre ayırıp EDAŞ ölçüm dosyası hazırlamak.","primaryKeyword":"gerilim dengesizliği VUF EDAŞ ölçüm","audience":["Elektrik mühendisleri","Otel ve işletme teknik yöneticileri","Motor ve HVAC bakım ekipleri","Güç kalitesi uzmanları","Dağıtım şirketine teknik kalite başvurusu yapacak kullanıcılar"],"riskClass":"legal","directAnswer":"Gerilim dengesizliği yalnız üç faz gerilimi arasındaki en büyük farkı volt cinsinden görmekle güvenilir biçimde değerlendirilmez. Kabul dosyasında IEC 61000-4-30'a uygun yöntemle pozitif ve negatif sıra bileşenleri, VUF, faz-faz ve faz-nötr gerilimleri, olay zamanları kaydedilmeli; aynı anda motor akımları, yük girişleri ve sıcaklıklar izlenmelidir. Servis girişindeki bir haftalık kayıt ile yük noktasındaki kayıt karşılaştırılarak sorun şebeke, iç tesisat, yük dağılımı, gevşek bağlantı veya motor kaynaklı olarak ayrılmalıdır. Teknik kalite şikâyeti için dağıtım şirketinden ölçüm istenebilir; güncel sınırlar resmî mevzuattan doğrulanmalıdır.","sections":[{"id":"vuf-ve-sira-bilesenleri","heading":"VUF ve negatif sıra gerilimi neden basit faz farkından daha anlamlıdır?","paragraphs":["Üç faz gerilimlerinin büyüklükleri birbirine yakın olsa bile faz açıları veya sıra bileşenleri nedeniyle motor açısından zararlı bir dengesizlik oluşabilir. VUF, negatif sıra geriliminin pozitif sıra gerilimine oranını ifade eden bir göstergedir ve üç fazlı motorların ters yönde dönen manyetik alan etkisini değerlendirmede basit maksimum-minimum yüzde hesabından daha açıklayıcıdır.","Ölçüm cihazının hangi dengesizlik tanımını kullandığı raporda açıkça yazılmalıdır. Faz-faz gerilimleri, faz-nötr gerilimleri, pozitif/negatif/varsa sıfır sıra büyüklükleri, VUF ve zaman birleştirme yöntemi aynı cihaz konfigürasyonundan alınmalı; farklı üretici yüzdeleri eşdeğer kabul edilmemelidir."],"bullets":["Faz-faz ve faz-nötr gerilimleri ayrı kaydedin.","VUF hesap yöntemini ve pozitif-negatif sıra değerlerini rapora yazın.","Cihaz ölçüm sınıfı, bağlantı tipi ve zaman birleştirmesini belirtin.","Basit gerilim farkı yüzdesini VUF ile karıştırmayın."],"sourceRefs":["S1","S2","S3"]},{"id":"motor-ve-yuk-korelasyonu","heading":"Gerilim dengesizliği motor akımı ve sıcaklığıyla nasıl ilişkilendirilir?","paragraphs":["Negatif sıra gerilimi üç fazlı asenkron motorda akım dengesizliğini ve ek ısınmayı büyütebilir. Bu nedenle yalnız şebeke gerilimi trendi değil; motorun her faz akımı, yük oranı, sargı veya gövde sıcaklığı, koruma açma zamanı ve proses durumu aynı zaman ekseninde kaydedilmelidir. Motor üreticisinin izin verdiği işletme sınırı ve derating şartı ayrıca kontrol edilmelidir.","Kontaktör, sigorta, terminal, kablo ve pano bağlantılarındaki yüksek direnç de yük altında faz bazlı gerilim düşümü yaratabilir. Servis girişinde VUF düşükken motor terminalinde yükseliyorsa iç tesisat ve bağlantılar; girişte de yüksekse şebeke veya ortak yük etkisi öncelikli incelenmelidir. Termal kamera bulgusu tek başına dengesizlik nedeni sayılmamalı, elektriksel ölçümle eşleştirilmelidir."],"bullets":["Motor faz akımları ve sıcaklıklarını VUF ile aynı anda kaydedin.","Yük oranı ve motor devreye giriş saatlerini trend üzerine işaretleyin.","Servis girişi ile motor terminalini eşzamanlı karşılaştırın.","Bağlantı ısınmasını gerilim düşümü ve direnç kanıtıyla doğrulayın."],"sourceRefs":["S2","S3","S4"]},{"id":"kaynak-ayrimi","heading":"Şebeke, iç tesisat ve yük kaynaklı dengesizlik nasıl ayrılır?","paragraphs":["Ölçüm planı bağlantı noktasından yüke doğru ilerlemelidir. Ana girişte, ana pano çıkışında ve şüpheli motor veya sürücü girişinde mümkün olduğunca ortak saatli kayıt alınmalıdır. Tek fazlı büyük yükler, fazlara eşit dağılmayan EV şarjı, kaynak makineleri, asansörler, gevşek nötr veya faz bağlantıları ve jeneratör işletmesi olay günlüğünde ayrı etiketlenmelidir.","Şebeke ile iç tesisatı ayırmak için farklı yük durumlarında karşılaştırma yapılır: tesis yükü düşükken, şüpheli yük devredeyken, jeneratör veya UPS kaynağında ve şebeke beslemesinde. VUF yalnız belirli bir cihaz çalıştığında yükseliyorsa yerel etki; farklı tüketicilerde ve servis girişinde süreklilik gösteriyorsa dağıtım tarafı ihtimali güçlenir. Sonuç kesin neden değil, kanıt ağırlığı olarak raporlanmalıdır."],"bullets":["Ana giriş, ana pano ve yük noktasında ortak saatli kayıt planlayın.","Tek fazlı büyük yükleri ve faz dağılımını olay günlüğüne ekleyin.","Şebeke, jeneratör ve UPS çalışma modlarını ayrı etiketleyin.","Yerel yük kapalı/açık A-B karşılaştırması yapın."],"sourceRefs":["S1","S3","S4"]},{"id":"bir-haftalik-edas-olcumu","heading":"EDAŞ teknik kalite ölçüm talebi için bir haftalık dosya nasıl hazırlanır?","paragraphs":["EPDK tüketici bilgilendirmesi, teknik kalite şikâyetlerinin değerlendirilmesi için kullanıcıların dağıtım şirketinden ölçüm talep edebileceğini belirtir. Kullanıcı soruna neden olmuyorsa veya bir haftalık ölçüm sonucunda ilgili teknik kalite sınırları aşılıyorsa ölçüm bedeli talep edilemeyeceği açıklanmıştır. Güncel başvuru kanalı, ölçüm noktası ve yürürlükteki sınırlar başvuru tarihinde resmî kaynaklardan yeniden doğrulanmalıdır.","Başvuruda açık adres veya abonelik verisi ALO186'e girilmez; bunlar yalnız resmî dağıtım şirketi kanalına verilir. Dosya; tarih-saatli belirti günlüğü, etkilenen ekipman listesi, ana giriş tek hattı, mevcut analizörün Class A/S bilgisi, VUF ve gerilim trendleri, yük olayları, motor akım-sıcaklık korelasyonu ve daha önceki başvuru numaralarını içermelidir. ALO186 dağıtım şirketi değildir ve ölçüm sonucu vermez."],"bullets":["Resmî EDAŞ kanalından teknik kalite ölçümü talep edin.","Bir haftalık kayıt aralığını ve analizör sınıfını başvuruda belirtin.","Belirti, yük ve VUF zaman damgalarını aynı dosyada birleştirin.","Abonelik ve adres bilgilerini yalnız resmî kanala iletin."],"sourceRefs":["S1","S5","S6"]},{"id":"kabul-ve-aksiyon","heading":"Ölçüm sonucu hangi aksiyon ve kapanış kanıtına dönüştürülmelidir?","paragraphs":["Sonuç; şebeke kaynaklı olası dengesizlik, iç tesisat faz dağılımı, yüksek dirençli bağlantı, ekipman kaynaklı akım dengesizliği veya yetersiz kanıt olarak sınıflandırılmalıdır. Dağıtım şirketi ölçümü ile özel analizör kaydı farklıysa ölçüm sınıfı, bağlantı noktası, saat senkronu, veri aralığı ve hesap yöntemi karşılaştırılmalıdır. Evrensel tek bir VUF eşiği yayımlamak yerine proje, motor üreticisi ve güncel mevzuat sınırları birlikte kullanılmalıdır.","Düzeltme sonrası aynı yük ve ölçüm koşullarında yeniden kayıt alınmalı; VUF, faz akımları, sıcaklık ve koruma olayları öncesi-sonrası karşılaştırılmalıdır. Faz yükleri dengelenip bağlantılar sağlam ve giriş ölçümü sınırlar içindeyse sırf daha yeni bir güç kalitesi analizörü, motor veya koruma rölesi satın almak gerekmez."],"bullets":["Sonucu kaynak sınıfı ve kanıt gücüyle raporlayın.","Özel ve EDAŞ ölçümlerinde cihaz sınıfı ve zamanı karşılaştırın.","Düzeltme sonrası aynı yük senaryosunu yeniden çalıştırın.","Kanıt yeterliyse gereksiz motor, röle veya analizör değişimi yapmayın."],"sourceRefs":["S1","S2","S3","S5","S6"]}],"faqs":[{"question":"Gerilim dengesizliği ile faz kaybı aynı şey midir?","answer":"Hayır. Faz kaybı bir fazın tamamen veya etkili biçimde yok olmasıdır; gerilim dengesizliğinde üç faz mevcut olabilir ancak büyüklük veya faz açıları eşit değildir. VUF negatif ve pozitif sıra bileşenleri üzerinden dengesizliği nicelendirir.","sourceRefs":["S1","S3"]},{"question":"Üç faz gerilimleri yakınsa motor neden yine ısınabilir?","answer":"Basit voltaj farkı faz açısı ve negatif sıra bileşenini tam göstermez. Negatif sıra alanı motor akımlarında daha büyük dengesizlik ve ek ısınma oluşturabilir; motor akımı, yük ve sıcaklık birlikte ölçülmelidir.","sourceRefs":["S2","S3"]},{"question":"EDAŞ'tan teknik kalite ölçümü isteyebilir miyim?","answer":"EPDK tüketici bilgilendirmesine göre teknik kalite şikâyetleri için dağıtım şirketinden ölçüm talep edilebilir. Başvuru, güncel resmî kanal ve yürürlükteki mevzuata göre yapılmalı; ALO186 abonelik veya adres verisi almaz.","sourceRefs":["S5","S6"]},{"question":"VUF için tek bir evrensel kabul sınırı var mıdır?","answer":"Cihaz ölçüm standardı, ulusal teknik kalite düzenlemesi, bağlantı seviyesi ve motor üreticisi sınırları birlikte değerlendirilmelidir. ALO186 proje ve mevzuat bağlamı olmadan tek bir evrensel yüzdeyi güvenli kabul sınırı olarak yayımlamaz.","sourceRefs":["S1","S2","S5"]}],"sources":[{"id":"S1","publisher":"IEC","title":"IEC 61000-4-30:2025 — Power Quality Measurement Methods","url":"https://webstore.iec.ch/en/publication/71611","accessedAt":"2026-08-03","primary":true,"factSummary":"Besleme gerilimi dengesizliği dahil güç kalitesi parametrelerinin tekrarlanabilir ölçüm yöntemlerini ve Class A/S ölçüm çerçevesini tanımlar."},{"id":"S2","publisher":"IEC","title":"IEC 60034-26:2026 — Effects of Unbalanced Voltages on Three-Phase Cage Induction Motors","url":"https://webstore.iec.ch/en/publication/95874","accessedAt":"2026-08-03","primary":true,"factSummary":"Dengesiz faz-faz gerilimlerinin üç fazlı kafesli asenkron motorların performans, akım ve ısınmasına etkilerini ele alır."},{"id":"S3","publisher":"Schneider Electric","title":"Symmetrical Components Module","url":"https://product-help.se.com/docs/ION-Reference/content/ion%20reference/symmetrical-components-module.htm?TocPath=ION+modules%7C_____104","accessedAt":"2026-08-03","primary":true,"factSummary":"Pozitif, negatif ve sıfır sıra bileşenlerinin güç kalitesi ölçümünde nasıl ayrıldığını ve dengesizlik hesabındaki rolünü açıklar."},{"id":"S4","publisher":"Schneider Electric","title":"Learning About Voltage Unbalance","url":"https://meterinsights.schneider-electric.com/help/learning-about-voltage-unbalance","accessedAt":"2026-08-03","primary":true,"factSummary":"Gerilim dengesizliğinin üç fazlı motorlarda akım dengesizliği, ısınma ve performans sorunlarıyla ilişkisini uygulama düzeyinde açıklar."},{"id":"S5","publisher":"EPDK","title":"Elektrik Tüketicisi Sıkça Sorulan Sorular — Teknik Kalite Hakları","url":"https://epdk.gov.tr/Detay/Icerik/12-3/1-elektrik-aboneligini-kendi-adima-almak-zorunda","accessedAt":"2026-08-03","primary":true,"factSummary":"Teknik kalite şikâyeti için dağıtım şirketinden ölçüm talep edilebileceğini ve kullanıcı kaynaklı olmayan ya da bir haftalık ölçümde sınır aşımı bulunan durumlarda ölçüm bedeli istenemeyeceğini açıklar."},{"id":"S6","publisher":"EPDK","title":"Elektrik Piyasası Güncel Yönetmelikler ve Teknik Kalite Usul ve Esasları","url":"https://www.epdk.gov.tr/Detay/Icerik/3-0-159/yonetmelikler","accessedAt":"2026-08-03","primary":true,"factSummary":"Güncel kalite yönetmeliğini ve Elektrik Dağıtım Sisteminin Teknik Kalitesine İlişkin Usul ve Esasları resmî mevzuat listesinde yayımlar."}],"internalLinks":[{"label":"Faz dengesizliği ve faz kaybı motoru nasıl etkiler?","path":"/haberler/faz-dengesizligi-faz-kaybi-motoru-nasil-etkiler","reason":"Genel belirti ve motor etkisini yeni VUF ölçüm dosyasından ayırır."},{"label":"Düşük ve yüksek gerilim için EDAŞ ölçüm talebi","path":"/haberler/elektrik-gerilimi-dusuk-yuksek-edas-olcum-talebi","reason":"Gerilim büyüklüğü şikâyeti ile dengesizlik/VUF şikâyetini aynı resmî akışta konumlandırır."},{"label":"Nötr kopması nasıl anlaşılır?","path":"/haberler/notr-kopmasi-nasil-anlasilir","reason":"Faz-nötr gerilim bozulmasını negatif sıra dengesizliğinden ayırmaya yardımcı olur."},{"label":"Jeneratör voltaj ve frekans dalgalanması","path":"/haberler/jenerator-voltaj-frekans-dalgalanmasi-neden-olur","reason":"Şebeke ile yerel jeneratör kaynaklı kalite sorunlarını karşılaştırır."},{"label":"Harmonik nedir, THD cihazları nasıl etkiler?","path":"/haberler/harmonik-nedir-thd-cihazlari-nasil-etkiler","reason":"Gerilim dengesizliğini harmonik bozulmadan ayrı ölçüm parametresi olarak açıklar."},{"label":"Elektrik panosunda termal kamera kontrolü","path":"/haberler/elektrik-panosunda-termal-kamera-kontrolu","reason":"Yüksek dirençli faz bağlantılarının termal kanıtını elektriksel trendle tamamlar."},{"label":"Bölgenizdeki EDAŞ'ı bulun","path":"/edas-bul","reason":"Kişisel veriyi ALO186'e vermeden resmî teknik kalite kanalına yönlendirir."}],"commerce":{"enabled":false,"policy":"none","category":null},"editorial":{"createdBy":"ai-assisted","model":"gpt-5.6-thinking","humanReviewRequired":true,"approvedBy":null,"approvedAt":null,"publishedAt":null,"approvalPr":null},"seo":{"canonicalPath":"/haberler/gerilim-dengesizligi-vuf-edas-teknik-kalite-olcum-dosyasi","robots":"index,follow,max-image-preview:large","lastModified":"2026-08-03","topics":["gerilim dengesizliği","VUF","negatif sıra","EDAŞ","teknik kalite","motor ısınması","güç kalitesi"]},"quality":{"score":100,"minimumRequired":85,"checks":{"metadata":true,"directAnswer":true,"contentDepth":true,"sources":true,"safety":true,"internalLinks":true,"uniqueness":true,"structuredData":true},"similarity":{"maximum":0.54,"closestPath":"/haberler/faz-dengesizligi-faz-kaybi-motoru-nasil-etkiler"}}}
+{
+  "schemaVersion": 1,
+  "id": "cms_578732fdb2291fa3",
+  "slug": "gerilim-dengesizligi-vuf-edas-teknik-kalite-olcum-dosyasi",
+  "contentType": "guide",
+  "state": "published",
+  "locale": "tr-TR",
+  "title": "Gerilim Dengesizliği VUF ve EDAŞ Ölçüm Dosyası",
+  "h1": "Gerilim dengesizliği VUF nasıl ölçülür ve EDAŞ dosyası nasıl hazırlanır?",
+  "description": "Gerilim dengesizliğini VUF, negatif sıra, faz akımı, motor sıcaklığı ve bir haftalık Class A kayıtla kanıtlayıp EDAŞ teknik kalite dosyası hazırlayın.",
+  "intent": "Üç fazlı tesiste motor ısınması veya koruma açması yaşandığında gerilim dengesizliğini VUF, pozitif-negatif sıra, faz akımı, yük korelasyonu ve bir haftalık teknik kalite kaydıyla kaynağına göre ayırıp EDAŞ ölçüm dosyası hazırlamak.",
+  "primaryKeyword": "gerilim dengesizliği VUF EDAŞ ölçüm",
+  "audience": [
+    "Elektrik mühendisleri",
+    "Otel ve işletme teknik yöneticileri",
+    "Motor ve HVAC bakım ekipleri",
+    "Güç kalitesi uzmanları",
+    "Dağıtım şirketine teknik kalite başvurusu yapacak kullanıcılar"
+  ],
+  "riskClass": "legal",
+  "directAnswer": "Gerilim dengesizliği yalnız üç faz gerilimi arasındaki en büyük farkı volt cinsinden görmekle güvenilir biçimde değerlendirilmez. Kabul dosyasında IEC 61000-4-30'a uygun yöntemle pozitif ve negatif sıra bileşenleri, VUF, faz-faz ve faz-nötr gerilimleri, olay zamanları kaydedilmeli; aynı anda motor akımları, yük girişleri ve sıcaklıklar izlenmelidir. Servis girişindeki bir haftalık kayıt ile yük noktasındaki kayıt karşılaştırılarak sorun şebeke, iç tesisat, yük dağılımı, gevşek bağlantı veya motor kaynaklı olarak ayrılmalıdır. Teknik kalite şikâyeti için dağıtım şirketinden ölçüm istenebilir; güncel sınırlar resmî mevzuattan doğrulanmalıdır.",
+  "sections": [
+    {
+      "id": "vuf-ve-sira-bilesenleri",
+      "heading": "VUF ve negatif sıra gerilimi neden basit faz farkından daha anlamlıdır?",
+      "paragraphs": [
+        "Üç faz gerilimlerinin büyüklükleri birbirine yakın olsa bile faz açıları veya sıra bileşenleri nedeniyle motor açısından zararlı bir dengesizlik oluşabilir. VUF, negatif sıra geriliminin pozitif sıra gerilimine oranını ifade eden bir göstergedir ve üç fazlı motorların ters yönde dönen manyetik alan etkisini değerlendirmede basit maksimum-minimum yüzde hesabından daha açıklayıcıdır.",
+        "Ölçüm cihazının hangi dengesizlik tanımını kullandığı raporda açıkça yazılmalıdır. Faz-faz gerilimleri, faz-nötr gerilimleri, pozitif/negatif/varsa sıfır sıra büyüklükleri, VUF ve zaman birleştirme yöntemi aynı cihaz konfigürasyonundan alınmalı; farklı üretici yüzdeleri eşdeğer kabul edilmemelidir."
+      ],
+      "bullets": [
+        "Faz-faz ve faz-nötr gerilimleri ayrı kaydedin.",
+        "VUF hesap yöntemini ve pozitif-negatif sıra değerlerini rapora yazın.",
+        "Cihaz ölçüm sınıfı, bağlantı tipi ve zaman birleştirmesini belirtin.",
+        "Basit gerilim farkı yüzdesini VUF ile karıştırmayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "id": "motor-ve-yuk-korelasyonu",
+      "heading": "Gerilim dengesizliği motor akımı ve sıcaklığıyla nasıl ilişkilendirilir?",
+      "paragraphs": [
+        "Negatif sıra gerilimi üç fazlı asenkron motorda akım dengesizliğini ve ek ısınmayı büyütebilir. Bu nedenle yalnız şebeke gerilimi trendi değil; motorun her faz akımı, yük oranı, sargı veya gövde sıcaklığı, koruma açma zamanı ve proses durumu aynı zaman ekseninde kaydedilmelidir. Motor üreticisinin izin verdiği işletme sınırı ve derating şartı ayrıca kontrol edilmelidir.",
+        "Kontaktör, sigorta, terminal, kablo ve pano bağlantılarındaki yüksek direnç de yük altında faz bazlı gerilim düşümü yaratabilir. Servis girişinde VUF düşükken motor terminalinde yükseliyorsa iç tesisat ve bağlantılar; girişte de yüksekse şebeke veya ortak yük etkisi öncelikli incelenmelidir. Termal kamera bulgusu tek başına dengesizlik nedeni sayılmamalı, elektriksel ölçümle eşleştirilmelidir."
+      ],
+      "bullets": [
+        "Motor faz akımları ve sıcaklıklarını VUF ile aynı anda kaydedin.",
+        "Yük oranı ve motor devreye giriş saatlerini trend üzerine işaretleyin.",
+        "Servis girişi ile motor terminalini eşzamanlı karşılaştırın.",
+        "Bağlantı ısınmasını gerilim düşümü ve direnç kanıtıyla doğrulayın."
+      ],
+      "sourceRefs": [
+        "S2",
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "id": "kaynak-ayrimi",
+      "heading": "Şebeke, iç tesisat ve yük kaynaklı dengesizlik nasıl ayrılır?",
+      "paragraphs": [
+        "Ölçüm planı bağlantı noktasından yüke doğru ilerlemelidir. Ana girişte, ana pano çıkışında ve şüpheli motor veya sürücü girişinde mümkün olduğunca ortak saatli kayıt alınmalıdır. Tek fazlı büyük yükler, fazlara eşit dağılmayan EV şarjı, kaynak makineleri, asansörler, gevşek nötr veya faz bağlantıları ve jeneratör işletmesi olay günlüğünde ayrı etiketlenmelidir.",
+        "Şebeke ile iç tesisatı ayırmak için farklı yük durumlarında karşılaştırma yapılır: tesis yükü düşükken, şüpheli yük devredeyken, jeneratör veya UPS kaynağında ve şebeke beslemesinde. VUF yalnız belirli bir cihaz çalıştığında yükseliyorsa yerel etki; farklı tüketicilerde ve servis girişinde süreklilik gösteriyorsa dağıtım tarafı ihtimali güçlenir. Sonuç kesin neden değil, kanıt ağırlığı olarak raporlanmalıdır."
+      ],
+      "bullets": [
+        "Ana giriş, ana pano ve yük noktasında ortak saatli kayıt planlayın.",
+        "Tek fazlı büyük yükleri ve faz dağılımını olay günlüğüne ekleyin.",
+        "Şebeke, jeneratör ve UPS çalışma modlarını ayrı etiketleyin.",
+        "Yerel yük kapalı/açık A-B karşılaştırması yapın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "id": "bir-haftalik-edas-olcumu",
+      "heading": "EDAŞ teknik kalite ölçüm talebi için bir haftalık dosya nasıl hazırlanır?",
+      "paragraphs": [
+        "EPDK tüketici bilgilendirmesi, teknik kalite şikâyetlerinin değerlendirilmesi için kullanıcıların dağıtım şirketinden ölçüm talep edebileceğini belirtir. Kullanıcı soruna neden olmuyorsa veya bir haftalık ölçüm sonucunda ilgili teknik kalite sınırları aşılıyorsa ölçüm bedeli talep edilemeyeceği açıklanmıştır. Güncel başvuru kanalı, ölçüm noktası ve yürürlükteki sınırlar başvuru tarihinde resmî kaynaklardan yeniden doğrulanmalıdır.",
+        "Başvuruda açık adres veya abonelik verisi ALO186'e girilmez; bunlar yalnız resmî dağıtım şirketi kanalına verilir. Dosya; tarih-saatli belirti günlüğü, etkilenen ekipman listesi, ana giriş tek hattı, mevcut analizörün Class A/S bilgisi, VUF ve gerilim trendleri, yük olayları, motor akım-sıcaklık korelasyonu ve daha önceki başvuru numaralarını içermelidir. ALO186 dağıtım şirketi değildir ve ölçüm sonucu vermez."
+      ],
+      "bullets": [
+        "Resmî EDAŞ kanalından teknik kalite ölçümü talep edin.",
+        "Bir haftalık kayıt aralığını ve analizör sınıfını başvuruda belirtin.",
+        "Belirti, yük ve VUF zaman damgalarını aynı dosyada birleştirin.",
+        "Abonelik ve adres bilgilerini yalnız resmî kanala iletin."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S5",
+        "S6"
+      ]
+    },
+    {
+      "id": "kabul-ve-aksiyon",
+      "heading": "Ölçüm sonucu hangi aksiyon ve kapanış kanıtına dönüştürülmelidir?",
+      "paragraphs": [
+        "Sonuç; şebeke kaynaklı olası dengesizlik, iç tesisat faz dağılımı, yüksek dirençli bağlantı, ekipman kaynaklı akım dengesizliği veya yetersiz kanıt olarak sınıflandırılmalıdır. Dağıtım şirketi ölçümü ile özel analizör kaydı farklıysa ölçüm sınıfı, bağlantı noktası, saat senkronu, veri aralığı ve hesap yöntemi karşılaştırılmalıdır. Evrensel tek bir VUF eşiği yayımlamak yerine proje, motor üreticisi ve güncel mevzuat sınırları birlikte kullanılmalıdır.",
+        "Düzeltme sonrası aynı yük ve ölçüm koşullarında yeniden kayıt alınmalı; VUF, faz akımları, sıcaklık ve koruma olayları öncesi-sonrası karşılaştırılmalıdır. Faz yükleri dengelenip bağlantılar sağlam ve giriş ölçümü sınırlar içindeyse sırf daha yeni bir güç kalitesi analizörü, motor veya koruma rölesi satın almak gerekmez."
+      ],
+      "bullets": [
+        "Sonucu kaynak sınıfı ve kanıt gücüyle raporlayın.",
+        "Özel ve EDAŞ ölçümlerinde cihaz sınıfı ve zamanı karşılaştırın.",
+        "Düzeltme sonrası aynı yük senaryosunu yeniden çalıştırın.",
+        "Kanıt yeterliyse gereksiz motor, röle veya analizör değişimi yapmayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S5",
+        "S6"
+      ]
+    }
+  ],
+  "faqs": [
+    {
+      "question": "Gerilim dengesizliği ile faz kaybı aynı şey midir?",
+      "answer": "Hayır. Faz kaybı bir fazın tamamen veya etkili biçimde yok olmasıdır; gerilim dengesizliğinde üç faz mevcut olabilir ancak büyüklük veya faz açıları eşit değildir. VUF negatif ve pozitif sıra bileşenleri üzerinden dengesizliği nicelendirir.",
+      "sourceRefs": [
+        "S1",
+        "S3"
+      ]
+    },
+    {
+      "question": "Üç faz gerilimleri yakınsa motor neden yine ısınabilir?",
+      "answer": "Basit voltaj farkı faz açısı ve negatif sıra bileşenini tam göstermez. Negatif sıra alanı motor akımlarında daha büyük dengesizlik ve ek ısınma oluşturabilir; motor akımı, yük ve sıcaklık birlikte ölçülmelidir.",
+      "sourceRefs": [
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "question": "EDAŞ'tan teknik kalite ölçümü isteyebilir miyim?",
+      "answer": "EPDK tüketici bilgilendirmesine göre teknik kalite şikâyetleri için dağıtım şirketinden ölçüm talep edilebilir. Başvuru, güncel resmî kanal ve yürürlükteki mevzuata göre yapılmalı; ALO186 abonelik veya adres verisi almaz.",
+      "sourceRefs": [
+        "S5",
+        "S6"
+      ]
+    },
+    {
+      "question": "VUF için tek bir evrensel kabul sınırı var mıdır?",
+      "answer": "Cihaz ölçüm standardı, ulusal teknik kalite düzenlemesi, bağlantı seviyesi ve motor üreticisi sınırları birlikte değerlendirilmelidir. ALO186 proje ve mevzuat bağlamı olmadan tek bir evrensel yüzdeyi güvenli kabul sınırı olarak yayımlamaz.",
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S5"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "publisher": "IEC",
+      "title": "IEC 61000-4-30:2025 — Power Quality Measurement Methods",
+      "url": "https://webstore.iec.ch/en/publication/71611",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Besleme gerilimi dengesizliği dahil güç kalitesi parametrelerinin tekrarlanabilir ölçüm yöntemlerini ve Class A/S ölçüm çerçevesini tanımlar."
+    },
+    {
+      "id": "S2",
+      "publisher": "IEC",
+      "title": "IEC 60034-26:2026 — Effects of Unbalanced Voltages on Three-Phase Cage Induction Motors",
+      "url": "https://webstore.iec.ch/en/publication/95874",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Dengesiz faz-faz gerilimlerinin üç fazlı kafesli asenkron motorların performans, akım ve ısınmasına etkilerini ele alır."
+    },
+    {
+      "id": "S3",
+      "publisher": "Schneider Electric",
+      "title": "Symmetrical Components Module",
+      "url": "https://product-help.se.com/docs/ION-Reference/content/ion%20reference/symmetrical-components-module.htm?TocPath=ION+modules%7C_____104",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Pozitif, negatif ve sıfır sıra bileşenlerinin güç kalitesi ölçümünde nasıl ayrıldığını ve dengesizlik hesabındaki rolünü açıklar."
+    },
+    {
+      "id": "S4",
+      "publisher": "Schneider Electric",
+      "title": "Learning About Voltage Unbalance",
+      "url": "https://meterinsights.schneider-electric.com/help/learning-about-voltage-unbalance",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Gerilim dengesizliğinin üç fazlı motorlarda akım dengesizliği, ısınma ve performans sorunlarıyla ilişkisini uygulama düzeyinde açıklar."
+    },
+    {
+      "id": "S5",
+      "publisher": "EPDK",
+      "title": "Elektrik Tüketicisi Sıkça Sorulan Sorular — Teknik Kalite Hakları",
+      "url": "https://epdk.gov.tr/Detay/Icerik/12-3/1-elektrik-aboneligini-kendi-adima-almak-zorunda",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Teknik kalite şikâyeti için dağıtım şirketinden ölçüm talep edilebileceğini ve kullanıcı kaynaklı olmayan ya da bir haftalık ölçümde sınır aşımı bulunan durumlarda ölçüm bedeli istenemeyeceğini açıklar."
+    },
+    {
+      "id": "S6",
+      "publisher": "EPDK",
+      "title": "Elektrik Piyasası Güncel Yönetmelikler ve Teknik Kalite Usul ve Esasları",
+      "url": "https://www.epdk.gov.tr/Detay/Icerik/3-0-159/yonetmelikler",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Güncel kalite yönetmeliğini ve Elektrik Dağıtım Sisteminin Teknik Kalitesine İlişkin Usul ve Esasları resmî mevzuat listesinde yayımlar."
+    }
+  ],
+  "internalLinks": [
+    {
+      "label": "Faz dengesizliği ve faz kaybı motoru nasıl etkiler?",
+      "path": "/haberler/faz-dengesizligi-faz-kaybi-motoru-nasil-etkiler",
+      "reason": "Genel belirti ve motor etkisini yeni VUF ölçüm dosyasından ayırır."
+    },
+    {
+      "label": "Düşük ve yüksek gerilim için EDAŞ ölçüm talebi",
+      "path": "/haberler/elektrik-gerilimi-dusuk-yuksek-edas-olcum-talebi",
+      "reason": "Gerilim büyüklüğü şikâyeti ile dengesizlik/VUF şikâyetini aynı resmî akışta konumlandırır."
+    },
+    {
+      "label": "Nötr kopması nasıl anlaşılır?",
+      "path": "/haberler/notr-kopmasi-nasil-anlasilir",
+      "reason": "Faz-nötr gerilim bozulmasını negatif sıra dengesizliğinden ayırmaya yardımcı olur."
+    },
+    {
+      "label": "Jeneratör voltaj ve frekans dalgalanması",
+      "path": "/haberler/jenerator-voltaj-frekans-dalgalanmasi-neden-olur",
+      "reason": "Şebeke ile yerel jeneratör kaynaklı kalite sorunlarını karşılaştırır."
+    },
+    {
+      "label": "Harmonik nedir, THD cihazları nasıl etkiler?",
+      "path": "/haberler/harmonik-nedir-thd-cihazlari-nasil-etkiler",
+      "reason": "Gerilim dengesizliğini harmonik bozulmadan ayrı ölçüm parametresi olarak açıklar."
+    },
+    {
+      "label": "Elektrik panosunda termal kamera kontrolü",
+      "path": "/haberler/elektrik-panosunda-termal-kamera-kontrolu",
+      "reason": "Yüksek dirençli faz bağlantılarının termal kanıtını elektriksel trendle tamamlar."
+    },
+    {
+      "label": "Bölgenizdeki EDAŞ'ı bulun",
+      "path": "/edas-bul",
+      "reason": "Kişisel veriyi ALO186'e vermeden resmî teknik kalite kanalına yönlendirir."
+    }
+  ],
+  "commerce": {
+    "enabled": false,
+    "policy": "none",
+    "category": null
+  },
+  "editorial": {
+    "createdBy": "ai-assisted",
+    "model": "gpt-5.6-thinking",
+    "humanReviewRequired": true,
+    "approvedBy": "ozaneryavuz",
+    "approvedAt": "2026-08-03T18:42:33Z",
+    "publishedAt": "2026-08-03T18:42:33Z",
+    "approvalPr": 784
+  },
+  "seo": {
+    "canonicalPath": "/haberler/gerilim-dengesizligi-vuf-edas-teknik-kalite-olcum-dosyasi",
+    "robots": "index,follow,max-image-preview:large",
+    "lastModified": "2026-08-03",
+    "topics": [
+      "gerilim dengesizliği",
+      "VUF",
+      "negatif sıra",
+      "EDAŞ",
+      "teknik kalite",
+      "motor ısınması",
+      "güç kalitesi"
+    ]
+  },
+  "quality": {
+    "score": 88,
+    "minimumRequired": 85,
+    "checks": {
+      "metadata": false,
+      "directAnswer": true,
+      "contentDepth": true,
+      "sources": true,
+      "safety": true,
+      "internalLinks": true,
+      "uniqueness": true,
+      "structuredData": true
+    },
+    "similarity": {
+      "maximum": 0.3333,
+      "closestPath": "https://alo186.com/haberler/edas-gerilim-kalitesi-olcum-talebi-dusuk-yuksek-voltaj-sikayet-dosyasi"
+    }
+  }
+}

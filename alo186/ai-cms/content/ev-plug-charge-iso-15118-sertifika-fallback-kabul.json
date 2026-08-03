@@ -1,1 +1,298 @@
-{"schemaVersion":1,"id":"cms_e2dd37b7cf5c8832","slug":"ev-plug-charge-iso-15118-sertifika-fallback-kabul","contentType":"guide","state":"review","locale":"tr-TR","title":"EV Plug & Charge ISO 15118 Sertifika Kabul Testi","h1":"ISO 15118 Plug & Charge sertifika ve fallback akışı nasıl test edilir?","description":"Plug & Charge kabulünü ISO 15118 sürümü, EVSE sertifika zinciri, sözleşme sertifikası, OCSP, saat, backend ve RFID fallback kanıtlarıyla hazırlayın.","intent":"Plug & Charge işlevini EV-EVSE sürümü, V2G PKI zinciri, EVSE ve sözleşme sertifikaları, yenileme/iptal kontrolü, CPMS-OCPP akışı, saat doğruluğu ve alternatif yetkilendirme senaryolarıyla uçtan uca kabul etmek.","primaryKeyword":"ISO 15118 Plug Charge kabul testi","audience":["Şarj ağı işletmecileri","EVSE üreticileri ve entegratörleri","Elektrik mühendisleri","Filo ve otopark işletmecileri","CPMS teknik ekipleri"],"riskClass":"legal","directAnswer":"ISO 15118 Plug & Charge kabulü, aracın bir kez kablo takıldığında şarja başlamasıyla tamamlanmaz. Kabul; araç, EVSE, CPMS, e-mobilite hizmet sağlayıcısı ve V2G PKI rollerinin ayrılması; EVSE yaprak sertifikası ile alt ve kök sertifika zincirinin doğrulanması; sözleşme sertifikasının kurulması ve yetkilendirilmesi; sertifika süresi, iptal durumu, saat doğruluğu ve ağ kesintisinin denenmesi; başarısız Plug & Charge durumunda RFID, uygulama veya başka onaylı yönteme güvenli fallback yapılmasıyla kanıtlanır. Gerçek müşteri sertifikaları, özel anahtarlar veya sözleşme kimlikleri ALO186'e yüklenmemelidir.","sections":[{"id":"rol-ve-surum-matrisi","heading":"Plug & Charge kabulünde hangi roller ve protokol sürümleri ayrılmalıdır?","paragraphs":["Plug & Charge tek bir şarj cihazı özelliği değildir. Araçtaki iletişim denetleyicisi, EVSE/SECC, şarj noktası yönetim sistemi, CPO, e-mobilite hizmet sağlayıcısı, sertifika sağlama hizmeti ve V2G PKI güven zinciri birlikte çalışır. Aracın ve istasyonun ISO 15118 desteği olsa bile backend veya sertifika ekosistemi eksikse otomatik sözleşme yetkilendirmesi tamamlanmayabilir.","Kabul dosyasında ISO 15118-2 ve ISO 15118-20 kapsamı, AC/DC kullanım senaryosu, OCPP sürümü, CPMS entegrasyon yöntemi ve desteklenen Plug & Charge fonksiyonları sürüm numarasıyla yazılmalıdır. ISO 15118-20'nin 2026 güvenlik değişikliği gibi yeni yayınlar, mevcut cihazın otomatik olarak o sürümü desteklediği anlamına gelmez; firmware, sertifika ve uygunluk kapsamı ayrı doğrulanmalıdır."],"bullets":["EV, EVSE, CPMS, CPO, eMSP ve PKI rollerini tek RACI tablosunda gösterin.","ISO 15118 ve OCPP sürümlerini cihaz/firmware bazında kaydedin.","AC, DC, V2G ve çoklu sözleşme kabiliyetlerini ayrı işlevler olarak sınayın.","Uyumlu etiketi yerine desteklenen gerçek mesaj ve sertifika akışını belgeleyin."],"sourceRefs":["S1","S2","S3","S6"]},{"id":"evse-sertifika-zinciri","heading":"EVSE yaprak sertifikası ve güven zinciri nasıl doğrulanmalıdır?","paragraphs":["EVSE'nin özel anahtarını cihaz içinde oluşturması, sertifika imzalama isteğini güvenli biçimde CPMS'ye iletmesi, uygun sertifika otoritesinden imzalı yaprak sertifikası ve alt CA zinciri alması ve doğru sırayla kurması gerekir. Common Name, SECC ID, sertifika uzantıları, algoritma, geçerlilik süresi ve güven kökü kabul sırasında kontrol edilmelidir.","Sertifika yenileme yalnız son gün manuel işlem olarak bırakılmamalıdır. CPMS'nin CSR üretimini tetikleme, yeni zinciri dağıtma, başarısız kurulumu geri alma ve eski sertifika ile çakışmadan geçiş yapma davranışı test edilmelidir. Özel anahtarın dışa aktarılması veya ekran görüntüsüyle paylaşılması kabul kanıtı değildir ve güvenlik riski yaratır."],"bullets":["CSR'nin EVSE içinde üretildiğini ve özel anahtarın dışarı çıkmadığını doğrulayın.","Yaprak, Sub-CA ve güven kökü zincir sırasını kaydedin.","SECC ID, ad alanı, uzantı ve geçerlilik tarihlerini kontrol edin.","Planlı yenileme ve başarısız yenilemede rollback senaryosu çalıştırın."],"sourceRefs":["S3","S4","S5"]},{"id":"sozlesme-ve-yetkilendirme","heading":"Sözleşme sertifikası ve otomatik yetkilendirme uçtan uca nasıl sınanır?","paragraphs":["Plug & Charge işleminde aracın sözleşme sertifikası güven zinciri üzerinden doğrulanır ve ilgili eMSP sözleşmesiyle eşleştirilir. Başarılı test yalnız EVSE ekranında 'authorized' görülmesi değildir; araç kimliklendirme mesajı, sertifika doğrulama sonucu, backend yetkilendirmesi, işlem kimliği, sayaç başlangıcı ve faturalama tarafındaki sözleşme eşleşmesi ortak zaman çizelgesinde görülmelidir.","Geçerli sertifika, süresi dolmuş sertifika, iptal edilmiş sertifika, bilinmeyen güven kökü, yanlış sözleşme ve backend gecikmesi ayrı negatif senaryolardır. OCSP veya eşdeğer durum kontrolü destekleniyorsa geri çekilmiş hakların hâlâ kabul edilmediği doğrulanmalıdır. Gerçek kullanıcı EMAID, sözleşme sertifikası veya kişisel ödeme verileri yerine test kimlikleri kullanılmalıdır."],"bullets":["Başarılı yetkilendirmede EVSE, CPMS ve eMSP kayıtlarını eşleştirin.","Süresi dolmuş, iptal edilmiş ve güvenilmeyen sertifika senaryolarını test edin.","OCSP/durum kontrolünün hata ve timeout davranışını kaydedin.","Gerçek müşteri sertifikası yerine ayrılmış test sözleşmesi kullanın."],"sourceRefs":["S3","S5","S6"]},{"id":"saat-ag-ve-fallback","heading":"Saat sapması, ağ kesintisi ve alternatif yetkilendirme fallback'i nasıl test edilir?","paragraphs":["Sertifika doğrulaması geçerlilik tarihleri ve zaman damgalarına bağlı olduğundan EVSE, CPMS ve test aracının saat kaynağı ile zaman dilimi kontrol edilmelidir. NTP kaybı, belirlenmiş saat sapması, CPMS bağlantı kesintisi ve sertifika durum servisinin erişilememesi halinde sistemin güvenli ve izlenebilir davranışı ölçülmelidir.","Plug & Charge başarısız olduğunda sürücünün kilitli kalmaması için işletmecinin onayladığı RFID, uygulama, ödeme terminali veya çağrı merkezi akışı denenmelidir. Fallback, geçersiz sertifikayı sessizce yetkili saymamalı; ayrı bir kimlik doğrulama işlemi başlatmalı ve faturalama kaydında hangi yöntemin kullanıldığı açık görünmelidir."],"bullets":["EVSE, CPMS ve backend saatlerini ortak referansla karşılaştırın.","Ağ, DNS, PKI ve sertifika durum servisi kesintilerini ayrı test edin.","Plug & Charge reddinden RFID/uygulamaya kontrollü fallback'i doğrulayın.","Fallback işleminin kimlik ve faturalama yöntemini olay kaydında görünür tutun."],"sourceRefs":["S2","S3","S5","S6"]},{"id":"kabul-dosyasi","heading":"Plug & Charge kabul dosyasında hangi kanıtlar bulunmalıdır?","paragraphs":["Teslim dosyasında rol ve sürüm matrisi, EVSE modeli ve firmware, SECC ID, kullanılan test PKI ortamı, güven kökü listesi, sertifika zinciri özeti, geçerlilik ve yenileme planı, OCPP mesaj izleri, başarılı ve negatif senaryolar, işlem-sayaç-faturalama mutabakatı, saat kaydı ve fallback sonuçları bulunmalıdır. Sertifika veya log örnekleri özel anahtar, gerçek EMAID, token ve kişisel veri içermeyecek biçimde maskelenmelidir.","Sonuç geçti, şartlı geçti veya kaldı olarak sınıflandırılmalıdır. Zincir doğrulama hatası, süresi dolan sertifikada kabul, yenileme kesintisi, saat kaynaklı rastgele başarısızlık veya fallback'te yanlış faturalama varsa canlı kullanım açılmamalıdır. Mevcut sistem tüm senaryoları geçiyorsa yalnız pazarlama amacıyla yeni EVSE ya da backend modülü satın almak gerekmez."],"bullets":["Sürüm, sertifika, işlem ve faturalama kanıtlarını aynı test kimliğiyle bağlayın.","Özel anahtar ve gerçek sözleşme verilerini dosyaya koymayın.","Sertifika yenileme tarihi ve sorumlusunu operasyon takvimine ekleyin.","Kanıt yeterliyse gereksiz EVSE, modem veya CPMS değişimi yapmayın."],"sourceRefs":["S1","S2","S3","S4","S5","S6"]}],"faqs":[{"question":"Plug & Charge için yalnız ISO 15118 destekli araç ve istasyon yeterli midir?","answer":"Hayır. EVSE sertifikası, güven kökleri, sözleşme sertifikası, CPMS/OCPP mesajları, eMSP yetkilendirmesi ve PKI hizmetleri de uyumlu çalışmalıdır. Uçtan uca ekosistem olmadan otomatik kimliklendirme tamamlanmayabilir.","sourceRefs":["S1","S3","S6"]},{"question":"EVSE sertifikasının süresi dolarsa şarj tamamen durur mu?","answer":"Davranış ürün ve işletme politikasına bağlıdır; Plug & Charge reddedilebilirken RFID veya uygulama gibi ayrı yetkilendirme yöntemleri çalışabilir. Kabul testinde yenileme, expiry ve güvenli fallback birlikte sınanmalıdır.","sourceRefs":["S3","S5"]},{"question":"Plug & Charge testi için gerçek müşteri sertifikası kullanılmalı mı?","answer":"Hayır. Ayrılmış test ortamı ve test sözleşmesi kullanılmalı; özel anahtar, gerçek EMAID, sözleşme kimliği ve ödeme verileri rapora veya ALO186'e yüklenmemelidir.","sourceRefs":["S3","S4"]},{"question":"OCPP 1.6 kullanan istasyonda Plug & Charge mümkün müdür?","answer":"Bazı uygulamalar ISO 15118 mesajlarını OCPP 1.6J DataTransfer üzerinden taşıyabilir; OCPP 2.0.1 ise ilgili mesajları yerel olarak destekler. Gerçek kapsam CPMS ve EVSE uygulamasıyla test edilmelidir.","sourceRefs":["S5"]}],"sources":[{"id":"S1","publisher":"ISO","title":"ISO 15118-20:2022 — Second Generation Network and Application Layer Requirements","url":"https://www.iso.org/standard/77845.html","accessedAt":"2026-08-03","primary":true,"factSummary":"EV ile EVSE arasındaki ikinci nesil ağ ve uygulama katmanı iletişimi, şarj ve çift yönlü enerji aktarımı işlevleri için temel teknik çerçeveyi tanımlar."},{"id":"S2","publisher":"ISO","title":"ISO 15118-20:2022/Amd 1:2026 — AC DER, MCS and Improved Security Concept","url":"https://www.iso.org/standard/87920.html","accessedAt":"2026-08-03","primary":true,"factSummary":"ISO 15118-20 için AC DER, MCS ve geliştirilmiş güvenlik kavramlarını içeren Temmuz 2026 değişikliğini yayımlar."},{"id":"S3","publisher":"Hubject","title":"Plug&Charge Ecosystem","url":"https://support.hubject.com/hc/en-us/articles/9205932782621-1-3-Plug-Charge-Ecosystem","accessedAt":"2026-08-03","primary":true,"factSummary":"Provisioning, contract certificate, root certificate pool ve katılımcılar arasındaki güven zinciri dahil Plug & Charge ekosistem süreçlerini açıklar."},{"id":"S4","publisher":"Hubject","title":"Signing a CSR and Obtaining an EVSE Leaf Certificate","url":"https://support.hubject.com/hc/en-us/articles/8922829951133-3-1-Signing-of-a-Certificate-Signing-Request-CSR-and-obtaining-an-EVSE-Leaf-Certificate-and-its-corresponding-Sub-Certificate-Chain","accessedAt":"2026-08-03","primary":true,"factSummary":"EVSE CSR oluşturma, imzalı yaprak sertifikası ve alt sertifika zincirinin alınması ve kurulmasına ilişkin teknik akışı tanımlar."},{"id":"S5","publisher":"Hubject","title":"Requirements for CPMS","url":"https://support.hubject.com/hc/en-us/articles/9174328536221-3-6-Requirements-for-CPMS","accessedAt":"2026-08-03","primary":true,"factSummary":"OCPP 2.0.1 veya 1.6J üzerinden Plug & Charge, sertifika yenileme, CSR, zincir kurulumu, güvenlik, OCSP ve CPMS süreç gerekliliklerini açıklar."},{"id":"S6","publisher":"CharIN","title":"Certificate Policy Guideline for an ISO 15118 V2G PKI","url":"https://www.charin.global/news/charin-e-v-publishes-certificate-policy-guideline-for-an-iso-15118-v2g-pki/","accessedAt":"2026-08-03","primary":true,"factSummary":"ISO 15118 V2G PKI katılımcıları için sertifika politikası, güven, kimlik ve yaşam döngüsü yönetişimi konusunda sektör kılavuzu sunar."}],"internalLinks":[{"label":"Wallbox şarj neden başlamıyor?","path":"/haberler/elektrikli-arac-sarj-olmuyor-wallbox-neden-baslamiyor","reason":"Plug & Charge sertifika hatasını elektriksel veya genel wallbox arızasından ayırır."},{"label":"V2L, V2H ve V2G farkı","path":"/haberler/v2l-v2h-v2g-farki-cift-yonlu-sarj","reason":"ISO 15118-20 çift yönlü hizmet kapsamını kullanıcı görevine bağlar."},{"label":"EV şarjında dinamik yük yönetimi","path":"/haberler/ev-sarjinda-dinamik-yuk-yonetimi","reason":"Yetkilendirme ile güç kontrolünün farklı sistem görevleri olduğunu açıklar."},{"label":"Tip 2 EV şarj kablosu seçimi","path":"/haberler/tip-2-ev-sarj-kablosu-nasil-secilir","reason":"Fiziksel kablo uygunluğunu dijital sertifika yetkilendirmesinden ayırır."},{"label":"EV şarj gücü neden düşük?","path":"/haberler/ev-sarj-gucu-neden-dusuk-yavas-sarj","reason":"Başarılı yetkilendirme sonrası güç sınırlaması teşhisini tamamlar."},{"label":"EV şarj uygunluk aracı","path":"/hesaplama/ev-sarj-uygunluk","reason":"Tesisat ve kullanım uygunluğunu Plug & Charge kabulünden önce değerlendirir."},{"label":"Kurumsal elektrik sürekliliği ön değerlendirme","path":"/kurumsal-elektrik-surekliligi-on-degerlendirme","reason":"Filo ve otopark için yetkin EVSE-backend kabul planına geçiş sağlar."}],"commerce":{"enabled":false,"policy":"none","category":null},"editorial":{"createdBy":"ai-assisted","model":"gpt-5.6-thinking","humanReviewRequired":true,"approvedBy":null,"approvedAt":null,"publishedAt":null,"approvalPr":null},"seo":{"canonicalPath":"/haberler/ev-plug-charge-iso-15118-sertifika-fallback-kabul","robots":"index,follow,max-image-preview:large","lastModified":"2026-08-03","topics":["EV şarj","Plug & Charge","ISO 15118","V2G PKI","sertifika","OCPP","CPMS","fallback"]},"quality":{"score":100,"minimumRequired":85,"checks":{"metadata":true,"directAnswer":true,"contentDepth":true,"sources":true,"safety":true,"internalLinks":true,"uniqueness":true,"structuredData":true},"similarity":{"maximum":0.36,"closestPath":"/haberler/elektrikli-arac-sarj-olmuyor-wallbox-neden-baslamiyor"}}}
+{
+  "schemaVersion": 1,
+  "id": "cms_e2dd37b7cf5c8832",
+  "slug": "ev-plug-charge-iso-15118-sertifika-fallback-kabul",
+  "contentType": "guide",
+  "state": "published",
+  "locale": "tr-TR",
+  "title": "EV Plug & Charge ISO 15118 Sertifika Kabul Testi",
+  "h1": "ISO 15118 Plug & Charge sertifika ve fallback akışı nasıl test edilir?",
+  "description": "Plug & Charge kabulünü ISO 15118 sürümü, EVSE sertifika zinciri, sözleşme sertifikası, OCSP, saat, backend ve RFID fallback kanıtlarıyla hazırlayın.",
+  "intent": "Plug & Charge işlevini EV-EVSE sürümü, V2G PKI zinciri, EVSE ve sözleşme sertifikaları, yenileme/iptal kontrolü, CPMS-OCPP akışı, saat doğruluğu ve alternatif yetkilendirme senaryolarıyla uçtan uca kabul etmek.",
+  "primaryKeyword": "ISO 15118 Plug Charge kabul testi",
+  "audience": [
+    "Şarj ağı işletmecileri",
+    "EVSE üreticileri ve entegratörleri",
+    "Elektrik mühendisleri",
+    "Filo ve otopark işletmecileri",
+    "CPMS teknik ekipleri"
+  ],
+  "riskClass": "legal",
+  "directAnswer": "ISO 15118 Plug & Charge kabulü, aracın bir kez kablo takıldığında şarja başlamasıyla tamamlanmaz. Kabul; araç, EVSE, CPMS, e-mobilite hizmet sağlayıcısı ve V2G PKI rollerinin ayrılması; EVSE yaprak sertifikası ile alt ve kök sertifika zincirinin doğrulanması; sözleşme sertifikasının kurulması ve yetkilendirilmesi; sertifika süresi, iptal durumu, saat doğruluğu ve ağ kesintisinin denenmesi; başarısız Plug & Charge durumunda RFID, uygulama veya başka onaylı yönteme güvenli fallback yapılmasıyla kanıtlanır. Gerçek müşteri sertifikaları, özel anahtarlar veya sözleşme kimlikleri ALO186'e yüklenmemelidir.",
+  "sections": [
+    {
+      "id": "rol-ve-surum-matrisi",
+      "heading": "Plug & Charge kabulünde hangi roller ve protokol sürümleri ayrılmalıdır?",
+      "paragraphs": [
+        "Plug & Charge tek bir şarj cihazı özelliği değildir. Araçtaki iletişim denetleyicisi, EVSE/SECC, şarj noktası yönetim sistemi, CPO, e-mobilite hizmet sağlayıcısı, sertifika sağlama hizmeti ve V2G PKI güven zinciri birlikte çalışır. Aracın ve istasyonun ISO 15118 desteği olsa bile backend veya sertifika ekosistemi eksikse otomatik sözleşme yetkilendirmesi tamamlanmayabilir.",
+        "Kabul dosyasında ISO 15118-2 ve ISO 15118-20 kapsamı, AC/DC kullanım senaryosu, OCPP sürümü, CPMS entegrasyon yöntemi ve desteklenen Plug & Charge fonksiyonları sürüm numarasıyla yazılmalıdır. ISO 15118-20'nin 2026 güvenlik değişikliği gibi yeni yayınlar, mevcut cihazın otomatik olarak o sürümü desteklediği anlamına gelmez; firmware, sertifika ve uygunluk kapsamı ayrı doğrulanmalıdır."
+      ],
+      "bullets": [
+        "EV, EVSE, CPMS, CPO, eMSP ve PKI rollerini tek RACI tablosunda gösterin.",
+        "ISO 15118 ve OCPP sürümlerini cihaz/firmware bazında kaydedin.",
+        "AC, DC, V2G ve çoklu sözleşme kabiliyetlerini ayrı işlevler olarak sınayın.",
+        "Uyumlu etiketi yerine desteklenen gerçek mesaj ve sertifika akışını belgeleyin."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S6"
+      ]
+    },
+    {
+      "id": "evse-sertifika-zinciri",
+      "heading": "EVSE yaprak sertifikası ve güven zinciri nasıl doğrulanmalıdır?",
+      "paragraphs": [
+        "EVSE'nin özel anahtarını cihaz içinde oluşturması, sertifika imzalama isteğini güvenli biçimde CPMS'ye iletmesi, uygun sertifika otoritesinden imzalı yaprak sertifikası ve alt CA zinciri alması ve doğru sırayla kurması gerekir. Common Name, SECC ID, sertifika uzantıları, algoritma, geçerlilik süresi ve güven kökü kabul sırasında kontrol edilmelidir.",
+        "Sertifika yenileme yalnız son gün manuel işlem olarak bırakılmamalıdır. CPMS'nin CSR üretimini tetikleme, yeni zinciri dağıtma, başarısız kurulumu geri alma ve eski sertifika ile çakışmadan geçiş yapma davranışı test edilmelidir. Özel anahtarın dışa aktarılması veya ekran görüntüsüyle paylaşılması kabul kanıtı değildir ve güvenlik riski yaratır."
+      ],
+      "bullets": [
+        "CSR'nin EVSE içinde üretildiğini ve özel anahtarın dışarı çıkmadığını doğrulayın.",
+        "Yaprak, Sub-CA ve güven kökü zincir sırasını kaydedin.",
+        "SECC ID, ad alanı, uzantı ve geçerlilik tarihlerini kontrol edin.",
+        "Planlı yenileme ve başarısız yenilemede rollback senaryosu çalıştırın."
+      ],
+      "sourceRefs": [
+        "S3",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "id": "sozlesme-ve-yetkilendirme",
+      "heading": "Sözleşme sertifikası ve otomatik yetkilendirme uçtan uca nasıl sınanır?",
+      "paragraphs": [
+        "Plug & Charge işleminde aracın sözleşme sertifikası güven zinciri üzerinden doğrulanır ve ilgili eMSP sözleşmesiyle eşleştirilir. Başarılı test yalnız EVSE ekranında 'authorized' görülmesi değildir; araç kimliklendirme mesajı, sertifika doğrulama sonucu, backend yetkilendirmesi, işlem kimliği, sayaç başlangıcı ve faturalama tarafındaki sözleşme eşleşmesi ortak zaman çizelgesinde görülmelidir.",
+        "Geçerli sertifika, süresi dolmuş sertifika, iptal edilmiş sertifika, bilinmeyen güven kökü, yanlış sözleşme ve backend gecikmesi ayrı negatif senaryolardır. OCSP veya eşdeğer durum kontrolü destekleniyorsa geri çekilmiş hakların hâlâ kabul edilmediği doğrulanmalıdır. Gerçek kullanıcı EMAID, sözleşme sertifikası veya kişisel ödeme verileri yerine test kimlikleri kullanılmalıdır."
+      ],
+      "bullets": [
+        "Başarılı yetkilendirmede EVSE, CPMS ve eMSP kayıtlarını eşleştirin.",
+        "Süresi dolmuş, iptal edilmiş ve güvenilmeyen sertifika senaryolarını test edin.",
+        "OCSP/durum kontrolünün hata ve timeout davranışını kaydedin.",
+        "Gerçek müşteri sertifikası yerine ayrılmış test sözleşmesi kullanın."
+      ],
+      "sourceRefs": [
+        "S3",
+        "S5",
+        "S6"
+      ]
+    },
+    {
+      "id": "saat-ag-ve-fallback",
+      "heading": "Saat sapması, ağ kesintisi ve alternatif yetkilendirme fallback'i nasıl test edilir?",
+      "paragraphs": [
+        "Sertifika doğrulaması geçerlilik tarihleri ve zaman damgalarına bağlı olduğundan EVSE, CPMS ve test aracının saat kaynağı ile zaman dilimi kontrol edilmelidir. NTP kaybı, belirlenmiş saat sapması, CPMS bağlantı kesintisi ve sertifika durum servisinin erişilememesi halinde sistemin güvenli ve izlenebilir davranışı ölçülmelidir.",
+        "Plug & Charge başarısız olduğunda sürücünün kilitli kalmaması için işletmecinin onayladığı RFID, uygulama, ödeme terminali veya çağrı merkezi akışı denenmelidir. Fallback, geçersiz sertifikayı sessizce yetkili saymamalı; ayrı bir kimlik doğrulama işlemi başlatmalı ve faturalama kaydında hangi yöntemin kullanıldığı açık görünmelidir."
+      ],
+      "bullets": [
+        "EVSE, CPMS ve backend saatlerini ortak referansla karşılaştırın.",
+        "Ağ, DNS, PKI ve sertifika durum servisi kesintilerini ayrı test edin.",
+        "Plug & Charge reddinden RFID/uygulamaya kontrollü fallback'i doğrulayın.",
+        "Fallback işleminin kimlik ve faturalama yöntemini olay kaydında görünür tutun."
+      ],
+      "sourceRefs": [
+        "S2",
+        "S3",
+        "S5",
+        "S6"
+      ]
+    },
+    {
+      "id": "kabul-dosyasi",
+      "heading": "Plug & Charge kabul dosyasında hangi kanıtlar bulunmalıdır?",
+      "paragraphs": [
+        "Teslim dosyasında rol ve sürüm matrisi, EVSE modeli ve firmware, SECC ID, kullanılan test PKI ortamı, güven kökü listesi, sertifika zinciri özeti, geçerlilik ve yenileme planı, OCPP mesaj izleri, başarılı ve negatif senaryolar, işlem-sayaç-faturalama mutabakatı, saat kaydı ve fallback sonuçları bulunmalıdır. Sertifika veya log örnekleri özel anahtar, gerçek EMAID, token ve kişisel veri içermeyecek biçimde maskelenmelidir.",
+        "Sonuç geçti, şartlı geçti veya kaldı olarak sınıflandırılmalıdır. Zincir doğrulama hatası, süresi dolan sertifikada kabul, yenileme kesintisi, saat kaynaklı rastgele başarısızlık veya fallback'te yanlış faturalama varsa canlı kullanım açılmamalıdır. Mevcut sistem tüm senaryoları geçiyorsa yalnız pazarlama amacıyla yeni EVSE ya da backend modülü satın almak gerekmez."
+      ],
+      "bullets": [
+        "Sürüm, sertifika, işlem ve faturalama kanıtlarını aynı test kimliğiyle bağlayın.",
+        "Özel anahtar ve gerçek sözleşme verilerini dosyaya koymayın.",
+        "Sertifika yenileme tarihi ve sorumlusunu operasyon takvimine ekleyin.",
+        "Kanıt yeterliyse gereksiz EVSE, modem veya CPMS değişimi yapmayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S4",
+        "S5",
+        "S6"
+      ]
+    }
+  ],
+  "faqs": [
+    {
+      "question": "Plug & Charge için yalnız ISO 15118 destekli araç ve istasyon yeterli midir?",
+      "answer": "Hayır. EVSE sertifikası, güven kökleri, sözleşme sertifikası, CPMS/OCPP mesajları, eMSP yetkilendirmesi ve PKI hizmetleri de uyumlu çalışmalıdır. Uçtan uca ekosistem olmadan otomatik kimliklendirme tamamlanmayabilir.",
+      "sourceRefs": [
+        "S1",
+        "S3",
+        "S6"
+      ]
+    },
+    {
+      "question": "EVSE sertifikasının süresi dolarsa şarj tamamen durur mu?",
+      "answer": "Davranış ürün ve işletme politikasına bağlıdır; Plug & Charge reddedilebilirken RFID veya uygulama gibi ayrı yetkilendirme yöntemleri çalışabilir. Kabul testinde yenileme, expiry ve güvenli fallback birlikte sınanmalıdır.",
+      "sourceRefs": [
+        "S3",
+        "S5"
+      ]
+    },
+    {
+      "question": "Plug & Charge testi için gerçek müşteri sertifikası kullanılmalı mı?",
+      "answer": "Hayır. Ayrılmış test ortamı ve test sözleşmesi kullanılmalı; özel anahtar, gerçek EMAID, sözleşme kimliği ve ödeme verileri rapora veya ALO186'e yüklenmemelidir.",
+      "sourceRefs": [
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "question": "OCPP 1.6 kullanan istasyonda Plug & Charge mümkün müdür?",
+      "answer": "Bazı uygulamalar ISO 15118 mesajlarını OCPP 1.6J DataTransfer üzerinden taşıyabilir; OCPP 2.0.1 ise ilgili mesajları yerel olarak destekler. Gerçek kapsam CPMS ve EVSE uygulamasıyla test edilmelidir.",
+      "sourceRefs": [
+        "S5"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "publisher": "ISO",
+      "title": "ISO 15118-20:2022 — Second Generation Network and Application Layer Requirements",
+      "url": "https://www.iso.org/standard/77845.html",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "EV ile EVSE arasındaki ikinci nesil ağ ve uygulama katmanı iletişimi, şarj ve çift yönlü enerji aktarımı işlevleri için temel teknik çerçeveyi tanımlar."
+    },
+    {
+      "id": "S2",
+      "publisher": "ISO",
+      "title": "ISO 15118-20:2022/Amd 1:2026 — AC DER, MCS and Improved Security Concept",
+      "url": "https://www.iso.org/standard/87920.html",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "ISO 15118-20 için AC DER, MCS ve geliştirilmiş güvenlik kavramlarını içeren Temmuz 2026 değişikliğini yayımlar."
+    },
+    {
+      "id": "S3",
+      "publisher": "Hubject",
+      "title": "Plug&Charge Ecosystem",
+      "url": "https://support.hubject.com/hc/en-us/articles/9205932782621-1-3-Plug-Charge-Ecosystem",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Provisioning, contract certificate, root certificate pool ve katılımcılar arasındaki güven zinciri dahil Plug & Charge ekosistem süreçlerini açıklar."
+    },
+    {
+      "id": "S4",
+      "publisher": "Hubject",
+      "title": "Signing a CSR and Obtaining an EVSE Leaf Certificate",
+      "url": "https://support.hubject.com/hc/en-us/articles/8922829951133-3-1-Signing-of-a-Certificate-Signing-Request-CSR-and-obtaining-an-EVSE-Leaf-Certificate-and-its-corresponding-Sub-Certificate-Chain",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "EVSE CSR oluşturma, imzalı yaprak sertifikası ve alt sertifika zincirinin alınması ve kurulmasına ilişkin teknik akışı tanımlar."
+    },
+    {
+      "id": "S5",
+      "publisher": "Hubject",
+      "title": "Requirements for CPMS",
+      "url": "https://support.hubject.com/hc/en-us/articles/9174328536221-3-6-Requirements-for-CPMS",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "OCPP 2.0.1 veya 1.6J üzerinden Plug & Charge, sertifika yenileme, CSR, zincir kurulumu, güvenlik, OCSP ve CPMS süreç gerekliliklerini açıklar."
+    },
+    {
+      "id": "S6",
+      "publisher": "CharIN",
+      "title": "Certificate Policy Guideline for an ISO 15118 V2G PKI",
+      "url": "https://www.charin.global/news/charin-e-v-publishes-certificate-policy-guideline-for-an-iso-15118-v2g-pki/",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "ISO 15118 V2G PKI katılımcıları için sertifika politikası, güven, kimlik ve yaşam döngüsü yönetişimi konusunda sektör kılavuzu sunar."
+    }
+  ],
+  "internalLinks": [
+    {
+      "label": "Wallbox şarj neden başlamıyor?",
+      "path": "/haberler/elektrikli-arac-sarj-olmuyor-wallbox-neden-baslamiyor",
+      "reason": "Plug & Charge sertifika hatasını elektriksel veya genel wallbox arızasından ayırır."
+    },
+    {
+      "label": "V2L, V2H ve V2G farkı",
+      "path": "/haberler/v2l-v2h-v2g-farki-cift-yonlu-sarj",
+      "reason": "ISO 15118-20 çift yönlü hizmet kapsamını kullanıcı görevine bağlar."
+    },
+    {
+      "label": "EV şarjında dinamik yük yönetimi",
+      "path": "/haberler/ev-sarjinda-dinamik-yuk-yonetimi",
+      "reason": "Yetkilendirme ile güç kontrolünün farklı sistem görevleri olduğunu açıklar."
+    },
+    {
+      "label": "Tip 2 EV şarj kablosu seçimi",
+      "path": "/haberler/tip-2-ev-sarj-kablosu-nasil-secilir",
+      "reason": "Fiziksel kablo uygunluğunu dijital sertifika yetkilendirmesinden ayırır."
+    },
+    {
+      "label": "EV şarj gücü neden düşük?",
+      "path": "/haberler/ev-sarj-gucu-neden-dusuk-yavas-sarj",
+      "reason": "Başarılı yetkilendirme sonrası güç sınırlaması teşhisini tamamlar."
+    },
+    {
+      "label": "EV şarj uygunluk aracı",
+      "path": "/hesaplama/ev-sarj-uygunluk",
+      "reason": "Tesisat ve kullanım uygunluğunu Plug & Charge kabulünden önce değerlendirir."
+    },
+    {
+      "label": "Kurumsal elektrik sürekliliği ön değerlendirme",
+      "path": "/kurumsal-elektrik-surekliligi-on-degerlendirme",
+      "reason": "Filo ve otopark için yetkin EVSE-backend kabul planına geçiş sağlar."
+    }
+  ],
+  "commerce": {
+    "enabled": false,
+    "policy": "none",
+    "category": null
+  },
+  "editorial": {
+    "createdBy": "ai-assisted",
+    "model": "gpt-5.6-thinking",
+    "humanReviewRequired": true,
+    "approvedBy": "ozaneryavuz",
+    "approvedAt": "2026-08-03T18:42:32Z",
+    "publishedAt": "2026-08-03T18:42:32Z",
+    "approvalPr": 784
+  },
+  "seo": {
+    "canonicalPath": "/haberler/ev-plug-charge-iso-15118-sertifika-fallback-kabul",
+    "robots": "index,follow,max-image-preview:large",
+    "lastModified": "2026-08-03",
+    "topics": [
+      "EV şarj",
+      "Plug & Charge",
+      "ISO 15118",
+      "V2G PKI",
+      "sertifika",
+      "OCPP",
+      "CPMS",
+      "fallback"
+    ]
+  },
+  "quality": {
+    "score": 88,
+    "minimumRequired": 85,
+    "checks": {
+      "metadata": false,
+      "directAnswer": true,
+      "contentDepth": true,
+      "sources": true,
+      "safety": true,
+      "internalLinks": true,
+      "uniqueness": true,
+      "structuredData": true
+    },
+    "similarity": {
+      "maximum": 0.3571,
+      "closestPath": "https://www.alo186.com/haberler/ev-sarj-plug-and-charge-iso-15118-sertifika-hatasi"
+    }
+  }
+}
