@@ -1,0 +1,33 @@
+# ALO186
+
+> ALO186, Türkiye'de elektrik kesintisi, resmî dağıtım kanalları, elektrik güvenliği ve teknik ekipman seçimi için bağımsız bilgi platformudur. Arıza kaydı almaz; EDAŞ veya kamu kurumu değildir. Acil ve resmî yönlendirme sayfaları ticari içerikten ayrıdır.
+
+## Resmî Kanallar
+
+- [112, 186 ve diğer ulusal acil/arıza numaraları](https://alo186.com/acil-numaralar): Can güvenliği riski ile elektrik şebekesi arızasını ayırır.
+- [Elektrik kesintisini resmî kaynaktan sorgulama](https://alo186.com/elektrik-kesintisi): İle göre yetkili dağıtım şirketini ve resmî kesinti ekranını bulur.
+- [İlinize göre EDAŞ bulma](https://alo186.com/edas-bul): İli doğru dağıtım şirketi ve doğrulanmış resmî kanallarla eşleştirir.
+
+## Teknik Çözüm ve Ekipman Rehberleri
+
+- [Amazon elektrik ürünleri karar merkezi](https://alo186.com/amazon-elektrik-urunleri/): Fiyat listesi yerine ihtiyaç, teknik uyumluluk, güvenlik sınırı ve satın almama koşuluyla ürün rehberleri.
+- [Teknik hesaplama ve karar araçları](https://alo186.com/hesaplama/): Kişisel veri istemeyen, ürün sınıfı ve teknik uygunluk odaklı araçlar.
+
+### Ev/Ofis Kesinti Hazırlığı
+
+- [UPS, power station, inverter-batarya veya jeneratör çözüm seçici](https://alo186.com/hesaplama/yedek-guc-cozum-secici/): Watt, Wh, geçiş süresi, taşınabilirlik ve tesisat sınırlarını karşılaştırır.
+- [Modem ve ONT mini UPS yedekleme seçici](https://alo186.com/amazon-elektrik-urunleri/modem-ont-mini-ups-yedekleme-secici/): Gerilim, konektör, güç ve hedef çalışma süresi doğrulamasından sonra ürün yoluna ilerler.
+
+### Cihaz ve Pano Koruması
+
+- [Akım korumalı priz yük uygunluk seçimi](https://alo186.com/amazon-elektrik-urunleri/akim-korumali-priz-yuk-uygunluk-secimi/): Toplam yük, topraklama, kullanım sınırı ve üç doğrulanmış ürün adayını karşılaştırır.
+- [Akım korumalı priz ve SPD koruma zinciri](https://alo186.com/hesaplama/akim-korumali-priz-spd-koruma-zinciri/): Priz tipi koruma, pano tipi SPD, topraklama ve RCD görevlerini ayırır.
+
+### GES ve Yedek Enerji Sistemleri
+
+- [GES kesinti yedekleme mimarisi](https://alo186.com/hesaplama/ges-kesinti-yedekleme-mimarisi/): Şebekeye bağlı inverter, EPS/backup, batarya ve kritik yük mimarisini ayırır.
+- [Ev GES, batarya ve yedek güç kabul merkezi](https://alo186.com/sektor-rehberi/ev-ges-batarya-yedek-guc-kabul-test-merkezi/): Tasarım, güvenlik, test ve teslim kanıtlarını tek akışta toplar.
+
+## Ticari Şeffaflık
+
+Bazı teknik ekipman rehberlerinde Amazon Türkiye satış ortaklığı bağlantıları bulunur. Bu bağlantılar `rel="sponsored nofollow noopener"` ile işaretlenir, görünür satış ortaklığı açıklaması taşır ve aktif tehlike ya da yüksek riskli elektrik işlerinde açılmaz. Fiyat, stok, satıcı, puan, yorum, garanti veya doğrulanmamış `Offer` verisi yayımlanmaz.
