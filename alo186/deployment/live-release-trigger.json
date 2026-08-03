@@ -1,14 +1,15 @@
 {
   "schemaVersion": 7,
-  "release": "alo186-v251-competitor-gap-ai-search-live-2026-08-03T22:42+03:00",
-  "requestedAt": "2026-08-03T19:42:00Z",
+  "release": "alo186-v253-competitor-gap-location-aeo-live-2026-08-03T23:06+03:00",
+  "requestedAt": "2026-08-03T20:06:52Z",
   "requestedTimeZone": "Europe/Istanbul",
-  "includesMainThrough": "a4fc8ad1b4a6baa29e4343748b361c5125f723a9",
-  "purpose": "Ana daldaki bütün onaylı ALO186 içerik ve araçlarını; competitor-gap v250/v251 görünür HowTo, 81 il Service/Organization/ServiceChannel grafiği, JavaScript kapalı SSR kararları, açık Amazon satış ortaklığı bağlantıları ve AI crawler robots kurallarıyla tek production artifactında derle, GitHub Pages yayınını tetikle ve canlı origin üzerinde fail-closed doğrula.",
+  "includesMainThrough": "972f8d9ffc239b0d53cc85fd870531c71e19ae26",
+  "purpose": "Ana daldaki bütün onaylı ALO186 içerik ve araçlarını; v252 Soru–Sorun–Çözüm–Ürün semantik zinciri, kararlı urun-ups-3000va Amazon Türkiye ankrajı, JavaScript kapalı Akıllı Yol ve Kişisel Hazırlık SSR blokları, v253 ile üretilen 81 il ve 21 EDAŞ statik canonical AEO sayfaları, doğru 112 GovernmentService / özel EDAŞ Organization-Service ayrımı ve AI crawler robots kurallarıyla tek production artifactında derle, GitHub Pages yayınını tetikle ve canlı origin üzerinde fail-closed doğrula.",
   "deploymentWorkflow": ".github/workflows/alo186-pages-autobootstrap-live.yml",
   "verificationWorkflow": ".github/workflows/alo186-v177-hosting-aware-live.yml",
   "receiptTargets": [
-    "pull/828",
+    "pull/832",
+    "pull/833",
     "issues/21",
     "issues/400"
   ],
@@ -19,11 +20,14 @@
     "/edas-bul/",
     "/il/ankara/",
     "/il/istanbul/",
+    "/il/mugla/",
     "/dagitim-sirketleri/adm-elektrik/",
     "/amazon-elektrik-urunleri/",
     "/amazon-elektrik-urunleri/kombi-yedek-enerji-urun-secici/",
     "/karar-motoru/",
-    "/hesaplama/kesinti-hazirlik-plani/"
+    "/hesaplama/kesinti-hazirlik-plani/",
+    "/robots.txt",
+    "/sitemap.xml"
   ],
   "requiredTrustMarkers": [
     "Bağımsız",
@@ -35,15 +39,32 @@
   "requiredDeploymentIntegrity": {
     "competitorGapAffiliateV250": true,
     "competitorGapAffiliateV251": true,
+    "competitorGapRevision252": true,
+    "questionProblemSolutionProductChain": true,
+    "questionProblemSolutionProductItems": 4,
+    "primaryAffiliateAnchor": "urun-ups-3000va",
     "visibleHowToParity": true,
     "provinceServices81": true,
     "serviceChannels81": true,
     "servicePhone186": true,
+    "locationPagesV253": true,
+    "provincePages81": true,
+    "companyPages21": true,
+    "governmentService112Pages102": true,
+    "questionPages102": true,
     "privateEdasGovernmentServiceCount": 0,
+    "locationSitemapRoutes102": true,
+    "locationPagesSourceFirst": true,
+    "affiliateLinksOnLocationPages": 0,
     "ssrDecisionFallbacks": true,
+    "ssrNamedModules": [
+      "akilli-yol-ssr",
+      "kisisel-hazirlik-kontrolu-ssr"
+    ],
     "ssrAffiliateLinks": true,
     "robotsAiCrawlersAllowed": true,
     "schemaValidationReport": "alo186-schema-validation-v251.json",
+    "locationSchemaReport": "alo186-location-schema-v253.json",
     "sitemapApexCanonicalOnly": true,
     "activeCanonicalRoutesOnly": true,
     "projectBasePathStructuralLinksChecked": true,
@@ -62,14 +83,23 @@
     "existingProductSufficientNoBuy": true,
     "activeHazardCommerceClosed": true,
     "staticSsrLinksRequireSponsoredNofollowNoopener": true,
-    "amazonTurkeyOnly": true
+    "amazonTurkeyOnly": true,
+    "primaryAnchorId": "urun-ups-3000va"
   },
   "schemaPolicy": {
     "howToVisibleContentParity": true,
+    "questionProblemSolutionProductChain": true,
     "productClassesWithoutOffer": true,
     "privateEdasUsesServiceOrganization": true,
     "governmentServiceReservedForActualGovernmentServices": true,
+    "provinceAndCompanyPagesAreStaticHtml": true,
     "googleRichResultAppearanceGuaranteed": false
+  },
+  "scheduledAudit": {
+    "workflow": ".github/workflows/alo186-competitor-gap-v251.yml",
+    "cronUtc": "30 6 * * 1",
+    "localSchedule": "Her pazartesi 09:30 Europe/Istanbul",
+    "scope": "v250-v253 semantik, affiliate, SSR, 81 il, 21 EDAŞ, sitemap ve AI crawler denetimi"
   },
   "status": "requested"
 }
