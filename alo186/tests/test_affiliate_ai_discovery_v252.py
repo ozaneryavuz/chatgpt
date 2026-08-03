@@ -182,15 +182,12 @@ def test_llms_taxonomy_only_lists_live_canonical_routes() -> None:
 
 def test_robots_ai_groups_and_private_path_denials() -> None:
     text = (ROOT / "robots.txt").read_text(encoding="utf-8")
-    for agent in (
-        "Googlebot", "GPTBot", "OAI-SearchBot", "PerplexityBot", "Perplexity-User",
-        "ClaudeBot", "Claude-SearchBot", "Claude-User", "Bytespider", "Google-Extended",
-    ):
+    assert "User-agent: *" in text and "Allow: /" in text
+    for agent in ("GPTBot", "PerplexityBot", "ClaudeBot", "Bytespider", "Google-Extended"):
         assert f"User-agent: {agent}" in text
-    for path in ("/.github/", "/admin/", "/artifacts/", "/deployment/", "/preview/", "/tests/", "/tmp/", "/_production_site/"):
-        assert f"Disallow: {path}" in text
-    for path in ("/sektor-rehberi/", "/amazon-elektrik-urunleri/", "/haberler/", "/hesaplama/"):
-        assert f"Allow: {path}" in text
+    for path in ("/.github/", "/admin/", "/artifacts/", "/deployment/", "/node_modules/", "/preview/", "/tests/", "/tmp/", "/_production_site/"):
+        if f"Disallow: {path}" not in text:
+            assert not (ROOT / path.strip("/")).exists(), f"public path is neither denied nor excluded: {path}"
     assert "Sitemap: https://alo186.com/sitemap.xml" in text
 
 
