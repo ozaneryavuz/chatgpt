@@ -1,0 +1,18 @@
+{
+  "version": 234,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/ev-sarj-kacak-akim-rcd-tip-b-rdc-dd-6ma-kabul/index.html",
+      "canonicalPath": "/haberler/ev-sarj-kacak-akim-rcd-tip-b-rdc-dd-6ma-kabul",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_2c114c4f89483c5d",
+    "humanApproved": true,
+    "approvalPr": 792,
+    "qualityScore": 88
+  }
+}
