@@ -1,0 +1,11 @@
+{
+  "version": 257,
+  "description": "Genel hazırlık niyetini mevcut ürün-kiti ve kesinti-sonrası rotalarından ayıran, kişisel verisiz 30/90 günlük tekrar kontrolü.",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/kesinti-hazirlik-kontrolu/index.html",
+      "canonicalPath": "/hesaplama/kesinti-hazirlik-kontrolu/",
+      "type": "tool"
+    }
+  ]
+}

@@ -14,6 +14,7 @@ sys.path.insert(0, str(DEPLOYMENT))
 
 import build_static_site  # noqa: E402
 import build_static_site_core  # noqa: E402
+import materialize_location_pages_v253  # noqa: E402
 import sitemap_hreflang  # noqa: E402
 
 SITEMAP_NS = {
@@ -62,6 +63,17 @@ def main() -> None:
 
     canonical_host = manifest["canonicalHost"].rstrip("/")
     expected_routes = {route["canonicalPath"] for route in manifest["routes"]}
+    expected_manifest_urls = {canonical_host + route for route in expected_routes}
+    provinces, companies = materialize_location_pages_v253.load_catalog(ROOT)
+    expected_location_urls = {
+        canonical_host + f"/il/{materialize_location_pages_v253.normalize_slug(city)}"
+        for city in provinces.values()
+    }
+    expected_location_urls.update(
+        canonical_host + f"/dagitim-sirketleri/{company.slug}"
+        for company in companies
+    )
+    expected_final_urls = expected_manifest_urls | expected_location_urls
 
     with tempfile.TemporaryDirectory(prefix="alo186-hreflang-") as directory:
         output = Path(directory) / "site"
@@ -83,7 +95,8 @@ def main() -> None:
         text = sitemap.read_text(encoding="utf-8")
         assert 'xmlns:xhtml="http://www.w3.org/1999/xhtml"' in text
         records = sitemap_records(sitemap)
-        assert len(records) == len(expected_routes)
+        assert set(records) == expected_final_urls
+        assert len(records) == len(expected_routes) + 102
 
         for pair in pairs:
             turkish_url = canonical_host + pair["turkishPath"]
@@ -99,6 +112,7 @@ def main() -> None:
         linked_urls = {loc for loc, links in records.items() if links}
         assert len(linked_urls) == 20
         assert sum(len(links) for links in records.values()) == 60
+        assert all(not records[url] for url in expected_location_urls)
 
     duplicate = copy.deepcopy(payload)
     duplicate["pairs"][1]["englishPath"] = duplicate["pairs"][0]["englishPath"]
@@ -129,6 +143,8 @@ def main() -> None:
                 "linkedUrls": 20,
                 "alternateLinks": 60,
                 "canonicalHost": canonical_host,
+                "generatedLocationUrls": len(expected_location_urls),
+                "finalSitemapUrls": len(expected_final_urls),
             },
             ensure_ascii=False,
         )
