@@ -14,6 +14,48 @@ Bu paketteki `sites-source-manifest.json`, `route-inventory.json`, `source-integ
 - GitHub Pages'i özel alan adına bağlama.
 - Belgelenmemiş veya taklit edilmiş bir Sites API kullanma.
 
+## Bu çalıştırmanın öncelikli 3 deltası
+
+Aşağıdaki üç değişikliği P0/P1 genel aktarımından önce uygula ve aynı yayın partisinde canlıya al:
+
+### 1. Kombi kesintisi karar aracı
+
+- Canonical rota: `/hesaplama/kombi-kesinti-yedek-guc-uygunluk/`
+- Paket kaynağı: `public/hesaplama/kombi-kesinti-yedek-guc-uygunluk/`
+- Gazlı kombi, elektrikli kombi ve ısı pompasını ayrı karar yollarında ele al.
+- Etiket W, tepe W, hedef süre, gerçek Wh, saf sinüs, topraklama ve nötr-toprak/RCD doğrulamasını taşı.
+- Gaz kokusu, CO belirtisi, su teması, yanık kokusu, kıvılcım veya elektrik çarpması belirtisinde ticari yolu kapat.
+- Mevcut güvenli çözüm kontrollü testte hedefi karşılıyorsa “yeni ürün almayın” sonucunu göster.
+- Bu rota doğrudan Amazon bağlantısı vermesin; yalnız doğrulanmış eksikte ilgili teknik seçiciye ilerlesin.
+
+### 2. Ürün merkezini katalogdan görev-temelli karar merkezine dönüştür
+
+- Canonical rota: `/amazon-elektrik-urunleri/`
+- Paket kaynağı: `public/amazon-elektrik-urunleri/`
+- Canlıdaki “96 ürün seçim yolu”, “154 ASIN/model” ve benzeri hızla eskiyen sayaçları kaldır.
+- İlk ekranda ürün adedi yerine kullanıcının çalışır tutmak istediği görevi seçtir.
+- Genel bakış kartlarındaki doğrudan Amazon bağlantılarını kaldır; önce ilgili ALO186 hesaplayıcı veya teknik seçiciye yönlendir.
+- Modem/ONT, NAS, kamera-NVR-PoE, ev tipi alarm paneli, CPAP hazırlığı ve mobil internet sürekliliğini yüksek niyetli öncelikli yollar olarak göster.
+- Affiliate bağlantısı yalnız ihtiyaç, teknik uygunluk ve görünür satış ortaklığı açıklaması tamamlandıktan sonra açılsın.
+- Fiyat, stok, satıcı, puan, yorum, teslimat veya garanti iddiası ekleme.
+
+### 3. Fiyat bağımsız tekrar ziyaret döngüsü
+
+- `/hesaplama/kesinti-kiti-donemsel-kontrolu/` rotasını ürün merkezi ve hazırlık akışlarından görünür bağla.
+- Kullanıcıya kişisel veri istemeyen 30 ve 90 günlük yerel `.ics` hazırlık kontrolü sun.
+- Hatırlatma; UPS/mini UPS çalışma süresi, modem-ONT değişimi, batarya şişmesi/ısınması, yeni kritik yük ve kesinti sıklığı değişimini yeniden kontrol ettirsin.
+- Ad, e-posta, telefon, açık adres, tesisat veya abonelik numarası isteme; ham yanıtları analitiğe gönderme.
+- Mevcut sistem güvenli ve yeterliyse satın almama sonucunu koru.
+
+Bu üç delta için yayın sonrası canlı kabul ölçütleri:
+
+- Üç canonical URL HTTP 200 vermeli.
+- Her sayfada tek H1, self-canonical ve görünür bağımsızlık açıklaması bulunmalı.
+- Kombi ve ürün merkezi temel cevabı JavaScript kapalıyken kaynak HTML'de okunabilmeli.
+- Ürün merkezi üst düzey kartlarında doğrudan `amazon.com.tr` bağlantısı bulunmamalı.
+- Açılan her Amazon bağlantısı `rel="sponsored nofollow noopener"` taşımalı ve öncesinde görünür affiliate açıklaması olmalı.
+- Aktif tehlike yolunda çalışan ticari bağlantı sayısı sıfır olmalı.
+
 ## Uygulama yöntemi
 
 1. Önce `sites-source-manifest.json` içindeki P0 katmanlarını uygula.
