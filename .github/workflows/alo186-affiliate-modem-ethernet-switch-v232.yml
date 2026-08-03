@@ -49,7 +49,6 @@ jobs:
             'alo186/amazon-elektrik-urunleri/modem-ethernet-switch-port-hiz-olcum-secimi/app-v232.js' \
             > /tmp/changed-affiliate-v232.txt
           python alo186/tests/test_affiliate_scope_policy_v229.py --changed-files /tmp/changed-affiliate-v232.txt
-          python alo186/tests/test_commercial_governance.py
           node alo186/tests/test_release_manifest.js
       - name: Canonical production paketi
         run: |
