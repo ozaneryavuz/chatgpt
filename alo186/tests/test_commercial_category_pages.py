@@ -22,7 +22,7 @@ DIRECT_COMMERCIAL_ROUTES = {
     "/amazon-elektrik-urunleri",
     "/amazon-elektrik-urunleri/powerbank-usb-c-secimi",
 }
-# Ürün merkezi v174+ ile genel kategori listesinden görev odaklı 12 karar kartına
+# Ürün merkezi v174+ ile genel kategori listesinden görev odaklı karar kartlarına
 # dönüştürüldü. Eski “9 özel rehber” ve yalnız power-station odaklı buzdolabı
 # rotası artık ana merkez sözleşmesi değildir.
 HUB_ROUTES = {
@@ -119,7 +119,7 @@ class CommercialCategoryPagesTests(unittest.TestCase):
             self.assertIn(f'href="{route}"', html)
             self.assertTrue(route_file(route).is_file(), route)
         self.assertGreaterEqual(html.count('class="card route-card"'), len(HUB_ROUTES))
-        self.assertIn("18+ karar rotası", html)
+        self.assertIn("Güncel karar rotaları", html)
         self.assertIn("Mevcut sistem yeterliyse satın alma yok", html)
         self.assertIn("Aktif tehlikede satış yolu kapalı", html)
         self.assertNotIn("9 özel rehber", html)
