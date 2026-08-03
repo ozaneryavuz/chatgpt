@@ -1,24 +1,24 @@
 {
   "schemaVersion": 5,
-  "release": "alo186-run136-deployment-integrity-live-2026-08-02T21:10+03:00",
-  "requestedAt": "2026-08-02T18:10:00Z",
+  "release": "alo186-run149-full-live-2026-08-03T21:42+03:00",
+  "requestedAt": "2026-08-03T18:42:35Z",
   "requestedTimeZone": "Europe/Istanbul",
-  "includesMainThrough": "000ac7ccc6636b8e3e46450d625a12aa208d60a2",
-  "purpose": "Güncel ana daldaki karar araçlarını, affiliate güven katmanlarını ve içerik konsolidasyonlarını; bozuk sitemap kurtarma, hreflang koruması ve project-path URL denetimi tamamlanmış tek üretim artifactında derleyip GitHub Pages özel alan adına dağıt.",
+  "includesMainThrough": "9aa6daadf247374c489533d116bbf3abeed6eda3",
+  "purpose": "Main dalında birleşmiş bütün ALO186 güncellemelerini; run149 insan onaylı EV RCD, UPS selektivite ve SPD ömür sonu canonical yayınlarını, AI CMS yayın altyapısını, güncel karar araçlarını, affiliate güven katmanlarını, içerik konsolidasyonlarını, sitemap/canonical tekillik korumalarını ve final artifact kalite kapılarını tek üretim artifactında derleyip alo186.com özel alan adına dağıt ve canlı kabul makbuzunu doğrula.",
   "deploymentWorkflow": ".github/workflows/alo186-pages-autobootstrap-live.yml",
   "verificationWorkflow": ".github/workflows/alo186-v177-hosting-aware-live.yml",
   "receiptTargets": [
-    "pull/695",
-    "pull/697",
     "issues/21"
   ],
   "liveDomain": "https://alo186.com",
   "requiredLiveRoutes": [
-    "/hesaplama/elektrik-kesintisi-tazminat-kontrolu/",
-    "/hesaplama/ges-kesinti-yedekleme-mimarisi/",
-    "/hesaplama/ev-sarj-kacak-akim-koruma-secici/",
+    "/",
     "/elektrik-portali/",
-    "/amazon-elektrik-urunleri/"
+    "/edas-bul/",
+    "/amazon-elektrik-urunleri/",
+    "/haberler/ev-sarj-kacak-akim-rcd-tip-b-rdc-dd-6ma-kabul",
+    "/haberler/ups-cikis-kisa-devre-akimi-selektivite-kesici-kabul",
+    "/haberler/parafudr-omur-sonu-gosterge-uzak-kontak-degisim-kabul"
   ],
   "requiredTrustMarkers": [
     "30 gün",
@@ -36,7 +36,6 @@
   },
   "forbiddenPublicClaims": [
     "on iş günü",
-    "Product",
     "Offer",
     "AggregateRating"
   ],
