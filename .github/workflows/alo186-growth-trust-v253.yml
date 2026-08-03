@@ -1,0 +1,63 @@
+name: ALO186 güvenli büyüme ve affiliate dönüşüm v253
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/assets/alo186-track-v253.js'
+      - 'alo186/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi/**'
+      - 'alo186/tests/test_growth_trust_v253.js'
+      - '.github/workflows/alo186-growth-trust-v253.yml'
+  pull_request:
+    paths:
+      - 'alo186/assets/alo186-track-v253.js'
+      - 'alo186/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi/**'
+      - 'alo186/tests/test_growth_trust_v253.js'
+      - '.github/workflows/alo186-growth-trust-v253.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-growth-trust-v253-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: JavaScript ve güven regresyonu
+        run: |
+          node --check alo186/assets/alo186-track-v253.js
+          node --check alo186/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi/catalog-v253.js
+          node --check alo186/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi/app-v253.js
+          node alo186/tests/test_growth_trust_v253.js
+      - name: Affiliate kapsam ve yayın sözleşmesi
+        run: |
+          printf '%s\n' \
+            'alo186/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi/index.html' \
+            'alo186/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi/catalog-v253.js' \
+            'alo186/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi/app-v253.js' \
+            > /tmp/changed-affiliate-v253.txt
+          python alo186/tests/test_affiliate_scope_policy_v229.py --changed-files /tmp/changed-affiliate-v253.txt
+          node alo186/tests/test_release_manifest.js
+      - name: Canonical production paketi
+        run: |
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-growth-v253 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-growth-v253
+          PAGE=/tmp/alo186-growth-v253/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi/index.html
+          test -f "$PAGE"
+          grep -Fq 'https://alo186.com/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi/' "$PAGE"
+          grep -Fq 'Mevcut çözümüm yeterli — satın almayacağım' "$PAGE"
+          grep -Fq 'rel="sponsored nofollow noopener"' "$PAGE"
+          ! grep -Eqi '"@type"[[:space:]]*:[[:space:]]*"Offer"|priceCurrency|aggregateRating|ratingValue|availability' "$PAGE"
