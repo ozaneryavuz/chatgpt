@@ -74,13 +74,24 @@ def finalize(site: Path, base_path: str) -> dict:
     }
 
 
+def _merge_receipt(existing: object, report: dict) -> dict:
+    if not isinstance(existing, dict) or existing.get("basePath") != report.get("basePath"):
+        return report
+    merged = dict(report)
+    merged["injectedPages"] = int(existing.get("injectedPages") or 0) + int(
+        report.get("injectedPages") or 0
+    )
+    merged["runs"] = int(existing.get("runs") or 1) + 1
+    return merged
+
+
 def record_receipt(site: Path, report: dict) -> None:
     for name in ("alo186-release.json", "pages-release.json"):
         path = site / name
         if not path.is_file():
             continue
         payload = json.loads(path.read_text(encoding="utf-8"))
-        payload[RECEIPT_KEY] = report
+        payload[RECEIPT_KEY] = _merge_receipt(payload.get(RECEIPT_KEY), report)
         path.write_text(
             json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
             encoding="utf-8",
