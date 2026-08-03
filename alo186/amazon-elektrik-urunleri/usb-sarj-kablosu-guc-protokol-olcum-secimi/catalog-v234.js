@@ -18,13 +18,13 @@
   });
   const products = Object.freeze([
     {
-      id: 'baseus-crystal-shine-100w-2m', asin: 'B0B46PHW14', mpn: 'CAJY000701', brand: 'Baseus',
-      name: 'Baseus Crystal Shine USB-C–USB-C 100W 2 m Şarj Kablosu', verifiedAt,
-      userNeed: 'USB-C dizüstü bilgisayar, tablet, telefon veya powerbank için 2 metrelik, 5 A sınıfında yüksek güçlü bir şarj kablosu gerektiğinde.',
-      strengths: ['USB-C–USB-C bağlantı ve 100 W (20 V / 5 A) sınıfı','2 metre uzunluk ve örgülü dış yapı','480 Mbps veri aktarımı'],
-      limitations: ['100 W için adaptör, cihaz ve protokol desteği birlikte gerekir','480 Mbps, yüksek hızlı harici disk veya görüntü kablosu gereksinimini karşılamaz','2 metre uzunluk kısa masaüstü kullanımında gereksiz kablo kalabalığı oluşturabilir'],
-      noBuyWhen: 'Mevcut kablo cihazın ölçülen gücünü kararlı veriyorsa, 5 A / 100 W gerekmiyorsa veya yüksek hızlı veri/görüntü aktarımı bekliyorsanız satın alma yapmayın.',
-      technicalSource: 'https://cz.baseus.com/en/products/cajy000701'
+      id: 'baseus-cafule-60w-1m', asin: 'B0144AE0V6', mpn: 'CATKLF-GG1', brand: 'Baseus',
+      name: 'Baseus Cafule USB-C–USB-C 60W 1 m Şarj ve Veri Kablosu', verifiedAt,
+      userNeed: 'USB-C dizüstü bilgisayar, tablet, telefon veya powerbank için 1 metrelik, 3 A / 60 W sınıfında günlük bir şarj kablosu gerektiğinde.',
+      strengths: ['USB-C–USB-C bağlantı ve 60 W (20 V / 3 A) sınıfı','Power Delivery 2.0 ve Quick Charge 3.0 desteği','480 Mbps veri aktarımı ve örgülü dış yapı'],
+      limitations: ['100 W veya 240 W isteyen cihazlarda tam güç vermez','480 Mbps, yüksek hızlı harici disk veya görüntü kablosu gereksinimini karşılamaz','Gerçek hız ve güç adaptör, cihaz ve protokol eşleşmesine bağlıdır'],
+      noBuyWhen: 'Mevcut kablo cihazın ölçülen gücünü kararlı veriyorsa, 60 W üstü güç gerekiyorsa veya yüksek hızlı veri/görüntü aktarımı bekliyorsanız satın alma yapmayın.',
+      technicalSource: 'https://cz.baseus.com/en/products/catklf-gg1'
     },
     {
       id: 'spigen-aca08717-60w', asin: 'B0F2MH3GFW', mpn: 'ACA08717', brand: 'Spigen',
