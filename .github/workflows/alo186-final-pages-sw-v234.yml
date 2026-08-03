@@ -5,14 +5,18 @@ on:
     paths:
       - 'alo186/deployment/finalize_pages_service_worker.py'
       - 'alo186/deployment/inject_live_quality_v218_compat.py'
+      - 'alo186/deployment/inject_intent_tools_run135.py'
       - 'alo186/tests/test_finalize_pages_service_worker.py'
+      - 'alo186/tests/test_intent_tools_outage_idempotency_v234.py'
       - '.github/workflows/alo186-final-pages-sw-v234.yml'
   push:
     branches: [main]
     paths:
       - 'alo186/deployment/finalize_pages_service_worker.py'
       - 'alo186/deployment/inject_live_quality_v218_compat.py'
+      - 'alo186/deployment/inject_intent_tools_run135.py'
       - 'alo186/tests/test_finalize_pages_service_worker.py'
+      - 'alo186/tests/test_intent_tools_outage_idempotency_v234.py'
       - '.github/workflows/alo186-final-pages-sw-v234.yml'
   workflow_dispatch:
 
@@ -44,7 +48,9 @@ jobs:
         run: |
           python -m py_compile alo186/deployment/finalize_pages_service_worker.py
           python -m py_compile alo186/deployment/inject_live_quality_v218_compat.py
+          python -m py_compile alo186/deployment/inject_intent_tools_run135.py
           python alo186/tests/test_finalize_pages_service_worker.py
+          python alo186/tests/test_intent_tools_outage_idempotency_v234.py
       - name: Canonical paketi oluştur
         run: |
           python alo186/deployment/build_static_site.py \
