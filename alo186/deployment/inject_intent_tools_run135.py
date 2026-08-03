@@ -32,6 +32,9 @@ FORBIDDEN = (
     "priceCurrency",
     "availability",
 )
+SECURE_CONDITION = "rawHours===''||!Number.isFinite(hours)||hours<0||hours>8760"
+SECURE_VALID_ASSIGNMENT = "const valid=rawHours!==''&&Number.isFinite(hours)&&hours>=0&&hours<=8760;"
+SECURE_VALID_BRANCH = "if(!valid)"
 
 
 def normalize_base_path(value: str) -> str:
@@ -108,6 +111,12 @@ def normalize_product_hub_jsonld(site: Path) -> int:
     return count
 
 
+def has_secure_outage_validation(text: str) -> bool:
+    return SECURE_CONDITION in text or (
+        SECURE_VALID_ASSIGNMENT in text and SECURE_VALID_BRANCH in text
+    )
+
+
 def harden_outage_input(site: Path) -> bool:
     path = site / ROUTES[0].strip("/") / "index.html"
     if not path.is_file():
@@ -124,14 +133,13 @@ def harden_outage_input(site: Path) -> bool:
             raise RuntimeError("Kesinti süresi sayısal dönüşüm kalıbı bulunamadı")
         text = text.replace(old, new, 1)
         changed = True
-    secure_condition = "rawHours===''||!Number.isFinite(hours)||hours<0||hours>8760"
-    if secure_condition not in text:
+    if not has_secure_outage_validation(text):
         old_condition = "!Number.isFinite(hours)||hours<0||hours>8760"
         if old_condition not in text:
             old_condition = "!Number.isFinite(h)||h<0"
         if old_condition not in text:
             raise RuntimeError("Kesinti süresi doğrulama kalıbı bulunamadı")
-        text = text.replace(old_condition, secure_condition, 1)
+        text = text.replace(old_condition, SECURE_CONDITION, 1)
         changed = True
     if changed:
         path.write_text(text, encoding="utf-8")
@@ -192,6 +200,7 @@ def update_release(site: Path, base_path: str, added: bool, search_result: dict,
         "directMarketplaceLinks": 0,
         "personalDataCollected": False,
         "failClosed": True,
+        "acceptedValidationForms": ["inline_fail_closed", "named_valid_boolean"],
     }
     path.write_text(json.dumps(release, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
@@ -222,11 +231,12 @@ def validate(site: Path, base_path: str) -> dict:
     for token in (
         "const rawHours=input.value.trim()",
         "rawHours===''?Number.NaN:Number(rawHours)",
-        "rawHours===''||!Number.isFinite(hours)||hours<0||hours>8760",
         "30 gün",
     ):
         if token not in outage:
             raise RuntimeError(f"Kesinti aracı fail-closed sözleşmesi eksik: {token}")
+    if not has_secure_outage_validation(outage):
+        raise RuntimeError("Kesinti aracı fail-closed süre doğrulaması eksik")
 
     product_hub = (site / PRODUCT_HUB).read_text(encoding="utf-8", errors="strict")
     if MALFORMED_PRODUCT_URL.search(product_hub):
@@ -287,6 +297,7 @@ def validate(site: Path, base_path: str) -> dict:
         "sitemapWellFormed": True,
         "productHubJsonLdValid": True,
         "hubToolCount": actual_tool_count,
+        "outageValidationForm": "named_valid_boolean" if SECURE_VALID_ASSIGNMENT in outage else "inline_fail_closed",
     }
 
 
