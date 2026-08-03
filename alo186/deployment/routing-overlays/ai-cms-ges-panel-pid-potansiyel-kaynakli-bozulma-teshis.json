@@ -1,0 +1,18 @@
+{
+  "version": 236,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/ges-panel-pid-potansiyel-kaynakli-bozulma-teshis/index.html",
+      "canonicalPath": "/haberler/ges-panel-pid-potansiyel-kaynakli-bozulma-teshis",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_4b1ced9d04a1b668",
+    "humanApproved": true,
+    "approvalPr": 816,
+    "qualityScore": 88
+  }
+}

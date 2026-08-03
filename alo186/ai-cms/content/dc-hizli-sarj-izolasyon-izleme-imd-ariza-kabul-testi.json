@@ -1,0 +1,290 @@
+{
+  "schemaVersion": 1,
+  "id": "cms_cc8af81955a2e30e",
+  "slug": "dc-hizli-sarj-izolasyon-izleme-imd-ariza-kabul-testi",
+  "contentType": "guide",
+  "state": "published",
+  "locale": "tr-TR",
+  "title": "DC Hızlı Şarj İzolasyon İzleme ve IMD Kabul Testi",
+  "h1": "DC hızlı şarj istasyonunda izolasyon hatası ve IMD nasıl test edilir?",
+  "description": "DC hızlı şarjda IMD, izolasyon eşiği, kontaktör ve deşarj sırasını güvenli simülasyonla doğrulayın; araç–istasyon kök nedenini ayırın.",
+  "intent": "CCS veya CHAdeMO DC hızlı şarj istasyonunda izolasyon izleme cihazının şarj öncesi ve şarj sırasındaki arızaları doğru algıladığını, enerji transferini güvenli durdurduğunu ve arıza katmanını kanıtla ayırdığını doğrulamak.",
+  "primaryKeyword": "DC hızlı şarj izolasyon hatası IMD",
+  "audience": [
+    "Şarj ağı işletmecileri",
+    "DC hızlı şarj yatırımcıları",
+    "Elektrik mühendisleri",
+    "EVSE servis ve devreye alma ekipleri",
+    "Otel ve filo teknik yöneticileri"
+  ],
+  "riskClass": "high",
+  "directAnswer": "DC hızlı şarjda izolasyon izleme cihazı (IMD), toprağa göre yalıtılmış DC+ ve DC− devresinin izolasyon direncini sürekli izler; AC giriş RCD'sinin yerine geçmez. Kabul; IMD ve kuplaj cihazının tam modeli, gerilim ve kaçak kapasitesi sınırları, şarj öncesi öz-test, bilinen test direnciyle güvenli simülasyon, alarm–akım düşürme–kontaktör açma–deşarj sırası ve olay loguyla yapılır. Gerçek DC iletkenini toprağa bağlayarak veya araç bağlıyken rastgele megger kullanarak test yapılmaz.",
+  "sections": [
+    {
+      "id": "imd-gorevi",
+      "heading": "DC hızlı şarjda IMD neyi izler, RCD'den farkı nedir?",
+      "paragraphs": [
+        "DC hızlı şarj güç devresi çoğu tasarımda şarj sırasında toprağa göre yalıtılmış bir DC sistem olarak yönetilir. İzolasyon izleme cihazı (IMD), DC+ ve DC− ile toprak arasındaki izolasyon direncini sürekli değerlendirerek ilk izolasyon bozulmasını şarj başlamadan veya şarj sırasında tespit etmeyi amaçlar. RCD ise AC besleme tarafındaki artık akım korumasıdır; aynı arızayı ve aynı devreyi izlemez.",
+        "Kabul dosyasında IMD'nin ölçüm noktası, kuplaj cihazı, anma gerilim aralığı, izin verilen sistem kaçak kapasitesi, alarm ve kesme eşikleri ile istasyonun tam güç modülü mimarisi gösterilmelidir. 'İzolasyon kontrolü var' şeklindeki genel satış ifadesi yeterli değildir."
+      ],
+      "bullets": [
+        "AC giriş RCD'si ile DC çıkış IMD'sini ayrı koruma katmanları olarak gösterin.",
+        "IMD modelini, kuplaj modülünü ve anma DC gerilim aralığını kaydedin.",
+        "DC+–PE ve DC−–PE ölçüm noktalarını tek hatta işaretleyin.",
+        "Ürün ailesindeki başka varyantın eşik ve sürelerini kullanmayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S5"
+      ]
+    },
+    {
+      "id": "on-kontrol",
+      "heading": "Araç bağlanmadan önce izolasyon ön kontrolü nasıl kabul edilir?",
+      "paragraphs": [
+        "DC enerji aktarımı başlamadan önce istasyon, kendi çıkış devresinin ve bağlantı yolunun güvenli durumda olduğunu doğrulamalıdır. Kablo, konnektör, kontaktör, güç modülü ve çıkış filtresinin oluşturduğu doğal kaçak kapasitesi IMD ölçümünü etkileyebilir. Sistem gerilimi yokken ve kontrollü test geriliminde yapılan aşamalar ayrı kaydedilmelidir.",
+        "Yetkin ekip, üretici tarafından izin verilen izolasyon test kutusu veya simülatörle bilinen dirençleri uygular; alarm eşiği, tepki süresi, kontaktörün kapama izni ve olay kodunu doğrular. Meger gibi yüksek test gerilimi üreten cihazlar, bağlı elektronik ve araç üzerinde üretici prosedürü olmadan kullanılmamalıdır."
+      ],
+      "bullets": [
+        "Şarj öncesi öz-test ve IMD hazır durumunu kaydedin.",
+        "Bilinen test dirençlerini yalnız üretici onaylı simülatörle uygulayın.",
+        "Kontaktör kapama izninin izolasyon sonucuna bağlı olduğunu doğrulayın.",
+        "Araç veya güç elektroniği bağlıyken rastgele megger testi yapmayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S5"
+      ]
+    },
+    {
+      "id": "sarj-sirasinda",
+      "heading": "Şarj sırasında izolasyon arızası oluşursa hangi sıra izlenmelidir?",
+      "paragraphs": [
+        "Şarj sırasında asimetrik veya simetrik izolasyon bozulması oluşabilir. Kabul, yalnız alarm LED'inin yanmasını değil; araç-EVSE haberleşmesindeki hata bildirimi, akımın kontrollü düşürülmesi, DC kontaktörlerin açılması, deşarj süresi, konnektör kilidi ve kullanıcı mesajını birlikte kapsamalıdır. Kesme sırası yüksek DC gerilimin konnektörde kalmasını önlemelidir.",
+        "IMD'nin tepki süresi ve eşik değeri istasyon mimarisi, gerilim ve kaçak kapasitesine bağlıdır. Üretici örneğindeki süreler evrensel kabul limiti değildir. Gerçek geçti-kaldı sınırı istasyon standardı, uygunluk dosyası ve model dokümanından alınmalıdır."
+      ],
+      "bullets": [
+        "IMD alarmı, şarj kontrolü, akım, kontaktör ve DC gerilimi ortak zaman çizelgesinde kaydedin.",
+        "Arıza sonrası konnektör geriliminin güvenli seviyeye düşüşünü doğrulayın.",
+        "Simetrik ve asimetrik arıza senaryolarını ayrı test edin.",
+        "Gerçek DC iletkenini toprağa kısa devre ederek test yapmayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S5"
+      ]
+    },
+    {
+      "id": "kok-neden",
+      "heading": "İzolasyon hatası araçtan mı istasyondan mı kaynaklanıyor?",
+      "paragraphs": [
+        "Aynı hata şarj kablosu veya konnektör nemi, güç modülü, DC bara, filtre, soğutma sıvısı, araç yüksek gerilim sistemi ya da haberleşme/parametre uyumsuzluğundan kaynaklanabilir. Olay kaydı; araç kimliğini kişisel veri toplamadan tip/model düzeyinde, soket, hava koşulu, gerilim, şarj aşaması ve IMD ölçümüyle eşleştirmelidir.",
+        "Aynı aracın farklı doğrulanmış istasyonda veya aynı istasyonun üretici test aracıyla karşılaştırılması arıza katmanını daraltabilir; tek başına kesin teşhis değildir. Alarm eşiklerini büyütmek, IMD'yi köprülemek veya tekrar tekrar şarj başlatmak güvenli çözüm değildir."
+      ],
+      "bullets": [
+        "Kablo, konnektör, istasyon güç katı ve araç katmanını ayrı inceleyin.",
+        "Nem ve soğutma sıvısı izlerini enerjisiz görsel kontrol planına alın.",
+        "Hata kaydını araç sahibinin kişisel verisini toplamadan saklayın.",
+        "Tekrarlayan izolasyon alarmında şarj noktasını servis dışı bırakın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S3",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "id": "teslim",
+      "heading": "DC hızlı şarj izolasyon izleme sistemi nasıl teslim alınmalıdır?",
+      "paragraphs": [
+        "Teslim dosyası; tek hat, DC sistem topolojisi, EVSE ve IMD tam referansları, firmware, kuplaj modülü, eşik ve tepki süreleri, doğal kaçak kapasitesi, öz-test, şarj öncesi kontrol, şarj sırasında hata, kontaktör/deşarj sırası, olay logu ve yeniden başlatma koşullarını içermelidir. Her konnektör ve güç modülü ayrı sonuç satırıyla izlenmelidir.",
+        "Testler geçtiyse sırf daha yeni bir IMD modeli bulunduğu için değişim gerekmez; fakat yalnız alarmın silinmesi veya tek başarılı şarj kabul kanıtı değildir. CTA: kişisel verisiz DC EVSE–IMD–kontaktör–deşarj kabul matrisini yetkili şarj istasyonu servis ve devreye alma ekibine iletin."
+      ],
+      "bullets": [
+        "Her soket için IMD ve güç modülü ilişkisini tekilleştirin.",
+        "Test ekipmanı, kalibrasyon, direnç ve tepki sürelerini rapora ekleyin.",
+        "Firmware veya güç modülü değişiminden sonra kabul testini tekrarlayın.",
+        "Kanıt yeterliyse gereksiz IMD veya komple şarj cihazı değişimi satın almayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S4",
+        "S5"
+      ]
+    }
+  ],
+  "faqs": [
+    {
+      "question": "DC hızlı şarj istasyonunda RCD varsa IMD gerekir mi?",
+      "answer": "RCD ve IMD farklı devre ve arızaları izler. AC giriş RCD'si, yalıtılmış DC çıkışın izolasyon direncini sürekli izleyen IMD'nin yerine geçmez; kesin mimari istasyon standardı ve uygunluk dosyasından doğrulanır.",
+      "sourceRefs": [
+        "S1",
+        "S2"
+      ]
+    },
+    {
+      "question": "İzolasyon hatasında şarja tekrar başlanabilir mi?",
+      "answer": "Kök neden giderilmeden ve güvenli reset koşulu sağlanmadan tekrar denenmemelidir. İstasyon servis dışı bırakılmalı; olay logu ve ölçüm yetkili servisçe incelenmelidir.",
+      "sourceRefs": [
+        "S1",
+        "S3",
+        "S5"
+      ]
+    },
+    {
+      "question": "IMD testi için DC kablo toprağa değdirilir mi?",
+      "answer": "Hayır. Gerçek DC iletkenini toprağa bağlamak tehlikelidir. Üreticinin izin verdiği test direnci ve simülatör, manevra planı ve yetkin ekip kullanılmalıdır.",
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S5"
+      ]
+    },
+    {
+      "question": "İzolasyon hatası her zaman araç arızası mıdır?",
+      "answer": "Hayır. Kablo, konnektör, nem, istasyon güç modülü, DC bara, filtre veya araç yüksek gerilim sistemi kaynaklı olabilir. Karşılaştırmalı test kesin hüküm değil, kök neden ayrımı için kanıttır.",
+      "sourceRefs": [
+        "S1",
+        "S3",
+        "S4"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "publisher": "IEC",
+      "title": "IEC 61851-23:2023 — DC electric vehicle supply equipment",
+      "url": "https://webstore.iec.ch/en/publication/32973",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "DC EVSE için enerji transferi, güvenlik ve uygunluk gereklerini tanımlar."
+    },
+    {
+      "id": "S2",
+      "publisher": "IEC",
+      "title": "IEC 61557-8:2014 — Insulation monitoring devices for IT systems",
+      "url": "https://webstore.iec.ch/en/publication/5582",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Topraktan yalıtılmış AC/DC IT sistemlerinde izolasyon direncini sürekli izleyen IMD cihazlarının gereklerini tanımlar."
+    },
+    {
+      "id": "S3",
+      "publisher": "IEC",
+      "title": "IEC 61851-24:2023 — Digital communication for DC charging",
+      "url": "https://webstore.iec.ch/en/publication/32582",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "DC EVSE ile araç arasındaki şarj kontrol haberleşmesini ve sistem A/B/C iletişim çerçevesini kapsar."
+    },
+    {
+      "id": "S4",
+      "publisher": "ISO",
+      "title": "ISO 6469-3:2021 — Electrically propelled road vehicles electrical safety",
+      "url": "https://www.iso.org/standard/81746.html",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Araç tarafındaki yüksek gerilim elektrik devrelerinde elektrik çarpması ve termal olaylara karşı güvenlik gereklerini açıklar."
+    },
+    {
+      "id": "S5",
+      "publisher": "Bender",
+      "title": "ISOMETER isoCHA425HV — insulation monitoring for DC fast charging",
+      "url": "https://www.bender.de/en/products/insulation-monitoring/isometer-isocha425hv-with-agh420-1/",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "CCS/CHAdeMO DC şarj sisteminde simetrik-asimetrik izolasyon arızası, sistem gerilimi ve modele özgü parametre gereğini gösterir."
+    }
+  ],
+  "internalLinks": [
+    {
+      "label": "EV şarj tesisat uygunluğu",
+      "path": "/haberler/ev-sarj-cihazi-icin-ev-tesisati-uygun-mu",
+      "reason": "DC istasyonun AC besleme ve tesis altyapısını tamamlar."
+    },
+    {
+      "label": "EV şarj Tip B RCD ve RDC-DD kabulü",
+      "path": "/haberler/ev-sarj-kacak-akim-rcd-tip-b-rdc-dd-6ma-kabul",
+      "reason": "AC şarj artık akım korumasını DC izolasyon izlemeden ayırır."
+    },
+    {
+      "label": "Wallbox neden başlamıyor?",
+      "path": "/haberler/elektrikli-arac-sarj-olmuyor-wallbox-neden-baslamiyor",
+      "reason": "Genel başlatma hatalarını izolasyon alarmından ayırır."
+    },
+    {
+      "label": "EV şarj kablosu ve prizi ısınıyor",
+      "path": "/haberler/ev-sarj-kablosu-prizi-isiniyor-ne-yapilmali",
+      "reason": "Konnektör hasarı ve ısınma belirtilerini güvenli sınıflandırır."
+    },
+    {
+      "label": "EV şarj gücü neden düşük?",
+      "path": "/haberler/ev-sarj-gucu-neden-dusuk-yavas-sarj",
+      "reason": "Güç sınırlama ile güvenlik kesmesini karıştırmayı önler."
+    },
+    {
+      "label": "EV şarj uygunluk aracı",
+      "path": "/hesaplama/ev-sarj-uygunluk",
+      "reason": "Kullanıcıyı güç ve altyapı ön kontrolüne yönlendirir."
+    },
+    {
+      "label": "Elektrik Portalı",
+      "path": "/elektrik-portali",
+      "reason": "Şarj, koruma ve teknik ölçüm görevlerini tek merkezde bağlar."
+    }
+  ],
+  "commerce": {
+    "enabled": false,
+    "policy": "none",
+    "category": null
+  },
+  "editorial": {
+    "createdBy": "ai-assisted",
+    "model": "gpt-5.6-thinking",
+    "humanReviewRequired": true,
+    "approvedBy": "ozaneryavuz",
+    "approvedAt": "2026-08-03T18:43:07Z",
+    "publishedAt": "2026-08-03T18:43:08Z",
+    "approvalPr": 804
+  },
+  "seo": {
+    "canonicalPath": "/haberler/dc-hizli-sarj-izolasyon-izleme-imd-ariza-kabul-testi",
+    "robots": "index,follow,max-image-preview:large",
+    "lastModified": "2026-08-03",
+    "topics": [
+      "DC hızlı şarj",
+      "IMD",
+      "izolasyon izleme",
+      "CCS",
+      "CHAdeMO",
+      "izolasyon hatası",
+      "EVSE"
+    ]
+  },
+  "quality": {
+    "score": 88,
+    "minimumRequired": 85,
+    "checks": {
+      "metadata": false,
+      "directAnswer": true,
+      "contentDepth": true,
+      "sources": true,
+      "safety": true,
+      "internalLinks": true,
+      "uniqueness": true,
+      "structuredData": true
+    },
+    "similarity": {
+      "maximum": 0.375,
+      "closestPath": "https://alo186.com/haberler/dc-hizli-sarj-izolasyon-hatasi-imd-arac-istasyon-ayrimi"
+    }
+  }
+}

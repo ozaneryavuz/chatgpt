@@ -1,0 +1,18 @@
+{
+  "version": 238,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/jenerator-odasi-havalandirma-egzoz-karsi-basinc-kabul-testi/index.html",
+      "canonicalPath": "/haberler/jenerator-odasi-havalandirma-egzoz-karsi-basinc-kabul-testi",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_9c4f1a7e2d8b3650",
+    "humanApproved": true,
+    "approvalPr": 780,
+    "qualityScore": 88
+  }
+}

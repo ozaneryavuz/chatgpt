@@ -1,0 +1,286 @@
+{
+  "schemaVersion": 1,
+  "id": "cms_4c7a9e1d5b83f260",
+  "slug": "vpp-talep-tarafi-katilimi-baseline-telemetri-hazirlik",
+  "contentType": "guide",
+  "state": "published",
+  "locale": "tr-TR",
+  "title": "VPP Talep Tarafı Katılımı Hazırlık Dosyası",
+  "h1": "VPP ve talep tarafı katılımı için baseline ve telemetri nasıl hazırlanır?",
+  "description": "Toplayıcı ve tesis ekipleri için baseline, sayaç, telemetri, CSV/API, dispatch yanıtı ve kabul testlerini tek VPP hazırlık dosyasında doğrulayın.",
+  "intent": "Bir tesisin veya portföyün VPP ve Talep Tarafı Katılımı hizmetine teknik ve operasyonel olarak hazır olup olmadığını, başvuru öncesi kanıt matrisiyle değerlendirmek.",
+  "primaryKeyword": "talep tarafı katılımı hazırlık",
+  "audience": [
+    "Toplayıcı şirketler",
+    "Enerji yöneticileri",
+    "BESS ve GES işletmecileri",
+    "Sanayi ve otel tesisleri",
+    "VPP yazılım ekipleri"
+  ],
+  "riskClass": "legal",
+  "directAnswer": "VPP veya Talep Tarafı Katılımı hazırlığı yalnız batarya kapasitesi hesabı değildir. Hazır bir dosya; yetkili piyasa katılımcısı ve anlaşma durumunu, TTK birimi sayaç/ölçüm sınırını, geçmiş tüketim verisinden baseline üretimini, telemetri ve CSV/API veri akışını, dispatch komutunun sahada güvenli karşılanmasını ve olay sonrası doğrulamayı birlikte kanıtlamalıdır. TEİAŞ’ın 2026 duyuruları anlaşma, başvuru CSV’si ve web servis kataloğunu fiilen kullanan bir süreç gösterdiği için, teknik entegrasyon ile mevzuat uygunluğu aynı hazırlık planında tutulmalıdır.",
+  "sections": [
+    {
+      "id": "gorev-ve-rol-ayrimi",
+      "heading": "VPP, toplayıcı ve talep tarafı katılımı rollerini nasıl ayırmalısınız?",
+      "paragraphs": [
+        "VPP, dağınık tüketim, üretim ve depolama esnekliğini ortak bir kontrol ve ticari karar katmanında birleştiren daha geniş bir işletim yaklaşımıdır. Türkiye’de Talep Tarafı Katılımı Hizmeti ise TEİAŞ’ın yan hizmet tedarik sürecine, toplayıcıların anlaşma ve teknik başvuru yükümlülükleriyle katıldığı belirli bir piyasa sürecidir. Bir tesisin VPP yazılımına bağlanması, tek başına TTK hizmetine kabul edildiği anlamına gelmez.",
+        "İlk matriste lisans ve toplayıcı sorumluluğu, tesis sahibi sorumluluğu, ölçüm noktası, portföy içi komut yetkisi, veri işleyen taraflar ve sözleşmesel performans yükümlülükleri ayrı yazılmalıdır. TEİAŞ 2026 duyurularında tedarik dönemine katılacak toplayıcılardan yan hizmet anlaşmasının belirli tarihe kadar imzalanmasını istemiş, ayrıca anlaşma başvurusunda lisans ve ticaret sicil belgelerini saymıştır."
+      ],
+      "bullets": [
+        "VPP yazılım hizmeti ile resmî TTK piyasa katılımını ayrı satırlarda gösterin.",
+        "Toplayıcı, tesis, ölçüm sorumlusu ve yazılım sağlayıcının rollerini yazın.",
+        "Güncel tedarik dönemi ve anlaşma son tarihlerini yalnız TEİAŞ duyurusundan doğrulayın.",
+        "Bir tesisi yalnız teknik bağlantı kuruldu diye piyasa katılımcısı ilan etmeyin."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S5"
+      ]
+    },
+    {
+      "id": "ttk-birimi-ve-veri",
+      "heading": "TTK birimi, sayaç ve geçmiş veri sınırı nasıl tanımlanır?",
+      "paragraphs": [
+        "Başvuru dosyası, hangi sayaçların ve yüklerin tek TTK birimi olarak ele alınacağını açıkça göstermelidir. Sayaç kimliği, ölçüm periyodu, zaman dilimi, veri eksikliği, sayaç değişimi, üretim ve depolamanın net yükü nasıl etkilediği kayıt altına alınmalıdır. TEİAŞ hizmet sayfası EPDK onaylı anlaşma metni, web servis kataloğu ve başvuru için CSV örneğini aynı klasörde yayımlayarak veri modelinin başvurunun parçası olduğunu gösterir.",
+        "CSV veya API alanlarını son anda doldurmak yerine, geçmiş veride boşluk, tekrar, saat kayması ve birim dönüşümü kontrol edilmelidir. GES, BESS, EV şarj, jeneratör testi veya üretim vardiyası gibi olaylar baseline’ı bozabilir. Bu olaylar etiketlenmezse portföyün gerçek azaltma veya artırma performansı yanlış yorumlanabilir."
+      ],
+      "bullets": [
+        "Tek hat şemasıyla TTK birimine dahil ölçüm noktalarını eşleştirin.",
+        "Sayaç zaman damgası, periyot ve birim sözlüğü oluşturun.",
+        "Eksik ve değiştirilen sayaç dönemlerini işaretleyin.",
+        "GES, BESS, EV ve üretim planı etkilerini olay etiketi olarak tutun."
+      ],
+      "sourceRefs": [
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "id": "baseline-ve-kapasite",
+      "heading": "Baseline ve sunulabilir esneklik kapasitesi nasıl kanıtlanır?",
+      "paragraphs": [
+        "Baseline, dispatch olmasaydı tesisin ne tüketeceğine ilişkin karşılaştırma çizgisidir; yalnız son gün ortalaması kullanmak çoğu tesis için yeterli kanıt değildir. Hafta içi/hafta sonu, mevsim, vardiya, sıcaklık, doluluk, üretim siparişi ve kendi üretim etkileri ayrılmalıdır. Yöntem, sözleşme ve güncel TEİAŞ prosedürleriyle uyumlu olmalı; tesis içi planlama için alternatif yöntemler hata ölçütleriyle karşılaştırılmalıdır.",
+        "Sunulabilir kapasite, teorik cihaz gücü değil; proses, konfor, can güvenliği, ürün kalitesi, minimum çalışma süresi, rebound ve batarya SoC rezervi sonrasında güvenle sürdürülebilen net değişimdir. Her kaynak için minimum/azami güç, rampalama, sürdürülebilir süre, toparlanma süresi ve o anda kullanılabilirliği hesaplayan veri tanımlanmalıdır. Aşırı taahhüt, hem proses riskini hem performans sapmasını büyütür."
+      ],
+      "bullets": [
+        "Baseline yöntemini veri penceresi ve dışlama kurallarıyla belgeleyin.",
+        "Tahmin hatasını normal günler ve olay günleri için ayrı ölçün.",
+        "Esneklik kapasitesinden proses, güvenlik ve SoC rezervlerini düşün.",
+        "Rebound ve sonraki saatlerde oluşacak ek tüketimi hesaba katın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S3",
+        "S5"
+      ]
+    },
+    {
+      "id": "telemetri-api-dispatch",
+      "heading": "Telemetri, CSV/API ve dispatch zinciri hangi testlerden geçmelidir?",
+      "paragraphs": [
+        "TEİAŞ, toplayıcıların Talep Tarafı Katılımı modülüne veri göndermesi için web servis kataloğu yayımlamış; 20 Mayıs 2026 duyurusunda dağıtımdan başvuruda kullanılacak CSV örneğini ayrıca paylaşmıştır. Bu nedenle hazırlık yalnız dosya formatı değil; kimlik doğrulama, alan eşleştirme, zaman damgası, yeniden deneme, hata kodu ve veri bütünlüğü testlerini kapsamalıdır.",
+        "Dispatch komutu; piyasa sisteminden toplayıcıya, oradan tesis kontrol katmanına ve gerçek yüke kadar izlenebilmelidir. Komutun alındığı, kabul/red nedeni, hedef güç, başlangıç zamanı, gerçekleşen değer, bağlantı kaybı ve manuel geri dönüş aynı olay kimliğiyle kaydedilmelidir. Kritik yüklerde bağlantı kesilmesi veya yanlış komut, fail-safe yerel kontrolü geçersiz kılamaz."
+      ],
+      "bullets": [
+        "API ve CSV alanlarını tek veri sözlüğünde eşleştirin.",
+        "Saat senkronu, tekrar kayıt ve eksik veri senaryolarını test edin.",
+        "Dispatch komutuna uçtan uca olay kimliği verin.",
+        "İletişim kaybında güvenli yerel işletme ve manuel geri alma planı yazın."
+      ],
+      "sourceRefs": [
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "id": "kabul-sozlesme-ve-izleme",
+      "heading": "Canlı katılım öncesi kabul ve sözleşme dosyası ne içermelidir?",
+      "paragraphs": [
+        "Canlı kabul, masa başı API testinden daha geniştir. Temsili bir dispatch senaryosunda komut gecikmesi, ölçüm doğruluğu, gerçek güç değişimi, sürdürülebilir süre, rebound, veri teslimi ve olay raporu birlikte doğrulanmalıdır. GES üretim tahmini, BESS SoC sınırı ve tesis üretim planı değiştiğinde sunulabilir kapasitenin otomatik güncellendiği gösterilmelidir.",
+        "Sözleşme dosyasında performans ölçümü, sapma sorumluluğu, veri erişimi, siber güvenlik, kişisel veri, bakım penceresi, cihaz garanti sınırı ve portföyden çıkış koşulları bulunmalıdır. TEİAŞ duyuru ve belgeleri dönemsel olarak güncellenebileceğinden, başvuru günündeki resmî anlaşma ve teknik katalog sürümü kayda alınmalıdır. Mevcut ölçüm ve kontrol altyapısı şartları karşılıyorsa gereksiz yeni cihaz satın almak doğru sonuç değildir."
+      ],
+      "bullets": [
+        "Uçtan uca dispatch kabul tutanağı hazırlayın.",
+        "Kapasite güncellemesini SoC, üretim ve bakım durumuna bağlayın.",
+        "Veri, siber güvenlik ve sorumluluk maddelerini teknik ekle eşleştirin.",
+        "Başvuru günündeki TEİAŞ belge sürümlerini arşivleyin."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S4",
+        "S5"
+      ]
+    }
+  ],
+  "faqs": [
+    {
+      "question": "VPP’ye bağlanan her tesis Talep Tarafı Katılımı hizmetine katılabilir mi?",
+      "answer": "Hayır. Teknik VPP bağlantısı, toplayıcı lisansı, yan hizmet anlaşması, TTK birimi başvurusu ve güncel tedarik koşullarının yerine geçtiği anlamına gelmez. Resmî süreç TEİAŞ ve EPDK belgeleriyle doğrulanmalıdır.",
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S5"
+      ]
+    },
+    {
+      "question": "Baseline yalnız geçmiş tüketim ortalamasıyla kurulabilir mi?",
+      "answer": "Her tesis için tek bir ortalama yeterli değildir. Vardiya, mevsim, hava, üretim, GES, BESS ve olay günleri ayrılmalı; kullanılan yöntem güncel piyasa kurallarıyla uyumlu ve hata ölçütleriyle izlenebilir olmalıdır.",
+      "sourceRefs": [
+        "S1",
+        "S3"
+      ]
+    },
+    {
+      "question": "TEİAŞ başvurusunda CSV yeterli midir?",
+      "answer": "CSV örneği başvuru veri yapısının bir parçasıdır; ayrıca yan hizmet anlaşması, lisans ve ilgili belgeler ile web servis/API entegrasyonu ve teknik performans gerekleri bulunabilir. Güncel resmî paket birlikte kontrol edilmelidir.",
+      "sourceRefs": [
+        "S2",
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "question": "BESS’in nominal gücü VPP’ye sunulabilir kapasite midir?",
+      "answer": "Hayır. SoC rezervi, enerji kapasitesi, sıcaklık, garanti, inverter sınırı, tesis yükü, sürdürülebilir süre ve rebound dikkate alınmadan nominal güç taahhüt edilmemelidir.",
+      "sourceRefs": [
+        "S1",
+        "S3"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "publisher": "TEİAŞ",
+      "title": "Talep Tarafı Katılımı Hizmeti Hakkında — Temmuz–Eylül 2026 tedarik duyurusu",
+      "url": "https://www.teias.gov.tr/haberler/talep-tarafi-katilimi-hizmeti-hakkinda-bkh2",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "2026 tedarik dönemine katılmak isteyen toplayıcılar için yan hizmet anlaşması imza süresini ve tedarik sürecini duyurur."
+    },
+    {
+      "id": "S2",
+      "publisher": "TEİAŞ",
+      "title": "Talep Tarafı Katılımı Anlaşması duyurusu",
+      "url": "https://www.teias.gov.tr/haberler/talep-tarafi-katilimi-anlasmasi",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Toplayıcıların yan hizmet anlaşması, toplayıcılık lisansı, ticaret sicil tasdiknamesi ve aydınlatma metni teslim gereğini duyurur."
+    },
+    {
+      "id": "S3",
+      "publisher": "TEİAŞ",
+      "title": "Talep Tarafı Katılımı Hizmeti doküman merkezi",
+      "url": "https://www.teias.gov.tr/talep-tarafi-katilimi-hizmeti",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "EPDK onaylı yan hizmet anlaşması, web servis kataloğu ve TTK birimi başvuru CSV örneğini aynı resmî merkezde yayımlar."
+    },
+    {
+      "id": "S4",
+      "publisher": "TEİAŞ",
+      "title": "Talep Tarafı Katılımı modülüne veri gönderme API dokümanı duyurusu",
+      "url": "https://www.teias.gov.tr/duyurular/talep-tarafi-katilimi-modulune-veri-gonderebilmesine-dair-api-dokumani-duyurusu",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Toplayıcıların TTK modülüne veri gönderebilmesi için web servis kataloğunun yayımlandığını bildirir."
+    },
+    {
+      "id": "S5",
+      "publisher": "EPDK",
+      "title": "Elektrik piyasası yürürlükteki yönetmelikler",
+      "url": "https://www.epdk.gov.tr/Detay/Icerik/3-0-159/yonetmelikler",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Elektrik Piyasasında Toplayıcılık Faaliyeti Yönetmeliğini ve ilgili güncel elektrik piyasası mevzuatını listeler."
+    }
+  ],
+  "internalLinks": [
+    {
+      "label": "VPP sanal güç santrali nedir?",
+      "path": "/haberler/vpp-sanal-guc-santrali-nedir",
+      "reason": "Temel VPP kavramını başvuru hazırlığından ayırır."
+    },
+    {
+      "label": "VPP batarya çevrim, rezerv ve garanti sözleşmesi",
+      "path": "/haberler/vpp-batarya-cevrim-rezerv-garanti-sozlesmesi",
+      "reason": "Batarya ticari ve garanti sınırını teknik katılım dosyasına bağlar."
+    },
+    {
+      "label": "Batarya SoC ve SoH farkı",
+      "path": "/haberler/batarya-soc-soh-farki-kapasite-saglik-nasil-anlasilir",
+      "reason": "Sunulabilir kapasitede şarj durumu ve sağlık ayrımını açıklar."
+    },
+    {
+      "label": "Batarya C-rate ve DoD",
+      "path": "/haberler/batarya-c-rate-dod-kullanilabilir-kapasite",
+      "reason": "Güç, süre ve kullanılabilir enerji sınırlarını destekler."
+    },
+    {
+      "label": "Elektrik sürekliliği pasaportu",
+      "path": "/hesaplama/elektrik-surekliligi-pasaportu",
+      "reason": "Varlık ve test kayıtlarını düzenli kanıt dosyasına dönüştürür."
+    },
+    {
+      "label": "Kurumsal elektrik sürekliliği ön değerlendirme",
+      "path": "/kurumsal-elektrik-surekliligi-on-degerlendirme",
+      "reason": "Çoklu tesis ve profesyonel ölçüm kapsamına geçiş sağlar."
+    },
+    {
+      "label": "İşletme sürekliliği",
+      "path": "/isletme-surekliligi",
+      "reason": "Dispatch sırasında kritik yük ve proses sınırını tanımlar."
+    }
+  ],
+  "commerce": {
+    "enabled": false,
+    "policy": "none",
+    "category": null
+  },
+  "editorial": {
+    "createdBy": "ai-assisted",
+    "model": "gpt-5.6-thinking",
+    "humanReviewRequired": true,
+    "approvedBy": "ozaneryavuz",
+    "approvedAt": "2026-08-03T18:41:32Z",
+    "publishedAt": "2026-08-03T18:41:32Z",
+    "approvalPr": 759
+  },
+  "seo": {
+    "canonicalPath": "/haberler/vpp-talep-tarafi-katilimi-baseline-telemetri-hazirlik",
+    "robots": "index,follow,max-image-preview:large",
+    "lastModified": "2026-08-03",
+    "topics": [
+      "VPP",
+      "talep tarafı katılımı",
+      "toplayıcı",
+      "baseline",
+      "telemetri",
+      "TEİAŞ",
+      "CSV API",
+      "BESS"
+    ]
+  },
+  "quality": {
+    "score": 100,
+    "minimumRequired": 85,
+    "checks": {
+      "metadata": true,
+      "directAnswer": true,
+      "contentDepth": true,
+      "sources": true,
+      "safety": true,
+      "internalLinks": true,
+      "uniqueness": true,
+      "structuredData": true
+    },
+    "similarity": {
+      "maximum": 0.4167,
+      "closestPath": "https://www.alo186.com/haberler/vpp-talep-tarafi-katilimi-toplayici-2026"
+    }
+  }
+}

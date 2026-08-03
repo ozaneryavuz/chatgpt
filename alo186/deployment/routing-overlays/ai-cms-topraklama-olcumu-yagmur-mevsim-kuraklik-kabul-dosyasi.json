@@ -1,0 +1,18 @@
+{
+  "version": 238,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/topraklama-olcumu-yagmur-mevsim-kuraklik-kabul-dosyasi/index.html",
+      "canonicalPath": "/haberler/topraklama-olcumu-yagmur-mevsim-kuraklik-kabul-dosyasi",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_3d6221b82393aad6",
+    "humanApproved": true,
+    "approvalPr": 801,
+    "qualityScore": 100
+  }
+}

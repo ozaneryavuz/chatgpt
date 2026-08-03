@@ -1,0 +1,18 @@
+{
+  "version": 236,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/bess-kullanilabilir-enerji-round-trip-verim-standby-kaybi-kabul/index.html",
+      "canonicalPath": "/haberler/bess-kullanilabilir-enerji-round-trip-verim-standby-kaybi-kabul",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_62ce83bb36861cce",
+    "humanApproved": true,
+    "approvalPr": 790,
+    "qualityScore": 100
+  }
+}

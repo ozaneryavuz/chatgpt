@@ -1,0 +1,18 @@
+{
+  "version": 237,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/ges-rapid-shutdown-acil-ayirma-itfaiyeci-kabul-testi/index.html",
+      "canonicalPath": "/haberler/ges-rapid-shutdown-acil-ayirma-itfaiyeci-kabul-testi",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_6ee3de747074058f",
+    "humanApproved": true,
+    "approvalPr": 812,
+    "qualityScore": 88
+  }
+}

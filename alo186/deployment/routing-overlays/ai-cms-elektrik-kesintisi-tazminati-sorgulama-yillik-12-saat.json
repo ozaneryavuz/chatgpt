@@ -1,0 +1,18 @@
+{
+  "version": 236,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesintisi-tazminati-sorgulama-yillik-12-saat/index.html",
+      "canonicalPath": "/haberler/elektrik-kesintisi-tazminati-sorgulama-yillik-12-saat",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_8d6f2e4a91c7b305",
+    "humanApproved": true,
+    "approvalPr": 759,
+    "qualityScore": 100
+  }
+}

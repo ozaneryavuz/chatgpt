@@ -1,0 +1,18 @@
+{
+  "version": 236,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/inverter-eps-backup-notr-toprak-rcd-kabul-testi/index.html",
+      "canonicalPath": "/haberler/inverter-eps-backup-notr-toprak-rcd-kabul-testi",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_18574c12f2c44b0a",
+    "humanApproved": true,
+    "approvalPr": 799,
+    "qualityScore": 100
+  }
+}

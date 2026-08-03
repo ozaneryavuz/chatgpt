@@ -1,0 +1,290 @@
+{
+  "schemaVersion": 1,
+  "id": "cms_5a1768296643b6cb",
+  "slug": "ups-epo-repo-acil-kapatma-devresi-kabul-testi",
+  "contentType": "guide",
+  "state": "published",
+  "locale": "tr-TR",
+  "title": "UPS EPO ve REPO Acil Kapatma Devresi Kabul Testi",
+  "h1": "UPS EPO ve REPO acil kapatma devresi nasıl güvenle test edilir?",
+  "description": "UPS EPO ve REPO kabul testini şebeke, bypass, akü, yük, alarm, reset ve yeniden başlatma kanıtlarıyla hazırlayın; acil kapatmayı izolasyonla karıştırmayın.",
+  "intent": "UPS EPO/REPO girişinin acil durumda hangi güç bloklarını durdurduğunu; yük, bypass, akü, haricî kesiciler, alarm, reset ve yeniden başlatma davranışını model bazında kanıtlayan bir kabul dosyası hazırlamak.",
+  "primaryKeyword": "UPS EPO REPO kabul testi",
+  "audience": [
+    "Elektrik mühendisleri",
+    "UPS devreye alma ekipleri",
+    "Otel ve işletme teknik yöneticileri",
+    "Yangın ve bina otomasyonu ekipleri",
+    "Veri merkezi işletmecileri"
+  ],
+  "riskClass": "high",
+  "directAnswer": "UPS EPO veya REPO kabulü, düğmeye basınca ekranda alarm görülmesiyle tamamlanmaz. Önce üreticinin bu giriş için tanımladığı davranış okunmalı; ardından normal çalışma, statik bypass, aküden çalışma ve mümkünse bakım senaryolarında doğrultucu, inverter, şarj cihazı, statik bypass, haricî akü kesicisi ve yükün gerçek durumu ayrı ayrı kaydedilmelidir. EPO bazı modellerde yükü tamamen keserken bazı yapılandırmalarda yükü statik bypass üzerinden beslemeye devam edebilir; ayrıca kontrol devresi veya başka enerji kaynakları gerilimli kalabilir. Bu nedenle EPO, gerilimsiz bırakma veya LOTO yerine kullanılamaz.",
+  "sections": [
+    {
+      "id": "islev-matrisi",
+      "heading": "EPO, REPO, RPO ve uzaktan açma işlevleri nasıl ayrılmalıdır?",
+      "paragraphs": [
+        "EPO, REPO ve RPO etiketleri üreticiler arasında aynı elektriksel sonucu garanti etmez. Bazı UPS'lerde acil giriş doğrultucu, inverter, şarj cihazı ve statik bypassı kapatıp yükü hemen enerjisiz bırakır; bazı modellerde ise yapılandırmaya bağlı olarak yük statik bypassa aktarılabilir. Uzaktan normal açma-kapama girişi de acil kapatma devresiyle aynı güvenlik fonksiyonu değildir.",
+        "Kabul dosyasının ilk sayfasında cihaz modeli, firmware, giriş terminali, kontak mantığı, normal ve acil durum konumu, kablo gözetimi, fabrika ayarı ve sahadaki seçili davranış tek matriste gösterilmelidir. Projede istenen yangın senaryosu ile üretici işlevi uyuşmuyorsa yalnız etiket adına güvenilmemelidir."
+      ],
+      "bullets": [
+        "EPO/REPO/RPO ile normal remote on-off girişini ayrı satırlarda gösterin.",
+        "Kontak açık/kapalı mantığını ve kablo kopmasındaki davranışı kaydedin.",
+        "Fabrika ayarı ile sahada seçilmiş konfigürasyonu karşılaştırın.",
+        "Yangın senaryosunda yükün kesilmesi mi, bypassla sürmesi mi istendiğini yazılılaştırın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "id": "enerji-kaynaklari",
+      "heading": "Şebeke, bypass, akü ve geri besleme kaynakları hangi sırayla doğrulanmalıdır?",
+      "paragraphs": [
+        "EPO komutu UPS çıkışında enerji görülmemesiyle tek başına kabul edilemez. Şebeke girişi, ayrı bypass girişi, dahili veya haricî akü dizisi, ortak akü barası, paralel UPS modülleri ve haricî statik transfer anahtarı gibi bütün kaynaklar tek hat üzerinde işaretlenmelidir. Üretici dokümanı, ana giriş mevcutken kontrol devresinin EPO sonrasında etkin kalabileceğini açıkça belirtebilir.",
+        "Haricî akü kesicisinin şönt açtırma bobini, geri besleme koruması veya bina otomasyonuna giden alarm kontağı projede varsa bunların gerçekten çalıştığı bağımsız kanıtlanmalıdır. EPO devresi açıkken yalnız UPS ekranına bakmak yerine uygun ölçüm noktalarında yetkin personel tarafından gerilim durumu, kesici geri bildirimleri ve olay kayıtları birlikte doğrulanmalıdır."
+      ],
+      "bullets": [
+        "Tek hatta bütün AC ve DC enerji kaynaklarını işaretleyin.",
+        "Haricî akü kesicisi trip zincirini fonksiyonel olarak sınayın.",
+        "Paralel modüller ve ortak bypass varsa her modülün durumunu kaydedin.",
+        "EPO sonrasında gerilimli kalabilecek kontrol ve yardımcı devreleri açıkça etiketleyin."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S5"
+      ]
+    },
+    {
+      "id": "senaryo-testi",
+      "heading": "Acil kapatma senaryoları yük ve işletme modu bazında nasıl test edilir?",
+      "paragraphs": [
+        "Test planı en az normal çevrim içi çalışma, aküden çalışma ve statik bypass senaryolarını içermelidir. Bakım bypassı gerçek EPO zincirinin dışında kalıyorsa bu durum ayrıca görünür hale getirilmelidir. Kritik yüklerin plansız kesilmesini önlemek için test zamanı, yük temsilcisi, geri dönüş yöntemi ve başarısızlıkta güvenli duruş önceden onaylanmalıdır.",
+        "Her senaryoda komut zamanı, doğrultucu-inverter-şarj cihazı durumu, statik bypass konumu, çıkış gerilimi, akü kesicisi, haricî kesiciler, alarm ve bina otomasyonu geri bildirimi aynı zaman çizelgesine yazılmalıdır. İşlevin yalnız boşta değil, proje tarafından belirlenen güvenli temsilî yük altında da doğrulanması gerekir."
+      ],
+      "bullets": [
+        "Normal, akü ve statik bypass modlarını ayrı test satırları yapın.",
+        "Bakım bypassının EPO dışında kalıp kalmadığını kanıtlayın.",
+        "Komut ile gerçek güç kesilmesi arasındaki süreyi kaydedin.",
+        "Yangın alarmı/BMS sinyali ile UPS olay günlüğünün zaman damgalarını eşleştirin."
+      ],
+      "sourceRefs": [
+        "S2",
+        "S3",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "id": "reset-ve-yeniden-baslatma",
+      "heading": "Reset, kilitleme ve yeniden başlatma güvenliği nasıl kabul edilir?",
+      "paragraphs": [
+        "Acil giriş serbest bırakıldığında UPS'nin kendiliğinden yükü yeniden beslemesi kabul edilmemelidir; beklenen davranış üretici dokümanı, risk değerlendirmesi ve tesis işletme prosedürüyle belirlenmelidir. Fiziksel EPO butonunun kilitli kalması, manuel reset, yetkili yeniden başlatma ve varsa uzaktan komut önceliği ayrı test edilmelidir.",
+        "Kablo kısa devresi, kablo kopması, kontak yapışması, yardımcı besleme kaybı ve haberleşme kesintisi gibi arızalar için sistemin güvenli duruşu doğrulanmalıdır. Test sonrası bütün alarmlar temizlenmeli, giriş kontakları normal duruma dönmeli ve kritik yükler kontrollü sıra ile devreye alınmalıdır."
+      ],
+      "bullets": [
+        "EPO resetinden sonra otomatik restart olup olmadığını sınayın.",
+        "Fiziksel buton kilidi ve yetkili manuel reset gereğini doğrulayın.",
+        "Kablo kopması ve kontak arızası senaryosunu tasarım kapsamına göre test edin.",
+        "Yeniden başlatmada yük sırası, bypass senkronu ve alarm temizliğini kaydedin."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "id": "teslim-dosyasi",
+      "heading": "UPS EPO/REPO kabul dosyasında hangi kanıtlar bulunmalıdır?",
+      "paragraphs": [
+        "Teslim dosyası; onaylı tek hat, EPO bağlantı şeması, terminal ve kontak bilgileri, cihaz modeli-firmware-konfigürasyon yedeği, buton yerleşimi, etiketler, test senaryoları, olay günlüğü, kesici geri bildirimleri, ölçüm sonuçları, BMS/yangın paneli eşleşmesi ve imzalı geçti-kaldı tablosunu içermelidir. Her sapma için sorumlu, düzeltme kanıtı ve yeniden test tarihi tanımlanmalıdır.",
+        "EPO testi başarılı olsa bile bakım için gerilimsiz çalışma kanıtı ayrıca LOTO ve uygun ölçümle sağlanır. Mevcut EPO zinciri bütün kaynakları ve reset davranışını kanıtla karşılıyorsa sırf daha yeni bir UPS veya uzaktan kapatma modülü satın almak gerekmez."
+      ],
+      "bullets": [
+        "EPO işlevini izolasyon ve LOTO prosedüründen ayrı dokümante edin.",
+        "Her güç kaynağı için beklenen ve ölçülen sonucu tek tabloda verin.",
+        "Fotoğraf, olay günlüğü ve test formuna sürüm/tarih bilgisi ekleyin.",
+        "Kanıt yeterliyse gereksiz UPS, buton veya haberleşme modülü değişimi yapmayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S4",
+        "S5"
+      ]
+    }
+  ],
+  "faqs": [
+    {
+      "question": "UPS EPO düğmesine basınca bütün gerilimler kesilir mi?",
+      "answer": "Her zaman değil. Bazı yapılandırmalarda yük statik bypass üzerinden beslenmeye devam edebilir; şebeke mevcutsa kontrol devresi veya haricî akü gibi başka kaynaklar gerilimli kalabilir. Sonuç yalnız model dokümanı ve saha testiyle doğrulanmalıdır.",
+      "sourceRefs": [
+        "S2",
+        "S3",
+        "S5"
+      ]
+    },
+    {
+      "question": "EPO ile bakım için güvenli izolasyon yapılabilir mi?",
+      "answer": "Hayır. EPO bir acil kontrol fonksiyonudur; bütün enerji kaynaklarının fiziksel olarak ayrıldığını ve gerilimsizliği tek başına kanıtlamaz. Bakım için onaylı LOTO, kesici ayırma ve yetkin personel ölçümü gerekir.",
+      "sourceRefs": [
+        "S1",
+        "S2"
+      ]
+    },
+    {
+      "question": "REPO ile remote on-off aynı giriş midir?",
+      "answer": "Genellikle aynı amaç değildir. REPO/RPO acil kapatmaya yöneliktir; remote on-off işletme amaçlı uzaktan açma-kapama fonksiyonudur. Terminal mantığı ve sonuç model dokümanından doğrulanmalıdır.",
+      "sourceRefs": [
+        "S4"
+      ]
+    },
+    {
+      "question": "EPO resetlenince UPS otomatik olarak yeniden başlamalı mı?",
+      "answer": "Evrensel bir cevap yoktur. Tesis risk değerlendirmesi ve üretici davranışı birlikte ele alınmalıdır; kritik yüklerde yetkisiz veya kontrolsüz otomatik yeniden enerjilenme kabul edilmemeli, manuel reset ve yük sırası test edilmelidir.",
+      "sourceRefs": [
+        "S1",
+        "S3",
+        "S4"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "publisher": "IEC",
+      "title": "IEC 62040-1:2017+A1:2021+A2:2022 — UPS Safety Requirements",
+      "url": "https://webstore.iec.ch/en/publication/80573",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "UPS sistemlerinde elektrik çarpması, yangın, termal, enerji ve mekanik tehlikeleri azaltmaya yönelik genel güvenlik gerekliliklerini tanımlar."
+    },
+    {
+      "id": "S2",
+      "publisher": "Schneider Electric",
+      "title": "Easy UPS 3M Operation Manual — EPO",
+      "url": "https://productinfo.se.com/easyups3m/5d162cef183e8500013dc210/990-5995A%20Easy%20UPS%203M%20Operation%20Manual/English/990-5995%20Easy%20UPS%203M%20Operation_0000255764.xml/%24/EPOREF_0000274034",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "EPO'nun yükü kesme veya yapılandırmaya bağlı statik bypassa aktarma seçeneklerini ve şebeke varken kontrol devresinin etkin kalabileceğini açıklar."
+    },
+    {
+      "id": "S3",
+      "publisher": "Schneider Electric",
+      "title": "Easy UPS 3L Operation Manual — Remote EPO",
+      "url": "https://productinfo.se.com/easyups3l/990-6287_master-easy-ups-3l-operation/English/990-6287%20Operation%20Easy%20UPS%203L_0000410385.xml/%24/RemoteEPO_0000422154",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Remote EPO'nun varsayılan ve yapılandırılabilir davranışlarını, yük ve kontrol devresi üzerindeki model bazlı sonuçlarını tanımlar."
+    },
+    {
+      "id": "S4",
+      "publisher": "Eaton",
+      "title": "UPS RPO and ROO Remote Power Control",
+      "url": "https://www.eaton.com/us/en-us/products/backup-power-ups-surge-it-power-distribution/backup-power-ups/ups-rpo-roo-remote-power-control.html",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "RPO/EPO/REPO acil kapatma işlevini normal remote on-off işlevinden ayırır ve kontak mantığının model dokümanından doğrulanmasını ister."
+    },
+    {
+      "id": "S5",
+      "publisher": "Schneider Electric",
+      "title": "Configure Input Contacts and Output Relays for Easy UPS",
+      "url": "https://productinfo.se.com/easyups3m/5d162cef183e8500013dc210/990-5995A%20Easy%20UPS%203M%20Operation%20Manual/English/990-5995%20Easy%20UPS%203M%20Operation_0000255764.xml/%24/ConfigureInputContactsAndOutputRelaysREF_0000273640",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "EPO, haricî akü kesicisi trip ve geri besleme alarmı gibi giriş/çıkışların cihaz konfigürasyonunda ayrı işlevler olduğunu gösterir."
+    }
+  ],
+  "internalLinks": [
+    {
+      "label": "UPS bypass modu nedir?",
+      "path": "/haberler/ups-bypass-modu-nedir-neden-gecer",
+      "reason": "EPO sırasında statik ve bakım bypassının farklı davranışını anlamayı destekler."
+    },
+    {
+      "label": "Online, line-interactive ve offline UPS farkı",
+      "path": "/haberler/ups-online-line-interactive-offline-farki",
+      "reason": "UPS topolojisinin acil kapatma ve transfer davranışına etkisini bağlama yerleştirir."
+    },
+    {
+      "label": "Paralel UPS ve N+1 yedeklilik",
+      "path": "/haberler/paralel-ups-n-arti-1-yedeklilik-nedir",
+      "reason": "Ortak bypass ve çoklu modül EPO kapsamını tamamlar."
+    },
+    {
+      "label": "UPS şebeke varken neden aküye geçer?",
+      "path": "/haberler/ups-sebeke-varken-bataryaya-geciyor",
+      "reason": "Acil kapatma dışındaki beklenmeyen mod geçişlerini ayırır."
+    },
+    {
+      "label": "UPS overload alarmı",
+      "path": "/haberler/ups-overload-asiri-yuk-alarmi-neden-verir",
+      "reason": "Test yükünün UPS kapasitesi ve bypass koşullarıyla uyumunu destekler."
+    },
+    {
+      "label": "Elektrik kesintisi tatbikatı",
+      "path": "/hesaplama/elektrik-kesintisi-tatbikati",
+      "reason": "Acil kapatma testini kontrollü tatbikat ve geri dönüş planına bağlar."
+    },
+    {
+      "label": "Kurumsal elektrik sürekliliği ön değerlendirme",
+      "path": "/kurumsal-elektrik-surekliligi-on-degerlendirme",
+      "reason": "Yetkin EPO testi ve kritik yük planlamasına güvenli geçiş sağlar."
+    }
+  ],
+  "commerce": {
+    "enabled": false,
+    "policy": "none",
+    "category": null
+  },
+  "editorial": {
+    "createdBy": "ai-assisted",
+    "model": "gpt-5.6-thinking",
+    "humanReviewRequired": true,
+    "approvedBy": "ozaneryavuz",
+    "approvedAt": "2026-08-03T18:42:34Z",
+    "publishedAt": "2026-08-03T18:42:34Z",
+    "approvalPr": 784
+  },
+  "seo": {
+    "canonicalPath": "/haberler/ups-epo-repo-acil-kapatma-devresi-kabul-testi",
+    "robots": "index,follow,max-image-preview:large",
+    "lastModified": "2026-08-03",
+    "topics": [
+      "UPS",
+      "EPO",
+      "REPO",
+      "RPO",
+      "acil kapatma",
+      "bypass",
+      "LOTO",
+      "devreye alma"
+    ]
+  },
+  "quality": {
+    "score": 88,
+    "minimumRequired": 85,
+    "checks": {
+      "metadata": false,
+      "directAnswer": true,
+      "contentDepth": true,
+      "sources": true,
+      "safety": true,
+      "internalLinks": true,
+      "uniqueness": true,
+      "structuredData": true
+    },
+    "similarity": {
+      "maximum": 0.3077,
+      "closestPath": "https://www.alo186.com/haberler/ups-epo-rpo-acil-kapatma-nasil-calisir"
+    }
+  }
+}

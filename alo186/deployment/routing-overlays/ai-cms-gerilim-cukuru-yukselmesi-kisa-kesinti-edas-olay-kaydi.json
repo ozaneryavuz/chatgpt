@@ -1,0 +1,18 @@
+{
+  "version": 237,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/gerilim-cukuru-yukselmesi-kisa-kesinti-edas-olay-kaydi/index.html",
+      "canonicalPath": "/haberler/gerilim-cukuru-yukselmesi-kisa-kesinti-edas-olay-kaydi",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_cb99dcfdeeec1eb7",
+    "humanApproved": true,
+    "approvalPr": 790,
+    "qualityScore": 100
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "version": 238,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/vpp-der-telemetri-siber-guvenlik-zaman-senkronizasyonu-kabul/index.html",
+      "canonicalPath": "/haberler/vpp-der-telemetri-siber-guvenlik-zaman-senkronizasyonu-kabul",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_6d91a4c7e2b85f30",
+    "humanApproved": true,
+    "approvalPr": 776,
+    "qualityScore": 88
+  }
+}

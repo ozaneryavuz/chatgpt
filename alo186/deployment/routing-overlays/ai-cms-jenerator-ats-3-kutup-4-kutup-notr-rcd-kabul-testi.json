@@ -1,0 +1,18 @@
+{
+  "version": 236,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/jenerator-ats-3-kutup-4-kutup-notr-rcd-kabul-testi/index.html",
+      "canonicalPath": "/haberler/jenerator-ats-3-kutup-4-kutup-notr-rcd-kabul-testi",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_4cdb9ae6cdf55b90",
+    "humanApproved": true,
+    "approvalPr": 811,
+    "qualityScore": 88
+  }
+}

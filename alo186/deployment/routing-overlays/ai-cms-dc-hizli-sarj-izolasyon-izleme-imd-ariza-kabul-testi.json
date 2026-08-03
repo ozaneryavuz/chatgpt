@@ -1,0 +1,18 @@
+{
+  "version": 236,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/dc-hizli-sarj-izolasyon-izleme-imd-ariza-kabul-testi/index.html",
+      "canonicalPath": "/haberler/dc-hizli-sarj-izolasyon-izleme-imd-ariza-kabul-testi",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_cc8af81955a2e30e",
+    "humanApproved": true,
+    "approvalPr": 804,
+    "qualityScore": 88
+  }
+}

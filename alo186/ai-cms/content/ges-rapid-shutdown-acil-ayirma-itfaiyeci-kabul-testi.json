@@ -1,0 +1,287 @@
+{
+  "schemaVersion": 1,
+  "id": "cms_6ee3de747074058f",
+  "slug": "ges-rapid-shutdown-acil-ayirma-itfaiyeci-kabul-testi",
+  "contentType": "guide",
+  "state": "published",
+  "locale": "tr-TR",
+  "title": "GES Rapid Shutdown ve Acil Ayırma Kabul Testi",
+  "h1": "GES rapid shutdown ve itfaiyeci acil ayırma sistemi nasıl kabul edilir?",
+  "description": "GES rapid shutdown sisteminde tetikleyici, modül anahtarı, DC gerilim düşümü, etiket ve yeniden başlatmayı kanıta dayalı kabul edin.",
+  "intent": "Rapid shutdown veya itfaiyeci acil ayırma işlevi bulunan PV sisteminde tetikleyiciden modül seviyesine kadar bütün zincirin çalıştığını, DC iletken gerilimi ve durum geri bildirimiyle güvenli biçimde doğrulamak.",
+  "primaryKeyword": "GES rapid shutdown kabul testi",
+  "audience": [
+    "GES yatırımcıları",
+    "Otel ve işletme teknik ekipleri",
+    "PV tasarım ve devreye alma mühendisleri",
+    "Yangın güvenliği ve bakım ekipleri",
+    "Elektrik işletme sorumluları"
+  ],
+  "riskClass": "high",
+  "directAnswer": "GES’te inverteri kapatmak veya AC kesiciyi açmak, bütün çatı DC iletkenlerinin güvenli gerilime indiğini tek başına kanıtlamaz. Rapid shutdown bulunan bir sistemde tetikleyici, inverter/iletişim, modül veya dizi anahtarları ve DC kablo gerilimi uçtan uca test edilmelidir. Kabul; normal–shutdown durum zinciri, belirlenmiş ölçüm noktalarında gerilim-zaman kaydı, etiketleme, yardımcı besleme kaybı ve kontrollü yeniden başlatma ile yapılır. Bu işlev Türkiye’de her tesis için evrensel zorunluluk gibi sunulmamalı; proje ve yetkili merci şartları doğrulanmalıdır.",
+  "sections": [
+    {
+      "id": "gorev-ve-kapsam",
+      "heading": "Rapid shutdown, AC ayırma ve DC yük ayırıcısı nasıl ayrılır?",
+      "paragraphs": [
+        "AC ana kesicinin açılması inverterin şebekeye enerji vermesini durdurabilir; fakat PV modülleri ışık aldıkça DC üretmeye devam eder. İnverter üzerindeki DC yük ayırıcısı da yalnız kendi bağlantı sınırındaki iletkenleri ayırabilir. Rapid shutdown ise tasarıma bağlı olarak çatı veya dizi dışına çıkan DC iletkenlerin gerilimini azaltmak için iletişimli modül/dizi anahtarlarını içeren ayrı bir sistem görevidir.",
+        "IEC 62548-1 PV dizi tasarımında DC kablolama, koruma, switching, topraklama, izolasyon izleme ve ayırma hükümlerini kapsar. IEC 60364-7-712 PV tesisinin modülden bağlantı noktasına kadar seçim ve uygulama gereklerini tanımlar. Bu standartlar, proje kapsamının bütün bileşenleriyle belgelenmesi gerektiğini destekler; rapid shutdown zorunluluğu ise proje ülkesi, yetkili merci ve seçilen ürün sistemine göre ayrıca belirlenmelidir."
+      ],
+      "bullets": [
+        "AC kesici, inverter DC ayırıcı ve rapid shutdown tetikleyicisini ayrı etiketleyin.",
+        "Hangi DC iletkenlerin hangi işlevle gerilimden düşürüldüğünü tek hatta gösterin.",
+        "İnverter kapanmasını modül seviyesinde gerilimsizlik saymayın.",
+        "Proje şartını başka ülkenin mevzuatından otomatik kopyalamayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "id": "sistem-bilesenleri",
+      "heading": "Tam rapid shutdown sistemi hangi bileşenlerden oluşur?",
+      "paragraphs": [
+        "Tam sistem; tetikleyici veya initiator, inverter ya da haberleşme vericisi, modül/dizi anahtarları, iletişim yolu, yardımcı besleme, kablolama ve durum geri bildiriminden oluşabilir. Tek bir inverterin PVRSE veya rapid shutdown uyumlu olarak listelenmesi, kurulu tesisin bütün işlevleri yerine getirdiğini tek başına göstermez. Tam ürün kodları ve birlikte çalışma listesi doğrulanmalıdır.",
+        "IEC 63257:2026, DC shutdown ekipmanının durumunu güç hattı iletişimiyle bileşenlere iletmeyi ve PV dizisinden çıkan DC kabloların gerilimini acil müdahale ekiplerini destekleyecek şekilde azaltma iletişim gerekliliklerini tanımlar. SMA üretici dokümanı da tam sistemin inverter, PV anahtarları ve tetikleyiciden oluştuğunu; işlev etkinleştirilirken uyumlu modül anahtarlarının bulunması gerektiğini açıklar."
+      ],
+      "bullets": [
+        "Tetkileyici, inverter/verici, modül anahtarı ve firmware listesini oluşturun.",
+        "Uyumlu bileşen kombinasyonunu üretici belgesiyle doğrulayın.",
+        "İletişim ve yardımcı besleme yollarını tek hatta işleyin.",
+        "Yalnız inverter etiketini tam sistem uygunluğu saymayın."
+      ],
+      "sourceRefs": [
+        "S3",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "id": "fonksiyon-ve-gerilim-testi",
+      "heading": "Shutdown komutu ve DC gerilim düşümü nasıl sınanmalıdır?",
+      "paragraphs": [
+        "Test, tesis normal üretimde kararlı iken başlatılmalı; tetikleyici konumu, inverter durumu, dizi veya modül anahtarı geri bildirimi ve seçilmiş DC ölçüm noktaları ortak zaman çizelgesinde kaydedilmelidir. Gerilim ölçüm cihazı beklenen maksimum DC gerilimine uygun olmalı ve yalnız yetkin ekip tarafından üretici prosedürüne göre bağlanmalıdır.",
+        "IEC 63257 iletişimli shutdown sistemlerinde normal/shutdown durumunun bütün üretim bileşenlerine yayılmasını ve dizi dışına çıkan DC kablolarda gerilim azaltma işlevini ele alır. Üretici sistemlerinde hedef süre ve gerilim modele ve uyulan kurala göre değişebilir; örneğin bazı hızlı kapatma sistemleri 30 saniyelik bir sınıra göre tasarlanır. Kabul kriteri ilgili proje ve ürün sertifikasından alınmalı, evrensel tek sayı gibi kullanılmamalıdır."
+      ],
+      "bullets": [
+        "Başlangıç DC gerilimi, tetikleme saati ve gerilim-zaman eğrisini kaydedin.",
+        "Birden çok string ve çatı bölgesini temsil eden ölçüm noktaları seçin.",
+        "Sadece ekran mesajına değil fiziksel gerilim ve durum geri bildirimine bakın.",
+        "Kontrolsüz DC ayırma veya çıplak iletken ölçümü yapmayın."
+      ],
+      "sourceRefs": [
+        "S3",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "id": "ariza-ve-yardimci-besleme",
+      "heading": "İletişim veya yardımcı besleme kaybında sistem nasıl davranmalıdır?",
+      "paragraphs": [
+        "Yangın veya şebeke kaybı sırasında AC yardımcı besleme, ağ veya PLC iletişimi aynı anda kaybolabilir. Tasarımın bu durumda shutdowna geçip geçmediği, son durumu koruyup korumadığı veya arıza alarmı ürettiği ürün belgelerinde tanımlanmalıdır. Fail-safe beklentisi varsayımla değil gerçek sistem mimarisiyle doğrulanmalıdır.",
+        "SolarEdge güvenlik açıklaması SafeDC ve Rapid Shutdown işlevlerini ark algılama ve sistem alarmlarından ayrı görevler olarak sunar. SMA dokümanı da rapid shutdown işlevinin yalnız uygun PV anahtarları kurulu olduğunda etkinleştirilmesi gerektiğini belirtir. Kabulde iletişim kablosu, tetikleyici yardımcı beslemesi ve seçilmiş modül anahtarı arızası ayrı senaryolarda sınanmalı; arıza, alarm ve geri dönüş davranışı kaydedilmelidir."
+      ],
+      "bullets": [
+        "Tetikleyici beslemesi ve iletişim kaybını ayrı test edin.",
+        "Tek bir modül anahtarı yanıt vermediğinde alarmın görünürlüğünü doğrulayın.",
+        "Şebeke kaybı ile kullanıcı tetikleme komutunu birbirinden ayırın.",
+        "Arıza hâlinde otomatik yeniden enerjilenme olup olmadığını kaydedin."
+      ],
+      "sourceRefs": [
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "id": "etiket-yeniden-baslatma-dosyasi",
+      "heading": "Etiketleme ve yeniden başlatma kabulü nasıl tamamlanır?",
+      "paragraphs": [
+        "İtfaiyeci veya acil durum ekibinin yanlış anahtarı kullanmasını önlemek için tetikleyicinin konumu, işlevi, kapsadığı çatı alanı ve sistem durumu kalıcı ve okunabilir biçimde belirtilmelidir. Tek hat, çatı planı ve saha etiketi aynı adlandırmayı kullanmalıdır. Birden fazla inverter veya bina varsa hangi tetikleyicinin hangi alanı kapattığı açık olmalıdır.",
+        "Shutdown sonrasında yeniden başlatma; olay nedeni kontrol edilmeden yalnız anahtarı geri çevirmek değildir. Yetkin ekip tetikleyici, DC kablo, modül anahtarları, inverter alarmları ve haberleşmeyi kontrol etmeli; üretici sırasına göre sistemi kademeli devreye almalıdır. CTA: kişisel verisiz tetikleyici–bileşen–gerilim–alarm–yeniden başlatma kabul matrisini PV ve yangın güvenliği ekiplerine iletin."
+      ],
+      "bullets": [
+        "Çatı planı, tek hat ve saha etiketlerini aynı kodlarla eşleştirin.",
+        "Her tetikleyicinin kapsadığı inverter/string alanını gösterin.",
+        "Shutdown sonrası fiziksel inceleme ve alarm kapanışını kaydedin.",
+        "Kanıt yeterliyse gereksiz modül anahtarı veya komple inverter değişimi satın almayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S4",
+        "S5"
+      ]
+    }
+  ],
+  "faqs": [
+    {
+      "question": "GES ana AC şalterini kapatınca çatıda DC gerilim kalır mı?",
+      "answer": "Evet, sistem mimarisine bağlı olarak PV modülleri ışık altında DC üretmeye devam edebilir. AC ayırma, rapid shutdown işlevinin tamamlandığını tek başına kanıtlamaz.",
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S4"
+      ]
+    },
+    {
+      "question": "Her GES’te rapid shutdown zorunlu mudur?",
+      "answer": "Hayır, bu rehber evrensel Türkiye zorunluluğu ilan etmez. Proje, yetkili merci, ülke kuralı ve ürün sertifika kapsamı ayrı doğrulanmalıdır.",
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "question": "İnverter rapid shutdown uyumluysa başka ekipman gerekmez mi?",
+      "answer": "Her zaman değil. Bazı sistemlerde tam işlev için tetikleyici, modül/dizi anahtarları ve uyumlu iletişim gerekir; tam bileşen zinciri belgelenmelidir.",
+      "sourceRefs": [
+        "S3",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "question": "Rapid shutdown sonrası kullanıcı sistemi tekrar açabilir mi?",
+      "answer": "Acil durum veya arıza nedeni kontrol edilmeden hayır. Yeniden başlatma üretici prosedürü, fiziksel kontrol ve yetkin ekip ile yapılmalıdır.",
+      "sourceRefs": [
+        "S4",
+        "S5"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "publisher": "IEC",
+      "title": "IEC 62548-1:2023 — Photovoltaic arrays, design requirements",
+      "url": "https://webstore.iec.ch/en/publication/64171",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "PV dizilerinde DC kablolama, koruma cihazları, switching, topraklama, izolasyon izleme ve ayırma tasarım gereklerini tanımlar."
+    },
+    {
+      "id": "S2",
+      "publisher": "IEC",
+      "title": "IEC 60364-7-712:2025 — Solar photovoltaic power supply installations",
+      "url": "https://webstore.iec.ch/en/publication/65748",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "PV modüllerinden bağlantı noktasına kadar tesis ekipmanının seçim ve uygulama gereklerini kapsar."
+    },
+    {
+      "id": "S3",
+      "publisher": "IEC",
+      "title": "IEC 63257:2026 — Power line communication for DC shutdown equipment",
+      "url": "https://webstore.iec.ch/en/publication/64941",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "PV shutdown durumunun bileşenlere iletilmesi ve dizi dışı DC kabloların gerilim azaltma iletişim gereklerini tanımlar."
+    },
+    {
+      "id": "S4",
+      "publisher": "SMA Solar Technology",
+      "title": "Rapid Shutdown Equipment",
+      "url": "https://manuals.sma.de/SBSExx-US-50/en-US/13317429131.html",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Tam rapid shutdown sisteminin inverter, PV modül anahtarları ve tetikleyiciden oluştuğunu ve uyumlu bileşen gereğini açıklar."
+    },
+    {
+      "id": "S5",
+      "publisher": "SolarEdge",
+      "title": "Safety First with SolarEdge Commercial PV Systems",
+      "url": "https://www.solaredge.com/aus/commercial/safety",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "SafeDC, Rapid Shutdown, ark algılama ve sistem alarmı işlevlerini ayrı güvenlik katmanları olarak açıklar."
+    }
+  ],
+  "internalLinks": [
+    {
+      "label": "GES elektrik kesintisinde çalışır mı?",
+      "path": "/haberler/ges-elektrik-kesintisinde-calisir-mi",
+      "reason": "Şebeke kaybı, anti-islanding ve çatı DC gerilimi arasındaki farkı açıklar."
+    },
+    {
+      "label": "GES inverter şebeke gerilimi yüksek hatası",
+      "path": "/haberler/ges-inverter-sebeke-gerilimi-yuksek-hatasi",
+      "reason": "Şebeke kaynaklı inverter kapanmasını acil shutdown komutundan ayırır."
+    },
+    {
+      "label": "Güneş paneli inverter clipping ve DC/AC oranı",
+      "path": "/haberler/gunes-paneli-inverter-clipping-dc-ac-orani",
+      "reason": "Normal güç sınırlamasını güvenlik amaçlı shutdown davranışından ayırır."
+    },
+    {
+      "label": "Elektrik panosunda termal kamera kontrolü",
+      "path": "/haberler/elektrik-panosunda-termal-kamera-kontrolu",
+      "reason": "Acil ayırma bileşenlerinin bağlantı ve ısınma kontrolüne bağlanır."
+    },
+    {
+      "label": "Parafudr ve gerilim koruma rölesi farkı",
+      "path": "/haberler/parafudr-gerilim-koruma-rolesi-farki",
+      "reason": "Darbe korumasını rapid shutdown ve izolasyon görevinden ayırır."
+    },
+    {
+      "label": "Gerilim koruma çözüm seçici",
+      "path": "/hesaplama/gerilim-koruma-cozum-secici",
+      "reason": "Kullanıcının darbe, sürekli gerilim ve kesinti sorununu doğru sınıfa yönlendirmesini sağlar."
+    },
+    {
+      "label": "Kurumsal elektrik sürekliliği ön değerlendirme",
+      "path": "/kurumsal-elektrik-surekliligi-on-degerlendirme",
+      "reason": "Çoklu inverter ve kritik tesislerde profesyonel kabul kapsamını oluşturur."
+    }
+  ],
+  "commerce": {
+    "enabled": false,
+    "policy": "none",
+    "category": null
+  },
+  "editorial": {
+    "createdBy": "ai-assisted",
+    "model": "gpt-5.6-thinking",
+    "humanReviewRequired": true,
+    "approvedBy": "ozaneryavuz",
+    "approvedAt": "2026-08-03T18:43:32Z",
+    "publishedAt": "2026-08-03T18:43:32Z",
+    "approvalPr": 812
+  },
+  "seo": {
+    "canonicalPath": "/haberler/ges-rapid-shutdown-acil-ayirma-itfaiyeci-kabul-testi",
+    "robots": "index,follow,max-image-preview:large",
+    "lastModified": "2026-08-03",
+    "topics": [
+      "GES",
+      "rapid shutdown",
+      "acil ayırma",
+      "itfaiyeci anahtarı",
+      "PV DC güvenliği",
+      "modül anahtarı",
+      "IEC 63257"
+    ]
+  },
+  "quality": {
+    "score": 88,
+    "minimumRequired": 85,
+    "checks": {
+      "metadata": false,
+      "directAnswer": true,
+      "contentDepth": true,
+      "sources": true,
+      "safety": true,
+      "internalLinks": true,
+      "uniqueness": true,
+      "structuredData": true
+    },
+    "similarity": {
+      "maximum": 0.2143,
+      "closestPath": "https://www.alo186.com/haberler/ges-rapid-shutdown-dc-izolator-afci-farki"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "version": 237,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/ges-mc4-konnektor-capraz-eslestirme-krimp-kabul/index.html",
+      "canonicalPath": "/haberler/ges-mc4-konnektor-capraz-eslestirme-krimp-kabul",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_0b1ae0210cf7f255",
+    "humanApproved": true,
+    "approvalPr": 755,
+    "qualityScore": 100
+  }
+}

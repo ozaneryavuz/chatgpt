@@ -1,0 +1,275 @@
+{
+  "schemaVersion": 1,
+  "id": "cms_c5cda2b158d352af",
+  "slug": "kacak-akim-toplam-kacak-butcesi-istenmeyen-acma-teshisi",
+  "contentType": "guide",
+  "state": "published",
+  "locale": "tr-TR",
+  "title": "Toplam Kaçak Akım Bütçesi ve RCD Açma Teşhisi",
+  "h1": "Toplam kaçak akım bütçesi nasıl çıkarılır ve RCD neden gereksiz açar?",
+  "description": "UPS, inverter, EVSE ve elektronik yüklerde biriken koruma iletkeni akımlarını ölçerek gerçek izolasyon arızasını istenmeyen RCD açmasından ayırın.",
+  "intent": "Bir tesiste tekrarlayan kaçak akım rölesi açmalarının gerçek izolasyon arızasından mı, biriken normal kaçak akımlardan mı veya anahtarlama darbelerinden mi kaynaklandığını kanıt dosyasıyla ayırmak.",
+  "primaryKeyword": "toplam kaçak akım bütçesi",
+  "audience": [
+    "Elektrik mühendisleri",
+    "Tesis yöneticileri",
+    "UPS ve veri odası ekipleri",
+    "EV şarj işletmecileri",
+    "Yetkili elektrikçiler"
+  ],
+  "riskClass": "high",
+  "directAnswer": "RCD’nin sık açması her zaman tek bir arızalı cihaz olduğu anlamına gelmez. UPS, inverter, EVSE, LED sürücüler ve IT güç kaynaklarının EMI filtreleri koruma iletkenine normal çalışma akımı taşıyabilir; aynı koruma cihazı altındaki yükler arttıkça bu akımlar toplanır ve anahtarlama anındaki kısa darbelerle açma eşiğine yaklaşabilir. Güvenli teşhis; devre topolojisi, RCD tipi, nötr karışması, sürekli ve olay anı kaçak akım ölçümü ile yüklerin kontrollü ayrılmasını birlikte kaydetmelidir. Koruma cihazını büyütmek, köprülemek veya iptal etmek ölçüm yerine geçmez.",
+  "sections": [
+    {
+      "id": "ariza-ile-toplam-kacagi-ayirin",
+      "heading": "Gerçek izolasyon arızası ile toplam normal kaçak akımı nasıl ayırırsınız?",
+      "paragraphs": [
+        "Elektronik cihazların şebeke girişindeki EMI filtreleri, ortak mod gürültüsünü sınırlamak için faz veya nötr ile koruma iletkeni arasında kapasitif yollar kullanabilir. Bu nedenle cihaz sağlamken de küçük koruma iletkeni akımları oluşabilir. Schneider Electric, UPS girişinde görülen kaçağın UPS ile bağlı yüklerin toplamı olduğunu ve çoklu IT yüklerinin 30 mA sınıfı bir korumayı istenmeyen biçimde açtırabileceğini açıklar.",
+        "Bu açıklama, gerçek arızanın önemsiz olduğu anlamına gelmez. İzolasyon bozulması, nem, kablo hasarı, nötrlerin farklı RCD grupları arasında karışması ve yanlış N–PE bağlantıları aynı belirtiyi üretebilir. Kanıt dosyası sürekli taban akımı, yük eklenince değişim, olay anı tepe değeri ve izolasyon test sonuçlarını ayrı sütunlarda göstermelidir."
+      ],
+      "bullets": [
+        "Her RCD’nin beslediği devre ve yükleri tek hat üzerinde işaretleyin.",
+        "Sürekli koruma iletkeni akımı ile olay anındaki darbeyi ayrı kaydedin.",
+        "Nötr karışması ve istenmeyen N–PE bağlantısını kontrol ettirin.",
+        "Nem, kablo ve cihaz izolasyon bulgularını toplam kaçak bütçesinden ayrı tutun."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "id": "kacak-butcesi-olcum-plani",
+      "heading": "Kaçak akım bütçesi hangi ölçümlerle hazırlanmalıdır?",
+      "paragraphs": [
+        "Yetkili personel, uygun kaçak akım pensiyle önce ana koruma iletkenindeki veya tüm aktif iletkenlerin birlikte kavrandığı ölçüm noktasındaki artık akımı kaydeder. Ardından kritik yükleri rastgele söküp takmak yerine, onaylı bir sıra içinde devre bazında değişimi izler. Amaç yalnız tek bir anlık değer değil; normal işletme, ilk enerjilenme, UPS transferi, inverter startı, EV şarj başlangıcı ve yüksek yük anlarının karşılaştırılmasıdır.",
+        "Ölçüm aralığı ve cihaz bant genişliği raporda belirtilmelidir. Milisaniyelik anahtarlama darbeleri sıradan bir el tipi ölçümde görünmeyebilir. Olay kaydedici veya uygun güç kalitesi analizörü kullanılıyorsa zaman damgası RCD açma kaydı, UPS olay günlüğü ve otomasyon loguyla eşleştirilmelidir."
+      ],
+      "bullets": [
+        "Normal işletme taban değerini en az üç farklı yük seviyesinde kaydedin.",
+        "İlk enerjilenme, transfer ve şarj başlangıcını ayrı olay olarak etiketleyin.",
+        "Ölçüm cihazının aralık, bant genişliği ve kalibrasyon bilgisini yazın.",
+        "Aynı saat çizelgesinde RCD, UPS, EVSE ve otomasyon olaylarını birleştirin."
+      ],
+      "sourceRefs": [
+        "S2",
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "id": "rcd-tipi-ve-selektivite",
+      "heading": "RCD tipi, hassasiyet ve selektivite kararı nasıl verilmelidir?",
+      "paragraphs": [
+        "IEC 60364-5-53, güvenlik amaçlı koruma, ayırma ve kontrol cihazlarının seçimi ile tesisini kapsar. Uygun RCD tipi ve eşik; topraklama düzeni, son devre koruma ihtiyacı, güç elektroniğinin üretebileceği artık akım biçimi, üretici talimatı ve yerel mevzuat birlikte değerlendirilerek belirlenmelidir. Tek başına “daha yüksek mA” seçmek veya her devreye aynı tip cihaz koymak doğru koordinasyon değildir.",
+        "Schneider kaynakları UPS ve bağlı IT yüklerinde sürekli kaçak, transfer darbeleri, ortak mod filtreleri ve nötr karışmasının açmaya yol açabileceğini; bazı uygulamalarda özel devre, uygun tip veya seçici zaman gecikmeli çözüm gerekebileceğini belirtir. Bu, son devrelerdeki can koruma gereğini kaldırmaz. Üst ve alt kademenin görevleri, açma süreleri ve üretici eğrileri kanıtlanmalıdır."
+      ],
+      "bullets": [
+        "Topraklama sistemi ve koruma amacını yazmadan RCD seçmeyin.",
+        "Son devre can koruması ile üst kademe yangın/selektivite görevini ayırın.",
+        "UPS, sürücü ve EVSE üreticisinin artık akım tipini doğrulayın.",
+        "Seçiciliği yalnız etiketle değil, açma süresi ve test sonucu ile kaydedin."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "id": "kontrollu-ayirma-ve-kabul",
+      "heading": "Kontrollü yük ayırma ve onarım sonrası kabul nasıl yapılır?",
+      "paragraphs": [
+        "Teşhis sırasında kullanıcıların cihazları tekrar tekrar fişe takması veya panoda devre ayırması güvenli değildir. Yetkili ekip, operasyonel kesinti planına göre yük gruplarını ayırır; her adımda artık akımın ne kadar değiştiğini ve RCD’nin hangi koşulda açtığını kaydeder. Kritik IT, yangın, haberleşme veya sağlık yüklerinde geçici enerji düzeni ayrıca planlanmalıdır.",
+        "Bulgu gerçek izolasyon arızasıysa onarım sonrası izolasyon, koruma iletkeni sürekliliği ve RCD fonksiyon testi yapılır. Sorun toplam normal kaçaksa devrelerin güvenli bölünmesi, üreticiye uygun koruma tipi, nötr düzeninin düzeltilmesi veya filtre/topoloji çözümü değerlendirilir. Kabul, normal yük ve en olumsuz beklenen geçiş senaryosunda tekrarlanmalıdır."
+      ],
+      "bullets": [
+        "Yük ayırma sırasını operasyon ve güvenlik sorumlularıyla onaylayın.",
+        "Her adımda akım değişimini ve açma zamanını kaydedin.",
+        "Onarım sonrası izolasyon, süreklilik ve RCD testini tekrarlayın.",
+        "Kabulü yalnız boşta değil, gerçek yük ve transfer senaryosunda yapın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S4"
+      ]
+    },
+    {
+      "id": "kanit-dosyasi-ve-satin-almama",
+      "heading": "Teknik kanıt dosyası hangi sonucu üretmelidir?",
+      "paragraphs": [
+        "Dosya; tek hat, RCD marka/model/tip/eşik, devre listesi, taban kaçak akımı, olay tepe değeri, cihaz grupları, nötr kontrolü, izolasyon sonuçları, olay logları, düzeltme ve tekrar testinden oluşmalıdır. Böylece “RCD bozuk” veya “UPS uyumsuz” gibi erken sonuçlar yerine, ölçülen neden ile düzeltme arasında izlenebilir bağ kurulur.",
+        "Mevcut cihazlar üretici sınırları içinde çalışıyor, nötr düzeni doğru ve devre bölünmesiyle güvenli marj sağlanıyorsa yeni UPS, RCD veya filtre satın almak gerekmeyebilir. Buna karşılık izolasyon arızası veya yanlış bağlantı varsa daha dayanıklı RCD seçmek tehlikeyi gizlememelidir. Sonuç, satın alma değil güvenli koruma ve süreklilik kabulüdür."
+      ],
+      "bullets": [
+        "Tek hat, ölçüm ve olay loglarını tek dosyada sürümleyin.",
+        "Her düzeltmeyi öncesi–sonrası ölçümle bağlayın.",
+        "Mevcut sistem yeterliyse satın almama sonucunu açıkça yazın.",
+        "Koruma seviyesini düşüren veya RCD’yi devre dışı bırakan çözümü reddedin."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S4"
+      ]
+    }
+  ],
+  "faqs": [
+    {
+      "question": "Kaçak akım rölesi atıyorsa mutlaka bir cihaz arızalı mıdır?",
+      "answer": "Hayır. Gerçek izolasyon arızası önemli bir olasılıktır; ancak birden çok elektronik yükün normal filtre akımları, nötr karışması veya kısa anahtarlama darbeleri de aynı koruma altında birleşerek açmaya neden olabilir. Ölçüm yapılmadan arıza veya cihaz değişimi kararı verilmemelidir.",
+      "sourceRefs": [
+        "S2",
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "question": "30 mA RCD yerine 100 mA takmak sorunu çözer mi?",
+      "answer": "Bu değişiklik koruma amacını ve yerel gereklilikleri bozabilir. Eşik, tip ve selektivite; topraklama sistemi, devre görevi, üretici talimatı ve ölçülen artık akım biçimiyle yetkili mühendis tarafından belirlenmelidir. Rastgele eşik büyütmek güvenli çözüm değildir.",
+      "sourceRefs": [
+        "S1",
+        "S2"
+      ]
+    },
+    {
+      "question": "UPS bağlıyken kaçak akım neden yükselir?",
+      "answer": "UPS’nin kendi EMI filtreleri ile çıkışına bağlı IT ve elektronik yüklerin koruma iletkeni akımları girişte birlikte görülebilir. Transfer, kapasitör şarjı ve ortak mod anahtarlama darbeleri de kısa süreli artış oluşturabilir.",
+      "sourceRefs": [
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "question": "Kaçak akım pensiyle tek ölçüm yeterli midir?",
+      "answer": "Hayır. Tek anlık değer olay anını kaçırabilir. Normal yük, enerjilenme, transfer, şarj başlangıcı ve farklı devre kombinasyonları zaman damgalı olarak karşılaştırılmalı; izolasyon ve nötr düzeni testleriyle birlikte yorumlanmalıdır.",
+      "sourceRefs": [
+        "S2",
+        "S4"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "publisher": "IEC",
+      "title": "IEC 60364-5-53:2019+A1:2020+A2:2024 — Koruma ve anahtarlama cihazlarının seçimi",
+      "url": "https://webstore.iec.ch/en/publication/104394",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Alçak gerilim tesislerinde güvenlik, ayırma, anahtarlama, kontrol ve izleme cihazlarının seçimi ve tesisine ilişkin güncel çerçeveyi verir."
+    },
+    {
+      "id": "S2",
+      "publisher": "Schneider Electric",
+      "title": "UPS tesislerinde RCD, toprak kaçağı ve istenmeyen açma",
+      "url": "https://www.se.com/us/en/faqs/FAQ000281380/",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "UPS EMI filtreleri, bağlı yüklerin kümülatif kaçak akımı, transfer darbeleri, nötr karışması ve uygun RCD seçimi hakkında üretici açıklamasıdır."
+    },
+    {
+      "id": "S3",
+      "publisher": "Schneider Electric",
+      "title": "UPS giriş tarafında RCD ve kümülatif kaçak akım",
+      "url": "https://www.se.com/us/en/faqs/FA157373/",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "UPS ile bağlı yüklerin artık akımlarının girişte toplandığını ve çoklu devre/transfer koşullarının istenmeyen açmaya yol açabileceğini açıklar."
+    },
+    {
+      "id": "S4",
+      "publisher": "Schneider Electric",
+      "title": "Arıza olmadan toprak kaçağı korumasının açma nedenleri",
+      "url": "https://www.se.com/eg/en/faqs/FA277483/",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Yüksek frekans bileşenleri, sürekli kaçak akım, kapasitif veya endüktif anahtarlama ve ortak mod darbelerinin istenmeyen açmaya etkisini listeler."
+    }
+  ],
+  "internalLinks": [
+    {
+      "label": "Kaçak akım rölesi neden sürekli atar?",
+      "path": "/haberler/kacak-akim-rolesi-neden-surekli-atar",
+      "reason": "Genel arıza belirtilerini ölçüm bütçesi görevinden ayırır."
+    },
+    {
+      "label": "Tip A ve Tip AC farkı",
+      "path": "/haberler/kacak-akim-rolesi-tip-a-tip-ac-farki",
+      "reason": "Artık akım dalga biçimi ve koruma tipi temelini açıklar."
+    },
+    {
+      "label": "Tip S selektivite",
+      "path": "/haberler/kacak-akim-rolesi-tip-s-selektivite-nedir",
+      "reason": "Üst ve alt kademe zaman koordinasyonuna bağlar."
+    },
+    {
+      "label": "Tip F ve inverterli cihazlar",
+      "path": "/haberler/kacak-akim-rolesi-tip-f-nedir-inverterli-cihazlar",
+      "reason": "Frekans bileşenli yüklerin koruma gereğini destekler."
+    },
+    {
+      "label": "EV şarjda Tip B ve RDC-DD",
+      "path": "/haberler/ev-sarj-istasyonu-tip-b-rcd-rdc-dd-secimi",
+      "reason": "EVSE kaynaklı DC artık akım görevini ayırır."
+    },
+    {
+      "label": "UPS şebeke varken bataryaya geçiyor",
+      "path": "/haberler/ups-sebeke-varken-bataryaya-geciyor",
+      "reason": "Transfer olayları ve şebeke kalitesi loglarına bağlar."
+    },
+    {
+      "label": "Kurumsal elektrik sürekliliği ön değerlendirmesi",
+      "path": "/kurumsal-elektrik-surekliligi-on-degerlendirme",
+      "reason": "Çok devreli tesislerde yetkili ölçüm ve kabul kapsamına geçiş sağlar."
+    }
+  ],
+  "commerce": {
+    "enabled": false,
+    "policy": "none",
+    "category": null
+  },
+  "editorial": {
+    "createdBy": "ai-assisted",
+    "model": "GPT-5.6 Thinking",
+    "humanReviewRequired": true,
+    "approvedBy": "ozaneryavuz",
+    "approvedAt": "2026-08-03T18:41:43Z",
+    "publishedAt": "2026-08-03T18:41:43Z",
+    "approvalPr": 763
+  },
+  "seo": {
+    "canonicalPath": "/haberler/kacak-akim-toplam-kacak-butcesi-istenmeyen-acma-teshisi",
+    "robots": "index,follow,max-image-preview:large",
+    "lastModified": "2026-08-03",
+    "topics": [
+      "kaçak akım rölesi",
+      "RCD",
+      "toplam kaçak akım",
+      "UPS",
+      "EMI filtre",
+      "selektivite"
+    ]
+  },
+  "quality": {
+    "score": 100,
+    "minimumRequired": 85,
+    "checks": {
+      "metadata": true,
+      "directAnswer": true,
+      "contentDepth": true,
+      "sources": true,
+      "safety": true,
+      "internalLinks": true,
+      "uniqueness": true,
+      "structuredData": true
+    },
+    "similarity": {
+      "maximum": 0.3684,
+      "closestPath": "https://alo186.com/haberler/kacak-akim-rolesi-toplam-kacak-akim-emc-filtre-ups-surucu"
+    }
+  }
+}

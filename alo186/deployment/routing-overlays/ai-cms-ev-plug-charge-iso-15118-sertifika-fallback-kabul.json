@@ -1,0 +1,18 @@
+{
+  "version": 236,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/ev-plug-charge-iso-15118-sertifika-fallback-kabul/index.html",
+      "canonicalPath": "/haberler/ev-plug-charge-iso-15118-sertifika-fallback-kabul",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_e2dd37b7cf5c8832",
+    "humanApproved": true,
+    "approvalPr": 784,
+    "qualityScore": 88
+  }
+}

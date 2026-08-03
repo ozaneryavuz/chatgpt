@@ -1,0 +1,287 @@
+{
+  "schemaVersion": 1,
+  "id": "cms_fb570ee2512d3be9",
+  "slug": "ups-dc-toprak-kacagi-izolasyon-izleme-alarm-kabul",
+  "contentType": "guide",
+  "state": "published",
+  "locale": "tr-TR",
+  "title": "UPS DC Toprak Kaçağı ve İzolasyon İzleme Kabulü",
+  "h1": "UPS akü DC toprak kaçağı alarmı nasıl doğrulanır ve kabul edilir?",
+  "description": "UPS akü DC toprak kaçağında IMD, alarm, polarite, string ayrımı ve güvenli müdahale zincirini kanıta dayalı kabul edin.",
+  "intent": "UPS veya haricî akü sisteminde DC ground fault/toprak kaçağı alarmının gerçek izolasyon bozulmasını mı, ölçüm/bağlantı hatasını mı gösterdiğini; IMD ayarı, alarm zinciri ve kontrollü kaynak ayrımıyla kanıtlamak.",
+  "primaryKeyword": "UPS DC toprak kaçağı izolasyon izleme",
+  "audience": [
+    "Otel ve veri merkezi teknik yöneticileri",
+    "UPS bakım ve devreye alma ekipleri",
+    "Elektrik mühendisleri",
+    "Akü sistemi uzmanları",
+    "Kritik tesis işletmecileri"
+  ],
+  "riskClass": "high",
+  "directAnswer": "UPS DC ground fault alarmı, akü kutuplarından birinin toprağa istenmeyen bağlantısını veya izolasyon direncinin düşmesini gösterebilir; fakat alarm tek başına arızanın yerini ve nedenini kanıtlamaz. Önce sistemin topraklanmış mı yoksa yalıtılmış IT/DC mimaride mi olduğu, IMD’nin ölçüm aralığı ve eşikleri, DC kaçak kapasitesi, alarm girişi ve akü string yapısı doğrulanmalıdır. Kabul; pozitif/negatif kutup gerilimleri, izolasyon direnci trendi, güvenli test direnci senaryosu ve alarm–UPS olay kaydı eşleşmesiyle yapılır.",
+  "sections": [
+    {
+      "id": "sistem-mimarisi",
+      "heading": "UPS akü DC sistemi topraklanmış mı, yalıtılmış mı nasıl anlaşılır?",
+      "paragraphs": [
+        "İlk adım, DC sisteminin tasarım referansını belirlemektir. Bazı UPS akü sistemleri topraktan yalıtılmış biçimde izlenir; bazılarında üreticiye özgü orta nokta, ölçüm veya koruma bağlantıları bulunabilir. Akü kabini gövdesinin PE’ye bağlanması, DC kutuplarından birinin toprağa bağlı olduğu anlamına gelmez. Tek hat, üretici şeması ve sahadaki gerçek bağlantılar birlikte okunmalıdır.",
+        "IEC 62040-1, enerji depolama içeren UPS’lerde yangın, elektrik çarpması, termal ve enerji tehlikelerini azaltmaya yönelik güvenlik gereklerini kapsar. IEC 61557-8 ise topraktan yalıtılmış AC, AC/DC ve DC IT sistemlerinde izolasyon direncini sürekli izleyen IMD’lerin gereklerini tanımlar. Yanlış sistem sınıfına göre seçilen cihaz veya eşik, anlamsız alarm ya da görünmeyen arıza oluşturabilir."
+      ],
+      "bullets": [
+        "DC tek hat, string sayısı, nominal gerilim ve kutup-toprak düzenini belgeleyin.",
+        "Kabin gövde PE bağlantısını DC kutup bağlantısından ayırın.",
+        "UPS ve haricî akü üreticisinin topraklama şemasını doğrulayın.",
+        "Bilinmeyen DC kutbunu kullanıcı tarafından toprağa bağlamayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2"
+      ]
+    },
+    {
+      "id": "imd-secimi-ve-ayar",
+      "heading": "IMD ölçüm aralığı, eşik ve kaçak kapasitesi nasıl doğrulanır?",
+      "paragraphs": [
+        "IMD’nin nominal AC/DC gerilim aralığı, sistem kaçak kapasitesi, ölçüm yöntemi ve iki alarm eşiği kurulu UPS/akü sistemine uygun olmalıdır. Çok uzun kablolar, filtreler, paralel stringler ve güç elektroniği toprağa göre kapasitif davranışı artırabilir; cihazın kararlı ölçüm süresi ve hassasiyeti bu nedenle ürün verisiyle karşılaştırılmalıdır.",
+        "Bender iso415R, yalıtılmış AC, AC/DC ve DC sistemlerde IEC 61557-8’e uygun izolasyon izleme örneğidir. isoES425 ise enerji depolama uygulamalarında yalıtılmış sistemlerin izolasyon direncini izler. Bu ürünler evrensel UPS seçimi olarak değil, cihaz gerilim aralığı, kaçak kapasitesi ve uygulama sınırının doğrulanması gerektiğini gösteren üretici örnekleri olarak kullanılmalıdır."
+      ],
+      "bullets": [
+        "IMD ürün kodu, gerilim aralığı ve sistem kaçak kapasitesi sınırını kaydedin.",
+        "Alarm 1 ve Alarm 2 eşiklerini proje/üretici gerekleriyle eşleştirin.",
+        "Ölçüm gecikmesi ve filtre ayarını olay süresiyle karşılaştırın.",
+        "Başka tesisten eşik değerini kopyalamayın."
+      ],
+      "sourceRefs": [
+        "S2",
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "id": "alarm-ve-polarite",
+      "heading": "Alarm zinciri ve arızalı kutup yönü nasıl kanıtlanır?",
+      "paragraphs": [
+        "UPS ekranındaki DC ground fault mesajı, haricî IMD’nin kuru kontağından veya UPS’nin kendi izleme işlevinden gelebilir. Schneider Galaxy VX dokümanında haricî ground fault/DC ground fault girişinin alarmı etkinleştirebildiği görülür. Kabulde IMD rölesi, kablo, dijital giriş mantığı, UPS alarm metni, BMS/SCADA ve olay zamanı uçtan uca eşleştirilmelidir.",
+        "Pozitif ve negatif kutbun toprağa göre gerilimleri arıza yönü hakkında ipucu verebilir; bazı özel cihazlar L+ veya L− tarafı için yer belirleme bilgisi sunar. Ancak yalnız iki voltmetre değeriyle kablo veya blok sökülmemelidir. Ölçüm; üreticinin izin verdiği test noktalarında, uygun DC kategorili cihaz ve yetkin ekip tarafından yapılmalıdır."
+      ],
+      "bullets": [
+        "IMD röle durumunu UPS dijital girişi ve alarm metniyle eşleştirin.",
+        "BMS/SCADA alarmında normal, alarm ve yardımcı besleme kaybı mantığını test edin.",
+        "Pozitif ve negatif kutup-toprak gerilimlerini ortak zamanla kaydedin.",
+        "Alarmı susturmayı izolasyonun düzeldiği anlamına getirmeyin."
+      ],
+      "sourceRefs": [
+        "S3",
+        "S5"
+      ]
+    },
+    {
+      "id": "guvenli-fonksiyon-testi",
+      "heading": "İzolasyon izleme fonksiyon testi nasıl güvenli yapılmalıdır?",
+      "paragraphs": [
+        "Gerçek akü kutbunu toprağa kısa devre ederek test yapılmaz. Yetkin ekip, IMD üreticisinin tanımladığı test düğmesi, dahili öz-test veya uygun değerde ve gerilim sınıfında kontrollü test direnci yöntemini kullanır. Test planı, beklenen alarm eşiğini, tepki süresini, röle değişimini ve UPS/BMS mesajını önceden belirlemelidir.",
+        "IEC 61557-8 IMD’lerin sürekli izleme ve test gereklerini tanımlar; ürünün test işlevi bütün saha kablolamasını doğrulamayabilir. Bu nedenle dahili öz-test ile uçtan uca haricî test ayrı sonuç satırlarında tutulmalıdır. Test sonrasında cihazın normal ölçüme döndüğü, alarmın kontrollü resetlendiği ve şarj/UPS durumunun güvenli kaldığı doğrulanmalıdır."
+      ],
+      "bullets": [
+        "Test düğmesi ile uçtan uca direnç simülasyonunu ayırın.",
+        "Test direnci, bağlantı noktası ve beklenen tepki süresini planlayın.",
+        "Alarm, röle, UPS logu ve BMS kaydını aynı zaman çizelgesine alın.",
+        "Canlı DC barayı kısa devre etmeyin veya korumayı köprülemeyin."
+      ],
+      "sourceRefs": [
+        "S2",
+        "S3",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "id": "kok-neden-ve-kabul-dosyasi",
+      "heading": "DC toprak kaçağı kök nedeni ve teslim dosyası nasıl kapatılır?",
+      "paragraphs": [
+        "Alarmın kaynağı akü kablosu izolasyonu, nem/kir, ezilmiş kablo, kabin içi temas, sensör bağlantısı, DC filtre, haricî ekipman veya yanlış eşik olabilir. String veya alt bölüm ayrımı yalnız onaylı manevra planı, alternatif güç, LOTO ve üretici prosedürüyle yapılmalıdır. Alarm varken rastgele blok sökmek veya kutupları ayırmak yüksek ark ve enerji tehlikesi oluşturur.",
+        "Teslim paketi; DC tek hat, akü kimyası/string düzeni, IMD modeli ve ayarları, sistem kaçak kapasitesi, kutup-toprak gerilimleri, izolasyon trendi, test yöntemi, alarm zinciri, olay günlüğü, kök neden, onarım ve yeniden kabul sonucunu içermelidir. CTA: kişisel verisiz DC sistem–IMD–alarm–polarite–kök neden kabul matrisini yetkin UPS/akü ekibine iletin."
+      ],
+      "bullets": [
+        "Arıza bölgesi ayrımını onaylı manevra planıyla yürütün.",
+        "Nem, kablo hasarı, filtre ve sensör bağlantısını ayrı kontrol edin.",
+        "Onarım öncesi ve sonrası aynı test yöntemini tekrarlayın.",
+        "Kanıt yeterliyse gereksiz akü stringi veya IMD değişimi satın almayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S4",
+        "S5"
+      ]
+    }
+  ],
+  "faqs": [
+    {
+      "question": "UPS DC ground fault alarmı varken UPS çalışmaya devam eder mi?",
+      "answer": "Modele ve arıza seviyesine göre çalışabilir; ancak ikinci bir izolasyon arızası ciddi risk oluşturabilir. Alarm üretici prosedürüne göre gecikmeden yetkin ekipçe incelenmelidir.",
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "question": "Akü kabini topraklıysa DC sistem de topraklı mıdır?",
+      "answer": "Hayır. Kabin gövdesinin PE’ye bağlanması elektrik çarpmasına karşı korumadır; DC pozitif veya negatif kutbun toprağa bağlandığını tek başına göstermez.",
+      "sourceRefs": [
+        "S1",
+        "S2"
+      ]
+    },
+    {
+      "question": "IMD test düğmesi bütün kablolamanın sağlam olduğunu kanıtlar mı?",
+      "answer": "Her zaman değil. Dahili test cihaz elektroniğini sınayabilir; röle, saha kablosu, UPS girişi ve BMS alarmı uçtan uca ayrıca doğrulanmalıdır.",
+      "sourceRefs": [
+        "S2",
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "question": "DC toprak kaçağını bulmak için akü kutbu toprağa değdirilir mi?",
+      "answer": "Hayır. Kontrollü test direnci veya üretici öz-test yöntemi kullanılmalı; canlı DC bara üzerinde kısa devre ve rastgele ayırma yapılmamalıdır.",
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S5"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "publisher": "IEC",
+      "title": "IEC 62040-1:2017+A1:2021+A2:2022 — UPS safety requirements",
+      "url": "https://webstore.iec.ch/en/publication/80573",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Enerji depolama içeren UPS’lerde elektrik çarpması, yangın, termal, enerji ve mekanik tehlikelere karşı güvenlik gereklerini tanımlar."
+    },
+    {
+      "id": "S2",
+      "publisher": "IEC",
+      "title": "IEC 61557-8:2014 — Insulation monitoring devices for IT systems",
+      "url": "https://webstore.iec.ch/en/publication/5582",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Topraktan yalıtılmış AC, AC/DC ve 1500 V DC’ye kadar IT sistemlerinde izolasyon direncini sürekli izleyen IMD gereklerini tanımlar."
+    },
+    {
+      "id": "S3",
+      "publisher": "Bender",
+      "title": "ISOMETER iso415R",
+      "url": "https://www.bender.de/en/products/insulation-monitoring/isometer-iso415r/",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "IEC 61557-8’e uygun, yalıtılmış AC, AC/DC ve DC sistemler için ayarlanabilir iki eşikli izolasyon izleme cihazı örneğidir."
+    },
+    {
+      "id": "S4",
+      "publisher": "Bender",
+      "title": "ISOMETER isoES425",
+      "url": "https://www.bender.de/en/products/insulation-monitoring/isometer-isoes425/",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Enerji depolama uygulamalarında AC/DC 400 V’a kadar yalıtılmış sistemlerin izolasyon direncini izleme uygulamasını açıklar."
+    },
+    {
+      "id": "S5",
+      "publisher": "Schneider Electric",
+      "title": "Configure the Input Contacts — Galaxy VX",
+      "url": "https://productinfo.se.com/galaxyvx_ul/5b69ada2313cae0001704e8d/990-5452F%20Galaxy%20VX%20Operation/English/990-5452%20Operation_0000060284.xml/$/ConfiguretheInputContacts_GVX_DD00578888",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Haricî ground fault ve DC ground fault girişlerinin UPS alarm zincirinde nasıl yapılandırılabildiğini gösterir."
+    }
+  ],
+  "internalLinks": [
+    {
+      "label": "UPS aküsü ne zaman değişir?",
+      "path": "/haberler/ups-akusu-ne-zaman-degisir",
+      "reason": "İzolasyon alarmını yaş ve kapasite kaybı kararından ayırır."
+    },
+    {
+      "label": "UPS çalışma süresi hesaplama",
+      "path": "/hesaplama/ups-suresi",
+      "reason": "Akü enerji kapasitesi görevini izolasyon güvenliği görevinden ayırır."
+    },
+    {
+      "label": "UPS akü değişim uygunluk aracı",
+      "path": "/hesaplama/ups-aku-degisim-uygunluk",
+      "reason": "Değişim kararında yaş, yük ve belirti kontrolünü destekler."
+    },
+    {
+      "label": "UPS online, line-interactive ve offline farkı",
+      "path": "/haberler/ups-online-line-interactive-offline-farki",
+      "reason": "UPS topolojisinin temel çalışma farklarını açıklar."
+    },
+    {
+      "label": "UPS çıkış kısa devre ve selektivite kabulü",
+      "path": "/haberler/ups-cikis-kisa-devre-akimi-selektivite-kesici-kabul",
+      "reason": "DC izolasyon izlemesini AC çıkış koruma koordinasyonundan ayırır."
+    },
+    {
+      "label": "Jeneratör ve UPS birlikte çalışır mı?",
+      "path": "/haberler/jenerator-ups-birlikte-calisir-mi",
+      "reason": "Alternatif kaynak ve bakım penceresi planını tamamlar."
+    },
+    {
+      "label": "Kurumsal elektrik sürekliliği ön değerlendirme",
+      "path": "/kurumsal-elektrik-surekliligi-on-degerlendirme",
+      "reason": "Kritik UPS ve çoklu akü stringi için profesyonel inceleme kapsamı oluşturur."
+    }
+  ],
+  "commerce": {
+    "enabled": false,
+    "policy": "none",
+    "category": null
+  },
+  "editorial": {
+    "createdBy": "ai-assisted",
+    "model": "gpt-5.6-thinking",
+    "humanReviewRequired": true,
+    "approvedBy": "ozaneryavuz",
+    "approvedAt": "2026-08-03T18:43:33Z",
+    "publishedAt": "2026-08-03T18:43:33Z",
+    "approvalPr": 812
+  },
+  "seo": {
+    "canonicalPath": "/haberler/ups-dc-toprak-kacagi-izolasyon-izleme-alarm-kabul",
+    "robots": "index,follow,max-image-preview:large",
+    "lastModified": "2026-08-03",
+    "topics": [
+      "UPS",
+      "DC ground fault",
+      "izolasyon izleme",
+      "IMD",
+      "akü stringi",
+      "toprak kaçağı",
+      "IEC 61557-8"
+    ]
+  },
+  "quality": {
+    "score": 88,
+    "minimumRequired": 85,
+    "checks": {
+      "metadata": false,
+      "directAnswer": true,
+      "contentDepth": true,
+      "sources": true,
+      "safety": true,
+      "internalLinks": true,
+      "uniqueness": true,
+      "structuredData": true
+    },
+    "similarity": {
+      "maximum": 0.2632,
+      "closestPath": "https://alo186.com/haberler/bess-izolasyon-izleme-imd-toprak-arizasi-alarmi"
+    }
+  }
+}

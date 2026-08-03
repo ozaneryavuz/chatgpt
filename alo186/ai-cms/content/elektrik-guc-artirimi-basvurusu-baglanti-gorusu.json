@@ -1,0 +1,271 @@
+{
+  "schemaVersion": 1,
+  "id": "cms_40704e16af2c8d2e",
+  "slug": "elektrik-guc-artirimi-basvurusu-baglanti-gorusu",
+  "contentType": "guide",
+  "state": "published",
+  "locale": "tr-TR",
+  "title": "Elektrik Güç Artırımı Başvurusu ve Bağlantı Görüşü",
+  "h1": "Elektrik güç artırımı başvurusu nasıl hazırlanır, bağlantı görüşünde ne incelenir?",
+  "description": "Ana sigorta ve sözleşme gücü yetmiyorsa yük cetveli, proje, bağlantı görüşü ve EDAŞ başvuru dosyasını doğru sırayla hazırlayın.",
+  "intent": "Konut veya işletmede yeni cihazlar nedeniyle mevcut bağlantı gücü yetersiz kaldığında, dağıtım şirketine güç artırımı talebini teknik ve belgeye dayalı biçimde hazırlamak.",
+  "primaryKeyword": "elektrik güç artırımı başvurusu",
+  "audience": [
+    "Konut ve site yöneticileri",
+    "Otel ve işletme yöneticileri",
+    "Elektrik mühendisleri",
+    "Proje ve taahhüt ekipleri",
+    "EV şarj yatırımı yapanlar"
+  ],
+  "riskClass": "legal",
+  "directAnswer": "Elektrik güç artırımı, yalnız ana sigortayı büyütmek değildir. Önce mevcut bağlantı ve sözleşme gücü, sayaç ve koruma düzeni, eşzamanlı yükler, kablo ve pano kapasitesi ile yeni talep gücü yetkili proje çalışmasıyla belirlenir. Ardından ilgili dağıtım şirketine güncel proje ve istenen belgelerle başvurulur; şebeke kapasitesi, bağlantı seviyesi, trafo veya hat yatırımı gerekip gerekmediği bağlantı görüşünde değerlendirilir. Kullanıcı, proje onayı ve dağıtım şirketi süreci tamamlanmadan sigorta veya kabloyu tek başına büyütmemelidir.",
+  "sections": [
+    {
+      "id": "mevcut-guc-ve-ihtiyac",
+      "heading": "Güç artırımı gerekip gerekmediği nasıl anlaşılır?",
+      "paragraphs": [
+        "Tekrarlayan ana sigorta açması her zaman sözleşme gücünün düşük olduğu anlamına gelmez. Gevşek bağlantı, faz dengesizliği, hatalı koruma seçimi, yüksek kalkış akımı veya arızalı cihaz da aynı belirtiyi oluşturabilir. Bu nedenle önce son 12 aylık maksimum talep, sayaç verileri, faz akımları ve aynı anda çalışan yükler incelenmelidir.",
+        "Yeni EV şarj ünitesi, ısı pompası, mutfak ekipmanı, asansör, pompa, klima veya üretim makinesi eklenecekse kurulu güç ile eşzamanlı talep ayrı hesaplanır. Mevcut bağlantı anlaşması, projedeki güç, sayaç-akım trafosu oranı, ana kablo ve pano kapasitesi tek tabloda karşılaştırılır."
+      ],
+      "bullets": [
+        "Mevcut bağlantı ve sözleşme gücünü faturadan ve anlaşmadan doğrulayın.",
+        "Faz bazlı maksimum akım ve eşzamanlı yük listesini çıkarın.",
+        "Arıza kaynaklı açmayı gerçek kapasite yetersizliğinden ayırın.",
+        "Yeni yükün kalkış, harmonik ve süreklilik etkisini hesaba katın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "id": "proje-ve-belgeler",
+      "heading": "Başvuru öncesinde hangi teknik dosya hazırlanmalıdır?",
+      "paragraphs": [
+        "EPDK tüketici bilgilendirmesi, bağlantı başvurularında tapu veya kullanım hakkı, onaylı elektrik projesi ve yapının durumuna göre yapı kullanım ya da ruhsat belgeleri gibi evrakların istenebileceğini açıklar. Güç artırımı mevcut bir tesiste yapıldığında gereken belge seti tesisin bağlantı seviyesi, kullanım türü ve yapılacak tadilata göre değişebilir.",
+        "Teknik dosyada tek hat şeması, yük cetveli, talep gücü hesabı, gerilim düşümü, kısa devre ve koruma değerlendirmesi, sayaç ve akım trafosu bilgisi, topraklama düzeni ile gerekiyorsa kompanzasyon ve harmonik etkisi bulunmalıdır. Başvuru formu ve proje formatı doğrudan ilgili EDAŞ’ın güncel kanalından doğrulanmalıdır."
+      ],
+      "bullets": [
+        "Güncel tek hat şeması ve yük cetveli hazırlayın.",
+        "Mevcut-yeni güç karşılaştırmasını imzalı hesapla gösterin.",
+        "Kablo, pano, sayaç ve koruma kapasitesini birlikte doğrulayın.",
+        "EDAŞ’ın güncel başvuru formu ve ek listesini kullanın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S4"
+      ]
+    },
+    {
+      "id": "baglanti-gorusu",
+      "heading": "Dağıtım şirketi bağlantı görüşünde neyi değerlendirir?",
+      "paragraphs": [
+        "Bağlantı görüşü yalnız evrak kontrolü değildir. Dağıtım şirketi talep edilen gücün mevcut AG veya OG şebekeden karşılanıp karşılanamayacağını, bağlantı noktasını, gerilim seviyesini, ölçüm ve koruma düzenini ve ilave hat ya da trafo yatırımı gerekip gerekmediğini değerlendirir.",
+        "EPDK bilgilendirmesinde bağlantı anlaşması sonrasında yalnız AG hattı, mevcut şebekede kapasite artışı, trafo güç artışı veya yeni trafo gibi farklı iş kapsamları için farklı süreler tanımlandığı görülür. Bu süreler başvurunun niteliği ve güncel mevzuata göre teyit edilmelidir; proje hazırlamak otomatik olarak güç tahsisi anlamına gelmez."
+      ],
+      "bullets": [
+        "Talep edilen kW/kVA ile bağlantı seviyesini açık yazın.",
+        "Mevcut trafo ve hat kapasitesinin EDAŞ tarafından inceleneceğini kabul edin.",
+        "Yatırım gerektiren ve yalnız tesis tadili gerektiren senaryoları ayırın.",
+        "Bağlantı görüşünü kesin enerji verme tarihi gibi sunmayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2"
+      ]
+    },
+    {
+      "id": "uygulama-ve-kabul",
+      "heading": "Onay sonrasında tesis tadili ve kabul nasıl yönetilir?",
+      "paragraphs": [
+        "Olumlu bağlantı görüşünden sonra uygulama, onaylanan proje ve ilgili teknik mevzuata göre yetkili kişilerce yapılmalıdır. Ana kablo, şalter, bara, sayaç, akım trafosu, kompanzasyon, koruma ve topraklama düzeninde değişiklik varsa her kalem proje ile sahada eşleştirilmelidir.",
+        "EPDK’nın EV şarj bilgilendirmesi, mevcut iç tesisata eklenen şarj ünitesinde kurulu güç artışı, bağlantı seviyesi değişikliği ve proje veya tesis tadilinin teknik mevzuata göre yürütüldüğünü belirtir. Bu yaklaşım diğer büyük yeni yükler için de dosya disiplininin önemini gösterir. Enerji verme öncesinde test, kabul ve anlaşma güncellemesi tamamlanmalıdır."
+      ],
+      "bullets": [
+        "Sahadaki malzemeyi onaylı projeyle karşılaştırın.",
+        "Koruma ayarları ve faz dağılımı için devreye alma tutanağı oluşturun.",
+        "Sayaç ve ölçüm sistemindeki değişiklikleri EDAŞ süreciyle tamamlayın.",
+        "Onaysız sigorta büyütme veya koruma iptali yapmayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S3"
+      ]
+    },
+    {
+      "id": "sonuc-dosyasi",
+      "heading": "Kullanıcı hangi sonuç dosyasını saklamalıdır?",
+      "paragraphs": [
+        "Tamamlanan dosyada mevcut ve yeni güç, yük cetveli, proje revizyon numarası, bağlantı görüşü, başvuru ve işlem numaraları, saha testleri, kabul belgeleri ve güncellenmiş anlaşma bilgileri birlikte tutulmalıdır. Böylece sonraki EV, GES, jeneratör veya işletme büyümesi kararları aynı veri tabanından yapılabilir.",
+        "Ölçüm ve yük yönetimiyle mevcut güç yeterli kalıyorsa güç artırımı gereksiz yatırım ve sabit maliyet oluşturabilir. Dinamik yük yönetimi, faz dengeleme veya çalışma saatlerinin düzenlenmesi teknik olarak yeterli ve mevzuata uygunsa önce bu seçenekler değerlendirilmelidir."
+      ],
+      "bullets": [
+        "Başvuru, proje, görüş ve kabul belgelerini tek indeks altında saklayın.",
+        "Öncesi-sonrası maksimum talep ve faz akımlarını karşılaştırın.",
+        "Mevcut güç yeterliyse gereksiz kapasite artışından kaçının.",
+        "Kişisel ve abonelik verilerini ALO186’e yüklemeyin."
+      ],
+      "sourceRefs": [
+        "S2",
+        "S3",
+        "S4"
+      ]
+    }
+  ],
+  "faqs": [
+    {
+      "question": "Elektrik güç artırımı için yalnız ana sigortayı büyütmek yeterli mi?",
+      "answer": "Hayır. Ana sigorta; kablo, bara, sayaç, koruma, topraklama, proje ve dağıtım şirketince tahsis edilen bağlantı gücüyle koordineli olmalıdır. Onaysız büyütme yangın ve koruma riski yaratabilir.",
+      "sourceRefs": [
+        "S1",
+        "S2"
+      ]
+    },
+    {
+      "question": "Güç artırımı başvurusunu tedarik şirketine mi EDAŞ’a mı yapmalıyım?",
+      "answer": "Şebeke bağlantısı ve teknik kapasite değerlendirmesi dağıtım şirketinin alanıdır. Perakende satış veya enerji tedarik sözleşmesi ayrı süreçtir. Bölgenizdeki resmî EDAŞ kanalını doğrulayarak başlayın.",
+      "sourceRefs": [
+        "S1",
+        "S2"
+      ]
+    },
+    {
+      "question": "EV şarj cihazı için güç artırımı her zaman gerekir mi?",
+      "answer": "Hayır. Mevcut bağlantı gücü, eşzamanlı bina yükü ve dinamik yük yönetimi birlikte incelenmelidir. Yetersizlik varsa güç artışı, proje veya bağlantı seviyesi değişikliği ilgili teknik süreçle yürütülür.",
+      "sourceRefs": [
+        "S3"
+      ]
+    },
+    {
+      "question": "Dağıtım şirketi yeni trafo isterse süre ve maliyet nasıl belirlenir?",
+      "answer": "İş kapsamı, bağlantı noktası, şebeke kapasitesi ve güncel yönetmelik hükümlerine göre belirlenir. EPDK farklı bağlantı ve kapasite artışı senaryoları için süre çerçeveleri yayımlar; bağlayıcı sonuç resmî bağlantı görüşünde yer alır.",
+      "sourceRefs": [
+        "S1",
+        "S2"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "publisher": "EPDK",
+      "title": "Elektrik Piyasası Bağlantı ve Sistem Kullanım Yönetmeliği",
+      "url": "https://www.epdk.gov.tr/Detay/Icerik/3-6726/elektrik-piyasasi-baglanti-ve-sistem-kullanim-yonetmeligi",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Dağıtım ve iletim sistemine bağlantı, bağlantı anlaşmaları, teknik değerlendirme ve sistem kullanımına ilişkin güncel resmî mevzuat ve ilişkili dokümanları yayımlar."
+    },
+    {
+      "id": "S2",
+      "publisher": "EPDK",
+      "title": "Elektrik bağlantı talepleri ve tüketici bilgilendirmesi",
+      "url": "https://epdk.gov.tr/Detay/Icerik/12-3/1-elektrik-aboneligini-kendi-adima-almak-zorunda",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Bağlantı başvurusunda sunulabilen belgeleri, dağıtım şirketi ile bağlantı sürecini ve AG hattı, kapasite artışı, trafo güç artışı veya yeni trafo gibi iş kapsamları için süre çerçevelerini açıklar."
+    },
+    {
+      "id": "S3",
+      "publisher": "EPDK",
+      "title": "Elektrikli araç şarj ünitesi kurulum süreci",
+      "url": "https://www.epdk.gov.tr/Detay/Icerik/12-1040/enerji-donusumu",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Şarj ünitesinin ayrı abonelik veya mevcut iç tesisat kapsamında kurulabileceğini; kurulu güç artışı, bağlantı seviyesi değişikliği ve proje veya tesis tadilinin ilgili teknik mevzuata göre yürütüldüğünü belirtir."
+    },
+    {
+      "id": "S4",
+      "publisher": "EPDK",
+      "title": "Elektrik piyasası güncel yönetmelikler listesi",
+      "url": "https://www.epdk.gov.tr/detay/icerik/3-0-0-49/yonetmelikler",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Bağlantı ve sistem kullanım, tüketici hizmetleri ve diğer elektrik piyasası yönetmeliklerinin güncel resmî erişim noktasıdır."
+    }
+  ],
+  "internalLinks": [
+    {
+      "label": "EDAŞ Bul",
+      "path": "/edas-bul",
+      "reason": "Güç artırımı için bölgedeki resmî dağıtım şirketi kanalını doğrular."
+    },
+    {
+      "label": "EDAŞ mı tedarikçi mi?",
+      "path": "/haberler/elektrik-arizasinda-edas-mi-tedarikci-mi-aranir",
+      "reason": "Teknik bağlantı süreci ile enerji satış sözleşmesini ayırır."
+    },
+    {
+      "label": "EV şarj tesisat uygunluğu",
+      "path": "/haberler/ev-sarj-cihazi-icin-ev-tesisati-uygun-mu",
+      "reason": "Yeni şarj yükünün mevcut tesis ve güç kapasitesine etkisini bağlama alır."
+    },
+    {
+      "label": "Dinamik yük yönetimi",
+      "path": "/haberler/ev-sarjinda-dinamik-yuk-yonetimi",
+      "reason": "Güç artışına alternatif olabilecek kontrollü yük paylaşımını açıklar."
+    },
+    {
+      "label": "Kablo gerilim düşümü",
+      "path": "/hesaplama/kablo-gerilim-dusumu",
+      "reason": "Yeni güçte besleme hattının gerilim düşümü ön kontrolünü destekler."
+    },
+    {
+      "label": "Faz dengesizliği",
+      "path": "/haberler/faz-dengesizligi-faz-kaybi-motoru-nasil-etkiler",
+      "reason": "Talep gücünün fazlara dengeli dağıtılması gereğini tamamlar."
+    },
+    {
+      "label": "Kurumsal ön değerlendirme",
+      "path": "/kurumsal-elektrik-surekliligi-on-degerlendirme",
+      "reason": "İşletme ve otellerde yük envanteri ile teknik kapsamı profesyonel değerlendirmeye taşır."
+    }
+  ],
+  "commerce": {
+    "enabled": false,
+    "policy": "none",
+    "category": null
+  },
+  "editorial": {
+    "createdBy": "ai-assisted",
+    "model": "gpt-5.6-thinking",
+    "humanReviewRequired": true,
+    "approvedBy": "ozaneryavuz",
+    "approvedAt": "2026-08-03T18:41:42Z",
+    "publishedAt": "2026-08-03T18:41:42Z",
+    "approvalPr": 764
+  },
+  "seo": {
+    "canonicalPath": "/haberler/elektrik-guc-artirimi-basvurusu-baglanti-gorusu",
+    "robots": "index,follow,max-image-preview:large",
+    "lastModified": "2026-08-03",
+    "topics": [
+      "güç artırımı",
+      "EDAŞ",
+      "bağlantı görüşü",
+      "sözleşme gücü",
+      "elektrik projesi",
+      "EV şarj",
+      "dağıtım şebekesi"
+    ]
+  },
+  "quality": {
+    "score": 100,
+    "minimumRequired": 85,
+    "checks": {
+      "metadata": true,
+      "directAnswer": true,
+      "contentDepth": true,
+      "sources": true,
+      "safety": true,
+      "internalLinks": true,
+      "uniqueness": true,
+      "structuredData": true
+    },
+    "similarity": {
+      "maximum": 0.2727,
+      "closestPath": "https://www.alo186.com/haberler/elektrik-guc-artirimi-edas-tadilat-projesi-basvurusu"
+    }
+  }
+}
