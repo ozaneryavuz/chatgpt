@@ -64,6 +64,10 @@ assert.ok(html.includes('gerilim altında çalışma'));
 assert.ok(app.includes("catalog.category.professionalOnly === false"));
 assert.ok(app.includes("catalog.category.affiliatePolicy === 'after_tool'"));
 assert.ok(app.includes('catalog.verificationStatus(new Date())'));
+assert.ok(app.includes("'/hesaplama/elektrik-ekipmani-tekrar-test-takvimi/'"));
+assert.ok(app.includes('90 günlük yeniden testi planla'));
+assert.ok(app.includes("const safetyChecks = ["));
+assert.ok(app.includes('retestLink.hidden = !safeForRetest'));
 
 for (const forbidden of [
   '"@type":"Offer"',
@@ -117,6 +121,7 @@ console.log(JSON.stringify({
     'after-tool',
     'professional-only',
     'high-risk-exclusions',
-    'no-commercial-dynamic-fields'
+    'no-commercial-dynamic-fields',
+    'no-pii-retest-loop'
   ]
 }));
