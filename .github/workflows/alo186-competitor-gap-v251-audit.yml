@@ -1,0 +1,174 @@
+name: ALO186 competitor-gap v251 haftalık denetim
+
+on:
+  pull_request:
+    paths:
+      - "alo186/deployment/inject_competitor_gap_affiliate_v250.py"
+      - "alo186/deployment/build_static_site.py"
+      - "alo186/turkiye-arama/companies.js"
+      - "alo186/robots.txt"
+      - "alo186/tests/test_competitor_gap_affiliate_v250.py"
+      - ".github/workflows/alo186-competitor-gap-v251-audit.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alo186/deployment/inject_competitor_gap_affiliate_v250.py"
+      - "alo186/deployment/build_static_site.py"
+      - "alo186/turkiye-arama/companies.js"
+      - "alo186/robots.txt"
+      - "alo186/tests/test_competitor_gap_affiliate_v250.py"
+      - ".github/workflows/alo186-competitor-gap-v251-audit.yml"
+  schedule:
+    # Türkiye UTC+3: her pazartesi 09:30 Europe/Istanbul.
+    - cron: "30 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-competitor-gap-v251-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Semantik, SSR, affiliate ve robots regresyonları
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/alo186-v251-audit
+          python -m py_compile \
+            alo186/deployment/inject_competitor_gap_affiliate_v250.py \
+            alo186/deployment/build_static_site.py \
+            alo186/tests/test_competitor_gap_affiliate_v250.py
+          python -m alo186.tests.test_competitor_gap_affiliate_v250 \
+            | tee /tmp/alo186-v251-audit/regression.txt
+
+      - name: Canonical artifactı oluştur ve smoke testini çalıştır
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-v251-site
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-v251-site \
+            --commit "$GITHUB_SHA" \
+            | tee /tmp/alo186-v251-audit/build.json
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-v251-site \
+            | tee /tmp/alo186-v251-audit/smoke.txt
+
+      - name: Üretim artifact sözleşmelerini doğrula
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp /tmp/alo186-v251-site/alo186-competitor-gap-affiliate-v250.json \
+            /tmp/alo186-v251-audit/competitor-gap-report.json
+          python - <<'PY'
+          from __future__ import annotations
+
+          import json
+          from pathlib import Path
+
+          site = Path('/tmp/alo186-v251-site')
+          report = json.loads((site / 'alo186-competitor-gap-affiliate-v250.json').read_text(encoding='utf-8'))
+          assert report['version'] == 250
+          assert report['revision'] == 251
+          assert report['validation']['jsonLdSyntax'] == 'pass'
+          assert report['validation']['ssrNamedModules'] == 'pass'
+          assert report['validation']['affiliateRel'] == 'pass'
+          assert report['validation']['robots'] == 'pass'
+          assert report['validation']['newGoogleRichResultEligibility'] == []
+          assert report['edas']['provinceServices'] == 81
+          assert report['edas']['organizations'] == 21
+          assert report['edas']['serviceChannels186'] == 81
+          assert report['edas']['governmentServiceForPrivateEdas'] is False
+          assert report['kombi']['ssrAffiliateLinks'] == 3
+          assert report['kombi']['ssrModules'] == [
+              'akilli-yol-ssr',
+              'kisisel-hazirlik-kontrolu-ssr',
+          ]
+
+          kombi = (site / 'amazon-elektrik-urunleri/kombi-yedek-enerji-urun-secici/index.html').read_text(encoding='utf-8')
+          assert kombi.count('id="akilli-yol-ssr"') == 1
+          assert kombi.count('id="kisisel-hazirlik-kontrolu-ssr"') == 1
+          assert kombi.count('id="urun-ups-3000va"') == 1
+          assert kombi.count('rel="sponsored nofollow noopener"') >= 3
+          for schema_type in ('Question', 'DefinedTerm', 'HowTo', 'ItemList', 'Product'):
+              assert f'"@type":"{schema_type}"' in kombi
+          assert 'Soru–Sorun–Çözüm–Ürün' in kombi
+          assert '"offers"' not in kombi.lower()
+          assert 'aggregaterating' not in kombi.lower()
+
+          edas_path = next(
+              path for path in (
+                  site / 'edas-bul/index.html',
+                  site / 'elektrik-kesintisi/index.html',
+              ) if path.is_file()
+          )
+          edas = edas_path.read_text(encoding='utf-8')
+          assert edas.count('"telephone":"186"') == 81
+          assert '"@type":"GovernmentService"' not in edas
+
+          robots = (site / 'robots.txt').read_text(encoding='utf-8')
+          for agent in ('GPTBot', 'PerplexityBot', 'ClaudeBot', 'Bytespider', 'Google-Extended'):
+              assert f'User-agent: {agent}\nAllow: /' in robots
+
+          evidence = {
+              'ok': True,
+              'version': report['version'],
+              'revision': report['revision'],
+              'questionProblemSolutionProduct': True,
+              'namedSsrModules': report['kombi']['ssrModules'],
+              'affiliateLinksVisibleWithoutJavascript': report['kombi']['ssrAffiliateLinks'],
+              'provinceServices': report['edas']['provinceServices'],
+              'organizations': report['edas']['organizations'],
+              'serviceChannels186': report['edas']['serviceChannels186'],
+              'aiCrawlers': report['robots']['explicitAllow'],
+              'schemaOrgContract': report['validation']['jsonLdSyntax'],
+              'newGoogleRichResultEligibility': report['validation']['newGoogleRichResultEligibility'],
+              'richResultsNote': report['validation']['richResultsNote'],
+          }
+          Path('/tmp/alo186-v251-audit/evidence.json').write_text(
+              json.dumps(evidence, ensure_ascii=False, indent=2) + '\n',
+              encoding='utf-8',
+          )
+          print(json.dumps(evidence, ensure_ascii=False, indent=2))
+          PY
+          python -m json.tool /tmp/alo186-v251-audit/evidence.json >/dev/null
+
+      - name: Denetim özetini yayımla
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## ALO186 competitor-gap v251"
+            echo
+            if [ -f /tmp/alo186-v251-audit/evidence.json ]; then
+              echo '```json'
+              cat /tmp/alo186-v251-audit/evidence.json
+              echo '```'
+            else
+              echo "Denetim kanıtı üretilemedi; önceki adımın hata kaydını inceleyin."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Denetim kanıtını 90 gün sakla
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-competitor-gap-v251-${{ github.run_id }}
+          path: /tmp/alo186-v251-audit
+          if-no-files-found: warn
+          retention-days: 90
+          include-hidden-files: false
