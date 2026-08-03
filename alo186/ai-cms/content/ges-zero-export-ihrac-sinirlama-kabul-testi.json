@@ -1,0 +1,273 @@
+{
+  "schemaVersion": 1,
+  "id": "cms_885c3a442880c279",
+  "slug": "ges-zero-export-ihrac-sinirlama-kabul-testi",
+  "contentType": "guide",
+  "state": "published",
+  "locale": "tr-TR",
+  "title": "GES Zero Export: İhracat Sınırlama Kabul Testi",
+  "h1": "GES zero export nasıl çalışır, sayaç ve haberleşme arızasında nasıl test edilir?",
+  "description": "Şebekeye enerji vermemesi gereken GES’te sayaç yönü, faz bazlı ölçüm, kontrol gecikmesi ve haberleşme arızası senaryosunu kanıtlayın.",
+  "intent": "Şebekeye aktif güç ihracının sınırlandırıldığı GES’te zero export fonksiyonunun bağlantı noktasında, faz bazında ve arıza senaryolarında gerçekten çalıştığını doğrulamak.",
+  "primaryKeyword": "GES zero export kabul testi",
+  "audience": [
+    "GES yatırımcıları",
+    "Otel ve işletme yöneticileri",
+    "Elektrik mühendisleri",
+    "GES EPC ve devreye alma ekipleri",
+    "Enerji yöneticileri"
+  ],
+  "riskClass": "high",
+  "directAnswer": "Zero export, inverter gücünü sabit bir yüzdeye kısmak değil; bağlantı noktasındaki çift yönlü sayaç veya güç sensörü verisine göre üretimi kapalı çevrim düzenleyerek şebekeye verilen aktif gücü hedef sınırda tutmaktır. Kabul testi; sayaç yönü ve faz eşlemesi, toplam veya faz bazlı kontrol modu, yükün ani düşmesi, kontrol gecikmesi, haberleşme kopması, cihaz yeniden başlaması ve varsa batarya şarj-deşarjını kapsamalıdır. Üretici dokümanları kontrol çevrimi nedeniyle kısa süreli artık ihracın oluşabileceğini belirttiğinden, “0 kW” sonucu yalnız tek ekran görüntüsüyle değil zaman damgalı yüksek çözünürlüklü kayıtla doğrulanmalıdır.",
+  "sections": [
+    {
+      "id": "zero-export-gorevi",
+      "heading": "Zero export ile sabit güç sınırı arasındaki fark nedir?",
+      "paragraphs": [
+        "Zero export kontrolü, tesisin bağlantı noktasındaki net aktif gücü izler. Tüketim yükseldiğinde inverter üretimi artırabilir; tüketim aniden düştüğünde şebekeye taşmayı önlemek için üretimi azaltır. Bu nedenle yalnız inverter çıkış gücüne bakmak yeterli değildir; kontrolün referansı bağlantı noktasındaki ithalat-ihracat yönlü ölçümdür.",
+        "SMA dokümanı 0 kW veya yüzde 0 ayarını zero export olarak tanımlar ve kontrol çevrimi nedeniyle kaçınılmaz küçük bir enerji miktarının şebekeye çıkabileceğini belirtir. Kabul kriteri, dağıtım şirketi şartı ve üretici kabiliyeti birlikte değerlendirilerek güç, enerji ve süre sınırlarıyla yazılmalıdır."
+      ],
+      "bullets": [
+        "Kontrol noktasını inverter çıkışı değil şebeke bağlantı noktası olarak tanımlayın.",
+        "kW sınırı ile dönemsel kWh ihracını ayrı ölçün.",
+        "Toplam güç ve faz bazlı sınır seçeneklerini karıştırmayın.",
+        "Kabul toleransını EDAŞ ve üretici dokümanıyla yazılılaştırın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "id": "sayac-ve-faz-esleme",
+      "heading": "Sayaç yönü ve faz eşlemesi nasıl doğrulanmalıdır?",
+      "paragraphs": [
+        "İhracat sınırlama sistemi yanlış akım trafosu yönü, ters faz sırası, yanlış sayaç oranı veya hatalı bağlantı noktası tanımıyla çalışıyormuş gibi görünebilir. Önce yük açıkken her fazın güç işareti, akım-gerilim eşleşmesi ve toplam aktif güç bağımsız ölçümle karşılaştırılmalıdır.",
+        "Huawei sınırlı besleme ayarları toplam güç ile her fazın ayrı sınırlandığı modları ayırır. Üç faz dört iletkenli sistemlerde asimetrik yük varsa yalnız toplam net gücün sıfır görünmesi bir fazdan ihracı gizleyebilir. Şebeke şartı faz bazlı sınır istiyorsa kabul kaydı her faz için tutulmalıdır."
+      ],
+      "bullets": [
+        "Sayaç ve CT yönünü kontrollü ithalat durumunda doğrulayın.",
+        "Faz isimlerini inverter, sayaç ve ana panoda eşleştirin.",
+        "Sayaç çarpanı ve haberleşme ölçeklerini kontrol edin.",
+        "Asimetrik yükte her fazın ithalat-ihracat işaretini kaydedin."
+      ],
+      "sourceRefs": [
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "id": "dinamik-yuk-testi",
+      "heading": "Ani yük değişiminde kontrol performansı nasıl test edilir?",
+      "paragraphs": [
+        "En kritik senaryo, PV üretimi yüksekken büyük bir tesis yükünün aniden devreden çıkmasıdır. Kontrolör ölçümü alır, komutu hesaplar, haberleşme üzerinden inverterlere gönderir ve inverter çıkışı yeni değere iner. Bu zincirin toplam gecikmesi kısa süreli ihracın büyüklüğünü belirler.",
+        "SMA, yük basamaklarını karşılamak için güvenlik mesafesi sağlayan negatif bir sınır değerinin gerekebileceğini; Huawei ise ayar dönemleri, yükseltme eşiği ve kontrol süresi gibi parametreler tanımlar. Test; farklı güneşlenme ve yük seviyelerinde en az üç yük düşürme ve yük artırma olayıyla tekrarlanmalıdır."
+      ],
+      "bullets": [
+        "Yüksek üretimde büyük yükü kontrollü olarak azaltma senaryosu oluşturun.",
+        "En yüksek ihracat kW, olay süresi ve olay enerjisini kaydedin.",
+        "Farklı yük ve güneşlenme seviyelerinde testi tekrarlayın.",
+        "Gerekiyorsa güvenlik marjını ölçümle ayarlayın; rastgele değer kullanmayın."
+      ],
+      "sourceRefs": [
+        "S2",
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "id": "haberlesme-arizasi",
+      "heading": "Sayaç veya haberleşme arızasında sistem ne yapmalıdır?",
+      "paragraphs": [
+        "Zero export, sayaç verisi ve kontrol haberleşmesine bağımlıdır. Sayaç verisi donarsa, ağ koparsa veya kontrolör yeniden başlarsa inverterin son komutta üretime devam etmesi şebekeye istenmeyen güç verebilir. Bu nedenle fail-safe davranış devreye alma dosyasının zorunlu parçasıdır.",
+        "SMA dokümanları haberleşme yokluğunda fallback değerini ve zaman aşımını; Huawei dokümanları sayaç verisi alınamadığında uygulanacak aktif güç çıkış limitini tanımlar. Testte sayaç haberleşmesi, kontrolör-inverter iletişimi ve kontrolör enerjisi ayrı ayrı kesilerek sonuç kaydedilmelidir."
+      ],
+      "bullets": [
+        "Sayaç iletişimini ve inverter kontrol iletişimini ayrı test edin.",
+        "Zaman aşımı ve fallback güç değerini belgeleyin.",
+        "Kontrolör yeniden başlarken ihracat kaydını izleyin.",
+        "Arıza halinde güvenli kısıtlama çalışmıyorsa tesisi kabul etmeyin."
+      ],
+      "sourceRefs": [
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "id": "mevzuat-ve-kabul-dosyasi",
+      "heading": "Teknik kabul ile lisanssız üretim süreci nasıl ayrılır?",
+      "paragraphs": [
+        "Zero export fonksiyonunun çalışması, tesisin bağlantı ve kullanım yükümlülüklerini kendiliğinden ortadan kaldırmaz. EPDK lisanssız üretim sayfası yönetmelik, başvuru belgeleri, bağlantı ve sistem kullanım anlaşmaları ile mahsuplaşma usullerini ayrı resmî dokümanlar olarak yayımlar. Tesisin hukuki bağlantı modeli ilgili EDAŞ ve güncel mevzuattan doğrulanmalıdır.",
+        "Kabul dosyasında tek hat, sayaç ve CT şeması, cihaz modelleri ve yazılım sürümleri, ayar ekranları, faz bazlı trend, yük basamağı testleri, haberleşme arızası sonuçları, alarm kayıtları ve imzalı kabul kriterleri bulunmalıdır. Mevcut sistem tüm senaryolarda şartı sağlıyorsa yeni kontrolör veya sayaç satın almak gerekmeyebilir."
+      ],
+      "bullets": [
+        "Teknik zero export testini bağlantı izni yerine kullanmayın.",
+        "Cihaz modeli, firmware ve ayar yedeğini dosyalayın.",
+        "Ham trend ile özet kabul tablosunu birlikte saklayın.",
+        "Yeterli sistem varsa gereksiz donanım değişiminden kaçının."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S4"
+      ]
+    }
+  ],
+  "faqs": [
+    {
+      "question": "Zero export ayarı 0 kW ise şebekeye hiç enerji çıkmaz mı?",
+      "answer": "Kontrol çevrimi ve yükün ani değişmesi nedeniyle kısa süreli küçük ihracat oluşabilir. Kabul, tek anlık değerle değil yüksek çözünürlüklü güç ve enerji trendiyle ve EDAŞ’ın şartıyla değerlendirilmelidir.",
+      "sourceRefs": [
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "question": "Zero export için çift yönlü sayaç veya güç sensörü gerekli mi?",
+      "answer": "Kapalı çevrim kontrolün bağlantı noktasındaki net gücü bilmesi gerekir. Uyumlu sayaç veya güç sensörü, doğru faz ve yön bağlantısı ile kontrolör-inverter haberleşmesi üretici sistem tasarımına göre doğrulanmalıdır.",
+      "sourceRefs": [
+        "S2",
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "question": "İletişim kesilirse inverterler ne yapmalıdır?",
+      "answer": "Üretici sisteminde zaman aşımı ve fallback davranışı tanımlanmalıdır. Sayaç veya kontrol komutu kaybolduğunda çıkışın güvenli sınıra inmesi ayrı arıza testleriyle kanıtlanmalıdır.",
+      "sourceRefs": [
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "question": "Zero export kullanmak lisanssız üretim başvurusunu gereksiz yapar mı?",
+      "answer": "Hayır. Teknik ihracat sınırlaması ile bağlantı, anlaşma, ölçüm ve mevzuat yükümlülükleri ayrı konulardır. Tesis modeli için güncel EPDK ve ilgili dağıtım şirketi şartları doğrulanmalıdır.",
+      "sourceRefs": [
+        "S1"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "publisher": "EPDK",
+      "title": "Elektrik piyasasında lisanssız elektrik üretimi",
+      "url": "https://www.epdk.gov.tr/Detay/Icerik/3-0-92-0-0-5/Elektrik%20Piyasas%C4%B1",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Lisanssız üretim yönetmeliği, başvuru belgeleri, dağıtım sistemi bağlantı ve kullanım anlaşmaları ile mahsuplaşma usullerinin resmî erişim sayfasıdır."
+    },
+    {
+      "id": "S2",
+      "publisher": "SMA Solar Technology",
+      "title": "Configuring Limitation of Active Power Feed-In",
+      "url": "https://manuals.sma.de/HM-20/en-US/1071201163.html",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Aktif güç besleme sınırını kW veya yüzde olarak ayarlamayı, 0 kW zero export seçeneğini ve kontrol çevrimi nedeniyle kaçınılmaz küçük miktarda ihracat oluşabileceğini açıklar."
+    },
+    {
+      "id": "S3",
+      "publisher": "SMA Solar Technology",
+      "title": "Active power limitation with the SMA Data Manager M",
+      "url": "https://manuals.sma.de/Business-Systeme-PL/en-US/14620400779.html",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Bağlantı noktasında uygun enerji sayacı, 0% sınır, yük basamakları için güvenlik mesafesi ve haberleşme kaybında fallback desteği gerekliliklerini açıklar."
+    },
+    {
+      "id": "S4",
+      "publisher": "Huawei",
+      "title": "Setting Limited Feed-in Parameters",
+      "url": "https://support.huawei.com/enterprise/en/doc/EDOC1100273864/e17fd2ae/setting-limited-feed-in-parameters",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Zero power, kW ve yüzde sınırlama modlarını; toplam veya faz bazlı kontrolü; sayaç verisi kaybında aktif güç limitini, ayar dönemi ve üç faz dengesizlik kontrolünü tanımlar."
+    }
+  ],
+  "internalLinks": [
+    {
+      "label": "Lisanssız GES mahsuplaşma",
+      "path": "/haberler/lisanssiz-ges-mahsuplasma-ihtiyac-fazlasi",
+      "reason": "İhracat sınırlamasını ihtiyaç fazlası enerji ve mahsuplaşma sürecinden ayırır."
+    },
+    {
+      "label": "GES fazlasıyla EV şarjı",
+      "path": "/haberler/ges-fazlasi-ile-elektrikli-arac-sarji",
+      "reason": "İhracat yerine öz tüketimi artıran kontrollü yük kullanımını açıklar."
+    },
+    {
+      "label": "GES inverter yüksek şebeke gerilimi",
+      "path": "/haberler/ges-inverter-sebeke-gerilimi-yuksek-hatasi",
+      "reason": "İhracat ve bağlantı noktası gerilimi arasındaki işletme bağını tamamlar."
+    },
+    {
+      "label": "GES clipping ve DC/AC oranı",
+      "path": "/haberler/gunes-paneli-inverter-clipping-dc-ac-orani",
+      "reason": "Üretim kısıtlamasını inverter clipping olgusundan ayırır."
+    },
+    {
+      "label": "GES kesintide çalışır mı?",
+      "path": "/haberler/ges-elektrik-kesintisinde-calisir-mi",
+      "reason": "Zero export ile anti-islanding ve yedekleme işlevlerini karıştırmayı önler."
+    },
+    {
+      "label": "VPP nedir?",
+      "path": "/haberler/vpp-sanal-guc-santrali-nedir",
+      "reason": "Harici aktif güç komutu ve enerji yönetimi bağlamını genişletir."
+    },
+    {
+      "label": "Kurumsal ön değerlendirme",
+      "path": "/kurumsal-elektrik-surekliligi-on-degerlendirme",
+      "reason": "Çok inverterli tesislerde ölçüm ve kabul kapsamını profesyonel çalışmaya taşır."
+    }
+  ],
+  "commerce": {
+    "enabled": false,
+    "policy": "none",
+    "category": null
+  },
+  "editorial": {
+    "createdBy": "ai-assisted",
+    "model": "gpt-5.6-thinking",
+    "humanReviewRequired": true,
+    "approvedBy": "ozaneryavuz",
+    "approvedAt": "2026-08-03T18:41:43Z",
+    "publishedAt": "2026-08-03T18:41:43Z",
+    "approvalPr": 764
+  },
+  "seo": {
+    "canonicalPath": "/haberler/ges-zero-export-ihrac-sinirlama-kabul-testi",
+    "robots": "index,follow,max-image-preview:large",
+    "lastModified": "2026-08-03",
+    "topics": [
+      "GES",
+      "zero export",
+      "ihracat sınırlama",
+      "inverter",
+      "enerji sayacı",
+      "öz tüketim",
+      "lisanssız üretim"
+    ]
+  },
+  "quality": {
+    "score": 88,
+    "minimumRequired": 85,
+    "checks": {
+      "metadata": false,
+      "directAnswer": true,
+      "contentDepth": true,
+      "sources": true,
+      "safety": true,
+      "internalLinks": true,
+      "uniqueness": true,
+      "structuredData": true
+    },
+    "similarity": {
+      "maximum": 0.3529,
+      "closestPath": "https://alo186.com/haberler/ges-zero-export-ct-yonu-ihracat-siniri-kabul"
+    }
+  }
+}

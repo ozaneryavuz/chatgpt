@@ -1,0 +1,18 @@
+{
+  "version": 236,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-guc-artirimi-basvurusu-baglanti-gorusu/index.html",
+      "canonicalPath": "/haberler/elektrik-guc-artirimi-basvurusu-baglanti-gorusu",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_40704e16af2c8d2e",
+    "humanApproved": true,
+    "approvalPr": 764,
+    "qualityScore": 100
+  }
+}
