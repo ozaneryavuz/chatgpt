@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'alo186/deployment/competitor_gap_affiliate_v250.py'
+      - 'alo186/deployment/inject_competitor_gap_affiliate_v250.py'
       - 'alo186/deployment/build_static_site.py'
       - 'alo186/robots.txt'
       - 'alo186/tests/test_competitor_gap_affiliate_v250.py'
@@ -21,6 +22,7 @@ on:
     branches: [main]
     paths:
       - 'alo186/deployment/competitor_gap_affiliate_v250.py'
+      - 'alo186/deployment/inject_competitor_gap_affiliate_v250.py'
       - 'alo186/deployment/build_static_site.py'
       - 'alo186/robots.txt'
       - 'alo186/tests/test_competitor_gap_affiliate_v250.py'
@@ -45,12 +47,12 @@ concurrency:
 
 jobs:
   validate:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 35
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -59,6 +61,7 @@ jobs:
           set -euo pipefail
           python -m py_compile \
             alo186/deployment/competitor_gap_affiliate_v250.py \
+            alo186/deployment/inject_competitor_gap_affiliate_v250.py \
             alo186/deployment/build_static_site.py \
             alo186/tests/test_competitor_gap_affiliate_v250.py
           python alo186/tests/test_kombi_yedek_enerji_growth_v191.py
