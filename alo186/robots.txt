@@ -1,20 +1,61 @@
 User-agent: *
 Allow: /
+Allow: /haberler/
+Allow: /rehber/
+Allow: /urunler/
+Allow: /amazon-elektrik-urunleri/
+Allow: /hesaplama/
+
+User-agent: OAI-SearchBot
+Allow: /
+Allow: /haberler/
+Allow: /rehber/
+Allow: /urunler/
+Allow: /amazon-elektrik-urunleri/
+Allow: /hesaplama/
 
 User-agent: GPTBot
+Allow: /
+Allow: /haberler/
+Allow: /rehber/
+Allow: /urunler/
+Allow: /amazon-elektrik-urunleri/
+Allow: /hesaplama/
+
+User-agent: ChatGPT-User
 Allow: /
 
 User-agent: PerplexityBot
 Allow: /
+Allow: /haberler/
+Allow: /rehber/
+Allow: /urunler/
+Allow: /amazon-elektrik-urunleri/
+Allow: /hesaplama/
 
 User-agent: ClaudeBot
 Allow: /
+Allow: /haberler/
+Allow: /rehber/
+Allow: /urunler/
+Allow: /amazon-elektrik-urunleri/
+Allow: /hesaplama/
 
 User-agent: Bytespider
 Allow: /
+Allow: /haberler/
+Allow: /rehber/
+Allow: /urunler/
+Allow: /amazon-elektrik-urunleri/
+Allow: /hesaplama/
 
 User-agent: Google-Extended
 Allow: /
+Allow: /haberler/
+Allow: /rehber/
+Allow: /urunler/
+Allow: /amazon-elektrik-urunleri/
+Allow: /hesaplama/
 
 Sitemap: https://alo186.com/sitemap.xml
 Sitemap: https://alo186.com/sitemap-electric-project-v200.xml

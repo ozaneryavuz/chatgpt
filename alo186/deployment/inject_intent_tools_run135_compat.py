@@ -1,16 +1,17 @@
 from __future__ import annotations
 
-"""Compatibility layer for the run135 outage-input hardening step.
+"""Compatibility layer for run135 plus the final AI-commerce AEO stage.
 
-The current outage-compensation tool already uses a fail-closed positive
-validation expression. The original injector only recognised its older
-negative-expression spelling and stopped otherwise-safe release artifacts.
-This shim normalises the equivalent expression before delegating to the
-existing, strict injector. It does not weaken any bound or commercial guard.
+The outage-compensation tool already uses a fail-closed positive validation
+expression. The original injector only recognised an older negative spelling.
+This shim normalises that equivalent expression, delegates to the strict base
+injector, then applies the v250 AI-commerce layer after the private search index
+and final route discovery exist.
 """
 
 from pathlib import Path
 
+import inject_ai_commerce_aeo_v250 as _ai_commerce
 import inject_intent_tools_run135 as _base
 
 _POSITIVE_CONDITION = (
@@ -20,6 +21,7 @@ _NEGATIVE_CONDITION = (
     "const invalid=rawHours===''||!Number.isFinite(hours)||hours<0||hours>8760;"
 )
 _ORIGINAL_HARDEN = _base.harden_outage_input
+_ORIGINAL_INJECT = _base.inject
 
 
 def harden_outage_input(site: Path) -> bool:
@@ -43,13 +45,27 @@ def harden_outage_input(site: Path) -> bool:
     return _ORIGINAL_HARDEN(site) or changed
 
 
-# The imported inject() function resolves harden_outage_input from the base
-# module globals at runtime. Patch that single symbol, then expose the strict
-# base API unchanged.
+def inject(site: Path, base_path: str) -> dict:
+    """Run route/search discovery first, then attach the AI commerce semantics."""
+    run135_result = _ORIGINAL_INJECT(site, base_path)
+    ai_result = _ai_commerce.run(site, base_path)
+    return {
+        **run135_result,
+        "aiCommerceAeoV250": ai_result,
+    }
+
+
+def validate(site: Path, base_path: str) -> dict:
+    run135_result = _base.validate(site, base_path)
+    ai_result = _ai_commerce.validate(site, base_path)
+    return {
+        **run135_result,
+        "aiCommerceAeoV250": ai_result,
+    }
+
+
 _base.harden_outage_input = harden_outage_input
 
-VERSION = _base.VERSION
+VERSION = max(_base.VERSION, _ai_commerce.VERSION)
 ROUTES = _base.ROUTES
-inject = _base.inject
-validate = _base.validate
 main = _base.main

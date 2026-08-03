@@ -1,0 +1,17 @@
+{
+  "version": 250,
+  "policy": "fail-closed",
+  "maxAgeHours": 24,
+  "requiredFields": [
+    "productId",
+    "url",
+    "price",
+    "priceCurrency",
+    "availability",
+    "sellerName",
+    "verifiedAt",
+    "validThrough"
+  ],
+  "offers": [],
+  "note": "Amazon Türkiye fiyat ve stok bilgisi, görünür sayfa içeriğiyle aynı anda doğrulanmış sunucu tarafı veri kaynağı olmadan JSON-LD Offer olarak yayımlanmaz."
+}

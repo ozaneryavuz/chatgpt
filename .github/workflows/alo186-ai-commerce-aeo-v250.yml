@@ -1,0 +1,104 @@
+name: ALO186 AI-commerce AEO ve affiliate semantiği v250
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/llms.txt'
+      - 'alo186/robots.txt'
+      - 'alo186/deployment/inject_ai_commerce_aeo_v250.py'
+      - 'alo186/deployment/ai-commerce-verified-offers-v250.json'
+      - 'alo186/deployment/inject_intent_tools_run135_compat.py'
+      - 'alo186/tests/test_ai_commerce_aeo_v250.py'
+      - 'alo186/audits/ai-commerce-aeo-v250-validation.md'
+      - '.github/workflows/alo186-ai-commerce-aeo-v250.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/llms.txt'
+      - 'alo186/robots.txt'
+      - 'alo186/deployment/inject_ai_commerce_aeo_v250.py'
+      - 'alo186/deployment/ai-commerce-verified-offers-v250.json'
+      - 'alo186/deployment/inject_intent_tools_run135_compat.py'
+      - 'alo186/tests/test_ai_commerce_aeo_v250.py'
+      - 'alo186/audits/ai-commerce-aeo-v250-validation.md'
+      - '.github/workflows/alo186-ai-commerce-aeo-v250.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-ai-commerce-aeo-v250-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+
+      - name: Kaynak, llms, robots ve Offer fail-closed sözleşmesi
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            alo186/deployment/inject_ai_commerce_aeo_v250.py \
+            alo186/deployment/inject_intent_tools_run135_compat.py
+          python alo186/tests/test_ai_commerce_aeo_v250.py
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Canonical üretim paketi
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-ai-commerce-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-ai-commerce-canonical
+
+      - name: Custom-domain ve project-path artifact kabulü
+        shell: bash
+        run: |
+          set -euo pipefail
+          for spec in 'custom|' 'project|/chatgpt'; do
+            name=${spec%%|*}
+            base=${spec#*|}
+            site="/tmp/alo186-ai-commerce-${name}"
+            rm -rf "$site"
+            cp -a /tmp/alo186-ai-commerce-canonical "$site"
+            python alo186/deployment/prepare_github_pages.py \
+              --site "$site" \
+              --base-path "$base" \
+              --repository "$GITHUB_REPOSITORY" \
+              --commit "$GITHUB_SHA"
+            python alo186/deployment/inject_outcome_runtime.py --site "$site" --base-path "$base"
+            python alo186/deployment/inject_contextual_affiliate_growth_v177.py --site "$site" --base-path "$base"
+            python alo186/deployment/inject_live_quality_hardening_v2.py --site "$site" --base-path "$base"
+            python alo186/deployment/inject_home_affiliate_banner_v209.py --site "$site" --base-path "$base"
+            python alo186/deployment/inject_affiliate_intent_router_v210.py --site "$site" --base-path "$base"
+            python alo186/deployment/inject_ga4_consent.py --site "$site" --base-path "$base" --measurement-id ''
+            python alo186/deployment/inject_affiliate_measurement_v211.py --site "$site" --base-path "$base"
+            python alo186/deployment/guard_commerce_routes_v3.py --site "$site"
+            python alo186/tests/test_ai_commerce_aeo_v250.py --site "$site" --base-path "$base"
+            python alo186/deployment/smoke_github_pages.py --site "$site" --base-path "$base"
+            test -s "$site/llms.txt"
+            test -s "$site/ai-commerce-aeo-v250.json"
+          done
+
+      - name: Doğrulanmış AEO artifactı
+        uses: actions/upload-artifact@v5
+        with:
+          name: alo186-ai-commerce-aeo-v250
+          path: |
+            /tmp/alo186-ai-commerce-custom
+            /tmp/alo186-ai-commerce-project
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30

@@ -1,0 +1,57 @@
+# ALO186
+
+> Türkiye için bağımsız elektrik bilgi, güvenli yönlendirme, teknik karar ve ürün uygunluğu platformu. ALO186 bir EDAŞ, TEDAŞ, EPDK veya kamu kurumu değildir; arıza kaydı almaz ve kişisel tesisat bilgisi istemez.
+
+## Resmî Kanallar
+
+- [Acil numaralar ve 112/186 ayrımı](https://alo186.com/acil-numaralar/)
+- [Bulunduğunuz bölgedeki dağıtım şirketini bulun](https://alo186.com/edas-bul)
+- [Elektrik kesintisi ve güvenli ilk adımlar](https://alo186.com/elektrik-durum-merkezi/)
+- [Planlı kesinti sorgulama yönlendirmesi](https://alo186.com/planli-kesinti-sorgulama/)
+
+## Teknik Çözüm ve Ekipman Rehberleri
+
+### Ev/Ofis Kesinti Hazırlık Ekipmanları
+
+- [UPS mi, taşınabilir güç istasyonu mu?](https://alo186.com/haberler/ups-mi-tasinabilir-guc-istasyonu-mu/)
+- [UPS çalışma süresi hesaplayıcı](https://alo186.com/hesaplama/ups-suresi/)
+- [Taşınabilir güç istasyonu kapasite ve EPS uygunluğu](https://alo186.com/hesaplama/power-station-kapasite-eps-uygunluk/)
+- [Modem ve ONT mini UPS seçici](https://alo186.com/amazon-elektrik-urunleri/modem-ont-mini-ups-yedekleme-secici/)
+- [Taşınabilir güç istasyonu seçim rehberi](https://alo186.com/amazon-elektrik-urunleri/tasinabilir-guc-istasyonu-secimi/)
+
+### Cihaz ve Pano Koruma Ekipmanları
+
+- [Akım korumalı grup priz uygunluk testi](https://alo186.com/hesaplama/akim-korumali-grup-priz-uygunluk/)
+- [Akım korumalı priz yük uygunluk seçimi](https://alo186.com/amazon-elektrik-urunleri/akim-korumali-priz-yuk-uygunluk-secimi/)
+- [Parafudr risk testi](https://alo186.com/hesaplama/parafudr-risk-testi/)
+- [Gerilim koruma çözüm seçici](https://alo186.com/hesaplama/gerilim-koruma-cozum-secici/)
+- [Parafudr ve gerilim koruma rölesi farkı](https://alo186.com/haberler/parafudr-gerilim-koruma-rolesi-farki/)
+
+### GES ve Yedek Enerji Sistemleri
+
+- [GES elektrik kesintisinde çalışır mı?](https://alo186.com/haberler/ges-elektrik-kesintisinde-calisir-mi/)
+- [GES kesinti yedekleme mimarisi](https://alo186.com/hesaplama/ges-kesinti-yedekleme-mimarisi/)
+- [Güneş paneli ve power station uygunluğu](https://alo186.com/hesaplama/gunes-paneli-power-station-uygunluk/)
+- [BESS, VPP ve şebeke esnekliği rehberleri](https://alo186.com/haberler/vpp-sanal-guc-santrali-nedir/)
+
+## Karar Ağaçları ve Ürün Seçimi
+
+- [Akıllı ürün seçimi](https://alo186.com/akilli-urun-secimi/)
+- [Amazon elektrik ürünleri güvenli seçim merkezi](https://alo186.com/amazon-elektrik-urunleri/)
+- [Yedek güç çözüm seçici](https://alo186.com/hesaplama/yedek-guc-cozum-secici/)
+- [Teknik ürün karşılaştırma](https://alo186.com/hesaplama/teknik-urun-karsilastirma/)
+
+## Affiliate ve Güvenlik Politikası
+
+ALO186 yalnız Amazon Türkiye satış ortaklığı kullanır. Affiliate bağlantıları görünür açıklamayla ve `rel="sponsored nofollow noopener"` niteliğiyle işaretlenir. Fiyat, stok, satıcı, puan, teslimat ve garanti ALO186 üzerinde güncelmiş gibi yayımlanmaz. Mevcut güvenli ürün ihtiyacı karşılıyorsa satın almama sonucu gösterilir. Sabit tesisat, pano, EV, GES, jeneratör, yaşam güvenliği veya aktif tehlike içeren durumda doğrudan mağaza yolu kapatılır.
+
+## Yapılandırılmış Veri ve Derin Bağlantı
+
+Ürün seçim sayfalarında görünür ürün kartları `Product`, koşullu teknik öneriler `Recommendation`, karşılaştırmalar `ItemList` ve `Table` ile ilişkilendirilir. Amazon `Offer` verisi yalnız görünür fiyat ve stokla aynı anda doğrulanmış, güncel sunucu tarafı kayıt varsa yayımlanır. Bölüm ve ürün kartları kalıcı `id` değerleri taşır; hash bağlantıları doğrudan ilgili çözüm bölümünü açar.
+
+## Yayın ve Düzeltme
+
+- [Yayın durumu ve sürüm kaydı](https://alo186.com/yayin-durumu/)
+- [Yayın ilkeleri](https://alo186.com/yayin-ilkeleri/)
+- [Kaynak yaklaşımı](https://alo186.com/kaynaklar/)
+- [Düzeltme bildirimi](https://alo186.com/iletisim/)
