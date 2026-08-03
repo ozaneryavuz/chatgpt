@@ -1,0 +1,101 @@
+name: ALO186 AI CMS — run153 VPP doğrudan cevap düzeltmesi
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: alo186-ai-cms-repair-run153
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    if: >-
+      github.event.issue.pull_request &&
+      github.event.issue.number == 807 &&
+      github.event.comment.body == '/cms repair-run153-vpp'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+      AUTHOR_ASSOCIATION: ${{ github.event.comment.author_association }}
+      PR_NUMBER: ${{ github.event.issue.number }}
+      HEAD_REF: automation/content-authority-run153
+      CMS_SLUG: vpp-telemetri-setpoint-feedback-veri-boslugu-kabul
+    steps:
+      - name: Yetki doğrulaması
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "$AUTHOR_ASSOCIATION" in
+            OWNER|MEMBER|COLLABORATOR) ;;
+            *) echo 'Yalnız repository yetkilisi içerik düzeltmesi yapabilir.' >&2; exit 1 ;;
+          esac
+          metadata=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER")
+          test "$(jq -r '.state' <<<"$metadata")" = 'open'
+          test "$(jq -r '.head.repo.full_name' <<<"$metadata")" = "$GITHUB_REPOSITORY"
+          test "$(jq -r '.head.ref' <<<"$metadata")" = "$HEAD_REF"
+
+      - name: PR branch checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.HEAD_REF }}
+          fetch-depth: 0
+
+      - name: Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Doğrudan cevabı yayın sözleşmesine getir
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          slug = os.environ['CMS_SLUG']
+          path = Path('alo186/ai-cms/content') / f'{slug}.json'
+          record = json.loads(path.read_text(encoding='utf-8'))
+          assert record['slug'] == slug
+          assert record['state'] in {'review', 'approved'}
+          answer = (
+              'VPP telemetri kabulü yalnız “komut gönderildi” kaydıyla tamamlanmaz. Her talimat için '
+              'gönderildi–alındı–kabul edildi–uygulandı–ölçüldü zinciri; ortak zaman tabanı, tekil komut '
+              'kimliği, DER ve sayaç eşleşmesi, setpoint ile bağlantı noktasındaki P/Q tepkisi, SoC, SoH '
+              've kullanılabilir güç birlikte doğrulanmalıdır. Eksik, gecikmiş, yinelenen veya stale veri '
+              'ile haberleşme kaybındaki güvenli yerel fallback ayrı senaryolarda sınanmalı; canlı erişim '
+              'anahtarı ve müşteri verisi test paketine konmamalıdır. Teknik test piyasa kabulü veya gelir '
+              'garantisi değildir.'
+          )
+          assert 80 <= len(answer) <= 650, len(answer)
+          record['directAnswer'] = answer
+          path.write_text(json.dumps(record, ensure_ascii=False, separators=(',', ':')) + '\n', encoding='utf-8')
+          print({'slug': slug, 'directAnswerLength': len(answer)})
+          PY
+          python alo186/ai-cms/cms.py validate --slug "$CMS_SLUG" --write
+
+      - name: Düzeltmeyi PR branchine gönder
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add "alo186/ai-cms/content/$CMS_SLUG.json" "alo186/ai-cms/reviews/$CMS_SLUG.md"
+          git commit -m "fix(alo186): VPP telemetri doğrudan cevabını yayın sınırına getir"
+          git push origin "HEAD:$HEAD_REF"
+
+      - name: Sonucu bildir
+        if: success()
+        run: gh pr comment "$PR_NUMBER" --body "✅ Run153 VPP doğrudan cevabı 80–650 karakter yayın sözleşmesine getirildi ve AI CMS doğrulaması geçti. Toplu yayın yeniden çalıştırılabilir."
+
+      - name: Hata bildir
+        if: failure()
+        run: gh pr comment "$PR_NUMBER" --body "❌ Run153 VPP içerik düzeltmesi başarısız. Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
