@@ -219,30 +219,136 @@ def copy_route(repo_root: Path, output: Path, route: dict) -> None:
     )
 
 
-def normalize_text_file(path: Path) -> None:
-    if path.suffix.lower() not in TEXT_SUFFIXES and path.name not in {".htaccess", "tailwindcss"}:
-        return
-    content = path.read_text(encoding="utf-8", errors="strict")
-    content = content.replace(LEGACY_HOST, CANONICAL_HOST)
-    path.write_text(content, encoding="utf-8")
+def copy_file(repo_root: Path, output: Path, source_name: str, target_name: str) -> None:
+    source = repo_root / source_name
+    if not source.is_file():
+        raise FileNotFoundError(f"Yayın dosyası bulunamadı: {source}")
+    target = output / target_name
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(source, target)
 
 
-def normalize_canonical_host(output: Path) -> None:
-    for path in output.rglob("*"):
-        if path.is_file():
-            normalize_text_file(path)
-
-
-def write_effective_sitemap(output: Path, routes: list[dict]) -> None:
+def write_effective_sitemap(output: Path, manifest: dict) -> None:
     namespace = "http://www.sitemaps.org/schemas/sitemap/0.9"
     ET.register_namespace("", namespace)
     urlset = ET.Element(f"{{{namespace}}}urlset")
-    for route in routes:
+    for route in manifest["routes"]:
         url = ET.SubElement(urlset, f"{{{namespace}}}url")
         loc = ET.SubElement(url, f"{{{namespace}}}loc")
-        loc.text = CANONICAL_HOST + route["canonicalPath"]
+        loc.text = f"{CANONICAL_HOST}{route['canonicalPath']}"
     tree = ET.ElementTree(urlset)
+    ET.indent(tree, space="  ")
     tree.write(output / "sitemap.xml", encoding="utf-8", xml_declaration=True)
+
+
+def iter_text_files(output: Path):
+    for path in sorted(output.rglob("*")):
+        if not path.is_file():
+            continue
+        if path.name == ".htaccess" or path.suffix.lower() in TEXT_SUFFIXES:
+            yield path
+
+
+def normalize_canonical_host(output: Path) -> None:
+    for path in iter_text_files(output):
+        try:
+            text = path.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            continue
+        if LEGACY_HOST in text:
+            path.write_text(text.replace(LEGACY_HOST, CANONICAL_HOST), encoding="utf-8")
+
+
+def find_forbidden_public_files(output: Path) -> list[str]:
+    return [
+        path.relative_to(output).as_posix()
+        for path in sorted(output.rglob("*"))
+        if path.is_file() and is_forbidden_public_path(path, output)
+    ]
+
+
+def validate_bundle(output: Path, manifest: dict) -> dict[str, object]:
+    failures: list[str] = []
+
+    if manifest.get("canonicalHost") != CANONICAL_HOST:
+        failures.append(
+            f"routing manifest canonicalHost yanlış: {manifest.get('canonicalHost')!r}; beklenen={CANONICAL_HOST}"
+        )
+
+    for route in manifest["routes"]:
+        target = output / route["canonicalPath"].strip("/") / "index.html"
+        if not target.is_file():
+            failures.append(f"Canonical rota artifact'ta eksik: {route['canonicalPath']}")
+
+    for _source_name, target_name in (*SHARED_STATIC_ASSETS, *ROOT_STATIC_FILES):
+        if not (output / target_name).is_file():
+            failures.append(f"Kök/ortak yayın dosyası eksik: {target_name}")
+
+    forbidden_files = find_forbidden_public_files(output)
+    if forbidden_files:
+        failures.append(
+            "Public artifact iç kaynak/test dosyası taşıyor: " + ", ".join(forbidden_files[:50])
+        )
+
+    legacy_locations: list[str] = []
+    for path in iter_text_files(output):
+        try:
+            text = path.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            continue
+        if LEGACY_HOST in text:
+            legacy_locations.append(path.relative_to(output).as_posix())
+    if legacy_locations:
+        failures.append(f"Eski www origin artifact'ta kaldı: {', '.join(legacy_locations[:20])}")
+
+    stale_deadlines = find_stale_application_deadlines(output)
+    if stale_deadlines:
+        failures.append(
+            "Cihaz hasarı başvurusu bağlamında yürürlükteki 30 gün yerine eski 10 iş günü ifadesi:\n"
+            + "\n".join(stale_deadlines)
+        )
+
+    deadline_report: dict[str, object] = {}
+    try:
+        deadline_report = validate_published_site(output)
+    except RuntimeError as exc:
+        failures.append(str(exc))
+
+    htaccess_path = output / ".htaccess"
+    if htaccess_path.is_file():
+        htaccess = htaccess_path.read_text(encoding="utf-8")
+        for header in REQUIRED_SECURITY_HEADERS:
+            if header not in htaccess:
+                failures.append(f"Aktif production .htaccess güvenlik başlığı eksik: {header}")
+        for token in REQUIRED_APACHE_TOKENS:
+            if token not in htaccess:
+                failures.append(f"Aktif production .htaccess sözleşmesi eksik: {token}")
+        if "mod_substitute" in htaccess.lower() or "Substitute \"s|" in htaccess:
+            failures.append("Aktif production .htaccess hukukî içeriği yanıt katmanında değiştiremez")
+    else:
+        failures.append("Aktif production .htaccess artifact'ta yok")
+
+    robots = output / "robots.txt"
+    if robots.is_file() and f"Sitemap: {CANONICAL_HOST}/sitemap.xml" not in robots.read_text(encoding="utf-8"):
+        failures.append("robots.txt apex canonical sitemap adresini taşımıyor")
+
+    sitemap = output / "sitemap.xml"
+    if sitemap.is_file():
+        sitemap_text = sitemap.read_text(encoding="utf-8")
+        if CANONICAL_HOST not in sitemap_text:
+            failures.append("sitemap.xml apex canonical origin taşımıyor")
+        if LEGACY_HOST in sitemap_text:
+            failures.append("sitemap.xml eski www origin taşıyor")
+        for route in manifest["routes"]:
+            canonical = f"{CANONICAL_HOST}{route['canonicalPath']}"
+            if canonical not in sitemap_text:
+                failures.append(f"sitemap.xml canonical rotayı taşımıyor: {route['canonicalPath']}")
+    else:
+        failures.append("sitemap.xml artifact'ta yok")
+
+    if failures:
+        raise RuntimeError("ALO186 production bundle doğrulaması başarısız:\n- " + "\n- ".join(failures))
+    return deadline_report
 
 
 def sha256(path: Path) -> str:
@@ -253,110 +359,86 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def find_forbidden_public_files(output: Path) -> list[str]:
-    return sorted(
-        path.relative_to(output).as_posix()
-        for path in output.rglob("*")
-        if path.is_file() and is_forbidden_public_path(path, output)
-    )
-
-
 def build(repo_root: Path, output: Path, commit_sha: str = "local") -> dict:
     manifest = load_effective_manifest(repo_root)
     if output.exists():
         shutil.rmtree(output)
     output.mkdir(parents=True)
-    copied_routes: list[dict] = []
-    article_count = 0
+
     for route in manifest["routes"]:
         copy_route(repo_root, output, route)
-        copied_routes.append(route)
-        if route["type"] == "article":
-            article_count += 1
 
-    copied_legacy_assets: list[str] = []
+    for source_name, target_name in SHARED_STATIC_ASSETS:
+        copy_file(repo_root, output, source_name, target_name)
+
     for directory in LEGACY_ASSET_DIRECTORIES:
         source = repo_root / "alo186" / directory
-        if not source.is_dir():
-            raise FileNotFoundError(f"Legacy asset dizini bulunamadı: {source}")
-        shutil.copytree(
-            source,
-            output / directory,
-            dirs_exist_ok=True,
-            ignore=public_copy_ignore,
-        )
-        copied_legacy_assets.append(directory)
+        if source.is_dir():
+            shutil.copytree(
+                source,
+                output / directory,
+                dirs_exist_ok=True,
+                ignore=public_copy_ignore,
+            )
 
-    copied_shared_assets: list[str] = []
-    for source_name, target_name in SHARED_STATIC_ASSETS:
-        source = repo_root / source_name
-        if not source.is_file():
-            raise FileNotFoundError(f"Ortak statik asset bulunamadı: {source}")
-        target = output / target_name
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(source, target)
-        copied_shared_assets.append(target_name)
-
-    copied_root_files: list[str] = []
     for source_name, target_name in ROOT_STATIC_FILES:
-        source = repo_root / source_name
-        if not source.is_file():
-            raise FileNotFoundError(f"Kök statik dosya bulunamadı: {source}")
-        target = output / target_name
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(source, target)
-        copied_root_files.append(target_name)
+        copy_file(repo_root, output, source_name, target_name)
 
-    write_effective_sitemap(output, copied_routes)
+    write_effective_sitemap(output, manifest)
+    (output / ".nojekyll").touch()
     normalize_canonical_host(output)
-    normalize_published_site(output)
-    forbidden_public_files = find_forbidden_public_files(output)
-    if forbidden_public_files:
-        raise RuntimeError("Yayın paketinde kaynak/test dosyası kaldı: " + ", ".join(forbidden_public_files[:30]))
+    normalized_deadline_files = normalize_published_site(output)
+    deadline_report = validate_bundle(output, manifest)
 
-    device_damage_validation = validate_published_site(output)
     release = {
         "schemaVersion": 5,
         "commit": commit_sha,
-        "canonicalHost": CANONICAL_HOST,
+        "canonicalHost": manifest["canonicalHost"],
         "routingVersion": manifest["version"],
         "routingGeneratedAt": manifest["generatedAt"],
         "routingOverlays": manifest["routingOverlays"],
-        "routeCount": len(copied_routes),
-        "articleCount": article_count,
-        "legacyAssetDirectories": copied_legacy_assets,
-        "sharedStaticAssets": copied_shared_assets,
-        "rootStaticFiles": copied_root_files,
+        "routeCount": len(manifest["routes"]),
+        "articleCount": sum(1 for item in manifest["routes"] if item["type"] == "article"),
+        "legacyAssetDirectories": list(LEGACY_ASSET_DIRECTORIES),
+        "sharedStaticAssets": [target for _, target in SHARED_STATIC_ASSETS],
+        "rootStaticFiles": [target for _, target in ROOT_STATIC_FILES],
         "securityHeaders": list(REQUIRED_SECURITY_HEADERS),
         "deviceDamageDeadline": CURRENT_DEADLINE,
         "deviceDamageRegulationUrl": DEVICE_DAMAGE_REGULATION_URL,
         "deviceDamageAmendmentUrl": DEVICE_DAMAGE_AMENDMENT_URL,
-        "deviceDamageNormalizedFiles": device_damage_validation["normalizedFiles"],
-        "deviceDamageVerifiedLocations": device_damage_validation["verifiedLocations"],
+        "deviceDamageNormalizedFiles": normalized_deadline_files,
+        "deviceDamageVerifiedLocations": deadline_report.get("verifiedLocations", 0),
         "publicArtifactPolicy": {
             "sourceDocsExcluded": True,
             "testsExcluded": True,
             "packageMetadataExcluded": True,
         },
-        "routes": copied_routes,
+        "routes": [
+            {
+                "canonicalPath": item["canonicalPath"],
+                "source": item["source"],
+                "type": item["type"],
+            }
+            for item in manifest["routes"]
+        ],
     }
-    release_path = output / "alo186-release.json"
-    release_path.write_text(json.dumps(release, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    (output / "alo186-release.json").write_text(
+        json.dumps(release, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
 
-    checksums = []
-    for path in sorted(p for p in output.rglob("*") if p.is_file()):
-        checksums.append(f"{sha256(path)}  {path.relative_to(output).as_posix()}")
-    (output / "checksums.sha256").write_text("\n".join(checksums) + "\n", encoding="utf-8")
+    files = sorted(path for path in output.rglob("*") if path.is_file())
+    checksum_lines = [f"{sha256(path)}  {path.relative_to(output).as_posix()}" for path in files]
+    (output / "checksums.sha256").write_text("\n".join(checksum_lines) + "\n", encoding="utf-8")
     return release
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="ALO186 statik üretim paketini oluştur")
-    parser.add_argument("--output", required=True)
+    parser = argparse.ArgumentParser(description="ALO186 canonical production bundle oluşturur.")
+    parser.add_argument("--repo-root", type=Path, default=Path(__file__).resolve().parents[2])
+    parser.add_argument("--output", type=Path, default=Path("_production_site"))
     parser.add_argument("--commit", default="local")
     args = parser.parse_args()
-    repo_root = Path(__file__).resolve().parents[2]
-    release = build(repo_root, Path(args.output).resolve(), args.commit)
+    release = build(args.repo_root.resolve(), args.output.resolve(), args.commit)
     print(json.dumps(release, ensure_ascii=False))
 
 
