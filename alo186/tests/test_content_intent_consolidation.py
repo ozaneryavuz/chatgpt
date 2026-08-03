@@ -19,6 +19,7 @@ STOPWORDS = {
     "icin", "için", "ve", "ile", "bir", "ne", "edilir", "edilmeli", "farki", "farkı", "kontrol", "rehberi",
     "elektrik", "teknik", "cihazi", "cihazı", "sistemi", "sistem", "kullanilir", "kullanılır",
 }
+AFCI_ALIAS_INTENT = "pv-inverter-afci-dc-arc-alarm"
 
 
 def html_text(html: str, tag: str) -> str:
@@ -108,12 +109,27 @@ def declared_pair_matches(left: dict, right: dict) -> tuple[bool, str]:
     )
 
 
+def assert_afci_alias_bridge(item: dict, alias_source: str, target_source: str) -> None:
+    alias_html = (REPO_ROOT / alias_source).read_text(encoding="utf-8")
+    target_html = (REPO_ROOT / target_source).read_text(encoding="utf-8")
+    expected = f"https://alo186.com{item['canonicalPath']}"
+
+    assert 'data-alo186-content-alias="true"' in alias_html
+    assert re.search(r'<meta\s+name="robots"\s+content="noindex,follow"', alias_html, re.I)
+    assert f'<link rel="canonical" href="{expected}">' in alias_html
+    assert f'"mainEntityOfPage":"{expected}"' in alias_html
+    assert f'href="{item["canonicalPath"]}"' in alias_html
+    assert "https://www.alo186.com" not in alias_html
+    assert f'<link rel="canonical" href="{expected}">' in target_html
+
+
 def main() -> None:
     manifest = load_effective_manifest(REPO_ROOT)
     config = load_config()
     route_by_path = {route["canonicalPath"]: route for route in manifest["routes"]}
     declared_pairs = {(item["aliasPath"], item["canonicalPath"]) for item in config["consolidations"]}
     alias_paths = {item["aliasPath"] for item in config["consolidations"]}
+    afci_alias_checked = False
 
     for item in config["consolidations"]:
         alias_route = route_by_path.get(item["aliasPath"])
@@ -128,6 +144,11 @@ def main() -> None:
             f"İlan edilen içerik birleştirmesi aynı arama niyetini doğrulamıyor: "
             f"{item['aliasPath']} → {item['canonicalPath']} ({evidence})"
         )
+        if item.get("intentKey") == AFCI_ALIAS_INTENT:
+            assert_afci_alias_bridge(item, alias_route["source"], target_route["source"])
+            afci_alias_checked = True
+
+    assert afci_alias_checked, "AFCI/DC ark alias canonical regresyon kaydı bulunamadı"
 
     active_articles = [
         route for route in manifest["routes"]
@@ -159,6 +180,7 @@ def main() -> None:
                 "activeCanonicalArticleCountAfterConsolidation": len(active_articles),
                 "consolidationCount": len(config["consolidations"]),
                 "undeclaredHighSimilarityCollisions": 0,
+                "afciAliasCanonicalGuard": afci_alias_checked,
             },
             ensure_ascii=False,
             indent=2,
