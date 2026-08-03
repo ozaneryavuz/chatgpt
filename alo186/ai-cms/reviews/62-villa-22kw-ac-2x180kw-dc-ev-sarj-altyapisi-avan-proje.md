@@ -4,7 +4,7 @@
 
 - **Başlık:** 62 Villa EV Şarj Altyapısı Avan Projesi: 22 kW AC ve 180 kW DC
 - **Canonical adayı:** `/haberler/62-villa-22kw-ac-2x180kw-dc-ev-sarj-altyapisi-avan-proje`
-- **Birincil anahtar ifade:** `62 villa 22 kW AC 180 kW DC araç şarj altyapısı projesi`
+- **Birincil anahtar ifade:** `62 villa EV şarj altyapısı`
 - **Risk sınıfı:** `high`
 - **Fırsat puanı:** **99/100**
 - **AI CMS kalite hedefi:** **100/100**
