@@ -15,15 +15,18 @@ assert.match(runtime,/function injectRevenueHubEntry\(\)/);
 assert.match(runtime,/section\.dataset\.affiliateRevenueEntryV177 = 'true'/);
 assert.match(runtime,/data-commercial-route=\"verified-hub-v177\"/);
 assert.match(runtime,/affiliate_revenue_v177_entry_view/);
-assert.match(runtime,/25\+ uzun kuyruk ürün sınıfını/);
-assert.match(runtime,/yedi kullanım paketini/);
+assert.match(runtime,/Kesinti, iletişim ve ölçüm görevlerini tek teknik filtrede açın/);
+assert.match(runtime,/Güncel doğrulanmış model havuzunu kullanım görevine göre inceleyin/);
 assert.match(runtime,/45 günlük doğrulama sınırı/);
 assert.match(runtime,/ASIN tekilleştirme/);
-assert.match(runtime,/Yüksek riskli ürünlerde doğrudan satış yok/);
+assert.match(runtime,/Yüksek riskte doğrudan satış yok/);
 assert.match(runtime,/Mevcut güvenli ürün yeterliyse satın alma bağlantısı açılmaz/);
-assert.match(runtime,/currentPath\.endsWith\('\/amazon-elektrik-urunleri'\)/);
-assert.match(runtime,/if \(categoryId \|\|/);
+assert.match(runtime,/function isHubPage\(\)/);
+assert.match(runtime,/currentPath\(\)\.endsWith\(hubPath\)/);
+assert.match(runtime,/if \(categoryId \|\| !isHubPage\(\)\) return/);
 assert.match(runtime,/document\.querySelector\('\[data-affiliate-revenue-entry-v177\]'\)/);
+assert.match(runtime,/function gateHubDirectStoreLinks\(\)/);
+assert.match(runtime,/function deEmphasizeCatalogCounts\(\)/);
 assert.ok(!runtime.includes('href="https://www.amazon.com.tr'), 'Yeni keşif kartı statik Amazon bağlantısı taşımamalı.');
 
 console.log(JSON.stringify({
@@ -33,5 +36,6 @@ console.log(JSON.stringify({
   idempotent:true,
   categoryPagesUnaffected:true,
   staticAmazonLink:false,
+  trustFirstHub:true,
   trackingEvent:'affiliate_revenue_v177_entry_view'
 },null,2));
