@@ -16,8 +16,8 @@ WRITER_MODULES = [
     importlib.import_module("inject_growth_run12"),
     importlib.import_module("inject_growth_run15"),
 ]
-CANONICAL_ORIGIN = "https://alo186.com"
 SITEMAP_NS = "http://www.sitemaps.org/schemas/sitemap/0.9"
+ORIGINS = ("https://www.alo186.com", "https://alo186.com")
 AFFECTED_ROUTES = tuple(
     dict.fromkeys(route for module in WRITER_MODULES for route in module.ROUTES.values())
 )
@@ -37,20 +37,21 @@ assert {
 }.issubset(AFFECTED_ROUTES)
 
 
-def seed_sitemap(path: Path) -> None:
+def seed_sitemap(path: Path, preferred_origin: str) -> None:
+    alternate_origin = next(origin for origin in ORIGINS if origin != preferred_origin)
     ET.register_namespace("", SITEMAP_NS)
     root = ET.Element(f"{{{SITEMAP_NS}}}urlset")
     home = ET.SubElement(root, f"{{{SITEMAP_NS}}}url")
-    ET.SubElement(home, f"{{{SITEMAP_NS}}}loc").text = f"{CANONICAL_ORIGIN}/"
+    ET.SubElement(home, f"{{{SITEMAP_NS}}}loc").text = f"{preferred_origin}/"
 
     for index, route in enumerate(AFFECTED_ROUTES):
-        canonical = ET.SubElement(root, f"{{{SITEMAP_NS}}}url")
-        ET.SubElement(canonical, f"{{{SITEMAP_NS}}}loc").text = f"{CANONICAL_ORIGIN}{route}"
-        ET.SubElement(canonical, f"{{{SITEMAP_NS}}}lastmod").text = f"2026-08-{index + 1:02d}"
+        preferred = ET.SubElement(root, f"{{{SITEMAP_NS}}}url")
+        ET.SubElement(preferred, f"{{{SITEMAP_NS}}}loc").text = f"{preferred_origin}{route}"
+        ET.SubElement(preferred, f"{{{SITEMAP_NS}}}lastmod").text = f"2026-08-{index + 1:02d}"
 
-        legacy = ET.SubElement(root, f"{{{SITEMAP_NS}}}url")
-        ET.SubElement(legacy, f"{{{SITEMAP_NS}}}loc").text = f"https://www.alo186.com{route}"
-        ET.SubElement(legacy, f"{{{SITEMAP_NS}}}priority").text = "0.1"
+        duplicate = ET.SubElement(root, f"{{{SITEMAP_NS}}}url")
+        ET.SubElement(duplicate, f"{{{SITEMAP_NS}}}loc").text = f"{alternate_origin}{route}"
+        ET.SubElement(duplicate, f"{{{SITEMAP_NS}}}priority").text = "0.1"
 
     tree = ET.ElementTree(root)
     ET.indent(tree, space="  ")
@@ -73,11 +74,15 @@ def sitemap_rows(path: Path) -> list[tuple[str, str | None, str | None]]:
     return rows
 
 
-for artifact_name in ("custom-domain", "project-path"):
-    with tempfile.TemporaryDirectory(prefix=f"alo186-{artifact_name}-") as temporary:
+for stage_name, preferred_origin in (
+    ("pages-pre-finalize", "https://www.alo186.com"),
+    ("live-finalized", "https://alo186.com"),
+):
+    alternate_origin = next(origin for origin in ORIGINS if origin != preferred_origin)
+    with tempfile.TemporaryDirectory(prefix=f"alo186-{stage_name}-") as temporary:
         site = Path(temporary)
         sitemap = site / "sitemap.xml"
-        seed_sitemap(sitemap)
+        seed_sitemap(sitemap, preferred_origin)
 
         for writer in WRITER_MODULES:
             writer.append_sitemap(site)
@@ -87,11 +92,11 @@ for artifact_name in ("custom-domain", "project-path"):
         rows = sitemap_rows(sitemap)
         locations = [row[0] for row in rows]
 
-        assert not any("https://www.alo186.com" in location for location in locations)
+        assert not any(location.startswith(alternate_origin) for location in locations)
         assert not any("/chatgpt/" in location for location in locations)
         for index, route in enumerate(AFFECTED_ROUTES):
-            canonical = f"{CANONICAL_ORIGIN}{route}"
-            assert locations.count(canonical) == 1, (artifact_name, canonical)
+            canonical = f"{preferred_origin}{route}"
+            assert locations.count(canonical) == 1, (stage_name, canonical)
             row = next(item for item in rows if item[0] == canonical)
             assert row[1] == f"2026-08-{index + 1:02d}"
             assert row[2] is None
@@ -116,10 +121,11 @@ print(
     {
         "ok": True,
         "writers": [module.__name__ for module in WRITER_MODULES],
-        "canonicalOrigin": CANONICAL_ORIGIN,
+        "preferredOrigins": list(ORIGINS),
         "routeCount": len(AFFECTED_ROUTES),
-        "customDomain": True,
-        "projectPath": True,
+        "pagesStageHostPreserved": True,
+        "liveApexPreserved": True,
+        "hostCollapsedDuplicatesRemoved": True,
         "idempotent": True,
         "malformedXmlFailsClosed": True,
     }
