@@ -1,5 +1,6 @@
 name: ALO186 v260 one-shot materializer
 
+# Second push intentionally triggers the workflow after the file exists on default branch.
 on:
   push:
     branches: [main]
