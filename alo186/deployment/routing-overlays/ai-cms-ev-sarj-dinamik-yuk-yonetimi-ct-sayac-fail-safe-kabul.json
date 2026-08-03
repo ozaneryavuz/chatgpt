@@ -1,0 +1,18 @@
+{
+  "version": 236,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/ev-sarj-dinamik-yuk-yonetimi-ct-sayac-fail-safe-kabul/index.html",
+      "canonicalPath": "/haberler/ev-sarj-dinamik-yuk-yonetimi-ct-sayac-fail-safe-kabul",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_3784c2eb7a08b5b8",
+    "humanApproved": true,
+    "approvalPr": 812,
+    "qualityScore": 88
+  }
+}

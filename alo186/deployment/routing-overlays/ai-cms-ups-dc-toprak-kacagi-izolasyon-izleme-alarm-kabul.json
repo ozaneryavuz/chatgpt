@@ -1,0 +1,18 @@
+{
+  "version": 238,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/ups-dc-toprak-kacagi-izolasyon-izleme-alarm-kabul/index.html",
+      "canonicalPath": "/haberler/ups-dc-toprak-kacagi-izolasyon-izleme-alarm-kabul",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_fb570ee2512d3be9",
+    "humanApproved": true,
+    "approvalPr": 812,
+    "qualityScore": 88
+  }
+}
