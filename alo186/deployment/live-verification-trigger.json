@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "requestedAt": "2026-08-03T19:10:00Z",
+  "release": "alo186-v250-all-approved-content-live-2026-08-03T22:05+03:00",
+  "expectedMainThrough": "b687de2c0ae19cb42c9acbc5005146d02a2928f4",
+  "origin": "https://alo186.com",
+  "purpose": "v250 zorunlu canlı rota, title, self-canonical ve release makbuzu doğrulaması"
+}
