@@ -27,25 +27,25 @@
 
   const products = Object.freeze([
     Object.freeze({
-      id: 'tp-link-tl-pa7017p-kit',
-      asin: 'B0859MDSFX',
-      mpn: 'TL-PA7017P KIT',
+      id: 'tp-link-tl-pa8033p-kit',
+      asin: 'B07GBK9CQL',
+      mpn: 'TL-PA8033P KIT',
       brand: 'TP-Link',
-      name: 'TP-Link TL-PA7017P KIT AV1000 Gigabit Passthrough Powerline',
+      name: 'TP-Link TL-PA8033P KIT AV1300 3-Port Gigabit Passthrough Powerline',
       verifiedAt,
-      userNeed: 'Wi-Fi erişiminin zayıf olduğu kişisel ev/ofis noktasına, yeni kablo çekmeden duvar prizi hattı üzerinden tek Gigabit Ethernet bağlantısı taşımak.',
+      userNeed: 'Wi-Fi erişiminin zayıf olduğu kişisel ev/ofis noktasına, yeni kablo çekmeden elektrik hattı üzerinden üç adede kadar Gigabit Ethernet cihazı bağlamak.',
       strengths: Object.freeze([
-        'HomePlug AV2 sınıfında 1000 Mbps teorik powerline bağlantı hızı',
-        'Tek Gigabit Ethernet portu ve entegre EU geçişli elektrik prizi',
+        'HomePlug AV2 sınıfında 1300 Mbps teorik powerline bağlantı hızı ve 2×2 MIMO',
+        'Üç Gigabit Ethernet portu ve entegre EU geçişli elektrik prizi',
         'Pair düğmesi, 128-bit AES powerline şifreleme ve tak-çalıştır kurulum',
       ]),
       limitations: Object.freeze([
-        'Gerçek hız elektrik tesisatı, ayrı devre/faz, AFCI, mesafe ve elektriksel gürültüye göre belirgin değişebilir',
-        'Wi-Fi yayını yapmaz; hedef cihaz Ethernet ile bağlanmalıdır',
-        'Çoklayıcı, aşırı gerilim koruyucu veya UPS arkasında performans düşebilir; doğrudan sağlam duvar prizi testi gerekir',
+        'Gerçek hız elektrik tesisatı, ayrı devre/faz, mesafe ve elektriksel gürültüye göre belirgin değişebilir',
+        'Wi-Fi yayını yapmaz; hedef cihazlar Ethernet ile bağlanmalıdır',
+        'MIMO için canlı, nötr ve koruma iletkeni koşulları önemlidir; priz güvenliği veya topraklama için kullanıcı tarafından enerjili ölçüm yapılmamalıdır',
       ]),
-      noBuyWhen: 'Mevcut Ethernet veya mesh bağlantısı hedef noktada yeterliyse, iki priz aynı kullanıcı tesisatı içinde değilse, doğrudan duvar prizi testi başarısızsa ya da prizde ısınma, gevşeklik, yanık kokusu veya hasar varsa satın alma yapmayın.',
-      technicalSource: 'https://www.tp-link.com/tr/home-networking/powerline/tl-pa7017p-kit/',
+      noBuyWhen: 'Mevcut Ethernet veya mesh bağlantısı hedef noktada yeterliyse, üç kablolu porta ihtiyaç yoksa, iki priz aynı kullanıcı tesisatı içinde değilse ya da prizde ısınma, gevşeklik, yanık kokusu veya hasar varsa satın alma yapmayın.',
+      technicalSource: 'https://www.tp-link.com/tr/home-networking/powerline/tl-pa8033p-kit/',
     }),
     Object.freeze({
       id: 'tp-link-tl-wpa7617-kit',
