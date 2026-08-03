@@ -1,1 +1,261 @@
-{"schemaVersion":1,"id":"cms_c3d62bb8a850fb5d","slug":"jenerator-ats-notr-transferi-3p-4p-kanit-dosyasi","contentType":"guide","state":"review","locale":"tr-TR","title":"Jeneratör ATS Nötr Transferi: 3P/4P Kanıt Dosyası","h1":"Jeneratör ATS’de nötr ne zaman anahtarlanır? 3P/4P kanıt planı","description":"Jeneratör ATS nötr transferinde 3P/4P kararını; N–PE bağı, ayrı türetilmiş kaynak, RCD testi ve saha kabul kanıtlarıyla doğrulayın.","intent":"Jeneratör ve ATS projesinde nötrün anahtarlanıp anahtarlanmayacağını kullanıcı müdahalesi olmadan, tek hat şeması, N–PE bağları, kontak sırası ve saha kabul testleriyle kanıtlamak.","primaryKeyword":"jeneratör ATS nötr transferi","audience":["Elektrik mühendisleri","Jeneratör ve ATS servisleri","Otel ve tesis yöneticileri","Taahhüt ve kabul ekipleri"],"riskClass":"high","directAnswer":"Jeneratör ATS nötr transferinde 3P veya 4P seçimi yalnız faz sayısına göre yapılmaz. Jeneratörün ayrı türetilmiş kaynak olup olmadığı, şebeke ve jeneratördeki N–PE bağları, ATS’nin nötr kontak sırası, RCD yerleşimi ve topraklama sistemi birlikte doğrulanmalıdır. Sonuç; tek hat, bağlantı şeması ve ölçümlü saha kabul dosyasıyla kanıtlanmalıdır.","sections":[{"id":"karar-neden-tek-satir-degildir","heading":"3P veya 4P kararı neden tek satırdan verilemez?","paragraphs":["Jeneratör ATS nötr transferi, yalnız transfer şalterinin kutup sayısını seçmek değildir. Karar; şebeke kaynağının nötr-toprak bağı, jeneratör sargı bağlantısı, jeneratör üzerindeki N–PE bağı, tesisin topraklama sistemi, RCD yerleşimi ve ATS’nin kontak sırasıyla birlikte değerlendirilir. Aynı cihaz bir projede nötrü anahtarlamadan kullanılabilirken başka bir projede nötrün fazlarla birlikte güvenli biçimde ayrılması gerekebilir.","IEC 60364-5-55, düşük gerilim jeneratör setlerinin tesisata bağlanmasında koruma, ayırma, nötr ve topraklama düzeninin sistem bütünlüğü içinde ele alınmasını ister. Bu nedenle “üç fazsa 4 kutuplu olmalıdır” veya “nötr hiçbir zaman anahtarlanmaz” gibi evrensel cümleler güvenli proje kararı değildir; tek hat şeması ve kaynak sınıflandırması kanıtlanmalıdır."],"bullets":["Şebeke ve jeneratör kaynaklarının nötr referansını ayrı ayrı işaretleyin.","ATS’nin faz ve nötr kontaklarının açma-kapama sırasını üretici dokümanından doğrulayın.","Ana dağıtım panosu, jeneratör panosu ve ATS içindeki bütün N–PE bağlantı noktalarını tek çizimde gösterin."],"sourceRefs":["S1","S2"]},{"id":"ayri-turetilmis-kaynak-kaniti","heading":"Ayrı türetilmiş kaynak kararı hangi kanıtlarla verilir?","paragraphs":["Jeneratör nötrü şebeke nötründen transfer sırasında tamamen ayrılıyor ve jeneratör tarafında tanımlı bir nötr-toprak bağlantısı bulunuyorsa jeneratör ayrı türetilmiş kaynak yaklaşımıyla ele alınabilir. Bu senaryoda üç faz ile birlikte nötrün de anahtarlanması, kaynaklar arasında istenmeyen paralel nötr yolu kalmaması ve seçilen kaynağın kendi referansının korunması için 4 kutuplu ATS çözümü gündeme gelir.","Nötr şebeke tarafına sürekli bağlı kalıyor ve sistemde yalnız ana servis noktasında tanımlı N–PE bağı kullanılıyorsa solid neutral düzeni uygulanabilir. Jeneratör üzerinde ikinci bir N–PE bağı bırakılırsa normal yük akımının bir bölümü koruma iletkeni, kablo tavaları veya metal borular üzerinden dolaşabilir. Kanıt dosyası, bu iki mimariden hangisinin seçildiğini ve seçilmeyen mimarinin neden uygulanmadığını açıkça yazmalıdır."],"bullets":["Jeneratör üretici bağlantı şeması ve nötr bond bilgisi","ATS marka/model, kutup sayısı ve neutral switching tipi","Tesis topraklama sistemi ve ana eşpotansiyel bağlantı noktası","Tek hat üzerinde normal ve jeneratör çalışma durumlarının ayrı gösterimi"],"sourceRefs":["S1","S2","S3"]},{"id":"rcd-ve-hassas-yuklar","heading":"RCD, UPS ve elektronik yükler nötr kararını nasıl etkiler?","paragraphs":["RCD, fazlardan çıkan akımla nötrden dönen akım arasındaki farkı izler. Yanlış nötr-toprak topolojisi veya iki farklı N–PE bağı, dönüş akımının bir bölümünü RCD ölçüm toroidinin dışından taşıyabilir ve jeneratör devreye girdiğinde açmaya neden olabilir. Bu durum RCD’nin daha yüksek mA değerli bir cihazla değiştirilerek giderilecek bir arıza değildir; kaynak topolojisi ve gerçek kaçak akımlar ölçülmelidir.","UPS, frekans konvertörü, EV şarj cihazı ve EMC filtreli elektronik yükler normal işletmede kaçak bileşenleri oluşturabilir. Transfer anında nötrün erken açılması veya geç kapanması, hassas yüklerde referans kayması ve geçici gerilimlere yol açabilir. Overlapping neutral veya özel anahtarlama seçenekleri yalnız ATS üreticisinin dokümanı, proje koruma koordinasyonu ve saha kabul testiyle kullanılmalıdır."],"bullets":["RCD açma akımı ve açma süresini şebeke ve jeneratör modunda ayrı kaydedin.","Toplam artık akımı kaçak akım pensiyle devre ve kaynak bazında karşılaştırın.","UPS bypass, jeneratör ve şebeke modlarında nötr sürekliliğini üretici prosedürüne göre doğrulayın."],"sourceRefs":["S1","S2","S3"]},{"id":"saha-kabul-plani","heading":"Jeneratör ATS nötr transferi saha kabul planı","paragraphs":["Yayınlanabilir kanıt dosyasının temel çıktısı, tasarım varsayımını saha testiyle bağlayan bir kabul tablosudur. Testler enerjili panoda kullanıcı tarafından yapılmamalıdır. Yetkili ekip; enerjisiz süreklilik kontrolleri, N–PE bağ noktası doğrulaması, ATS mekanik ve elektriksel çalışma sırası, PE sürekliliği, çevrim empedansı, RCD testi ve gerçek yük transferini tanımlı bir sırayla yürütmelidir.","Her test için cihaz seri numarası, kalibrasyon durumu, ölçüm noktası, şebeke/jeneratör çalışma modu, beklenen değer, ölçülen değer ve kabul sonucu kaydedilmelidir. Test yalnız “çalıştı” ifadesiyle kapatılmamalı; transfer sırasında alarm, nötr akımı, faz gerilimleri ve kritik yük davranışı zaman damgasıyla ilişkilendirilmelidir."],"bullets":["Tek hat ve as-built bağlantı şeması eşleşmesi","N–PE bağ noktalarının görsel ve ölçümsel doğrulaması","ATS faz/nötr kontak sırası ve mekanik kilitleme testi","Şebeke ve jeneratör modunda RCD açma süresi","Kritik yüklerle gerçek transfer ve yeniden transfer kaydı","Uygunsuzluk, sorumlu taraf ve kapanış kanıtı"],"sourceRefs":["S1","S2","S3"]},{"id":"kullanici-icin-guvenli-sonraki-adim","heading":"Kullanıcı hangi bilgiyi toplamalı, neyi yapmamalıdır?","paragraphs":["Kullanıcı için somut fayda, panoyu açmak değil doğru teknik ekibi doğru kanıtla yönlendirmektir. ATS marka ve modelini, jeneratör bağlantı şemasını, RCD’nin yalnız hangi çalışma modunda açtığını, etkilenen devreleri ve son bakım tarihini kaydedin. Tek hat şeması yoksa bunun hazırlanmasını; varsa sahadaki bağlantıyla karşılaştırılmasını talep edin.","Elektrik çarpması, ark, duman, yanık kokusu veya iletken ısınması varsa tekrar transfer denemesi yapmayın. Nötr-toprak köprüsü eklemeyin, RCD’yi devre dışı bırakmayın ve ATS kutup bağlantısını değiştirmeyin. Çıktı, yetkili elektrik mühendisi ile jeneratör/ATS servisinin ortak kabul formuna dönüştürülmelidir."],"bullets":["Fotoğraf yerine cihaz etiketi ve tek hat referansı kaydedin.","Arızanın şebekede mi, jeneratörde mi, yalnız transfer anında mı oluştuğunu ayırın.","Servisten yapılan değişikliği değil, değişiklik sonrası test sonuçlarını isteyin."],"sourceRefs":["S1","S2"]}],"faqs":[{"question":"Jeneratör için her zaman 4 kutuplu ATS gerekir mi?","answer":"Hayır. Nötrün anahtarlanması, jeneratörün ayrı türetilmiş kaynak olup olmamasına, N–PE bağ noktasına ve tesisin topraklama düzenine bağlıdır. 3P/4P seçimi tek hat şeması ve üretici ATS dokümanıyla doğrulanmalıdır.","sourceRefs":["S1","S2"]},{"question":"Jeneratör nötrünü toprağa bağlamak RCD sorununu çözer mi?","answer":"Rastgele yeni bir N–PE bağı eklemek sorunu büyütebilir. Aynı sistemde iki bağ paralel dönüş akımı oluşturabilir. Bağın yeri, ATS’nin nötr anahtarlaması ve kaynak sınıflandırması birlikte projelendirilmelidir.","sourceRefs":["S1","S2"]},{"question":"Overlapping neutral her hassas yükte gerekli midir?","answer":"Hayır. Örtüşmeli nötr özel bir transfer çözümüdür; ATS üreticisinin tasarımı, geçiş sırası, koruma koordinasyonu ve yük davranışı doğrulanmadan genel çözüm olarak kullanılamaz.","sourceRefs":["S2","S3"]},{"question":"Kabul dosyasında yalnız RCD testi yeterli midir?","answer":"Hayır. Tek hat, N–PE bağları, PE sürekliliği, ATS kontak sırası, çevrim empedansı, şebeke/jeneratör gerilimleri ve gerçek yük transfer kaydı birlikte bulunmalıdır.","sourceRefs":["S1","S2","S3"]}],"sources":[{"id":"S1","publisher":"IEC","title":"IEC 60364-5-55:2011+A1:2012+A2:2016 — Low-voltage electrical installations, Part 5-55","url":"https://webstore.iec.ch/en/publication/25534","accessedAt":"2026-08-03","primary":true,"factSummary":"Jeneratör setleri dahil diğer ekipmanın düşük gerilim tesisatına güvenli bağlantısı, ayırma, koruma, nötr ve topraklama koşullarının sistem bütünlüğü içinde değerlendirilmesini tanımlar."},{"id":"S2","publisher":"Schneider Electric ASCO","title":"Neutral Configurations in Transfer Switches","url":"https://www.se.com/us/en/download/document/ASC-DB-NCTS/","accessedAt":"2026-08-03","primary":true,"factSummary":"Solid neutral, switched neutral ve transfer şalteri nötr seçeneklerini; ayrı türetilmiş kaynak ve nötr-topraklama topolojisiyle ilişkilendirir."},{"id":"S3","publisher":"Schneider Electric","title":"Comparison of Neutral Wire Distribution Options for Data Centers","url":"https://www.se.com/us/en/download/document/SPD_WP41_EN/","accessedAt":"2026-08-03","primary":true,"factSummary":"Nötr dağıtım ve transfer seçeneklerinin hassas yükler, toprak arıza akımı, süreklilik ve işletme etkilerini karşılaştırmalı olarak açıklar."}],"internalLinks":[{"label":"Jeneratör devreye girince RCD neden atar?","path":"/haberler/jenerator-devreye-girince-kacak-akim-rolesi-neden-atar","reason":"Mevcut arıza belirtisi rehberini proje ve kabul kanıt dosyasına bağlar."},{"label":"Jeneratör ATS ve AMF farkı","path":"/haberler/jenerator-ats-amf-farki-nedir","reason":"Kontrol ve transfer fonksiyonlarının görev ayrımını açıklar."},{"label":"Jeneratör transfer şalteri neden gerekir?","path":"/haberler/jenerator-transfer-salteri-neden-gerekir","reason":"Geri besleme ve güvenli kaynak ayırma temelini verir."},{"label":"Kaçak akım rölesi Tip S seçiciliği","path":"/haberler/kacak-akim-rolesi-tip-s-selektivite-nedir","reason":"RCD koordinasyonu ve zaman seçiciliği sınırını tamamlar."},{"label":"Nötr-toprak arası gerilim","path":"/haberler/notr-toprak-arasi-gerilim-kac-volt-olmali","reason":"N–PE ölçümünün tek başına teşhis olmadığını açıklayan bağlam sağlar."},{"label":"Jeneratör gücü seçimi","path":"/hesaplama/jenerator-gucu-secimi/","reason":"Transfer topolojisinden ayrı kapasite ön hesabına yönlendirir."},{"label":"Elektrik Portalı","path":"/elektrik-portali","reason":"Kullanıcının diğer güvenli teknik işlem rotalarına dönmesini sağlar."}],"commerce":{"enabled":false,"policy":"none","category":null},"editorial":{"createdBy":"ai-assisted","model":"gpt-5.6-thinking","humanReviewRequired":true,"approvedBy":null,"approvedAt":null,"publishedAt":null,"approvalPr":null},"seo":{"canonicalPath":"/haberler/jenerator-ats-notr-transferi-3p-4p-kanit-dosyasi","robots":"index,follow,max-image-preview:large","lastModified":"2026-08-03","topics":["jeneratör ATS nötr transferi","3P 4P ATS","switched neutral","solid neutral","N-PE bağı","RCD koordinasyonu"]},"quality":{"score":0,"minimumRequired":85,"checks":{},"similarity":{"maximum":0.0,"closestPath":null}}}
+{
+  "schemaVersion": 1,
+  "id": "cms_c3d62bb8a850fb5d",
+  "slug": "jenerator-ats-notr-transferi-3p-4p-kanit-dosyasi",
+  "contentType": "guide",
+  "state": "published",
+  "locale": "tr-TR",
+  "title": "Jeneratör ATS Nötr Transferi: 3P/4P Kanıt Dosyası",
+  "h1": "Jeneratör ATS’de nötr ne zaman anahtarlanır? 3P/4P kanıt planı",
+  "description": "Jeneratör ATS nötr transferinde 3P/4P kararını; N–PE bağı, ayrı türetilmiş kaynak, RCD testi ve saha kabul kanıtlarıyla doğrulayın.",
+  "intent": "Jeneratör ve ATS projesinde nötrün anahtarlanıp anahtarlanmayacağını kullanıcı müdahalesi olmadan, tek hat şeması, N–PE bağları, kontak sırası ve saha kabul testleriyle kanıtlamak.",
+  "primaryKeyword": "jeneratör ATS nötr transferi",
+  "audience": [
+    "Elektrik mühendisleri",
+    "Jeneratör ve ATS servisleri",
+    "Otel ve tesis yöneticileri",
+    "Taahhüt ve kabul ekipleri"
+  ],
+  "riskClass": "high",
+  "directAnswer": "Jeneratör ATS nötr transferinde 3P veya 4P seçimi yalnız faz sayısına göre yapılmaz. Jeneratörün ayrı türetilmiş kaynak olup olmadığı, şebeke ve jeneratördeki N–PE bağları, ATS’nin nötr kontak sırası, RCD yerleşimi ve topraklama sistemi birlikte doğrulanmalıdır. Sonuç; tek hat, bağlantı şeması ve ölçümlü saha kabul dosyasıyla kanıtlanmalıdır.",
+  "sections": [
+    {
+      "id": "karar-neden-tek-satir-degildir",
+      "heading": "3P veya 4P kararı neden tek satırdan verilemez?",
+      "paragraphs": [
+        "Jeneratör ATS nötr transferi, yalnız transfer şalterinin kutup sayısını seçmek değildir. Karar; şebeke kaynağının nötr-toprak bağı, jeneratör sargı bağlantısı, jeneratör üzerindeki N–PE bağı, tesisin topraklama sistemi, RCD yerleşimi ve ATS’nin kontak sırasıyla birlikte değerlendirilir. Aynı cihaz bir projede nötrü anahtarlamadan kullanılabilirken başka bir projede nötrün fazlarla birlikte güvenli biçimde ayrılması gerekebilir.",
+        "IEC 60364-5-55, düşük gerilim jeneratör setlerinin tesisata bağlanmasında koruma, ayırma, nötr ve topraklama düzeninin sistem bütünlüğü içinde ele alınmasını ister. Bu nedenle “üç fazsa 4 kutuplu olmalıdır” veya “nötr hiçbir zaman anahtarlanmaz” gibi evrensel cümleler güvenli proje kararı değildir; tek hat şeması ve kaynak sınıflandırması kanıtlanmalıdır."
+      ],
+      "bullets": [
+        "Şebeke ve jeneratör kaynaklarının nötr referansını ayrı ayrı işaretleyin.",
+        "ATS’nin faz ve nötr kontaklarının açma-kapama sırasını üretici dokümanından doğrulayın.",
+        "Ana dağıtım panosu, jeneratör panosu ve ATS içindeki bütün N–PE bağlantı noktalarını tek çizimde gösterin."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2"
+      ]
+    },
+    {
+      "id": "ayri-turetilmis-kaynak-kaniti",
+      "heading": "Ayrı türetilmiş kaynak kararı hangi kanıtlarla verilir?",
+      "paragraphs": [
+        "Jeneratör nötrü şebeke nötründen transfer sırasında tamamen ayrılıyor ve jeneratör tarafında tanımlı bir nötr-toprak bağlantısı bulunuyorsa jeneratör ayrı türetilmiş kaynak yaklaşımıyla ele alınabilir. Bu senaryoda üç faz ile birlikte nötrün de anahtarlanması, kaynaklar arasında istenmeyen paralel nötr yolu kalmaması ve seçilen kaynağın kendi referansının korunması için 4 kutuplu ATS çözümü gündeme gelir.",
+        "Nötr şebeke tarafına sürekli bağlı kalıyor ve sistemde yalnız ana servis noktasında tanımlı N–PE bağı kullanılıyorsa solid neutral düzeni uygulanabilir. Jeneratör üzerinde ikinci bir N–PE bağı bırakılırsa normal yük akımının bir bölümü koruma iletkeni, kablo tavaları veya metal borular üzerinden dolaşabilir. Kanıt dosyası, bu iki mimariden hangisinin seçildiğini ve seçilmeyen mimarinin neden uygulanmadığını açıkça yazmalıdır."
+      ],
+      "bullets": [
+        "Jeneratör üretici bağlantı şeması ve nötr bond bilgisi",
+        "ATS marka/model, kutup sayısı ve neutral switching tipi",
+        "Tesis topraklama sistemi ve ana eşpotansiyel bağlantı noktası",
+        "Tek hat üzerinde normal ve jeneratör çalışma durumlarının ayrı gösterimi"
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "id": "rcd-ve-hassas-yuklar",
+      "heading": "RCD, UPS ve elektronik yükler nötr kararını nasıl etkiler?",
+      "paragraphs": [
+        "RCD, fazlardan çıkan akımla nötrden dönen akım arasındaki farkı izler. Yanlış nötr-toprak topolojisi veya iki farklı N–PE bağı, dönüş akımının bir bölümünü RCD ölçüm toroidinin dışından taşıyabilir ve jeneratör devreye girdiğinde açmaya neden olabilir. Bu durum RCD’nin daha yüksek mA değerli bir cihazla değiştirilerek giderilecek bir arıza değildir; kaynak topolojisi ve gerçek kaçak akımlar ölçülmelidir.",
+        "UPS, frekans konvertörü, EV şarj cihazı ve EMC filtreli elektronik yükler normal işletmede kaçak bileşenleri oluşturabilir. Transfer anında nötrün erken açılması veya geç kapanması, hassas yüklerde referans kayması ve geçici gerilimlere yol açabilir. Overlapping neutral veya özel anahtarlama seçenekleri yalnız ATS üreticisinin dokümanı, proje koruma koordinasyonu ve saha kabul testiyle kullanılmalıdır."
+      ],
+      "bullets": [
+        "RCD açma akımı ve açma süresini şebeke ve jeneratör modunda ayrı kaydedin.",
+        "Toplam artık akımı kaçak akım pensiyle devre ve kaynak bazında karşılaştırın.",
+        "UPS bypass, jeneratör ve şebeke modlarında nötr sürekliliğini üretici prosedürüne göre doğrulayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "id": "saha-kabul-plani",
+      "heading": "Jeneratör ATS nötr transferi saha kabul planı",
+      "paragraphs": [
+        "Yayınlanabilir kanıt dosyasının temel çıktısı, tasarım varsayımını saha testiyle bağlayan bir kabul tablosudur. Testler enerjili panoda kullanıcı tarafından yapılmamalıdır. Yetkili ekip; enerjisiz süreklilik kontrolleri, N–PE bağ noktası doğrulaması, ATS mekanik ve elektriksel çalışma sırası, PE sürekliliği, çevrim empedansı, RCD testi ve gerçek yük transferini tanımlı bir sırayla yürütmelidir.",
+        "Her test için cihaz seri numarası, kalibrasyon durumu, ölçüm noktası, şebeke/jeneratör çalışma modu, beklenen değer, ölçülen değer ve kabul sonucu kaydedilmelidir. Test yalnız “çalıştı” ifadesiyle kapatılmamalı; transfer sırasında alarm, nötr akımı, faz gerilimleri ve kritik yük davranışı zaman damgasıyla ilişkilendirilmelidir."
+      ],
+      "bullets": [
+        "Tek hat ve as-built bağlantı şeması eşleşmesi",
+        "N–PE bağ noktalarının görsel ve ölçümsel doğrulaması",
+        "ATS faz/nötr kontak sırası ve mekanik kilitleme testi",
+        "Şebeke ve jeneratör modunda RCD açma süresi",
+        "Kritik yüklerle gerçek transfer ve yeniden transfer kaydı",
+        "Uygunsuzluk, sorumlu taraf ve kapanış kanıtı"
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "id": "kullanici-icin-guvenli-sonraki-adim",
+      "heading": "Kullanıcı hangi bilgiyi toplamalı, neyi yapmamalıdır?",
+      "paragraphs": [
+        "Kullanıcı için somut fayda, panoyu açmak değil doğru teknik ekibi doğru kanıtla yönlendirmektir. ATS marka ve modelini, jeneratör bağlantı şemasını, RCD’nin yalnız hangi çalışma modunda açtığını, etkilenen devreleri ve son bakım tarihini kaydedin. Tek hat şeması yoksa bunun hazırlanmasını; varsa sahadaki bağlantıyla karşılaştırılmasını talep edin.",
+        "Elektrik çarpması, ark, duman, yanık kokusu veya iletken ısınması varsa tekrar transfer denemesi yapmayın. Nötr-toprak köprüsü eklemeyin, RCD’yi devre dışı bırakmayın ve ATS kutup bağlantısını değiştirmeyin. Çıktı, yetkili elektrik mühendisi ile jeneratör/ATS servisinin ortak kabul formuna dönüştürülmelidir."
+      ],
+      "bullets": [
+        "Fotoğraf yerine cihaz etiketi ve tek hat referansı kaydedin.",
+        "Arızanın şebekede mi, jeneratörde mi, yalnız transfer anında mı oluştuğunu ayırın.",
+        "Servisten yapılan değişikliği değil, değişiklik sonrası test sonuçlarını isteyin."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2"
+      ]
+    }
+  ],
+  "faqs": [
+    {
+      "question": "Jeneratör için her zaman 4 kutuplu ATS gerekir mi?",
+      "answer": "Hayır. Nötrün anahtarlanması, jeneratörün ayrı türetilmiş kaynak olup olmamasına, N–PE bağ noktasına ve tesisin topraklama düzenine bağlıdır. 3P/4P seçimi tek hat şeması ve üretici ATS dokümanıyla doğrulanmalıdır.",
+      "sourceRefs": [
+        "S1",
+        "S2"
+      ]
+    },
+    {
+      "question": "Jeneratör nötrünü toprağa bağlamak RCD sorununu çözer mi?",
+      "answer": "Rastgele yeni bir N–PE bağı eklemek sorunu büyütebilir. Aynı sistemde iki bağ paralel dönüş akımı oluşturabilir. Bağın yeri, ATS’nin nötr anahtarlaması ve kaynak sınıflandırması birlikte projelendirilmelidir.",
+      "sourceRefs": [
+        "S1",
+        "S2"
+      ]
+    },
+    {
+      "question": "Overlapping neutral her hassas yükte gerekli midir?",
+      "answer": "Hayır. Örtüşmeli nötr özel bir transfer çözümüdür; ATS üreticisinin tasarımı, geçiş sırası, koruma koordinasyonu ve yük davranışı doğrulanmadan genel çözüm olarak kullanılamaz.",
+      "sourceRefs": [
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "question": "Kabul dosyasında yalnız RCD testi yeterli midir?",
+      "answer": "Hayır. Tek hat, N–PE bağları, PE sürekliliği, ATS kontak sırası, çevrim empedansı, şebeke/jeneratör gerilimleri ve gerçek yük transfer kaydı birlikte bulunmalıdır.",
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "publisher": "IEC",
+      "title": "IEC 60364-5-55:2011+A1:2012+A2:2016 — Low-voltage electrical installations, Part 5-55",
+      "url": "https://webstore.iec.ch/en/publication/25534",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Jeneratör setleri dahil diğer ekipmanın düşük gerilim tesisatına güvenli bağlantısı, ayırma, koruma, nötr ve topraklama koşullarının sistem bütünlüğü içinde değerlendirilmesini tanımlar."
+    },
+    {
+      "id": "S2",
+      "publisher": "Schneider Electric ASCO",
+      "title": "Neutral Configurations in Transfer Switches",
+      "url": "https://www.se.com/us/en/download/document/ASC-DB-NCTS/",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Solid neutral, switched neutral ve transfer şalteri nötr seçeneklerini; ayrı türetilmiş kaynak ve nötr-topraklama topolojisiyle ilişkilendirir."
+    },
+    {
+      "id": "S3",
+      "publisher": "Schneider Electric",
+      "title": "Comparison of Neutral Wire Distribution Options for Data Centers",
+      "url": "https://www.se.com/us/en/download/document/SPD_WP41_EN/",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Nötr dağıtım ve transfer seçeneklerinin hassas yükler, toprak arıza akımı, süreklilik ve işletme etkilerini karşılaştırmalı olarak açıklar."
+    }
+  ],
+  "internalLinks": [
+    {
+      "label": "Jeneratör devreye girince RCD neden atar?",
+      "path": "/haberler/jenerator-devreye-girince-kacak-akim-rolesi-neden-atar",
+      "reason": "Mevcut arıza belirtisi rehberini proje ve kabul kanıt dosyasına bağlar."
+    },
+    {
+      "label": "Jeneratör ATS ve AMF farkı",
+      "path": "/haberler/jenerator-ats-amf-farki-nedir",
+      "reason": "Kontrol ve transfer fonksiyonlarının görev ayrımını açıklar."
+    },
+    {
+      "label": "Jeneratör transfer şalteri neden gerekir?",
+      "path": "/haberler/jenerator-transfer-salteri-neden-gerekir",
+      "reason": "Geri besleme ve güvenli kaynak ayırma temelini verir."
+    },
+    {
+      "label": "Kaçak akım rölesi Tip S seçiciliği",
+      "path": "/haberler/kacak-akim-rolesi-tip-s-selektivite-nedir",
+      "reason": "RCD koordinasyonu ve zaman seçiciliği sınırını tamamlar."
+    },
+    {
+      "label": "Nötr-toprak arası gerilim",
+      "path": "/haberler/notr-toprak-arasi-gerilim-kac-volt-olmali",
+      "reason": "N–PE ölçümünün tek başına teşhis olmadığını açıklayan bağlam sağlar."
+    },
+    {
+      "label": "Jeneratör gücü seçimi",
+      "path": "/hesaplama/jenerator-gucu-secimi",
+      "reason": "Transfer topolojisinden ayrı kapasite ön hesabına yönlendirir."
+    },
+    {
+      "label": "Elektrik Portalı",
+      "path": "/elektrik-portali",
+      "reason": "Kullanıcının diğer güvenli teknik işlem rotalarına dönmesini sağlar."
+    }
+  ],
+  "commerce": {
+    "enabled": false,
+    "policy": "none",
+    "category": null
+  },
+  "editorial": {
+    "createdBy": "ai-assisted",
+    "model": "gpt-5.6-thinking",
+    "humanReviewRequired": true,
+    "approvedBy": "ozaneryavuz",
+    "approvedAt": "2026-08-03T18:41:19Z",
+    "publishedAt": "2026-08-03T18:41:19Z",
+    "approvalPr": 752
+  },
+  "seo": {
+    "canonicalPath": "/haberler/jenerator-ats-notr-transferi-3p-4p-kanit-dosyasi",
+    "robots": "index,follow,max-image-preview:large",
+    "lastModified": "2026-08-03",
+    "topics": [
+      "jeneratör ATS nötr transferi",
+      "3P 4P ATS",
+      "switched neutral",
+      "solid neutral",
+      "N-PE bağı",
+      "RCD koordinasyonu"
+    ]
+  },
+  "quality": {
+    "score": 100,
+    "minimumRequired": 85,
+    "checks": {
+      "metadata": true,
+      "directAnswer": true,
+      "contentDepth": true,
+      "sources": true,
+      "safety": true,
+      "internalLinks": true,
+      "uniqueness": true,
+      "structuredData": true
+    },
+    "similarity": {
+      "maximum": 0.3636,
+      "closestPath": "https://www.alo186.com/haberler/jenerator-ats-3-kutuplu-4-kutuplu-notr-transferi-rcd"
+    }
+  }
+}

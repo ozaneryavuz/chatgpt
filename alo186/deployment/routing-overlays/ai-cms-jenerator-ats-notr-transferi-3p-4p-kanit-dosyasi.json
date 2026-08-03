@@ -1,0 +1,18 @@
+{
+  "version": 238,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/jenerator-ats-notr-transferi-3p-4p-kanit-dosyasi/index.html",
+      "canonicalPath": "/haberler/jenerator-ats-notr-transferi-3p-4p-kanit-dosyasi",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_c3d62bb8a850fb5d",
+    "humanApproved": true,
+    "approvalPr": 752,
+    "qualityScore": 100
+  }
+}
