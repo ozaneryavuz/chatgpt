@@ -1,3 +1,35 @@
+# OpenAI search crawler — ChatGPT Search citations and discovery
+User-agent: OAI-SearchBot
+Allow: /
+
+# OpenAI model crawler — kept separate from search crawling policy
+User-agent: GPTBot
+Allow: /
+
+# User-requested OpenAI page fetches
+User-agent: ChatGPT-User
+Allow: /
+
+# Perplexity answer-engine crawler
+User-agent: PerplexityBot
+Allow: /
+
+# Anthropic answer and model crawlers
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+# ByteDance crawler
+User-agent: Bytespider
+Allow: /
+
+# Google generative-AI training control token
+User-agent: Google-Extended
+Allow: /
+
+# All other standards-compliant crawlers
 User-agent: *
 Allow: /
 
