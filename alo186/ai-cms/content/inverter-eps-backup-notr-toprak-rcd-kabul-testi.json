@@ -1,0 +1,286 @@
+{
+  "schemaVersion": 1,
+  "id": "cms_18574c12f2c44b0a",
+  "slug": "inverter-eps-backup-notr-toprak-rcd-kabul-testi",
+  "contentType": "guide",
+  "state": "published",
+  "locale": "tr-TR",
+  "title": "İnverter EPS Çıkışında Nötr–Toprak ve RCD Kabulü",
+  "h1": "İnverter EPS veya backup çıkışında nötr–toprak bağı ve RCD nasıl doğrulanır?",
+  "description": "Hibrit inverterin şebeke ve ada modlarında nötr–toprak bağını, nötr anahtarlamasını ve RCD açma davranışını model bazlı kabul testiyle doğrulayın.",
+  "intent": "Hibrit inverter, batarya veya GES backup/EPS çıkışında şebeke varken ve kesildiğinde koruma düzeninin değişip değişmediğini; N–PE bağı, nötr anahtarlaması ve RCD davranışıyla kanıta dayalı kabul etmek.",
+  "primaryKeyword": "EPS çıkışında",
+  "audience": [
+    "Hibrit inverter yatırımcıları",
+    "GES ve batarya kurulum ekipleri",
+    "Elektrik mühendisleri",
+    "Site ve otel teknik yöneticileri",
+    "Devreye alma firmaları"
+  ],
+  "riskClass": "high",
+  "directAnswer": "EPS veya backup çıkışının enerji vermesi, elektrik çarpmasına karşı korumanın her modda doğru çalıştığını kanıtlamaz. Şebeke modunda N–PE bağı çoğunlukla gelen kaynaktan sağlanırken ada modunda inverterin toprak rölesi veya haricî anahtarlama düzeni yeni bir referans oluşturabilir. Kabul; tek hat ve ürün kılavuzu, faz ve nötr anahtarlama matrisi, şebeke–ada geçiş sırası, N–PE süreklilik durumu, RCD açma akımı–süresi ve tekrar şebekeye bağlanma testiyle yapılmalıdır. Enerjili terminal ve koruma testleri yalnız yetkin ekipçe gerçekleştirilmelidir.",
+  "sections": [
+    {
+      "id": "kaynak-ve-topraklama-modlari",
+      "heading": "Şebeke ve ada modunda kaynak ile topraklama sistemi neden değişir?",
+      "paragraphs": [
+        "Hibrit inverter şebekeye paralel çalışırken yükler çoğu zaman dağıtım şebekesinin nötr ve koruma düzenine bağlıdır. Şebeke kesildiğinde backup/EPS çıkışı bağımsız bir kaynak hâline gelebilir; bu durumda topraklama sistemi, nötrün anahtarlanıp anahtarlanmadığı ve arıza akımının kaynağa dönüş yolu yeniden değerlendirilmelidir. IEC 60364-8-82’nin 2026 değişikliği, prosumer tesislerinde şebekeye bağlı ve ada modları arasında sistem topraklaması değişiminin sıralamasını özellikle netleştirir.",
+        "Ürün adı veya “EPS var” etiketi tek başına mimariyi göstermez. Bazı backup üniteleri yalnız faz iletkenlerini, bazıları nötr dahil tüm aktif iletkenleri anahtarlayabilir. İnverterin dahili ground relay işlevi, haricî kontaktörler, jeneratör veya başka bir paralel kaynak varsa tek hat üzerinde gerçek çalışma durumlarıyla gösterilmelidir."
+      ],
+      "bullets": [
+        "Şebeke, ada, bypass ve jeneratör modlarını ayrı kaynak olarak yazın.",
+        "Faz ve nötrün hangi cihaz tarafından anahtarlandığını tek hatta gösterin.",
+        "Dahili ground relay veya haricî N–PE rölesini ürün belgesiyle doğrulayın.",
+        "Ürün ailesindeki başka modelin bağlantı şemasını varsaymayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "id": "notr-toprak-bagi",
+      "heading": "Nötr–toprak bağı RCD çalışması için nasıl değerlendirilir?",
+      "paragraphs": [
+        "RCD, fazdan çıkan ve nötrden dönen akım arasındaki farkı algılar; koruma iletkeni üzerinden oluşan arıza akımının güvenilir bir dönüş yolu bulunmalıdır. Victron’un teknik kılavuzu, inverter kaynağında nötr–toprak bağlantısının RCD’nin çalışabilmesi için gerekli olduğunu ve inverter/şarj cihazlarında ground relay’in AC giriş kesildiğinde bu bağı oluşturabildiğini açıklar. Bu davranış üretici ve modele özgüdür; her inverter için genellenemez.",
+        "Çift N–PE bağı da sorun yaratabilir. Şebeke ve inverter bağları aynı anda kapalı kalırsa paralel nötr akımları, istenmeyen RCD açmaları ve koruma iletkeninde işletme akımı oluşabilir. Bu nedenle kabul yalnız “nötr toprağa bağlı mı?” sorusuyla değil, hangi modda hangi bağın kapalı olduğu ve geçiş sırasında iki bağın çakışıp çakışmadığıyla yapılmalıdır."
+      ],
+      "bullets": [
+        "Her mod için N–PE bağının açık veya kapalı durumunu matrise yazın.",
+        "Aynı anda iki bağın kapalı kalmadığını doğrulayın.",
+        "PE üzerinde sürekli işletme akımı görülürse kök neden araştırın.",
+        "RCD’yi koruma iletkenini sökerek veya köprüleyerek test etmeyin."
+      ],
+      "sourceRefs": [
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "id": "notr-anahtarlama-ve-gecis",
+      "heading": "Nötr anahtarlaması ve geçiş sırası hangi kanıtlarla kabul edilir?",
+      "paragraphs": [
+        "SMA’nın backup ünitesi dokümanı, bazı varyantların yalnız fazları, bazı varyantların ise nötr dahil tüm kutupları ayırdığını açıkça ayırır. Doğru seçimin yerel şebeke bağlantı koşulları ve normatif gereklere göre yapılması gerekir. Bu nedenle “4 kutuplu her zaman daha iyidir” veya “nötr hiç anahtarlanmaz” gibi bağlamsız kurallar yayımlanmamalıdır.",
+        "Geçiş sırası; şebeke kontaktörünün açılması, ada kaynağının gerilim oluşturması, N–PE bağının doğru anda kapanması, yüklerin devreye alınması ve şebeke geri geldiğinde ters sıranın güvenli tamamlanmasını kapsar. Kesici ve röle geri bildirimleri ile inverter olay günlüğü ortak zaman tabanında kaydedilmeli; geçiş sırasında belirsiz nötr, çift bağ veya kısa süreli gerilim kaybı bırakılmamalıdır."
+      ],
+      "bullets": [
+        "3 kutuplu ve 4 kutuplu anahtarlama kararını proje koşuluyla belgeleyin.",
+        "Kontaktör yardımcı kontaklarını olay günlüğüyle eşleştirin.",
+        "Şebeke kaybı ve geri dönüşte geçiş sırasını ayrı test edin.",
+        "Jeneratör veya ikinci inverter varsa kaynaklar arası kilitlemeyi doğrulayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "id": "rcd-fonksiyon-testi",
+      "heading": "RCD fonksiyon testi şebeke ve ada modunda nasıl kaydedilir?",
+      "paragraphs": [
+        "Ön panel TEST düğmesi RCD mekanizmasının temel işlevini sınar; gerçek tesisin arıza döngüsünü, N–PE rölesini, kutup bağlantısını veya açma süresini tek başına kanıtlamaz. Yetkin ekip, uygun test cihazıyla şebeke modunda ve ada modunda ayrı açma akımı–süresi ölçer; hangi RCD/RCBO’nun hangi backup devresini koruduğunu kaydeder.",
+        "Backup çıkışında bazı yükler kalıcı, bazıları transfer kontaktörü üzerinden olabilir. Her devrenin koruma zinciri, PE sürekliliği, otomatik açma davranışı ve inverterin arıza sonrası tepkisi ayrı satırda izlenmelidir. Test sırasında gerçek kısa devre, koruma köprüleme veya açık iletkenle deneme yapılmamalıdır; üretici prosedürü ve risk planı dışına çıkılmamalıdır."
+      ],
+      "bullets": [
+        "Şebeke ve ada modunda RCD açma akımı–süresini ayrı kaydedin.",
+        "Her backup devresi için PE sürekliliği ve koruma cihazını eşleştirin.",
+        "İnverter alarmı, kontaktör durumu ve RCD açmasını ortak zaman çizelgesine alın.",
+        "Kontrolsüz kısa devre veya iletken köprüleme yöntemi kullanmayın."
+      ],
+      "sourceRefs": [
+        "S2",
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "id": "kabul-dosyasi",
+      "heading": "EPS nötr–toprak ve RCD kabul dosyasında neler bulunmalıdır?",
+      "paragraphs": [
+        "Teslim dosyası; tek hat şeması, şebeke topraklama sistemi, inverter ve backup ünitesi tam ürün referansları, firmware, faz/nötr anahtarlama tablosu, N–PE röle mantığı, RCD tipi ve yerleşimi, PE sürekliliği, mod bazlı açma akımı–süresi, olay günlükleri ve başarısızlıkta güvenli durum bilgisini içermelidir. Değişiklik sonrası aynı test seti yeniden uygulanmalıdır.",
+        "Koruma zinciri her modda kanıtla doğru çalışıyorsa sırf başka bir projede farklı nötr anahtarlaması kullanıldığı için ek kontaktör, trafo veya RCD satın almak gerekmez. Kanıt eksikse yalnız yazılım ayarıyla deneme yapılmamalıdır. CTA: kişisel verisiz şebeke–ada–N–PE–RCD kabul matrisini tamamlayın ve yetkin elektrik mühendisine iletin."
+      ],
+      "bullets": [
+        "Model, firmware ve şebeke kodunu teslim dosyasında tekilleştirin.",
+        "Her mod için kaynak, nötr ve N–PE durumunu tabloya işleyin.",
+        "RCD test cihazı ve kalibrasyon bilgisini rapora ekleyin.",
+        "Kanıt yeterliyse gereksiz kontaktör, trafo veya RCD satın almayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S4",
+        "S5"
+      ]
+    }
+  ],
+  "faqs": [
+    {
+      "question": "İnverter ada modunda nötr otomatik olarak toprağa bağlanır mı?",
+      "answer": "Bazı inverter/şarj cihazlarında dahili ground relay AC giriş kesildiğinde N–PE bağını otomatik kurar; bazı ürünlerde haricî çözüm veya farklı bağlantı gerekir. Tam model kılavuzu ve tek hat doğrulanmadan varsayım yapılmamalıdır.",
+      "sourceRefs": [
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "question": "Backup çıkışında RCD TEST düğmesine basmak yeterli midir?",
+      "answer": "Hayır. TEST düğmesi mekanizmayı sınar; şebeke ve ada modunda gerçek açma akımı–süresi, PE sürekliliği, N–PE röle durumu ve korunan devreler uygun cihazla ayrıca doğrulanmalıdır.",
+      "sourceRefs": [
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "question": "EPS sisteminde nötr mutlaka dört kutuplu anahtarlanmalı mı?",
+      "answer": "Evrensel tek cevap yoktur. Ürün varyantı, şebeke topraklama sistemi, yerel dağıtım koşulları ve proje standardı birlikte değerlendirilmelidir; bazı backup üniteleri fazları, bazıları nötr dahil tüm aktif iletkenleri anahtarlar.",
+      "sourceRefs": [
+        "S1",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "question": "Çift nötr–toprak bağı neye yol açabilir?",
+      "answer": "Şebeke ve inverter N–PE bağları aynı anda kapalı kalırsa paralel nötr yolları, PE üzerinde işletme akımı ve istenmeyen RCD açmaları oluşabilir. Modlar arası röle sırası ve tek bağ ilkesi kanıtlanmalıdır.",
+      "sourceRefs": [
+        "S2",
+        "S3"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "publisher": "IEC",
+      "title": "IEC 60364-8-82:2022+A1:2026 — Prosumer low-voltage electrical installations",
+      "url": "https://webstore.iec.ch/en/publication/113148",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Şebekeye bağlı ve ada modunda çalışan prosumer tesislerinde sistem topraklaması türü, mod değişimi sıralaması ve dağıtım sistemiyle güvenli bağlantı-ayırma gereklerini günceller."
+    },
+    {
+      "id": "S2",
+      "publisher": "Victron Energy",
+      "title": "Wiring Unlimited — Ground, earth and electrical safety",
+      "url": "https://www.victronenergy.com/media/pg/The_Wiring_Unlimited_book/en/ground%2C-earth-and-electrical-safety.html",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "İnverter ve inverter/charger sistemlerinde N–PE bağı, ground relay davranışı, RCD yerleşimi ve çift bağ kaynaklı istenmeyen açmaları üretici teknik çerçevesiyle açıklar."
+    },
+    {
+      "id": "S3",
+      "publisher": "Victron Energy",
+      "title": "VEConfigure Manual — Inverter ground relay setting",
+      "url": "https://www.victronenergy.com/media/pg/VEConfigure_Manual/en/inverter-settings.html",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "AC giriş transferi açık veya kapalıyken dahili ground relay’in nötrü PE’ye bağlama-ayırma davranışını ve ayarın güvenlik etkisini tanımlar."
+    },
+    {
+      "id": "S4",
+      "publisher": "SMA Solar Technology",
+      "title": "Backup Unit intended use and three-pole/four-pole versions",
+      "url": "https://manuals.sma.de/BU-STPH-xP63x/en-US/16824414475.html",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Backup ünitesinin şebekeden güvenli ayrılmasını, batarya yedek işletmesine geçişini ve nötrü anahtarlayan veya anahtarlamayan ürün varyantlarını açıklar."
+    },
+    {
+      "id": "S5",
+      "publisher": "SMA Solar Technology",
+      "title": "Secure power supply output neutral and grounding conductor",
+      "url": "https://manuals.sma.de/SBSxx-10/en-US/1642621195.html",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Belirli güvenli güç çıkışında nötr ile koruma iletkeni bağlantısının ürün tarafından kalıcı sağlandığını ve yük seçiminin model davranışına göre yapılması gerektiğini belirtir."
+    }
+  ],
+  "internalLinks": [
+    {
+      "label": "GES elektrik kesintisinde çalışır mı?",
+      "path": "/haberler/ges-elektrik-kesintisinde-calisir-mi",
+      "reason": "On-grid çalışma ile gerçek backup/EPS ada beslemesini temel düzeyde ayırır."
+    },
+    {
+      "label": "Nötr–toprak arası gerilim",
+      "path": "/haberler/notr-toprak-arasi-gerilim-kac-volt-olmali",
+      "reason": "N–PE ölçümünün tek başına koruma kanıtı olmadığını ve olası nedenleri tamamlar."
+    },
+    {
+      "label": "Kaçak akım rölesi Tip A ve Tip AC farkı",
+      "path": "/haberler/kacak-akim-rolesi-tip-a-tip-ac-farki",
+      "reason": "Backup yüklerinin RCD tip seçimini nötr anahtarlamasından ayrı değerlendirmeyi sağlar."
+    },
+    {
+      "label": "Kaçak akım rölesi Tip S selektivite",
+      "path": "/haberler/kacak-akim-rolesi-tip-s-selektivite-nedir",
+      "reason": "Ana ve tali RCD koordinasyonunu mod değişimi kabulüne bağlar."
+    },
+    {
+      "label": "Jeneratör devreye girince RCD neden atar?",
+      "path": "/haberler/jenerator-devreye-girince-kacak-akim-rolesi-neden-atar",
+      "reason": "Alternatif kaynaklarda nötr ve topraklama değişiminin benzer kök nedenlerini gösterir."
+    },
+    {
+      "label": "İnverter uygunluk aracı",
+      "path": "/hesaplama/inverter-uygunluk",
+      "reason": "Yük, güç ve dalga biçimi uygunluğunu koruma düzeninden ayrı ön kontrolde ele alır."
+    },
+    {
+      "label": "Kurumsal elektrik sürekliliği ön değerlendirme",
+      "path": "/kurumsal-elektrik-surekliligi-on-degerlendirme",
+      "reason": "Çok kaynaklı tesislerde tek hat, koruma ve devreye alma kapsamını profesyonel çalışmaya taşır."
+    }
+  ],
+  "commerce": {
+    "enabled": false,
+    "policy": "none",
+    "category": null
+  },
+  "editorial": {
+    "createdBy": "ai-assisted",
+    "model": "gpt-5.6-thinking",
+    "humanReviewRequired": true,
+    "approvedBy": "ozaneryavuz",
+    "approvedAt": "2026-08-03T18:42:54Z",
+    "publishedAt": "2026-08-03T18:42:55Z",
+    "approvalPr": 799
+  },
+  "seo": {
+    "canonicalPath": "/haberler/inverter-eps-backup-notr-toprak-rcd-kabul-testi",
+    "robots": "index,follow,max-image-preview:large",
+    "lastModified": "2026-08-03",
+    "topics": [
+      "hibrit inverter",
+      "EPS çıkışı",
+      "backup sistemi",
+      "nötr toprak bağı",
+      "RCD testi",
+      "ada modu",
+      "ground relay"
+    ]
+  },
+  "quality": {
+    "score": 100,
+    "minimumRequired": 85,
+    "checks": {
+      "metadata": true,
+      "directAnswer": true,
+      "contentDepth": true,
+      "sources": true,
+      "safety": true,
+      "internalLinks": true,
+      "uniqueness": true,
+      "structuredData": true
+    },
+    "similarity": {
+      "maximum": 0.5,
+      "closestPath": "https://www.alo186.com/haberler/inverter-ada-modu-notr-toprak-rolesi-rcd-eps"
+    }
+  }
+}

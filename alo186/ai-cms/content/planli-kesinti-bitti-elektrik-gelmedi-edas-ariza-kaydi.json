@@ -1,0 +1,284 @@
+{
+  "schemaVersion": 1,
+  "id": "cms_0f731c2a8f486a65",
+  "slug": "planli-kesinti-bitti-elektrik-gelmedi-edas-ariza-kaydi",
+  "contentType": "guide",
+  "state": "published",
+  "locale": "tr-TR",
+  "title": "Planlı Kesinti Bitti Ama Elektrik Gelmedi: EDAŞ Kaydı",
+  "h1": "Planlı kesinti saati bittiği hâlde elektrik gelmediyse ne yapılmalı?",
+  "description": "Planlı kesinti bittikten sonra enerji gelmediyse komşu–bina–tesis ayrımını yapın, doğru EDAŞ’a arıza kaydı açın ve başvuru kanıtını saklayın.",
+  "intent": "Planlı kesinti ilanındaki bitiş saati geçtiği hâlde enerji verilmeyen kullanıcıya, tehlikeli müdahale yapmadan sorunun şebeke mi bina mı olduğunu sınıflandırma ve doğru dağıtım şirketine kanıtlı arıza kaydı açma yolu vermek.",
+  "primaryKeyword": "planlı kesinti bitti",
+  "audience": [
+    "Konut aboneleri",
+    "Site ve apartman yöneticileri",
+    "Küçük işletmeler",
+    "Otel teknik ekipleri",
+    "Elektrik tüketicileri"
+  ],
+  "riskClass": "legal",
+  "directAnswer": "Planlı kesintinin ilan edilen bitiş saati, elektriğin tam o dakikada kesin geleceği garantisi değildir. Önce yalnız güvenli dış kontrollerle komşu binalarda, ortak alanlarda ve kendi bağımsız bölümünüzde enerjinin durumunu ayırın; yanık kokusu, duman, kıvılcım veya kablo hasarı varsa hiçbir anahtara dokunmadan 112’yi ve dağıtım şirketini arayın. Tehlike yoksa doğru EDAŞ’a arıza kaydı açın, kayıt numarası ile gerçek enerji geliş saatini saklayın ve kalıcı şikâyeti yazılı kanaldan yürütün.",
+  "sections": [
+    {
+      "id": "ilk-guvenlik-ayrimi",
+      "heading": "İlk iki dakikada hangi güvenli ayrım yapılmalıdır?",
+      "paragraphs": [
+        "Planlı çalışmanın bitiş saati geçtiğinde ilk görev panoyu açmak veya sigortaları tekrar tekrar kaldırmak değildir. Sokaktan görülebilen komşu bina aydınlatmaları, apartman ortak alanları ve kendi bağımsız bölümünüz karşılaştırılır. Aynı sokakta enerji varken yalnız binada yoksa bina ana beslemesi, ortak pano veya bina içi koruma; yalnız dairede yoksa bağımsız bölüm devresi olasılığı artar.",
+        "Yanık kokusu, duman, çıtırtı, kıvılcım, ıslak pano, kopmuş iletken veya yere düşmüş kablo görülürse tesisata yaklaşılmamalıdır. Bu belirtiler planlı kesintinin uzamasından farklı bir acil güvenlik olayıdır. Kullanıcı kapağı açmamalı, mühürlü bölüme veya sayaç bağlantısına dokunmamalı ve tehlike alanını başkalarından uzak tutmalıdır."
+      ],
+      "bullets": [
+        "Komşu sokak ve bina ortak alanlarını uzaktan karşılaştırın.",
+        "Yanık kokusu, duman veya kıvılcım varsa hiçbir anahtara dokunmayın.",
+        "Mühürlü sayaç ve dağıtım şirketi ekipmanına müdahale etmeyin.",
+        "Tehlikeli durumda 112 ve dağıtım şirketine ayrı bildirim yapın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S3"
+      ]
+    },
+    {
+      "id": "planli-kesinti-ile-ariza-ayrimi",
+      "heading": "Planlı kesinti uzaması ile yeni arıza nasıl ayrılır?",
+      "paragraphs": [
+        "Dağıtım şirketi planlı çalışmayı tamamladıktan sonra şebekenin kademeli enerjilendirilmesi, ek güvenlik kontrolü veya çalışma sırasında ortaya çıkan yeni bir arıza nedeniyle süre uzayabilir. Bu nedenle ilan sayfasının güncellenmiş durumunu ve aynı bölgede yeni bir arıza kaydı bulunup bulunmadığını kontrol etmek yararlıdır; ancak çevrimiçi ekranın eski kalması, fiilî enerjinin geldiğini veya gelmediğini tek başına kanıtlamaz.",
+        "Birden fazla komşu bina aynı anda enerjisizse şebeke tarafı olasılığı güçlenir. Sokakta enerji var fakat bina veya bağımsız bölüm enerjisizse kullanıcı yalnız erişilebilir ana şalterin konumunu görsel olarak kontrol edebilir; tekrar açtıran, ısınan veya ses çıkaran bir koruma cihazı yetkin elektrikçi tarafından incelenmelidir. Aynı cihazı ısrarla kaldırmak güvenli bir teşhis yöntemi değildir."
+      ],
+      "bullets": [
+        "İlanın güncellenmiş saatini ve yeni arıza duyurusunu kontrol edin.",
+        "Aynı anda kaç bina veya ortak alanın etkilendiğini kaydedin.",
+        "Tekrarlayan açmada korumayı zorlamayın veya köprülemeyin.",
+        "Şebeke ve iç tesisat olasılıklarını ayrı başlıklarla not edin."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "id": "edas-ariza-kaydi",
+      "heading": "EDAŞ arıza kaydı hangi bilgilerle açılmalıdır?",
+      "paragraphs": [
+        "EPDK’nın tüketici bilgilendirmesine göre elektrik arıza bildirimleri dağıtım şirketine şahsen, telefonla veya internet üzerinden yapılabilir. Başvuruda abonelik veya tesisat numarası, il–ilçe, kesintinin başladığı ve ilan edilen bitiş saati, fiilî durum, komşu/ortak alan karşılaştırması ve varsa güvenlik belirtisi kısa ve yorumsuz biçimde aktarılmalıdır. ALO186 kayıt almaz; doğru dağıtım şirketinin resmî kanalını bulmaya yardımcı olur.",
+        "Telefon görüşmesi sonunda kayıt numarası istenmeli; internet başvurusunda ekran görüntüsü veya başvuru e-postası saklanmalıdır. Enerji geldiğinde gerçek geliş saati ayrıca yazılmalıdır. Aynı olay için art arda çok sayıda kaydı farklı ifadelerle açmak yerine mevcut kayıt numarası üzerinden güncelleme istemek, olay zincirinin izlenmesini kolaylaştırır."
+      ],
+      "bullets": [
+        "Tesisat numarası, konum ve olay saatlerini hazır bulundurun.",
+        "Komşu ve ortak alan durumunu kısa biçimde belirtin.",
+        "Kayıt numarasını, kanalını ve başvuru saatini saklayın.",
+        "Enerji geldiğinde gerçek geliş saatini kayıt dosyasına ekleyin."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S5"
+      ]
+    },
+    {
+      "id": "sikayet-ve-escalation",
+      "heading": "Arıza kaydı çözülmezse şikâyet hangi sırayla yürütülür?",
+      "paragraphs": [
+        "Anlık arıza bildirimi ile dağıtım şirketinin işlem ve uygulamasına yönelik yazılı şikâyet aynı şey değildir. EPDK, arıza bildirimlerinin dağıtım şirketine yapılabileceğini; diğer şikâyetlerin ise önce ilgili dağıtım veya görevli tedarik şirketinin tüketici hizmetleri merkezine internet ya da yazılı kanaldan iletilmesini belirtir. Başvurunun konusu, tarihleri, kayıt numaraları ve talep edilen sonuç açık olmalıdır.",
+        "EPDK tüketici portalı, tüketici hizmetleri merkezinin kayıtlı başvuruyu 15 iş günü içinde sonuçlandırması gerektiğini ve bu sürede cevap verilmemesi veya cevabın mevzuata aykırı olduğunun düşünülmesi hâlinde belgelerle EPDK’ya başvurulabileceğini açıklar. Bu süre acil arızanın giderilme süresi değil, yazılı tüketici şikâyetinin cevap süresidir; iki süreç birbirine karıştırılmamalıdır."
+      ],
+      "bullets": [
+        "Önce dağıtım şirketinde kayıtlı yazılı şikâyet oluşturun.",
+        "Arıza kayıt numaraları ve saat çizelgesini ekleyin.",
+        "15 iş gününü acil onarım süresi olarak yorumlamayın.",
+        "Cevap yoksa veya mevzuata aykırıysa belgelerle EPDK’ya başvurun."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "id": "kapanis-dosyasi",
+      "heading": "Kesinti olayı hangi kapanış dosyasıyla saklanmalıdır?",
+      "paragraphs": [
+        "Kapanış dosyasında planlı kesinti duyurusunun tarihi ve ekran görüntüsü, ilan edilen başlangıç–bitiş saati, fiilî kesinti süresi, etkilenen alan gözlemi, EDAŞ kayıt numarası, görüşme veya başvuru saati, enerji geliş saati ve varsa elektrikçi raporu bulunmalıdır. Kişisel kimlik, açık adres ve sayaç seri numarası gibi gereksiz veriler kamuya açık ortamlara yüklenmemelidir.",
+        "Bu dosya tekrar eden kesintilerde hizmet kalitesi değerlendirmesi, cihaz hasarı iddiası veya bina içi arızanın şebeke olayıyla zaman eşleştirilmesi için yararlıdır. Elektrik geldikten sonra sistem normal çalışıyor ve koruma cihazları tekrar açmıyorsa sırf kesinti yaşandı diye ürün satın almak gerekmeyebilir. CTA: ALO186 üzerinden doğru EDAŞ’ı bulun ve kişisel verisiz kesinti–kayıt zaman çizelgenizi tamamlayın."
+      ],
+      "bullets": [
+        "Duyuru, kayıt numarası ve gerçek saatleri tek çizelgede birleştirin.",
+        "Varsa elektrikçi raporunu şebeke kayıtlarından ayrı saklayın.",
+        "Gereksiz kişisel verileri ekran görüntüsünde maskeleyin.",
+        "Kanıt normal ise gereksiz koruma cihazı veya UPS satın almayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S4"
+      ]
+    }
+  ],
+  "faqs": [
+    {
+      "question": "Planlı kesinti saati bittiği hâlde elektrik hemen gelmek zorunda mı?",
+      "answer": "İlan edilen bitiş saati planlanan tamamlanma zamanıdır; kademeli enerjilendirme, ek güvenlik kontrolü veya yeni arıza nedeniyle süre uzayabilir. Fiilî durum dağıtım şirketinin güncel kaydı ve saha gözlemiyle doğrulanmalıdır.",
+      "sourceRefs": [
+        "S1",
+        "S3"
+      ]
+    },
+    {
+      "question": "Elektrik yalnız benim dairemde yoksa yine EDAŞ aranır mı?",
+      "answer": "Önce ortak alan ve komşu dairelerle güvenli karşılaştırma yapılır. Yalnız bağımsız bölüm etkileniyorsa iç tesisat olasılığı yüksektir; yine de sayaç veya şebeke tarafı şüphesi varsa EDAŞ kaydı açılabilir, pano müdahalesi yetkin elektrikçiye bırakılmalıdır.",
+      "sourceRefs": [
+        "S1",
+        "S3"
+      ]
+    },
+    {
+      "question": "EDAŞ arıza kaydında hangi numarayı mutlaka almalıyım?",
+      "answer": "Dağıtım şirketinin verdiği başvuru veya arıza kayıt numarasını, kayıt saatini ve kullanılan kanalı saklayın. Bu bilgiler sonraki yazılı şikâyet veya EPDK başvurusunda olay zincirini kanıtlar.",
+      "sourceRefs": [
+        "S1",
+        "S2"
+      ]
+    },
+    {
+      "question": "Dağıtım şirketi şikâyetime cevap vermezse doğrudan EPDK’ya başvurabilir miyim?",
+      "answer": "EPDK, önce ilgili dağıtım veya görevli tedarik şirketinin tüketici hizmetleri merkezine kayıtlı başvuru yapılmasını; 15 iş gününde cevap verilmezse veya cevap mevzuata aykırı görülürse belgelerle Kuruma başvurulmasını açıklar.",
+      "sourceRefs": [
+        "S2",
+        "S5"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "publisher": "EPDK",
+      "title": "Elektrik piyasası tüketici sıkça sorulan sorular: kesinti ve şikâyet süreçleri",
+      "url": "https://epdk.gov.tr/Detay/Icerik/12-3/1-elektrik-aboneligini-kendi-adima-almak-zorunda",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Elektrik arıza bildirimlerinin dağıtım şirketine şahsen, telefonla veya internetten yapılabileceğini; kesinti, hizmet kalitesi ve tüketici şikâyeti süreçlerini açıklar."
+    },
+    {
+      "id": "S2",
+      "publisher": "EPDK",
+      "title": "Bilgi Edinme ve Tüketici Şikâyet Portalı",
+      "url": "https://www.epdk.gov.tr/BilgiedinmeTuketici/bilgiedinmeTuketici.html",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Önce dağıtım veya görevli tedarik şirketine başvuru yapılmasını, kayıtlı şikâyetin 15 iş gününde cevaplanmasını ve sonrasında belgelerle EPDK başvurusunu tanımlar."
+    },
+    {
+      "id": "S3",
+      "publisher": "EPDK",
+      "title": "Elektrik Dağıtımı ve Perakende Satışına İlişkin Hizmet Kalitesi Yönetmeliği",
+      "url": "https://www.epdk.gov.tr/Detay/Icerik/3-6740/elektrik-dagitimi-ve-perakende-satisina-iliskin-hizmet-kalitesi-yonetmeligi",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Dağıtım hizmetinin tedarik sürekliliği, ticari ve teknik kalite çerçevesi ile kesinti kayıt ve yükümlülüklerinin resmî mevzuat dayanağını sağlar."
+    },
+    {
+      "id": "S4",
+      "publisher": "EPDK",
+      "title": "Elektrik piyasası güncel mevzuat listesi",
+      "url": "https://www.epdk.gov.tr/detay/icerik/23-2-3/mevzuat",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Güncel kalite, dağıtım sistemi, tüketici hizmetleri ve teknik kalite düzenlemelerinin yürürlükteki resmî listesini sunar."
+    },
+    {
+      "id": "S5",
+      "publisher": "EPDK",
+      "title": "Elektrik piyasası tüketici köşesi",
+      "url": "https://www.epdk.gov.tr/detay/icerik/18/tuketici-kosesi",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Elektrik tüketicilerine yönelik güncel mevzuat, haklar, kılavuzlar ve şikâyet yollarını tek resmî merkezde toplar."
+    }
+  ],
+  "internalLinks": [
+    {
+      "label": "Planlı kesinti ne kadar önce bildirilir?",
+      "path": "/haberler/planli-elektrik-kesintisi-ne-kadar-once-bildirilir",
+      "reason": "İlan süresi ve bildirimli kesinti kavramını olay sonrası arıza kaydından ayırır."
+    },
+    {
+      "label": "EDAŞ mı tedarikçi mi aranır?",
+      "path": "/haberler/elektrik-arizasinda-edas-mi-tedarikci-mi-aranir",
+      "reason": "Arıza, fatura ve sözleşme konularında doğru kurumu seçmeye yardım eder."
+    },
+    {
+      "label": "Elektrik kesintisi cihaz hasarı başvurusu",
+      "path": "/haberler/elektrik-kesintisi-cihaz-hasari-edas-basvurusu",
+      "reason": "Kesinti sonrasında cihaz hasarı varsa ayrı kanıt ve süre sürecini tamamlar."
+    },
+    {
+      "label": "Düşük veya yüksek gerilim ölçüm talebi",
+      "path": "/haberler/elektrik-gerilimi-dusuk-yuksek-edas-olcum-talebi",
+      "reason": "Enerji geldikten sonra gerilim kalitesi sorunu sürüyorsa ölçüm yolunu gösterir."
+    },
+    {
+      "label": "Kesinti günlüğü",
+      "path": "/hesaplama/kesinti-gunlugu",
+      "reason": "Duyuru, kayıt ve gerçek enerji geliş saatlerini düzenli tutmayı sağlar."
+    },
+    {
+      "label": "EDAŞ bul",
+      "path": "/edas-bul",
+      "reason": "Kullanıcının bulunduğu bölgedeki resmî dağıtım şirketi kanalına yönlendirir."
+    },
+    {
+      "label": "Elektrik Portalı",
+      "path": "/elektrik-portali",
+      "reason": "Kesinti, güvenlik ve başvuru araçlarını tek merkezden erişilebilir kılar."
+    }
+  ],
+  "commerce": {
+    "enabled": false,
+    "policy": "none",
+    "category": null
+  },
+  "editorial": {
+    "createdBy": "ai-assisted",
+    "model": "gpt-5.6-thinking",
+    "humanReviewRequired": true,
+    "approvedBy": "ozaneryavuz",
+    "approvedAt": "2026-08-03T18:42:56Z",
+    "publishedAt": "2026-08-03T18:42:57Z",
+    "approvalPr": 799
+  },
+  "seo": {
+    "canonicalPath": "/haberler/planli-kesinti-bitti-elektrik-gelmedi-edas-ariza-kaydi",
+    "robots": "index,follow,max-image-preview:large",
+    "lastModified": "2026-08-03",
+    "topics": [
+      "planlı elektrik kesintisi",
+      "elektrik gelmedi",
+      "EDAŞ arıza kaydı",
+      "dağıtım şirketi",
+      "EPDK şikâyet",
+      "kesinti kaydı",
+      "elektrik güvenliği"
+    ]
+  },
+  "quality": {
+    "score": 100,
+    "minimumRequired": 85,
+    "checks": {
+      "metadata": true,
+      "directAnswer": true,
+      "contentDepth": true,
+      "sources": true,
+      "safety": true,
+      "internalLinks": true,
+      "uniqueness": true,
+      "structuredData": true
+    },
+    "similarity": {
+      "maximum": 0.1333,
+      "closestPath": "https://www.alo186.com/haberler/jenerator-calisiyor-elektrik-uretmiyor-ne-yapilmali"
+    }
+  }
+}
