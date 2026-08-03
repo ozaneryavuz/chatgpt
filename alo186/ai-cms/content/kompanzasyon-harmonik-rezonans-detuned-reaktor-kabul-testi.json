@@ -1,1 +1,287 @@
-{"schemaVersion":1,"id":"cms_ac4e0429c461f41e","slug":"kompanzasyon-harmonik-rezonans-detuned-reaktor-kabul-testi","contentType":"guide","state":"review","locale":"tr-TR","title":"Kompanzasyonda Harmonik Rezonans ve Detuned Reaktör Kabulü","h1":"Kompanzasyon kondansatörleri neden ısınıyor; harmonik rezonans nasıl doğrulanır?","description":"Kompanzasyon panosunda rezonans, kondansatör ve reaktör ısınmasını; harmonik ölçüm, kademe trendi ve termal kabul dosyasıyla doğrulayın.","intent":"Kompanzasyon kondansatörü, detuned reaktör, kontaktör veya sigortaların tekrarlayan ısınma ve arızalarında harmonik rezonans ihtimalini ölçümle ayırmak; reaktör-kondansatör eşleşmesini ve kademelerin güvenli çalışmasını kanıtlamak.","primaryKeyword":"kompanzasyon harmonik rezonans detuned reaktör","audience":["Otel ve işletme teknik yöneticileri","Elektrik mühendisleri","Kompanzasyon bakım firmaları","Enerji yöneticileri","Güç kalitesi ölçüm ekipleri"],"riskClass":"high","directAnswer":"Kompanzasyon kondansatörlerinin sık arızalanması yalnız ürün kalitesiyle açıklanamaz. Şebeke ve trafo empedansı ile kondansatör kademeleri belirli bir frekansta rezonans oluşturup mevcut harmonik akım ve gerilimleri büyütebilir; bunun sonucu kondansatör, reaktör, kontaktör, sigorta ve nötr iletkeninde aşırı ısınma görülebilir. Kabul; kademe bazında temel bileşen ve tekil harmonikler, P–Q–güç faktörü, gerilim bozulması, reaktör-kondansatör etiket ve ayar uyumu, termal trend, koruma durumu ve jeneratör modu birlikte kaydedilerek yapılmalıdır. Enerjili panoda ölçüm bağlantısı veya kademe müdahalesi yalnız yetkin ekipçe gerçekleştirilmelidir.","sections":[{"id":"rezonans-nasil-olusur","heading":"Kompanzasyon panosunda harmonik rezonans nasıl oluşur?","paragraphs":["Kondansatör bankı reaktif güç ihtiyacını karşılamak için kullanılırken, tesisin trafo ve kablo endüktansı ile birlikte frekansa bağlı bir devre oluşturur. Rezonans frekansı tesiste baskın bulunan bir harmonik bileşene yaklaşırsa, küçük bir harmonik kaynak bile pano akımını ve bara gerilim bozulmasını büyütebilir. Bu durum çoğu zaman kondansatör akımında artış, sigorta açması, kontaktör yüzey hasarı, reaktör uğultusu ve sıcaklık yükselmesi olarak görünür.","Detuned reaktör, kondansatörle seri bağlanarak bankın rezonans noktasını baskın harmoniklerin altına taşımayı amaçlar; aktif harmonik filtreyle aynı görevde değildir. Reaktör seçimi, yalnız 'harmonik var' ifadesine değil trafo gücü ve kısa devre empedansı, mevcut ve gelecekteki doğrusal olmayan yükler, kademe kvar değerleri, sistem gerilimi ve tekil harmonik spektrumuna dayanmalıdır."],"bullets":["Trafo, kablo, jeneratör ve kondansatör bankını aynı tek hat üzerinde gösterin.","Arızayı yalnız kondansatör markasına bağlamadan tekil harmonik spektrumunu ölçün.","Detuned reaktör ile aktif harmonik filtrenin görevlerini birbirine karıştırmayın.","Yeni sürücü, UPS veya EV şarj yükü eklendiğinde rezonans değerlendirmesini yenileyin."],"sourceRefs":["S1","S2","S3","S4","S5"]},{"id":"olcum-plani","heading":"Rezonans şüphesinde hangi elektriksel veriler birlikte kaydedilmelidir?","paragraphs":["Tek bir THD ekran görüntüsü kabul için yeterli değildir. Ana girişte ve gerekiyorsa kompanzasyon barasında faz bazında aktif ve reaktif güç, güç faktörü, RMS akım-gerilim, gerilim ve akım THD'si ile tekil harmonikler ortak zaman tabanında kaydedilmelidir. Kademe komutları, kontaktör durumu, yük değişimleri ve jeneratör-şebeke modu aynı olay çizelgesine eklenmelidir.","IEC 61000-4-7 harmonik ve ara harmonik ölçüm yöntemlerini, IEC 61000-4-30 ise güç kalitesi parametrelerinin ölçüm ve birleştirme yöntemlerini tanımlar. Ölçüm cihazının sınıfı, CT oranı ve yönü, nominal gerilim, örnekleme süresi, zaman senkronu ve veri boşlukları raporda açıkça gösterilmezse farklı gün veya kademelerin karşılaştırılması yanıltıcı olabilir."],"bullets":["THD yanında 3., 5., 7., 11. ve 13. gibi tekil bileşenleri yük profiline göre kaydedin.","Kademe açma-kapama anlarını P, Q, akım ve gerilim trendiyle eşleştirin.","CT yönü, oranı ve faz eşleşmesini ölçümden önce doğrulayın.","Şebeke ve jeneratör modlarını aynı kabul sonucu içinde karıştırmayın."],"sourceRefs":["S3","S4"]},{"id":"reaktor-kondansator-eslesmesi","heading":"Detuned reaktör ile kondansatörün doğru eşleştiği nasıl anlaşılır?","paragraphs":["Reaktörün ayar oranı veya tuning frekansı, kondansatörün kvar ve gerilim değeri, sistem frekansı ve üreticinin takım tablosuyla birlikte doğrulanmalıdır. Seri reaktör nedeniyle kondansatör uç gerilimi şebeke geriliminden yüksek olabilir; bu nedenle yalnız bara gerilimine göre seçilmiş standart bir kondansatör uygun olmayabilir. Farklı kademelerde karışık reaktör oranları veya uyumsuz yedek parça, pano rezonansını ve akım paylaşımını değiştirebilir.","Piyasada 135 Hz, 189/190 Hz veya 210/215 Hz gibi değerler görülebilir; bunlar evrensel tercih değildir. Schneider'in detuned ürün bilgileri de seçimin sistem harmonik ortamı ve kondansatör bankı tasarımıyla yapılması gerektiğini gösterir. Kabul dosyasında her kademenin reaktör ürün kodu, endüktans veya ayar oranı, kondansatör ürün kodu, kvar, gerilim ve üretici eşleşme kanıtı yer almalıdır."],"bullets":["Her kademe için reaktör ve kondansatör etiketini ayrı fotoğraf ve tabloyla kaydedin.","Tuning frekansını başka tesis veya eski projeden kopyalamayın.","Seri reaktörün oluşturduğu kondansatör uç gerilimini üretici hesabıyla kontrol edin.","Uyumsuz yedek parça veya karışık kademe varsa yeniden mühendislik değerlendirmesi yapın."],"sourceRefs":["S1","S2","S5"]},{"id":"termal-ve-kademe-kabulu","heading":"Kademe ve termal kabul testi hangi senaryoları kapsamalıdır?","paragraphs":["IEC 61921 alçak gerilim güç faktörü düzeltme banklarının tasarım ve test çerçevesini, IEC 60831-1 ise kendini onaran tip kondansatörlerin performans ve güvenlik gereklerini ele alır. Saha kabulünde her kademe devredeyken faz akımları, akım dengesizliği, kondansatör ve reaktör sıcaklığı, sigorta ve kontaktör bağlantıları, pano havalandırması ve kontrol rölesi davranışı izlenmelidir.","Test düşük, tipik ve yüksek yük dönemlerini; ani yük kaybını, gece düşük yükte kapasitif taşmayı, jeneratör çalışmasını ve kademe boşalma süresini kapsamalıdır. Termal kamera görüntüsü ortam sıcaklığı, yük yüzdesi ve karşılaştırma noktalarıyla kaydedilmeli; yalnız renk paletine bakılarak arıza kararı verilmemelidir. Aşırı sıcak veya yanık kokusu varsa pano güvenli biçimde devreden çıkarılmalıdır."],"bullets":["Her kademede üç faz akımı ve yüzey sıcaklıklarını aynı yükte karşılaştırın.","Kontaktör, sigorta, bara ve kablo bağlantılarını termal trendle birlikte inceleyin.","Kontrol rölesinin kademe alma-bırakma ve boşalma sürelerini doğrulayın.","Jeneratör modunda kompanzasyon kilidi veya ayrı ayar davranışını test edin."],"sourceRefs":["S1","S2","S4"]},{"id":"kabul-dosyasi","heading":"Harmonik rezonans ve detuned reaktör kabul dosyası nasıl hazırlanmalıdır?","paragraphs":["Dosya; tek hat, trafo gücü ve uk değeri, kısa devre seviyesi, yük envanteri, kompanzasyon kademe tablosu, CT ve kontrol rölesi bilgileri, reaktör-kondansatör etiketleri, ölçüm cihazı ve kalibrasyonu, P–Q–THD–tekil harmonik trendleri, sıcaklıklar, alarm ve açma olayları, şebeke-jeneratör senaryoları ile geçti-kaldı sonucunu içermelidir. Onarım sonrası aynı ölçüm noktası ve benzer yük koşulunda tekrar test yapılmalıdır.","Ölçüm, mevcut bankın doğru eşleştiğini ve sıcaklıkların kabul sınırında kaldığını gösteriyorsa sırf 'harmonikli tesis' denilerek yeni reaktör, kondansatör veya aktif filtre satın almak gerekmez. CTA: kişisel verisiz kompanzasyon–harmonik–kademe–termal kabul matrisini tamamlayıp yetkin güç kalitesi mühendisine iletin."],"bullets":["Ham ölçüm, işlenmiş grafik ve karar tablosunu ayrı katmanlarda saklayın.","Her iddiayı kademe, zaman ve ölçüm noktasıyla izlenebilir hâle getirin.","Onarım öncesi ve sonrası veriyi aynı yöntemle karşılaştırın.","Kanıt yeterliyse gereksiz kondansatör, reaktör veya filtre yatırımı yapmayın."],"sourceRefs":["S1","S2","S3","S4","S5"]}],"faqs":[{"question":"Kondansatörlerin sık patlaması mutlaka harmonik olduğu anlamına mı gelir?","answer":"Hayır. Aşırı gerilim, yüksek sıcaklık, yanlış kademe seçimi, gevşek bağlantı, yetersiz havalandırma ve uygun olmayan yedek koruma da neden olabilir. Harmonik rezonans ölçümle ayrılmalıdır.","sourceRefs":["S1","S2","S4"]},{"question":"Detuned reaktör takılırsa bütün harmonikler temizlenir mi?","answer":"Hayır. Detuned reaktör temel olarak kondansatör bankını rezonans ve belirli harmonik büyütme riskinden korumaya yöneliktir; aktif harmonik filtre gibi geniş bant akım kompanzasyonu yapmaz.","sourceRefs":["S1","S5"]},{"question":"189 veya 190 Hz detuned reaktör her tesise uygun mudur?","answer":"Hayır. Ayar frekansı sistem frekansı, harmonik spektrumu, trafo ve kondansatör bankı tasarımıyla belirlenir. Üretici örnek değerleri evrensel proje ayarı değildir.","sourceRefs":["S1","S5"]},{"question":"THD düşük görünüyorsa rezonans riski yok mudur?","answer":"Tek bir anlık THD değeri yeterli değildir. Kademe değişimleri, tekil harmonikler, yük ve jeneratör modu boyunca zaman serisi ile termal davranış birlikte incelenmelidir.","sourceRefs":["S3","S4"]}],"sources":[{"id":"S1","publisher":"IEC","title":"IEC 61921:2017 — Power capacitors — Low-voltage power factor correction banks","url":"https://webstore.iec.ch/en/publication/26596","accessedAt":"2026-08-03","primary":true,"factSummary":"Alçak gerilim güç faktörü düzeltme banklarının tasarım, performans ve test gereklerini tanımlar."},{"id":"S2","publisher":"IEC","title":"IEC 60831-1:2014 — Self-healing shunt power capacitors","url":"https://webstore.iec.ch/en/publication/3609","accessedAt":"2026-08-03","primary":true,"factSummary":"1000 V'a kadar kendini onaran tip şönt güç kondansatörlerinin performans, rating ve güvenlik gereklerini kapsar."},{"id":"S3","publisher":"IEC","title":"IEC 61000-4-7:2002+A1:2008 — Harmonics and interharmonics measurements","url":"https://webstore.iec.ch/en/publication/4228","accessedAt":"2026-08-03","primary":true,"factSummary":"Harmonik ve ara harmonik ölçüm cihazları ile ölçüm yöntemlerinin genel çerçevesini verir."},{"id":"S4","publisher":"IEC","title":"IEC 61000-4-30:2025 — Power quality measurement methods","url":"https://webstore.iec.ch/en/publication/71611","accessedAt":"2026-08-03","primary":true,"factSummary":"Güç kalitesi parametrelerinin ölçüm, zaman birleştirme ve sınıflandırma yöntemlerini tanımlar; 2026 düzeltmesiyle günceldir."},{"id":"S5","publisher":"Schneider Electric","title":"PowerLogic PFC detuned reactors","url":"https://www.se.com/ca/en/product-range/1426-powerlogic-pfc-detuned-reactors/","accessedAt":"2026-08-03","primary":true,"factSummary":"Detuned reaktörlerin güç faktörü düzeltme banklarında harmonik ve rezonans riskine göre kullanımını ve ürün eşleşmesini açıklar."}],"internalLinks":[{"label":"Kompanzasyon panosu neden bozulur?","path":"/haberler/kompanzasyon-panosu-reaktif-guc-neden-bozulur","reason":"Genel arıza belirtilerinden rezonans kabul görevine geçiş sağlar."},{"label":"Detuned reaktör ve aktif harmonik filtre farkı","path":"/haberler/detuned-reaktor-aktif-harmonik-filtre-farki","reason":"İki çözümün görev ve yatırım farkını açıklar."},{"label":"Harmonik ve THD nedir?","path":"/haberler/harmonik-nedir-thd-cihazlari-nasil-etkiler","reason":"Temel harmonik kavramlarını kabul ölçümünden ayırır."},{"label":"Nötr akımı neden yüksek olur?","path":"/haberler/notr-akimi-faz-akimindan-yuksek-neden-olur","reason":"Üçlü harmonik ve nötr ısınması bağlantısını tamamlar."},{"label":"Faz dengesizliği motorları nasıl etkiler?","path":"/haberler/faz-dengesizligi-faz-kaybi-motoru-nasil-etkiler","reason":"Akım dengesizliği ile harmonik etkisini ayırır."},{"label":"Elektrik panosunda termal kamera kontrolü","path":"/haberler/elektrik-panosunda-termal-kamera-kontrolu","reason":"Termal görüntülemenin güvenli ve karşılaştırmalı kullanımını açıklar."},{"label":"Fatura analizi","path":"/fatura-analizi","reason":"Reaktif enerji etkisini teknik ölçümle finansal sonuca bağlar."}],"commerce":{"enabled":false,"policy":"none","category":null},"editorial":{"createdBy":"ai-assisted","model":"gpt-5.6-thinking","humanReviewRequired":true,"approvedBy":null,"approvedAt":null,"publishedAt":null,"approvalPr":null},"seo":{"canonicalPath":"/haberler/kompanzasyon-harmonik-rezonans-detuned-reaktor-kabul-testi","robots":"index,follow,max-image-preview:large","lastModified":"2026-08-03","topics":["kompanzasyon","harmonik rezonans","detuned reaktör","kondansatör","güç kalitesi","termal kabul","reaktif güç"]},"quality":{"score":100,"minimumRequired":85,"checks":{"metadata":true,"directAnswer":true,"contentDepth":true,"sources":true,"safety":true,"internalLinks":true,"uniqueness":true,"structuredData":true},"similarity":{"maximum":0.52,"closestPath":"/haberler/detuned-reaktor-aktif-harmonik-filtre-farki"}}}
+{
+  "schemaVersion": 1,
+  "id": "cms_ac4e0429c461f41e",
+  "slug": "kompanzasyon-harmonik-rezonans-detuned-reaktor-kabul-testi",
+  "contentType": "guide",
+  "state": "published",
+  "locale": "tr-TR",
+  "title": "Kompanzasyonda Harmonik Rezonans ve Detuned Reaktör Kabulü",
+  "h1": "Kompanzasyon kondansatörleri neden ısınıyor; harmonik rezonans nasıl doğrulanır?",
+  "description": "Kompanzasyon panosunda rezonans, kondansatör ve reaktör ısınmasını; harmonik ölçüm, kademe trendi ve termal kabul dosyasıyla doğrulayın.",
+  "intent": "Kompanzasyon kondansatörü, detuned reaktör, kontaktör veya sigortaların tekrarlayan ısınma ve arızalarında harmonik rezonans ihtimalini ölçümle ayırmak; reaktör-kondansatör eşleşmesini ve kademelerin güvenli çalışmasını kanıtlamak.",
+  "primaryKeyword": "kompanzasyon harmonik rezonans detuned reaktör",
+  "audience": [
+    "Otel ve işletme teknik yöneticileri",
+    "Elektrik mühendisleri",
+    "Kompanzasyon bakım firmaları",
+    "Enerji yöneticileri",
+    "Güç kalitesi ölçüm ekipleri"
+  ],
+  "riskClass": "high",
+  "directAnswer": "Kompanzasyon kondansatörlerinin sık arızalanması yalnız ürün kalitesiyle açıklanamaz. Şebeke ve trafo empedansı ile kondansatör kademeleri belirli bir frekansta rezonans oluşturup mevcut harmonik akım ve gerilimleri büyütebilir; bunun sonucu kondansatör, reaktör, kontaktör, sigorta ve nötr iletkeninde aşırı ısınma görülebilir. Kabul; kademe bazında temel bileşen ve tekil harmonikler, P–Q–güç faktörü, gerilim bozulması, reaktör-kondansatör etiket ve ayar uyumu, termal trend, koruma durumu ve jeneratör modu birlikte kaydedilerek yapılmalıdır. Enerjili panoda ölçüm bağlantısı veya kademe müdahalesi yalnız yetkin ekipçe gerçekleştirilmelidir.",
+  "sections": [
+    {
+      "id": "rezonans-nasil-olusur",
+      "heading": "Kompanzasyon panosunda harmonik rezonans nasıl oluşur?",
+      "paragraphs": [
+        "Kondansatör bankı reaktif güç ihtiyacını karşılamak için kullanılırken, tesisin trafo ve kablo endüktansı ile birlikte frekansa bağlı bir devre oluşturur. Rezonans frekansı tesiste baskın bulunan bir harmonik bileşene yaklaşırsa, küçük bir harmonik kaynak bile pano akımını ve bara gerilim bozulmasını büyütebilir. Bu durum çoğu zaman kondansatör akımında artış, sigorta açması, kontaktör yüzey hasarı, reaktör uğultusu ve sıcaklık yükselmesi olarak görünür.",
+        "Detuned reaktör, kondansatörle seri bağlanarak bankın rezonans noktasını baskın harmoniklerin altına taşımayı amaçlar; aktif harmonik filtreyle aynı görevde değildir. Reaktör seçimi, yalnız 'harmonik var' ifadesine değil trafo gücü ve kısa devre empedansı, mevcut ve gelecekteki doğrusal olmayan yükler, kademe kvar değerleri, sistem gerilimi ve tekil harmonik spektrumuna dayanmalıdır."
+      ],
+      "bullets": [
+        "Trafo, kablo, jeneratör ve kondansatör bankını aynı tek hat üzerinde gösterin.",
+        "Arızayı yalnız kondansatör markasına bağlamadan tekil harmonik spektrumunu ölçün.",
+        "Detuned reaktör ile aktif harmonik filtrenin görevlerini birbirine karıştırmayın.",
+        "Yeni sürücü, UPS veya EV şarj yükü eklendiğinde rezonans değerlendirmesini yenileyin."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "id": "olcum-plani",
+      "heading": "Rezonans şüphesinde hangi elektriksel veriler birlikte kaydedilmelidir?",
+      "paragraphs": [
+        "Tek bir THD ekran görüntüsü kabul için yeterli değildir. Ana girişte ve gerekiyorsa kompanzasyon barasında faz bazında aktif ve reaktif güç, güç faktörü, RMS akım-gerilim, gerilim ve akım THD'si ile tekil harmonikler ortak zaman tabanında kaydedilmelidir. Kademe komutları, kontaktör durumu, yük değişimleri ve jeneratör-şebeke modu aynı olay çizelgesine eklenmelidir.",
+        "IEC 61000-4-7 harmonik ve ara harmonik ölçüm yöntemlerini, IEC 61000-4-30 ise güç kalitesi parametrelerinin ölçüm ve birleştirme yöntemlerini tanımlar. Ölçüm cihazının sınıfı, CT oranı ve yönü, nominal gerilim, örnekleme süresi, zaman senkronu ve veri boşlukları raporda açıkça gösterilmezse farklı gün veya kademelerin karşılaştırılması yanıltıcı olabilir."
+      ],
+      "bullets": [
+        "THD yanında 3., 5., 7., 11. ve 13. gibi tekil bileşenleri yük profiline göre kaydedin.",
+        "Kademe açma-kapama anlarını P, Q, akım ve gerilim trendiyle eşleştirin.",
+        "CT yönü, oranı ve faz eşleşmesini ölçümden önce doğrulayın.",
+        "Şebeke ve jeneratör modlarını aynı kabul sonucu içinde karıştırmayın."
+      ],
+      "sourceRefs": [
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "id": "reaktor-kondansator-eslesmesi",
+      "heading": "Detuned reaktör ile kondansatörün doğru eşleştiği nasıl anlaşılır?",
+      "paragraphs": [
+        "Reaktörün ayar oranı veya tuning frekansı, kondansatörün kvar ve gerilim değeri, sistem frekansı ve üreticinin takım tablosuyla birlikte doğrulanmalıdır. Seri reaktör nedeniyle kondansatör uç gerilimi şebeke geriliminden yüksek olabilir; bu nedenle yalnız bara gerilimine göre seçilmiş standart bir kondansatör uygun olmayabilir. Farklı kademelerde karışık reaktör oranları veya uyumsuz yedek parça, pano rezonansını ve akım paylaşımını değiştirebilir.",
+        "Piyasada 135 Hz, 189/190 Hz veya 210/215 Hz gibi değerler görülebilir; bunlar evrensel tercih değildir. Schneider'in detuned ürün bilgileri de seçimin sistem harmonik ortamı ve kondansatör bankı tasarımıyla yapılması gerektiğini gösterir. Kabul dosyasında her kademenin reaktör ürün kodu, endüktans veya ayar oranı, kondansatör ürün kodu, kvar, gerilim ve üretici eşleşme kanıtı yer almalıdır."
+      ],
+      "bullets": [
+        "Her kademe için reaktör ve kondansatör etiketini ayrı fotoğraf ve tabloyla kaydedin.",
+        "Tuning frekansını başka tesis veya eski projeden kopyalamayın.",
+        "Seri reaktörün oluşturduğu kondansatör uç gerilimini üretici hesabıyla kontrol edin.",
+        "Uyumsuz yedek parça veya karışık kademe varsa yeniden mühendislik değerlendirmesi yapın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S5"
+      ]
+    },
+    {
+      "id": "termal-ve-kademe-kabulu",
+      "heading": "Kademe ve termal kabul testi hangi senaryoları kapsamalıdır?",
+      "paragraphs": [
+        "IEC 61921 alçak gerilim güç faktörü düzeltme banklarının tasarım ve test çerçevesini, IEC 60831-1 ise kendini onaran tip kondansatörlerin performans ve güvenlik gereklerini ele alır. Saha kabulünde her kademe devredeyken faz akımları, akım dengesizliği, kondansatör ve reaktör sıcaklığı, sigorta ve kontaktör bağlantıları, pano havalandırması ve kontrol rölesi davranışı izlenmelidir.",
+        "Test düşük, tipik ve yüksek yük dönemlerini; ani yük kaybını, gece düşük yükte kapasitif taşmayı, jeneratör çalışmasını ve kademe boşalma süresini kapsamalıdır. Termal kamera görüntüsü ortam sıcaklığı, yük yüzdesi ve karşılaştırma noktalarıyla kaydedilmeli; yalnız renk paletine bakılarak arıza kararı verilmemelidir. Aşırı sıcak veya yanık kokusu varsa pano güvenli biçimde devreden çıkarılmalıdır."
+      ],
+      "bullets": [
+        "Her kademede üç faz akımı ve yüzey sıcaklıklarını aynı yükte karşılaştırın.",
+        "Kontaktör, sigorta, bara ve kablo bağlantılarını termal trendle birlikte inceleyin.",
+        "Kontrol rölesinin kademe alma-bırakma ve boşalma sürelerini doğrulayın.",
+        "Jeneratör modunda kompanzasyon kilidi veya ayrı ayar davranışını test edin."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S4"
+      ]
+    },
+    {
+      "id": "kabul-dosyasi",
+      "heading": "Harmonik rezonans ve detuned reaktör kabul dosyası nasıl hazırlanmalıdır?",
+      "paragraphs": [
+        "Dosya; tek hat, trafo gücü ve uk değeri, kısa devre seviyesi, yük envanteri, kompanzasyon kademe tablosu, CT ve kontrol rölesi bilgileri, reaktör-kondansatör etiketleri, ölçüm cihazı ve kalibrasyonu, P–Q–THD–tekil harmonik trendleri, sıcaklıklar, alarm ve açma olayları, şebeke-jeneratör senaryoları ile geçti-kaldı sonucunu içermelidir. Onarım sonrası aynı ölçüm noktası ve benzer yük koşulunda tekrar test yapılmalıdır.",
+        "Ölçüm, mevcut bankın doğru eşleştiğini ve sıcaklıkların kabul sınırında kaldığını gösteriyorsa sırf 'harmonikli tesis' denilerek yeni reaktör, kondansatör veya aktif filtre satın almak gerekmez. CTA: kişisel verisiz kompanzasyon–harmonik–kademe–termal kabul matrisini tamamlayıp yetkin güç kalitesi mühendisine iletin."
+      ],
+      "bullets": [
+        "Ham ölçüm, işlenmiş grafik ve karar tablosunu ayrı katmanlarda saklayın.",
+        "Her iddiayı kademe, zaman ve ölçüm noktasıyla izlenebilir hâle getirin.",
+        "Onarım öncesi ve sonrası veriyi aynı yöntemle karşılaştırın.",
+        "Kanıt yeterliyse gereksiz kondansatör, reaktör veya filtre yatırımı yapmayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S4",
+        "S5"
+      ]
+    }
+  ],
+  "faqs": [
+    {
+      "question": "Kondansatörlerin sık patlaması mutlaka harmonik olduğu anlamına mı gelir?",
+      "answer": "Hayır. Aşırı gerilim, yüksek sıcaklık, yanlış kademe seçimi, gevşek bağlantı, yetersiz havalandırma ve uygun olmayan yedek koruma da neden olabilir. Harmonik rezonans ölçümle ayrılmalıdır.",
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S4"
+      ]
+    },
+    {
+      "question": "Detuned reaktör takılırsa bütün harmonikler temizlenir mi?",
+      "answer": "Hayır. Detuned reaktör temel olarak kondansatör bankını rezonans ve belirli harmonik büyütme riskinden korumaya yöneliktir; aktif harmonik filtre gibi geniş bant akım kompanzasyonu yapmaz.",
+      "sourceRefs": [
+        "S1",
+        "S5"
+      ]
+    },
+    {
+      "question": "189 veya 190 Hz detuned reaktör her tesise uygun mudur?",
+      "answer": "Hayır. Ayar frekansı sistem frekansı, harmonik spektrumu, trafo ve kondansatör bankı tasarımıyla belirlenir. Üretici örnek değerleri evrensel proje ayarı değildir.",
+      "sourceRefs": [
+        "S1",
+        "S5"
+      ]
+    },
+    {
+      "question": "THD düşük görünüyorsa rezonans riski yok mudur?",
+      "answer": "Tek bir anlık THD değeri yeterli değildir. Kademe değişimleri, tekil harmonikler, yük ve jeneratör modu boyunca zaman serisi ile termal davranış birlikte incelenmelidir.",
+      "sourceRefs": [
+        "S3",
+        "S4"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "publisher": "IEC",
+      "title": "IEC 61921:2017 — Power capacitors — Low-voltage power factor correction banks",
+      "url": "https://webstore.iec.ch/en/publication/26596",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Alçak gerilim güç faktörü düzeltme banklarının tasarım, performans ve test gereklerini tanımlar."
+    },
+    {
+      "id": "S2",
+      "publisher": "IEC",
+      "title": "IEC 60831-1:2014 — Self-healing shunt power capacitors",
+      "url": "https://webstore.iec.ch/en/publication/3609",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "1000 V'a kadar kendini onaran tip şönt güç kondansatörlerinin performans, rating ve güvenlik gereklerini kapsar."
+    },
+    {
+      "id": "S3",
+      "publisher": "IEC",
+      "title": "IEC 61000-4-7:2002+A1:2008 — Harmonics and interharmonics measurements",
+      "url": "https://webstore.iec.ch/en/publication/4228",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Harmonik ve ara harmonik ölçüm cihazları ile ölçüm yöntemlerinin genel çerçevesini verir."
+    },
+    {
+      "id": "S4",
+      "publisher": "IEC",
+      "title": "IEC 61000-4-30:2025 — Power quality measurement methods",
+      "url": "https://webstore.iec.ch/en/publication/71611",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Güç kalitesi parametrelerinin ölçüm, zaman birleştirme ve sınıflandırma yöntemlerini tanımlar; 2026 düzeltmesiyle günceldir."
+    },
+    {
+      "id": "S5",
+      "publisher": "Schneider Electric",
+      "title": "PowerLogic PFC detuned reactors",
+      "url": "https://www.se.com/ca/en/product-range/1426-powerlogic-pfc-detuned-reactors/",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Detuned reaktörlerin güç faktörü düzeltme banklarında harmonik ve rezonans riskine göre kullanımını ve ürün eşleşmesini açıklar."
+    }
+  ],
+  "internalLinks": [
+    {
+      "label": "Kompanzasyon panosu neden bozulur?",
+      "path": "/haberler/kompanzasyon-panosu-reaktif-guc-neden-bozulur",
+      "reason": "Genel arıza belirtilerinden rezonans kabul görevine geçiş sağlar."
+    },
+    {
+      "label": "Detuned reaktör ve aktif harmonik filtre farkı",
+      "path": "/haberler/detuned-reaktor-aktif-harmonik-filtre-farki",
+      "reason": "İki çözümün görev ve yatırım farkını açıklar."
+    },
+    {
+      "label": "Harmonik ve THD nedir?",
+      "path": "/haberler/harmonik-nedir-thd-cihazlari-nasil-etkiler",
+      "reason": "Temel harmonik kavramlarını kabul ölçümünden ayırır."
+    },
+    {
+      "label": "Nötr akımı neden yüksek olur?",
+      "path": "/haberler/notr-akimi-faz-akimindan-yuksek-neden-olur",
+      "reason": "Üçlü harmonik ve nötr ısınması bağlantısını tamamlar."
+    },
+    {
+      "label": "Faz dengesizliği motorları nasıl etkiler?",
+      "path": "/haberler/faz-dengesizligi-faz-kaybi-motoru-nasil-etkiler",
+      "reason": "Akım dengesizliği ile harmonik etkisini ayırır."
+    },
+    {
+      "label": "Elektrik panosunda termal kamera kontrolü",
+      "path": "/haberler/elektrik-panosunda-termal-kamera-kontrolu",
+      "reason": "Termal görüntülemenin güvenli ve karşılaştırmalı kullanımını açıklar."
+    },
+    {
+      "label": "Fatura analizi",
+      "path": "/fatura-analizi",
+      "reason": "Reaktif enerji etkisini teknik ölçümle finansal sonuca bağlar."
+    }
+  ],
+  "commerce": {
+    "enabled": false,
+    "policy": "none",
+    "category": null
+  },
+  "editorial": {
+    "createdBy": "ai-assisted",
+    "model": "gpt-5.6-thinking",
+    "humanReviewRequired": true,
+    "approvedBy": "ozaneryavuz",
+    "approvedAt": "2026-08-03T18:43:26Z",
+    "publishedAt": "2026-08-03T18:43:26Z",
+    "approvalPr": 811
+  },
+  "seo": {
+    "canonicalPath": "/haberler/kompanzasyon-harmonik-rezonans-detuned-reaktor-kabul-testi",
+    "robots": "index,follow,max-image-preview:large",
+    "lastModified": "2026-08-03",
+    "topics": [
+      "kompanzasyon",
+      "harmonik rezonans",
+      "detuned reaktör",
+      "kondansatör",
+      "güç kalitesi",
+      "termal kabul",
+      "reaktif güç"
+    ]
+  },
+  "quality": {
+    "score": 88,
+    "minimumRequired": 85,
+    "checks": {
+      "metadata": false,
+      "directAnswer": true,
+      "contentDepth": true,
+      "sources": true,
+      "safety": true,
+      "internalLinks": true,
+      "uniqueness": true,
+      "structuredData": true
+    },
+    "similarity": {
+      "maximum": 0.4545,
+      "closestPath": "https://www.alo186.com/haberler/kompanzasyon-harmonik-rezonans-detuned-reaktor-secimi"
+    }
+  }
+}

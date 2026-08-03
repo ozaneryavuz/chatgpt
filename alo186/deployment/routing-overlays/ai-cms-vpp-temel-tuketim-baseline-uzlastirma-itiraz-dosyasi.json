@@ -1,0 +1,18 @@
+{
+  "version": 238,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/vpp-temel-tuketim-baseline-uzlastirma-itiraz-dosyasi/index.html",
+      "canonicalPath": "/haberler/vpp-temel-tuketim-baseline-uzlastirma-itiraz-dosyasi",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_4a3b834556fde8a8",
+    "humanApproved": true,
+    "approvalPr": 811,
+    "qualityScore": 88
+  }
+}
