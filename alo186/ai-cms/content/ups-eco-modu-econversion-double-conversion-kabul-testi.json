@@ -1,1 +1,289 @@
-{"schemaVersion":1,"id":"cms_16f976e4a09f89f3","slug":"ups-eco-modu-econversion-double-conversion-kabul-testi","contentType":"guide","state":"review","locale":"tr-TR","title":"UPS ECO, eConversion ve Double Conversion Kabul Testi","h1":"UPS ECO modu güvenli mi, eConversion ve double conversion nasıl karşılaştırılır?","description":"UPS ECO/eConversion modunu; transfer süresi, güç kalitesi, jeneratör uyumu ve gerçek enerji ölçümüyle kanıta dayalı kabul edin.","intent":"Üç fazlı UPS sisteminde yüksek verim modunun kritik yük sürekliliği ve güç kalitesi gereksinimlerini bozmadan gerçek enerji avantajı sağlayıp sağlamadığını doğrulamak.","primaryKeyword":"UPS ECO modu kabul testi","audience":["Veri merkezi ve kritik tesis yöneticileri","Otel ve işletme teknik ekipleri","Elektrik mühendisleri","UPS bakım ve devreye alma firmaları","Enerji yöneticileri"],"riskClass":"high","directAnswer":"ECO, eConversion ve double conversion aynı işletme modu değildir. Kabul; tam UPS modeli ve firmware, yükün hangi güç yolundan beslendiği, bypass toleransları, şebeke bozulduğunda transfer davranışı, jeneratör ve paralel sistem uyumu, çıkış güç kalitesi ve aynı yükte gerçek giriş-çıkış enerji ölçümüyle yapılır. Hassas yükün izin verdiği kesinti kanıtlanmıyorsa yalnız verim amacıyla ECO modu açılmamalıdır. Enerjili UPS ve bypass şalterlerinde işlem yalnız yetkin ekipçe yapılmalıdır.","sections":[{"id":"modlari-ayirma","heading":"ECO, eConversion ve double conversion aynı şey midir?","paragraphs":["Hayır. Double conversion modunda şebeke enerjisi doğrultucu ve inverter üzerinden sürekli yeniden oluşturulur; yük giriş gerilim ve frekans değişimlerinden büyük ölçüde ayrıştırılır. Geleneksel ECO modunda yük, kabul edilen toleranslar içinde çoğunlukla statik bypass üzerinden beslenir. eConversion veya benzer gelişmiş yüksek verim modlarında inverter paralelde kalabilir ve reaktif güç ya da harmonik telafisi üstlenebilir.","Bu adlar üreticiler arasında birebir eş anlamlı değildir. Kabul dosyasında yalnız ekrandaki mod adı değil; tam UPS modeli, firmware, tek hat, bypass kaynağı, yük sınıfı ve üreticinin o modele ait çalışma açıklaması bulunmalıdır. Verim yüzdesi veya kesintisiz transfer iddiası başka modelden kopyalanmamalıdır."],"bullets":["UPS tam modelini, firmware'i ve yüksek verim modu adını kaydedin.","Yükün her modda inverterden mi bypass kaynağından mı beslendiğini tek hatta gösterin.","Üretici verim değerini tesisin gerçek yük oranı ve yardımcı tüketimleriyle karıştırmayın.","ECO'yu bakım bypassı veya zorunlu statik bypass ile eş anlamlı kullanmayın."],"sourceRefs":["S1","S2","S3","S4","S5"]},{"id":"kabul-matrisi","heading":"Yük açısından hangi kabul senaryoları uygulanmalıdır?","paragraphs":["Kabul düşük, tipik ve yüksek yük oranlarında ayrı yürütülmelidir. Sunucu, ağ, otomasyon, kritik elektronik, motor veya sürücü gibi yüklerin gerilim çukuru, frekans sapması ve kısa transfer davranışına toleransı aynı değildir. UPS çıkış gerilimi, frekans, THDU, yük yüzdesi, giriş güç faktörü, sıcaklık ve olay günlüğü ortak zaman tabanında kaydedilmelidir.","Yük değişimi sırasında yüksek verim modunun double conversion'a geçişi, geri dönüş gecikmesi ve gereksiz mod salınımı gözlenmelidir. Kabul yalnız boşta veya direnç yüküyle yapılmamalı; gerçek kritik yükü riske atmadan üretici onaylı test yükü ve değişim profili kullanılmalıdır."],"bullets":["Düşük, tipik ve yüksek yük için ayrı geçti-kaldı satırı oluşturun.","Hassas yüklerin izin verilen kesinti ve gerilim toleransını üretici belgesinden alın.","Mod geçişinde çıkış dalga şekli ve olay kaydını aynı zaman çizelgesine bağlayın.","Kontrolsüz şebeke kesme veya kritik yük üzerinde deneme yapmayın."],"sourceRefs":["S1","S3","S4"]},{"id":"sebekeyi-bozma","heading":"Şebeke bozulduğunda ECO modundan çıkış nasıl doğrulanır?","paragraphs":["Yüksek verim modunun asıl kabulü bypass kaynağı tolerans dışına çıktığında yapılır. Üretici prosedürüne göre gerilim, frekans veya güç kalitesi sınırı simüle edilerek UPS'nin inverter işletmesine geçişi; yükteki kesinti, çukur veya faz atlaması kaydedilir. Bazı geleneksel ECO uygulamalarında transfer koşuluna bağlı kısa kesinti oluşabilir; bu değer model ve senaryoya bağlıdır.","Test ayrıca şebeke geri geldiğinde UPS'nin yüksek verim moduna dönüş gecikmesini, batarya şarj durumunu ve bypass senkronizasyonunu kapsamalıdır. Ekranda normal görülmesi, hassas yük terminalinde kabul edilen güç kalitesinin sağlandığını tek başına kanıtlamaz."],"bullets":["Bypass gerilim/frekans toleranslarını ve geri dönüş gecikmesini rapora yazın.","Transfer anındaki minimum RMS gerilim, süre ve yük tepkisini kaydedin.","Batarya ve inverterin geçiş sırasında gerçekten hazır olduğunu doğrulayın.","Kabul sınırını başka UPS modelinin ürün verisinden kopyalamayın."],"sourceRefs":["S1","S2","S3","S4"]},{"id":"jenerator-paralel","heading":"Jeneratör ve paralel UPS sisteminde yüksek verim modu kullanılmalı mı?","paragraphs":["Jeneratör frekansının yük adımlarında dalgalanması, yüksek verim modunun sürekli devreye girip çıkmasına neden olabilir. Bazı üreticiler jeneratör çalışırken giriş kontağıyla yüksek verim modunun devre dışı bırakılmasını önerir. Haricî senkronizasyon, statik transfer sistemi veya paralel UPS mimarisi de uygunluğu değiştirebilir.","Jeneratör devredeyken yüksüzden yüke geçiş, büyük yük adımı, frekans toparlanması, bypass uygunluğu, UPS'nin double conversion'a dönüşü ve yeniden yüksek verim moduna geçişi kaydedilir. Paralel sistemde ortak ayarların bütün modüllere yayılıp yayılmadığı doğrulanmalıdır."],"bullets":["Jeneratör çalışma kontağı ile yüksek verim modu kilidini doğrulayın.","Frekans salınımında tekrarlayan mod transferlerini izleyin.","Paralel UPS'lerde ortak ayar ve yük paylaşımını kaydedin.","Haricî senkronizasyon varsa üretici onayı olmadan modu açmayın."],"sourceRefs":["S3","S4"]},{"id":"karar-dosyasi","heading":"ECO modu hangi karar dosyasıyla devreye alınmalıdır?","paragraphs":["Teslim dosyası; model ve firmware, tek hat, bypass kaynağı, kritik yük sınıfları, üretici toleransları, mod ayarları, transfer testleri, çıkış güç kalitesi, jeneratör senaryosu, olay günlüğü ve enerji ölçümünü içermelidir. Verim kazancı yalnız UPS ekranındaki anlık yüzdeyle değil aynı yük ve çevre koşullarında giriş-çıkış enerji ölçümüyle karşılaştırılmalıdır.","Kritik yük toleransı veya transfer kanıtı yetersizse double conversion korunmalıdır. Testler uygunsa ve ölçülen enerji farkı anlamlıysa yüksek verim modu kontrollü takvimle kullanılabilir. CTA: kişisel verisiz UPS mod–yük–transfer–enerji kabul matrisini yetkin UPS devreye alma ekibine iletin."],"bullets":["Ayar yedeğini ve değişiklik yetkisini kayıt altına alın.","Aynı yük koşulunda yüksek verim ve double conversion enerji ölçümünü karşılaştırın.","Alarm, bypass ve batarya kullanılabilirliğini işletme prosedürüne bağlayın.","Kanıt yoksa sırf verim vaadiyle mod değiştirmeyin veya yeni UPS satın almayın."],"sourceRefs":["S1","S2","S3","S4","S5"]}],"faqs":[{"question":"UPS ECO modunda elektrik kesilirse yük kesilir mi?","answer":"Modele ve transfer koşuluna bağlıdır. Bazı geleneksel ECO uygulamalarında invertere geçiş sırasında kısa kesinti olabilir; gelişmiş yüksek verim modlarında davranış farklıdır. Tam modelin üretici verisi ve saha testi gerekir.","sourceRefs":["S2","S3","S4"]},{"question":"ECO modu her zaman daha az elektrik tüketir mi?","answer":"UPS dönüşüm kayıplarını azaltmayı amaçlar; gerçek tasarruf yük oranı, yardımcı tüketimler, ortam ve modda kalma süresine bağlıdır. Tesis bazlı giriş-çıkış enerji ölçümü yapılmalıdır.","sourceRefs":["S1","S3","S5"]},{"question":"ECO ile bakım bypassı aynı mıdır?","answer":"Hayır. ECO bir işletme modudur; bakım bypassı UPS'yi servis için devreden ayıran ayrı güç yoludur. Bakım bypassında batarya çoğunlukla alternatif kaynak değildir.","sourceRefs":["S2","S3"]},{"question":"Jeneratör çalışırken ECO modu açık kalabilir mi?","answer":"Evrensel cevap yoktur. Frekans ve gerilim kararlılığı, UPS modeli ve üretici talimatı belirleyicidir; bazı sistemlerde jeneratör kontağıyla yüksek verim modu kapatılır.","sourceRefs":["S3","S4"]}],"sources":[{"id":"S1","publisher":"IEC","title":"IEC 62040-3:2021 — UPS performance and test requirements","url":"https://webstore.iec.ch/en/publication/60140","accessedAt":"2026-08-03","primary":true,"factSummary":"UPS performans sınıflandırması, normal modlar, verim ve test gerekleri için güncel çerçeveyi tanımlar."},{"id":"S2","publisher":"Schneider Electric","title":"How does a UPS system work?","url":"https://www.se.com/us/en/faqs/FAQ000244169/","accessedAt":"2026-08-03","primary":true,"factSummary":"Double conversion, battery, bypass, traditional ECO ve eConversion modlarının görev ayrımını açıklar."},{"id":"S3","publisher":"Schneider Electric","title":"Galaxy VS — System Modes","url":"https://productinfo.se.com/galaxyvs_iec/990-5910_master-galaxy-vs-operation/990-5910B%20Galaxy%20VS%20Operation/English/990-5910%20Operation%20manual%20Galaxy%20VS_0000153852.xml/%24/SystemOperationModesREF_0000178270","accessedAt":"2026-08-03","primary":true,"factSummary":"ECO/eConversion geçiş koşulları, bypass toleransları, olası kısa kesinti, jeneratör ve dış senkronizasyon notlarını verir."},{"id":"S4","publisher":"Schneider Electric","title":"Galaxy VX — Operation Modes","url":"https://productinfo.se.com/galaxyvx_iec/5b69ada2313cae0001704e8d/990-5452F%20Galaxy%20VX%20Operation/English/990-5452%20Operation_0000060284.xml/%24/OperationModesREF_0000013071","accessedAt":"2026-08-03","primary":true,"factSummary":"Yükün inverter, statik bypass ve yüksek verim modlarında hangi kaynaktan beslendiğini model bazında açıklar."},{"id":"S5","publisher":"Eaton","title":"Eaton 93PM UPS — Energy Saver System and efficiency","url":"https://www.eaton.com/us/en-us/catalog/backup-power-ups-surge-it-power-distribution/eaton-93pm-ups.html","accessedAt":"2026-08-03","primary":true,"factSummary":"Yüksek verim modu ve double-conversion verim değerlerinin ürüne özgü olduğunu gösteren üretici örneğidir."}],"internalLinks":[{"label":"UPS online, line-interactive ve offline farkı","path":"/haberler/ups-online-line-interactive-offline-farki","reason":"Topoloji seçimini işletme modundan ayırır."},{"label":"UPS bypass modu nedir?","path":"/haberler/ups-bypass-modu-nedir-neden-gecer","reason":"ECO, statik bypass ve arıza bypassı görevlerini ayırır."},{"label":"UPS şebeke varken bataryaya geçiyor","path":"/haberler/ups-sebeke-varken-bataryaya-geciyor","reason":"Sınır dışı şebeke ve gereksiz transfer kök nedenlerini tamamlar."},{"label":"UPS çıkış kısa devre ve selektivite kabulü","path":"/haberler/ups-cikis-kisa-devre-akimi-selektivite-kesici-kabul","reason":"Bypass ve inverter modlarında koruma davranışını tamamlar."},{"label":"Jeneratör ve UPS birlikte çalışır mı?","path":"/haberler/jenerator-ups-birlikte-calisir-mi","reason":"Jeneratör frekansı ve UPS mod koordinasyonuna geçiş sağlar."},{"label":"UPS süresi hesabı","path":"/hesaplama/ups-suresi/","reason":"Mod kararından bağımsız gerçek yedekleme süresini hesaplatır."},{"label":"Kurumsal elektrik sürekliliği ön değerlendirmesi","path":"/kurumsal-elektrik-surekliligi-on-degerlendirme","reason":"Kritik yük ve devreye alma kapsamını profesyonel çalışmaya taşır."}],"commerce":{"enabled":false,"policy":"none","category":null},"editorial":{"createdBy":"ai-assisted","model":"gpt-5.6-thinking","humanReviewRequired":true,"approvedBy":null,"approvedAt":null,"publishedAt":null,"approvalPr":null},"seo":{"canonicalPath":"/haberler/ups-eco-modu-econversion-double-conversion-kabul-testi","robots":"index,follow,max-image-preview:large","lastModified":"2026-08-03","topics":["UPS","ECO mode","eConversion","double conversion","statik bypass","enerji verimliliği","kritik yük"]},"quality":{"score":100,"minimumRequired":85,"checks":{"metadata":true,"directAnswer":true,"contentDepth":true,"sources":true,"safety":true,"internalLinks":true,"uniqueness":true,"structuredData":true},"similarity":{"maximum":0.42,"closestPath":"/haberler/ups-bypass-modu-nedir-neden-gecer"}}}
+{
+  "schemaVersion": 1,
+  "id": "cms_16f976e4a09f89f3",
+  "slug": "ups-eco-modu-econversion-double-conversion-kabul-testi",
+  "contentType": "guide",
+  "state": "published",
+  "locale": "tr-TR",
+  "title": "UPS ECO, eConversion ve Double Conversion Kabul Testi",
+  "h1": "UPS ECO modu güvenli mi, eConversion ve double conversion nasıl karşılaştırılır?",
+  "description": "UPS ECO/eConversion modunu; transfer süresi, güç kalitesi, jeneratör uyumu ve gerçek enerji ölçümüyle kanıta dayalı kabul edin.",
+  "intent": "Üç fazlı UPS sisteminde yüksek verim modunun kritik yük sürekliliği ve güç kalitesi gereksinimlerini bozmadan gerçek enerji avantajı sağlayıp sağlamadığını doğrulamak.",
+  "primaryKeyword": "UPS ECO modu kabul testi",
+  "audience": [
+    "Veri merkezi ve kritik tesis yöneticileri",
+    "Otel ve işletme teknik ekipleri",
+    "Elektrik mühendisleri",
+    "UPS bakım ve devreye alma firmaları",
+    "Enerji yöneticileri"
+  ],
+  "riskClass": "high",
+  "directAnswer": "ECO, eConversion ve double conversion aynı işletme modu değildir. Kabul; tam UPS modeli ve firmware, yükün hangi güç yolundan beslendiği, bypass toleransları, şebeke bozulduğunda transfer davranışı, jeneratör ve paralel sistem uyumu, çıkış güç kalitesi ve aynı yükte gerçek giriş-çıkış enerji ölçümüyle yapılır. Hassas yükün izin verdiği kesinti kanıtlanmıyorsa yalnız verim amacıyla ECO modu açılmamalıdır. Enerjili UPS ve bypass şalterlerinde işlem yalnız yetkin ekipçe yapılmalıdır.",
+  "sections": [
+    {
+      "id": "modlari-ayirma",
+      "heading": "ECO, eConversion ve double conversion aynı şey midir?",
+      "paragraphs": [
+        "Hayır. Double conversion modunda şebeke enerjisi doğrultucu ve inverter üzerinden sürekli yeniden oluşturulur; yük giriş gerilim ve frekans değişimlerinden büyük ölçüde ayrıştırılır. Geleneksel ECO modunda yük, kabul edilen toleranslar içinde çoğunlukla statik bypass üzerinden beslenir. eConversion veya benzer gelişmiş yüksek verim modlarında inverter paralelde kalabilir ve reaktif güç ya da harmonik telafisi üstlenebilir.",
+        "Bu adlar üreticiler arasında birebir eş anlamlı değildir. Kabul dosyasında yalnız ekrandaki mod adı değil; tam UPS modeli, firmware, tek hat, bypass kaynağı, yük sınıfı ve üreticinin o modele ait çalışma açıklaması bulunmalıdır. Verim yüzdesi veya kesintisiz transfer iddiası başka modelden kopyalanmamalıdır."
+      ],
+      "bullets": [
+        "UPS tam modelini, firmware'i ve yüksek verim modu adını kaydedin.",
+        "Yükün her modda inverterden mi bypass kaynağından mı beslendiğini tek hatta gösterin.",
+        "Üretici verim değerini tesisin gerçek yük oranı ve yardımcı tüketimleriyle karıştırmayın.",
+        "ECO'yu bakım bypassı veya zorunlu statik bypass ile eş anlamlı kullanmayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "id": "kabul-matrisi",
+      "heading": "Yük açısından hangi kabul senaryoları uygulanmalıdır?",
+      "paragraphs": [
+        "Kabul düşük, tipik ve yüksek yük oranlarında ayrı yürütülmelidir. Sunucu, ağ, otomasyon, kritik elektronik, motor veya sürücü gibi yüklerin gerilim çukuru, frekans sapması ve kısa transfer davranışına toleransı aynı değildir. UPS çıkış gerilimi, frekans, THDU, yük yüzdesi, giriş güç faktörü, sıcaklık ve olay günlüğü ortak zaman tabanında kaydedilmelidir.",
+        "Yük değişimi sırasında yüksek verim modunun double conversion'a geçişi, geri dönüş gecikmesi ve gereksiz mod salınımı gözlenmelidir. Kabul yalnız boşta veya direnç yüküyle yapılmamalı; gerçek kritik yükü riske atmadan üretici onaylı test yükü ve değişim profili kullanılmalıdır."
+      ],
+      "bullets": [
+        "Düşük, tipik ve yüksek yük için ayrı geçti-kaldı satırı oluşturun.",
+        "Hassas yüklerin izin verilen kesinti ve gerilim toleransını üretici belgesinden alın.",
+        "Mod geçişinde çıkış dalga şekli ve olay kaydını aynı zaman çizelgesine bağlayın.",
+        "Kontrolsüz şebeke kesme veya kritik yük üzerinde deneme yapmayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "id": "sebekeyi-bozma",
+      "heading": "Şebeke bozulduğunda ECO modundan çıkış nasıl doğrulanır?",
+      "paragraphs": [
+        "Yüksek verim modunun asıl kabulü bypass kaynağı tolerans dışına çıktığında yapılır. Üretici prosedürüne göre gerilim, frekans veya güç kalitesi sınırı simüle edilerek UPS'nin inverter işletmesine geçişi; yükteki kesinti, çukur veya faz atlaması kaydedilir. Bazı geleneksel ECO uygulamalarında transfer koşuluna bağlı kısa kesinti oluşabilir; bu değer model ve senaryoya bağlıdır.",
+        "Test ayrıca şebeke geri geldiğinde UPS'nin yüksek verim moduna dönüş gecikmesini, batarya şarj durumunu ve bypass senkronizasyonunu kapsamalıdır. Ekranda normal görülmesi, hassas yük terminalinde kabul edilen güç kalitesinin sağlandığını tek başına kanıtlamaz."
+      ],
+      "bullets": [
+        "Bypass gerilim/frekans toleranslarını ve geri dönüş gecikmesini rapora yazın.",
+        "Transfer anındaki minimum RMS gerilim, süre ve yük tepkisini kaydedin.",
+        "Batarya ve inverterin geçiş sırasında gerçekten hazır olduğunu doğrulayın.",
+        "Kabul sınırını başka UPS modelinin ürün verisinden kopyalamayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "id": "jenerator-paralel",
+      "heading": "Jeneratör ve paralel UPS sisteminde yüksek verim modu kullanılmalı mı?",
+      "paragraphs": [
+        "Jeneratör frekansının yük adımlarında dalgalanması, yüksek verim modunun sürekli devreye girip çıkmasına neden olabilir. Bazı üreticiler jeneratör çalışırken giriş kontağıyla yüksek verim modunun devre dışı bırakılmasını önerir. Haricî senkronizasyon, statik transfer sistemi veya paralel UPS mimarisi de uygunluğu değiştirebilir.",
+        "Jeneratör devredeyken yüksüzden yüke geçiş, büyük yük adımı, frekans toparlanması, bypass uygunluğu, UPS'nin double conversion'a dönüşü ve yeniden yüksek verim moduna geçişi kaydedilir. Paralel sistemde ortak ayarların bütün modüllere yayılıp yayılmadığı doğrulanmalıdır."
+      ],
+      "bullets": [
+        "Jeneratör çalışma kontağı ile yüksek verim modu kilidini doğrulayın.",
+        "Frekans salınımında tekrarlayan mod transferlerini izleyin.",
+        "Paralel UPS'lerde ortak ayar ve yük paylaşımını kaydedin.",
+        "Haricî senkronizasyon varsa üretici onayı olmadan modu açmayın."
+      ],
+      "sourceRefs": [
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "id": "karar-dosyasi",
+      "heading": "ECO modu hangi karar dosyasıyla devreye alınmalıdır?",
+      "paragraphs": [
+        "Teslim dosyası; model ve firmware, tek hat, bypass kaynağı, kritik yük sınıfları, üretici toleransları, mod ayarları, transfer testleri, çıkış güç kalitesi, jeneratör senaryosu, olay günlüğü ve enerji ölçümünü içermelidir. Verim kazancı yalnız UPS ekranındaki anlık yüzdeyle değil aynı yük ve çevre koşullarında giriş-çıkış enerji ölçümüyle karşılaştırılmalıdır.",
+        "Kritik yük toleransı veya transfer kanıtı yetersizse double conversion korunmalıdır. Testler uygunsa ve ölçülen enerji farkı anlamlıysa yüksek verim modu kontrollü takvimle kullanılabilir. CTA: kişisel verisiz UPS mod–yük–transfer–enerji kabul matrisini yetkin UPS devreye alma ekibine iletin."
+      ],
+      "bullets": [
+        "Ayar yedeğini ve değişiklik yetkisini kayıt altına alın.",
+        "Aynı yük koşulunda yüksek verim ve double conversion enerji ölçümünü karşılaştırın.",
+        "Alarm, bypass ve batarya kullanılabilirliğini işletme prosedürüne bağlayın.",
+        "Kanıt yoksa sırf verim vaadiyle mod değiştirmeyin veya yeni UPS satın almayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S4",
+        "S5"
+      ]
+    }
+  ],
+  "faqs": [
+    {
+      "question": "UPS ECO modunda elektrik kesilirse yük kesilir mi?",
+      "answer": "Modele ve transfer koşuluna bağlıdır. Bazı geleneksel ECO uygulamalarında invertere geçiş sırasında kısa kesinti olabilir; gelişmiş yüksek verim modlarında davranış farklıdır. Tam modelin üretici verisi ve saha testi gerekir.",
+      "sourceRefs": [
+        "S2",
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "question": "ECO modu her zaman daha az elektrik tüketir mi?",
+      "answer": "UPS dönüşüm kayıplarını azaltmayı amaçlar; gerçek tasarruf yük oranı, yardımcı tüketimler, ortam ve modda kalma süresine bağlıdır. Tesis bazlı giriş-çıkış enerji ölçümü yapılmalıdır.",
+      "sourceRefs": [
+        "S1",
+        "S3",
+        "S5"
+      ]
+    },
+    {
+      "question": "ECO ile bakım bypassı aynı mıdır?",
+      "answer": "Hayır. ECO bir işletme modudur; bakım bypassı UPS'yi servis için devreden ayıran ayrı güç yoludur. Bakım bypassında batarya çoğunlukla alternatif kaynak değildir.",
+      "sourceRefs": [
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "question": "Jeneratör çalışırken ECO modu açık kalabilir mi?",
+      "answer": "Evrensel cevap yoktur. Frekans ve gerilim kararlılığı, UPS modeli ve üretici talimatı belirleyicidir; bazı sistemlerde jeneratör kontağıyla yüksek verim modu kapatılır.",
+      "sourceRefs": [
+        "S3",
+        "S4"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "publisher": "IEC",
+      "title": "IEC 62040-3:2021 — UPS performance and test requirements",
+      "url": "https://webstore.iec.ch/en/publication/60140",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "UPS performans sınıflandırması, normal modlar, verim ve test gerekleri için güncel çerçeveyi tanımlar."
+    },
+    {
+      "id": "S2",
+      "publisher": "Schneider Electric",
+      "title": "How does a UPS system work?",
+      "url": "https://www.se.com/us/en/faqs/FAQ000244169/",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Double conversion, battery, bypass, traditional ECO ve eConversion modlarının görev ayrımını açıklar."
+    },
+    {
+      "id": "S3",
+      "publisher": "Schneider Electric",
+      "title": "Galaxy VS — System Modes",
+      "url": "https://productinfo.se.com/galaxyvs_iec/990-5910_master-galaxy-vs-operation/990-5910B%20Galaxy%20VS%20Operation/English/990-5910%20Operation%20manual%20Galaxy%20VS_0000153852.xml/%24/SystemOperationModesREF_0000178270",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "ECO/eConversion geçiş koşulları, bypass toleransları, olası kısa kesinti, jeneratör ve dış senkronizasyon notlarını verir."
+    },
+    {
+      "id": "S4",
+      "publisher": "Schneider Electric",
+      "title": "Galaxy VX — Operation Modes",
+      "url": "https://productinfo.se.com/galaxyvx_iec/5b69ada2313cae0001704e8d/990-5452F%20Galaxy%20VX%20Operation/English/990-5452%20Operation_0000060284.xml/%24/OperationModesREF_0000013071",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Yükün inverter, statik bypass ve yüksek verim modlarında hangi kaynaktan beslendiğini model bazında açıklar."
+    },
+    {
+      "id": "S5",
+      "publisher": "Eaton",
+      "title": "Eaton 93PM UPS — Energy Saver System and efficiency",
+      "url": "https://www.eaton.com/us/en-us/catalog/backup-power-ups-surge-it-power-distribution/eaton-93pm-ups.html",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Yüksek verim modu ve double-conversion verim değerlerinin ürüne özgü olduğunu gösteren üretici örneğidir."
+    }
+  ],
+  "internalLinks": [
+    {
+      "label": "UPS online, line-interactive ve offline farkı",
+      "path": "/haberler/ups-online-line-interactive-offline-farki",
+      "reason": "Topoloji seçimini işletme modundan ayırır."
+    },
+    {
+      "label": "UPS bypass modu nedir?",
+      "path": "/haberler/ups-bypass-modu-nedir-neden-gecer",
+      "reason": "ECO, statik bypass ve arıza bypassı görevlerini ayırır."
+    },
+    {
+      "label": "UPS şebeke varken bataryaya geçiyor",
+      "path": "/haberler/ups-sebeke-varken-bataryaya-geciyor",
+      "reason": "Sınır dışı şebeke ve gereksiz transfer kök nedenlerini tamamlar."
+    },
+    {
+      "label": "UPS çıkış kısa devre ve selektivite kabulü",
+      "path": "/haberler/ups-cikis-kisa-devre-akimi-selektivite-kesici-kabul",
+      "reason": "Bypass ve inverter modlarında koruma davranışını tamamlar."
+    },
+    {
+      "label": "Jeneratör ve UPS birlikte çalışır mı?",
+      "path": "/haberler/jenerator-ups-birlikte-calisir-mi",
+      "reason": "Jeneratör frekansı ve UPS mod koordinasyonuna geçiş sağlar."
+    },
+    {
+      "label": "UPS süresi hesabı",
+      "path": "/hesaplama/ups-suresi",
+      "reason": "Mod kararından bağımsız gerçek yedekleme süresini hesaplatır."
+    },
+    {
+      "label": "Kurumsal elektrik sürekliliği ön değerlendirmesi",
+      "path": "/kurumsal-elektrik-surekliligi-on-degerlendirme",
+      "reason": "Kritik yük ve devreye alma kapsamını profesyonel çalışmaya taşır."
+    }
+  ],
+  "commerce": {
+    "enabled": false,
+    "policy": "none",
+    "category": null
+  },
+  "editorial": {
+    "createdBy": "ai-assisted",
+    "model": "gpt-5.6-thinking",
+    "humanReviewRequired": true,
+    "approvedBy": "ozaneryavuz",
+    "approvedAt": "2026-08-03T18:43:09Z",
+    "publishedAt": "2026-08-03T18:43:09Z",
+    "approvalPr": 804
+  },
+  "seo": {
+    "canonicalPath": "/haberler/ups-eco-modu-econversion-double-conversion-kabul-testi",
+    "robots": "index,follow,max-image-preview:large",
+    "lastModified": "2026-08-03",
+    "topics": [
+      "UPS",
+      "ECO mode",
+      "eConversion",
+      "double conversion",
+      "statik bypass",
+      "enerji verimliliği",
+      "kritik yük"
+    ]
+  },
+  "quality": {
+    "score": 88,
+    "minimumRequired": 85,
+    "checks": {
+      "metadata": false,
+      "directAnswer": true,
+      "contentDepth": true,
+      "sources": true,
+      "safety": true,
+      "internalLinks": true,
+      "uniqueness": true,
+      "structuredData": true
+    },
+    "similarity": {
+      "maximum": 0.5455,
+      "closestPath": "https://www.alo186.com/haberler/ups-eco-modu-double-conversion-econversion-farki"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "version": 237,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/reaktif-bedel-enduktif-kapasitif-sayac-kompanzasyon-kabul/index.html",
+      "canonicalPath": "/haberler/reaktif-bedel-enduktif-kapasitif-sayac-kompanzasyon-kabul",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_9dbca7b51ed37687",
+    "humanApproved": true,
+    "approvalPr": 804,
+    "qualityScore": 88
+  }
+}
