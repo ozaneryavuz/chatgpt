@@ -1,51 +1,58 @@
 {
-  "schemaVersion": 5,
-  "release": "alo186-run136-deployment-integrity-live-2026-08-02T21:10+03:00",
-  "requestedAt": "2026-08-02T18:10:00Z",
+  "schemaVersion": 6,
+  "release": "alo186-v249-trust-growth-live-2026-08-03T21:50+03:00",
+  "requestedAt": "2026-08-03T18:50:00Z",
   "requestedTimeZone": "Europe/Istanbul",
-  "includesMainThrough": "000ac7ccc6636b8e3e46450d625a12aa208d60a2",
-  "purpose": "Güncel ana daldaki karar araçlarını, affiliate güven katmanlarını ve içerik konsolidasyonlarını; bozuk sitemap kurtarma, hreflang koruması ve project-path URL denetimi tamamlanmış tek üretim artifactında derleyip GitHub Pages özel alan adına dağıt.",
+  "includesMainThrough": "984904cf7759559db78b9812a397a78e4e9b6825",
+  "purpose": "Ürün merkezi JSON-LD ve canonical onarımını, güven öncelikli affiliate karar hunisini, 30/90 günlük tekrar kontrol döngüsünü ve v249 akım korumalı priz seçim rotasını tek üretim artifactında derleyip ALO186 canlı özel alan adına dağıt ve doğrula.",
   "deploymentWorkflow": ".github/workflows/alo186-pages-autobootstrap-live.yml",
   "verificationWorkflow": ".github/workflows/alo186-v177-hosting-aware-live.yml",
   "receiptTargets": [
-    "pull/695",
-    "pull/697",
+    "pull/786",
+    "pull/803",
+    "pull/813",
     "issues/21"
   ],
   "liveDomain": "https://alo186.com",
   "requiredLiveRoutes": [
-    "/hesaplama/elektrik-kesintisi-tazminat-kontrolu/",
-    "/hesaplama/ges-kesinti-yedekleme-mimarisi/",
-    "/hesaplama/ev-sarj-kacak-akim-koruma-secici/",
-    "/elektrik-portali/",
-    "/amazon-elektrik-urunleri/"
+    "/",
+    "/amazon-elektrik-urunleri/",
+    "/amazon-elektrik-urunleri/akim-korumali-priz-yuk-uygunluk-secimi/",
+    "/amazon-elektrik-urunleri/modem-ont-mini-ups-yedekleme-secici/",
+    "/amazon-elektrik-urunleri/nas-ups-usb-snmp-uygunluk-secici/",
+    "/amazon-elektrik-urunleri/guvenlik-kamerasi-nvr-poe-ups-secici/",
+    "/hesaplama/kesinti-kiti-donemsel-kontrolu/"
   ],
   "requiredTrustMarkers": [
-    "30 gün",
-    "ALO186",
     "Bağımsız",
-    "Mevcut"
+    "satış ortaklığı",
+    "Mevcut",
+    "satın alma"
   ],
   "requiredDeploymentIntegrity": {
     "malformedSitemapRecovery": true,
-    "sitemapHreflangPreserved": true,
+    "sitemapApexCanonicalOnly": true,
     "activeCanonicalRoutesOnly": true,
+    "productHubJsonLdRoutesValid": true,
+    "productHubDirectStoreLinksGated": true,
+    "returnVisitRemindersPresent": true,
     "projectBasePathStructuralLinksChecked": true,
-    "projectBasePathInlineExecutableUrlsChecked": true,
-    "logicalDataRouteMetadataExcluded": true
+    "projectBasePathInlineExecutableUrlsChecked": true
   },
   "forbiddenPublicClaims": [
-    "on iş günü",
-    "Product",
     "Offer",
-    "AggregateRating"
+    "AggregateRating",
+    "priceCurrency",
+    "stok garantisi",
+    "uygunluk garantisi"
   ],
   "affiliatePolicy": {
     "disclosureVisible": true,
     "unverifiedPriceStockRatingWarranty": false,
     "officialInstitutionImpression": false,
     "existingProductSufficientNoBuy": true,
-    "activeHazardCommerceClosed": true
+    "activeHazardCommerceClosed": true,
+    "storeLinkRequiresTechnicalGate": true
   },
   "status": "requested"
 }
