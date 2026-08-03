@@ -4,6 +4,7 @@ import json
 import re
 from pathlib import Path
 
+import finalize_pages_service_worker as sw_finalizer
 import inject_live_quality_v218 as core
 
 
@@ -36,15 +37,7 @@ def artifact_base_path(site: Path) -> str:
 
 
 def install_quality_css(site: Path) -> dict[str, object]:
-    """Inject v218 CSS with legacy-head repair and project-path awareness.
-
-    GitHub Pages rewrites existing canonical asset references before this late
-    quality layer runs. The layer therefore derives the final base path from
-    `pages-release.json` and writes `/chatgpt/assets/...` in project mode rather
-    than leaking a root-only reference. Re-running the guard also repairs an
-    already injected marker whose href no longer matches the artifact base path.
-    """
-
+    """Inject v218 CSS with legacy-head repair and project-path awareness."""
     target = site / core.ASSET_RELATIVE
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(core.QUALITY_CSS, encoding="utf-8")
@@ -87,12 +80,7 @@ def install_quality_css(site: Path) -> dict[str, object]:
         body = re.search(r"<body\b", html, re.I)
         head = re.search(r"<head\b[^>]*>", html, re.I)
         if body and head and head.start() < body.start():
-            updated = (
-                html[: body.start()]
-                + link
-                + "\n</head>\n"
-                + html[body.start() :]
-            )
+            updated = html[: body.start()] + link + "\n</head>\n" + html[body.start() :]
             path.write_text(updated, encoding="utf-8")
             injected += 1
             repaired_head += 1
@@ -116,8 +104,7 @@ def install_quality_css(site: Path) -> dict[str, object]:
 
     if failures:
         raise RuntimeError(
-            "Live quality CSS için onarılamayan HTML: "
-            + ", ".join(failures[:30])
+            "Live quality CSS için onarılamayan HTML: " + ", ".join(failures[:30])
         )
     return {
         "asset": asset_href,
@@ -131,17 +118,7 @@ def install_quality_css(site: Path) -> dict[str, object]:
 
 
 def ensure_skip_links(site: Path, base_path: str) -> dict[str, int]:
-    """Repair the critical-page main/skip-link pair instead of trusting stale markup.
-
-    Some legacy pages already contain a skip link, but its fragment does not point
-    to an existing main id. The original v218 helper treated any skip link as valid
-    and returned early. This compatibility layer makes the pair atomic:
-
-    1. every critical page must have a `<main id>`;
-    2. an existing `.skip-link` must target that id;
-    3. a missing skip link is inserted immediately after `<body>`.
-    """
-
+    """Repair the critical-page main/skip-link pair instead of trusting stale markup."""
     injected = target_repaired = main_ids_added = already_valid = missing_main = 0
 
     for route in core.CRITICAL_ROUTES:
@@ -169,17 +146,11 @@ def ensure_skip_links(site: Path, base_path: str) -> dict[str, int]:
         expected_href = f"#{target_id}"
         if skip_match:
             current_tag = skip_match.group(0)
-            href_match = re.search(
-                r'\bhref=["\']([^"\']*)["\']',
-                current_tag,
-                re.I,
-            )
+            href_match = re.search(r'\bhref=["\']([^"\']*)["\']', current_tag, re.I)
             current_href = href_match.group(1) if href_match else ""
             if current_href != expected_href:
                 html = SKIP_LINK_PATTERN.sub(
-                    lambda match: (
-                        match.group(1) + expected_href + match.group(2)
-                    ),
+                    lambda match: match.group(1) + expected_href + match.group(2),
                     html,
                     count=1,
                 )
@@ -191,16 +162,8 @@ def ensure_skip_links(site: Path, base_path: str) -> dict[str, int]:
             body_match = BODY_PATTERN.search(html)
             if not body_match:
                 continue
-            skip = (
-                f'<a class="skip-link" href="{expected_href}">'
-                "İçeriğe geç</a>"
-            )
-            html = (
-                html[: body_match.end()]
-                + "\n"
-                + skip
-                + html[body_match.end() :]
-            )
+            skip = f'<a class="skip-link" href="{expected_href}">İçeriğe geç</a>'
+            html = html[: body_match.end()] + "\n" + skip + html[body_match.end() :]
             injected += 1
             changed = True
 
@@ -217,14 +180,7 @@ def ensure_skip_links(site: Path, base_path: str) -> dict[str, int]:
 
 
 def normalize_canonical_origin(site: Path) -> dict[str, object]:
-    """Collapse all late-generated first-party URLs onto the apex HTTPS origin.
-
-    Several commerce and personal-plan routes are generated after the initial
-    Pages canonical rewrite. This final compatibility pass runs immediately
-    before the v218 audit, so canonical, hreflang, Open Graph, sitemap and robots
-    references cannot retain a stale `www` or HTTP first-party origin.
-    """
-
+    """Collapse all late-generated first-party URLs onto the apex HTTPS origin."""
     targets = sorted(site.rglob("*.html"))
     for relative in (Path("sitemap.xml"), Path("robots.txt")):
         candidate = site / relative
@@ -240,8 +196,7 @@ def normalize_canonical_origin(site: Path) -> dict[str, object]:
         if count == 0:
             continue
         updated = text.replace(WWW_HTTPS_ORIGIN, APEX_ORIGIN).replace(
-            WWW_HTTP_ORIGIN,
-            APEX_ORIGIN,
+            WWW_HTTP_ORIGIN, APEX_ORIGIN
         )
         path.write_text(updated, encoding="utf-8")
         files_changed += 1
@@ -268,10 +223,12 @@ def run(site: Path, base_path: str = "") -> dict[str, object]:
     report = _CORE_RUN(resolved, base_path)
     report["canonicalOriginNormalization"] = normalization
 
+    service_worker = sw_finalizer.finalize_and_record(resolved, base_path)
+    report["serviceWorkerRegistrationFinalization"] = service_worker
+
     receipt = resolved / core.RECEIPT_RELATIVE
     receipt.write_text(
-        json.dumps(report, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
+        json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
     for name in ("alo186-release.json", "pages-release.json"):
         path = resolved / name
@@ -280,8 +237,7 @@ def run(site: Path, base_path: str = "") -> dict[str, object]:
         payload = json.loads(path.read_text(encoding="utf-8"))
         payload["liveQualityV218"] = report
         path.write_text(
-            json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
-            encoding="utf-8",
+            json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
         )
     core.recompute_checksums(resolved)
     return report
@@ -290,7 +246,7 @@ def run(site: Path, base_path: str = "") -> dict[str, object]:
 def main() -> None:
     parser = core.argparse.ArgumentParser(
         description=(
-            "ALO186 final artifact UX, canonical-origin ve kopya kalite kapısı "
+            "ALO186 final artifact UX, canonical-origin, servis-worker ve kopya kalite kapısı "
             "v218 uyumluluk katmanı"
         )
     )
