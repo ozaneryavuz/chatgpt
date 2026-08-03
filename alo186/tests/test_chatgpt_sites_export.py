@@ -88,7 +88,7 @@ def main() -> None:
             "tek kaynak sistemidir",
             "Amazon Türkiye",
             "yeni ürün almayın",
-            "resmî kurum değildir",
+            "kamu kurumu değildir",
         ):
             assert token in brief, token
 
