@@ -1,0 +1,66 @@
+name: ALO186 affiliate AI discovery v252
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/akim-korumali-priz-yuk-uygunluk-secimi/index.html'
+      - 'alo186/llms.txt'
+      - 'alo186/robots.txt'
+      - 'alo186/sitemap-growth-v207.xml'
+      - 'alo186/tests/test_affiliate_ai_discovery_v252.py'
+      - '.github/workflows/alo186-affiliate-ai-discovery-v252.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/akim-korumali-priz-yuk-uygunluk-secimi/index.html'
+      - 'alo186/llms.txt'
+      - 'alo186/robots.txt'
+      - 'alo186/sitemap-growth-v207.xml'
+      - 'alo186/tests/test_affiliate_ai_discovery_v252.py'
+      - '.github/workflows/alo186-affiliate-ai-discovery-v252.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Kaynak structured data, deep link, llms ve robots sözleşmesi
+        run: python -m pytest -q alo186/tests/test_affiliate_ai_discovery_v252.py
+      - name: Canonical üretim artifactını oluştur ve smoke testini çalıştır
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-ai-discovery-v252 \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-ai-discovery-v252
+      - name: Üretilmiş artifact üzerinde aynı sözleşmeyi yeniden doğrula
+        env:
+          ALO186_SITE_ROOT: /tmp/alo186-ai-discovery-v252
+        run: python -m pytest -q alo186/tests/test_affiliate_ai_discovery_v252.py
+      - name: Doğrulayıcı giriş manifesti üret
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          payload = {
+              "schemaOrgValidatorUrl": "https://validator.schema.org/#url=https%3A%2F%2Falo186.com%2Famazon-elektrik-urunleri%2Fakim-korumali-priz-yuk-uygunluk-secimi%2F",
+              "googleRichResultsTestUrl": "https://search.google.com/test/rich-results?url=https%3A%2F%2Falo186.com%2Famazon-elektrik-urunleri%2Fakim-korumali-priz-yuk-uygunluk-secimi%2F",
+              "note": "External validators require a live merged URL. CI validates JSON parsing, visible-content alignment and prohibited Offer/Recommendation fields locally and in the production artifact."
+          }
+          Path('/tmp/alo186-ai-discovery-v252-validation.json').write_text(json.dumps(payload, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          PY
+      - uses: actions/upload-artifact@v5
+        with:
+          name: alo186-affiliate-ai-discovery-v252-validation
+          path: /tmp/alo186-ai-discovery-v252-validation.json
+          if-no-files-found: error
+          retention-days: 30
