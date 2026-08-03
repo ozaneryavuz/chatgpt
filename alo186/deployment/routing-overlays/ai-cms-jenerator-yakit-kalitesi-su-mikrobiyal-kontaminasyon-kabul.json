@@ -1,0 +1,18 @@
+{
+  "version": 237,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/jenerator-yakit-kalitesi-su-mikrobiyal-kontaminasyon-kabul/index.html",
+      "canonicalPath": "/haberler/jenerator-yakit-kalitesi-su-mikrobiyal-kontaminasyon-kabul",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_6730b72c2b2815ae",
+    "humanApproved": true,
+    "approvalPr": 816,
+    "qualityScore": 88
+  }
+}
