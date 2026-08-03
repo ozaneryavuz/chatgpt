@@ -49,7 +49,8 @@ jobs:
             'alo186/amazon-elektrik-urunleri/usb-c-pd-pps-sarj-gucu-olcum-secimi/app-v233.js' \
             > /tmp/changed-affiliate-v233.txt
           python alo186/tests/test_affiliate_scope_policy_v229.py --changed-files /tmp/changed-affiliate-v233.txt
-          python alo186/tests/test_commercial_governance.py
+          python alo186/tests/test_commerce_governance_v2.py
+          python alo186/tests/test_commerce_governance_v3.py
           node alo186/tests/test_release_manifest.js
       - name: Canonical production paketi
         run: |
