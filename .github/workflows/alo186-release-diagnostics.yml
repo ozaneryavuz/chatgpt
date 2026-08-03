@@ -30,17 +30,17 @@ jobs:
           ref: main
           fetch-depth: 1
 
-      - name: Son ALO186 workflow koşularını çıkar
+      - name: Canlı yayınla ilgili workflow koşularını çıkar
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p /tmp/alo186-release-diagnostics
           gh run list \
             --repo "$GITHUB_REPOSITORY" \
-            --limit 100 \
+            --limit 200 \
             --json databaseId,workflowName,status,conclusion,headSha,event,url,createdAt,updatedAt \
             > /tmp/alo186-release-diagnostics/all-runs.json
-          jq '[.[] | select(.workflowName | startswith("ALO186") or contains("ALO186"))] | sort_by(.createdAt) | reverse | .[:30]' \
+          jq '[.[] | select((.workflowName // "") | test("çift modlu|GitHub Pages|sunucusuz canlı yayın|üretim yayın paketi|canlı yayın kimliği|live publication|live required|gerekli canlı rotaları|yayın hattı tanısı"; "i"))] | sort_by(.createdAt) | reverse | .[:40]' \
             /tmp/alo186-release-diagnostics/all-runs.json \
             > /tmp/alo186-release-diagnostics/alo186-runs.json
           jq -r '.[] | [.databaseId,.workflowName,.status,(.conclusion // ""),.headSha,.event,.url] | @tsv' \
@@ -59,13 +59,13 @@ jobs:
               '<!-- alo186-release-diagnostics -->',
               '## ALO186 yayın hattı tanısı',
               '',
-              '| Run | Workflow | Durum | Sonuç | SHA |',
-              '|---:|---|---|---|---|',
+              '| Run | Workflow | Durum | Sonuç | SHA | Event |',
+              '|---:|---|---|---|---|---|',
           ]
-          for run in runs[:20]:
+          for run in runs[:30]:
               name=str(run.get('workflowName') or '').replace('|','\\|')
               sha=str(run.get('headSha') or '')[:12]
-              lines.append(f"| [{run['databaseId']}]({run['url']}) | {name} | {run.get('status')} | {run.get('conclusion') or '-'} | `{sha}` |")
+              lines.append(f"| [{run['databaseId']}]({run['url']}) | {name} | {run.get('status')} | {run.get('conclusion') or '-'} | `{sha}` | {run.get('event')} |")
           Path('/tmp/alo186-release-diagnostics/comment.md').write_text('\n'.join(lines)+'\n', encoding='utf-8')
           PY
           body=$(cat /tmp/alo186-release-diagnostics/comment.md)
