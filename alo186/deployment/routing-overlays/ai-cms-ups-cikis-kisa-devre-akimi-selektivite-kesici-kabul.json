@@ -1,0 +1,18 @@
+{
+  "version": 233,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/ups-cikis-kisa-devre-akimi-selektivite-kesici-kabul/index.html",
+      "canonicalPath": "/haberler/ups-cikis-kisa-devre-akimi-selektivite-kesici-kabul",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_e7640e8a433408fe",
+    "humanApproved": true,
+    "approvalPr": 792,
+    "qualityScore": 88
+  }
+}
