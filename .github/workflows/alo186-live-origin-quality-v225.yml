@@ -5,10 +5,12 @@ on:
     paths:
       - 'alo186/deployment/audit_live_origin_v225.py'
       - 'alo186/deployment/audit_live_origin_v225_compat.py'
+      - 'alo186/deployment/finalize_pages_service_worker.py'
       - 'alo186/deployment/finalize_sitemap_v225.py'
       - 'alo186/deployment/guard_commerce_routes_v3.py'
       - 'alo186/deployment/inject_intent_tools_run135.py'
       - 'alo186/deployment/smoke_static_site.py'
+      - 'alo186/tests/test_finalize_pages_service_worker.py'
       - 'alo186/tests/test_live_origin_quality_v225.py'
       - 'alo186/tests/test_live_origin_quality_v225_compat.py'
       - 'alo186/tests/test_sitemap_quality_v225.py'
@@ -52,9 +54,11 @@ jobs:
           python -m py_compile \
             alo186/deployment/audit_live_origin_v225.py \
             alo186/deployment/audit_live_origin_v225_compat.py \
+            alo186/deployment/finalize_pages_service_worker.py \
             alo186/deployment/finalize_sitemap_v225.py \
             alo186/deployment/inject_intent_tools_run135.py \
             alo186/deployment/smoke_static_site.py
+          python alo186/tests/test_finalize_pages_service_worker.py
           python alo186/tests/test_live_origin_quality_v225.py
           python alo186/tests/test_live_origin_quality_v225_compat.py
           python alo186/tests/test_sitemap_quality_v225.py
@@ -103,6 +107,10 @@ jobs:
             python alo186/deployment/guard_commerce_routes_v3.py \
               --site "$site" \
               > "/tmp/alo186-commerce-v225-${name}.json"
+            python alo186/deployment/finalize_pages_service_worker.py \
+              --site "$site" \
+              --base-path "$base" \
+              > "/tmp/alo186-service-worker-v225-${name}.json"
             python alo186/deployment/smoke_github_pages.py \
               --site "$site" \
               --base-path "$base"
@@ -142,6 +150,10 @@ jobs:
               for release_name in ('alo186-release.json','pages-release.json'):
                   release=json.loads((root/release_name).read_text(encoding='utf-8'))
                   assert release['sitemapQualityV225']==receipt
+                  sw=release['serviceWorkerRegistrationFinalization']
+                  assert sw['basePath']==base
+                  assert sw['checkedPages']>900
+                  assert sw['injectedPages']>=10
               for route,target in [
                   ('haberler/lifepo4-batarya-sogukta-sarj-edilir-mi/index.html','lifepo4-dusuk-sicaklikta-sarj-edilir-mi'),
                   ('haberler/elektrik-gerilimi-dusuk-yuksek-edas-olcum-talebi/index.html','dusuk-yuksek-voltaj-edas-teknik-kalite-olcumu'),
@@ -160,6 +172,7 @@ jobs:
             /tmp/alo186-v225-custom
             /tmp/alo186-sitemap-v225-custom.json
             /tmp/alo186-commerce-v225-custom.json
+            /tmp/alo186-service-worker-v225-custom.json
           if-no-files-found: error
           include-hidden-files: true
           retention-days: 30
