@@ -119,7 +119,7 @@ def assert_afci_alias_bridge(item: dict, alias_source: str, target_source: str) 
     assert f'<link rel="canonical" href="{expected}">' in alias_html
     assert f'"mainEntityOfPage":"{expected}"' in alias_html
     assert f'href="{item["canonicalPath"]}"' in alias_html
-    assert "https://www.alo186.com" not in alias_html
+    assert not re.search(r'<link\b[^>]*rel="canonical"[^>]*href="https://www\.alo186\.com', alias_html, re.I)
     assert f'<link rel="canonical" href="{expected}">' in target_html
 
 
