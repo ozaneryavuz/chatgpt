@@ -9,6 +9,7 @@ import prepare_github_pages_core as _core
 from finalize_article_discovery import run as finalize_article_discovery
 from finalize_editorial_trust import run as finalize_editorial_trust
 from finalize_live_quality import CANONICAL_HOST, CANONICAL_ORIGIN as LIVE_CANONICAL_ORIGIN
+from finalize_pages_service_worker import finalize as finalize_service_worker_registration
 from finalize_release_transparency import run as finalize_release_transparency
 from finalize_user_experience import run as finalize_user_experience
 from prepare_github_pages_core import *  # noqa: F401,F403
@@ -193,6 +194,7 @@ def prepare(site: Path, base_path: str, repository: str, commit: str) -> dict:
     )
     audit = finalize_user_experience(site, normalized)
     ux = install_sitewide_ux(site, normalized)
+    service_worker_finalization = finalize_service_worker_registration(site, normalized)
     validate_root_legal_deadline(site, normalized)
     validate_root_primary_start(site, normalized)
     update_primary_shortcut(site, normalized)
@@ -206,6 +208,7 @@ def prepare(site: Path, base_path: str, repository: str, commit: str) -> dict:
     release["primaryStartRoute"] = _core.public_url(normalized, PRIMARY_START_ROUTE)
     release["primaryStartMode"] = "progressive-disclosure"
     release["sitewideUx"] = ux
+    release["serviceWorkerRegistrationFinalization"] = service_worker_finalization
     release["sitewideUserExperienceAudit"] = audit
     release["articleDiscoveryV1"] = article_discovery
     release["editorialTrustV1"] = editorial_trust
