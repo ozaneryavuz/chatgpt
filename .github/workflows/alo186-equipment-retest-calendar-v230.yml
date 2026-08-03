@@ -1,0 +1,58 @@
+name: ALO186 ekipman tekrar test takvimi v230
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/elektrik-ekipmani-tekrar-test-takvimi/**'
+      - 'alo186/deployment/routing-overlays/230-equipment-retest-calendar.json'
+      - 'alo186/tests/test_equipment_retest_calendar_v230.js'
+      - '.github/workflows/alo186-equipment-retest-calendar-v230.yml'
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/elektrik-ekipmani-tekrar-test-takvimi/**'
+      - 'alo186/deployment/routing-overlays/230-equipment-retest-calendar.json'
+      - 'alo186/tests/test_equipment_retest_calendar_v230.js'
+      - '.github/workflows/alo186-equipment-retest-calendar-v230.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-equipment-retest-v230-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: JavaScript ve güven sözleşmesi
+        run: |
+          node --check alo186/hesaplama/elektrik-ekipmani-tekrar-test-takvimi/app.js
+          node --check alo186/tests/test_equipment_retest_calendar_v230.js
+          node alo186/tests/test_equipment_retest_calendar_v230.js
+      - name: Hukukî süre ve routing regresyonları
+        run: |
+          python alo186/tests/device_damage_deadline_guard.py
+          node alo186/tests/test_release_manifest.js
+      - name: Canonical üretim paketinde rota kabulü
+        run: |
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-equipment-retest-v230 \
+            --commit "$GITHUB_SHA"
+          test -f /tmp/alo186-equipment-retest-v230/hesaplama/elektrik-ekipmani-tekrar-test-takvimi/index.html
+          test -f /tmp/alo186-equipment-retest-v230/hesaplama/elektrik-ekipmani-tekrar-test-takvimi/app.js
+          grep -Fq 'https://alo186.com/hesaplama/elektrik-ekipmani-tekrar-test-takvimi/' \
+            /tmp/alo186-equipment-retest-v230/hesaplama/elektrik-ekipmani-tekrar-test-takvimi/index.html
+          ! grep -Eqi 'amazon\.com\.tr|amzn\.to|"@type"[[:space:]]*:[[:space:]]*"(Product|Offer|AggregateRating)"' \
+            /tmp/alo186-equipment-retest-v230/hesaplama/elektrik-ekipmani-tekrar-test-takvimi/index.html
