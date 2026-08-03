@@ -37,7 +37,6 @@
 
   function lockLinks(state) {
     links.forEach((link) => {
-      link.removeAttribute('href');
       link.removeAttribute('target');
       link.setAttribute('aria-disabled', 'true');
       link.setAttribute('tabindex', '-1');
@@ -68,6 +67,7 @@
       const product = catalog.products.find((item) => item.asin === link.dataset.affiliateAsin);
       const url = product ? catalog.amazonProductUrl(product, new Date()) : null;
       if (!url) {
+        link.removeAttribute('href');
         link.dataset.state = 'stale';
         return;
       }
@@ -167,7 +167,7 @@
 
   links.forEach((link) => {
     link.addEventListener('click', (event) => {
-      if (!link.getAttribute('href')) {
+      if (link.dataset.state !== 'open') {
         event.preventDefault();
         setStatus('Mağaza bağlantısı kapalı. Önce bütün güvenlik ve ihtiyaç koşullarını doğrulayın veya satın almama seçeneğini kullanın.');
         return;
