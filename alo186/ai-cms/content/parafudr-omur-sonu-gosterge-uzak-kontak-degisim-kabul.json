@@ -1,1 +1,289 @@
-{"schemaVersion":1,"id":"cms_95c2044e760173ff","slug":"parafudr-omur-sonu-gosterge-uzak-kontak-degisim-kabul","contentType":"guide","state":"review","locale":"tr-TR","title":"Parafudr Ömür Sonu Göstergesi ve Değişim Kabulü","h1":"Parafudr kırmızı gösterge verdiğinde ne yapılır?","description":"Parafudr kırmızı/sönük göstergesini, termik ayırıcıyı, yedek korumayı ve uzaktan alarmı doğrulayın; kartuş değişimini kabul dosyasıyla tamamlayın.","intent":"Panodaki SPD’nin görsel gösterge veya uzaktan alarm sonrası gerçekten koruma dışı olup olmadığını güvenli biçimde sınıflandırmak ve doğru kartuş değişimini kanıtlamak.","primaryKeyword":"parafudr kırmızı gösterge değişim","audience":["Konut ve site yöneticileri","Otel ve işletme teknik ekipleri","Elektrik mühendisleri","Pano bakım firmaları","BMS ve tesis yönetimi ekipleri"],"riskClass":"high","directAnswer":"Parafudr kırmızı veya sönük gösterge verdiğinde renk anlamı önce tam ürün kılavuzundan doğrulanmalıdır. Bazı modellerde kırmızı bayrak kartuşun ömür sonuna ulaştığını ve değiştirilmesi gerektiğini, bazı LED’lerde ise besleme ya da bağlantı sorunu dahil servis ihtiyacını gösterir. Kabul; termik ayırıcı ile yedek sigorta/kesicinin ayrılması, doğru uyumlu kartuş, LOTO ve gerilimsizlik, bağlantı-tork kontrolü, uzaktan kuru kontak/BMS alarmı ve değişim sonrası gösterge testinin kayıt altına alınmasıyla tamamlanır.","sections":[{"id":"gostergeyi-dogru-okuma","heading":"Parafudr kırmızı veya sönük gösterge verdiğinde ilk karar nedir?","paragraphs":["Parafudrun görsel göstergesi modelin koruma modülü ve termik ayırıcısı hakkında durum bilgisi verir; renk anlamı evrensel değildir. Schneider Resi9 örneğinde beyaz gösterge korumanın sürdüğünü, kırmızı gösterge kartuşun değiştirilmesi gerektiğini belirtir. Diğer cihazlarda yeşil LED’in sönmesi besleme, bağlantı veya modül arızasına işaret edebilir. Bu nedenle gösterge her zaman ürün kılavuzuyla okunmalıdır.","Kırmızı bayrağı bantla kapatmak, alarmı yalnız susturmak veya kartuşu yeniden takıp 'düzeldi' saymak korumayı geri getirmez. Öte yandan sönük LED de kartuşun kesin öldüğünü tek başına kanıtlamayabilir; önce yetkin personel doğru gerilim, faz ve bağlantının mevcut olduğunu üretici prosedürüne göre doğrular. Enerjili panoda kullanıcı müdahalesi yapılmamalıdır."],"bullets":["SPD’nin tam ürün kodu ve gösterge açıklamasını kılavuzdan doğrulayın.","Renk veya LED anlamını başka marka/modelden kopyalamayın.","Alarmı susturmayı korumanın geri gelmesi sanmayın.","Kırmızı/sönük durumda kritik yükleri korunuyor varsaymayın."],"sourceRefs":["S1","S3","S4","S5"]},{"id":"termik-ayirici-ve-yedek-koruma","heading":"Ömür sonu göstergesi, termik ayırıcı ve yedek sigorta nasıl ayrılır?","paragraphs":["SPD içindeki doğrusal olmayan eleman darbeler ve sürekli anormal gerilim nedeniyle yaşlanabilir. Dahili termik ayırıcı güvenli biçimde devreden çıkarak durum göstergesini değiştirebilir. Bunun yanında haricî yedek sigorta veya kesici kısa devre/arıza akımını yönetir. Kartuş göstergesinin sağlam olması haricî yedek korumanın kapalı veya sağlam olduğunu tek başına göstermez.","IEC 61643-11:2025 SPD performans ve güvenlik testlerini; IEC 60364-5-53 ise koruma, ayırma, anahtarlama ve izleme cihazlarının seçimi/tesisini kapsar. Kabulde SPD tipi ve Uc/Up/In/Imax/Iimp değerleri kadar üreticinin SCPD tablosu, prospektif kısa devre akımı, sigorta-kesici durumu, bağlantı iletkenleri ve topraklama yolu da kontrol edilmelidir."],"bullets":["Dahili termik ayırıcı ile haricî SCPD’yi ayrı satırlarda gösterin.","Yedek sigorta/kesici model ve anma değerini üretici tablosuyla eşleştirin.","Faz, nötr ve N-PE modüllerinin durumunu ayrı kontrol edin.","Yanmış veya ısınmış bağlantıyı yalnız kartuş değişimiyle kapatmayın."],"sourceRefs":["S1","S2","S4"]},{"id":"test-dugmesi-ve-uzak-kontak","heading":"Test düğmesi ve uzaktan alarm kontağı gerçekte neyi doğrular?","paragraphs":["Bazı endüstriyel SPD’lerde test düğmesi gösterge, alarm ve teşhis devresini sınar; cihazın yıldırım darbesi altında gerçek koruma kapasitesini yeniden üretmez. Schneider Surgelogic örneğinde düğme LED ve sesli alarm teşhisini test eder, arızalı fazda kırmızı gösterge servis gerektirir. Dolayısıyla test düğmesinin başarılı olması bütün MOV/koruma yollarının saha darbesine karşı yeni olduğu anlamına gelmez.","Kuru kontak veya uzaktan transfer kontağı BMS, SCADA ya da yangın/teknik alarm sistemine “servis/değişim” bilgisini taşıyabilir. Kabulde normal, alarm ve enerjisiz durum kontak mantığı; kablo kopması, yardımcı besleme kaybı, alarm susturma ve BMS mesajı birlikte test edilmelidir. Uzaktan alarmın çalışması görsel pano kontrolünün ve periyodik bakımın yerine geçmez."],"bullets":["Test düğmesinin yalnız teşhis devresini mi sınadığını kılavuzdan okuyun.","Kuru kontak NO/NC mantığını normal ve arıza durumunda kaydedin.","BMS alarm metni ile gerçek faz/modül durumunu eşleştirin.","Alarm susturulduğunda kalıcı arıza göstergesinin görünür kaldığını doğrulayın."],"sourceRefs":["S3","S4","S5"]},{"id":"degisim-ve-yeniden-kabul","heading":"Kartuş değişimi hangi kontrollerle tamamlanmalıdır?","paragraphs":["Değişim yalnız aynı fiziksel yuvaya uyan bir kartuş takmak değildir. Yeni modülün ürün ailesi, kutup, Uc, Tip/Test Class, Up ve darbe akımı değerleri ana tabanla uyumlu olmalı; üretici farklı kartuşların karıştırılmasına izin vermelidir. Değişimden önce enerji güvenli biçimde kesilir, LOTO uygulanır ve gerilimsizlik yetkin ekipçe doğrulanır.","Eski modülün arıza nedeni araştırılmadan yeni kartuş takılırsa sürekli aşırı gerilim, yanlış şebeke sistemi, gevşek bağlantı, yetersiz SCPD veya N-PE hatası yeni modülü tekrar bozabilir. Değişim sonrası tork, iletken uzunluğu, yedek koruma, gösterge, uzaktan kontak ve BMS alarm reseti kontrol edilir; tarih, faz ve modül kodu bakım kaydına yazılır."],"bullets":["Yalnız üreticinin uyumlu gösterdiği kartuşu kullanın.","LOTO ve gerilimsizlik doğrulaması olmadan kartuş çekmeyin.","Kök neden olarak sürekli aşırı gerilim ve bağlantı ısınmasını inceleyin.","Değişim sonrası gösterge, kuru kontak ve alarm resetini test edin."],"sourceRefs":["S1","S2","S3","S4"]},{"id":"bakim-dosyasi","heading":"Parafudr bakım ve değişim kabul dosyası nasıl oluşturulur?","paragraphs":["Dosyada tek hat, pano konumu, SPD taban ve kartuş ürün kodları, tip/sınıf, Uc-Up-Iimp-In-Imax, bağlantı kesiti ve yaklaşık toplam uzunluğu, topraklama sistemi, yedek koruma, görsel gösterge, uzaktan kontak, son kontrol tarihi, olay geçmişi ve değiştirilen modüller bulunmalıdır. Çok fazlı sistemde her faz ve N-PE modülü ayrı satırda izlenmelidir.","Parafudr için herkese uyan sabit bir takvim ömrü ilan edilmemelidir. Üretici talimatı, durum göstergesi, uzaktan alarm, yıldırım/arıza olayı ve periyodik pano kontrolü birlikte karar verir. Sistem göstergeleri normal, bağlantılar ve SCPD uygun ise yalnız yaşı nedeniyle kartuş değiştirmek gerekmeyebilir. CTA: kişisel verisiz SPD durum–SCPD–alarm–değişim matrisini bakım ekibine teslim edin."],"bullets":["Her modülü faz ve pano konumuyla tekilleştirin.","Yıldırım, aşırı gerilim ve sigorta açma olaylarını zaman çizelgesine ekleyin.","Değişim nedenini ve yeni kartuş kodunu imzalı kaydedin.","Kanıt normal ise gereksiz kartuş veya komple SPD değişimi satın almayın."],"sourceRefs":["S1","S2","S3","S4","S5"]}],"faqs":[{"question":"Parafudr göstergesi kırmızıysa elektrik çalışmaya devam eder mi?","answer":"Tesis enerjili kalabilir ancak ilgili SPD kartuşu koruma dışı olabilir. Kırmızı göstergenin anlamı model kılavuzundan doğrulanmalı ve yetkin personel güvenli değişim planlamalıdır.","sourceRefs":["S3","S4"]},{"question":"Parafudrun test düğmesi yıldırıma karşı koruduğunu kanıtlar mı?","answer":"Genellikle hayır. Bazı cihazlarda düğme LED, alarm ve teşhis devresini test eder; gerçek darbe koruma kapasitesini saha şartında yeniden test etmez.","sourceRefs":["S4","S5"]},{"question":"Kırmızı kartuşu aynı amperde herhangi bir marka ile değiştirebilir miyim?","answer":"Hayır. Taban-kartuş uyumu, Uc, tip/test sınıfı, Up ve darbe akımı değerleri ile üretici onayı gerekir. Fiziksel olarak uyması elektriksel koordinasyonu kanıtlamaz.","sourceRefs":["S1","S2","S3"]},{"question":"Parafudr kaç yılda bir değiştirilir?","answer":"Herkes için geçerli tek süre yoktur. Üretici bakım talimatı, durum göstergesi, alarm, olay geçmişi, çevre koşulları ve saha kontrolü birlikte değerlendirilir.","sourceRefs":["S1","S3","S4"]}],"sources":[{"id":"S1","publisher":"IEC","title":"IEC 61643-11:2025 — AC low-voltage surge protective devices","url":"https://webstore.iec.ch/en/publication/65314","accessedAt":"2026-08-03","primary":true,"factSummary":"AC 1000 V’a kadar sistemlere bağlanan SPD’lerin geçici aşırı gerilime karşı performans, güvenlik, test ve rating gereklerini tanımlar."},{"id":"S2","publisher":"IEC","title":"IEC 60364-5-53:2019+A1:2020+A2:2024 — Selection and erection","url":"https://webstore.iec.ch/en/publication/104394","accessedAt":"2026-08-03","primary":true,"factSummary":"Alçak gerilim tesislerinde koruma, ayırma, anahtarlama, kontrol ve izleme cihazlarının seçimi ve tesis edilmesi için güncel konsolide çerçeveyi sağlar."},{"id":"S3","publisher":"Schneider Electric","title":"When does the Resi9 SPD need to be replaced?","url":"https://www.se.com/nz/en/faqs/FAQ000264974/","accessedAt":"2026-08-03","primary":true,"factSummary":"Resi9 SPD’de beyaz göstergenin korumayı, kırmızı göstergenin kartuş değişimi gerektiğini belirttiğini açıklar."},{"id":"S4","publisher":"Schneider Electric","title":"ASCO Model 450/460/480 SPD installation and operation manual","url":"https://www.se.com/us/en/download/document/SPD-UM-SPIOMM450460480/","accessedAt":"2026-08-03","primary":true,"factSummary":"SPD durum LED’leri, sesli alarm, darbe sayacı, kuru kontak, bakım, arıza giderme ve yedek parça süreçlerini açıklar."},{"id":"S5","publisher":"Schneider Electric","title":"Surgelogic Push To Test diagnostic function","url":"https://www.se.com/us/en/faqs/FA123373/","accessedAt":"2026-08-03","primary":true,"factSummary":"Push To Test düğmesinin gösterge ve sesli alarm teşhisini sınadığını; kırmızı faz LED’inin yetkin servis gerektirdiğini açıklar."}],"internalLinks":[{"label":"Parafudr risk testi","path":"/hesaplama/parafudr-risk-testi/","reason":"Mevcut SPD’nin yapı ve besleme riskine uygunluğunu ilk aşamada sınıflandırır."},{"label":"Tip 1, Tip 2 ve Tip 3 koordinasyonu","path":"/haberler/parafudr-tip-1-tip-2-tip-3-koordinasyon-secimi","reason":"Ömür sonu bakımını SPD katmanlarının tasarım göreviyle ilişkilendirir."},{"label":"Uc, Up, In, Imax ve Iimp","path":"/haberler/parafudr-uc-up-in-imax-iimp-ne-demek","reason":"Yeni kartuşun etiket değerlerini doğru karşılaştırmayı sağlar."},{"label":"SPD yedek sigorta seçimi","path":"/haberler/parafudr-yedek-sigorta-scpd-nasil-secilir","reason":"Haricî yedek koruma ile kartuş durumunu birbirinden ayırır."},{"label":"Bağlantı kablosu neden kısa olmalı?","path":"/haberler/parafudr-baglanti-kablosu-neden-kisa-olmali","reason":"Değişim sonrası bağlantı yolu ve gerçek koruma seviyesini tamamlar."},{"label":"Parafudr ve gerilim rölesi farkı","path":"/haberler/parafudr-gerilim-koruma-rolesi-farki","reason":"Kartuş arızasını sürekli düşük-yüksek gerilim korumasıyla karıştırmayı önler."},{"label":"Gerilim koruma çözüm seçici","path":"/hesaplama/gerilim-koruma-cozum-secici/","reason":"Darbe, sürekli gerilim ve kesinti sorununu doğru çözüm sınıfına yönlendirir."}],"commerce":{"enabled":false,"policy":"none","category":null},"editorial":{"createdBy":"ai-assisted","model":"gpt-5.6-thinking","humanReviewRequired":true,"approvedBy":null,"approvedAt":null,"publishedAt":null,"approvalPr":null},"seo":{"canonicalPath":"/haberler/parafudr-omur-sonu-gosterge-uzak-kontak-degisim-kabul","robots":"index,follow,max-image-preview:large","lastModified":"2026-08-03","topics":["parafudr","SPD","kırmızı gösterge","ömrü sonu","uzak kontak","kartuş değişimi","aşırı gerilim koruması"]},"quality":{"score":100,"minimumRequired":85,"checks":{"metadata":true,"directAnswer":true,"contentDepth":true,"sources":true,"safety":true,"internalLinks":true,"uniqueness":true,"structuredData":true},"similarity":{"maximum":0.56,"closestPath":"/haberler/parafudr-tip-1-tip-2-tip-3-koordinasyon-secimi"}}}
+{
+  "schemaVersion": 1,
+  "id": "cms_95c2044e760173ff",
+  "slug": "parafudr-omur-sonu-gosterge-uzak-kontak-degisim-kabul",
+  "contentType": "guide",
+  "state": "published",
+  "locale": "tr-TR",
+  "title": "Parafudr Ömür Sonu Göstergesi ve Değişim Kabulü",
+  "h1": "Parafudr kırmızı gösterge verdiğinde ne yapılır?",
+  "description": "Parafudr kırmızı/sönük göstergesini, termik ayırıcıyı, yedek korumayı ve uzaktan alarmı doğrulayın; kartuş değişimini kabul dosyasıyla tamamlayın.",
+  "intent": "Panodaki SPD’nin görsel gösterge veya uzaktan alarm sonrası gerçekten koruma dışı olup olmadığını güvenli biçimde sınıflandırmak ve doğru kartuş değişimini kanıtlamak.",
+  "primaryKeyword": "parafudr kırmızı gösterge değişim",
+  "audience": [
+    "Konut ve site yöneticileri",
+    "Otel ve işletme teknik ekipleri",
+    "Elektrik mühendisleri",
+    "Pano bakım firmaları",
+    "BMS ve tesis yönetimi ekipleri"
+  ],
+  "riskClass": "high",
+  "directAnswer": "Parafudr kırmızı veya sönük gösterge verdiğinde renk anlamı önce tam ürün kılavuzundan doğrulanmalıdır. Bazı modellerde kırmızı bayrak kartuşun ömür sonuna ulaştığını ve değiştirilmesi gerektiğini, bazı LED’lerde ise besleme ya da bağlantı sorunu dahil servis ihtiyacını gösterir. Kabul; termik ayırıcı ile yedek sigorta/kesicinin ayrılması, doğru uyumlu kartuş, LOTO ve gerilimsizlik, bağlantı-tork kontrolü, uzaktan kuru kontak/BMS alarmı ve değişim sonrası gösterge testinin kayıt altına alınmasıyla tamamlanır.",
+  "sections": [
+    {
+      "id": "gostergeyi-dogru-okuma",
+      "heading": "Parafudr kırmızı veya sönük gösterge verdiğinde ilk karar nedir?",
+      "paragraphs": [
+        "Parafudrun görsel göstergesi modelin koruma modülü ve termik ayırıcısı hakkında durum bilgisi verir; renk anlamı evrensel değildir. Schneider Resi9 örneğinde beyaz gösterge korumanın sürdüğünü, kırmızı gösterge kartuşun değiştirilmesi gerektiğini belirtir. Diğer cihazlarda yeşil LED’in sönmesi besleme, bağlantı veya modül arızasına işaret edebilir. Bu nedenle gösterge her zaman ürün kılavuzuyla okunmalıdır.",
+        "Kırmızı bayrağı bantla kapatmak, alarmı yalnız susturmak veya kartuşu yeniden takıp 'düzeldi' saymak korumayı geri getirmez. Öte yandan sönük LED de kartuşun kesin öldüğünü tek başına kanıtlamayabilir; önce yetkin personel doğru gerilim, faz ve bağlantının mevcut olduğunu üretici prosedürüne göre doğrular. Enerjili panoda kullanıcı müdahalesi yapılmamalıdır."
+      ],
+      "bullets": [
+        "SPD’nin tam ürün kodu ve gösterge açıklamasını kılavuzdan doğrulayın.",
+        "Renk veya LED anlamını başka marka/modelden kopyalamayın.",
+        "Alarmı susturmayı korumanın geri gelmesi sanmayın.",
+        "Kırmızı/sönük durumda kritik yükleri korunuyor varsaymayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S3",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "id": "termik-ayirici-ve-yedek-koruma",
+      "heading": "Ömür sonu göstergesi, termik ayırıcı ve yedek sigorta nasıl ayrılır?",
+      "paragraphs": [
+        "SPD içindeki doğrusal olmayan eleman darbeler ve sürekli anormal gerilim nedeniyle yaşlanabilir. Dahili termik ayırıcı güvenli biçimde devreden çıkarak durum göstergesini değiştirebilir. Bunun yanında haricî yedek sigorta veya kesici kısa devre/arıza akımını yönetir. Kartuş göstergesinin sağlam olması haricî yedek korumanın kapalı veya sağlam olduğunu tek başına göstermez.",
+        "IEC 61643-11:2025 SPD performans ve güvenlik testlerini; IEC 60364-5-53 ise koruma, ayırma, anahtarlama ve izleme cihazlarının seçimi/tesisini kapsar. Kabulde SPD tipi ve Uc/Up/In/Imax/Iimp değerleri kadar üreticinin SCPD tablosu, prospektif kısa devre akımı, sigorta-kesici durumu, bağlantı iletkenleri ve topraklama yolu da kontrol edilmelidir."
+      ],
+      "bullets": [
+        "Dahili termik ayırıcı ile haricî SCPD’yi ayrı satırlarda gösterin.",
+        "Yedek sigorta/kesici model ve anma değerini üretici tablosuyla eşleştirin.",
+        "Faz, nötr ve N-PE modüllerinin durumunu ayrı kontrol edin.",
+        "Yanmış veya ısınmış bağlantıyı yalnız kartuş değişimiyle kapatmayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S4"
+      ]
+    },
+    {
+      "id": "test-dugmesi-ve-uzak-kontak",
+      "heading": "Test düğmesi ve uzaktan alarm kontağı gerçekte neyi doğrular?",
+      "paragraphs": [
+        "Bazı endüstriyel SPD’lerde test düğmesi gösterge, alarm ve teşhis devresini sınar; cihazın yıldırım darbesi altında gerçek koruma kapasitesini yeniden üretmez. Schneider Surgelogic örneğinde düğme LED ve sesli alarm teşhisini test eder, arızalı fazda kırmızı gösterge servis gerektirir. Dolayısıyla test düğmesinin başarılı olması bütün MOV/koruma yollarının saha darbesine karşı yeni olduğu anlamına gelmez.",
+        "Kuru kontak veya uzaktan transfer kontağı BMS, SCADA ya da yangın/teknik alarm sistemine “servis/değişim” bilgisini taşıyabilir. Kabulde normal, alarm ve enerjisiz durum kontak mantığı; kablo kopması, yardımcı besleme kaybı, alarm susturma ve BMS mesajı birlikte test edilmelidir. Uzaktan alarmın çalışması görsel pano kontrolünün ve periyodik bakımın yerine geçmez."
+      ],
+      "bullets": [
+        "Test düğmesinin yalnız teşhis devresini mi sınadığını kılavuzdan okuyun.",
+        "Kuru kontak NO/NC mantığını normal ve arıza durumunda kaydedin.",
+        "BMS alarm metni ile gerçek faz/modül durumunu eşleştirin.",
+        "Alarm susturulduğunda kalıcı arıza göstergesinin görünür kaldığını doğrulayın."
+      ],
+      "sourceRefs": [
+        "S3",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "id": "degisim-ve-yeniden-kabul",
+      "heading": "Kartuş değişimi hangi kontrollerle tamamlanmalıdır?",
+      "paragraphs": [
+        "Değişim yalnız aynı fiziksel yuvaya uyan bir kartuş takmak değildir. Yeni modülün ürün ailesi, kutup, Uc, Tip/Test Class, Up ve darbe akımı değerleri ana tabanla uyumlu olmalı; üretici farklı kartuşların karıştırılmasına izin vermelidir. Değişimden önce enerji güvenli biçimde kesilir, LOTO uygulanır ve gerilimsizlik yetkin ekipçe doğrulanır.",
+        "Eski modülün arıza nedeni araştırılmadan yeni kartuş takılırsa sürekli aşırı gerilim, yanlış şebeke sistemi, gevşek bağlantı, yetersiz SCPD veya N-PE hatası yeni modülü tekrar bozabilir. Değişim sonrası tork, iletken uzunluğu, yedek koruma, gösterge, uzaktan kontak ve BMS alarm reseti kontrol edilir; tarih, faz ve modül kodu bakım kaydına yazılır."
+      ],
+      "bullets": [
+        "Yalnız üreticinin uyumlu gösterdiği kartuşu kullanın.",
+        "LOTO ve gerilimsizlik doğrulaması olmadan kartuş çekmeyin.",
+        "Kök neden olarak sürekli aşırı gerilim ve bağlantı ısınmasını inceleyin.",
+        "Değişim sonrası gösterge, kuru kontak ve alarm resetini test edin."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "id": "bakim-dosyasi",
+      "heading": "Parafudr bakım ve değişim kabul dosyası nasıl oluşturulur?",
+      "paragraphs": [
+        "Dosyada tek hat, pano konumu, SPD taban ve kartuş ürün kodları, tip/sınıf, Uc-Up-Iimp-In-Imax, bağlantı kesiti ve yaklaşık toplam uzunluğu, topraklama sistemi, yedek koruma, görsel gösterge, uzaktan kontak, son kontrol tarihi, olay geçmişi ve değiştirilen modüller bulunmalıdır. Çok fazlı sistemde her faz ve N-PE modülü ayrı satırda izlenmelidir.",
+        "Parafudr için herkese uyan sabit bir takvim ömrü ilan edilmemelidir. Üretici talimatı, durum göstergesi, uzaktan alarm, yıldırım/arıza olayı ve periyodik pano kontrolü birlikte karar verir. Sistem göstergeleri normal, bağlantılar ve SCPD uygun ise yalnız yaşı nedeniyle kartuş değiştirmek gerekmeyebilir. CTA: kişisel verisiz SPD durum–SCPD–alarm–değişim matrisini bakım ekibine teslim edin."
+      ],
+      "bullets": [
+        "Her modülü faz ve pano konumuyla tekilleştirin.",
+        "Yıldırım, aşırı gerilim ve sigorta açma olaylarını zaman çizelgesine ekleyin.",
+        "Değişim nedenini ve yeni kartuş kodunu imzalı kaydedin.",
+        "Kanıt normal ise gereksiz kartuş veya komple SPD değişimi satın almayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S4",
+        "S5"
+      ]
+    }
+  ],
+  "faqs": [
+    {
+      "question": "Parafudr göstergesi kırmızıysa elektrik çalışmaya devam eder mi?",
+      "answer": "Tesis enerjili kalabilir ancak ilgili SPD kartuşu koruma dışı olabilir. Kırmızı göstergenin anlamı model kılavuzundan doğrulanmalı ve yetkin personel güvenli değişim planlamalıdır.",
+      "sourceRefs": [
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "question": "Parafudrun test düğmesi yıldırıma karşı koruduğunu kanıtlar mı?",
+      "answer": "Genellikle hayır. Bazı cihazlarda düğme LED, alarm ve teşhis devresini test eder; gerçek darbe koruma kapasitesini saha şartında yeniden test etmez.",
+      "sourceRefs": [
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "question": "Kırmızı kartuşu aynı amperde herhangi bir marka ile değiştirebilir miyim?",
+      "answer": "Hayır. Taban-kartuş uyumu, Uc, tip/test sınıfı, Up ve darbe akımı değerleri ile üretici onayı gerekir. Fiziksel olarak uyması elektriksel koordinasyonu kanıtlamaz.",
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "question": "Parafudr kaç yılda bir değiştirilir?",
+      "answer": "Herkes için geçerli tek süre yoktur. Üretici bakım talimatı, durum göstergesi, alarm, olay geçmişi, çevre koşulları ve saha kontrolü birlikte değerlendirilir.",
+      "sourceRefs": [
+        "S1",
+        "S3",
+        "S4"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "publisher": "IEC",
+      "title": "IEC 61643-11:2025 — AC low-voltage surge protective devices",
+      "url": "https://webstore.iec.ch/en/publication/65314",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "AC 1000 V’a kadar sistemlere bağlanan SPD’lerin geçici aşırı gerilime karşı performans, güvenlik, test ve rating gereklerini tanımlar."
+    },
+    {
+      "id": "S2",
+      "publisher": "IEC",
+      "title": "IEC 60364-5-53:2019+A1:2020+A2:2024 — Selection and erection",
+      "url": "https://webstore.iec.ch/en/publication/104394",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Alçak gerilim tesislerinde koruma, ayırma, anahtarlama, kontrol ve izleme cihazlarının seçimi ve tesis edilmesi için güncel konsolide çerçeveyi sağlar."
+    },
+    {
+      "id": "S3",
+      "publisher": "Schneider Electric",
+      "title": "When does the Resi9 SPD need to be replaced?",
+      "url": "https://www.se.com/nz/en/faqs/FAQ000264974/",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Resi9 SPD’de beyaz göstergenin korumayı, kırmızı göstergenin kartuş değişimi gerektiğini belirttiğini açıklar."
+    },
+    {
+      "id": "S4",
+      "publisher": "Schneider Electric",
+      "title": "ASCO Model 450/460/480 SPD installation and operation manual",
+      "url": "https://www.se.com/us/en/download/document/SPD-UM-SPIOMM450460480/",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "SPD durum LED’leri, sesli alarm, darbe sayacı, kuru kontak, bakım, arıza giderme ve yedek parça süreçlerini açıklar."
+    },
+    {
+      "id": "S5",
+      "publisher": "Schneider Electric",
+      "title": "Surgelogic Push To Test diagnostic function",
+      "url": "https://www.se.com/us/en/faqs/FA123373/",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Push To Test düğmesinin gösterge ve sesli alarm teşhisini sınadığını; kırmızı faz LED’inin yetkin servis gerektirdiğini açıklar."
+    }
+  ],
+  "internalLinks": [
+    {
+      "label": "Parafudr risk testi",
+      "path": "/hesaplama/parafudr-risk-testi/",
+      "reason": "Mevcut SPD’nin yapı ve besleme riskine uygunluğunu ilk aşamada sınıflandırır."
+    },
+    {
+      "label": "Parafudr göstergesi kırmızı ne demek?",
+      "path": "/haberler/parafudr-gostergesi-kirmizi-ne-demek",
+      "reason": "Genel gösterge yorumunu uzaktan alarm, SCPD ve değişim kabul dosyasından ayırır."
+    },
+    {
+      "label": "Uc, Up, In, Imax ve Iimp",
+      "path": "/haberler/parafudr-uc-up-in-imax-iimp-ne-demek",
+      "reason": "Yeni kartuşun etiket değerlerini doğru karşılaştırmayı sağlar."
+    },
+    {
+      "label": "SPD yedek sigorta seçimi",
+      "path": "/haberler/parafudr-yedek-sigorta-scpd-nasil-secilir",
+      "reason": "Haricî yedek koruma ile kartuş durumunu birbirinden ayırır."
+    },
+    {
+      "label": "Bağlantı kablosu neden kısa olmalı?",
+      "path": "/haberler/parafudr-baglanti-kablosu-neden-kisa-olmali",
+      "reason": "Değişim sonrası bağlantı yolu ve gerçek koruma seviyesini tamamlar."
+    },
+    {
+      "label": "Parafudr ve gerilim rölesi farkı",
+      "path": "/haberler/parafudr-gerilim-koruma-rolesi-farki",
+      "reason": "Kartuş arızasını sürekli düşük-yüksek gerilim korumasıyla karıştırmayı önler."
+    },
+    {
+      "label": "Gerilim koruma çözüm seçici",
+      "path": "/hesaplama/gerilim-koruma-cozum-secici/",
+      "reason": "Darbe, sürekli gerilim ve kesinti sorununu doğru çözüm sınıfına yönlendirir."
+    }
+  ],
+  "commerce": {
+    "enabled": false,
+    "policy": "none",
+    "category": null
+  },
+  "editorial": {
+    "createdBy": "ai-assisted",
+    "model": "gpt-5.6-thinking",
+    "humanReviewRequired": true,
+    "approvedBy": "ozaneryavuz",
+    "approvedAt": "2026-08-03T12:43:08Z",
+    "publishedAt": "2026-08-03T12:43:09Z",
+    "approvalPr": 792
+  },
+  "seo": {
+    "canonicalPath": "/haberler/parafudr-omur-sonu-gosterge-uzak-kontak-degisim-kabul",
+    "robots": "index,follow,max-image-preview:large",
+    "lastModified": "2026-08-03",
+    "topics": [
+      "parafudr",
+      "SPD",
+      "kırmızı gösterge",
+      "ömrü sonu",
+      "uzak kontak",
+      "kartuş değişimi",
+      "aşırı gerilim koruması"
+    ]
+  },
+  "quality": {
+    "score": 88,
+    "minimumRequired": 85,
+    "checks": {
+      "metadata": false,
+      "directAnswer": true,
+      "contentDepth": true,
+      "sources": true,
+      "safety": true,
+      "internalLinks": true,
+      "uniqueness": true,
+      "structuredData": true
+    },
+    "similarity": {
+      "maximum": 0.2941,
+      "closestPath": "https://www.alo186.com/haberler/parafudr-gosterge-kirmizi-yesil-uzak-kontak-degisim"
+    }
+  }
+}
