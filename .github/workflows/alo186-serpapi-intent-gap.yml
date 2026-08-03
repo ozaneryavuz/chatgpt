@@ -64,6 +64,8 @@ jobs:
     needs: validate
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    env:
+      SERPAPI_API_KEY: ${{ secrets.SERPAPI_API_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -71,7 +73,7 @@ jobs:
           python-version: '3.12'
 
       - name: SerpApi anahtarı yoksa güvenli biçimde dur
-        if: ${{ secrets.SERPAPI_API_KEY == '' }}
+        if: ${{ env.SERPAPI_API_KEY == '' }}
         run: |
           echo '## ALO186 SerpApi radarı' >> "$GITHUB_STEP_SUMMARY"
           echo '' >> "$GITHUB_STEP_SUMMARY"
@@ -79,9 +81,7 @@ jobs:
           echo 'Anahtar asla kaynak koda veya artifacta yazılmamalıdır.' >> "$GITHUB_STEP_SUMMARY"
 
       - name: Güncel Google SERP verisini topla
-        if: ${{ secrets.SERPAPI_API_KEY != '' }}
-        env:
-          SERPAPI_API_KEY: ${{ secrets.SERPAPI_API_KEY }}
+        if: ${{ env.SERPAPI_API_KEY != '' }}
         run: |
           set -euo pipefail
           rm -rf /tmp/alo186-serpapi
@@ -90,7 +90,7 @@ jobs:
             --output /tmp/alo186-serpapi
 
       - name: Raporu artifact olarak yükle
-        if: ${{ secrets.SERPAPI_API_KEY != '' }}
+        if: ${{ env.SERPAPI_API_KEY != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: alo186-serpapi-growth-${{ github.run_id }}
@@ -99,7 +99,7 @@ jobs:
           retention-days: 90
 
       - name: İlk üç aksiyonu özetle
-        if: ${{ secrets.SERPAPI_API_KEY != '' }}
+        if: ${{ env.SERPAPI_API_KEY != '' }}
         run: |
           python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
           import json
