@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[2]
 DEPLOYMENT = ROOT / "alo186/deployment"
 sys.path.insert(0, str(DEPLOYMENT))
 
-from export_chatgpt_sites_bundle import export_bundle  # noqa: E402
+from export_chatgpt_sites_bundle_v2 import export_bundle  # noqa: E402
 
 
 def main() -> None:
@@ -21,6 +21,7 @@ def main() -> None:
         assert manifest["targetSourceOfTruth"] == "chatgpt-sites"
         assert manifest["canonicalHost"] == "https://alo186.com"
         assert manifest["sourceCommit"] == "test-commit"
+        assert manifest["exporterVersion"] == 2
 
         stats = manifest["stats"]
         assert stats["effectiveRoutes"] >= 100, stats
@@ -74,8 +75,12 @@ def main() -> None:
             assert (output / required_file).is_file(), required_file
 
         locations = json.loads((output / "data/location-services.json").read_text(encoding="utf-8"))
-        assert len([item for item in locations if item["category"] == "location-province"]) >= 81
-        assert len([item for item in locations if item["category"] == "location-company"]) >= 21
+        province_records = [item for item in locations if item["category"] == "location-province"]
+        company_records = [item for item in locations if item["category"] == "location-company"]
+        assert len(province_records) == 81
+        assert len(company_records) == 21
+        assert all(any("Service" in json.dumps(block, ensure_ascii=False) for block in item["jsonLd"]) for item in locations)
+        assert all("amazon.com.tr" not in json.dumps(item, ensure_ascii=False).casefold() for item in locations)
 
         brief = (output / "SITE_BRIEF.md").read_text(encoding="utf-8")
         for token in (
