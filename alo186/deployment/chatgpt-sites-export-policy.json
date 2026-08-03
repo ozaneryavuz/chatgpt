@@ -1,10 +1,14 @@
 {
-  "version": 1,
+  "version": 2,
   "siteSlug": "alo186",
   "canonicalHost": "https://alo186.com",
   "targetPlatform": "ChatGPT Sites",
   "targetSourceOfTruth": "chatgpt-sites",
-  "exportPurpose": "GitHub'daki faydalı ALO186 içerik, araç, veri ve güven politikalarını ChatGPT Sites'e tek seferlik, denetlenebilir ve tekrar üretilebilir bir paket olarak aktarmak.",
+  "sourceRepository": "ozaneryavuz/chatgpt",
+  "sourceAuthorityManifest": "alo186/sites-sync/sites-source-manifest.json",
+  "sitesImportPrompt": "alo186/sites-sync/sites-import-prompt.md",
+  "artifactWorkflow": ".github/workflows/alo186-chatgpt-sites-export.yml",
+  "exportPurpose": "GitHub'daki faydalı ALO186 içerik, araç, veri ve güven politikalarını ChatGPT Sites'e denetlenebilir, tekrar üretilebilir ve Sites'in doğal tasarımını koruyan tek kaynak paketi olarak aktarmak.",
   "coreRoutes": [
     "/elektrik-portali",
     "/edas-bul",
@@ -24,7 +28,7 @@
   ],
   "priorityRoutePrefixes": [
     "/il/",
-    "/dagitim-sirketi/",
+    "/dagitim-sirketleri/",
     "/hesaplama/",
     "/haberler/",
     "/amazon-elektrik-urunleri/",
@@ -71,7 +75,11 @@
     "emergencyCommerceClosed": true,
     "amazonTurkeyOnly": true,
     "affiliateDisclosureBeforeLink": true,
-    "affiliateRelRequired": ["sponsored", "nofollow", "noopener"],
+    "affiliateRelRequired": [
+      "sponsored",
+      "nofollow",
+      "noopener"
+    ],
     "unverifiedCommercialFieldsForbidden": [
       "price",
       "stock",
@@ -88,13 +96,19 @@
   "migrationRules": {
     "preserveCanonicalPaths": true,
     "excludeDeclaredAliases": true,
+    "preserveNativeSitesDesignSystem": true,
+    "blindStaticCssOverwriteAllowed": false,
     "preferNativeSitesPagesForStaticContent": true,
     "preferSitesInteractiveAppsForTools": true,
     "keepServerRenderedFallback": true,
     "copyStructuredData": true,
     "copyLocalAssets": true,
+    "publishedAiCmsOnly": true,
     "doNotCopyGitHubWorkflows": true,
     "doNotCopyDeploymentScripts": true,
-    "doNotCopyTestsOrReports": true
+    "doNotCopyTestsOrReports": true,
+    "doNotChangeDns": true,
+    "doNotAttachCustomDomainToGitHubPages": true,
+    "undocumentedSitesApiAllowed": false
   }
 }
