@@ -1,0 +1,38 @@
+{
+  "release": "competitor-gap-affiliate-v250",
+  "site": "alo186",
+  "target": "https://alo186.com",
+  "sourceIntegrationCommit": "29728b6ebc7b7cba0768ba29e2c8a209a79e8b7e",
+  "publisher": ".github/workflows/alo186-github-pages.yml",
+  "buildIntegration": "alo186/deployment/build_static_site.py",
+  "postprocessor": "alo186/deployment/inject_competitor_gap_affiliate_v250.py",
+  "requiredRoutes": [
+    "/amazon-elektrik-urunleri/kombi-yedek-enerji-urun-secici/",
+    "/edas-bul/",
+    "/acil-numaralar/",
+    "/haberler/ups-mi-tasinabilir-guc-istasyonu-mu"
+  ],
+  "requiredArtifactMarkers": [
+    "data-alo186-schema-v250=\"true\"",
+    "data-alo186-ssr-affiliate-v250=\"true\"",
+    "data-alo186-service-catalog-v250=\"true\"",
+    "data-alo186-government-service-v250=\"true\"",
+    "data-alo186-affiliate-anchors-v250=\"ups\""
+  ],
+  "trustContract": {
+    "independentPlatform": true,
+    "officialInstitutionImpersonation": false,
+    "privateEdasGovernmentService": false,
+    "governmentServiceLimitedTo112": true,
+    "affiliateDisclosureRequired": true,
+    "noBuyOutcomeRequired": true,
+    "unverifiedPriceStockRatingWarrantyForbidden": true
+  },
+  "validation": {
+    "jsonLdSyntax": "passed-in-ci",
+    "canonicalBuild": "passed-in-ci",
+    "staticSmoke": "passed-in-ci",
+    "richResultProductEligibility": "not-claimed-without-offer-review-or-aggregateRating",
+    "externalLiveAcceptance": "required-after-pages-deploy"
+  }
+}
