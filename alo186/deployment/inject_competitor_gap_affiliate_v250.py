@@ -8,10 +8,12 @@ try:
     from .competitor_gap_affiliate_v250 import (
         apply_competitor_gap_affiliate_v250 as _apply_competitor_gap_affiliate_v250,
     )
+    from .materialize_location_pages_v251 import materialize as _materialize_location_pages
 except ImportError:
     from competitor_gap_affiliate_v250 import (
         apply_competitor_gap_affiliate_v250 as _apply_competitor_gap_affiliate_v250,
     )
+    from materialize_location_pages_v251 import materialize as _materialize_location_pages
 
 VERSION = 251
 AI_AGENTS = (
@@ -53,11 +55,14 @@ def robots(site: Path) -> dict[str, object]:
 
 
 def apply(repo: Path, site: Path, base_path: str = "") -> dict[str, object]:
-    """Apply the final-artifact schema, SSR, affiliate and crawler hardening layer."""
+    """Materialize location routes, then apply final-artifact schema and SSR hardening."""
 
-    del repo, base_path
-    report = _apply_competitor_gap_affiliate_v250(Path(site))
+    del base_path
+    repo, site = Path(repo), Path(site)
+    materialization = _materialize_location_pages(repo, site)
+    report = _apply_competitor_gap_affiliate_v250(site)
     report["adapterVersion"] = VERSION
+    report["locationPageMaterializationV251"] = materialization
     return report
 
 
