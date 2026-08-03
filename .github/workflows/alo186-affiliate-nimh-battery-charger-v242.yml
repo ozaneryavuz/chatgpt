@@ -1,0 +1,57 @@
+name: ALO186 güvenli AA AAA NiMH pil şarj cihazı affiliate v242
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/elektrik-kesintisi-aa-aaa-pil-sarj-cihazi-secimi/**'
+      - 'alo186/deployment/routing-overlays/242-affiliate-nimh-battery-charger.json'
+      - 'alo186/tests/test_affiliate_nimh_battery_charger_v242.js'
+      - '.github/workflows/alo186-affiliate-nimh-battery-charger-v242.yml'
+  pull_request:
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/elektrik-kesintisi-aa-aaa-pil-sarj-cihazi-secimi/**'
+      - 'alo186/deployment/routing-overlays/242-affiliate-nimh-battery-charger.json'
+      - 'alo186/tests/test_affiliate_nimh_battery_charger_v242.js'
+      - '.github/workflows/alo186-affiliate-nimh-battery-charger-v242.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: alo186-affiliate-nimh-battery-charger-v242-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Ürün, Knowledge Graph ve affiliate güven regresyonu
+        run: |
+          node --check alo186/amazon-elektrik-urunleri/elektrik-kesintisi-aa-aaa-pil-sarj-cihazi-secimi/catalog-v242.js
+          node --check alo186/amazon-elektrik-urunleri/elektrik-kesintisi-aa-aaa-pil-sarj-cihazi-secimi/app-v242.js
+          node alo186/tests/test_affiliate_nimh_battery_charger_v242.js
+      - name: Affiliate kapsam ve ticari yönetişim
+        run: |
+          printf '%s\n' \
+            'alo186/amazon-elektrik-urunleri/elektrik-kesintisi-aa-aaa-pil-sarj-cihazi-secimi/index.html' \
+            'alo186/amazon-elektrik-urunleri/elektrik-kesintisi-aa-aaa-pil-sarj-cihazi-secimi/catalog-v242.js' \
+            'alo186/amazon-elektrik-urunleri/elektrik-kesintisi-aa-aaa-pil-sarj-cihazi-secimi/app-v242.js' \
+            > /tmp/changed-affiliate-v242.txt
+          python alo186/tests/test_affiliate_scope_policy_v229.py --changed-files /tmp/changed-affiliate-v242.txt
+          node alo186/tests/test_release_manifest.js
+      - name: Canonical production paketi
+        run: |
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-affiliate-v242 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-affiliate-v242
+          test -f /tmp/alo186-affiliate-v242/amazon-elektrik-urunleri/elektrik-kesintisi-aa-aaa-pil-sarj-cihazi-secimi/index.html
+          grep -Fq 'https://alo186.com/amazon-elektrik-urunleri/elektrik-kesintisi-aa-aaa-pil-sarj-cihazi-secimi/' /tmp/alo186-affiliate-v242/amazon-elektrik-urunleri/elektrik-kesintisi-aa-aaa-pil-sarj-cihazi-secimi/index.html
+          grep -Fq 'rel="sponsored nofollow noopener"' /tmp/alo186-affiliate-v242/amazon-elektrik-urunleri/elektrik-kesintisi-aa-aaa-pil-sarj-cihazi-secimi/index.html
+          ! grep -Eqi '"@type"[[:space:]]*:[[:space:]]*"Offer"|priceCurrency|aggregateRating|ratingValue' /tmp/alo186-affiliate-v242/amazon-elektrik-urunleri/elektrik-kesintisi-aa-aaa-pil-sarj-cihazi-secimi/index.html
