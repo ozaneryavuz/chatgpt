@@ -6,6 +6,8 @@ import json
 import re
 from pathlib import Path
 
+from sitemap_routes import ensure_canonical_routes
+
 ROUTES = {
     "solar": "/hesaplama/power-station-gunes-paneli-uygunluk/",
     "alarm": "/hesaplama/duman-co-alarmi-bakim-gunlugu/",
@@ -79,13 +81,7 @@ def inject_entries(site: Path, base_path: str) -> int:
 
 
 def append_sitemap(site: Path) -> None:
-    path = site / "sitemap.xml"
-    text = path.read_text(encoding="utf-8")
-    for route in ROUTES.values():
-        loc = f"https://www.alo186.com{route}"
-        if f"<loc>{loc}</loc>" not in text:
-            text = text.replace("</urlset>", f"<url><loc>{loc}</loc></url></urlset>", 1)
-    path.write_text(text, encoding="utf-8")
+    ensure_canonical_routes(site / "sitemap.xml", ROUTES.values())
 
 
 def append_search(site: Path, base_path: str) -> None:
