@@ -1,1 +1,292 @@
-{"schemaVersion":1,"id":"cms_a8653e71974543ff","slug":"vpp-telemetri-setpoint-feedback-veri-boslugu-kabul","contentType":"guide","state":"review","locale":"tr-TR","title":"VPP Telemetri, Setpoint Geri Bildirimi ve Veri Boşluğu Kabulü","h1":"VPP'de komut gönderildi demek neden yetmez, telemetri nasıl kabul edilir?","description":"VPP komutunu; kabul, uygulama, ölçülen P/Q/SoC tepkisi, zaman damgası, veri boşluğu ve güvenli fallback kanıtıyla uçtan uca doğrulayın.","intent":"Toplayıcı veya VPP platformundan gönderilen aktif/reaktif güç ve işletme komutlarının doğru kaynağa ulaştığını, uygulandığını ve bağlantı noktasındaki ölçümle kanıtlandığını doğrulamak; eksik, gecikmiş veya yinelenen telemetriyi performans verisinden ayırmak.","primaryKeyword":"VPP telemetri kabul testi","audience":["VPP ve toplayıcılık platformu geliştiricileri","Enerji depolama yatırımcıları","GES ve EV filo işletmecileri","SCADA/DERMS mühendisleri","Enerji yöneticileri"],"riskClass":"legal","directAnswer":"VPP'de bir komutun yazılım ekranında 'gönderildi' görünmesi, kaynağın komutu kabul ettiği veya fiziksel olarak uyguladığı anlamına gelmez. Uçtan uca kabul; kaynak kimliği ve yetkisi, komut sıra numarası ve zaman damgası, alındı/kabul/red cevabı, uygulanan setpoint geri bildirimi, bağlantı noktasında ölçülen P–Q–SoC tepkisi, rampa ve süre, kesici/çalışma modu, eksik-gecikmiş-yinelenen veri sınıfları ve haberleşme kaybındaki güvenli yerel davranışla yapılmalıdır. Test ortamına gerçek müşteri kimliği, açık adres, özel anahtar veya canlı uzaktan kontrol parolası yüklenmemelidir. Teknik kabul, TEİAŞ/EPDK piyasa katılımı veya gelir garantisi değildir.","sections":[{"id":"komut-zinciri","heading":"Gönderildi, kabul edildi, uygulandı ve ölçüldü durumları nasıl ayrılır?","paragraphs":["VPP komut zinciri en az dört aşama içerir: platform komutu üretir, saha ağ geçidi veya DERMS komutu alır, kaynak kontrolörü komutu kabul edip uygular ve sayaç/SCADA bağlantı noktasındaki fiziksel tepkiyi ölçer. Her aşama için ayrı zaman damgası, benzersiz komut kimliği, durum kodu ve hata nedeni tutulmazsa başarılı görünen işlem yanlış kaynağa gitmiş, reddedilmiş veya yerel limitte kırpılmış olabilir.","TEİAŞ'ın güncel depolama yan hizmet kriterleri, belirli hizmetlerde TEİAŞ izleme sistemiyle veri alışverişi için yazılım ve donanım ile performans kanıtı ister; hizmetlerin bağlantı noktasında izlenmesini öngörür. Bu ulusal kriterler belirli güç ve piyasa kapsamlarına yöneliktir. Tesis içi veya dağıtım seviyesindeki bir VPP için de komut ile ölçümün ayrılması iyi mühendislik uygulamasıdır, ancak resmî katılım koşulu gibi genellenmemelidir."],"bullets":["Her komuta tekil kimlik ve ortak zaman tabanı verin.","Gönderim, kabul, uygulama ve ölçüm durumlarını ayrı alanlarda tutun.","Yerel limit veya SoC nedeniyle kırpılan komutu başarı saymayın.","Bağlantı noktası ölçümünü yalnız cihaz ekranı geri bildirimiyle değiştirmeyin."],"sourceRefs":["S1","S2","S3","S4","S5"]},{"id":"kaynak-envanteri","heading":"VPP kaynak envanterinde hangi kimlik ve kabiliyetler doğrulanmalıdır?","paragraphs":["Her DER için platform kimliği, tesis ve bağlantı noktası eşleşmesi, cihaz türü, nominal ve kullanılabilir güç/enerji, şarj-deşarj yönü, SoC/SoH, aktif-reaktif güç sınırları, rampa, minimum çalışma süresi, kesici durumu, kontrol modu, yerel öncelikler ve uzaktan kontrol yetkisi tutulmalıdır. Aynı cihazın farklı platformlarda çift kaydı veya yanlış CT yönü toplam VPP kapasitesini ve ölçülen tepkiyi hatalı gösterebilir.","TEİAŞ izleme ve kontrol usulünün SCADA ekinde kullanılabilir enerji, SoH, SoC, aktif güç emreamadeliği ve gerçek zamanlı güç gibi alanlar yer alır. IEC 61850-7-420, fiziksel ve sanal olarak toplanmış DER'ler için ortak bilgi modelleri tanımlar. Kabulde veri alanının adı kadar birimi, işareti, kalite biti, güncelleme sıklığı ve geçerlilik süresi de sözleşmeye bağlanmalıdır."],"bullets":["DER kimliğini sayaç ve bağlantı noktasıyla eşleştirin.","MW/MWh, işaret ve şarj-deşarj yönünü test verisiyle doğrulayın.","SoC, SoH, kullanılabilir enerji ve güç limitlerini ayrı alanlarda tutun.","Eski veya kalitesiz veriyi güncel kapasite gibi toplamaya dahil etmeyin."],"sourceRefs":["S2","S3","S4"]},{"id":"setpoint-testi","heading":"Setpoint, rampa ve çalışma modu testi hangi senaryoları kapsamalıdır?","paragraphs":["Test; sıfırdan pozitif/negatif aktif güç, reaktif güç veya güç faktörü, farklı rampa hızları, SoC sınırı, kesici açık/kapalı, yerel kontrol önceliği ve acil durdurma senaryolarını kapsar. Komutun kabul cevabı ile gerçek setpoint feedback ve ölçülen P/Q trendi aynı grafikte gösterilir. Hedefe ulaşma süresi, aşım, salınım, kararlı hata ve komutun hangi nedenle sınırladığı kaydedilir.","TEİAŞ'ın 3 Temmuz 2026 kriterleri belirli yan hizmetler için tepki ve izleme koşulları tanımlar; örneğin primer ve sekonder frekans kontrolünde zaman ve rezerv koşulları bulunur. Bu sayılar her VPP ürünü için evrensel SLA değildir. Kabul sınırı ilgili hizmet anlaşması, kaynak modeli, bağlantı şartı ve güncel mevzuattan alınmalı; test sırasında sonradan gevşetilmemelidir."],"bullets":["Pozitif ve negatif güç yönlerini ayrı test edin.","Setpoint feedback ile sayaç ölçümünü aynı grafikte gösterin.","Rampa, aşım, salınım ve kalıcı hatayı ölçün.","Piyasa hizmeti sınırını başka proje veya ülkeden kopyalamayın."],"sourceRefs":["S1","S2","S3"]},{"id":"veri-boslugu-fallback","heading":"Eksik, gecikmiş veya yinelenen telemetride VPP nasıl güvenli kalır?","paragraphs":["Telemetri her örnek için olay zamanı, alım zamanı, sıra numarası ve kalite bilgisi taşımalıdır. Eksik paket, geç gelen veri, yinelenen veri, saat sapması ve kaynak yeniden başlatması ayrı sınıflandırılır. Platformun son değeri sınırsız süre taşımaması, stale eşiğinde kapasiteyi düşürmesi ve raporda veri boşluğunu görünür bırakması gerekir. Sonradan doldurulan veriler gerçek zamanlı performansla karıştırılmamalıdır.","Haberleşme kaybında kaynak; onaylı güvenli yerel moda, son geçerli sınırlı setpointe veya sıfıra dönme gibi proje tarafından tanımlanan davranışı uygular. OpenADR 3 program, event, report ve endpoint etkileşimlerini REST tabanlı bilgi modeliyle ele alır; IEC 61850 bilgi modelleri saha verisinin anlamını standardize eder. Protokol kullanmak tek başına güvenli fallback, siber güvenlik veya performans garantisi değildir."],"bullets":["Olay ve alım zamanını ayrı kaydedin.","Stale veri eşiğini ve kapasite düşürme kuralını tanımlayın.","Haberleşme kaybı fallback'ini kontrollü test edin.","Sonradan doldurulan veriyi gerçek zamanlı yanıt gibi raporlamayın."],"sourceRefs":["S3","S4","S5"]},{"id":"kabul-dosyasi","heading":"VPP telemetri kabul dosyası nasıl oluşturulmalıdır?","paragraphs":["Dosya; mimari ve veri akışı, kaynak envanteri, kimlik-yetki matrisi, protokol/sürüm, zaman senkronu, alan sözlüğü, birim ve işaretler, güncelleme ve stale eşikleri, komut kimliği, cevap kodları, setpoint/feedback/ölçüm trendleri, P-Q-SoC-kesici-mod verileri, veri boşlukları, yeniden bağlantı ve fallback sonuçları, test sürümü ve açık maddeleri içermelidir. Ham mesajlar gizli bilgi temizlenerek saklanmalıdır.","Kabul, platformun belirli test koşullarında izlenebilir komut ve ölçüm zinciri oluşturduğunu gösterir; toplayıcılık lisansı, yan hizmet katılımı, kapasite ödemesi veya gelir garantisi değildir. Gerçek müşteri adı, açık adres, sayaç numarası, özel anahtar, erişim tokenı ve canlı kontrol parolası ALO186'e yüklenmemelidir. CTA: kişisel verisiz VPP komut–kabul–feedback–ölçüm–veri boşluğu kabul matrisini SCADA/DERMS ve piyasa uzmanlarına iletin."],"bullets":["Alan sözlüğü ve test sürümünü dosyaya sabitleyin.","Ham mesajlardan kimlik ve erişim sırlarını çıkarın.","Teknik kabul ile mevzuat/piyasa uygunluğunu ayrı imzalatın.","Kanıt yoksa kapasite veya gelir iddiası yayımlamayın."],"sourceRefs":["S1","S2","S3","S4","S5"]}],"faqs":[{"question":"VPP komutu 'başarılı' görünüyorsa kaynak mutlaka tepki vermiş midir?","answer":"Hayır. Başarı yalnız API alındısını gösterebilir. Uygulanan setpoint geri bildirimi ve bağlantı noktasındaki P/Q/SoC ölçümü birlikte doğrulanmalıdır.","sourceRefs":["S1","S2","S3"]},{"question":"VPP telemetrisi kaç saniyede bir gelmelidir?","answer":"Tek bir evrensel süre yoktur. Yan hizmet, bağlantı şartı, protokol ve kaynak dinamiğine göre sözleşmede belirlenir; güncelleme, gecikme ve stale eşikleri birlikte yazılmalıdır.","sourceRefs":["S1","S2","S4","S5"]},{"question":"İnternet kesilirse VPP cihazları son komutta kalmalı mı?","answer":"Proje bazlıdır. Güvenli fallback; son geçerli sınırlı setpoint, yerel kontrol veya sıfır güç gibi onaylı davranış olabilir. Sınırsız süre kör biçimde son komutta kalmak kabul edilmemelidir.","sourceRefs":["S3","S4","S5"]},{"question":"Bu test VPP'nin TEİAŞ yan hizmetlerine katılabileceğini kanıtlar mı?","answer":"Hayır. Teknik telemetri kabulü yalnız veri ve kontrol zincirini doğrular. Güncel TEİAŞ/EPDK kriterleri, performans sertifikası, anlaşma ve piyasa yükümlülükleri ayrıca sağlanmalıdır.","sourceRefs":["S1","S2","S3"]}],"sources":[{"id":"S1","publisher":"TEİAŞ","title":"Elektrik Depolama Ünite veya Tesislerinin Yan Hizmetlerde Kullanılmasına Dair Teknik Kriterler ve Test Prosedürleri — 3 Temmuz 2026 duyurusu","url":"https://www.teias.gov.tr/duyurular/elektrik-depolama-unite-veya-tesislerinin-yan-hizmetlerde-kullanilmasina-dair-teknik-kriterler-ve-test-prosedurleri","accessedAt":"2026-08-03","primary":true,"factSummary":"2024 sürümünü yürürlükten kaldıran 3 Temmuz 2026 güncel teknik kriter ve test prosedürü duyurusudur."},{"id":"S2","publisher":"TEİAŞ","title":"Elektrik Depolama Ünite veya Tesislerinin Yan Hizmetlerde Kullanılmasına Dair Teknik Kriterler ve Test Prosedürleri — güncel PDF","url":"https://webim.teias.gov.tr/file/70ddcfe5-9018-43f3-b708-4c69399a18a6?download=","accessedAt":"2026-08-03","primary":true,"factSummary":"Bağlantı noktasında izleme, TEİAŞ veri alışverişi, AGC, rezerv ve performans kriterleri ile güncel yan hizmet test çerçevesini içerir."},{"id":"S3","publisher":"TEİAŞ","title":"Elektrik Depolama Tesislerinin İzlenmesi ve Kontrol Edilmesine İlişkin Usul ve Esaslar","url":"https://webim.teias.gov.tr/file/9dc2089d-bd8a-4399-9dd7-326252daa4f1?download=","accessedAt":"2026-08-03","primary":true,"factSummary":"SCADA üzerinden SoH, SoC, kullanılabilir enerji, emreamade güç, aktif/reaktif güç, setpoint/geri bildirim ve durum verilerinin izlenmesi-kontrolü için alanları tanımlar."},{"id":"S4","publisher":"IEC","title":"IEC 61850-7-420:2021 — DER and distribution automation information models","url":"https://webstore.iec.ch/en/publication/34384","accessedAt":"2026-08-03","primary":true,"factSummary":"Enerji üretimi, depolama, kontrol edilebilir yük ve fiziksel/sanal DER agregasyonu için ortak bilgi modellerini tanımlar."},{"id":"S5","publisher":"OpenADR Alliance","title":"OpenADR 3 Introduction and Certification Program","url":"https://www.openadr.org/index.php?Itemid=194&catid=20%3Ageneral-site-content&id=210%3Aopenadr-3-0&option=com_content&view=article","accessedAt":"2026-08-03","primary":true,"factSummary":"OpenADR 3'ün normatif OpenAPI YAML'ını, program-event-report-endpoint etkileşimlerini, kullanıcı kılavuzu ve test yaklaşımını açıklar."}],"internalLinks":[{"label":"VPP sanal güç santrali nedir?","path":"/haberler/vpp-sanal-guc-santrali-nedir","reason":"Telemetri kabulünden önce VPP rol ve kaynak mimarisini açıklar."},{"label":"VPP batarya çevrim, rezerv ve garanti sözleşmesi","path":"/haberler/vpp-batarya-cevrim-rezerv-garanti-sozlesmesi","reason":"Teknik komut zincirini sözleşme, rezerv ve batarya kullanım sınırlarıyla ilişkilendirir."},{"label":"V2L, V2H ve V2G farkı","path":"/haberler/v2l-v2h-v2g-farki-cift-yonlu-sarj","reason":"EV kaynaklarının VPP kontrolüne hangi mimarilerde katılabileceğini ayırır."},{"label":"Batarya SoC ve SoH farkı","path":"/haberler/batarya-soc-soh-farki-kapasite-saglik-nasil-anlasilir","reason":"Telemetride SoC, SoH ve kullanılabilir enerjinin karıştırılmasını önler."},{"label":"Ev tipi enerji depolama kaç kWh olmalı?","path":"/haberler/ev-tipi-enerji-depolama-kac-kwh-olmali","reason":"Kaynak kapasitesi ile VPP'ye ayrılabilir rezerv arasındaki farkı tamamlar."},{"label":"LiFePO4 batarya güvenliği ve BMS","path":"/haberler/lifepo4-ev-bataryasi-guvenligi-bms-termal-kacak","reason":"Uzaktan kontrolün BMS ve yerel güvenlik sınırlarını aşamayacağını açıklar."},{"label":"Kurumsal elektrik sürekliliği ön değerlendirmesi","path":"/kurumsal-elektrik-surekliligi-on-degerlendirme","reason":"VPP, depolama ve SCADA kabul kapsamını profesyonel çalışmaya taşır."}],"commerce":{"enabled":false,"policy":"none","category":null},"editorial":{"createdBy":"ai-assisted","model":"gpt-5.6-thinking","humanReviewRequired":true,"approvedBy":null,"approvedAt":null,"publishedAt":null,"approvalPr":null},"seo":{"canonicalPath":"/haberler/vpp-telemetri-setpoint-feedback-veri-boslugu-kabul","robots":"index,follow,max-image-preview:large","lastModified":"2026-08-03","topics":["VPP","telemetri","setpoint","DERMS","SCADA","veri boşluğu","enerji depolama"]},"quality":{"score":100,"minimumRequired":85,"checks":{"metadata":true,"directAnswer":true,"contentDepth":true,"sources":true,"safety":true,"internalLinks":true,"uniqueness":true,"structuredData":true},"similarity":{"maximum":0.43,"closestPath":"/haberler/vpp-batarya-cevrim-rezerv-garanti-sozlesmesi"}}}
+{
+  "schemaVersion": 1,
+  "id": "cms_a8653e71974543ff",
+  "slug": "vpp-telemetri-setpoint-feedback-veri-boslugu-kabul",
+  "contentType": "guide",
+  "state": "review",
+  "locale": "tr-TR",
+  "title": "VPP Telemetri, Setpoint Geri Bildirimi ve Veri Boşluğu Kabulü",
+  "h1": "VPP'de komut gönderildi demek neden yetmez, telemetri nasıl kabul edilir?",
+  "description": "VPP komutunu; kabul, uygulama, ölçülen P/Q/SoC tepkisi, zaman damgası, veri boşluğu ve güvenli fallback kanıtıyla uçtan uca doğrulayın.",
+  "intent": "Toplayıcı veya VPP platformundan gönderilen aktif/reaktif güç ve işletme komutlarının doğru kaynağa ulaştığını, uygulandığını ve bağlantı noktasındaki ölçümle kanıtlandığını doğrulamak; eksik, gecikmiş veya yinelenen telemetriyi performans verisinden ayırmak.",
+  "primaryKeyword": "VPP telemetri kabul testi",
+  "audience": [
+    "VPP ve toplayıcılık platformu geliştiricileri",
+    "Enerji depolama yatırımcıları",
+    "GES ve EV filo işletmecileri",
+    "SCADA/DERMS mühendisleri",
+    "Enerji yöneticileri"
+  ],
+  "riskClass": "legal",
+  "directAnswer": "VPP'de bir komutun 'gönderildi' görünmesi, kaynağın komutu kabul edip fiziksel olarak uyguladığını kanıtlamaz. Uçtan uca kabul; kaynak kimliği ve yetkisi, komut kimliği ve zaman damgası, kabul/red cevabı, uygulanan setpoint geri bildirimi, bağlantı noktasında ölçülen P–Q–SoC tepkisi, rampa ve süre, kesici/çalışma modu, eksik-gecikmiş-yinelenen veri sınıfları ile haberleşme kaybındaki güvenli yerel davranışı birlikte doğrulamalıdır. Gerçek müşteri kimliği, açık adres, özel anahtar veya canlı kontrol parolası test dosyasına yüklenmemelidir. Teknik kabul, piyasa katılımı veya gelir garantisi değildir.",
+  "sections": [
+    {
+      "id": "komut-zinciri",
+      "heading": "Gönderildi, kabul edildi, uygulandı ve ölçüldü durumları nasıl ayrılır?",
+      "paragraphs": [
+        "VPP komut zinciri en az dört aşama içerir: platform komutu üretir, saha ağ geçidi veya DERMS komutu alır, kaynak kontrolörü komutu kabul edip uygular ve sayaç/SCADA bağlantı noktasındaki fiziksel tepkiyi ölçer. Her aşama için ayrı zaman damgası, benzersiz komut kimliği, durum kodu ve hata nedeni tutulmazsa başarılı görünen işlem yanlış kaynağa gitmiş, reddedilmiş veya yerel limitte kırpılmış olabilir.",
+        "TEİAŞ'ın güncel depolama yan hizmet kriterleri, belirli hizmetlerde TEİAŞ izleme sistemiyle veri alışverişi için yazılım ve donanım ile performans kanıtı ister; hizmetlerin bağlantı noktasında izlenmesini öngörür. Bu ulusal kriterler belirli güç ve piyasa kapsamlarına yöneliktir. Tesis içi veya dağıtım seviyesindeki bir VPP için de komut ile ölçümün ayrılması iyi mühendislik uygulamasıdır, ancak resmî katılım koşulu gibi genellenmemelidir."
+      ],
+      "bullets": [
+        "Her komuta tekil kimlik ve ortak zaman tabanı verin.",
+        "Gönderim, kabul, uygulama ve ölçüm durumlarını ayrı alanlarda tutun.",
+        "Yerel limit veya SoC nedeniyle kırpılan komutu başarı saymayın.",
+        "Bağlantı noktası ölçümünü yalnız cihaz ekranı geri bildirimiyle değiştirmeyin."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "id": "kaynak-envanteri",
+      "heading": "VPP kaynak envanterinde hangi kimlik ve kabiliyetler doğrulanmalıdır?",
+      "paragraphs": [
+        "Her DER için platform kimliği, tesis ve bağlantı noktası eşleşmesi, cihaz türü, nominal ve kullanılabilir güç/enerji, şarj-deşarj yönü, SoC/SoH, aktif-reaktif güç sınırları, rampa, minimum çalışma süresi, kesici durumu, kontrol modu, yerel öncelikler ve uzaktan kontrol yetkisi tutulmalıdır. Aynı cihazın farklı platformlarda çift kaydı veya yanlış CT yönü toplam VPP kapasitesini ve ölçülen tepkiyi hatalı gösterebilir.",
+        "TEİAŞ izleme ve kontrol usulünün SCADA ekinde kullanılabilir enerji, SoH, SoC, aktif güç emreamadeliği ve gerçek zamanlı güç gibi alanlar yer alır. IEC 61850-7-420, fiziksel ve sanal olarak toplanmış DER'ler için ortak bilgi modelleri tanımlar. Kabulde veri alanının adı kadar birimi, işareti, kalite biti, güncelleme sıklığı ve geçerlilik süresi de sözleşmeye bağlanmalıdır."
+      ],
+      "bullets": [
+        "DER kimliğini sayaç ve bağlantı noktasıyla eşleştirin.",
+        "MW/MWh, işaret ve şarj-deşarj yönünü test verisiyle doğrulayın.",
+        "SoC, SoH, kullanılabilir enerji ve güç limitlerini ayrı alanlarda tutun.",
+        "Eski veya kalitesiz veriyi güncel kapasite gibi toplamaya dahil etmeyin."
+      ],
+      "sourceRefs": [
+        "S2",
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "id": "setpoint-testi",
+      "heading": "Setpoint, rampa ve çalışma modu testi hangi senaryoları kapsamalıdır?",
+      "paragraphs": [
+        "Test; sıfırdan pozitif/negatif aktif güç, reaktif güç veya güç faktörü, farklı rampa hızları, SoC sınırı, kesici açık/kapalı, yerel kontrol önceliği ve acil durdurma senaryolarını kapsar. Komutun kabul cevabı ile gerçek setpoint feedback ve ölçülen P/Q trendi aynı grafikte gösterilir. Hedefe ulaşma süresi, aşım, salınım, kararlı hata ve komutun hangi nedenle sınırladığı kaydedilir.",
+        "TEİAŞ'ın 3 Temmuz 2026 kriterleri belirli yan hizmetler için tepki ve izleme koşulları tanımlar; örneğin primer ve sekonder frekans kontrolünde zaman ve rezerv koşulları bulunur. Bu sayılar her VPP ürünü için evrensel SLA değildir. Kabul sınırı ilgili hizmet anlaşması, kaynak modeli, bağlantı şartı ve güncel mevzuattan alınmalı; test sırasında sonradan gevşetilmemelidir."
+      ],
+      "bullets": [
+        "Pozitif ve negatif güç yönlerini ayrı test edin.",
+        "Setpoint feedback ile sayaç ölçümünü aynı grafikte gösterin.",
+        "Rampa, aşım, salınım ve kalıcı hatayı ölçün.",
+        "Piyasa hizmeti sınırını başka proje veya ülkeden kopyalamayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "id": "veri-boslugu-fallback",
+      "heading": "Eksik, gecikmiş veya yinelenen telemetride VPP nasıl güvenli kalır?",
+      "paragraphs": [
+        "Telemetri her örnek için olay zamanı, alım zamanı, sıra numarası ve kalite bilgisi taşımalıdır. Eksik paket, geç gelen veri, yinelenen veri, saat sapması ve kaynak yeniden başlatması ayrı sınıflandırılır. Platformun son değeri sınırsız süre taşımaması, stale eşiğinde kapasiteyi düşürmesi ve raporda veri boşluğunu görünür bırakması gerekir. Sonradan doldurulan veriler gerçek zamanlı performansla karıştırılmamalıdır.",
+        "Haberleşme kaybında kaynak; onaylı güvenli yerel moda, son geçerli sınırlı setpointe veya sıfıra dönme gibi proje tarafından tanımlanan davranışı uygular. OpenADR 3 program, event, report ve endpoint etkileşimlerini REST tabanlı bilgi modeliyle ele alır; IEC 61850 bilgi modelleri saha verisinin anlamını standardize eder. Protokol kullanmak tek başına güvenli fallback, siber güvenlik veya performans garantisi değildir."
+      ],
+      "bullets": [
+        "Olay ve alım zamanını ayrı kaydedin.",
+        "Stale veri eşiğini ve kapasite düşürme kuralını tanımlayın.",
+        "Haberleşme kaybı fallback'ini kontrollü test edin.",
+        "Sonradan doldurulan veriyi gerçek zamanlı yanıt gibi raporlamayın."
+      ],
+      "sourceRefs": [
+        "S3",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "id": "kabul-dosyasi",
+      "heading": "VPP telemetri kabul dosyası nasıl oluşturulmalıdır?",
+      "paragraphs": [
+        "Dosya; mimari ve veri akışı, kaynak envanteri, kimlik-yetki matrisi, protokol/sürüm, zaman senkronu, alan sözlüğü, birim ve işaretler, güncelleme ve stale eşikleri, komut kimliği, cevap kodları, setpoint/feedback/ölçüm trendleri, P-Q-SoC-kesici-mod verileri, veri boşlukları, yeniden bağlantı ve fallback sonuçları, test sürümü ve açık maddeleri içermelidir. Ham mesajlar gizli bilgi temizlenerek saklanmalıdır.",
+        "Kabul, platformun belirli test koşullarında izlenebilir komut ve ölçüm zinciri oluşturduğunu gösterir; toplayıcılık lisansı, yan hizmet katılımı, kapasite ödemesi veya gelir garantisi değildir. Gerçek müşteri adı, açık adres, sayaç numarası, özel anahtar, erişim tokenı ve canlı kontrol parolası ALO186'e yüklenmemelidir. CTA: kişisel verisiz VPP komut–kabul–feedback–ölçüm–veri boşluğu kabul matrisini SCADA/DERMS ve piyasa uzmanlarına iletin."
+      ],
+      "bullets": [
+        "Alan sözlüğü ve test sürümünü dosyaya sabitleyin.",
+        "Ham mesajlardan kimlik ve erişim sırlarını çıkarın.",
+        "Teknik kabul ile mevzuat/piyasa uygunluğunu ayrı imzalatın.",
+        "Kanıt yoksa kapasite veya gelir iddiası yayımlamayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S4",
+        "S5"
+      ]
+    }
+  ],
+  "faqs": [
+    {
+      "question": "VPP komutu 'başarılı' görünüyorsa kaynak mutlaka tepki vermiş midir?",
+      "answer": "Hayır. Başarı yalnız API alındısını gösterebilir. Uygulanan setpoint geri bildirimi ve bağlantı noktasındaki P/Q/SoC ölçümü birlikte doğrulanmalıdır.",
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "question": "VPP telemetrisi kaç saniyede bir gelmelidir?",
+      "answer": "Tek bir evrensel süre yoktur. Yan hizmet, bağlantı şartı, protokol ve kaynak dinamiğine göre sözleşmede belirlenir; güncelleme, gecikme ve stale eşikleri birlikte yazılmalıdır.",
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "question": "İnternet kesilirse VPP cihazları son komutta kalmalı mı?",
+      "answer": "Proje bazlıdır. Güvenli fallback; son geçerli sınırlı setpoint, yerel kontrol veya sıfır güç gibi onaylı davranış olabilir. Sınırsız süre kör biçimde son komutta kalmak kabul edilmemelidir.",
+      "sourceRefs": [
+        "S3",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "question": "Bu test VPP'nin TEİAŞ yan hizmetlerine katılabileceğini kanıtlar mı?",
+      "answer": "Hayır. Teknik telemetri kabulü yalnız veri ve kontrol zincirini doğrular. Güncel TEİAŞ/EPDK kriterleri, performans sertifikası, anlaşma ve piyasa yükümlülükleri ayrıca sağlanmalıdır.",
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "publisher": "TEİAŞ",
+      "title": "Elektrik Depolama Ünite veya Tesislerinin Yan Hizmetlerde Kullanılmasına Dair Teknik Kriterler ve Test Prosedürleri — 3 Temmuz 2026 duyurusu",
+      "url": "https://www.teias.gov.tr/duyurular/elektrik-depolama-unite-veya-tesislerinin-yan-hizmetlerde-kullanilmasina-dair-teknik-kriterler-ve-test-prosedurleri",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "2024 sürümünü yürürlükten kaldıran 3 Temmuz 2026 güncel teknik kriter ve test prosedürü duyurusudur."
+    },
+    {
+      "id": "S2",
+      "publisher": "TEİAŞ",
+      "title": "Elektrik Depolama Ünite veya Tesislerinin Yan Hizmetlerde Kullanılmasına Dair Teknik Kriterler ve Test Prosedürleri — güncel PDF",
+      "url": "https://webim.teias.gov.tr/file/70ddcfe5-9018-43f3-b708-4c69399a18a6?download=",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Bağlantı noktasında izleme, TEİAŞ veri alışverişi, AGC, rezerv ve performans kriterleri ile güncel yan hizmet test çerçevesini içerir."
+    },
+    {
+      "id": "S3",
+      "publisher": "TEİAŞ",
+      "title": "Elektrik Depolama Tesislerinin İzlenmesi ve Kontrol Edilmesine İlişkin Usul ve Esaslar",
+      "url": "https://webim.teias.gov.tr/file/9dc2089d-bd8a-4399-9dd7-326252daa4f1?download=",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "SCADA üzerinden SoH, SoC, kullanılabilir enerji, emreamade güç, aktif/reaktif güç, setpoint/geri bildirim ve durum verilerinin izlenmesi-kontrolü için alanları tanımlar."
+    },
+    {
+      "id": "S4",
+      "publisher": "IEC",
+      "title": "IEC 61850-7-420:2021 — DER and distribution automation information models",
+      "url": "https://webstore.iec.ch/en/publication/34384",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Enerji üretimi, depolama, kontrol edilebilir yük ve fiziksel/sanal DER agregasyonu için ortak bilgi modellerini tanımlar."
+    },
+    {
+      "id": "S5",
+      "publisher": "OpenADR Alliance",
+      "title": "OpenADR 3 Introduction and Certification Program",
+      "url": "https://www.openadr.org/index.php?Itemid=194&catid=20%3Ageneral-site-content&id=210%3Aopenadr-3-0&option=com_content&view=article",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "OpenADR 3'ün normatif OpenAPI YAML'ını, program-event-report-endpoint etkileşimlerini, kullanıcı kılavuzu ve test yaklaşımını açıklar."
+    }
+  ],
+  "internalLinks": [
+    {
+      "label": "VPP sanal güç santrali nedir?",
+      "path": "/haberler/vpp-sanal-guc-santrali-nedir",
+      "reason": "Telemetri kabulünden önce VPP rol ve kaynak mimarisini açıklar."
+    },
+    {
+      "label": "VPP batarya çevrim, rezerv ve garanti sözleşmesi",
+      "path": "/haberler/vpp-batarya-cevrim-rezerv-garanti-sozlesmesi",
+      "reason": "Teknik komut zincirini sözleşme, rezerv ve batarya kullanım sınırlarıyla ilişkilendirir."
+    },
+    {
+      "label": "V2L, V2H ve V2G farkı",
+      "path": "/haberler/v2l-v2h-v2g-farki-cift-yonlu-sarj",
+      "reason": "EV kaynaklarının VPP kontrolüne hangi mimarilerde katılabileceğini ayırır."
+    },
+    {
+      "label": "Batarya SoC ve SoH farkı",
+      "path": "/haberler/batarya-soc-soh-farki-kapasite-saglik-nasil-anlasilir",
+      "reason": "Telemetride SoC, SoH ve kullanılabilir enerjinin karıştırılmasını önler."
+    },
+    {
+      "label": "Ev tipi enerji depolama kaç kWh olmalı?",
+      "path": "/haberler/ev-tipi-enerji-depolama-kac-kwh-olmali",
+      "reason": "Kaynak kapasitesi ile VPP'ye ayrılabilir rezerv arasındaki farkı tamamlar."
+    },
+    {
+      "label": "LiFePO4 batarya güvenliği ve BMS",
+      "path": "/haberler/lifepo4-ev-bataryasi-guvenligi-bms-termal-kacak",
+      "reason": "Uzaktan kontrolün BMS ve yerel güvenlik sınırlarını aşamayacağını açıklar."
+    },
+    {
+      "label": "Kurumsal elektrik sürekliliği ön değerlendirmesi",
+      "path": "/kurumsal-elektrik-surekliligi-on-degerlendirme",
+      "reason": "VPP, depolama ve SCADA kabul kapsamını profesyonel çalışmaya taşır."
+    }
+  ],
+  "commerce": {
+    "enabled": false,
+    "policy": "none",
+    "category": null
+  },
+  "editorial": {
+    "createdBy": "ai-assisted",
+    "model": "gpt-5.6-thinking",
+    "humanReviewRequired": true,
+    "approvedBy": null,
+    "approvedAt": null,
+    "publishedAt": null,
+    "approvalPr": null
+  },
+  "seo": {
+    "canonicalPath": "/haberler/vpp-telemetri-setpoint-feedback-veri-boslugu-kabul",
+    "robots": "index,follow,max-image-preview:large",
+    "lastModified": "2026-08-03",
+    "topics": [
+      "VPP",
+      "telemetri",
+      "setpoint",
+      "DERMS",
+      "SCADA",
+      "veri boşluğu",
+      "enerji depolama"
+    ]
+  },
+  "quality": {
+    "score": 88,
+    "minimumRequired": 85,
+    "checks": {
+      "metadata": false,
+      "directAnswer": true,
+      "contentDepth": true,
+      "sources": true,
+      "safety": true,
+      "internalLinks": true,
+      "uniqueness": true,
+      "structuredData": true
+    },
+    "similarity": {
+      "maximum": 0.1364,
+      "closestPath": "https://alo186.com/haberler/vpp-toplayici-sozlesmesi-soc-telemetri-gelir-ceza-kontrol-listesi"
+    }
+  }
+}
