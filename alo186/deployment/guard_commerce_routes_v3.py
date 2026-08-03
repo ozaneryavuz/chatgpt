@@ -167,10 +167,34 @@ def _trusted_closed_choice_router(site: Path) -> bool:
     return names == ["need", "duration", "status"]
 
 
+def _trusted_product_hub_terminal_slash_canonical(site: Path) -> bool:
+    """Accept the single canonical form used by the public product hub.
+
+    V2's route registry predates the terminal-slash canonical migration and
+    expects ``https://alo186.com/amazon-elektrik-urunleri``. The source and
+    final artifact now intentionally use the unique public canonical with a
+    trailing slash. Only that exact apex URL is accepted; www, query,
+    fragment or a different origin remains fail-closed.
+    """
+    path = v2.route_file(site, "/amazon-elektrik-urunleri")
+    if not path.is_file():
+        return False
+    html = path.read_text(encoding="utf-8", errors="ignore")
+    return (
+        'rel="canonical" href="https://alo186.com/amazon-elektrik-urunleri/"' in html
+        and 'rel="canonical" href="https://www.alo186.com/' not in html
+        and 'rel="canonical" href="https://alo186.com/amazon-elektrik-urunleri/?' not in html
+        and 'rel="canonical" href="https://alo186.com/amazon-elektrik-urunleri/#' not in html
+    )
+
+
 def validate_commercial_pages(site: Path) -> tuple[list[str], dict]:
     errors, stats = _original_validate_commercial_pages(site)
     if _trusted_closed_choice_router(site):
         blocked = "/amazon-elektrik-urunleri: ticari içerik sayfası kişisel veri formu içermemeli"
+        errors = [error for error in errors if error != blocked]
+    if _trusted_product_hub_terminal_slash_canonical(site):
+        blocked = "/amazon-elektrik-urunleri: canonical yanlış veya eksik"
         errors = [error for error in errors if error != blocked]
     return errors, stats
 
