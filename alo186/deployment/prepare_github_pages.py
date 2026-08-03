@@ -4,6 +4,7 @@ import json
 import re
 import shutil
 from pathlib import Path
+from urllib.parse import urlsplit
 
 import prepare_github_pages_core as _core
 from finalize_article_discovery import run as finalize_article_discovery
@@ -25,7 +26,10 @@ PRIMARY_START_ROUTE = "/elektrik-durum-merkezi/"
 UX_MARKER = 'data-alo186-sitewide-ux="true"'
 UX_CSS_SOURCE = Path("alo186/assets/alo186-ux.css")
 UX_JS_SOURCE = Path("alo186/assets/alo186-ux.js")
+UPS_RUNTIME_ALIAS = "/hesaplama/ups-calisma-suresi"
+UPS_RUNTIME_TARGET = "/hesaplama/yedek-guc-cozum-secici/"
 _original_gateway_html = _core.gateway_html
+_original_choose_bridge_target = _core.choose_bridge_target
 _original_prepare = _core.prepare
 
 # Gateway ve yeni bridge'ler canlı son origin ile doğar. Mevcut kaynak sitemap ve
@@ -35,6 +39,15 @@ _core.CANONICAL_ORIGIN = LIVE_CANONICAL_ORIGIN
 
 if PRIMARY_START_ROUTE not in _core.CRITICAL_ROUTES:
     _core.CRITICAL_ROUTES = (_core.CRITICAL_ROUTES[0], PRIMARY_START_ROUTE, *_core.CRITICAL_ROUTES[1:])
+
+
+def choose_bridge_target(route: str) -> str:
+    """Eski UPS süre bağlantısını en yakın güncel karar aracına taşır."""
+
+    path = urlsplit(route).path.rstrip("/") or "/"
+    if path == UPS_RUNTIME_ALIAS:
+        return UPS_RUNTIME_TARGET
+    return _original_choose_bridge_target(route)
 
 
 def install_sitewide_ux(site: Path, base_path: str) -> dict:
@@ -217,6 +230,7 @@ def prepare(site: Path, base_path: str, repository: str, commit: str) -> dict:
     return release
 
 
+_core.choose_bridge_target = choose_bridge_target
 _core.gateway_html = gateway_html
 _core.prepare = prepare
 
