@@ -53,7 +53,12 @@ def load_item_list_urls() -> tuple[str, set[str]]:
     return source, urls
 
 
-def test_product_hub_jsonld_routes_are_canonical_and_clickable() -> None:
+def route_document(path: str) -> Path:
+    relative = path.strip("/")
+    return ROOT / "alo186" / relative / "index.html"
+
+
+def test_product_hub_jsonld_routes_are_canonical_clickable_and_published() -> None:
     source, urls = load_item_list_urls()
     paths: set[str] = set()
 
@@ -61,8 +66,24 @@ def test_product_hub_jsonld_routes_are_canonical_and_clickable() -> None:
         parsed = urlparse(url)
         assert f"{parsed.scheme}://{parsed.netloc}" == ORIGIN, f"Canonical origin sapması: {url}"
         assert parsed.path.startswith(ROUTE_PREFIX), f"Ürün merkezi rota ayıracı eksik: {url}"
+        assert parsed.path.endswith("/"), f"Canonical rota son eğik çizgiyi korumuyor: {url}"
         assert parsed.query == "" and parsed.fragment == "", f"JSON-LD rotası temiz değil: {url}"
         assert f'href="{parsed.path}"' in source, f"JSON-LD rotasının görünür eş bağlantısı yok: {url}"
+
+        document = route_document(parsed.path)
+        assert document.is_file(), f"JSON-LD rotası yayın kaynağında yok: {parsed.path}"
+        route_source = document.read_text(encoding="utf-8")
+        assert f'rel="canonical" href="{url}"' in route_source, f"Hedef canonical eşleşmiyor: {url}"
+        assert "Amazon Gelir Ortağı" in route_source or "Amazon satış ortaklığı" in route_source, (
+            f"Affiliate açıklaması görünür değil: {url}"
+        )
+        assert "satın almama" in route_source.lower() or "yeni ürün alınmamalıdır" in route_source.lower(), (
+            f"Satın almama sonucu eksik: {url}"
+        )
+        assert "resmî kurum" in route_source.lower(), f"Bağımsızlık açıklaması eksik: {url}"
+        assert '"@type":"Product"' not in route_source and '"@type":"Offer"' not in route_source, (
+            f"Doğrulanmamış ticari şema kullanılmış: {url}"
+        )
         paths.add(parsed.path)
 
     assert paths == EXPECTED_PATHS
@@ -75,5 +96,5 @@ def test_product_hub_jsonld_routes_are_canonical_and_clickable() -> None:
 
 
 if __name__ == "__main__":
-    test_product_hub_jsonld_routes_are_canonical_and_clickable()
+    test_product_hub_jsonld_routes_are_canonical_clickable_and_published()
     print(json.dumps({"ok": True, "routes": len(EXPECTED_PATHS), "origin": ORIGIN}))
