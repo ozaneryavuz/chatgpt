@@ -17,7 +17,6 @@ jobs:
   repair:
     if: >-
       github.event.issue.pull_request &&
-      github.event.issue.number == 807 &&
       github.event.comment.body == '/cms repair-run153-vpp'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
@@ -32,6 +31,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          test "$PR_NUMBER" = '807' || { echo 'Bu onarım yalnız PR #807 için çalışır.' >&2; exit 1; }
           case "$AUTHOR_ASSOCIATION" in
             OWNER|MEMBER|COLLABORATOR) ;;
             *) echo 'Yalnız repository yetkilisi içerik düzeltmesi yapabilir.' >&2; exit 1 ;;
