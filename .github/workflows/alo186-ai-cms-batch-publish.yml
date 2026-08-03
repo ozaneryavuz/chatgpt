@@ -1,0 +1,313 @@
+name: ALO186 AI CMS — PR içindeki tüm içerikleri yayımla
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: alo186-ai-cms-batch-publish-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  publish-all:
+    if: >-
+      github.event.issue.pull_request &&
+      startsWith(github.event.comment.body, '/cms publish-all')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      GH_TOKEN: ${{ github.token }}
+      COMMENT_BODY: ${{ github.event.comment.body }}
+      AUTHOR_ASSOCIATION: ${{ github.event.comment.author_association }}
+      PR_NUMBER: ${{ github.event.issue.number }}
+    steps:
+      - name: Yetki ve PR branch doğrulaması
+        id: request
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "$AUTHOR_ASSOCIATION" in
+            OWNER|MEMBER|COLLABORATOR) ;;
+            *) echo 'Yalnız repository yetkilisi toplu canlı yayın yapabilir.' >&2; exit 1 ;;
+          esac
+          test "$(printf '%s' "$COMMENT_BODY" | tr -d '\r\n')" = '/cms publish-all' || {
+            echo 'Komut tam olarak /cms publish-all olmalıdır.' >&2
+            exit 1
+          }
+          metadata=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER")
+          state=$(jq -r '.state' <<<"$metadata")
+          head_repo=$(jq -r '.head.repo.full_name' <<<"$metadata")
+          head_ref=$(jq -r '.head.ref' <<<"$metadata")
+          test "$state" = 'open' || { echo 'PR açık değil.' >&2; exit 1; }
+          test "$head_repo" = "$GITHUB_REPOSITORY" || { echo 'Fork PR üzerinde write-token yayın kapalıdır.' >&2; exit 1; }
+          case "$head_ref" in
+            ai-cms/*|automation/content-authority-*|automation/electrical-project-content-*) ;;
+            *) echo "Toplu yayın için izin verilmeyen branch: $head_ref" >&2; exit 1 ;;
+          esac
+          echo "head_ref=$head_ref" >> "$GITHUB_OUTPUT"
+
+      - name: PR branch checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ steps.request.outputs.head_ref }}
+          fetch-depth: 0
+
+      - name: Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Güncel main dalını PR branchine al
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git fetch origin main
+          git merge --no-edit origin/main
+
+      - name: PR içindeki AI CMS kayıtlarını belirle
+        id: records
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/files" --paginate --jq '.[].filename' \
+            | grep -E '^alo186/ai-cms/content/[a-z0-9-]+\.json$' \
+            | sort -u > /tmp/alo186-cms-records.txt
+          test -s /tmp/alo186-cms-records.txt || { echo 'PR içinde AI CMS içerik kaydı yok.' >&2; exit 1; }
+          sed -E 's#^alo186/ai-cms/content/##; s#\.json$##' /tmp/alo186-cms-records.txt > /tmp/alo186-cms-slugs.txt
+          count=$(wc -l < /tmp/alo186-cms-slugs.txt | tr -d ' ')
+          echo "count=$count" >> "$GITHUB_OUTPUT"
+          echo "Yayınlanacak kayıt sayısı: $count"
+          cat /tmp/alo186-cms-slugs.txt
+
+      - name: İç bağlantıları canlı canonical envantere göre normalleştir
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+
+          root = Path('.')
+          records = [Path(line.strip()) for line in Path('/tmp/alo186-cms-records.txt').read_text().splitlines() if line.strip()]
+          planned = {}
+          for path in records:
+              record = json.loads(path.read_text(encoding='utf-8'))
+              planned[record['seo']['canonicalPath'].rstrip('/')] = record['slug']
+
+          routes = {}
+          routing_docs = [root / 'alo186/deployment/routing-manifest.json']
+          overlay_dir = root / 'alo186/deployment/routing-overlays'
+          if overlay_dir.is_dir():
+              routing_docs.extend(sorted(overlay_dir.glob('*.json')))
+          for document in routing_docs:
+              if not document.is_file():
+                  continue
+              data = json.loads(document.read_text(encoding='utf-8'))
+              for item in data.get('routes', []):
+                  route = item.get('canonicalPath') or item.get('path')
+                  if route:
+                      routes[route.rstrip('/')] = route.rstrip('/')
+
+          canonical_re = re.compile(r'<link\b[^>]*rel=["\']canonical["\'][^>]*href=["\']([^"\']+)', re.I)
+          file_aliases = {}
+          for html in (root / 'alo186').rglob('index.html'):
+              if 'ai-cms' in html.parts:
+                  continue
+              relative = html.relative_to(root / 'alo186').as_posix()
+              source_route = '/' if relative == 'index.html' else '/' + relative[:-11]
+              text = html.read_text(encoding='utf-8', errors='ignore')
+              match = canonical_re.search(text)
+              if not match:
+                  continue
+              canonical = match.group(1)
+              canonical = re.sub(r'^https?://(?:www\.)?alo186\.com', '', canonical).rstrip('/') or '/'
+              file_aliases[source_route.rstrip('/') or '/'] = canonical
+
+          explicit_aliases = {
+              '/haberler/kacak-akim-rolesi-neden-atar': '/haberler/kacak-akim-rolesi-neden-surekli-atar',
+              '/haberler/parafudr-tip-1-tip-2-tip-3-koordinasyon-secimi': '/haberler/parafudr-gostergesi-kirmizi-ne-demek',
+          }
+
+          unresolved = []
+          for path in records:
+              record = json.loads(path.read_text(encoding='utf-8'))
+              links = record.get('internalLinks', [])
+              if not isinstance(links, list):
+                  raise SystemExit(f'{path}: internalLinks dizi değil')
+              changed = False
+              for index, link in enumerate(links):
+                  if not isinstance(link, dict):
+                      raise SystemExit(f'{path}: internalLinks[{index}] nesne değil')
+                  raw = str(link.get('path', '')).split('?', 1)[0].split('#', 1)[0]
+                  key = raw.rstrip('/') or '/'
+                  if key in routes or key in planned:
+                      if raw != key and key != '/':
+                          link['path'] = key
+                          changed = True
+                      continue
+                  target = explicit_aliases.get(key) or file_aliases.get(key)
+                  if target and (target.rstrip('/') in routes or target.rstrip('/') in planned):
+                      link['path'] = target.rstrip('/') or '/'
+                      changed = True
+                      print(f"{record['slug']}: {raw} -> {link['path']}")
+                      continue
+                  unresolved.append(f"{record['slug']}: {raw}")
+              normalized = [str(link.get('path', '')).rstrip('/') or '/' for link in links]
+              if len(normalized) != len(set(normalized)):
+                  raise SystemExit(f"{record['slug']}: canonical normalleştirme yinelenen iç bağlantı üretti")
+              if changed:
+                  path.write_text(json.dumps(record, ensure_ascii=False, separators=(',', ':')) + '\n', encoding='utf-8')
+          if unresolved:
+              raise SystemExit('Canlı veya planlı canonical envanterinde olmayan iç bağlantılar:\n' + '\n'.join(unresolved))
+          PY
+
+      - name: Planlanan rotaları geçici batch envanterine ekle
+        id: batch
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          routes=[]
+          for slug in Path('/tmp/alo186-cms-slugs.txt').read_text().splitlines():
+              slug=slug.strip()
+              if not slug:
+                  continue
+              record=json.loads(Path(f'alo186/ai-cms/content/{slug}.json').read_text(encoding='utf-8'))
+              routes.append({
+                  'source': f'alo186/haberler/{slug}/index.html',
+                  'canonicalPath': record['seo']['canonicalPath'],
+                  'type': 'article',
+              })
+          output=Path(f"alo186/deployment/routing-overlays/.ai-cms-batch-{os.environ['PR_NUMBER']}.json")
+          output.write_text(json.dumps({'version': 0, 'generatedAt': 'batch', 'routes': routes}, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          print(output)
+          PY
+          echo "path=alo186/deployment/routing-overlays/.ai-cms-batch-$PR_NUMBER.json" >> "$GITHUB_OUTPUT"
+
+      - name: AI CMS testleri
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            alo186/ai-cms/cms.py \
+            alo186/ai-cms/input_guard.py \
+            alo186/ai-cms/sites_bridge.py
+          python -m unittest discover -s alo186/ai-cms/tests -p 'test_*.py' -v
+
+      - name: İnsan onayı, canonical ve routing üret
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r slug; do
+            test -n "$slug" || continue
+            state=$(jq -r '.state' "alo186/ai-cms/content/$slug.json")
+            case "$state" in
+              review)
+                python alo186/ai-cms/cms.py approve \
+                  --slug "$slug" \
+                  --reviewer "$GITHUB_ACTOR" \
+                  --pr "$PR_NUMBER"
+                ;;
+              approved|published) ;;
+              *) echo "$slug için yayınlanabilir olmayan state: $state" >&2; exit 1 ;;
+            esac
+            state=$(jq -r '.state' "alo186/ai-cms/content/$slug.json")
+            if [ "$state" != 'published' ]; then
+              python alo186/ai-cms/cms.py publish --slug "$slug"
+            fi
+            python alo186/ai-cms/cms.py validate --slug "$slug" --write
+            test -f "alo186/haberler/$slug/index.html"
+            test -f "alo186/deployment/routing-overlays/ai-cms-$slug.json"
+            grep -q 'data-ai-cms-id' "alo186/haberler/$slug/index.html"
+            grep -q '"humanApproved": true' "alo186/deployment/routing-overlays/ai-cms-$slug.json"
+          done < /tmp/alo186-cms-slugs.txt
+          rm -f "${{ steps.batch.outputs.path }}"
+
+      - name: Canonical production build ve smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-ai-cms-canonical
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-ai-cms-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-ai-cms-canonical
+          while IFS= read -r slug; do
+            test -n "$slug" || continue
+            test -f "/tmp/alo186-ai-cms-canonical/haberler/$slug/index.html"
+            grep -q "https://alo186.com/haberler/$slug" /tmp/alo186-ai-cms-canonical/sitemap.xml
+          done < /tmp/alo186-cms-slugs.txt
+
+      - name: İnsan onaylı dosyaları PR branchine gönder
+        id: commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add alo186/ai-cms/content/ alo186/ai-cms/reviews/ alo186/haberler/ alo186/deployment/routing-overlays/
+          git add -u alo186/ai-cms/previews/ || true
+          if ! git diff --cached --quiet; then
+            git commit -m "cms(alo186): PR $PR_NUMBER içindeki tüm kayıtları insan onayıyla yayımla"
+          fi
+          source_commit=$(git rev-parse HEAD)
+          git push origin "HEAD:${{ steps.request.outputs.head_ref }}"
+          echo "source_commit=$source_commit" >> "$GITHUB_OUTPUT"
+
+      - name: ChatGPT Sites önizleme paketlerini üret
+        shell: bash
+        env:
+          SOURCE_COMMIT: ${{ steps.commit.outputs.source_commit }}
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-sites-handoff
+          mkdir -p /tmp/alo186-sites-handoff
+          while IFS= read -r slug; do
+            test -n "$slug" || continue
+            python alo186/ai-cms/sites_bridge.py \
+              --repo . \
+              package \
+              --slug "$slug" \
+              --source-commit "$SOURCE_COMMIT" \
+              --out-dir "/tmp/alo186-sites-handoff/$slug"
+            jq -e '.reviewPolicy.humanPreviewRequired == true and .reviewPolicy.automaticDeployAllowed == false and .operation.publish == false' \
+              "/tmp/alo186-sites-handoff/$slug/sites-package.json" >/dev/null
+          done < /tmp/alo186-cms-slugs.txt
+
+      - name: Toplu yayın artifactı
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-ai-cms-batch-${{ github.event.issue.number }}-${{ github.run_id }}
+          path: |
+            /tmp/alo186-ai-cms-canonical/alo186-release.json
+            /tmp/alo186-sites-handoff/
+            /tmp/alo186-cms-slugs.txt
+          if-no-files-found: error
+          retention-days: 30
+          include-hidden-files: false
+
+      - name: Başarı yorumunu ekle
+        if: success()
+        shell: bash
+        env:
+          SOURCE_COMMIT: ${{ steps.commit.outputs.source_commit }}
+        run: |
+          set -euo pipefail
+          slugs=$(sed 's/^/- `/' /tmp/alo186-cms-slugs.txt | sed 's/$/`/' )
+          gh pr comment "$PR_NUMBER" --body "✅ **AI CMS toplu yayın paketi tamamlandı.**\n\n$slugs\n\nCanonical HTML, routing overlay, sitemap production build ve smoke kontrolleri geçti. Kaynak commit: \`$SOURCE_COMMIT\`. ChatGPT Sites önizleme paketleri artifactta hazırlandı."
+
+      - name: Hata yorumunu ekle
+        if: failure()
+        shell: bash
+        run: |
+          gh pr comment "$PR_NUMBER" --body "❌ **AI CMS toplu yayın paketi başarısız.** Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID — fail-closed kapı nedeniyle merge/yayın yapılmadı."
