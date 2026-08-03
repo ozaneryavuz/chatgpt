@@ -11,7 +11,7 @@ from xml.etree import ElementTree
 import guard_commerce_routes_v2 as v2
 import aeo_control_plane_v219 as aeo_institutional
 import inject_affiliate_decision_funnel_v215 as affiliate_decision
-import inject_intent_tools_run135 as intent_tools
+import inject_intent_tools_run135_compat as intent_tools
 import inject_live_quality_v218_compat as live_quality
 import inject_portal_purchase_checkpoint_v213 as portal_checkpoint
 
