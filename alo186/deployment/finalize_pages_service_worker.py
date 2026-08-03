@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import argparse
+import hashlib
 import json
 from pathlib import Path
 
 MARKER = "data-alo186-pages-sw"
+RECEIPT_KEY = "serviceWorkerRegistrationFinalization"
 
 
 def normalize_base_path(value: str) -> str:
@@ -69,3 +72,59 @@ def finalize(site: Path, base_path: str) -> dict:
         "serviceWorker": public_url(normalized, "/sw.js"),
         "scope": public_url(normalized, "/"),
     }
+
+
+def record_receipt(site: Path, report: dict) -> None:
+    for name in ("alo186-release.json", "pages-release.json"):
+        path = site / name
+        if not path.is_file():
+            continue
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        payload[RECEIPT_KEY] = report
+        path.write_text(
+            json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+
+
+def recompute_checksums(site: Path) -> None:
+    path = site / "checksums.sha256"
+    if path.exists():
+        path.unlink()
+    files = sorted(item for item in site.rglob("*") if item.is_file())
+    path.write_text(
+        "\n".join(
+            f"{hashlib.sha256(item.read_bytes()).hexdigest()}  {item.relative_to(site).as_posix()}"
+            for item in files
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+
+def finalize_and_record(site: Path, base_path: str) -> dict:
+    resolved = Path(site).resolve()
+    report = finalize(resolved, base_path)
+    record_receipt(resolved, report)
+    recompute_checksums(resolved)
+    return report
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="ALO186 final Pages artifact service worker kayıtlarını tamamla"
+    )
+    parser.add_argument("--site", type=Path, required=True)
+    parser.add_argument("--base-path", default="")
+    args = parser.parse_args()
+    print(
+        json.dumps(
+            finalize_and_record(args.site, args.base_path),
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
+
+
+if __name__ == "__main__":
+    main()
