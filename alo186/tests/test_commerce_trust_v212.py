@@ -11,7 +11,9 @@ import guard_commerce_routes_v3 as guard  # noqa: E402
 
 def test_source_contract() -> None:
     hub = (ROOT / "alo186/amazon-elektrik-urunleri/index.html").read_text(encoding="utf-8")
-    assert 'rel="canonical" href="https://alo186.com/amazon-elektrik-urunleri/"' in hub
+    assert 'rel="canonical" href="https://alo186.com/amazon-elektrik-urunleri"' in hub
+    assert '"url":"https://alo186.com/amazon-elektrik-urunleri"' in hub
+    assert 'rel="canonical" href="https://alo186.com/amazon-elektrik-urunleri/"' not in hub
     for slug in (
         "akim-korumali-grup-priz-secimi",
         "modem-mini-ups-secimi",
