@@ -1,0 +1,61 @@
+name: ALO186 güvenli USB-C PD PPS şarj affiliate v233
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/usb-c-pd-pps-sarj-gucu-olcum-secimi/**'
+      - 'alo186/deployment/routing-overlays/233-affiliate-usbc-pd-pps-charger.json'
+      - 'alo186/tests/test_affiliate_usbc_pd_pps_charger_v233.js'
+      - '.github/workflows/alo186-affiliate-usbc-pd-pps-charger-v233.yml'
+  pull_request:
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/usb-c-pd-pps-sarj-gucu-olcum-secimi/**'
+      - 'alo186/deployment/routing-overlays/233-affiliate-usbc-pd-pps-charger.json'
+      - 'alo186/tests/test_affiliate_usbc_pd_pps_charger_v233.js'
+      - '.github/workflows/alo186-affiliate-usbc-pd-pps-charger-v233.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-affiliate-usbc-pd-pps-charger-v233-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Ürün, Knowledge Graph ve affiliate güven regresyonu
+        run: |
+          node --check alo186/amazon-elektrik-urunleri/usb-c-pd-pps-sarj-gucu-olcum-secimi/catalog-v233.js
+          node --check alo186/amazon-elektrik-urunleri/usb-c-pd-pps-sarj-gucu-olcum-secimi/app-v233.js
+          node alo186/tests/test_affiliate_usbc_pd_pps_charger_v233.js
+      - name: Affiliate kapsam ve ticari yönetişim
+        run: |
+          printf '%s\n' \
+            'alo186/amazon-elektrik-urunleri/usb-c-pd-pps-sarj-gucu-olcum-secimi/index.html' \
+            'alo186/amazon-elektrik-urunleri/usb-c-pd-pps-sarj-gucu-olcum-secimi/catalog-v233.js' \
+            'alo186/amazon-elektrik-urunleri/usb-c-pd-pps-sarj-gucu-olcum-secimi/app-v233.js' \
+            > /tmp/changed-affiliate-v233.txt
+          python alo186/tests/test_affiliate_scope_policy_v229.py --changed-files /tmp/changed-affiliate-v233.txt
+          python alo186/tests/test_commercial_governance.py
+          node alo186/tests/test_release_manifest.js
+      - name: Canonical production paketi
+        run: |
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-affiliate-v233 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-affiliate-v233
+          test -f /tmp/alo186-affiliate-v233/amazon-elektrik-urunleri/usb-c-pd-pps-sarj-gucu-olcum-secimi/index.html
+          grep -Fq 'https://alo186.com/amazon-elektrik-urunleri/usb-c-pd-pps-sarj-gucu-olcum-secimi/' /tmp/alo186-affiliate-v233/amazon-elektrik-urunleri/usb-c-pd-pps-sarj-gucu-olcum-secimi/index.html
+          grep -Fq 'rel="sponsored nofollow noopener"' /tmp/alo186-affiliate-v233/amazon-elektrik-urunleri/usb-c-pd-pps-sarj-gucu-olcum-secimi/index.html
+          ! grep -Eqi '"@type"[[:space:]]*:[[:space:]]*"Offer"|priceCurrency|aggregateRating|availability|seller' /tmp/alo186-affiliate-v233/amazon-elektrik-urunleri/usb-c-pd-pps-sarj-gucu-olcum-secimi/index.html
