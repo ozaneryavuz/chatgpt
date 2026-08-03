@@ -1,1 +1,294 @@
-{"schemaVersion":1,"id":"cms_0ac671cb2151f94d","slug":"ups-aku-odasi-hidrojen-havalandirma-sarj-arizasi-kabul","contentType":"guide","state":"review","locale":"tr-TR","title":"UPS Akü Odası Hidrojen Havalandırması ve Şarj Arızası Kabulü","h1":"UPS akü odasında hidrojen riski ve havalandırma nasıl kabul edilir?","description":"UPS akü odasında hidrojen, şarj modu, hava debisi, fan interlocku, sıcaklık ve alarm kanıtlarını tek kabul dosyasında toplayın; VRLA etiketine kör güvenmeyin.","intent":"UPS veya sabit akü odasında batarya teknolojisi, hücre sayısı, şarj rejimi ve üretici gaz verisine göre hidrojen oluşumunu; doğal veya mekanik havalandırma, fan-alarm interlocku, sıcaklık ve arıza senaryolarıyla kanıtlayan kabul dosyası hazırlamak.","primaryKeyword":"UPS akü odası havalandırma hesabı","audience":["Elektrik mühendisleri","UPS ve akü bakım ekipleri","Otel ve işletme teknik yöneticileri","HVAC ve yangın güvenliği ekipleri","Veri merkezi işletmecileri"],"riskClass":"high","directAnswer":"UPS akü odası kabulü, odada bir fan bulunması veya akülerin VRLA olarak etiketlenmesiyle tamamlanmaz. Akü kimyası, toplam hücre sayısı, şarj cihazının normal ve arıza akımı, boost/equalize rejimi, üreticinin gaz salımı verisi ve odanın gerçek hava yolu birlikte değerlendirilmelidir. Doğal ya da mekanik havalandırmanın hava giriş-çıkışı, fan çalışması, alarm ve şarj kesme interlocku doğrulanmalı; sıcaklık, hava debisi ve varsa hidrojen sensörü kayıtları temsilî şarj koşullarında izlenmelidir. Hesap ve saha kanıtı olmadan yalnız “bakım gerektirmeyen akü” ifadesine güvenilmemelidir.","sections":[{"id":"gaz-kaynagi","heading":"Hidrojen riski hangi akü ve şarj koşullarından doğar?","paragraphs":["Kurşun-asit ve bazı nikel bazlı sabit aküler şarjın özellikle son bölümünde gaz çıkarabilir. VLA, VRLA ve Ni-Cd sistemlerinin normal, boost/equalize ve şarj cihazı arızası koşulları aynı değildir. VRLA aküler normal kullanımda gazın önemli bölümünü yeniden birleştirebilse de valf açması, aşırı şarj, yüksek sıcaklık veya arızalı hücre gibi durumlarda emisyon sıfır kabul edilmemelidir.","Kabul çalışmasının ilk adımı akü teknolojisi, üretici-seri, hücre veya blok sayısı, kapasite, şarj gerilimi, akım limiti, sıcaklık kompanzasyonu ve olası en yüksek gazlanma durumunu tek veri sayfasında toplamaktır. IEEE/ASHRAE 1635, havalandırma tasarımını akü türü ve işletme modlarıyla ilişkilendirir; IEC 62485-2 ise elektrik, gaz ve elektrolit tehlikelerini birlikte ele alır."],"bullets":["Akü kimyasını ve VLA/VRLA/Ni-Cd ayrımını doğrulayın.","Toplam hücre sayısını ve şarj cihazı akım limitini kaydedin.","Normal, boost/equalize ve arıza şarj modlarını ayrı satırlarda gösterin.","Üreticinin gaz salımı veya havalandırma verisi varsa genel katsayı yerine onu kullanın."],"sourceRefs":["S1","S2","S3","S4","S5"]},{"id":"havalandirma-hesabi","heading":"Hava debisi ve hava yolu nasıl doğrulanmalıdır?","paragraphs":["Havalandırma hesabı yalnız oda hacmi veya saatlik hava değişimi tahminine indirgenmemelidir. Bataryanın olası hidrojen üretimi, izin verilen tasarım konsantrasyonu, taze hava koşulu ve fanın gerçek çalışma noktası birlikte değerlendirilmelidir. IEEE gassing calculator, üretici verisi bulunmadığında referans olabilir; ancak kendi açıklamasında en iyi gazlanma verisinin batarya üreticisinden alınması gerektiğini belirtir.","Taze hava girişi ve egzoz çıkışı kısa devre hava yolu oluşturmayacak, gazın birikebileceği yüksek noktaları süpürecek ve aküleri aşırı sıcaklık farkına maruz bırakmayacak biçimde doğrulanmalıdır. Kanal, panjur, filtre ve damper basınç kayıpları nominal fan etiketinden düşülmeli; ölçülen debi veya basınçla saha sonucu kanıtlanmalıdır."],"bullets":["Hesapta kullanılan gazlanma akımı, hücre sayısı ve güvenlik varsayımlarını görünür yapın.","Fan etiket debisi yerine kanal sonundaki gerçek hava akışını doğrulayın.","Taze hava ve egzoz açıklıklarının birbirini kısa devre etmediğini kontrol edin.","Yüksek noktalarda kör cep, asma tavan veya kapalı kabin içinde birikme riski bırakmayın."],"sourceRefs":["S1","S2","S5"]},{"id":"fan-alarm-interlock","heading":"Fan, alarm ve şarj cihazı interlocku hangi senaryolarda test edilir?","paragraphs":["Mekanik havalandırma güvenlik fonksiyonu olarak kullanılıyorsa yalnız fan motorunun dönmesi yeterli değildir. Fan beslemesi, hava akışı kanıtı, damper geri bildirimi, filtre tıkanması, fan arızası ve yardımcı besleme kaybı senaryolarında alarmın ve beklenen güvenli davranışın oluşması gerekir. Proje risk değerlendirmesine göre şarj akımının sınırlandırılması veya şarjın durdurulması gibi interlocklar ayrıca fonksiyonel test edilmelidir.","Varsa hidrojen sensörü için ölçüm aralığı, kalibrasyon tarihi, yerleşim yüksekliği, alarm seviyeleri, gecikmeler ve BMS/yangın paneli olay zamanları kaydedilmelidir. Sensör, yetersiz hava yolunu telafi eden tek önlem gibi sunulmamalıdır; ölçüm, havalandırma ve işletme prosedürü birbirini tamamlamalıdır."],"bullets":["Fan çalıştı bilgisini hava akışı veya diferansiyel basınç kanıtıyla eşleştirin.","Fan durması, damper kapanması ve güç kaybını ayrı senaryolar olarak sınayın.","Alarmın yerel panel, BMS ve ilgili işletme ekibine ulaştığını doğrulayın.","Interlock sonrası şarj cihazının ve UPS'nin gerçek durumunu olay kaydıyla kanıtlayın."],"sourceRefs":["S1","S2","S3","S5"]},{"id":"sicaklik-ve-bakim","heading":"Sıcaklık, ateşleme kaynakları ve bakım kabulü nasıl yapılır?","paragraphs":["Akü sıcaklığı yalnız ömür parametresi değildir; yüksek sıcaklık şarj davranışını ve gazlanma riskini de etkileyebilir. Oda ve blok sıcaklıkları, HVAC çalışma senaryoları, şarj cihazının sıcaklık kompanzasyonu ve sensör konumu birlikte kontrol edilmelidir. IEEE/ASHRAE 1635, sabit akü uygulamalarında havalandırma ile termal yönetimi aynı tasarım probleminde ele alır.","Oda içinde kıvılcım oluşturabilecek uygunsuz anahtarlama, gevşek bağlantı, açık rezistans veya bakımsız fan ekipmanı bulunmamalı; aydınlatma, kablo geçişleri, erişim, işaretleme ve acil durum prosedürü proje riskine göre değerlendirilmelidir. Enerjili akü baraları ve yüksek kısa devre akımı nedeniyle ölçüm ve bakım yalnız yetkin ekip tarafından yapılmalıdır."],"bullets":["Oda ve temsilî blok sıcaklıklarını zaman trendiyle kaydedin.","Şarj sıcaklık kompanzasyonunun sensör konumunu ve doğruluğunu doğrulayın.","Elektrik bağlantılarında termal anormallik ve gevşeklik için yetkili kontrol planlayın.","Havalandırma, sensör ve alarm bakım periyotlarını ekipman bakım planına bağlayın."],"sourceRefs":["S1","S2","S3","S4"]},{"id":"teslim-dosyasi","heading":"UPS akü odası kabul dosyasında hangi kanıtlar bulunmalıdır?","paragraphs":["Teslim dosyası; akü ve şarj cihazı veri sayfaları, tek hat, hücre sayısı, gazlanma hesabı, oda planı, taze hava-egzoz güzergâhı, fan eğrisi ve basınç kaybı, ölçülen hava debisi, sıcaklık trendi, sensör kalibrasyonu, alarm-interlock testleri, bakım planı ve imzalı geçti-kaldı tablosunu içermelidir. Her varsayımın kaynağı ve proje tarihindeki standart seti belirtilmelidir.","Bir tüketici tipi küçük VRLA UPS için üretici normal oda havalandırmasını yeterli görebilir; bu sonuç büyük merkezi akü odasına otomatik taşınamaz. Buna karşılık hesap ve saha testi mevcut havalandırmanın yeterli olduğunu gösteriyorsa sırf daha büyük fan, gaz sensörü veya yeni akü kabini satın almak gerekmez."],"bullets":["Hesap, çizim ve saha ölçümünün aynı akü konfigürasyonuna ait olduğunu doğrulayın.","Fan, alarm ve interlock testlerine tarih, sorumlu ve olay kaydı ekleyin.","Değişen akü sayısı veya şarj ayarında hesabın yeniden yapılma tetikleyicisini tanımlayın.","Kanıt yeterliyse gereksiz havalandırma veya sensör yatırımı yapmayın."],"sourceRefs":["S1","S2","S3","S4","S5"]}],"faqs":[{"question":"VRLA UPS aküsü hidrojen çıkarmaz mı?","answer":"Normal kullanımda gazın büyük bölümü yeniden birleşebilir ve bazı küçük UPS üreticileri normal oda havalandırmasını yeterli görebilir. Ancak aşırı şarj, yüksek sıcaklık, valf açması veya arızalı hücrelerde emisyon sıfır değildir; sonuç model ve tesis ölçeğine göre doğrulanmalıdır.","sourceRefs":["S1","S2","S4"]},{"question":"Akü odasında hidrojen sensörü zorunlu mudur?","answer":"Evrensel bir evet-hayır cevabı yoktur. Akü türü, gazlanma hesabı, doğal veya mekanik havalandırma, oda geometrisi ve yerel proje gerekleri birlikte değerlendirilmelidir. Sensör varsa havalandırmanın yerine değil, ek algılama ve interlock katmanı olarak kabul edilmelidir.","sourceRefs":["S1","S2","S5"]},{"question":"Fan dönüyorsa akü odası havalandırması yeterli sayılır mı?","answer":"Hayır. Kanal ve panjur kayıpları sonrasında gerçek debi, hava giriş-çıkış yolu, kör cepler, damper durumu ve fan arızasındaki alarm/interlock davranışı da kanıtlanmalıdır.","sourceRefs":["S1","S2"]},{"question":"Hidrojen hesabını nominal akü kapasitesinden yapmak yeterli midir?","answer":"Tek başına yeterli değildir. Hücre sayısı, akü teknolojisi, şarj akımı, normal ve boost/equalize rejimleri, sıcaklık ve üretici gazlanma verisi hesaba dahil edilmelidir.","sourceRefs":["S1","S2","S3","S5"]}],"sources":[{"id":"S1","publisher":"IEC","title":"IEC 62485-2:2010 — Safety requirements for stationary batteries","url":"https://webstore.iec.ch/en/publication/7091","accessedAt":"2026-08-03","primary":true,"factSummary":"Sabit akü tesislerinde elektrik, gaz emisyonu ve elektrolit tehlikelerine karşı kurulum, kullanım, kontrol, bakım ve bertaraf güvenliğini kapsar."},{"id":"S2","publisher":"IEEE/ASHRAE","title":"IEEE/ASHRAE 1635-2022 — Ventilation and Thermal Management of Stationary Batteries","url":"https://standards.ieee.org/ieee/1635/10255/","accessedAt":"2026-08-03","primary":true,"factSummary":"VLA, VRLA, Ni-Cd ve Li-ion sabit akülerin işletme modları, hidrojen tehlikesi, havalandırma ve termal yönetim arayüzünü tanımlar."},{"id":"S3","publisher":"IEEE","title":"IEEE 484-2019 — Installation Design of Vented Lead-Acid Batteries","url":"https://standards.ieee.org/ieee/484/5765/","accessedAt":"2026-08-03","primary":true,"factSummary":"Sabit VLA aküler için yerleşim, montaj, havalandırma, enstrümantasyon, şarj ve güvenlik uygulamalarını kapsar."},{"id":"S4","publisher":"Schneider Electric","title":"APC UPS battery types and VRLA ventilation guidance","url":"https://www.se.com/us/en/faqs/FA158864/","accessedAt":"2026-08-03","primary":true,"factSummary":"APC tek faz UPS'lerde kullanılan VRLA teknolojisinin normal koşullarda çok düşük hidrojen saldığını ve küçük uygulamalarda normal oda havalandırmasının yeterli olabileceğini model kapsamıyla açıklar."},{"id":"S5","publisher":"IEEE PES","title":"Battery Gassing Calculator based on IEEE 1635 / ASHRAE 21","url":"https://resourcecenter.ieee.org/technical-committees/tools/pes_tp_calc_080218","accessedAt":"2026-08-03","primary":true,"factSummary":"Hidrojen hesabı için akü türü ve işletme girdilerini kullanır; üretici gazlanma verisinin bulunması halinde öncelikle onun kullanılmasını önerir."}],"internalLinks":[{"label":"UPS aküsü ne zaman değişir?","path":"/haberler/ups-akusu-ne-zaman-degisir","reason":"Akü yaşı ve performans kararını oda güvenliği değerlendirmesinden ayırır."},{"label":"UPS akü string dengesizliği","path":"/haberler/ups-aku-string-dengesizligi-zayif-aku-nasil-anlasilir","reason":"Zayıf blok ve şarj dengesizliğinin sıcaklık ve aşırı şarj riskine etkisini tamamlar."},{"label":"UPS aküsü şarj olmuyor","path":"/haberler/ups-akusu-sarj-olmuyor-batarya-dolmuyor","reason":"Şarj cihazı ve batarya arızalarını güvenli teşhis akışına bağlar."},{"label":"Batarya SoC ve SoH farkı","path":"/haberler/batarya-soc-soh-farki-kapasite-saglik-nasil-anlasilir","reason":"Kapasite ve sağlık göstergelerinin gaz güvenliği hesabından farklı olduğunu açıklar."},{"label":"UPS akü değişim uygunluk aracı","path":"/hesaplama/ups-aku-degisim-uygunluk/","reason":"Akü değişim kararını ölçüm ve bakım kanıtıyla destekler."},{"label":"Ekipman bakım planı","path":"/hesaplama/ekipman-bakim-plani/","reason":"Fan, sensör, şarj cihazı ve akü kontrollerini periyodik plana bağlar."},{"label":"Kurumsal elektrik sürekliliği ön değerlendirme","path":"/kurumsal-elektrik-surekliligi-on-degerlendirme","reason":"Yetkin havalandırma ve UPS kabul çalışmasına güvenli geçiş sağlar."}],"commerce":{"enabled":false,"policy":"none","category":null},"editorial":{"createdBy":"ai-assisted","model":"gpt-5.6-thinking","humanReviewRequired":true,"approvedBy":null,"approvedAt":null,"publishedAt":null,"approvalPr":null},"seo":{"canonicalPath":"/haberler/ups-aku-odasi-hidrojen-havalandirma-sarj-arizasi-kabul","robots":"index,follow,max-image-preview:large","lastModified":"2026-08-03","topics":["UPS","akü odası","hidrojen","havalandırma","VRLA","şarj cihazı","alarm","interlock"]},"quality":{"score":100,"minimumRequired":85,"checks":{"metadata":true,"directAnswer":true,"contentDepth":true,"sources":true,"safety":true,"internalLinks":true,"uniqueness":true,"structuredData":true},"similarity":{"maximum":0.42,"closestPath":"/haberler/ups-akusu-ne-zaman-degisir"}}}
+{
+  "schemaVersion": 1,
+  "id": "cms_0ac671cb2151f94d",
+  "slug": "ups-aku-odasi-hidrojen-havalandirma-sarj-arizasi-kabul",
+  "contentType": "guide",
+  "state": "published",
+  "locale": "tr-TR",
+  "title": "UPS Akü Odası Hidrojen Havalandırması ve Şarj Arızası Kabulü",
+  "h1": "UPS akü odasında hidrojen riski ve havalandırma nasıl kabul edilir?",
+  "description": "UPS akü odasında hidrojen, şarj modu, hava debisi, fan interlocku, sıcaklık ve alarm kanıtlarını tek kabul dosyasında toplayın; VRLA etiketine kör güvenmeyin.",
+  "intent": "UPS veya sabit akü odasında batarya teknolojisi, hücre sayısı, şarj rejimi ve üretici gaz verisine göre hidrojen oluşumunu; doğal veya mekanik havalandırma, fan-alarm interlocku, sıcaklık ve arıza senaryolarıyla kanıtlayan kabul dosyası hazırlamak.",
+  "primaryKeyword": "UPS akü odası havalandırma hesabı",
+  "audience": [
+    "Elektrik mühendisleri",
+    "UPS ve akü bakım ekipleri",
+    "Otel ve işletme teknik yöneticileri",
+    "HVAC ve yangın güvenliği ekipleri",
+    "Veri merkezi işletmecileri"
+  ],
+  "riskClass": "high",
+  "directAnswer": "UPS akü odası kabulü, odada bir fan bulunması veya akülerin VRLA olarak etiketlenmesiyle tamamlanmaz. Akü kimyası, toplam hücre sayısı, şarj cihazının normal ve arıza akımı, boost/equalize rejimi, üreticinin gaz salımı verisi ve odanın gerçek hava yolu birlikte değerlendirilmelidir. Doğal ya da mekanik havalandırmanın hava giriş-çıkışı, fan çalışması, alarm ve şarj kesme interlocku doğrulanmalı; sıcaklık, hava debisi ve varsa hidrojen sensörü kayıtları temsilî şarj koşullarında izlenmelidir. Hesap ve saha kanıtı olmadan yalnız “bakım gerektirmeyen akü” ifadesine güvenilmemelidir.",
+  "sections": [
+    {
+      "id": "gaz-kaynagi",
+      "heading": "Hidrojen riski hangi akü ve şarj koşullarından doğar?",
+      "paragraphs": [
+        "Kurşun-asit ve bazı nikel bazlı sabit aküler şarjın özellikle son bölümünde gaz çıkarabilir. VLA, VRLA ve Ni-Cd sistemlerinin normal, boost/equalize ve şarj cihazı arızası koşulları aynı değildir. VRLA aküler normal kullanımda gazın önemli bölümünü yeniden birleştirebilse de valf açması, aşırı şarj, yüksek sıcaklık veya arızalı hücre gibi durumlarda emisyon sıfır kabul edilmemelidir.",
+        "Kabul çalışmasının ilk adımı akü teknolojisi, üretici-seri, hücre veya blok sayısı, kapasite, şarj gerilimi, akım limiti, sıcaklık kompanzasyonu ve olası en yüksek gazlanma durumunu tek veri sayfasında toplamaktır. IEEE/ASHRAE 1635, havalandırma tasarımını akü türü ve işletme modlarıyla ilişkilendirir; IEC 62485-2 ise elektrik, gaz ve elektrolit tehlikelerini birlikte ele alır."
+      ],
+      "bullets": [
+        "Akü kimyasını ve VLA/VRLA/Ni-Cd ayrımını doğrulayın.",
+        "Toplam hücre sayısını ve şarj cihazı akım limitini kaydedin.",
+        "Normal, boost/equalize ve arıza şarj modlarını ayrı satırlarda gösterin.",
+        "Üreticinin gaz salımı veya havalandırma verisi varsa genel katsayı yerine onu kullanın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "id": "havalandirma-hesabi",
+      "heading": "Hava debisi ve hava yolu nasıl doğrulanmalıdır?",
+      "paragraphs": [
+        "Havalandırma hesabı yalnız oda hacmi veya saatlik hava değişimi tahminine indirgenmemelidir. Bataryanın olası hidrojen üretimi, izin verilen tasarım konsantrasyonu, taze hava koşulu ve fanın gerçek çalışma noktası birlikte değerlendirilmelidir. IEEE gassing calculator, üretici verisi bulunmadığında referans olabilir; ancak kendi açıklamasında en iyi gazlanma verisinin batarya üreticisinden alınması gerektiğini belirtir.",
+        "Taze hava girişi ve egzoz çıkışı kısa devre hava yolu oluşturmayacak, gazın birikebileceği yüksek noktaları süpürecek ve aküleri aşırı sıcaklık farkına maruz bırakmayacak biçimde doğrulanmalıdır. Kanal, panjur, filtre ve damper basınç kayıpları nominal fan etiketinden düşülmeli; ölçülen debi veya basınçla saha sonucu kanıtlanmalıdır."
+      ],
+      "bullets": [
+        "Hesapta kullanılan gazlanma akımı, hücre sayısı ve güvenlik varsayımlarını görünür yapın.",
+        "Fan etiket debisi yerine kanal sonundaki gerçek hava akışını doğrulayın.",
+        "Taze hava ve egzoz açıklıklarının birbirini kısa devre etmediğini kontrol edin.",
+        "Yüksek noktalarda kör cep, asma tavan veya kapalı kabin içinde birikme riski bırakmayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S5"
+      ]
+    },
+    {
+      "id": "fan-alarm-interlock",
+      "heading": "Fan, alarm ve şarj cihazı interlocku hangi senaryolarda test edilir?",
+      "paragraphs": [
+        "Mekanik havalandırma güvenlik fonksiyonu olarak kullanılıyorsa yalnız fan motorunun dönmesi yeterli değildir. Fan beslemesi, hava akışı kanıtı, damper geri bildirimi, filtre tıkanması, fan arızası ve yardımcı besleme kaybı senaryolarında alarmın ve beklenen güvenli davranışın oluşması gerekir. Proje risk değerlendirmesine göre şarj akımının sınırlandırılması veya şarjın durdurulması gibi interlocklar ayrıca fonksiyonel test edilmelidir.",
+        "Varsa hidrojen sensörü için ölçüm aralığı, kalibrasyon tarihi, yerleşim yüksekliği, alarm seviyeleri, gecikmeler ve BMS/yangın paneli olay zamanları kaydedilmelidir. Sensör, yetersiz hava yolunu telafi eden tek önlem gibi sunulmamalıdır; ölçüm, havalandırma ve işletme prosedürü birbirini tamamlamalıdır."
+      ],
+      "bullets": [
+        "Fan çalıştı bilgisini hava akışı veya diferansiyel basınç kanıtıyla eşleştirin.",
+        "Fan durması, damper kapanması ve güç kaybını ayrı senaryolar olarak sınayın.",
+        "Alarmın yerel panel, BMS ve ilgili işletme ekibine ulaştığını doğrulayın.",
+        "Interlock sonrası şarj cihazının ve UPS'nin gerçek durumunu olay kaydıyla kanıtlayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S5"
+      ]
+    },
+    {
+      "id": "sicaklik-ve-bakim",
+      "heading": "Sıcaklık, ateşleme kaynakları ve bakım kabulü nasıl yapılır?",
+      "paragraphs": [
+        "Akü sıcaklığı yalnız ömür parametresi değildir; yüksek sıcaklık şarj davranışını ve gazlanma riskini de etkileyebilir. Oda ve blok sıcaklıkları, HVAC çalışma senaryoları, şarj cihazının sıcaklık kompanzasyonu ve sensör konumu birlikte kontrol edilmelidir. IEEE/ASHRAE 1635, sabit akü uygulamalarında havalandırma ile termal yönetimi aynı tasarım probleminde ele alır.",
+        "Oda içinde kıvılcım oluşturabilecek uygunsuz anahtarlama, gevşek bağlantı, açık rezistans veya bakımsız fan ekipmanı bulunmamalı; aydınlatma, kablo geçişleri, erişim, işaretleme ve acil durum prosedürü proje riskine göre değerlendirilmelidir. Enerjili akü baraları ve yüksek kısa devre akımı nedeniyle ölçüm ve bakım yalnız yetkin ekip tarafından yapılmalıdır."
+      ],
+      "bullets": [
+        "Oda ve temsilî blok sıcaklıklarını zaman trendiyle kaydedin.",
+        "Şarj sıcaklık kompanzasyonunun sensör konumunu ve doğruluğunu doğrulayın.",
+        "Elektrik bağlantılarında termal anormallik ve gevşeklik için yetkili kontrol planlayın.",
+        "Havalandırma, sensör ve alarm bakım periyotlarını ekipman bakım planına bağlayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "id": "teslim-dosyasi",
+      "heading": "UPS akü odası kabul dosyasında hangi kanıtlar bulunmalıdır?",
+      "paragraphs": [
+        "Teslim dosyası; akü ve şarj cihazı veri sayfaları, tek hat, hücre sayısı, gazlanma hesabı, oda planı, taze hava-egzoz güzergâhı, fan eğrisi ve basınç kaybı, ölçülen hava debisi, sıcaklık trendi, sensör kalibrasyonu, alarm-interlock testleri, bakım planı ve imzalı geçti-kaldı tablosunu içermelidir. Her varsayımın kaynağı ve proje tarihindeki standart seti belirtilmelidir.",
+        "Bir tüketici tipi küçük VRLA UPS için üretici normal oda havalandırmasını yeterli görebilir; bu sonuç büyük merkezi akü odasına otomatik taşınamaz. Buna karşılık hesap ve saha testi mevcut havalandırmanın yeterli olduğunu gösteriyorsa sırf daha büyük fan, gaz sensörü veya yeni akü kabini satın almak gerekmez."
+      ],
+      "bullets": [
+        "Hesap, çizim ve saha ölçümünün aynı akü konfigürasyonuna ait olduğunu doğrulayın.",
+        "Fan, alarm ve interlock testlerine tarih, sorumlu ve olay kaydı ekleyin.",
+        "Değişen akü sayısı veya şarj ayarında hesabın yeniden yapılma tetikleyicisini tanımlayın.",
+        "Kanıt yeterliyse gereksiz havalandırma veya sensör yatırımı yapmayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S4",
+        "S5"
+      ]
+    }
+  ],
+  "faqs": [
+    {
+      "question": "VRLA UPS aküsü hidrojen çıkarmaz mı?",
+      "answer": "Normal kullanımda gazın büyük bölümü yeniden birleşebilir ve bazı küçük UPS üreticileri normal oda havalandırmasını yeterli görebilir. Ancak aşırı şarj, yüksek sıcaklık, valf açması veya arızalı hücrelerde emisyon sıfır değildir; sonuç model ve tesis ölçeğine göre doğrulanmalıdır.",
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S4"
+      ]
+    },
+    {
+      "question": "Akü odasında hidrojen sensörü zorunlu mudur?",
+      "answer": "Evrensel bir evet-hayır cevabı yoktur. Akü türü, gazlanma hesabı, doğal veya mekanik havalandırma, oda geometrisi ve yerel proje gerekleri birlikte değerlendirilmelidir. Sensör varsa havalandırmanın yerine değil, ek algılama ve interlock katmanı olarak kabul edilmelidir.",
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S5"
+      ]
+    },
+    {
+      "question": "Fan dönüyorsa akü odası havalandırması yeterli sayılır mı?",
+      "answer": "Hayır. Kanal ve panjur kayıpları sonrasında gerçek debi, hava giriş-çıkış yolu, kör cepler, damper durumu ve fan arızasındaki alarm/interlock davranışı da kanıtlanmalıdır.",
+      "sourceRefs": [
+        "S1",
+        "S2"
+      ]
+    },
+    {
+      "question": "Hidrojen hesabını nominal akü kapasitesinden yapmak yeterli midir?",
+      "answer": "Tek başına yeterli değildir. Hücre sayısı, akü teknolojisi, şarj akımı, normal ve boost/equalize rejimleri, sıcaklık ve üretici gazlanma verisi hesaba dahil edilmelidir.",
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S5"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "publisher": "IEC",
+      "title": "IEC 62485-2:2010 — Safety requirements for stationary batteries",
+      "url": "https://webstore.iec.ch/en/publication/7091",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Sabit akü tesislerinde elektrik, gaz emisyonu ve elektrolit tehlikelerine karşı kurulum, kullanım, kontrol, bakım ve bertaraf güvenliğini kapsar."
+    },
+    {
+      "id": "S2",
+      "publisher": "IEEE/ASHRAE",
+      "title": "IEEE/ASHRAE 1635-2022 — Ventilation and Thermal Management of Stationary Batteries",
+      "url": "https://standards.ieee.org/ieee/1635/10255/",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "VLA, VRLA, Ni-Cd ve Li-ion sabit akülerin işletme modları, hidrojen tehlikesi, havalandırma ve termal yönetim arayüzünü tanımlar."
+    },
+    {
+      "id": "S3",
+      "publisher": "IEEE",
+      "title": "IEEE 484-2019 — Installation Design of Vented Lead-Acid Batteries",
+      "url": "https://standards.ieee.org/ieee/484/5765/",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Sabit VLA aküler için yerleşim, montaj, havalandırma, enstrümantasyon, şarj ve güvenlik uygulamalarını kapsar."
+    },
+    {
+      "id": "S4",
+      "publisher": "Schneider Electric",
+      "title": "APC UPS battery types and VRLA ventilation guidance",
+      "url": "https://www.se.com/us/en/faqs/FA158864/",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "APC tek faz UPS'lerde kullanılan VRLA teknolojisinin normal koşullarda çok düşük hidrojen saldığını ve küçük uygulamalarda normal oda havalandırmasının yeterli olabileceğini model kapsamıyla açıklar."
+    },
+    {
+      "id": "S5",
+      "publisher": "IEEE PES",
+      "title": "Battery Gassing Calculator based on IEEE 1635 / ASHRAE 21",
+      "url": "https://resourcecenter.ieee.org/technical-committees/tools/pes_tp_calc_080218",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Hidrojen hesabı için akü türü ve işletme girdilerini kullanır; üretici gazlanma verisinin bulunması halinde öncelikle onun kullanılmasını önerir."
+    }
+  ],
+  "internalLinks": [
+    {
+      "label": "UPS aküsü ne zaman değişir?",
+      "path": "/haberler/ups-akusu-ne-zaman-degisir",
+      "reason": "Akü yaşı ve performans kararını oda güvenliği değerlendirmesinden ayırır."
+    },
+    {
+      "label": "UPS akü string dengesizliği",
+      "path": "/haberler/ups-aku-string-dengesizligi-zayif-aku-nasil-anlasilir",
+      "reason": "Zayıf blok ve şarj dengesizliğinin sıcaklık ve aşırı şarj riskine etkisini tamamlar."
+    },
+    {
+      "label": "UPS aküsü şarj olmuyor",
+      "path": "/haberler/ups-akusu-sarj-olmuyor-batarya-dolmuyor",
+      "reason": "Şarj cihazı ve batarya arızalarını güvenli teşhis akışına bağlar."
+    },
+    {
+      "label": "Batarya SoC ve SoH farkı",
+      "path": "/haberler/batarya-soc-soh-farki-kapasite-saglik-nasil-anlasilir",
+      "reason": "Kapasite ve sağlık göstergelerinin gaz güvenliği hesabından farklı olduğunu açıklar."
+    },
+    {
+      "label": "UPS akü değişim uygunluk aracı",
+      "path": "/hesaplama/ups-aku-degisim-uygunluk",
+      "reason": "Akü değişim kararını ölçüm ve bakım kanıtıyla destekler."
+    },
+    {
+      "label": "Ekipman bakım planı",
+      "path": "/hesaplama/ekipman-bakim-plani",
+      "reason": "Fan, sensör, şarj cihazı ve akü kontrollerini periyodik plana bağlar."
+    },
+    {
+      "label": "Kurumsal elektrik sürekliliği ön değerlendirme",
+      "path": "/kurumsal-elektrik-surekliligi-on-degerlendirme",
+      "reason": "Yetkin havalandırma ve UPS kabul çalışmasına güvenli geçiş sağlar."
+    }
+  ],
+  "commerce": {
+    "enabled": false,
+    "policy": "none",
+    "category": null
+  },
+  "editorial": {
+    "createdBy": "ai-assisted",
+    "model": "gpt-5.6-thinking",
+    "humanReviewRequired": true,
+    "approvedBy": "ozaneryavuz",
+    "approvedAt": "2026-08-03T18:42:37Z",
+    "publishedAt": "2026-08-03T18:42:38Z",
+    "approvalPr": 787
+  },
+  "seo": {
+    "canonicalPath": "/haberler/ups-aku-odasi-hidrojen-havalandirma-sarj-arizasi-kabul",
+    "robots": "index,follow,max-image-preview:large",
+    "lastModified": "2026-08-03",
+    "topics": [
+      "UPS",
+      "akü odası",
+      "hidrojen",
+      "havalandırma",
+      "VRLA",
+      "şarj cihazı",
+      "alarm",
+      "interlock"
+    ]
+  },
+  "quality": {
+    "score": 88,
+    "minimumRequired": 85,
+    "checks": {
+      "metadata": false,
+      "directAnswer": true,
+      "contentDepth": true,
+      "sources": true,
+      "safety": true,
+      "internalLinks": true,
+      "uniqueness": true,
+      "structuredData": true
+    },
+    "similarity": {
+      "maximum": 0.3529,
+      "closestPath": "https://alo186.com/haberler/ups-aku-odasi-havalandirma-hidrojen-vrla-guvenligi"
+    }
+  }
+}
