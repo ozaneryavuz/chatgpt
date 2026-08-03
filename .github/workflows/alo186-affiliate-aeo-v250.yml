@@ -9,7 +9,9 @@ on:
       - 'alo186/deployment/validate_affiliate_aeo_v250.py'
       - 'alo186/deployment/affiliate-aeo-v250.css'
       - 'alo186/deployment/guard_commerce_routes_v3.py'
+      - 'alo186/deployment/inject_intent_tools_run135_compat.py'
       - 'alo186/tests/test_affiliate_aeo_v250.py'
+      - 'alo186/tests/test_intent_tools_run135_compat.py'
       - 'alo186/audits/affiliate-aeo-v250-2026-08-03.md'
       - '.github/workflows/alo186-affiliate-aeo-v250.yml'
   push:
@@ -21,7 +23,9 @@ on:
       - 'alo186/deployment/validate_affiliate_aeo_v250.py'
       - 'alo186/deployment/affiliate-aeo-v250.css'
       - 'alo186/deployment/guard_commerce_routes_v3.py'
+      - 'alo186/deployment/inject_intent_tools_run135_compat.py'
       - 'alo186/tests/test_affiliate_aeo_v250.py'
+      - 'alo186/tests/test_intent_tools_run135_compat.py'
       - 'alo186/audits/affiliate-aeo-v250-2026-08-03.md'
       - '.github/workflows/alo186-affiliate-aeo-v250.yml'
   workflow_dispatch:
@@ -57,8 +61,11 @@ jobs:
             alo186/deployment/inject_affiliate_aeo_v250.py \
             alo186/deployment/validate_affiliate_aeo_v250.py \
             alo186/deployment/guard_commerce_routes_v3.py \
-            alo186/tests/test_affiliate_aeo_v250.py
+            alo186/deployment/inject_intent_tools_run135_compat.py \
+            alo186/tests/test_affiliate_aeo_v250.py \
+            alo186/tests/test_intent_tools_run135_compat.py
           python alo186/tests/test_affiliate_aeo_v250.py
+          python alo186/tests/test_intent_tools_run135_compat.py
           grep -q 'import inject_affiliate_aeo_v250 as affiliate_aeo' alo186/deployment/guard_commerce_routes_v3.py
           grep -q 'affiliate_aeo.inject' alo186/deployment/guard_commerce_routes_v3.py
           grep -q 'User-agent: OAI-SearchBot' alo186/robots.txt
