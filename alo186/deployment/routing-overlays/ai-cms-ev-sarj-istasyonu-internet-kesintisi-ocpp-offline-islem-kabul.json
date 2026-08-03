@@ -1,0 +1,18 @@
+{
+  "version": 236,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/ev-sarj-istasyonu-internet-kesintisi-ocpp-offline-islem-kabul/index.html",
+      "canonicalPath": "/haberler/ev-sarj-istasyonu-internet-kesintisi-ocpp-offline-islem-kabul",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_38c9819451495865",
+    "humanApproved": true,
+    "approvalPr": 767,
+    "qualityScore": 88
+  }
+}

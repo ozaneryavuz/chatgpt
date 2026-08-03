@@ -1,0 +1,18 @@
+{
+  "version": 237,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/kompanzasyon-harmonik-rezonans-detuned-reaktor-kabul/index.html",
+      "canonicalPath": "/haberler/kompanzasyon-harmonik-rezonans-detuned-reaktor-kabul",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_305fa98f0fed0a6b",
+    "humanApproved": true,
+    "approvalPr": 767,
+    "qualityScore": 88
+  }
+}

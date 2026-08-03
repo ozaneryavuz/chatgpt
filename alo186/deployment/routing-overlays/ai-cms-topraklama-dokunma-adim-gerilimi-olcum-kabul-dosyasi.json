@@ -1,0 +1,18 @@
+{
+  "version": 238,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/topraklama-dokunma-adim-gerilimi-olcum-kabul-dosyasi/index.html",
+      "canonicalPath": "/haberler/topraklama-dokunma-adim-gerilimi-olcum-kabul-dosyasi",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_ada6037fd07a4565",
+    "humanApproved": true,
+    "approvalPr": 767,
+    "qualityScore": 88
+  }
+}
