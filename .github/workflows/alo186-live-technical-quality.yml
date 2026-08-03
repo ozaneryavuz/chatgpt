@@ -41,6 +41,8 @@ jobs:
             alo186/deployment/finalize_live_quality.py \
             alo186/deployment/repair_live_html_defects.py \
             alo186/deployment/inject_growth_run24.py \
+            alo186/deployment/sitemap_routes.py \
+            alo186/tests/test_sitemap_writer_canonical_dedup.py \
             alo186/tests/test_live_technical_quality.py \
             alo186/tests/live_http_audit.py \
             alo186/tests/audit_lighthouse_reports.py
@@ -52,6 +54,7 @@ jobs:
           node alo186/tests/test_portal_hardening.js
           python alo186/tests/test_content_intent_consolidation.py
           python alo186/tests/device_damage_deadline_guard.py
+          python alo186/tests/test_sitemap_writer_canonical_dedup.py
 
       - name: Canonical üretim paketini oluştur
         run: |
