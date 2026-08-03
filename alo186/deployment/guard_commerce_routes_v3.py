@@ -10,10 +10,12 @@ from xml.etree import ElementTree
 
 import guard_commerce_routes_v2 as v2
 import aeo_control_plane_v219_sitemap_compat as aeo_institutional
+import inject_affiliate_aeo_v250 as affiliate_aeo
 import inject_affiliate_decision_funnel_v215 as affiliate_decision
 import inject_intent_tools_run135_compat as intent_tools
 import inject_live_quality_v218_compat as live_quality
 import inject_portal_purchase_checkpoint_v213 as portal_checkpoint
+import validate_affiliate_aeo_v250 as affiliate_aeo_validator
 
 # V2, bağlantının çevresindeki sabit 900 karakteri tarıyordu. Uzun hesaplayıcı
 # sayfalarında başka bir bölümde geçen "topraklama" gibi güvenlik metinleri,
@@ -214,8 +216,8 @@ def _checkpoint_base_path(site: Path) -> str:
     except (OSError, json.JSONDecodeError):
         return ""
     for key in (
-        "affiliateDecisionFunnel", "affiliateIntentRouter", "homeAffiliateShowcase",
-        "affiliateMeasurement",
+        "affiliateAeoV250", "affiliateDecisionFunnel", "affiliateIntentRouter",
+        "homeAffiliateShowcase", "affiliateMeasurement",
     ):
         value = payload.get(key)
         if isinstance(value, dict) and isinstance(value.get("basePath"), str):
@@ -272,6 +274,13 @@ def validate_site(site: Path) -> dict:
     checkpoint_result = portal_checkpoint.inject(resolved, base_path)
     intent_result = intent_tools.inject(resolved, base_path)
     aeo_result = aeo_institutional.inject(resolved, base_path)
+    affiliate_aeo_result = affiliate_aeo.inject(resolved, base_path)
+    affiliate_aeo_validation = affiliate_aeo_validator.validate(resolved, base_path)
+    if not affiliate_aeo_validation["ok"]:
+        raise RuntimeError(
+            "Affiliate AEO v250 release gate failed: "
+            + "; ".join(affiliate_aeo_validation.get("errors", []))
+        )
     aeo_validation = aeo_institutional.validate(
         resolved,
         Path(__file__).resolve().parents[2],
@@ -290,6 +299,8 @@ def validate_site(site: Path) -> dict:
     result["intentToolsRun135"] = intent_result
     result["aeoInstitutionalV219"] = aeo_result
     result["aeoInstitutionalV219Validation"] = aeo_validation
+    result["affiliateAeoV250"] = affiliate_aeo_result
+    result["affiliateAeoV250Validation"] = affiliate_aeo_validation
     result["sitemapDeduplication"] = sitemap_deduplication
     result["liveQualityV218"] = quality_result
     return result
