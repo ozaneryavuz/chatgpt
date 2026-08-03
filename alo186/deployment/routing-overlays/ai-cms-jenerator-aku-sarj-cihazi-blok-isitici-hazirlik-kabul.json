@@ -1,0 +1,18 @@
+{
+  "version": 237,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/jenerator-aku-sarj-cihazi-blok-isitici-hazirlik-kabul/index.html",
+      "canonicalPath": "/haberler/jenerator-aku-sarj-cihazi-blok-isitici-hazirlik-kabul",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_db54659092217447",
+    "humanApproved": true,
+    "approvalPr": 799,
+    "qualityScore": 100
+  }
+}

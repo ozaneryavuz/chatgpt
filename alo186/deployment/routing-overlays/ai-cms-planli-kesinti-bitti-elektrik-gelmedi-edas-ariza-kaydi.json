@@ -1,0 +1,18 @@
+{
+  "version": 238,
+  "generatedAt": "2026-08-03",
+  "routes": [
+    {
+      "source": "alo186/haberler/planli-kesinti-bitti-elektrik-gelmedi-edas-ariza-kaydi/index.html",
+      "canonicalPath": "/haberler/planli-kesinti-bitti-elektrik-gelmedi-edas-ariza-kaydi",
+      "type": "article"
+    }
+  ],
+  "aiCms": {
+    "schemaVersion": 1,
+    "contentId": "cms_0f731c2a8f486a65",
+    "humanApproved": true,
+    "approvalPr": 799,
+    "qualityScore": 100
+  }
+}
