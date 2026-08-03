@@ -1,0 +1,301 @@
+{
+  "schemaVersion": 1,
+  "id": "cms_d40e7342478c657c",
+  "slug": "elektrik-odasi-safti-rezervasyon-yangin-durdurucu-koordinasyon",
+  "contentType": "guide",
+  "state": "published",
+  "locale": "tr-TR",
+  "title": "Elektrik Odası ve Şaft Koordinasyonu: Yangın Geçişleri",
+  "h1": "Elektrik odaları ve dikey şaftlar avan projede nasıl rezerve ve koordine edilir?",
+  "description": "Elektrik odası ve şaft rezervasyonunda pano, kablo, bakım, yangın durdurucu, topraklama, mekanik ve mimari bağımlılıkları kontrol edin.",
+  "intent": "Elektrik odaları, trafo/AG odaları, zayıf akım odaları ve dikey kablo şaftlarının mimari proje donmadan önce; ekipman ölçüsü, bakım erişimi, kablo dönüşü, taşıyıcı yük, yangın bölmesi, su riski, havalandırma ve disiplinler arası geçişler açısından doğru rezerve edilmesini sağlamak.",
+  "primaryKeyword": "elektrik odası ve şaft koordinasyonu",
+  "audience": [
+    "Mimarlar ve proje yöneticileri",
+    "Elektrik proje müellifleri",
+    "Statik ve mekanik koordinasyon ekipleri",
+    "Otel, villa, konut ve ticari yapı yatırımcıları",
+    "BIM ve uygulama projesi ekipleri"
+  ],
+  "riskClass": "high",
+  "directAnswer": "Elektrik odası ve şaftı, mimaride kalan boşluklara sonradan yerleştirilecek alanlar değildir. Avan projede ekipman zarfı, kapı ve taşıma rotası, güvenli işletme ve bakım mesafeleri, kablo bükülme yarıçapları, tava/busbar yükleri, güç–zayıf akım ayrımı, havalandırma ve ısı yükü, su basması riski, yangın bölmesi ve her penetrasyonun yangın durdurucu sistemi birlikte rezerve edilmelidir. Tek bir evrensel oda veya şaft ölçüsü yoktur; boyutlar seçilecek mimari, yük envanteri, üretici verisi, büyüme payı ve yetkili yangın stratejisine göre hesaplanır.",
+  "sections": [
+    {
+      "id": "kapsam-ve-arama-niyeti",
+      "heading": "Bu koordinasyon içeriği hangi sorunu çözer ve kapsamı nedir?",
+      "paragraphs": [
+        "“Elektrik odası kaç metrekare olmalı?”, “şaft ölçüsü ne olmalı?” veya “pano koridora sığar mı?” sorularına tek bir ölçü vermek güvenli değildir. Doğru kapsam; OG hücresi, trafo, AG ana pano, jeneratör/UPS, kompanzasyon, sayaç, zayıf akım rackleri, yangın algılama panelleri, busbar, kablo tavaları ve gelecekteki kapasitenin hangi odalarda ve güzergâhlarda yer alacağını tasarım aşamasına göre belirlemektir.",
+        "Elektrik İç Tesisleri Proje Hazırlama Yönetmeliği’nin EMO’da yayımlanan 2003 metni ön proje, kesin proje, uygulama ve son durum projelerini tanımlar. EMO 2024’te değişiklik taslağı hazırladığını duyurmuştur; bu nedenle 2003 metni ve taslak, güncel bağlayıcı hüküm veya son sürüm varsayılmadan proje tarihindeki resmî mevzuatla karşılaştırılmalıdır."
+      ],
+      "bullets": [
+        "Oda ve şaftları ekipman seçilmeden önce fonksiyon ve kapasite zarfıyla rezerve edin.",
+        "OG, AG, UPS, jeneratör, zayıf akım ve yangın sistemlerinin alanlarını ayrı tanımlayın.",
+        "Mevzuat metninin yürürlük ve değişiklik durumunu ihale tarihindeki resmî kaynaktan kontrol edin.",
+        "Şaftı yalnız net en×boy değil, kullanım zonları ve geçiş detaylarıyla tarif edin."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2"
+      ]
+    },
+    {
+      "id": "gerekli-girdiler",
+      "heading": "Oda ve şaft rezervasyonu için gerekli girdiler nelerdir?",
+      "paragraphs": [
+        "Girdiler; yükleme cetveli, sistem tek hatları, pano ve ekipman ön boyutları, kablo ve busbar çıkış yönleri, kapı/koridor/servis asansörü taşıma rotaları, döşeme yükleri, kat yükseklikleri, yangın kompartımanları, mekanik boru ve kanal güzergâhları, ıslak hacimler, drenaj kotları, havalandırma ve ısı kazançları, akustik sınırlar ve işletme erişim modelidir.",
+        "IEC 60364-5-52:2009+A1:2024 kablo sistemlerinin seçimi ve döşenmesinde akım taşıma, harmonikler, gerilim düşümü, bağlantılar, diğer tesislere yakınlık ve bakım yapılabilirlik gibi başlıkları kapsar. Şaft doluluk ve tava yerleşimi yalnız ilk metraja göre değil; kablo dış çapları, bükülme yarıçapları, montaj sırası, yangın durdurucu sınırları ve makul gelecek kapasitesiyle modellenmelidir."
+      ],
+      "bullets": [
+        "Her ekipman için ölçü, ağırlık, ısı kaybı, servis yüzü ve taşıma parçası verisini isteyin.",
+        "Kablo listesi ve dış çap envanterini şaft alan hesabına bağlayın.",
+        "Islak hacim, su deposu, pis su hattı ve drenaj kotlarını elektrik odalarıyla çakıştırmayın.",
+        "Kapı, koridor ve sökülebilir cephe gereksinimini ağır ekipman taşıma planıyla doğrulayın."
+      ],
+      "sourceRefs": [
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "id": "teslimler-ve-bagimliliklar",
+      "heading": "Koordinasyon teslimleri ve disiplinler arası bağımlılıklar nelerdir?",
+      "paragraphs": [
+        "Teslimler; oda fonksiyon matrisi, ekipman yerleşim planları, bakım ve taşıma zarfları, şaft zonlama kesitleri, tava/busbar prensipleri, kat geçişleri, kapı ve döşeme yük notları, havalandırma ve ısı yükü girdileri, drenaj/su risk planı, eşpotansiyel kuşaklama şeması, yangın penetrasyon çizelgesi ve açık arayüz listesinden oluşmalıdır.",
+        "Mimari ekip net alan, kapı ve kaçış ilişkisini; statik ekip döşeme ve ankraj yüklerini; mekanik ekip havalandırma, drenaj ve boru çakışmalarını; yangın danışmanı kompartıman ve penetrasyon performansını; elektrik ekibi kablo, busbar, pano, topraklama ve bakım erişimini onaylamalıdır. BIM/CAD modeli tek başına koordinasyon kanıtı değildir; çözülmemiş çakışmalar ve sorumlu taraflar tarihli bir kayıtla kapatılmalıdır."
+      ],
+      "bullets": [
+        "Her oda için mimari, statik, mekanik, yangın ve elektrik onay kutuları oluşturun.",
+        "Şaft kesitinde güç, zayıf akım, yangın, yedek kapasite ve erişim zonlarını gösterin.",
+        "Penetrasyon çizelgesini kablo/tava tipi ve kompartıman performansıyla eşleştirin.",
+        "Model çakışma raporunu çizim revizyonu ve sorumlu kişiyle kapatın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S3",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "id": "kritik-kontrol-noktalari",
+      "heading": "Kritik kontrol noktaları nasıl doğrulanmalıdır?",
+      "paragraphs": [
+        "Kontrol; pano kapılarının açılması, çekmeceli ünitelerin çıkarılması, kablo başlıklarının yapılması, termal kamera ve bakım erişimi, busbar eklerinin ulaşılabilirliği, UPS akü veya trafo değişim rotası, şaft kapağı erişimi ve yangın durdurucu sistemin bakım sırasında bozulmadan yenilenebilmesi üzerinden yapılmalıdır. Üretici mesafeleri ve yerel yangın stratejisi bilinmeden sabit bir bakım mesafesi yayımlanmamalıdır.",
+        "IEC 60364-5-54:2011+A1:2021 topraklama düzenleri, koruma ve eşpotansiyel iletkenlerini kapsar. Oda ve şaft içindeki tava, busbar gövdesi, metal kapı/çerçeve ve ekipmanların kuşaklama yaklaşımı tek bir “topraklama var” notuyla geçiştirilmemeli; iletken güzergâhı, bağlantı noktası, süreklilik ve korozyon/erişim koşulları projede gösterilmelidir."
+      ],
+      "bullets": [
+        "En büyük ekipmanın bina dışından nihai yerine kadar taşıma simülasyonunu yapın.",
+        "Kapı açılımı, bakım yüzü ve kablo dönüş alanını aynı plan üzerinde doğrulayın.",
+        "Yangın geçişlerini ürün adıyla değil, geçiş konfigürasyonu ve kanıt setiyle tarif edin.",
+        "Koruma ve eşpotansiyel iletkenlerinin süreklilik test noktalarını erişilebilir bırakın."
+      ],
+      "sourceRefs": [
+        "S3",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "id": "kapsam-disi-ve-hatalar",
+      "heading": "Kapsam dışı hususlar ve sık yapılan hatalar nelerdir?",
+      "paragraphs": [
+        "Bu rehber, yangın danışmanı onayı, mimari ruhsat uygunluğu, statik taşıma hesabı, üretici montaj talimatı veya elektrik projesi onayı yerine geçmez. Yangın durdurucu malzeme seçimi, yalnız köpük veya mastik adıyla yapılamaz; açıklık, kablo/tava düzeni, duvar/döşeme tipi ve istenen yangın performansına uygun sistem kanıtı yetkili ekipçe doğrulanmalıdır.",
+        "Sık hatalar; elektrik odasını ıslak hacim altına koymak, pano değişim rotasını düşünmemek, şaftı yalnız bugünkü kablolarla doldurmak, mekanik boruları elektrik şaftından geçirmek, zayıf akım ile güçlü akımı kontrolsüz yakınlaştırmak, yangın geçişini şantiyede çözmek ve üretici pano ölçüsü değişince mimariyi güncellememektir."
+      ],
+      "bullets": [
+        "Genel rehberi ruhsat veya proje onayı saymayın.",
+        "Tek bir yangın durdurucu ürününü tüm penetrasyonlara otomatik uygulamayın.",
+        "Şaft doluluğu ve kablo taşıma yükünü varsayımsal yüzdeyle kapatmayın.",
+        "Bakım ve değişim rotası yoksa ekipman siparişini dondurun."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "id": "kanitlar-ve-guvenli-cta",
+      "heading": "İşveren hangi kanıtları istemeli ve güvenli CTA ne olmalıdır?",
+      "paragraphs": [
+        "İşveren; revizyonlu ekipman listesi, boyut ve ağırlık veri sayfaları, oda/şaft koordinasyon matrisi, taşıma rotası, döşeme yükü onayı, ısı kaybı ve havalandırma girdisi, kablo/tava doluluk hesabı, yangın penetrasyon çizelgesi, kuşaklama şeması, çakışma raporu ve fotoğraflı kapanış kayıtlarını istemelidir. Son durum projesi, şantiye değişikliklerini ve kapatılan geçişleri gerçek konumlarıyla göstermelidir.",
+        "Güvenli CTA, “oda ve şaft rezervasyon kontrol listesini proje ekibiyle doldur; kritik ekipman ve penetrasyonlar donmadan bağımsız koordinasyon incelemesi yaptır” şeklindedir. ALO186 bağımsız bilgi platformudur; EDAŞ, TEDAŞ, EPDK, EMO, GİB veya kamu kuruluşu değildir ve proje onayı, yangın uygunluğu, ruhsat veya mevzuata tam uyum garantisi vermez."
+      ],
+      "bullets": [
+        "İşveren tasarım donma tarihinden önce imzalı oda/şaft rezervasyon matrisi istesin.",
+        "Her penetrasyon için konum, açıklık, geçiş elemanı ve kanıt referansı kaydedilsin.",
+        "Son durum çizimleri kapatılmadan önce fotoğraf ve süreklilik testleri arşivlensin.",
+        "Mevcut alan ve sistem kanıtla yeterliyse gereksiz pano, tava veya yangın malzemesi satın alınmasın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S4",
+        "S5"
+      ]
+    }
+  ],
+  "faqs": [
+    {
+      "question": "Elektrik odası için standart tek bir metrekare var mı?",
+      "answer": "Hayır. Oda büyüklüğü ekipman zarfı, servis ve taşıma alanı, kablo dönüşleri, havalandırma, yangın ve gelecek kapasitesine göre proje özelinde belirlenir. İlgili idare ve üretici şartları ayrıca kontrol edilir.",
+      "sourceRefs": [
+        "S1",
+        "S3"
+      ]
+    },
+    {
+      "question": "Elektrik şaftında yüzde kaç boşluk bırakılmalıdır?",
+      "answer": "Bütün yapılar için geçerli tek bir yüzde yoktur. Kablo dış çapları, tava kapasitesi, bükülme yarıçapı, yangın durdurucu alanı, montaj sırası ve gelecekteki gerçek genişleme senaryosu hesaplanmalıdır.",
+      "sourceRefs": [
+        "S3"
+      ]
+    },
+    {
+      "question": "Elektrik şaftından mekanik boru geçirilebilir mi?",
+      "answer": "Bu, yerel mevzuat, yangın stratejisi, risk ve ayrım koşullarına bağlıdır; varsayılan çözüm olarak kabul edilmemelidir. Su/yoğuşma ve bakım riski nedeniyle disiplinler arası yazılı onay ve özel detay gerekir.",
+      "sourceRefs": [
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "question": "Yangın durdurucu köpük tüm kablo geçişleri için yeterli midir?",
+      "answer": "Hayır. Sistem; duvar/döşeme tipi, açıklık, kablo ve tava düzeni, hedef yangın performansı ve test/uygulama kanıtıyla eşleşmelidir. Genel ürün adı tek başına uygunluk kanıtı değildir.",
+      "sourceRefs": [
+        "S2"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "publisher": "Elektrik Mühendisleri Odası",
+      "title": "Elektrik İç Tesisleri Proje Hazırlama Yönetmeliği — 3 Aralık 2003 metni",
+      "url": "https://www.emo.org.tr/mevzuat/mevzuat_detay.php?kod=52",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Ön proje, kesin proje, uygulama ve son durum projesi tanımlarını; güç, aydınlatma, kompanzasyon, koruma, iletişim, yangın ve güvenlik sistemleri proje kapsamını yayımlar."
+    },
+    {
+      "id": "S2",
+      "publisher": "Elektrik Mühendisleri Odası",
+      "title": "Elektrik İç Tesisleri Proje Hazırlama Yönetmeliği Değişiklik Taslağı Duyurusu",
+      "url": "https://www.emo.org.tr/genel/bizden_detay.php?kod=144650&sube=15",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "EMO, 7 Mart 2024’te Bakanlığa bir değişiklik taslağı ilettiğini açıklar; taslak bağlayıcı mevzuat gibi sunulmamalı ve güncel resmî metin proje tarihinde kontrol edilmelidir."
+    },
+    {
+      "id": "S3",
+      "publisher": "Çevre, Şehircilik ve İklim Değişikliği Bakanlığı",
+      "title": "Binaların Yangından Korunması Hakkında Yönetmelik Kılavuzu Duyurusu",
+      "url": "https://meslekihizmetler.csb.gov.tr/haberler/binalarin-yangindan-korunmasi-hakkinda-yonetmelik-kilavuzu-yayimlandi-289797",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Bakanlık 16 Aralık 2024’te yönetmeliğin uygulanmasına rehberlik eden güncel bir kılavuz yayımladığını duyurur."
+    },
+    {
+      "id": "S4",
+      "publisher": "International Electrotechnical Commission",
+      "title": "IEC 60364-5-52:2009+AMD1:2024 — Wiring Systems",
+      "url": "https://webstore.iec.ch/en/publication/103734",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Kablo sistemlerinin seçimi ve kurulumu; busbar, harmonik akımlar, gerilim düşümü, bağlantılar, yakınlık ve bakım yapılabilirlik başlıklarını kapsayan konsolide IEC kaynağıdır."
+    },
+    {
+      "id": "S5",
+      "publisher": "International Electrotechnical Commission",
+      "title": "IEC 60364-5-54:2011+AMD1:2021 — Earthing and Protective Conductors",
+      "url": "https://webstore.iec.ch/en/publication/68865",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Topraklama düzenleri, koruma iletkenleri ve koruyucu eşpotansiyel kuşaklama iletkenlerini kapsayan konsolide IEC kaynağıdır."
+    }
+  ],
+  "internalLinks": [
+    {
+      "label": "Elektrik panosunda termal kamera kontrolü",
+      "path": "/haberler/elektrik-panosunda-termal-kamera-kontrolu",
+      "reason": "Pano yerleşimi ve bakım erişiminin işletme dönemindeki kontrol ihtiyacını gösterir."
+    },
+    {
+      "label": "Topraklama direnci ve arıza çevrim empedansı farkı",
+      "path": "/haberler/topraklama-direnci-ariza-cevrim-empedansi-farki",
+      "reason": "Oda ve şaft kuşaklamasının yalnız toprak direnciyle değerlendirilmemesi gerektiğini tamamlar."
+    },
+    {
+      "label": "Nötr–toprak arası gerilim",
+      "path": "/haberler/notr-toprak-arasi-gerilim-kac-volt-olmali",
+      "reason": "Dağıtım ve eşpotansiyel sistemde saha ölçümünün bağlamını açıklar."
+    },
+    {
+      "label": "Parafudr bağlantı kablosu neden kısa olmalı?",
+      "path": "/haberler/parafudr-baglanti-kablosu-neden-kisa-olmali",
+      "reason": "Pano yerleşimi ile SPD bağlantı geometrisinin birlikte çözülmesi gerektiğini gösterir."
+    },
+    {
+      "label": "Harmonik nedir, THD cihazları nasıl etkiler?",
+      "path": "/haberler/harmonik-nedir-thd-cihazlari-nasil-etkiler",
+      "reason": "Nötr, kablo ve pano ısı yükü için harmonik girdilerin önemini açıklar."
+    },
+    {
+      "label": "Kablo gerilim düşümü hesabı",
+      "path": "/hesaplama/kablo-gerilim-dusumu",
+      "reason": "Şaft ve yatay güzergâh uzunluğunun kablo seçimine etkisini ön değerlendirmeye bağlar."
+    },
+    {
+      "label": "Kurumsal elektrik sürekliliği ön değerlendirme",
+      "path": "/kurumsal-elektrik-surekliligi-on-degerlendirme",
+      "reason": "Kritik oda ve dağıtım sistemleri için profesyonel koordinasyon incelemesine geçiş sağlar."
+    }
+  ],
+  "commerce": {
+    "enabled": false,
+    "policy": "none",
+    "category": null
+  },
+  "editorial": {
+    "createdBy": "ai-assisted",
+    "model": "gpt-5.6-thinking",
+    "humanReviewRequired": true,
+    "approvedBy": "ozaneryavuz",
+    "approvedAt": "2026-08-03T18:42:01Z",
+    "publishedAt": "2026-08-03T18:42:01Z",
+    "approvalPr": 772
+  },
+  "seo": {
+    "canonicalPath": "/haberler/elektrik-odasi-safti-rezervasyon-yangin-durdurucu-koordinasyon",
+    "robots": "index,follow,max-image-preview:large",
+    "lastModified": "2026-08-03",
+    "topics": [
+      "elektrik odası",
+      "elektrik şaftı",
+      "şaft rezervasyonu",
+      "yangın durdurucu",
+      "kablo tavası",
+      "BIM koordinasyonu",
+      "pano yerleşimi"
+    ]
+  },
+  "quality": {
+    "score": 100,
+    "minimumRequired": 85,
+    "checks": {
+      "metadata": true,
+      "directAnswer": true,
+      "contentDepth": true,
+      "sources": true,
+      "safety": true,
+      "internalLinks": true,
+      "uniqueness": true,
+      "structuredData": true
+    },
+    "similarity": {
+      "maximum": 0.1765,
+      "closestPath": "https://alo186.com/sektor-rehberi/elektrik-odasi-saft-pano-yerlesim-koordinasyonu/"
+    }
+  }
+}
