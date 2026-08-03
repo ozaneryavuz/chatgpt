@@ -15,6 +15,7 @@ import inject_affiliate_decision_funnel_v215 as affiliate_decision
 import inject_intent_tools_run135 as intent_tools
 import inject_live_quality_v218_compat as live_quality
 import inject_portal_purchase_checkpoint_v213 as portal_checkpoint
+import merge_sitemaps_v225 as sitemap_merge
 
 # V2, bağlantının çevresindeki sabit 900 karakteri tarıyordu. Uzun hesaplayıcı
 # sayfalarında başka bir bölümde geçen "topraklama" gibi güvenlik metinleri,
@@ -256,6 +257,10 @@ def validate_site(site: Path) -> dict:
             + "; ".join(aeo_validation.get("errors", []))
         )
     result = _original_validate_site(resolved)
+    sitemap_merge_result = sitemap_merge.run(
+        resolved,
+        Path(__file__).resolve().parents[1],
+    )
     sitemap_deduplication = _deduplicate_sitemap(resolved)
     sitemap_result = sitemap_quality.run(resolved, base_path)
     quality_result = live_quality.run(resolved, base_path)
@@ -264,6 +269,7 @@ def validate_site(site: Path) -> dict:
     result["intentToolsRun135"] = intent_result
     result["aeoInstitutionalV219"] = aeo_result
     result["aeoInstitutionalV219Validation"] = aeo_validation
+    result["sitemapMergeV225"] = sitemap_merge_result
     result["sitemapDeduplication"] = sitemap_deduplication
     result["sitemapQualityV225"] = sitemap_result
     result["liveQualityV218"] = quality_result
