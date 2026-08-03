@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "siteDomain": "alo186.com",
+  "engine": "google",
+  "googleDomain": "google.com.tr",
+  "location": "Istanbul, Turkey",
+  "gl": "tr",
+  "hl": "tr",
+  "device": "mobile",
+  "num": 10,
+  "monthlyBudgetNote": "8 sorgu/gün yaklaşık 240 arama/30 gün. SerpApi paket limitinize göre cadence veya sorgu sayısını azaltın.",
+  "queries": [
+    {
+      "query": "elektrik kesintisi sorgulama",
+      "intent": "official-navigation",
+      "targetRoute": "/elektrik-kesintisi",
+      "commercialMode": "closed"
+    },
+    {
+      "query": "elektrikler ne zaman gelecek",
+      "intent": "outage-status",
+      "targetRoute": "/elektrik-kesintisi",
+      "commercialMode": "closed"
+    },
+    {
+      "query": "elektrik kesintisi için nere aranır",
+      "intent": "official-contact",
+      "targetRoute": "/edas-bul",
+      "commercialMode": "closed"
+    },
+    {
+      "query": "elektrik geldikten sonra cihazlar nasıl açılır",
+      "intent": "post-outage-recovery",
+      "targetRoute": "/hesaplama/elektrik-geldikten-sonra-guvenli-yeniden-baslatma/",
+      "commercialMode": "technical-gate"
+    },
+    {
+      "query": "kombi için ups",
+      "intent": "backup-power-heating",
+      "targetRoute": "/hesaplama/kombi-kesinti-yedek-guc-uygunluk/",
+      "commercialMode": "technical-gate"
+    },
+    {
+      "query": "modem için mini ups",
+      "intent": "backup-power-internet",
+      "targetRoute": "/hesaplama/modem-internet-yedekleme/",
+      "commercialMode": "technical-gate"
+    },
+    {
+      "query": "ups kaç saat çalışır",
+      "intent": "runtime-calculation",
+      "targetRoute": "/hesaplama/ups-calisma-suresi/",
+      "commercialMode": "technical-gate"
+    },
+    {
+      "query": "akım korumalı priz işe yarar mı",
+      "intent": "surge-protection-education",
+      "targetRoute": "/hesaplama/gerilim-koruma-cozum-secici/",
+      "commercialMode": "technical-gate"
+    }
+  ]
+}
