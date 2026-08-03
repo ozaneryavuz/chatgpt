@@ -45,10 +45,11 @@ def source_contracts() -> None:
         "const rawHours=input.value.trim()",
         "rawHours===''?Number.NaN:Number(rawHours)",
         "const valid=rawHours!==''&&Number.isFinite(hours)&&hours>=0&&hours<=8760",
-        "if(!valid)",
+        "rawHours===''||!Number.isFinite(hours)||hours<0||hours>8760",
         "30 gün",
     ):
         assert token in outage, token
+    assert "if(!valid)" in outage or "if(invalidHours)" in outage
     assert "on iş günü" not in outage.casefold()
 
     for token in (
