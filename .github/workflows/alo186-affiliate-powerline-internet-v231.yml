@@ -64,7 +64,7 @@ jobs:
           test -f "$route/index.html"
           test -f "$route/catalog-v231.js"
           test -f "$route/app-v231.js"
-          grep -Fq 'B0859MDSFX' "$route/index.html"
+          grep -Fq 'B07GBK9CQL' "$route/index.html"
           grep -Fq 'B08XNLZLJ3' "$route/index.html"
           grep -Fq 'B00C2ICYPC' "$route/index.html"
           grep -Fq 'alo186rehber-21' "$route/catalog-v231.js"
