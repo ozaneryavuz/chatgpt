@@ -4,8 +4,12 @@ on:
   pull_request:
     paths:
       - 'alo186/deployment/audit_live_origin_v225.py'
+      - 'alo186/deployment/audit_live_origin_v225_compat.py'
       - 'alo186/deployment/finalize_sitemap_v225.py'
+      - 'alo186/deployment/guard_commerce_routes_v3.py'
+      - 'alo186/deployment/inject_intent_tools_run135.py'
       - 'alo186/tests/test_live_origin_quality_v225.py'
+      - 'alo186/tests/test_live_origin_quality_v225_compat.py'
       - 'alo186/tests/test_sitemap_quality_v225.py'
       - 'alo186/robots.txt'
       - 'alo186/haberler/lifepo4-batarya-sogukta-sarj-edilir-mi/index.html'
@@ -45,8 +49,11 @@ jobs:
         run: |
           python -m py_compile \
             alo186/deployment/audit_live_origin_v225.py \
-            alo186/deployment/finalize_sitemap_v225.py
+            alo186/deployment/audit_live_origin_v225_compat.py \
+            alo186/deployment/finalize_sitemap_v225.py \
+            alo186/deployment/inject_intent_tools_run135.py
           python alo186/tests/test_live_origin_quality_v225.py
+          python alo186/tests/test_live_origin_quality_v225_compat.py
           python alo186/tests/test_sitemap_quality_v225.py
 
       - name: Mevcut final-artifact regresyonları
@@ -115,6 +122,7 @@ jobs:
               receipt=json.loads((root/'sitemap-quality-v225.json').read_text(encoding='utf-8'))
               assert receipt['version']==225
               assert receipt['basePath']==base
+              assert receipt['projectPreviewNoindexIgnored'] is bool(base)
               assert receipt['robotsSingleCanonicalSitemap'] is True
               assert receipt['legacyWwwRejected'] is True
               assert receipt['keptUrlCount']>100
@@ -193,7 +201,7 @@ jobs:
         shell: bash
         run: |
           set +e
-          python alo186/deployment/audit_live_origin_v225.py \
+          python alo186/deployment/audit_live_origin_v225_compat.py \
             --origin https://alo186.com \
             --expected-commit "$GITHUB_SHA" \
             --mobile-lighthouse /tmp/alo186-lighthouse-mobile.json \
