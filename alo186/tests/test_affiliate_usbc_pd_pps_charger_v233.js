@@ -5,7 +5,7 @@ const ROUTE=path.join(ROOT,'amazon-elektrik-urunleri','usb-c-pd-pps-sarj-gucu-ol
 const HTML=fs.readFileSync(path.join(ROUTE,'index.html'),'utf8');
 const APP=fs.readFileSync(path.join(ROUTE,'app-v233.js'),'utf8');
 const catalog=require(path.join(ROUTE,'catalog-v233.js'));
-const EXPECTED=new Map([['B0DFX1N74Z','ACH08448'],['B0B4K26Z58','ACH03717'],['B09W2HP21R','EP-T6530NBEGWW']]);
+const EXPECTED=new Map([['B0DFX1N74Z','ACH08448'],['B0B4DL9XSV','ACH03714'],['B0B4K26Z58','ACH03717']]);
 function walk(dir){return fs.readdirSync(dir,{withFileTypes:true}).flatMap((entry)=>{const full=path.join(dir,entry.name);return entry.isDirectory()?walk(full):[full];});}
 assert.strictEqual(catalog.version,233);
 assert.strictEqual(catalog.affiliateTag,'alo186rehber-21');
