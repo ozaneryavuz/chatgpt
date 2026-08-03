@@ -7,9 +7,11 @@ from pathlib import Path
 
 try:
     from . import build_static_site_core as _core
+    from .install_competitor_gap_v220 import install as _install_competitor_gap_v220
     from .sitemap_hreflang import write_effective_sitemap as _write_effective_sitemap
 except ImportError:
     import build_static_site_core as _core
+    from install_competitor_gap_v220 import install as _install_competitor_gap_v220
     from sitemap_hreflang import write_effective_sitemap as _write_effective_sitemap
 
 # Keep every existing import/function contract while replacing only sitemap output.
@@ -166,8 +168,10 @@ def _build_with_platform_hardening(
     release = _original_build(repo_root, output, commit_sha)
     commercial_report = normalize_commercial_hub_urls(output)
     accessibility_report = install_accessibility_hardening(repo_root, output)
+    competitor_gap_report = _install_competitor_gap_v220(repo_root, output)
     release["commercialCanonicalV217"] = commercial_report
     release["accessibilityHardeningV215"] = accessibility_report
+    release["competitorGapAffiliateV220"] = competitor_gap_report
     release_path = output / "alo186-release.json"
     release_path.write_text(json.dumps(release, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     _recompute_checksums(output)
