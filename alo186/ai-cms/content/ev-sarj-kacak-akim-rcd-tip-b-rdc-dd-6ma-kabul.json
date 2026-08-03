@@ -1,0 +1,291 @@
+{
+  "schemaVersion": 1,
+  "id": "cms_2c114c4f89483c5d",
+  "slug": "ev-sarj-kacak-akim-rcd-tip-b-rdc-dd-6ma-kabul",
+  "contentType": "guide",
+  "state": "published",
+  "locale": "tr-TR",
+  "title": "EV Şarj Kaçak Akım Koruması: Tip B veya 6 mA RDC-DD",
+  "h1": "EV şarjda Tip B RCD mi, Tip A + 6 mA RDC-DD mi kullanılmalı?",
+  "description": "EV şarj devresinde Tip B RCD ile Tip A + 6 mA RDC-DD seçimini, ürün belgesini ve açma testlerini kanıta dayalı kabul edin.",
+  "intent": "Mode 3 AC EV şarj noktasında düzgün DC artık akıma karşı korumanın Tip B RCD veya IEC 62955 RDC-DD ile doğru kurulduğunu ve saha testleriyle çalıştığını doğrulamak.",
+  "primaryKeyword": "EV şarj kaçak akım rölesi Tip B",
+  "audience": [
+    "EV şarj yatırımcıları",
+    "Site ve otel teknik yöneticileri",
+    "Elektrik mühendisleri",
+    "Wallbox kurulum ekipleri",
+    "Devreye alma ve bakım firmaları"
+  ],
+  "riskClass": "high",
+  "directAnswer": "EV şarj devresinde yalnız “30 mA kaçak akım rölesi var” demek yeterli değildir. Şarj elektroniğinin oluşturabileceği düzgün DC artık akım için ya uygun Tip B RCD ya da IEC 62955’e uygun 6 mA RDC-DD ile üreticinin istediği Tip A/F RCD koordinasyonu bulunmalıdır. Kabul; tam ürün referansı ve uygunluk belgesi, haricî RCD tipi, PE sürekliliği, açma akımı-süresi, RDC-DD alarm/kesme ve reset davranışının kaydıyla yapılır. Enerjili pano ve şarj ünitesi içindeki testler yalnız yetkin ekipçe gerçekleştirilmelidir.",
+  "sections": [
+    {
+      "id": "koruma-mimarisi",
+      "heading": "Tip B RCD ile Tip A + 6 mA RDC-DD arasındaki karar nasıl verilir?",
+      "paragraphs": [
+        "Mode 3 AC şarj devresinde temel soru yalnız “kaçak akım rölesi var mı?” değildir. Araç ve şarj elektroniği düzgün DC artık akım oluşturabilir; bu akım, uygun DC algılama yoksa bazı AC veya Tip A koruma cihazlarının doğru çalışmasını etkileyebilir. IEC 60364-7-722 EV besleme devrelerini, IEC 62955 ise mode 3 istasyonlarda kullanılan RDC-DD cihazlarını kapsar.",
+        "Uygulama iki ana mimariden biriyle kurulur: düzgün DC artık akıma duyarlı Tip B RCD veya şarj cihazında IEC 62955’e uygun 6 mA RDC-DD ile koordineli en az Tip A RCD. Hangi mimarinin geçerli olduğu istasyonun tam ürün referansı, üretici talimatı, proje ve yürürlükteki ulusal kurallarla doğrulanmalıdır; ürün ailesinin başka bir varyantındaki koruma özelliği varsayılamaz."
+      ],
+      "bullets": [
+        "Şarj cihazının tam model ve ürün referansını kaydedin.",
+        "Dahili RDC-DD veya Tip B özelliğini sertifika ve kılavuzla doğrulayın.",
+        "Haricî RCD tipi, kutup sayısı, anma akımı ve IΔn değerini tek hatta gösterin.",
+        "Üretici doğrulaması olmadan Tip A’yı tek başına yeterli kabul etmeyin."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "id": "urun-varyanti-ve-belge",
+      "heading": "Dahili 6 mA koruma gerçekten var mı, nasıl belgelenir?",
+      "paragraphs": [
+        "Aynı ticari seri içinde RDC-DD bulunan, Tip B içeren veya haricî koruma isteyen farklı ürün referansları olabilir. Schneider Electric Türkiye’nin EVlink Home açıklaması dahili 6 mA RDC-DD ile birlikte en az 30 mA Tip A RCD gerektiğini; EVlink Pro AC açıklaması ise RDC-DD’nin üründe bulunduğunu ve Tip B içermeyen referanslarda etkin olduğunu belirtir. Bu, marka genellemesi değil ürün-referansı doğrulamasının önemini gösteren üretici örneğidir.",
+        "Kabul dosyasında ürün etiketi, seri numarası, donanım ve firmware sürümü, uygunluk beyanı, IEC 62955 kapsamı, haricî RCD şeması ve varsa dahili öz-test davranışı birlikte bulunmalıdır. “Wallbox’ta DC koruma var” şeklindeki satış ifadesi; eşik, açma yöntemi, arıza sonrası reset ve hangi çıkışları koruduğu belgelenmeden kabul kanıtı sayılmamalıdır."
+      ],
+      "bullets": [
+        "Uygunluk beyanı ile ürün etiketindeki referansı eşleştirin.",
+        "RDC-DD’nin hangi soket veya konektörü koruduğunu doğrulayın.",
+        "Dahili öz-test sıklığı ve başarısızlık alarmını üretici belgesinden alın.",
+        "Firmware değişiminden sonra koruma davranışını yeniden doğrulayın."
+      ],
+      "sourceRefs": [
+        "S2",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "id": "fonksiyon-testi",
+      "heading": "RCD ve RDC-DD fonksiyon testi hangi senaryoları kapsamalıdır?",
+      "paragraphs": [
+        "Ön paneldeki TEST düğmesi mekanizmanın temel işlevini kontrol eder; tesis edilmiş devredeki gerçek açma akımı, açma süresi, iletken kutupları, PE sürekliliği ve RDC-DD–RCD koordinasyonunu tek başına kanıtlamaz. Yetkin ekip, üreticinin izin verdiği uyumlu test cihazıyla AC, pulsating DC ve gerekiyorsa düzgün DC senaryolarını uygular; sonuçları modelin beyan edilen koruma mimarisiyle karşılaştırır.",
+        "Test; araç bağlı değilken başlangıç kontrolünü, kontrollü şarj sırasında algılama ve kesmeyi, arıza sonrası kilit veya otomatik reset davranışını, enerji kesilip geldiğinde durumu ve şarj ünitesinin hata kaydını kapsamalıdır. Schneider’in EVlink Pro AC belgesinde 6 mA RDC-DD için periyodik otomatik kontrol açıklanır; ancak otomatik öz-test, haricî RCD’nin tesis kabul testinin yerine geçmez."
+      ],
+      "bullets": [
+        "Haricî RCD açma akımı ve süresini uygun cihazla kaydedin.",
+        "Dahili RDC-DD alarmı, kontaktör açması ve yeniden başlatma davranışını test edin.",
+        "Test sonucunu EVSE olay kaydı ve kesici durumuyla aynı zaman çizelgesinde gösterin.",
+        "Gerçek arıza üretmek için iletkenleri kısa devre etmeyin veya korumayı köprülemeyin."
+      ],
+      "sourceRefs": [
+        "S2",
+        "S3",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "id": "istenmeyen-acma-ve-kok-neden",
+      "heading": "Şarj sırasında kaçak akım koruması açarsa kök neden nasıl ayrılır?",
+      "paragraphs": [
+        "Açma olayı doğrudan daha yüksek eşikli bir RCD takılarak çözülmemelidir. Araçtan kaynaklanan DC artık akım, EVSE izolasyon arızası, kablo veya fiş hasarı, nem, N-PE karışması, yanlış RCD tipi, toplam tesis kaçak akımı ve seçicilik eksikliği ayrı olasılıklardır. Hata zamanı; araç, konektör, şarj gücü, hava koşulu ve EVSE olay koduyla eşleştirilmelidir.",
+        "Üretici arıza prosedürleri bazı RDC-DD olaylarında aracın bağlantısının kesilmesi veya istasyonun kontrollü yeniden enerjilenmesi gibi modele özgü adımlar tanımlar. Kullanıcı yalnız güvenli dış kontrolleri yapmalı; pano, RCD, kontaktör veya EVSE iç devresine müdahale etmemelidir. Aynı araç farklı istasyonda ve aynı istasyon kontrollü test yüküyle yetkin ekipçe karşılaştırılarak arıza katmanı daraltılabilir."
+      ],
+      "bullets": [
+        "Olayı araç, kablo, EVSE ve tesis katmanlarına ayırın.",
+        "RCD tipi veya eşik değerini kanıtsız büyütmeyin.",
+        "N-PE karışması ve toplam kaçak akımı ayrı ölçüm planına alın.",
+        "Arıza tekrarlıyorsa istasyonu kapalı tutup yetkili servise yönlendirin."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S4",
+        "S5"
+      ]
+    },
+    {
+      "id": "kabul-dosyasi",
+      "heading": "EV şarj kaçak akım koruması hangi kabul dosyasıyla teslim alınmalıdır?",
+      "paragraphs": [
+        "Teslim dosyası; tek hat, besleme ve topraklama sistemi, EVSE tam referansı, IEC uygunluk belgeleri, dahili RDC-DD veya Tip B kanıtı, haricî RCD bilgileri, kısa devre koruması, PE sürekliliği, açma akımı-süresi, RDC-DD alarm/kesme testi, reset davranışı ve imzalı geçti-kaldı sonucunu içermelidir. Her şarj noktası ayrı devre ve ayrı sonuç satırıyla izlenmelidir.",
+        "Koruma mimarisi ve test sonuçları uygun ise sırf “Tip B daha pahalı ve daha iyi” düşüncesiyle uyumlu sistemi değiştirmek gerekmez; aynı şekilde 6 mA ifadesi bulunan fakat belgesi ve haricî RCD koordinasyonu eksik cihaz kabul edilmemelidir. CTA: kişisel verisiz EVSE–RCD–RDC-DD kabul matrisini tamamlayın ve yetkin elektrik mühendisi veya devreye alma ekibine iletin."
+      ],
+      "bullets": [
+        "Her soket için ürün referansı ve koruma zincirini ayrı yazın.",
+        "Test cihazı, kalibrasyon, akım ve açma süresini rapora ekleyin.",
+        "Proje, üretici talimatı ve saha uygulamasını aynı revizyonda eşleştirin.",
+        "Kanıt yeterliyse gereksiz RCD veya wallbox değişimi satın almayın."
+      ],
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S4",
+        "S5"
+      ]
+    }
+  ],
+  "faqs": [
+    {
+      "question": "EV şarj için her zaman Tip B kaçak akım rölesi gerekir mi?",
+      "answer": "Hayır. Uygun çözüm, ürün ve proje şartına göre Tip B RCD veya IEC 62955’e uygun 6 mA RDC-DD ile koordineli en az Tip A RCD olabilir. Tam ürün referansı ve üretici talimatı doğrulanmalıdır.",
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "question": "Wallbox içinde 6 mA DC koruma varsa haricî RCD gerekmez mi?",
+      "answer": "Genellikle hayır. Örneğin Schneider EVlink Home dokümanı dahili 6 mA RDC-DD yanında en az 30 mA Tip A RCD ister. Kesin gereklilik ürün kılavuzu, proje ve ulusal kurallardan alınmalıdır.",
+      "sourceRefs": [
+        "S4"
+      ]
+    },
+    {
+      "question": "RCD üzerindeki TEST düğmesine basmak kabul için yeterli mi?",
+      "answer": "Hayır. TEST düğmesi temel mekanizmayı kontrol eder; gerçek açma akımı-süresi, PE sürekliliği, kutuplar ve RDC-DD koordinasyonu uygun test cihazı ve kayıtla doğrulanmalıdır.",
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "question": "Şarj sırasında kaçak akım koruması açarsa daha yüksek mA takılır mı?",
+      "answer": "Kanıtsız olarak hayır. Önce araç, EVSE, kablo, nem, N-PE karışması, yanlış RCD tipi ve toplam kaçak akım kök nedenleri ayrılmalıdır; koruma eşiğini büyütmek tehlikeyi gizleyebilir.",
+      "sourceRefs": [
+        "S1",
+        "S2",
+        "S5"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "publisher": "IEC",
+      "title": "IEC 60364-7-722:2018 — Supplies for electric vehicles",
+      "url": "https://webstore.iec.ch/en/publication/29958",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "EV’leri besleyen ve EV’den geri besleme yapan alçak gerilim devrelerinin özel tesis gereklerini tanımlar."
+    },
+    {
+      "id": "S2",
+      "publisher": "IEC",
+      "title": "IEC 62955:2018 — RDC-DD for mode 3 EV charging",
+      "url": "https://webstore.iec.ch/en/publication/32963",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "440 V AC ve 125 A’e kadar kalıcı bağlı mode 3 EV şarj istasyonlarında kullanılan RDC-DD cihazlarının gerek ve testlerini kapsar."
+    },
+    {
+      "id": "S3",
+      "publisher": "IEC",
+      "title": "IEC 62423:2009 — Type F and Type B RCDs",
+      "url": "https://webstore.iec.ch/en/publication/6998",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "Tip F ve Tip B RCD’lerin ek gereklerini; Tip B’nin AC, pulsating DC ve düzgün DC artık akımlara yanıtını tanımlar."
+    },
+    {
+      "id": "S4",
+      "publisher": "Schneider Electric Türkiye",
+      "title": "EVlink Home dahili 6 mA RDC-DD ve haricî RCD gereği",
+      "url": "https://www.se.com/tr/tr/faqs/FAQ000234506/",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "EVlink Home’da 6 mA RDC-DD bulunduğunu ve buna rağmen en az 30 mA Tip A RCD eklenmesi gerektiğini belirtir."
+    },
+    {
+      "id": "S5",
+      "publisher": "Schneider Electric Türkiye",
+      "title": "EVlink Pro AC dahili 6 mA RDC-DD davranışı",
+      "url": "https://www.se.com/tr/tr/faqs/FAQ000234461/",
+      "accessedAt": "2026-08-03",
+      "primary": true,
+      "factSummary": "EVlink Pro AC’de RDC-DD bulunduğunu, 24 saatte bir otomatik kontrol edildiğini ve Tip B içermeyen referanslarda etkin olduğunu açıklar."
+    }
+  ],
+  "internalLinks": [
+    {
+      "label": "EV şarj tesisat uygunluğu",
+      "path": "/haberler/ev-sarj-cihazi-icin-ev-tesisati-uygun-mu",
+      "reason": "RCD kararından önce kablo, güç, pano ve topraklama uygunluğunu tamamlar."
+    },
+    {
+      "label": "Dinamik yük yönetimi",
+      "path": "/haberler/ev-sarjinda-dinamik-yuk-yonetimi",
+      "reason": "Koruma işlevini güç sınırlama ve ana sigorta koordinasyonundan ayırır."
+    },
+    {
+      "label": "Wallbox neden başlamıyor?",
+      "path": "/haberler/elektrikli-arac-sarj-olmuyor-wallbox-neden-baslamiyor",
+      "reason": "RCD/RDC-DD hatasını diğer yetkilendirme ve besleme sorunlarından ayırır."
+    },
+    {
+      "label": "Kaçak akım rölesi neden atar?",
+      "path": "/haberler/kacak-akim-rolesi-neden-surekli-atar",
+      "reason": "Genel artık akım arızalarını EV’ye özgü DC korumadan ayırır."
+    },
+    {
+      "label": "Prizde topraklama var mı?",
+      "path": "/haberler/prizde-topraklama-var-mi-priz-test-cihazi",
+      "reason": "PE sürekliliği ve basit kullanıcı kontrolünün sınırını açıklar."
+    },
+    {
+      "label": "EV şarj gücü neden düşük?",
+      "path": "/haberler/ev-sarj-gucu-neden-dusuk-yavas-sarj",
+      "reason": "Koruma açmasını araç veya güç sınırlamasıyla karıştırmayı önler."
+    },
+    {
+      "label": "Kurumsal ön değerlendirme",
+      "path": "/kurumsal-elektrik-surekliligi-on-degerlendirme",
+      "reason": "Çoklu şarj noktalarında koruma ve saha kabul kapsamını profesyonel çalışmaya taşır."
+    }
+  ],
+  "commerce": {
+    "enabled": false,
+    "policy": "none",
+    "category": null
+  },
+  "editorial": {
+    "createdBy": "ai-assisted",
+    "model": "gpt-5.6-thinking",
+    "humanReviewRequired": true,
+    "approvedBy": "ozaneryavuz",
+    "approvedAt": "2026-08-03T12:38:02Z",
+    "publishedAt": "2026-08-03T12:38:03Z",
+    "approvalPr": 792
+  },
+  "seo": {
+    "canonicalPath": "/haberler/ev-sarj-kacak-akim-rcd-tip-b-rdc-dd-6ma-kabul",
+    "robots": "index,follow,max-image-preview:large",
+    "lastModified": "2026-08-03",
+    "topics": [
+      "EV şarj",
+      "RCD Tip B",
+      "RDC-DD",
+      "6 mA DC",
+      "kaçak akım koruması",
+      "wallbox",
+      "IEC 62955"
+    ]
+  },
+  "quality": {
+    "score": 88,
+    "minimumRequired": 85,
+    "checks": {
+      "metadata": false,
+      "directAnswer": true,
+      "contentDepth": true,
+      "sources": true,
+      "safety": true,
+      "internalLinks": true,
+      "uniqueness": true,
+      "structuredData": true
+    },
+    "similarity": {
+      "maximum": 0.4545,
+      "closestPath": "https://www.alo186.com/haberler/ev-sarj-kacak-akim-type-a-type-b-6ma-rdc-dd"
+    }
+  }
+}
