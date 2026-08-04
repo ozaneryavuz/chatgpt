@@ -201,7 +201,13 @@ def main() -> None:
 
     assert policy["professionalLeadOnlyRoutePatterns"], "Profesyonel-only desenleri boş olamaz"
     assert policy["reviewOnlyRoutePatterns"], "İnceleme kuyruğu desenleri boş olamaz"
-    assert policy["legacyMigrationQueue"], "Eski affiliate rotaları için geçiş kuyruğu bulunmalı"
+    legacy_queue = policy["legacyMigrationQueue"]
+    assert isinstance(legacy_queue, list), "Legacy migration queue liste olmalı"
+    if not legacy_queue:
+        assert "modem-ont-mini-ups-yedekleme" in governed_patterns, (
+            "Boş migration kuyruğunda güncel modem/ONT canonical deseni yönetilen portföyde olmalı"
+        )
+        assert "modem-mini-ups" not in legacy_queue and "ont-mini-ups" not in legacy_queue
 
     zero_affiliate_pages = sum(
         assert_zero_affiliate_prefix(prefix) for prefix in policy["zeroAffiliatePrefixes"]
@@ -223,7 +229,7 @@ def main() -> None:
         "governedRoutes": len(governed),
         "governedAmazonLinks": sum(item["amazonLinks"] for item in governed),
         "canonicalOverrides": len(canonical_overrides),
-        "legacyMigrationQueue": len(policy["legacyMigrationQueue"]),
+        "legacyMigrationQueue": len(legacy_queue),
         "zeroAffiliatePages": zero_affiliate_pages,
         "blockedCandidateRoutes": len(policy["blockedCandidateRoutes"]),
         "unverifiedSchemaFields": 0,
