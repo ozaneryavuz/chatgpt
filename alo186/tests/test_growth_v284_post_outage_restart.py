@@ -52,7 +52,7 @@ def main() -> None:
     for required in (
         "Enerji geri geldiğinde önce tehlikeyi dışlayın",
         "Koruma yeniden açıyorsa zorlamayın",
-        "yeni ürün almanız gerekmez",
+        "ek ürün almanız gerekmez",
         "ALO186 EDAŞ, servis, üretici veya kamu kurumu değildir",
         "/hesaplama/elektrik-geldikten-sonra-cihaz-yeniden-baslatma-plani/",
         "/sektor-rehberi/elektrik-kesintisi-sonrasi-cihaz-koruma-karar-merkezi/",
