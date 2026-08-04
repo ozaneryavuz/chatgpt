@@ -1,0 +1,99 @@
+name: ALO186 EV şarj kesintisi ve planlı hatırlatıcı v280
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/elektrik-kesilince-elektrikli-arac-sarji-ne-olur/**'
+      - 'alo186/hesaplama/ev-sarj-istasyonu-elektrik-kesintisi-yeniden-baslatma-plani/**'
+      - 'alo186/hesaplama/planli-elektrik-kesintisi-takvim-hatirlatici/**'
+      - 'alo186/deployment/routing-overlays/growth-v280-ev-outage-reminder.json'
+      - 'alo186/deployment/affiliate-category-decisions/ev-charging-outage-v280.json'
+      - 'alo186/deployment/affiliate_route_risk_policy_v265.json'
+      - 'alo186/tests/test_growth_v280_ev_outage_reminder.py'
+      - '.github/workflows/alo186-growth-v280-ev-outage-reminder.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/elektrik-kesilince-elektrikli-arac-sarji-ne-olur/**'
+      - 'alo186/hesaplama/ev-sarj-istasyonu-elektrik-kesintisi-yeniden-baslatma-plani/**'
+      - 'alo186/hesaplama/planli-elektrik-kesintisi-takvim-hatirlatici/**'
+      - 'alo186/deployment/routing-overlays/growth-v280-ev-outage-reminder.json'
+      - 'alo186/deployment/affiliate-category-decisions/ev-charging-outage-v280.json'
+      - 'alo186/deployment/affiliate_route_risk_policy_v265.json'
+      - 'alo186/tests/test_growth_v280_ev_outage_reminder.py'
+      - '.github/workflows/alo186-growth-v280-ev-outage-reminder.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-growth-v280-ev-outage-reminder-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: EV şarj kesintisi, gizlilik ve professional-only sınırı
+        run: |
+          set -euo pipefail
+          python -m py_compile alo186/tests/test_growth_v280_ev_outage_reminder.py alo186/tests/test_affiliate_route_risk_policy_v265.py
+          python alo186/tests/test_growth_v280_ev_outage_reminder.py
+          python alo186/tests/test_affiliate_route_risk_policy_v265.py
+          python -m json.tool alo186/deployment/routing-overlays/growth-v280-ev-outage-reminder.json >/dev/null
+          python -m json.tool alo186/deployment/affiliate-category-decisions/ev-charging-outage-v280.json >/dev/null
+          python -m json.tool alo186/deployment/affiliate_route_risk_policy_v265.json >/dev/null
+
+      - name: Canonical production build ve static smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-v280
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-v280 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-v280
+          test -f /tmp/alo186-v280/haberler/elektrik-kesilince-elektrikli-arac-sarji-ne-olur/index.html
+          test -f /tmp/alo186-v280/hesaplama/ev-sarj-istasyonu-elektrik-kesintisi-yeniden-baslatma-plani/index.html
+          test -f /tmp/alo186-v280/hesaplama/planli-elektrik-kesintisi-takvim-hatirlatici/index.html
+
+      - name: ChatGPT Sites aktarım paketi kabulü
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-sites-v280
+          python alo186/deployment/export_chatgpt_sites_bundle_v2.py --output /tmp/alo186-sites-v280 --commit "$GITHUB_SHA"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/alo186-sites-v280')
+          manifest = json.loads((root / 'sites-import.json').read_text(encoding='utf-8'))
+          pages = {item['canonicalPath']: item for item in manifest['pages']}
+          expected = {
+              '/haberler/elektrik-kesilince-elektrikli-arac-sarji-ne-olur/',
+              '/hesaplama/ev-sarj-istasyonu-elektrik-kesintisi-yeniden-baslatma-plani/',
+              '/hesaplama/planli-elektrik-kesintisi-takvim-hatirlatici/',
+          }
+          assert expected.issubset(pages), expected - set(pages)
+          for path in expected:
+              assert not pages[path]['affiliate']['unsafeStaticLinks']
+              assert pages[path]['affiliate']['hasAffiliateLinks'] is False
+          print(json.dumps({'ok': True, 'routes': sorted(expected), 'affiliateLinks': 0, 'unsafeStaticLinks': 0}, ensure_ascii=False))
+          PY
+
+      - name: Özet
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ## ALO186 v280 EV şarj kesintisi ve planlı hatırlatıcı
+
+          - Arama niyeti: elektrik kesilince EV şarjı / kablo kilidi / güvenli yeniden başlatma
+          - Ücretsiz araç: ev wallbox, halka açık istasyon, koruma, bağlantı ve gerçek test
+          - Tekrar ziyaret: resmî planlı kesinti saatini yerel takvime alma ve yeniden doğrulama
+          - Mevcut sistem yeterliyse: yeni ürün almayın
+          - Wallbox, EVSE, UPS, jeneratör, transfer ve V2H/V2G: professional-only
+          - Affiliate bağlantısı, fiyat, stok, puan, yorum, teslimat, garanti ve Offer: yok
+          - Kişisel veri, ağ isteği ve tarayıcı depolaması: yok
+          EOF
