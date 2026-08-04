@@ -1,0 +1,21 @@
+{
+  "version": 273,
+  "name": "growth-v273-heat-outage",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesilince-klima-calisir-mi/index.html",
+      "canonicalPath": "/haberler/elektrik-kesilince-klima-calisir-mi/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/elektrik-kesintisinde-sicak-hava-serinleme-plani/index.html",
+      "canonicalPath": "/hesaplama/elektrik-kesintisinde-sicak-hava-serinleme-plani/",
+      "type": "tool"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/sarjli-fan-termometre-elektrik-kesintisi-secimi/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/sarjli-fan-termometre-elektrik-kesintisi-secimi/",
+      "type": "commerce"
+    }
+  ]
+}
