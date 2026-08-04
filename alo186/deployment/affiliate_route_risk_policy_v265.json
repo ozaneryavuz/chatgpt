@@ -71,7 +71,11 @@
     "ats",
     "sabit-tesisat",
     "pelet-sobasi",
-    "pelet-kazani"
+    "pelet-kazani",
+    "hidrofor",
+    "pompa",
+    "kuyu-pompasi",
+    "yangin-pompasi"
   ],
   "portfolioRules": {
     "genericDIYRequiresDirectElectricalContinuityOrSafetyIntent": true,

@@ -1,0 +1,58 @@
+{
+  "version": 278,
+  "reviewDate": "2026-08-04",
+  "intent": "elektrik kesilince hidrofor calisir mi / apartmanda elektrik kesilince su akar mi / hidrofor icin UPS",
+  "decision": "professional-only-no-direct-affiliate",
+  "reason": "Hidrofor ve pompa sistemleri motor kalkisi, faz yapisi, kontrol panosu, kuru calisma korumasi, depo, transfer ve sabit tesisatla birlikte degerlendirilir. Modelden ve projeden bagimsiz UPS, inverter veya jeneratör onerisi elektrik carpmasi, geri besleme, pompa hasari ve su hizmeti kaybi riski yaratabilir.",
+  "searchDemandEvidence": {
+    "checkedAt": "2026-08-04",
+    "observedGap": "Turkce arama sonuclarinda hidroforun kesintide durdugu belirtilse de jeneratör veya UPS onerisi cogu kez pompa kalkisi, faz, depo, kuru calisma, transfer ve bina olcegi ayrimi yapilmadan veriliyor.",
+    "primarySources": [
+      "https://www.grundfos.com/solutions/support/faq/can-the-scala-pumps-work-during-a-power-outage-",
+      "https://www.grundfos.com/uk/learn/research-and-insights/dry-running-protection",
+      "https://www.osha.gov/Publications/portable_generator_safety.pdf"
+    ]
+  },
+  "conversionPolicy": {
+    "directAffiliateLinksAllowed": false,
+    "activeHazardCommerceClosed": true,
+    "professionalDesignRequiredForBackupPower": true,
+    "noBuyOutcomeRequired": true,
+    "personalDataCollectionForbidden": true,
+    "noPriceStockRatingWarrantyClaims": true,
+    "officialInstitutionImpressionForbidden": true
+  },
+  "permittedConversionPaths": [
+    {
+      "type": "no-buy",
+      "condition": "Sebeke veya yercekimiyle su hizmeti yeterli ya da projelendirilmis mevcut yedekleme son 90 gun testinde hedefi sagliyor"
+    },
+    {
+      "type": "maintenance-and-retest",
+      "condition": "Mevcut sistem var ancak test eski; 30/90/365 gunluk kontrol dongusu"
+    },
+    {
+      "type": "authorized-service",
+      "condition": "Kuru calisma, seviye, otomatik yeniden baslama veya pompa kontrol davranisi belirsiz"
+    },
+    {
+      "type": "professional-engineering-lead",
+      "condition": "Apartman, site, otel, kuyu, coklu pompa, uc faz, yangin suyu, basarisiz test veya jeneratör-transfer ihtiyaci"
+    }
+  ],
+  "excludedConsumerAffiliateClasses": [
+    "hydrofor UPS",
+    "pump inverter",
+    "pump battery bank",
+    "portable generator for building pump",
+    "automatic transfer switch",
+    "pump control panel",
+    "well pump backup system",
+    "fire pump backup system"
+  ],
+  "repeatVisitReasons": [
+    {"days": 30, "reason": "Su temasi, kacaga dair gorsel kontrol, depo seviyesi ve kuru calisma uyarisi"},
+    {"days": 90, "reason": "Yetkili prosedurle kritik katlara su hizmeti ve enerji geri donus testi"},
+    {"days": 365, "reason": "Pompa, pano, koruma, depo, transfer ve jeneratör koordinasyonunun profesyonel kontrolu"}
+  ]
+}
