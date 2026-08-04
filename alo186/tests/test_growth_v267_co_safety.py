@@ -88,7 +88,7 @@ def main() -> None:
         "Mevcut alarmım doğru konumda",
         "Fiyat, stok, satıcı, teslimat, puan, yorum ve garanti",
         "ALO186 satıcı, üretici, montaj firması veya resmî kurum değildir",
-        "alarm yanlış konumu telafi etmek için alınıyorsa",
+        "Alarmı, yanlış jeneratör konumunun telafisi olarak satın almayın",
     ):
         assert phrase in selector, phrase
     assert selector.index("Can güvenliği sınırı") < selector.index("data-affiliate-href")
