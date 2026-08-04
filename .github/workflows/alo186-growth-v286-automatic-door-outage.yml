@@ -1,0 +1,99 @@
+name: ALO186 otomatik kapı kesinti güvenliği v286
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/elektrik-kesilince-otomatik-kapi-acilir-mi/**'
+      - 'alo186/hesaplama/otomatik-kapi-elektrik-kesintisi-cikis-plani/**'
+      - 'alo186/sektor-rehberi/otomatik-kapi-erisim-kontrolu-kesinti-surekliligi/**'
+      - 'alo186/deployment/routing-overlays/growth-v286-automatic-door-outage.json'
+      - 'alo186/deployment/affiliate-category-decisions/automatic-door-access-control-outage-v286.json'
+      - 'alo186/deployment/affiliate_route_risk_policy_v265.json'
+      - 'alo186/tests/test_growth_v286_automatic_door_outage.py'
+      - '.github/workflows/alo186-growth-v286-automatic-door-outage.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/elektrik-kesilince-otomatik-kapi-acilir-mi/**'
+      - 'alo186/hesaplama/otomatik-kapi-elektrik-kesintisi-cikis-plani/**'
+      - 'alo186/sektor-rehberi/otomatik-kapi-erisim-kontrolu-kesinti-surekliligi/**'
+      - 'alo186/deployment/routing-overlays/growth-v286-automatic-door-outage.json'
+      - 'alo186/deployment/affiliate-category-decisions/automatic-door-access-control-outage-v286.json'
+      - 'alo186/deployment/affiliate_route_risk_policy_v265.json'
+      - 'alo186/tests/test_growth_v286_automatic_door_outage.py'
+      - '.github/workflows/alo186-growth-v286-automatic-door-outage.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-growth-v286-automatic-door-outage-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Otomatik kapı arama niyeti, gizlilik ve professional-only sınır
+        run: |
+          set -euo pipefail
+          python -m py_compile alo186/tests/test_growth_v286_automatic_door_outage.py alo186/tests/test_affiliate_route_risk_policy_v265.py
+          python alo186/tests/test_growth_v286_automatic_door_outage.py
+          python alo186/tests/test_affiliate_route_risk_policy_v265.py
+          python -m json.tool alo186/deployment/routing-overlays/growth-v286-automatic-door-outage.json >/dev/null
+          python -m json.tool alo186/deployment/affiliate-category-decisions/automatic-door-access-control-outage-v286.json >/dev/null
+          python -m json.tool alo186/deployment/affiliate_route_risk_policy_v265.json >/dev/null
+
+      - name: Canonical production build ve static smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-v286
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-v286 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-v286
+          test -f /tmp/alo186-v286/haberler/elektrik-kesilince-otomatik-kapi-acilir-mi/index.html
+          test -f /tmp/alo186-v286/hesaplama/otomatik-kapi-elektrik-kesintisi-cikis-plani/index.html
+          test -f /tmp/alo186-v286/sektor-rehberi/otomatik-kapi-erisim-kontrolu-kesinti-surekliligi/index.html
+
+      - name: ChatGPT Sites aktarım paketi kabulü
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-sites-v286
+          python alo186/deployment/export_chatgpt_sites_bundle_v2.py --output /tmp/alo186-sites-v286 --commit "$GITHUB_SHA"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/alo186-sites-v286')
+          manifest = json.loads((root / 'sites-import.json').read_text(encoding='utf-8'))
+          pages = {item['canonicalPath']: item for item in manifest['pages']}
+          expected = {
+              '/haberler/elektrik-kesilince-otomatik-kapi-acilir-mi/',
+              '/hesaplama/otomatik-kapi-elektrik-kesintisi-cikis-plani/',
+              '/sektor-rehberi/otomatik-kapi-erisim-kontrolu-kesinti-surekliligi/',
+          }
+          assert expected.issubset(pages), expected - set(pages)
+          for path in expected:
+              assert not pages[path]['affiliate']['unsafeStaticLinks']
+              assert pages[path]['affiliate']['hasAffiliateLinks'] is False
+          print(json.dumps({'ok': True, 'routes': sorted(expected), 'affiliateLinks': 0, 'unsafeStaticLinks': 0}, ensure_ascii=False))
+          PY
+
+      - name: Özet
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ## ALO186 v286 otomatik kapı ve erişim kontrolü kesinti güvenliği
+
+          - Arama niyeti: elektrik kesilince otomatik kapı / manyetik kilit / kartlı geçiş ne olur
+          - Ücretsiz araç: kapı tipi, serbest çıkış, yangın yolu, batarya/UPS ve son test kararı
+          - Mevcut sistem güvenli testte yeterliyse: yeni ürün almayın
+          - Otomatik kapı, kilit, acil açma ve yedek enerji: professional-only
+          - Amazon veya başka mağaza bağlantısı: yok
+          - Fiyat, stok, puan, yorum, teslimat, garanti, Offer ve AggregateRating: yok
+          - 30/90/365 günlük tekrar ziyaret: yerel takvim dosyası
+          EOF

@@ -82,7 +82,13 @@
     "ev-sarj-istasyonu-kesinti",
     "wallbox-yedekleme",
     "evse-yedekleme",
-    "sarj-istasyonu-surekliligi"
+    "sarj-istasyonu-surekliligi",
+    "otomatik-kapi",
+    "erisim-kontrolu",
+    "manyetik-kilit",
+    "elektrikli-karsilik",
+    "kartli-gecis",
+    "acil-cikis-kapisi"
   ],
   "portfolioRules": {
     "genericDIYRequiresDirectElectricalContinuityOrSafetyIntent": true,
