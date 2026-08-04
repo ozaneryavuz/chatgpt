@@ -44,6 +44,9 @@ SHARED_STATIC_ASSETS = (
     # Kritik sistem hesaplayıcıları aynı erişilebilir ve mobil stil sözleşmesini
     # canonical ile project-path paketlerinde tek public asset olarak kullanır.
     ("alo186/assets/critical-continuity-v126.css", "assets/critical-continuity-v126.css"),
+    # Akıllı priz seçim rehberi bu ortak, kişisel verisiz yolculuk ölçüm dosyasını
+    # kök /assets rotasından çağırır; canonical ve Pages artifactlarında birlikte yayınlanır.
+    ("alo186/assets/alo186-track-v253.js", "assets/alo186-track-v253.js"),
 )
 
 ROOT_STATIC_FILES = (
