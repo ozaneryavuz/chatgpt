@@ -2,8 +2,9 @@
   'use strict';
 
   const STORAGE_KEY = 'alo186.outageJournal.v1';
-  const BUSINESS_DAYS = 10;
-  const SOURCE_URL = 'https://www.epdk.gov.tr/Detay/Icerik/12-3/1-elektrik-aboneligini-kendi-adima-almak-zorunda';
+  const CALENDAR_DAYS = 30;
+  const SOURCE_URL = 'https://www.resmigazete.gov.tr/eskiler/2020/12/20201229M1-1.htm';
+  const AMENDMENT_URL = 'https://www.resmigazete.gov.tr/eskiler/2025/10/20251023-5.htm';
   const ARTICLE_URL = '/haberler/elektrik-kesintisi-cihaz-hasari-edas-basvurusu';
   const panel = document.getElementById('damageDeadlinePlanner');
   const summary = document.getElementById('damageDeadlineSummary');
@@ -34,15 +35,9 @@
     year: 'numeric',
   }).format(date);
 
-  const isWeekend = (date) => date.getDay() === 0 || date.getDay() === 6;
-
-  const addBusinessDays = (startDate, count) => {
+  const addCalendarDays = (startDate, count) => {
     const date = new Date(startDate.getTime());
-    let added = 0;
-    while (added < count) {
-      date.setDate(date.getDate() + 1);
-      if (!isWeekend(date)) added += 1;
-    }
+    date.setDate(date.getDate() + count);
     return date;
   };
 
@@ -64,7 +59,7 @@
           return {
             id: String(entry.id || entry.date),
             eventDate,
-            deadline: addBusinessDays(eventDate, BUSINESS_DAYS),
+            deadline: addCalendarDays(eventDate, CALENDAR_DAYS),
           };
         })
         .filter(Boolean)
@@ -76,10 +71,10 @@
 
   const deadlineStatus = (entry) => {
     const remaining = remainingCalendarDays(entry.deadline);
-    if (remaining < 0) return { className: 'expired', text: 'Planlama tarihi geçmiş görünüyor; yine de resmî kayıt oluşturup gerekçeli yanıt isteyin.' };
-    if (remaining === 0) return { className: 'urgent', text: 'Yaklaşık planlama tarihi bugün. Resmî kanalı gecikmeden kullanın.' };
-    if (remaining <= 3) return { className: 'urgent', text: `Yaklaşık ${remaining} takvim günü kaldı. Resmî başvuruyu geciktirmeyin.` };
-    return { className: 'open', text: `Yaklaşık ${remaining} takvim günü kaldı.` };
+    if (remaining < 0) return { className: 'expired', text: 'Yaklaşık süre geçmiş görünüyor; yine de resmî kayıt oluşturup gerekçeli yanıt isteyin.' };
+    if (remaining === 0) return { className: 'urgent', text: 'Yaklaşık son gün bugün. Resmî kanalı gecikmeden kullanın.' };
+    if (remaining <= 3) return { className: 'urgent', text: `Yaklaşık ${remaining} gün kaldı. Resmî başvuruyu geciktirmeyin.` };
+    return { className: 'open', text: `Yaklaşık ${remaining} gün kaldı.` };
   };
 
   const render = () => {
@@ -93,10 +88,10 @@
     }
 
     const earliest = currentDamageEntries[0];
-    summary.innerHTML = `<strong>${currentDamageEntries.length} cihaz hasarı şüphesi için yerel süre planı hazır.</strong> En erken yaklaşık tarih <b>${formatDate(earliest.deadline)}</b>. Bu tarih yalnız hafta sonlarını dışlayan yardımcı bir hesaplamadır; resmî tatilleri otomatik hesaplamaz ve resmî uygunluk kararı değildir.`;
+    summary.innerHTML = `<strong>${currentDamageEntries.length} cihaz hasarı şüphesi için yerel süre planı hazır.</strong> En erken yaklaşık tarih <b>${formatDate(earliest.deadline)}</b>. Kalite Yönetmeliği Madde 26/1 kapsamında 30 takvim günü eklenerek hesaplanmıştır; resmî uygunluk veya tazminat kararı değildir.`;
     entriesHost.innerHTML = currentDamageEntries.map((entry) => {
       const status = deadlineStatus(entry);
-      return `<li class="damage-deadline-item ${status.className}"><span><b>Olay tarihi:</b> ${formatDate(entry.eventDate)}</span><span><b>10 iş günü için yardımcı tarih:</b> ${formatDate(entry.deadline)}</span><small>${status.text}</small></li>`;
+      return `<li class="damage-deadline-item ${status.className}"><span><b>Olay tarihi:</b> ${formatDate(entry.eventDate)}</span><span><b>30 gün için yardımcı tarih:</b> ${formatDate(entry.deadline)}</span><small>${status.text}</small></li>`;
     }).join('');
     reminderButton.disabled = false;
   };
@@ -112,19 +107,17 @@
   const createReminder = () => {
     if (!currentDamageEntries.length) return;
     const earliest = currentDamageEntries[0];
-    const reminderDate = new Date(earliest.deadline.getTime());
-    reminderDate.setDate(reminderDate.getDate() - 1);
-    while (isWeekend(reminderDate)) reminderDate.setDate(reminderDate.getDate() - 1);
-    const endDate = new Date(reminderDate.getTime());
-    endDate.setDate(endDate.getDate() + 1);
+    const reminderDate = addCalendarDays(earliest.deadline, -3);
+    const endDate = addCalendarDays(reminderDate, 1);
     const now = new Date();
-    const stamp = `${now.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z')}`;
+    const stamp = now.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
     const uid = `alo186-cihaz-hasari-${dateKey(earliest.eventDate)}-${dateKey(earliest.deadline)}@alo186.com`;
     const description = [
-      'EPDK tüketici açıklamasındaki 10 iş günlük süre için yardımcı hatırlatmadır.',
-      'Resmî tatiller otomatik hesaplanmamıştır. Sonucu dağıtım şirketinin resmî kanalı belirler.',
+      'Kalite Yönetmeliği Madde 26/1 kapsamındaki 30 günlük talep süresi için yardımcı hatırlatmadır.',
+      'Hasarın dağıtım sisteminden kaynaklandığını ve sürecin sonucunu dağıtım şirketinin teknik incelemesi belirler.',
       `ALO186 rehberi: https://alo186.com${ARTICLE_URL}`,
-      `EPDK kaynağı: ${SOURCE_URL}`,
+      `Kalite Yönetmeliği: ${SOURCE_URL}`,
+      `23 Ekim 2025 değişikliği: ${AMENDMENT_URL}`,
     ].join('\n');
     const ics = [
       'BEGIN:VCALENDAR',
@@ -137,7 +130,7 @@
       `DTSTAMP:${stamp}`,
       `DTSTART;VALUE=DATE:${icsDate(reminderDate)}`,
       `DTEND;VALUE=DATE:${icsDate(endDate)}`,
-      `SUMMARY:${escapeIcs('Cihaz hasarı resmî başvuru süresini kontrol et')}`,
+      `SUMMARY:${escapeIcs('Cihaz hasarı resmî talep süresini kontrol et')}`,
       `DESCRIPTION:${escapeIcs(description)}`,
       `URL:${SOURCE_URL}`,
       'TRANSP:TRANSPARENT',
