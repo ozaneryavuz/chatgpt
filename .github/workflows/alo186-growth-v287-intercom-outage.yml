@@ -1,0 +1,86 @@
+name: ALO186 diafon interkom kesinti güvenliği v287
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/elektrik-kesilince-diafon-calisir-mi/**'
+      - 'alo186/hesaplama/diafon-elektrik-kesintisi-haberlesme-plani/**'
+      - 'alo186/sektor-rehberi/apartman-site-diafon-interkom-kesinti-surekliligi/**'
+      - 'alo186/deployment/routing-overlays/growth-v287-intercom-outage.json'
+      - 'alo186/deployment/affiliate-category-decisions/intercom-outage-v287.json'
+      - 'alo186/deployment/affiliate_route_risk_policy_v265.json'
+      - 'alo186/tests/test_growth_v287_intercom_outage.py'
+      - '.github/workflows/alo186-growth-v287-intercom-outage.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/elektrik-kesilince-diafon-calisir-mi/**'
+      - 'alo186/hesaplama/diafon-elektrik-kesintisi-haberlesme-plani/**'
+      - 'alo186/sektor-rehberi/apartman-site-diafon-interkom-kesinti-surekliligi/**'
+      - 'alo186/deployment/routing-overlays/growth-v287-intercom-outage.json'
+      - 'alo186/deployment/affiliate-category-decisions/intercom-outage-v287.json'
+      - 'alo186/deployment/affiliate_route_risk_policy_v265.json'
+      - 'alo186/tests/test_growth_v287_intercom_outage.py'
+      - '.github/workflows/alo186-growth-v287-intercom-outage.yml'
+permissions:
+  contents: read
+concurrency:
+  group: alo186-growth-v287-intercom-outage-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Diafon arama niyeti gizlilik ve professional-only sınır
+        run: |
+          set -euo pipefail
+          python -m py_compile alo186/tests/test_growth_v287_intercom_outage.py alo186/tests/test_affiliate_route_risk_policy_v265.py
+          python alo186/tests/test_growth_v287_intercom_outage.py
+          python alo186/tests/test_affiliate_route_risk_policy_v265.py
+          python -m json.tool alo186/deployment/routing-overlays/growth-v287-intercom-outage.json >/dev/null
+          python -m json.tool alo186/deployment/affiliate-category-decisions/intercom-outage-v287.json >/dev/null
+          python -m json.tool alo186/deployment/affiliate_route_risk_policy_v265.json >/dev/null
+      - name: Canonical production build ve static smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-v287
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-v287 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-v287
+          test -f /tmp/alo186-v287/haberler/elektrik-kesilince-diafon-calisir-mi/index.html
+          test -f /tmp/alo186-v287/hesaplama/diafon-elektrik-kesintisi-haberlesme-plani/index.html
+          test -f /tmp/alo186-v287/sektor-rehberi/apartman-site-diafon-interkom-kesinti-surekliligi/index.html
+      - name: ChatGPT Sites aktarım paketi kabulü
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-sites-v287
+          python alo186/deployment/export_chatgpt_sites_bundle_v2.py --output /tmp/alo186-sites-v287 --commit "$GITHUB_SHA"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('/tmp/alo186-sites-v287')
+          manifest=json.loads((root/'sites-import.json').read_text(encoding='utf-8'))
+          pages={item['canonicalPath']:item for item in manifest['pages']}
+          expected={'/haberler/elektrik-kesilince-diafon-calisir-mi/','/hesaplama/diafon-elektrik-kesintisi-haberlesme-plani/','/sektor-rehberi/apartman-site-diafon-interkom-kesinti-surekliligi/'}
+          assert expected.issubset(pages),expected-set(pages)
+          for path in expected:
+              assert pages[path]['affiliate']['hasAffiliateLinks'] is False
+              assert not pages[path]['affiliate']['unsafeStaticLinks']
+          print(json.dumps({'ok':True,'routes':sorted(expected),'affiliateLinks':0,'unsafeStaticLinks':0},ensure_ascii=False))
+          PY
+      - name: Özet
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ## ALO186 v287 diafon ve interkom kesinti sürekliliği
+          - Arama niyeti: elektrik kesilince diafon / görüntülü kapı telefonu çalışır mı
+          - Ücretsiz araç: güç, PoE, ağ, kapı açma ve gerçek kesinti testi
+          - Mevcut sistem yeterliyse: yeni ürün almayın
+          - Sabit diafon, interkom, kilit ve yedek enerji: professional-only
+          - Amazon veya başka mağaza bağlantısı: yok
+          - Fiyat, stok, puan, yorum, teslimat, garanti, Offer ve AggregateRating: yok
+          - 30/90/365 günlük tekrar ziyaret: yerel takvim dosyası
+          EOF

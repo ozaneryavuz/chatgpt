@@ -8,11 +8,7 @@
   "affiliateProgram": {
     "merchant": "Amazon Türkiye",
     "tag": "alo186rehber-21",
-    "requiredRel": [
-      "sponsored",
-      "nofollow",
-      "noopener"
-    ],
+    "requiredRel": ["sponsored", "nofollow", "noopener"],
     "disclosureBeforeLinkRequired": true,
     "noBuyOutcomeRequired": true
   },
@@ -21,23 +17,10 @@
     "activeHazardCommerceClosed": true,
     "personalDataCollectionForbidden": true,
     "locationAndEmergencyPagesZeroAffiliate": true,
-    "unverifiedCommercialFieldsForbidden": [
-      "offers",
-      "price",
-      "priceCurrency",
-      "availability",
-      "aggregateRating",
-      "review",
-      "warranty",
-      "delivery"
-    ],
+    "unverifiedCommercialFieldsForbidden": ["offers", "price", "priceCurrency", "availability", "aggregateRating", "review", "warranty", "delivery"],
     "productSchemaWithoutVerifiedOffer": "generic-class-only"
   },
-  "zeroAffiliatePrefixes": [
-    "/il/",
-    "/dagitim-sirketleri/",
-    "/acil-numaralar/"
-  ],
+  "zeroAffiliatePrefixes": ["/il/", "/dagitim-sirketleri/", "/acil-numaralar/"],
   "governedAffiliateRoutePatterns": [
     "akvaryum-pilli-usb-hava-motoru",
     "pilli-su-kacagi-alarmi",
@@ -53,14 +36,7 @@
     "modem-ont-mini-ups-yedekleme"
   ],
   "legacyMigrationQueue": [],
-  "reviewOnlyRoutePatterns": [
-    "lazer-metre",
-    "lazer-hizalama",
-    "genel-el-aleti",
-    "usb-c-hub",
-    "seyahat-priz-adaptoru",
-    "post-outage-appliance-restart"
-  ],
+  "reviewOnlyRoutePatterns": ["lazer-metre", "lazer-hizalama", "genel-el-aleti", "usb-c-hub", "seyahat-priz-adaptoru", "post-outage-appliance-restart"],
   "professionalLeadOnlyRoutePatterns": [
     "kablo-soyma",
     "terminal-hazirlama",
@@ -88,7 +64,11 @@
     "manyetik-kilit",
     "elektrikli-karsilik",
     "kartli-gecis",
-    "acil-cikis-kapisi"
+    "acil-cikis-kapisi",
+    "diafon",
+    "interkom",
+    "goruntulu-kapi-telefonu",
+    "sip-interkom"
   ],
   "portfolioRules": {
     "genericDIYRequiresDirectElectricalContinuityOrSafetyIntent": true,

@@ -1,0 +1,21 @@
+{
+  "version": 287,
+  "name": "growth-v287-intercom-outage",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesilince-diafon-calisir-mi/index.html",
+      "canonicalPath": "/haberler/elektrik-kesilince-diafon-calisir-mi/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/diafon-elektrik-kesintisi-haberlesme-plani/index.html",
+      "canonicalPath": "/hesaplama/diafon-elektrik-kesintisi-haberlesme-plani/",
+      "type": "tool"
+    },
+    {
+      "source": "alo186/sektor-rehberi/apartman-site-diafon-interkom-kesinti-surekliligi/index.html",
+      "canonicalPath": "/sektor-rehberi/apartman-site-diafon-interkom-kesinti-surekliligi/",
+      "type": "professional-guide"
+    }
+  ]
+}
