@@ -1,0 +1,64 @@
+{
+  "version": 284,
+  "category": "post-outage-appliance-restart",
+  "decision": "decision-first-no-new-affiliate-route",
+  "reviewedAt": "2026-08-04",
+  "searchIntent": [
+    "elektrik geldikten sonra cihazlar hemen açılır mı",
+    "elektrik gidip gelince çamaşır makinesi kaldığı yerden devam eder mi",
+    "elektrik kesintisi sonrası sigorta tekrar atıyor",
+    "buzdolabı ve klima elektrik geldikten sonra ne zaman çalışır"
+  ],
+  "userJourney": [
+    "active hazard and repeated protection trip check",
+    "device class and exact model restart behavior",
+    "no-buy when normal operation is verified",
+    "manufacturer service for device-only error",
+    "electrician for repeated trip or multi-device anomaly",
+    "official EDAŞ channel or 186 for area outage",
+    "existing gated technical route only for a verified low-risk gap"
+  ],
+  "allowedExistingAffiliateClasses": [
+    "manufacturer-compatible delayed under-over-voltage protection for a suitable plug-in compressor appliance after technical verification",
+    "rated energy-monitoring plug for a supported low-risk plug-in load used only for measurement",
+    "surge-protection class for suitable electronics where it is not presented as a substitute for earthing RCD or panel SPD"
+  ],
+  "excludedConsumerAffiliateClasses": [
+    "generic surge strip or adapter chain for washing machine dishwasher split air conditioner heat pump or fixed high-power appliance",
+    "product offered while RCD RCBO or circuit breaker repeatedly trips",
+    "product offered for wet melted overheated loose or electrically damaged equipment",
+    "universal restart-delay runtime protection or warranty promise",
+    "consumer plug-in product presented as a repair for an internal appliance or building wiring fault",
+    "new duplicate merchant route that cannibalizes the existing voltage-protection or smart-plug selector"
+  ],
+  "conversionPolicy": {
+    "newMerchantLinks": 0,
+    "reuseExistingGatedRoutesOnly": true,
+    "disclosureBeforeAnyDownstreamMerchantLinkRequired": true,
+    "noBuyOutcomeRequired": true,
+    "activeHazardCommerceClosed": true,
+    "repeatedTripCommerceClosed": true,
+    "fixedInstallationCommerceClosed": true,
+    "personalDataCollectionForbidden": true,
+    "noPriceStockRatingWarrantyClaims": true,
+    "officialInstitutionImpressionForbidden": true
+  },
+  "conversionPoints": [
+    {"result": "no-buy", "condition": "device follows exact-model instructions and operates without error or protection trip"},
+    {"result": "manufacturer-or-authorized-service", "condition": "single appliance has an error code fails to start or behaves abnormally"},
+    {"result": "electrician", "condition": "protection trips repeatedly or several circuits and appliances behave abnormally"},
+    {"result": "official-distributor-channel", "condition": "area or building supply outage is suspected"},
+    {"result": "existing-gated-tool", "condition": "a low-risk plug-in protection or measurement gap is technically verified"}
+  ],
+  "repeatVisitReasons": [
+    {"days": 30, "reason": "plug cord socket and visible heat or discoloration inspection"},
+    {"days": 90, "reason": "controlled post-outage restart drill using exact-model instructions"},
+    {"days": 365, "reason": "professional appliance connection protection and panel review"}
+  ],
+  "sources": [
+    {"publisher": "Samsung UK", "title": "What to do if your Washing Machine has no power", "url": "https://www.samsung.com/uk/support/home-appliances/how-to-resolve-a-washing-machine-with-no-power/", "checkedAt": "2026-08-04"},
+    {"publisher": "Samsung US", "title": "Power issues with Samsung washing machine", "url": "https://www.samsung.com/us/support/troubleshoot/TSG10007300/", "checkedAt": "2026-08-04"},
+    {"publisher": "Siemens Ev Aletleri", "title": "Çamaşır Makinesi Programı Başlamıyor", "url": "https://www.siemens-home.bsh-group.com/tr/musteri-hizmetleri/destek-merkezi/sorun-giderme/camasir-makinesi/camasir-makinesi-baslamiyor", "checkedAt": "2026-08-04"},
+    {"publisher": "Samsung Türkiye", "title": "Klimam için voltaj sabitleyici gerekir mi?", "url": "https://www.samsung.com/tr/support/home-appliances/klimam-icin-voltaj-sabitleyici-gerekir-mi/", "checkedAt": "2026-08-04"}
+  ]
+}
