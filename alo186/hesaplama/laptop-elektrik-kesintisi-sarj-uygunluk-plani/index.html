@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Laptop Kesinti Şarj Uygunluk Planı | USB-C PD, W ve Wh | ALO186</title>
+  <meta name="description" content="Laptopun USB-C PD desteğini, adaptör watt değerini, hedef süreyi, powerbank çıkışını ve gerçek testi kişisel veri göndermeden değerlendirin.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta name="theme-color" content="#071631">
+  <link rel="canonical" href="https://alo186.com/hesaplama/laptop-elektrik-kesintisi-sarj-uygunluk-plani/">
+  <style>
+    :root{--ink:#10213b;--muted:#58677a;--line:#d7e0eb;--soft:#f4f7fb;--brand:#0759ca;--safe:#17643a;--warn:#8a5300;--danger:#a21d26;--radius:18px}
+    *{box-sizing:border-box}body{margin:0;font:16px/1.55 system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink);background:var(--soft)}a{color:#064fae}
+    .shell{width:min(980px,calc(100% - 32px));margin:auto}.top,footer{background:#071631;color:#fff}.top .shell{display:flex;justify-content:space-between;gap:16px;align-items:center;padding:18px 0}.top a,footer a{color:#dbe7ff}.brand{font-weight:900;text-decoration:none}
+    .hero{padding:42px 0 12px}.hero h1{font-size:clamp(2rem,5vw,3.3rem);line-height:1.08;margin:.3rem 0}.lead{font-size:1.1rem;color:var(--muted)}
+    .card,.notice,.result{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:22px;margin:20px 0;box-shadow:0 10px 28px rgba(8,31,67,.06)}.notice{border-left:6px solid var(--danger)}
+    fieldset{border:0;padding:0;margin:0 0 18px}legend{font-weight:900;margin-bottom:8px}label{display:block;font-weight:750;margin:12px 0 5px}select,input{width:100%;min-height:48px;border:1px solid #9eacbd;border-radius:12px;padding:10px;font:inherit;background:#fff}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.checks label{display:flex;gap:10px;align-items:flex-start;font-weight:600}.checks input{width:22px;min-height:22px;margin-top:2px}
+    button,.button{display:inline-block;border:0;border-radius:999px;padding:13px 18px;font-weight:900;text-decoration:none;background:var(--brand);color:#fff;cursor:pointer;margin:6px 6px 6px 0}.secondary{background:#e8eef7;color:var(--ink)}
+    .result{display:none}.result.show{display:block}.safe{border-left:6px solid var(--safe)}.warn{border-left:6px solid var(--warn)}.danger{border-left:6px solid var(--danger)}.metric{font-size:1.7rem;font-weight:950}.small{font-size:.9rem;color:var(--muted)}
+    footer{margin-top:40px;padding:28px 0}@media(max-width:720px){.grid{grid-template-columns:1fr}.top .shell{flex-direction:column;align-items:flex-start}}
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@graph":[
+      {"@type":"WebApplication","name":"Laptop elektrik kesintisi şarj uygunluk planı","url":"https://alo186.com/hesaplama/laptop-elektrik-kesintisi-sarj-uygunluk-plani/","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","isAccessibleForFree":true,"inLanguage":"tr-TR","description":"USB-C PD, watt, Wh ve gerçek test üzerinden kişisel verisiz laptop yedek enerji planı."},
+      {"@type":"HowTo","name":"Kesintide laptop şarj uygunluğunu nasıl kontrol edersiniz?","step":[
+        {"@type":"HowToStep","name":"Batarya tehlikesini dışlayın","text":"Şişme, aşırı ısınma, duman, koku, sıvı veya fiziksel hasar varsa şarj etmeyin."},
+        {"@type":"HowToStep","name":"Şarj girişini doğrulayın","text":"Laptopun USB-C Power Delivery şarj kabul edip etmediğini üretici kılavuzundan doğrulayın."},
+        {"@type":"HowToStep","name":"W değerlerini eşleştirin","text":"Orijinal adaptör, güç kaynağı tek port çıkışı ve kablo watt kapasitesini karşılaştırın."},
+        {"@type":"HowToStep","name":"Enerji ihtiyacını hesaplayın","text":"Tipik yük watt değerini hedef saatle çarparak ham enerji ihtiyacını bulun; kayıplar nedeniyle bunu kesin kapasite saymayın."},
+        {"@type":"HowToStep","name":"Gerçek test yapın","text":"Mevcut çözüm hedef süreyi sağlıyorsa yeni ürün almayın."}
+      ]},
+      {"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ALO186","item":"https://alo186.com/"},{"@type":"ListItem","position":2,"name":"Hesaplama araçları","item":"https://alo186.com/hesaplama/"},{"@type":"ListItem","position":3,"name":"Laptop şarj uygunluk planı"}]}
+    ]
+  }
+  </script>
+</head>
+<body>
+<header class="top"><div class="shell"><a class="brand" href="/">ALO186 · bağımsız elektrik bilgi ağı</a><nav><a href="/haberler/elektrik-kesintisinde-laptop-nasil-sarj-edilir/">Rehber</a> · <a href="/amazon-elektrik-urunleri/laptop-usb-c-pd-powerbank-secimi/">Ürün sınıfları</a></nav></div></header>
+<main class="shell">
+  <section class="hero"><p class="small"><strong>Ücretsiz · kişisel veri yok · mağaza bağlantısı yok</strong></p><h1>Laptop kesinti şarj uygunluk planı</h1><p class="lead">Bu araç satın alma garantisi vermez. Şarj girişini, W/Wh değerlerini ve gerçek testi doğru sıraya koyar.</p></section>
+
+  <section class="notice"><h2>Önce batarya güvenliği</h2><p>Şişme, aşırı ısınma, duman, yanık kokusu, tıslama, sıvı teması veya fiziksel hasar varsa şarj etmeyin. Yangın ya da duman varsa güvenli alana geçip 112’yi arayın.</p></section>
+
+  <form id="planner" class="card">
+    <fieldset><legend>1. Şarj girişi</legend>
+      <label for="inputType">Laptop hangi girişten şarj oluyor?</label>
+      <select id="inputType" required>
+        <option value="">Seçin</option>
+        <option value="usbc">USB-C Power Delivery desteği kılavuzda doğrulandı</option>
+        <option value="proprietary">Yuvarlak uç / üreticiye özel giriş</option>
+        <option value="unknown">Bilmiyorum veya yalnız USB-C biçimini görüyorum</option>
+      </select>
+    </fieldset>
+
+    <div class="grid">
+      <fieldset><legend>2. Güç değerleri</legend>
+        <label for="adapterW">Orijinal adaptörün etiketteki gücü (W)</label><input id="adapterW" type="number" min="10" max="330" step="1" required>
+        <label for="loadW">Tipik kullanımda yaklaşık laptop yükü (W)</label><input id="loadW" type="number" min="5" max="330" step="1" required>
+        <label for="targetHours">Hedef çalışma süresi (saat)</label><input id="targetHours" type="number" min="0.25" max="24" step="0.25" required>
+      </fieldset>
+      <fieldset><legend>3. Mevcut güç kaynağı</legend>
+        <label for="sourceW">Powerbank veya kaynağın tek USB-C port çıkışı (W)</label><input id="sourceW" type="number" min="0" max="240" step="1" value="0">
+        <label for="sourceWh">Etiketteki enerji kapasitesi (Wh)</label><input id="sourceWh" type="number" min="0" max="500" step="0.1" value="0">
+        <label for="cableW">Kablonun işaretli kapasitesi (W)</label><input id="cableW" type="number" min="0" max="240" step="1" value="0">
+        <label for="testedMinutes">Mevcut çözümün gerçek test süresi (dakika)</label><input id="testedMinutes" type="number" min="0" max="1440" step="1" value="0">
+      </fieldset>
+    </div>
+
+    <fieldset class="checks"><legend>4. Güvenlik ve kapsam</legend>
+      <label><input id="hazard" type="checkbox"> Bataryada şişme, aşırı ısınma, duman, koku, sıvı veya fiziksel hasar var</label>
+      <label><input id="critical" type="checkbox"> Kullanım medikal, yaşam güvenliği, sunucu veya işletme sürekliliği açısından kritik</label>
+      <label><input id="manualChecked" type="checkbox"> Laptop kılavuzunu ve orijinal adaptör etiketini kontrol ettim</label>
+    </fieldset>
+
+    <button type="submit">Planı oluştur</button>
+    <button type="button" id="reset" class="secondary">Sıfırla</button>
+  </form>
+
+  <section id="result" class="result" aria-live="polite"></section>
+
+  <section class="card"><h2>Sonuç nasıl yorumlanır?</h2><ul>
+    <li><strong>Ham enerji ihtiyacı = tipik yük W × hedef saat.</strong> Bu değer dönüşüm kayıplarını, batarya yaşlanmasını ve aynı anda şarj/çalışma davranışını içermez; satın alınacak kapasite garantisi değildir.</li>
+    <li>Kaynağın tek port çıkışı ve kablo kapasitesi, laptopun gerekli gücünü karşılamalıdır.</li>
+    <li>Daha düşük güç bazı modellerde yalnız yavaş şarj veya bataryanın azalmaya devam etmesi sonucunu verebilir.</li>
+    <li>Gerçek test hedef süreyi sağlıyorsa yeni ürün almayın.</li>
+  </ul></section>
+
+  <section class="card"><h2>Tekrar ziyaret nedenleri</h2><p>İndirim takibi yerine gerçek işlev kontrolü kullanın.</p><button type="button" data-reminder="30">30 günlük batarya ve kablo kontrolü</button><button type="button" data-reminder="90">90 günlük gerçek kesinti testi</button><p class="small">Takvim dosyası yalnız cihazınızda oluşturulur; ad, e-posta, telefon, adres, cihaz seri numarası veya form cevapları gönderilmez.</p></section>
+</main>
+<footer><div class="shell"><strong>ALO186</strong><p>Bağımsız bilgilendirme platformudur; EDAŞ, kamu kurumu, üretici veya satıcı değildir.</p></div></footer>
+<script>
+(() => {
+  const form = document.getElementById('planner');
+  const result = document.getElementById('result');
+  const val = id => Number(document.getElementById(id).value || 0);
+  const checked = id => document.getElementById(id).checked;
+  const track = (step, outcome) => {
+    if (window.alo186AnalyticsConsent === true && Array.isArray(window.dataLayer)) {
+      window.dataLayer.push({event:'alo186_journey',journey:'laptop_outage',step,outcome});
+    }
+  };
+  const show = (kind, title, body, extra='') => {
+    result.className = 'result show ' + kind;
+    result.innerHTML = `<h2>${title}</h2>${body}${extra}`;
+    result.scrollIntoView({behavior:'smooth',block:'start'});
+  };
+
+  form.addEventListener('submit', event => {
+    event.preventDefault();
+    track('tool_completed','evaluated');
+    const inputType = document.getElementById('inputType').value;
+    const adapterW = val('adapterW');
+    const loadW = val('loadW');
+    const targetHours = val('targetHours');
+    const sourceW = val('sourceW');
+    const sourceWh = val('sourceWh');
+    const cableW = val('cableW');
+    const testedMinutes = val('testedMinutes');
+    const rawWh = loadW * targetHours;
+    const metric = `<p class="metric">Ham enerji ihtiyacı: ${rawWh.toFixed(1)} Wh</p><p class="small">Dönüşüm kayıpları nedeniyle gerçek kaynak kapasitesi bunun üzerinde olmalıdır; kesin çalışma süresi değildir.</p>`;
+
+    if (checked('hazard')) {
+      show('danger','Şarjı durdurun',`<p>Batarya veya ekipman tehlikesi varken ürün kararı vermeyin. Cihaza dokunmak güvenli değilse uzaklaşın; duman veya yangında 112’yi arayın.</p>${metric}`);
+      track('safety_gate','hazard');
+      return;
+    }
+    if (checked('critical')) {
+      show('warn','Profesyonel sistem: tüketici affiliate yolu kapalı',`<p>Kritik kullanım için tek powerbank güvenlik katmanı değildir. Yük, süre, yedeklilik ve bakım planı profesyonel olarak doğrulanmalıdır.</p>${metric}`);
+      track('professional_only','critical');
+      return;
+    }
+    if (!checked('manualChecked')) {
+      show('warn','Önce kılavuz ve etiketi kontrol edin',`<p>USB-C biçimi, şarj desteğini veya gerekli gücü kanıtlamaz. Ürün kararı vermeden önce kılavuzdaki şarj girişini ve orijinal adaptörün W değerini doğrulayın.</p>${metric}`);
+      return;
+    }
+    if (testedMinutes >= targetHours * 60 && testedMinutes > 0) {
+      show('safe','Mevcut sistem yeterli görünüyor — yeni ürün almayın',`<p>Gerçek test süreniz hedef süreyi karşılıyor. Batarya ve kablo güvenli kaldığı sürece yeni powerbank almak gereksizdir.</p>${metric}`);
+      track('no_buy_selected','existing_solution');
+      return;
+    }
+    if (inputType !== 'usbc') {
+      show('warn',inputType === 'proprietary' ? 'Üreticiye özel giriş: genel USB-C powerbank yolu uygun değil' : 'Şarj girişi belirsiz — ürün kararı vermeyin',`<p>Model bağımsız dönüştürücü kablo kullanmayın. Üretici kılavuzu, yetkili servis veya güvenli AC güç çözümüyle ilerleyin.</p>${metric}`);
+      return;
+    }
+    if (sourceW === 0 || sourceWh === 0 || cableW === 0) {
+      show('warn','Önce gerçek test yapın; ürün kararı vermeyin',`<p>Mevcut kaynağın tek port W, Wh ve kablo W bilgisi eksik. Etiketleri doğrulayın ve güvenli bir test yapın.</p>${metric}`);
+      return;
+    }
+    if (sourceW < adapterW || cableW < adapterW) {
+      show('warn','Güç zinciri doğrulanmış gereksinimin altında',`<p>Kaynak veya kablo, orijinal adaptörün ${adapterW} W değerinin altında. Laptop yavaş şarj olabilir, yük altında bataryası azalabilir veya şarjı reddedebilir.</p>${metric}`);
+      return;
+    }
+    if (sourceWh <= rawWh) {
+      show('warn','Etiket enerjisi ham ihtiyacı karşılamıyor',`<p>Kaynağın ${sourceWh.toFixed(1)} Wh etiketi, kayıplar hesaba katılmadan bile ${rawWh.toFixed(1)} Wh ham ihtiyacın üzerinde değil. Daha uzun süre vaat etmeyin.</p>${metric}`);
+      return;
+    }
+    show('warn','Teknik olarak aday; satın almadan önce gerçek test gerekli',`<p>USB-C PD, tek port güç ve kablo kapasitesi temel eşiği geçiyor. Ancak etiketteki Wh değerinin tamamı kullanılamaz. Mevcut çözümü tipik iş yükünde test edin.</p>${metric}`,`<p><a class="button" href="/amazon-elektrik-urunleri/laptop-usb-c-pd-powerbank-secimi/">Güvenlik kapılı ürün sınıflarını aç</a></p>`);
+  });
+
+  document.getElementById('reset').addEventListener('click', () => {
+    form.reset(); result.className='result'; result.innerHTML='';
+  });
+
+  document.querySelectorAll('[data-reminder]').forEach(button => {
+    button.addEventListener('click', () => {
+      const days = Number(button.dataset.reminder);
+      const start = new Date(Date.now() + days * 86400000);
+      const stamp = d => d.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z');
+      const title = days === 30 ? 'ALO186 laptop batarya ve kablo güvenlik kontrolü' : 'ALO186 laptop gerçek kesinti şarj testi';
+      const description = days === 30 ? 'Şişme, ısınma, koku, kablo ve port hasarını kontrol edin.' : 'Laptopu tipik iş yükünde test edin; süre yeterliyse yeni ürün almayın.';
+      const ics = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//ALO186//Laptop Outage//TR','BEGIN:VEVENT',`UID:laptop-${days}-${Date.now()}@alo186.com`,`DTSTAMP:${stamp(new Date())}`,`DTSTART:${stamp(start)}`,`SUMMARY:${title}`,`DESCRIPTION:${description}`,'END:VEVENT','END:VCALENDAR'].join('\r\n');
+      const blob = new Blob([ics],{type:'text/calendar;charset=utf-8'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download=`alo186-laptop-${days}-gun.ics`; a.click(); URL.revokeObjectURL(url);
+      track('reminder_downloaded',String(days));
+    });
+  });
+})();
+</script>
+</body>
+</html>

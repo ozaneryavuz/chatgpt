@@ -1,0 +1,21 @@
+{
+  "version": 275,
+  "name": "growth-v275-laptop-outage",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesintisinde-laptop-nasil-sarj-edilir/index.html",
+      "canonicalPath": "/haberler/elektrik-kesintisinde-laptop-nasil-sarj-edilir/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/laptop-elektrik-kesintisi-sarj-uygunluk-plani/index.html",
+      "canonicalPath": "/hesaplama/laptop-elektrik-kesintisi-sarj-uygunluk-plani/",
+      "type": "tool"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/laptop-usb-c-pd-powerbank-secimi/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/laptop-usb-c-pd-powerbank-secimi/",
+      "type": "commerce"
+    }
+  ]
+}

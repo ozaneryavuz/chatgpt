@@ -1,0 +1,72 @@
+{
+  "version": 275,
+  "category": "laptop-outage-usb-c-pd",
+  "decision": "conditional-consumer-affiliate",
+  "reviewedAt": "2026-08-04",
+  "searchIntent": [
+    "elektrik kesintisinde laptop nasıl şarj edilir",
+    "powerbank ile laptop şarj edilir mi",
+    "USB-C PD laptop powerbank seçimi"
+  ],
+  "allowedConsumerAffiliateClasses": [
+    "USB-C PD power bank with verified single-port output matching laptop requirement",
+    "USB-C PD cable with marked watt capacity matching laptop requirement"
+  ],
+  "excludedConsumerAffiliateClasses": [
+    "model-independent DC barrel trigger cable",
+    "damaged or unlabeled lithium battery",
+    "critical medical or business continuity power source",
+    "gaming laptop or mobile workstation source without manufacturer validation"
+  ],
+  "conversionPolicy": {
+    "merchant": "Amazon Türkiye",
+    "tag": "alo186rehber-21",
+    "linksLockedByDefault": true,
+    "disclosureBeforeLinkRequired": true,
+    "requiredRel": [
+      "sponsored",
+      "nofollow",
+      "noopener"
+    ],
+    "noBuyOutcomeRequired": true,
+    "activeHazardCommerceClosed": true,
+    "personalDataCollectionForbidden": true,
+    "noPriceStockRatingWarrantyClaims": true
+  },
+  "unlockRequirements": [
+    "no battery or electrical hazard",
+    "USB-C Power Delivery charging support confirmed in manufacturer documentation",
+    "original adapter wattage and single-port source wattage confirmed",
+    "cable watt capacity confirmed",
+    "existing solution failed a real target-duration test",
+    "use is not critical medical, life-safety, server or business continuity",
+    "affiliate disclosure acknowledged"
+  ],
+  "repeatVisitReasons": [
+    {
+      "days": 30,
+      "reason": "battery swelling, heat, cable and port inspection"
+    },
+    {
+      "days": 90,
+      "reason": "real outage charging test with typical laptop workload"
+    }
+  ],
+  "sources": [
+    {
+      "publisher": "Dell Support",
+      "url": "https://www.dell.com/support/kbdoc/en-us/000354027/usb-type-c-port-support-features-on-certain-dell-laptops",
+      "checkedAt": "2026-08-04"
+    },
+    {
+      "publisher": "Apple Support",
+      "url": "https://support.apple.com/en-us/102464",
+      "checkedAt": "2026-08-04"
+    },
+    {
+      "publisher": "FAA PackSafe",
+      "url": "https://www.faa.gov/hazmat/packsafe/lithium-batteries",
+      "checkedAt": "2026-08-04"
+    }
+  ]
+}
