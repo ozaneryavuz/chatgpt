@@ -1,0 +1,16 @@
+{
+  "version": 260,
+  "name": "growth-v260-aquarium",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/akvaryum-elektrik-kesintisi-oksijen-plani/index.html",
+      "canonicalPath": "/hesaplama/akvaryum-elektrik-kesintisi-oksijen-plani/",
+      "type": "tool"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/akvaryum-pilli-usb-hava-motoru-secimi/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/akvaryum-pilli-usb-hava-motoru-secimi/",
+      "type": "commerce-guide"
+    }
+  ]
+}
