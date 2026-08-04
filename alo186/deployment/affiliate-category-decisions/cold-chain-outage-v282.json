@@ -1,0 +1,54 @@
+{
+  "version": 282,
+  "category": "refrigerator-freezer-outage-cold-chain",
+  "decision": "conditional-consumer-affiliate",
+  "reviewedAt": "2026-08-04",
+  "searchIntent": [
+    "elektrik kesilince buzdolabı kaç saat dayanır",
+    "elektrik kesilince derin dondurucu kaç saat dayanır",
+    "buzdolabı termometresi elektrik kesintisi",
+    "kesintide gıda güvenliği"
+  ],
+  "allowedConsumerAffiliateClasses": [
+    "refrigerator or freezer appliance thermometer with readable range",
+    "reusable cold pack used with an insulated container and thermometer"
+  ],
+  "excludedConsumerAffiliateClasses": [
+    "dry ice presented without ventilation and handling controls",
+    "consumer product used as a guarantee for medicine infant formula or professional cold chain",
+    "generator inverter UPS or building backfeed for a refrigerator",
+    "smart sensor requiring cloud or Wi-Fi as the only temperature evidence",
+    "product promising a fixed safe duration without measured temperature"
+  ],
+  "conversionPolicy": {
+    "merchant": "Amazon Türkiye",
+    "tag": "alo186rehber-21",
+    "linksLockedByDefault": true,
+    "disclosureBeforeLinkRequired": true,
+    "requiredRel": ["sponsored", "nofollow", "noopener"],
+    "noBuyOutcomeRequired": true,
+    "activeHazardCommerceClosed": true,
+    "activeOutageUrgencyCommerceClosed": true,
+    "personalDataCollectionForbidden": true,
+    "noPriceStockRatingWarrantyClaims": true,
+    "officialInstitutionImpressionForbidden": true
+  },
+  "unlockRequirements": [
+    "current outage food-safety decision already completed",
+    "no electrical water smoke or fire hazard",
+    "existing thermometer or cold-chain preparation absent or failed a real check",
+    "user understands 4 24 and 48 hour values are planning limits not guarantees",
+    "use is not medicine infant food medical specimen or professional cold chain",
+    "affiliate disclosure acknowledged"
+  ],
+  "repeatVisitReasons": [
+    {"days": 30, "reason": "refrigerator and freezer thermometer function check"},
+    {"days": 90, "reason": "door-closed outage and cold-chain preparation drill"},
+    {"days": 180, "reason": "seasonal thermometer insulated-container and cold-pack review"}
+  ],
+  "sources": [
+    {"publisher": "USDA FSIS", "title": "Keep Your Food Safe During Emergencies", "url": "https://www.fsis.usda.gov/food-safety/safe-food-handling-and-preparation/emergencies/keep-your-food-safe-during-emergencies", "checkedAt": "2026-08-04"},
+    {"publisher": "U.S. FDA", "title": "Food and Water Safety During Power Outages and Floods", "url": "https://www.fda.gov/food/buy-store-serve-safe-food/food-and-water-safety-during-power-outages-and-floods", "checkedAt": "2026-08-04"},
+    {"publisher": "T.C. Tarım ve Orman Bakanlığı", "title": "Evinizin Balkonu Buzdolabı Yerine Geçmez", "url": "https://guvenilirgida.tarimorman.gov.tr/Haber/Detay/16952", "checkedAt": "2026-08-04"}
+  ]
+}
