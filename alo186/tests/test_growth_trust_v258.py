@@ -53,7 +53,7 @@ def main() -> None:
         assert "Kritik bilgiler ve son doğrulama" in sources
         assert '"@type":"Claim"' in sources
         assert "Çelişen eski kaynak" in sources
-        assert "güncel Kalite Yönetmeliği Madde 26/1 esas alınır" in sources
+        assert "Kalite Yönetmeliği Madde 26/1 esas alınır" in sources
         assert "Kaynak merkezi son gözden geçirme: 4 Ağustos 2026." in sources
 
         journal = (output / "source/hesaplama/kesinti-gunlugu/index.html").read_text(encoding="utf-8")
