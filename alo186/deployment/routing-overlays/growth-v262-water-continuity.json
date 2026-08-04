@@ -1,0 +1,16 @@
+{
+  "version": 262,
+  "name": "growth-v262-water-continuity",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/hidrofor-elektrik-kesintisi-yedekleme-plani/index.html",
+      "canonicalPath": "/hesaplama/hidrofor-elektrik-kesintisi-yedekleme-plani/",
+      "type": "tool"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/pilli-su-kacagi-alarmi-secimi/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/pilli-su-kacagi-alarmi-secimi/",
+      "type": "commerce-guide"
+    }
+  ]
+}
