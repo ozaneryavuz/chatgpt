@@ -1,0 +1,21 @@
+{
+  "version": 284,
+  "name": "growth-v284-post-outage-restart",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-geldikten-sonra-cihazlar-nasil-guvenli-acilir/index.html",
+      "canonicalPath": "/haberler/elektrik-geldikten-sonra-cihazlar-nasil-guvenli-acilir/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/elektrik-geldikten-sonra-cihaz-yeniden-baslatma-plani/index.html",
+      "canonicalPath": "/hesaplama/elektrik-geldikten-sonra-cihaz-yeniden-baslatma-plani/",
+      "type": "tool"
+    },
+    {
+      "source": "alo186/sektor-rehberi/elektrik-kesintisi-sonrasi-cihaz-koruma-karar-merkezi/index.html",
+      "canonicalPath": "/sektor-rehberi/elektrik-kesintisi-sonrasi-cihaz-koruma-karar-merkezi/",
+      "type": "decision-center"
+    }
+  ]
+}
