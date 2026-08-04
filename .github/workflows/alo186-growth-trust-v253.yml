@@ -57,7 +57,8 @@ jobs:
           python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-growth-v253
           PAGE=/tmp/alo186-growth-v253/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi/index.html
           test -f "$PAGE"
-          grep -Fq 'https://alo186.com/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi/' "$PAGE"
+          grep -Fq '<link rel="canonical" href="https://alo186.com/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi">' "$PAGE"
+          ! grep -Fq '<link rel="canonical" href="https://alo186.com/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi/">' "$PAGE"
           grep -Fq 'Mevcut çözümüm yeterli — satın almayacağım' "$PAGE"
           grep -Fq 'rel="sponsored nofollow noopener"' "$PAGE"
           ! grep -Eqi '"@type"[[:space:]]*:[[:space:]]*"Offer"|priceCurrency|aggregateRating|ratingValue|availability' "$PAGE"

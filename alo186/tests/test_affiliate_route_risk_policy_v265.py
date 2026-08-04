@@ -100,6 +100,11 @@ def route_for(path: Path) -> str:
     return "/" + relative[: -len("index.html")]
 
 
+def expected_canonical(route: str, policy: dict[str, Any]) -> str:
+    overrides = policy.get("canonicalOverrides", {})
+    return overrides.get(route, policy["canonicalHost"] + route)
+
+
 def assert_governed_page(path: Path, policy: dict[str, Any]) -> dict[str, Any]:
     html = path.read_text(encoding="utf-8")
     lowered = html.casefold()
@@ -131,7 +136,7 @@ def assert_governed_page(path: Path, policy: dict[str, Any]) -> dict[str, Any]:
     assert not unsafe_links, f"Affiliate rel sözleşmesi eksik: {route}: {unsafe_links}"
 
     canonical = canonical_url(html)
-    expected = policy["canonicalHost"] + route
+    expected = expected_canonical(route, policy)
     assert canonical == expected, f"Canonical uyuşmuyor: {route}: {canonical!r} != {expected!r}"
 
     forbidden = {item.casefold() for item in policy["trustRules"]["unverifiedCommercialFieldsForbidden"]}
@@ -171,6 +176,18 @@ def main() -> None:
     assert all_pages, "Affiliate rota kaynağı bulunamadı"
     source_routes = {route_for(path) for path in all_pages}
 
+    canonical_overrides = policy.get("canonicalOverrides", {})
+    assert isinstance(canonical_overrides, dict), "canonicalOverrides nesne olmalı"
+    for route, canonical in canonical_overrides.items():
+        assert route in source_routes, f"Canonical istisnasının kaynak rotası yok: {route}"
+        assert route.endswith("/"), f"Canonical istisna anahtarı kaynak rota biçiminde olmalı: {route}"
+        assert canonical.startswith(policy["canonicalHost"] + "/"), (
+            f"Canonical istisnası apex host dışında: {route}: {canonical}"
+        )
+        assert "?" not in canonical and "#" not in canonical, (
+            f"Canonical istisnasında query veya fragment olamaz: {route}: {canonical}"
+        )
+
     governed: list[dict[str, Any]] = []
     governed_patterns = [item.casefold() for item in policy["governedAffiliateRoutePatterns"]]
     for path in all_pages:
@@ -190,17 +207,22 @@ def main() -> None:
         assert_zero_affiliate_prefix(prefix) for prefix in policy["zeroAffiliatePrefixes"]
     )
 
+    smart_plug_route = "/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi/"
     smart_plug = AFFILIATE_ROOT / "akilli-priz-enerji-olcer-secimi/index.html"
     assert smart_plug.is_file(), "Akıllı priz canonical seçim rotası yok"
     smart_html = smart_plug.read_text(encoding="utf-8")
     assert 'data-commercial-scope="after_tool"' in smart_html
     assert "/hesaplama/akilli-priz-enerji-olcer-uygunluk/" in smart_html
+    assert canonical_overrides.get(smart_plug_route) == (
+        "https://alo186.com/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi"
+    )
 
     summary = {
         "ok": True,
         "policyVersion": policy["version"],
         "governedRoutes": len(governed),
         "governedAmazonLinks": sum(item["amazonLinks"] for item in governed),
+        "canonicalOverrides": len(canonical_overrides),
         "legacyMigrationQueue": len(policy["legacyMigrationQueue"]),
         "zeroAffiliatePages": zero_affiliate_pages,
         "blockedCandidateRoutes": len(policy["blockedCandidateRoutes"]),

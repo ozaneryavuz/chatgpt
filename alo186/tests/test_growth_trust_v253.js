@@ -16,8 +16,14 @@ const catalogSource = fs.readFileSync(CATALOG, 'utf8');
 const appSource = fs.readFileSync(APP, 'utf8');
 const trackSource = fs.readFileSync(TRACK, 'utf8');
 
-assert.match(html, /<link rel="canonical" href="https:\/\/alo186\.com\/amazon-elektrik-urunleri\/akilli-priz-enerji-olcer-secimi\/">/);
+const canonicalUrl = 'https://alo186.com/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi';
+assert.ok(html.includes(`<link rel="canonical" href="${canonicalUrl}">`));
+assert.ok(!html.includes(`<link rel="canonical" href="${canonicalUrl}/">`));
 assert.ok(!html.includes('https://www.alo186.com/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi'));
+assert.ok(html.includes(`"@id":"${canonicalUrl}#page"`));
+assert.ok(html.includes(`"url":"${canonicalUrl}"`));
+assert.ok(html.includes(`"@id":"${canonicalUrl}#product-list"`));
+assert.ok(!html.includes(`${canonicalUrl}/#`), 'JSON-LD must not split the canonical route with a slash');
 assert.ok(!html.toLowerCase().includes('amazon.com.tr'), 'source HTML must not contain a static store URL');
 
 const expectedAsins = ['B0C4LHP7G3', 'B0BTJ1DTBX', 'B07Z5JD3T4'];
