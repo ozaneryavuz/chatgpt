@@ -4,6 +4,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import re
+import sys
 import tempfile
 from html.parser import HTMLParser
 from pathlib import Path
@@ -73,9 +74,11 @@ def write_fixture(root: Path, url_path: str, html: str) -> None:
 
 
 def load_drift_module():
-    spec = importlib.util.spec_from_file_location("alo186_live_drift_v259", SCRIPT)
+    name = "alo186_live_drift_v259"
+    spec = importlib.util.spec_from_file_location(name, SCRIPT)
     assert spec and spec.loader
     module = importlib.util.module_from_spec(spec)
+    sys.modules[name] = module
     spec.loader.exec_module(module)
     return module
 
