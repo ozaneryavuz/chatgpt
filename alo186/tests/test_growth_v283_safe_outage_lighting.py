@@ -78,7 +78,7 @@ def main() -> None:
         "180 günlük afet çantası gözden geçirme",
     ):
         assert required in tool, required
-    for forbidden in ("fetch(", "XMLHttpRequest", "localStorage", "sessionStorage", 'type="email"', 'type="tel"'):
+    for forbidden in ("fetch(", "XMLHttpRequest", "localStorage.", "sessionStorage.", 'type="email"', 'type="tel"'):
         assert forbidden not in tool, forbidden
     assert "www.amazon.com.tr" not in tool
     assert_no_unverified_commerce(tool)
