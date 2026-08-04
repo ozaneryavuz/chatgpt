@@ -45,7 +45,7 @@ const articles=[
   {slug:'ges-inverter-izolasyon-direnci-dusuk-hatasi',required:['Low insulation resistance','PV string','yağmur','DC konnektör','yetkili kişi'],cta:'/hesaplama/ekipman-bakim-plani/',fresh:true},
   {slug:'inverter-dusuk-voltaj-alarmi-neden-verir',required:['low battery voltage','DC gerilim düşümü','kablo kesiti','BMS','yetkili kişi'],cta:'/hesaplama/inverter-uygunluk/',fresh:true},
   {slug:'ups-va-watt-farki-nasil-hesaplanir',required:['VA','Watt','güç faktörü','W = VA × PF','runtime'],cta:'/hesaplama/ups-suresi/',fresh:true},
-  {slug:'jenerator-balkonda-garajda-calistirilir-mi',required:['20 feet','yaklaşık 6 metre','karbonmonoksit','112','CO alarmı'],cta:'/hesaplama/kesinti-hazirlik-plani/',fresh:true},
+  {slug:'jenerator-balkonda-garajda-calistirilir-mi',required:['20 feet','yaklaşık 6 metre','karbonmonoksit','112','CO alarmı'],cta:'/hesaplama/jenerator-karbonmonoksit-guvenlik-kontrolu/',fresh:true,verifiedAt:'4 Ağustos 2026'},
   {slug:'kacak-akim-rolesi-kac-amper-kac-ma-olmali',required:['40 A 30 mA','RCCB','RCBO','nominal akım','yetkili elektrikçi'],cta:'/karar-motoru',fresh:true},
   {slug:'notr-toprak-arasi-gerilim-kac-volt-olmali',required:['nötr-toprak gerilimi','IR gerilim düşümü','triplen harmonik','186','112'],cta:'/karar-motoru',fresh:true},
   {slug:'ges-inverter-afci-dc-ark-hatasi',required:['AFCI','DC ark','PV konnektör','112','yetkili GES personeli'],cta:'/hesaplama/ekipman-bakim-plani/',fresh:true},
@@ -102,7 +102,8 @@ for(const article of articles){
   assert(html.includes(article.cta),`İç CTA eksik: ${article.slug}`);
   assert(html.includes('Bağımsız bilgi'),`Bağımsızlık ifadesi eksik: ${article.slug}`);
   if(article.fresh){
-    assert(html.includes('Son doğrulama: 28 Temmuz 2026'),`Doğrulama tarihi eksik: ${article.slug}`);
+    const expectedVerificationDate=article.verifiedAt||'28 Temmuz 2026';
+    assert(html.includes(`Son doğrulama: ${expectedVerificationDate}`),`Doğrulama tarihi eksik: ${article.slug}`);
     assert(html.includes('Kaynaklar ve doğrulama'),`Görünür kaynak bölümü eksik: ${article.slug}`);
   }
   assert(!/<form\b/i.test(html),`Makale kişisel veri/form istememeli: ${article.slug}`);
