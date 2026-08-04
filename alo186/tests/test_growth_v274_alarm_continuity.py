@@ -48,7 +48,7 @@ class GrowthV274AlarmContinuityTests(unittest.TestCase):
     def test_article_answers_intent_without_fixed_runtime_or_commerce(self) -> None:
         required = (
             "Alarm sistemi kesintide çalışabilir",
-            "panel, siren, sensör, internet/GSM haberleşmesi",
+            "Panel, siren, sensör, internet/GSM haberleşmesi",
             "Acil sınır: ürün aramayın",
             "112",
             "Ajax Systems",
