@@ -1,0 +1,78 @@
+name: ALO186 affiliate rota risk yönetişimi
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/**'
+      - 'alo186/il/**'
+      - 'alo186/dagitim-sirketleri/**'
+      - 'alo186/acil-numaralar/**'
+      - 'alo186/deployment/affiliate_route_risk_policy_v265.json'
+      - 'alo186/tests/test_affiliate_route_risk_policy_v265.py'
+      - '.github/workflows/alo186-affiliate-risk-governance.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/**'
+      - 'alo186/il/**'
+      - 'alo186/dagitim-sirketleri/**'
+      - 'alo186/acil-numaralar/**'
+      - 'alo186/deployment/affiliate_route_risk_policy_v265.json'
+      - 'alo186/tests/test_affiliate_route_risk_policy_v265.py'
+      - '.github/workflows/alo186-affiliate-risk-governance.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-affiliate-risk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  risk-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Kaynağı al
+        uses: actions/checkout@v4
+
+      - name: Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Politika ve kod sözdizimi
+        run: |
+          set -euo pipefail
+          python -m json.tool alo186/deployment/affiliate_route_risk_policy_v265.json >/dev/null
+          python -m py_compile alo186/tests/test_affiliate_route_risk_policy_v265.py
+
+      - name: Fail-closed affiliate portföy kontrolü
+        run: |
+          set -euo pipefail
+          python alo186/tests/test_affiliate_route_risk_policy_v265.py | tee /tmp/alo186-affiliate-risk-v265.json
+
+      - name: Denetim özeti
+        if: always()
+        run: |
+          {
+            echo '## ALO186 affiliate rota risk yönetişimi v265'
+            echo
+            if [ -f /tmp/alo186-affiliate-risk-v265.json ]; then
+              echo '```json'
+              cat /tmp/alo186-affiliate-risk-v265.json
+              echo '```'
+            else
+              echo 'Risk sözleşmesi fail-closed durdu; ayrıntı iş logundadır.'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Denetim artifactı
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-affiliate-risk-v265-${{ github.sha }}
+          path: /tmp/alo186-affiliate-risk-v265.json
+          if-no-files-found: ignore
+          retention-days: 30
