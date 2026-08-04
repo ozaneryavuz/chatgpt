@@ -1,0 +1,56 @@
+{
+  "version": 283,
+  "category": "safe-household-outage-lighting",
+  "decision": "conditional-consumer-affiliate",
+  "reviewedAt": "2026-08-04",
+  "searchIntent": [
+    "elektrik kesintisinde ev nasıl aydınlatılır",
+    "elektrik kesintisinde mum kullanılır mı",
+    "kesinti için el feneri",
+    "afet çantası el feneri ve yedek pil"
+  ],
+  "allowedConsumerAffiliateClasses": [
+    "LED flashlight using standard consumer batteries or a protected integral battery",
+    "hands-free LED headlamp with manufacturer-specified consumer battery or protected integral pack",
+    "portable LED area lantern with stable base and manufacturer-specified battery or charging method"
+  ],
+  "excludedConsumerAffiliateClasses": [
+    "loose unlabeled or unprotected 18650 lithium-ion cells",
+    "candle gas lantern or other open flame presented for outage lighting",
+    "consumer flashlight presented as workplace hotel apartment common-area or code-compliant emergency lighting",
+    "product presented for intervention on energized panels or exposed conductors",
+    "recalled swollen overheated leaking or physically damaged battery product",
+    "product promising fixed runtime brightness or safety without verified technical evidence"
+  ],
+  "conversionPolicy": {
+    "merchant": "Amazon Türkiye",
+    "tag": "alo186rehber-21",
+    "linksLockedByDefault": true,
+    "disclosureBeforeLinkRequired": true,
+    "requiredRel": ["sponsored", "nofollow", "noopener"],
+    "noBuyOutcomeRequired": true,
+    "activeHazardCommerceClosed": true,
+    "activeOutageUrgencyCommerceClosed": true,
+    "personalDataCollectionForbidden": true,
+    "noPriceStockRatingWarrantyClaims": true,
+    "officialInstitutionImpressionForbidden": true
+  },
+  "unlockRequirements": [
+    "purchase is for future preparedness rather than an active emergency",
+    "no fire smoke gas water electrical shock or battery hazard",
+    "existing portable lighting absent or failed a real test",
+    "only manufacturer-specified consumer battery protected pack or integral protected battery will be used",
+    "use is household personal preparedness rather than regulated emergency lighting",
+    "affiliate disclosure acknowledged"
+  ],
+  "repeatVisitReasons": [
+    {"days": 30, "reason": "flashlight body battery compartment and charge inspection"},
+    {"days": 90, "reason": "real-use outage lighting drill across critical household routes"},
+    {"days": 180, "reason": "AFAD-style emergency bag flashlight and spare-battery review"}
+  ],
+  "sources": [
+    {"publisher": "U.S. Fire Administration", "title": "Candle Fire Safety", "url": "https://www.usfa.fema.gov/prevention/home-fires/prevent-fires/candle/", "checkedAt": "2026-08-04"},
+    {"publisher": "AFAD", "title": "Afet ve Acil Durum Çantanız Hazır Olsun", "url": "https://canakkale.afad.gov.tr/afet-ve-acil-durum-cantaniz-hazir-olsun", "checkedAt": "2026-08-04"},
+    {"publisher": "U.S. Consumer Product Safety Commission", "title": "Warning on loose lithium-ion battery cells", "url": "https://www.cpsc.gov/Newsroom/News-Releases/2021/CPSC-Issues-Consumer-Safety-Warning-Serious-Injury-or-Death-Can-Occur-if-Lithium-Ion-Battery-Cells-Are-Separated-from-Battery-Packs-and-Used-to-Power-Devices", "checkedAt": "2026-08-04"}
+  ]
+}

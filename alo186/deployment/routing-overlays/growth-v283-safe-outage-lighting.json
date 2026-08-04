@@ -1,0 +1,21 @@
+{
+  "version": 283,
+  "name": "growth-v283-safe-outage-lighting",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesintisinde-ev-nasil-aydinlatilir-mum-mu-led-fener-mi/index.html",
+      "canonicalPath": "/haberler/elektrik-kesintisinde-ev-nasil-aydinlatilir-mum-mu-led-fener-mi/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/elektrik-kesintisi-ev-aydinlatma-plani/index.html",
+      "canonicalPath": "/hesaplama/elektrik-kesintisi-ev-aydinlatma-plani/",
+      "type": "tool"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/kesinti-led-fener-kafa-lambasi-secimi/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/kesinti-led-fener-kafa-lambasi-secimi/",
+      "type": "affiliate-guide"
+    }
+  ]
+}
