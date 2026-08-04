@@ -93,7 +93,7 @@ def main() -> None:
         assert action["normalizedSourceFiles"]
 
         sites_manifest = json.loads((output / "sites-import.json").read_text(encoding="utf-8"))
-        sources_page = next(page for page in sites_manifest["pages"] if page["canonicalPath"] == "/kaynaklar/")
+        sources_page = next(page for page in sites_manifest["pages"] if page["canonicalPath"] == "/kaynaklar")
         assert "Claim" in sources_page["schemaTypes"]
         assert any(item.get("@id") == "https://alo186.com/kaynaklar#critical-claims" for item in sources_page["jsonLd"])
 
