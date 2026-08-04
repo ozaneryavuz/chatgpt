@@ -35,6 +35,7 @@ TOOLS = {
     "/amazon-elektrik-urunleri/ges-malzemeleri-secimi": "/hesaplama/gunes-paneli-power-station-uygunluk/",
 }
 AMAZON_HOSTS = {"amazon.com.tr", "www.amazon.com.tr"}
+SOURCE_CANONICAL_HOSTS = {"alo186.com", "www.alo186.com"}
 
 
 def text_of(html: str, tag: str) -> str:
@@ -42,6 +43,15 @@ def text_of(html: str, tag: str) -> str:
     if not match:
         return ""
     return re.sub(r"\s+", " ", unescape(re.sub(r"<[^>]+>", " ", match.group(1)))).strip()
+
+
+def canonical_href(html: str) -> str:
+    match = re.search(
+        r'<link\s+rel=["\']canonical["\']\s+href=["\']([^"\']+)["\']',
+        html,
+        re.I,
+    )
+    return unescape(match.group(1)) if match else ""
 
 
 def jsonld_types(html: str) -> set[str]:
@@ -101,9 +111,18 @@ class CommercialCategoryExpansionTests(unittest.TestCase):
             headings.add(h1)
             descriptions.add(description)
             self.assertGreaterEqual(len(description), 120, route)
-            self.assertIn(f'<link rel="canonical" href="https://www.alo186.com{route}">', html)
+
+            canonical = urlsplit(canonical_href(html))
+            self.assertEqual(canonical.scheme, "https", route)
+            self.assertIn(canonical.hostname, SOURCE_CANONICAL_HOSTS, route)
+            self.assertEqual(canonical.path.rstrip("/"), route, route)
+            self.assertFalse(canonical.query, route)
+            self.assertFalse(canonical.fragment, route)
+
             self.assertEqual(html.count("<h1>"), 1, route)
-            self.assertGreaterEqual(len(re.findall(r"<h2>", html)), 6, route)
+            h2_count = len(re.findall(r"<h2>", html))
+            minimum_h2 = 3 if route.endswith("/akilli-priz-enerji-olcer-secimi") else 6
+            self.assertGreaterEqual(h2_count, minimum_h2, route)
             self.assertGreaterEqual(html.count("<details>"), 3, route)
             self.assertIn("Reklam / satış ortaklığı" if "ges-malzemeleri" not in route else "Ticari şeffaflık", html)
             self.assertIn("ürün satıc", lower)
@@ -116,14 +135,21 @@ class CommercialCategoryExpansionTests(unittest.TestCase):
             self.assertNotIn("en ucuz", lower)
             self.assertNotIn("en iyi ürün", lower)
             self.assertNotIn("garanti edilir", lower)
+
             types = jsonld_types(html)
-            self.assertIn("Article", types)
             self.assertIn("FAQPage", types)
-            self.assertNotIn("Product", types)
+            if route.endswith("/akilli-priz-enerji-olcer-secimi"):
+                self.assertIn("CollectionPage", types)
+                self.assertIn("ItemList", types)
+                self.assertIn("Product", types)
+            else:
+                self.assertIn("Article", types)
+                self.assertNotIn("Product", types)
             self.assertNotIn("Offer", types)
+            self.assertNotIn("AggregateRating", types)
             self.assertEqual(amazon_links(html), [], route)
 
-    def test_free_tool_and_no_purchase_boundary_precede_product_center(self) -> None:
+    def test_free_tool_and_no_purchase_boundary_precede_each_commerce_surface(self) -> None:
         for route, path in ROUTES.items():
             html = path.read_text(encoding="utf-8")
             self.assertIn(TOOLS[route], html)
@@ -131,17 +157,29 @@ class CommercialCategoryExpansionTests(unittest.TestCase):
                 any(term in html for term in ("Satın almama", "satın almamanız", "sipariş vermeyin")),
                 route,
             )
+
         power = ROUTES["/amazon-elektrik-urunleri/tasinabilir-guc-istasyonu-secimi"].read_text(encoding="utf-8")
         smart = ROUTES["/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi"].read_text(encoding="utf-8")
         ges = ROUTES["/amazon-elektrik-urunleri/ges-malzemeleri-secimi"].read_text(encoding="utf-8")
         runtime = (SOURCE_ROOT / "commercial.js").read_text(encoding="utf-8")
+
         self.assertIn('data-category="power_station"', power)
-        self.assertIn('data-category="smart_plug"', smart)
         self.assertIn("data-product-center", power)
-        self.assertIn("data-product-center", smart)
-        for html in (power, smart):
-            self.assertIn("doğrudan Amazon bağlantısı gösterilmez", html)
-            self.assertTrue("doğrulanmış ürün" in html.casefold() or "doğrulanmış ürün kartı" in html.casefold())
+        self.assertIn("doğrudan Amazon bağlantısı gösterilmez", power)
+        self.assertTrue("doğrulanmış ürün" in power.casefold() or "doğrulanmış ürün kartı" in power.casefold())
+
+        self.assertIn('data-category="smart_plug"', smart)
+        self.assertIn('data-commercial-scope="after_tool"', smart)
+        self.assertNotIn("data-product-center", smart)
+        self.assertIn('id="guven-kapisi"', smart)
+        self.assertIn('id="unlockProducts"', smart)
+        self.assertIn('data-affiliate-asin="', smart)
+        self.assertIn('data-state="locked"', smart)
+        self.assertIn('aria-disabled="true"', smart)
+        self.assertIn("Mağaza bağlantıları ancak bütün koşullar doğrulanınca açılır.", smart)
+        self.assertIn("Mevcut çözümüm yeterli — satın almayacağım", smart)
+        self.assertEqual(amazon_links(smart), [])
+
         self.assertIn('data-commercial-scope="professional-only"', ges)
         self.assertIn("doğrudan Amazon veya başka mağaza bağlantısı göstermez", ges)
         self.assertNotIn("data-product-center", ges)
@@ -185,8 +223,17 @@ class CommercialCategoryExpansionTests(unittest.TestCase):
             self.assertTrue(set(ROUTES) <= routes)
             sitemap = (site / "sitemap.xml").read_text(encoding="utf-8")
             for route in ROUTES:
-                self.assertTrue((site / route.strip("/") / "index.html").is_file(), route)
+                built_page = site / route.strip("/") / "index.html"
+                self.assertTrue(built_page.is_file(), route)
                 self.assertIn(f"https://alo186.com{route}", sitemap)
+
+                built_html = built_page.read_text(encoding="utf-8")
+                canonical = urlsplit(canonical_href(built_html))
+                self.assertEqual(canonical.scheme, "https", route)
+                self.assertEqual(canonical.hostname, "alo186.com", route)
+                self.assertEqual(canonical.path.rstrip("/"), route, route)
+                self.assertFalse(canonical.query, route)
+                self.assertFalse(canonical.fragment, route)
 
             result = inject_private_search(site, "")
             self.assertGreaterEqual(result["entryCount"], 90)

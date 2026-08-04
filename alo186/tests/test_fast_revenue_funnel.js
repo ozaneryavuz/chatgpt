@@ -8,6 +8,7 @@ const root = path.resolve(__dirname, '..');
 const portal = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const manifest = JSON.parse(fs.readFileSync(path.join(root, 'deployment', 'routing-manifest.json'), 'utf8'));
 const sitemap = fs.readFileSync(path.join(root, 'sitemap.xml'), 'utf8');
+const sourceCanonicalHosts = new Set(['alo186.com', 'www.alo186.com']);
 
 const pages = [
   {
@@ -39,14 +40,24 @@ function parseJsonLd(html, source) {
   for (const block of blocks) JSON.parse(block[1]);
 }
 
+function canonicalHref(html) {
+  const match = html.match(/<link\b(?=[^>]*\brel=["']canonical["'])(?=[^>]*\bhref=["']([^"']+)["'])[^>]*>/i);
+  return match ? match[1] : '';
+}
+
 for (const item of pages) {
   const dir = path.join(root, item.source);
   const html = fs.readFileSync(path.join(dir, 'index.html'), 'utf8');
   const css = fs.readFileSync(path.join(dir, 'styles.css'), 'utf8');
   const js = fs.readFileSync(path.join(dir, 'app.js'), 'utf8');
-  const canonicalUrl = `https://www.alo186.com${item.canonical}`;
+  const productionCanonicalUrl = `${manifest.canonicalHost}${item.canonical}`;
+  const sourceCanonical = new URL(canonicalHref(html));
 
-  assert(html.includes(`rel="canonical" href="${canonicalUrl}"`), `${item.source}: canonical eksik`);
+  assert.equal(sourceCanonical.protocol, 'https:', `${item.source}: canonical HTTPS olmalı`);
+  assert(sourceCanonicalHosts.has(sourceCanonical.hostname), `${item.source}: canonical host geçersiz`);
+  assert.equal(sourceCanonical.pathname.replace(/\/$/, ''), item.canonical.replace(/\/$/, ''), `${item.source}: canonical rota uyuşmuyor`);
+  assert.equal(sourceCanonical.search, '', `${item.source}: canonical query içermemeli`);
+  assert.equal(sourceCanonical.hash, '', `${item.source}: canonical fragment içermemeli`);
   assert.equal((html.match(/<h1\b/g) || []).length, 1, `${item.source}: tek H1 olmalı`);
   assert(html.includes('meta name="description"'), `${item.source}: description eksik`);
   parseJsonLd(html, item.source);
@@ -61,7 +72,7 @@ for (const item of pages) {
   assert(css.includes('prefers-reduced-motion'), `${item.source}: azaltılmış hareket desteği eksik`);
 
   assert(manifest.routes.some((route) => route.source === `alo186/${item.source}/index.html` && route.canonicalPath === item.canonical && route.type === item.type), `${item.source}: routing manifest kaydı eksik`);
-  assert(sitemap.includes(`<loc>${canonicalUrl}</loc>`), `${item.source}: sitemap kaydı eksik`);
+  assert(sitemap.includes(`<loc>${productionCanonicalUrl}</loc>`), `${item.source}: sitemap kaydı eksik`);
   assert(portal.includes(`href="${item.canonical}"`), `${item.source}: portal görünürlüğü eksik`);
 }
 
