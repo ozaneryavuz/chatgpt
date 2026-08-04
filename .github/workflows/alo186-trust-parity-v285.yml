@@ -4,12 +4,14 @@ on:
   pull_request:
     paths:
       - 'alo186/amazon-elektrik-urunleri/**'
+      - 'alo186/hesaplama/elektrik-kesintisi-guvenli-urun-baslangic/**'
       - 'alo186/tests/test_live_trust_parity_v285.py'
       - '.github/workflows/alo186-trust-parity-v285.yml'
   push:
     branches: [main]
     paths:
       - 'alo186/amazon-elektrik-urunleri/**'
+      - 'alo186/hesaplama/elektrik-kesintisi-guvenli-urun-baslangic/**'
       - 'alo186/tests/test_live_trust_parity_v285.py'
       - '.github/workflows/alo186-trust-parity-v285.yml'
   schedule:
