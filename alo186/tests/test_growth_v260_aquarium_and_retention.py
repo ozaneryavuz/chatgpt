@@ -65,11 +65,9 @@ def main() -> None:
         assert forbidden not in combined_schema, forbidden
 
     # Amazon Türkiye bağlantıları, güven kapısı tamamlanmadan gerçek href taşımaz.
-    assert not re.search(
-        r'<a\b(?=[^>]*\bhref="https://www\.amazon\.com\.tr)[^>]*>',
-        selector,
-        flags=re.I,
-    )
+    for anchor in re.findall(r'<a\b[^>]*>', selector, flags=re.I):
+        href = re.search(r'\shref="([^"]+)"', anchor, flags=re.I)
+        assert not (href and 'amazon.com.tr/' in href.group(1).casefold()), anchor
     locked_links = re.findall(r'<a\b[^>]*data-affiliate-href="([^"]+)"[^>]*>', selector, flags=re.I)
     assert len(locked_links) == 3
     assert all('amazon.com.tr/' in link and 'tag=alo186rehber-21' in link for link in locked_links)
