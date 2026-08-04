@@ -1,6 +1,9 @@
 {
   "version": 265,
   "canonicalHost": "https://alo186.com",
+  "canonicalOverrides": {
+    "/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi/": "https://alo186.com/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi"
+  },
   "purpose": "ALO186 affiliate portföyünü elektrik güvenliği, kesinti hazırlığı ve doğrulanabilir kullanıcı ihtiyacıyla sınırlamak; genel teknoloji mağazasına dönüşmeyi ve yüksek riskli sabit tesisat DIY yönlendirmelerini engellemek.",
   "affiliateProgram": {
     "merchant": "Amazon Türkiye",
