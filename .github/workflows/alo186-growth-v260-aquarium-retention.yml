@@ -1,0 +1,73 @@
+name: ALO186 akvaryum kesinti ve güvenli dönüşüm v260
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/assets/journey-events-v260.js'
+      - 'alo186/hesaplama/akvaryum-elektrik-kesintisi-oksijen-plani/**'
+      - 'alo186/amazon-elektrik-urunleri/akvaryum-pilli-usb-hava-motoru-secimi/**'
+      - 'alo186/deployment/routing-overlays/growth-v260-aquarium.json'
+      - 'alo186/tests/test_growth_v260_aquarium_and_retention.py'
+      - '.github/workflows/alo186-growth-v260-aquarium-retention.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/assets/journey-events-v260.js'
+      - 'alo186/hesaplama/akvaryum-elektrik-kesintisi-oksijen-plani/**'
+      - 'alo186/amazon-elektrik-urunleri/akvaryum-pilli-usb-hava-motoru-secimi/**'
+      - 'alo186/deployment/routing-overlays/growth-v260-aquarium.json'
+      - 'alo186/tests/test_growth_v260_aquarium_and_retention.py'
+      - '.github/workflows/alo186-growth-v260-aquarium-retention.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-growth-v260-aquarium-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Akvaryum araç, affiliate ve ölçüm sözleşmesi
+        run: |
+          set -euo pipefail
+          python -m py_compile alo186/tests/test_growth_v260_aquarium_and_retention.py
+          python alo186/tests/test_growth_v260_aquarium_and_retention.py
+          python -m json.tool alo186/deployment/routing-overlays/growth-v260-aquarium.json >/dev/null
+
+      - name: Canonical production build ve smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-v260
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-v260 \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-v260
+          test -f /tmp/alo186-v260/hesaplama/akvaryum-elektrik-kesintisi-oksijen-plani/index.html
+          test -f /tmp/alo186-v260/amazon-elektrik-urunleri/akvaryum-pilli-usb-hava-motoru-secimi/index.html
+          test -f /tmp/alo186-v260/assets/journey-events-v260.js
+
+      - name: Özet
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ## ALO186 v260 akvaryum büyüme paketi
+
+          - Akvaryum elektrik kesintisi oksijen planı: doğrulandı
+          - Pilli/USB hava desteği affiliate güven kapısı: doğrulandı
+          - Amazon bağlantıları: statik href olmadan kilitli
+          - Satın almama sonucu: zorunlu
+          - 30/60 dakika ve 30/90 gün tekrar ziyaret döngüsü: doğrulandı
+          - Olay ölçümü: yalnız kategorik alanlar, açık analytics consent varsa dataLayer
+          - Fiyat, stok, puan, garanti, Offer ve AggregateRating: yok
+          - Canonical build ve smoke: başarılı
+          EOF
