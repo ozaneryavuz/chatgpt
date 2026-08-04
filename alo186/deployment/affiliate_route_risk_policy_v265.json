@@ -35,13 +35,15 @@
     "/dagitim-sirketleri/",
     "/acil-numaralar/"
   ],
-  "allowedAffiliateRoutePatterns": [
-    "modem-mini-ups",
-    "ont-mini-ups",
+  "governedAffiliateRoutePatterns": [
     "akvaryum-pilli-usb-hava-motoru",
     "pilli-su-kacagi-alarmi",
     "duvar-kablo-metal-dedektoru",
     "akilli-priz-enerji-olcer"
+  ],
+  "legacyMigrationQueue": [
+    "modem-mini-ups",
+    "ont-mini-ups"
   ],
   "reviewOnlyRoutePatterns": [
     "lazer-metre",
@@ -68,7 +70,8 @@
     "professionalPowerSystemsUseEngineeringLead": true,
     "newCategoryNeedsSearchDemandEvidence": true,
     "newCategoryNeedsDistinctCanonicalIntent": true,
-    "newCategoryNeedsSafeNoBuyOutcome": true
+    "newCategoryNeedsSafeNoBuyOutcome": true,
+    "legacyRoutesMigrateBeforeExpansion": true
   },
   "blockedCandidateRoutes": [
     "/amazon-elektrik-urunleri/lazer-metre-lazer-hizalama-secimi/",
