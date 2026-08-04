@@ -1,0 +1,21 @@
+{
+  "version": 268,
+  "name": "growth-v268-cctv-continuity",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/guvenlik-kamerasi-elektrik-kesintisi-sureklilik-plani/index.html",
+      "canonicalPath": "/hesaplama/guvenlik-kamerasi-elektrik-kesintisi-sureklilik-plani/",
+      "type": "tool"
+    },
+    {
+      "source": "alo186/haberler/elektrik-kesilince-guvenlik-kamerasi-calisir-mi/index.html",
+      "canonicalPath": "/haberler/elektrik-kesilince-guvenlik-kamerasi-calisir-mi/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/kamera-nvr-ups-yedek-guc-secimi/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/kamera-nvr-ups-yedek-guc-secimi/",
+      "type": "commerce-guide"
+    }
+  ]
+}
