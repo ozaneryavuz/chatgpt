@@ -1,0 +1,133 @@
+name: ALO186 v266 modem sürekliliği ve Sites güven drift
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '43 */6 * * *'
+  pull_request:
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/modem-mini-ups-secimi/**'
+      - 'alo186/amazon-elektrik-urunleri/modem-ont-mini-ups-yedekleme-secici/**'
+      - 'alo186/assets/journey-events-v260.js'
+      - 'alo186/deployment/content-consolidations.json'
+      - 'alo186/deployment/affiliate_route_risk_policy_v266.json'
+      - 'alo186/growth/live-drift/critical-pages-v266.json'
+      - 'alo186/growth/live-drift/chatgpt_sites_live_drift.py'
+      - 'alo186/tests/test_growth_v266_modem_sites_trust.py'
+      - '.github/workflows/alo186-growth-v266-modem-sites-trust.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/modem-mini-ups-secimi/**'
+      - 'alo186/amazon-elektrik-urunleri/modem-ont-mini-ups-yedekleme-secici/**'
+      - 'alo186/assets/journey-events-v260.js'
+      - 'alo186/deployment/content-consolidations.json'
+      - 'alo186/deployment/affiliate_route_risk_policy_v266.json'
+      - 'alo186/growth/live-drift/critical-pages-v266.json'
+      - 'alo186/growth/live-drift/chatgpt_sites_live_drift.py'
+      - 'alo186/tests/test_growth_v266_modem_sites_trust.py'
+      - '.github/workflows/alo186-growth-v266-modem-sites-trust.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-growth-v266-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Politika, içerik ve gizlilik regresyonu
+        run: |
+          set -euo pipefail
+          python -m json.tool alo186/deployment/affiliate_route_risk_policy_v266.json >/dev/null
+          python -m json.tool alo186/deployment/content-consolidations.json >/dev/null
+          python -m json.tool alo186/growth/live-drift/critical-pages-v266.json >/dev/null
+          python -m py_compile \
+            alo186/growth/live-drift/chatgpt_sites_live_drift.py \
+            alo186/tests/test_growth_v266_modem_sites_trust.py
+          python alo186/tests/test_growth_v266_modem_sites_trust.py | tee /tmp/alo186-v266-regression.json
+
+      - name: Mevcut affiliate portföy risk kapısı
+        run: |
+          set -euo pipefail
+          python alo186/tests/test_affiliate_route_risk_policy_v265.py
+
+      - name: Canonical production build ve smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-v266
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-v266 \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-v266
+          test -f /tmp/alo186-v266/amazon-elektrik-urunleri/modem-ont-mini-ups-yedekleme-secici/index.html
+          grep -Fq 'https://alo186.com/amazon-elektrik-urunleri/modem-ont-mini-ups-yedekleme-secici/' /tmp/alo186-v266/sitemap.xml
+          if grep -Fq 'https://alo186.com/amazon-elektrik-urunleri/modem-mini-ups-secimi/' /tmp/alo186-v266/sitemap.xml; then
+            echo 'Eski modem mini UPS aliası sitemap içinde kalamaz.' >&2
+            exit 1
+          fi
+          grep -Fq '30 günlük kısa kontrol' /tmp/alo186-v266/amazon-elektrik-urunleri/modem-ont-mini-ups-yedekleme-secici/index.html
+          grep -Fq '90 günlük gerçek süre provası' /tmp/alo186-v266/amazon-elektrik-urunleri/modem-ont-mini-ups-yedekleme-secici/index.html
+          grep -Fq '/assets/journey-events-v260.js' /tmp/alo186-v266/amazon-elektrik-urunleri/modem-ont-mini-ups-yedekleme-secici/index.html
+
+      - name: ChatGPT Sites import paketi doğrulaması
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-sites-v266
+          python alo186/deployment/export_chatgpt_sites_bundle_v2.py \
+            --output /tmp/alo186-sites-v266 \
+            --commit "$GITHUB_SHA"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('/tmp/alo186-sites-v266')
+          manifest=json.loads((root/'sites-import.json').read_text(encoding='utf-8'))
+          paths={item['canonicalPath'] for item in manifest['pages']}
+          assert '/amazon-elektrik-urunleri/modem-ont-mini-ups-yedekleme-secici/' in paths
+          assert '/amazon-elektrik-urunleri/modem-mini-ups-secimi/' not in paths
+          assert (root/'data/redirects.json').is_file()
+          redirects=json.loads((root/'data/redirects.json').read_text(encoding='utf-8'))
+          assert any(item['from']=='/amazon-elektrik-urunleri/modem-mini-ups-secimi/' and item['to']=='/amazon-elektrik-urunleri/modem-ont-mini-ups-yedekleme-secici/' for item in redirects)
+          PY
+
+  live-drift:
+    if: github.event_name != 'pull_request'
+    needs: validate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: ChatGPT Sites canlı güven ve dönüşüm drift denetimi
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-live-drift-v266
+          python alo186/growth/live-drift/chatgpt_sites_live_drift.py \
+            --config alo186/growth/live-drift/critical-pages-v266.json \
+            --output /tmp/alo186-live-drift-v266
+          cp /tmp/alo186-live-drift-v266/sites-delta-patch-v259.json \
+             /tmp/alo186-live-drift-v266/sites-delta-patch-v266.json
+      - name: Sites delta patch ve denetim artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-chatgpt-sites-trust-delta-v266-${{ github.run_id }}
+          path: /tmp/alo186-live-drift-v266
+          if-no-files-found: error
+          retention-days: 90
+      - name: İlk üç kritik aksiyonu özetle
+        run: |
+          cat /tmp/alo186-live-drift-v266/SUMMARY.md >> "$GITHUB_STEP_SUMMARY"
+          echo '' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Bu artifact canlı Sites yayını değildir; bağlı ChatGPT Sites yazma erişimi gerekir.' >> "$GITHUB_STEP_SUMMARY"

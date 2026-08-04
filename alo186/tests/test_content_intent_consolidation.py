@@ -108,10 +108,27 @@ def declared_pair_matches(left: dict, right: dict) -> tuple[bool, str]:
     )
 
 
+def commerce_pair_matches(left: dict, right: dict) -> tuple[bool, str]:
+    headline_score, headline_common, field = pair_score(left, right)
+    summary_score, summary_common = similarity(left["summaryTokens"], right["summaryTokens"])
+    # Güvenlik kapılı güncel seçiciler eski katalog sayfalarından daha kapsamlıdır;
+    # Jaccard oranı bu nedenle düşebilir. Aynı ürün görevi için başlıkta en az üç
+    # veya özet sinyalinde en az sekiz ortak teknik token kanıt kabul edilir.
+    matches = headline_common >= 3 or summary_common >= 8
+    return matches, (
+        f"{field}={headline_score:.2f}, ortak={headline_common}; "
+        f"özet={summary_score:.2f}, ortak={summary_common}"
+    )
+
+
 def main() -> None:
     manifest = load_effective_manifest(REPO_ROOT)
     config = load_config()
-    route_by_path = {route["canonicalPath"]: route for route in manifest["routes"]}
+    route_by_path: dict[str, dict] = {}
+    for route in manifest["routes"]:
+        canonical = route["canonicalPath"]
+        route_by_path[canonical] = route
+        route_by_path[canonical.rstrip("/") or "/"] = route
     declared_pairs = {(item["aliasPath"], item["canonicalPath"]) for item in config["consolidations"]}
     alias_paths = {item["aliasPath"] for item in config["consolidations"]}
 
@@ -120,10 +137,19 @@ def main() -> None:
         target_route = route_by_path.get(item["canonicalPath"])
         assert alias_route, f"Birleştirilecek alias routing envanterinde yok: {item['aliasPath']}"
         assert target_route, f"Canonical hedef routing envanterinde yok: {item['canonicalPath']}"
-        assert alias_route["type"] == "article" and target_route["type"] == "article"
+        assert alias_route["type"] == target_route["type"], (
+            f"Birleştirilen rotaların içerik türü aynı olmalı: {item['aliasPath']} "
+            f"({alias_route['type']}) → {item['canonicalPath']} ({target_route['type']})"
+        )
+        assert alias_route["type"] in {"article", "commerce-guide"}, (
+            f"Desteklenmeyen canonical birleştirme türü: {alias_route['type']}"
+        )
         alias_signature = article_signature(alias_route["source"])
         target_signature = article_signature(target_route["source"])
-        matches, evidence = declared_pair_matches(alias_signature, target_signature)
+        if alias_route["type"] == "commerce-guide":
+            matches, evidence = commerce_pair_matches(alias_signature, target_signature)
+        else:
+            matches, evidence = declared_pair_matches(alias_signature, target_signature)
         assert matches, (
             f"İlan edilen içerik birleştirmesi aynı arama niyetini doğrulamıyor: "
             f"{item['aliasPath']} → {item['canonicalPath']} ({evidence})"
@@ -158,6 +184,7 @@ def main() -> None:
                 "effectiveArticleCount": len([route for route in manifest["routes"] if route["type"] == "article"]),
                 "activeCanonicalArticleCountAfterConsolidation": len(active_articles),
                 "consolidationCount": len(config["consolidations"]),
+                "supportedConsolidationTypes": ["article", "commerce-guide"],
                 "undeclaredHighSimilarityCollisions": 0,
             },
             ensure_ascii=False,

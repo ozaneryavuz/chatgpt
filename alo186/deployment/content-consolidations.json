@@ -1,6 +1,6 @@
 {
-  "version": 10,
-  "generatedAt": "2026-08-03",
+  "version": 11,
+  "generatedAt": "2026-08-04",
   "consolidations": [
     {
       "intentKey": "lifepo4-low-temperature-charging",
@@ -141,6 +141,13 @@
       "canonicalPath": "/haberler/kompanzasyon-harmonik-rezonans-detuned-reaktor-kabul-testi",
       "label": "Kompanzasyon harmonik rezonans ve detuned reaktör kabulü",
       "reason": "İki rehber aynı harmonik rezonans, detuned reaktör, tuning frekansı ve kompanzasyon güvenliği niyetini hedefliyor. Ölçüm, kademe zaman çizelgesi ve termal kabulü birlikte veren güncel kabul rotası canonical seçildi."
+    },
+    {
+      "intentKey": "modem-ont-mini-ups-governed-selector",
+      "aliasPath": "/amazon-elektrik-urunleri/modem-mini-ups-secimi/",
+      "canonicalPath": "/amazon-elektrik-urunleri/modem-ont-mini-ups-yedekleme-secici/",
+      "label": "Modem, fiber ONT ve mini UPS güvenli seçim rotası",
+      "reason": "Aynı gerilim, polarite, cihaz zinciri, çalışma süresi ve satın almama kararını hedefleyen eski ürün merkezi rotası; güvenlik kapılı ve üç onaylı güncel seçicide birleştirildi."
     }
   ]
 }
