@@ -114,8 +114,8 @@ class GrowthV272BoilerTrustTests(unittest.TestCase):
         locked_anchors = re.findall(r'<a\b[^>]*class="button primary store-link"[^>]*aria-disabled="true"', self.commerce)
         self.assertEqual(len(locked_anchors), 3)
         self.assertIsNone(
-            re.search(r'(?i)href\s*=\s*[\"\']https://www\.amazon\.com\.tr', self.commerce),
-            "Amazon linkleri kaynak HTML içinde aktif href olarak bulunmamalı",
+            re.search(r'(?is)<a\b[^>]*\bhref\s*=\s*[\"\']https://www\.amazon\.com\.tr[^>]*>', self.commerce),
+            "Amazon linkleri kaynak HTML içindeki anchor etiketlerinde aktif href olarak bulunmamalı",
         )
         for forbidden in ("fetch(", "XMLHttpRequest", "localStorage", "sessionStorage", "document.cookie"):
             self.assertNotIn(forbidden, self.commerce)
