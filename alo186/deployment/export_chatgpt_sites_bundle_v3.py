@@ -9,10 +9,40 @@ from pathlib import Path
 from typing import Any
 
 try:
-    from .export_chatgpt_sites_bundle import extract_text, markdown_document, read_json, safe_filename, write_json
+    from .device_damage_deadline import (
+        AMENDMENT_URL,
+        CURRENT_DEADLINE,
+        REGULATION_URL,
+        normalize_published_site,
+        validate_published_site,
+    )
+    from .export_chatgpt_sites_bundle import (
+        collect_schema_types,
+        extract_text,
+        jsonld_blocks,
+        markdown_document,
+        read_json,
+        safe_filename,
+        write_json,
+    )
     from .export_chatgpt_sites_bundle_v2 import export_bundle as export_v2_bundle
 except ImportError:
-    from export_chatgpt_sites_bundle import extract_text, markdown_document, read_json, safe_filename, write_json
+    from device_damage_deadline import (
+        AMENDMENT_URL,
+        CURRENT_DEADLINE,
+        REGULATION_URL,
+        normalize_published_site,
+        validate_published_site,
+    )
+    from export_chatgpt_sites_bundle import (
+        collect_schema_types,
+        extract_text,
+        jsonld_blocks,
+        markdown_document,
+        read_json,
+        safe_filename,
+        write_json,
+    )
     from export_chatgpt_sites_bundle_v2 import export_bundle as export_v2_bundle
 
 VERSION = 3
@@ -24,11 +54,8 @@ HOME_ROUTE = "/elektrik-portali"
 JOURNAL_ROUTE = "/hesaplama/kesinti-gunlugu/"
 ARTICLE_ROUTE = "/haberler/elektrik-kesintisi-cihaz-hasari-edas-basvurusu"
 SOURCES_ROUTE = "/kaynaklar/"
-
-WRONG_HOME_TITLE = "Cihaz hasarında başvuru süresi 30 gündür"
-WRONG_HOME_BODY = "zararın ortaya çıktığı tarihten itibaren <strong>30 gün içinde</strong>"
-CORRECT_HOME_TITLE = "Cihaz hasarında talep süresi 10 iş günüdür"
-CORRECT_HOME_BODY = "zararın ortaya çıktığı tarihten itibaren <strong>10 iş günü içinde</strong>"
+CURRENT_HOME_TITLE = "Cihaz hasarında başvuru süresi 30 gündür"
+CURRENT_HOME_BODY = "zararın ortaya çıktığı tarihten itibaren <strong>30 gün içinde</strong>"
 
 
 def _page_record(manifest: dict[str, Any], route: str) -> dict[str, Any]:
@@ -55,7 +82,10 @@ def _replace_once(source: str, old: str, new: str, label: str) -> str:
     return source.replace(old, new, 1)
 
 
-def _write_page_markdown(output: Path, page: dict[str, Any], html: str) -> None:
+def _refresh_page(output: Path, page: dict[str, Any], html: str) -> None:
+    blocks = jsonld_blocks(html)
+    page["jsonLd"] = blocks
+    page["schemaTypes"] = sorted(set().union(*(collect_schema_types(item) for item in blocks))) if blocks else []
     destination = output / "content/pages" / f"{safe_filename(page['canonicalPath'])}.md"
     if not destination.is_file():
         raise FileNotFoundError(destination)
@@ -66,16 +96,16 @@ def _patch_home(output: Path, manifest: dict[str, Any]) -> None:
     page = _page_record(manifest, HOME_ROUTE)
     path = _source_path(output, page)
     html = path.read_text(encoding="utf-8")
-    html = _replace_once(html, WRONG_HOME_TITLE, CORRECT_HOME_TITLE, "Ana sayfa cihaz hasarı başlığı")
-    html = _replace_once(html, WRONG_HOME_BODY, CORRECT_HOME_BODY, "Ana sayfa cihaz hasarı süresi")
-    html = _replace_once(
-        html,
-        "Olay zamanı, cihaz bilgisi, fotoğraflar, servis raporu ve şirketin yazılı kararını saklayın. ALO186 başvuru veya hasar kaydı almaz.",
-        "Olay zamanı, cihaz bilgisi, fotoğraflar, servis raporu ve şirketin yazılı kararını saklayın. Hasarın şebekeden kaynaklandığı resmî incelemeyle belirlenir; ALO186 başvuru, hasar veya tazminat kararı almaz.",
-        "Ana sayfa güven açıklaması",
-    )
+    if CURRENT_HOME_TITLE not in html or CURRENT_HOME_BODY not in html:
+        raise RuntimeError("Ana sayfa güncel 30 günlük cihaz hasarı talep süresini taşımıyor")
+    old = "Olay zamanı, cihaz bilgisi, fotoğraflar, servis raporu ve şirketin yazılı kararını saklayın. ALO186 başvuru veya hasar kaydı almaz."
+    new = "Olay zamanı, cihaz bilgisi, fotoğraflar, servis raporu ve şirketin yazılı kararını saklayın. Hasarın dağıtım sisteminden kaynaklandığı teknik raporla belirlenir; ALO186 başvuru, hasar veya tazminat kararı almaz."
+    if old in html:
+        html = _replace_once(html, old, new, "Ana sayfa güven açıklaması")
+    elif new not in html:
+        raise RuntimeError("Ana sayfa cihaz hasarı güven açıklaması bulunamadı")
     path.write_text(html, encoding="utf-8")
-    _write_page_markdown(output, page, html)
+    _refresh_page(output, page, html)
 
 
 def _critical_claim_schema(claims: dict[str, Any]) -> dict[str, Any]:
@@ -114,6 +144,12 @@ def _claims_section(claims: dict[str, Any]) -> str:
     cards: list[str] = []
     for claim in claims["claims"]:
         caveat = claim["requiredCaveats"][0]
+        conflict = ""
+        if claim.get("conflictingSource"):
+            conflict = (
+                '<p class="danger-note"><strong>Çelişen eski kaynak:</strong> '
+                'EPDK tüketici SSS sayfasında eski süre görülebilir. Güncel Kalite Yönetmeliği Madde 26/1 esas alınır.</p>'
+            )
         cards.append(
             '<article class="source-card">'
             f'<span class="eyebrow">Son doğrulama: {claims["verifiedAt"]}</span>'
@@ -121,15 +157,16 @@ def _claims_section(claims: dict[str, Any]) -> str:
             f'<p><strong>{claim["value"]}</strong></p>'
             f'<p>{claim["scope"]}</p>'
             f'<p><small>{caveat}</small></p>'
+            f'{conflict}'
             f'<a href="{claim["sourceUrl"]}" rel="external noopener">{claim["sourcePublisher"]} kaynağını aç ↗</a>'
             '</article>'
         )
     return (
         '<section class="section" data-alo186-critical-claims="v258">'
         '<div class="wrap">'
-        '<div class="section-heading"><span class="eyebrow">Kritik bilgi · tek kaynak · fail-closed</span>'
+        '<div class="section-heading"><span class="eyebrow">Kritik bilgi · güncel mevzuat · fail-closed</span>'
         '<h2>Kritik bilgiler ve son doğrulama</h2>'
-        '<p>Telefon, başvuru süresi ve resmî işlem yönleri değişebildiği için bu kayıtlar birincil kaynaktan periyodik olarak kontrol edilir. Çelişki varsa ticari içerik değil resmî kaynak önceliklendirilir.</p></div>'
+        '<p>Telefon, başvuru süresi ve resmî işlem yönleri değişebildiği için birincil ve yürürlükteki kaynaklar periyodik olarak kontrol edilir. Çelişki varsa ticari içerik değil güncel mevzuat ve resmî kanal önceliklendirilir.</p></div>'
         f'<div class="sources">{"".join(cards)}</div>'
         '</div></section>'
     )
@@ -148,22 +185,20 @@ def _patch_sources(output: Path, manifest: dict[str, Any], claims: dict[str, Any
     html = _replace_once(html, "</head>", schema_tag + "\n</head>", "Kaynak merkezi head kapanışı")
     html = html.replace("Kaynak merkezi son gözden geçirme: 30 Temmuz 2026.", "Kaynak merkezi son gözden geçirme: 4 Ağustos 2026.")
     path.write_text(html, encoding="utf-8")
-    page.setdefault("jsonLd", []).append(schema)
-    page["schemaTypes"] = sorted(set(page.get("schemaTypes", [])) | {"Claim", "CreativeWork", "ItemList", "ListItem"})
-    _write_page_markdown(output, page, html)
+    _refresh_page(output, page, html)
 
 
 def _deadline_panel() -> str:
     return (
         '<section id="damageDeadlinePlanner" class="content-section" data-alo186-damage-deadline="v258" hidden>'
         '<div class="result-card">'
-        '<span class="step">5</span><h2>Cihaz hasarı için 10 iş günlük süre planı</h2>'
+        '<span class="step">5</span><h2>Cihaz hasarı için 30 günlük süre planı</h2>'
         '<p id="damageDeadlineSummary" class="info" aria-live="polite"></p>'
         '<ul id="damageDeadlineEntries" class="evidence-list"></ul>'
-        '<div class="warning"><strong>Hukukî ve takvim sınırı:</strong> Bu yardımcı hesap yalnız hafta sonlarını dışlar; resmî tatilleri otomatik hesaplamaz. Hasarın şebekeden kaynaklanıp kaynaklanmadığını ve sürecin sonucunu dağıtım şirketinin resmî incelemesi belirler. ALO186 başvuru veya tazminat kararı almaz.</div>'
+        '<div class="warning"><strong>Hukukî sınır:</strong> Bu araç olay tarihine 30 takvim günü ekleyen yardımcı bir plandır. Hasarın dağıtım sisteminden kaynaklanıp kaynaklanmadığını ve sürecin sonucunu dağıtım şirketinin teknik incelemesi belirler. ALO186 başvuru veya tazminat kararı almaz.</div>'
         '<div class="actions"><button class="btn btn-secondary" type="button" id="damageReminderBtn">Yerel takvim hatırlatıcısı oluştur</button>'
         '<a class="btn btn-secondary" href="/haberler/elektrik-kesintisi-cihaz-hasari-edas-basvurusu">Belge rehberini aç</a>'
-        '<a class="btn btn-secondary" href="https://www.epdk.gov.tr/Detay/Icerik/12-3/1-elektrik-aboneligini-kendi-adima-almak-zorunda" target="_blank" rel="external noopener">EPDK kaynağını doğrula</a></div>'
+        f'<a class="btn btn-secondary" href="{REGULATION_URL}" target="_blank" rel="external noopener">Kalite Yönetmeliğini doğrula</a></div>'
         '<small>Hatırlatıcı cihazınızda oluşturulur; ad, e-posta, telefon, adres, abonelik veya başvuru numarası istenmez.</small>'
         '</div></section>'
     )
@@ -188,46 +223,36 @@ def _patch_journal(output: Path, manifest: dict[str, Any]) -> None:
         "Kesinti günlüğü script zinciri",
     )
     path.write_text(html, encoding="utf-8")
-    destination = path.parent / "damage-deadline-v258.js"
-    shutil.copy2(DEADLINE_SCRIPT, destination)
-    _write_page_markdown(output, page, html)
+    shutil.copy2(DEADLINE_SCRIPT, path.parent / "damage-deadline-v258.js")
+    _refresh_page(output, page, html)
 
 
-def _update_date_modified(value: Any) -> None:
-    if isinstance(value, dict):
-        if value.get("@type") == "Article":
-            value["dateModified"] = "2026-08-04"
-        for child in value.values():
-            _update_date_modified(child)
-    elif isinstance(value, list):
-        for child in value:
-            _update_date_modified(child)
-
-
-def _patch_article(output: Path, manifest: dict[str, Any]) -> None:
+def _patch_article_date(output: Path, manifest: dict[str, Any]) -> None:
     page = _page_record(manifest, ARTICLE_ROUTE)
     path = _source_path(output, page)
     html = path.read_text(encoding="utf-8")
     html = html.replace('"dateModified":"2026-07-28"', '"dateModified":"2026-08-04"')
     html = html.replace("Son doğrulama: 28 Temmuz 2026", "Son doğrulama: 4 Ağustos 2026")
     path.write_text(html, encoding="utf-8")
-    _update_date_modified(page.get("jsonLd", []))
-    _write_page_markdown(output, page, html)
+    _refresh_page(output, page, html)
 
 
-def _assert_claim_contract(output: Path, claims: dict[str, Any]) -> None:
+def _assert_claim_contract(output: Path, claims: dict[str, Any]) -> dict[str, object]:
+    source_root = output / "source"
+    deadline_report = validate_published_site(source_root)
     forbidden = [phrase for claim in claims["claims"] for phrase in claim.get("forbiddenPhrases", [])]
-    checked_routes = (HOME_ROUTE, JOURNAL_ROUTE, ARTICLE_ROUTE, SOURCES_ROUTE)
     manifest = read_json(output / "sites-import.json", {})
-    for route in checked_routes:
-        page = _page_record(manifest, route)
-        text = _source_path(output, page).read_text(encoding="utf-8")
+    for route in (HOME_ROUTE, JOURNAL_ROUTE, ARTICLE_ROUTE):
+        text = _source_path(output, _page_record(manifest, route)).read_text(encoding="utf-8")
         for phrase in forbidden:
             if phrase in text:
-                raise RuntimeError(f"Yasak kritik iddia bulundu: {route}: {phrase}")
+                raise RuntimeError(f"Eski kritik iddia bulundu: {route}: {phrase}")
     home = _source_path(output, _page_record(manifest, HOME_ROUTE)).read_text(encoding="utf-8")
-    if CORRECT_HOME_TITLE not in home or CORRECT_HOME_BODY not in home:
-        raise RuntimeError("Ana sayfa 10 iş günü sözleşmesini taşımıyor")
+    if CURRENT_HOME_TITLE not in home or CURRENT_HOME_BODY not in home:
+        raise RuntimeError("Ana sayfa 30 günlük cihaz hasarı sözleşmesini taşımıyor")
+    if deadline_report["deadline"] != CURRENT_DEADLINE:
+        raise RuntimeError("Cihaz hasarı süre doğrulaması beklenmeyen değer döndürdü")
+    return deadline_report
 
 
 def _rebuild_checksums(output: Path) -> None:
@@ -247,16 +272,21 @@ def export_bundle(output: Path, source_commit: str) -> dict[str, Any]:
     if claims.get("version") != 258 or len(claims.get("claims", [])) != 3:
         raise RuntimeError("Kritik bilgi kayıtları eksik veya geçersiz")
 
+    normalized = normalize_published_site(output / "source")
     _patch_home(output, manifest)
     _patch_sources(output, manifest, claims)
     _patch_journal(output, manifest)
-    _patch_article(output, manifest)
+    _patch_article_date(output, manifest)
 
     manifest["exporterVersion"] = VERSION
     manifest["criticalClaimsVersion"] = claims["version"]
     manifest["criticalClaimsVerifiedAt"] = claims["verifiedAt"]
+    manifest["deviceDamageDeadline"] = CURRENT_DEADLINE
+    manifest["deviceDamageRegulationUrl"] = REGULATION_URL
+    manifest["deviceDamageAmendmentUrl"] = AMENDMENT_URL
     manifest["growthActionVersion"] = 258
     write_json(output / "sites-import.json", manifest)
+    deadline_report = _assert_claim_contract(output, claims)
     write_json(output / "data/critical-claims.json", claims)
     write_json(
         output / "data/growth-action-v258.json",
@@ -266,23 +296,26 @@ def export_bundle(output: Path, source_commit: str) -> dict[str, Any]:
             "actions": [
                 {
                     "priority": 1,
-                    "action": "Ana sayfadaki cihaz hasarı talep süresini EPDK kaynağıyla 10 iş günü olarak düzelt",
-                    "userBenefit": "Kullanıcının kritik başvuru süresini kaçırma riski azalır.",
-                    "revenueImpact": "Doğrudan gelir hedeflemez; güven ve organik dönüşüm temelini korur."
+                    "action": "Eski 10 iş günü içeriklerini yürürlükteki Kalite Yönetmeliği Madde 26/1 uyarınca 30 güne tekilleştir",
+                    "userBenefit": "Kullanıcı güncel talep süresini tek ve tutarlı biçimde görür; eski EPDK SSS metniyle yanıltılmaz.",
+                    "revenueImpact": "Doğrudan gelir hedeflemez; hukukî doğruluk ve marka güvenini koruyarak organik dönüşüm kaybını azaltır."
                 },
                 {
                     "priority": 2,
-                    "action": "Kritik telefon ve süre iddialarını kaynak, doğrulama tarihi ve yaş sınırıyla tek kayıt altında yönet",
-                    "userBenefit": "112, 186 ve cihaz hasarı süreci açıkça ayrılır; resmî kurum izlenimi önlenir.",
-                    "revenueImpact": "Yanlış bilgi kaynaklı güven kaybını ve dönüşüm hunisi terkini azaltır."
+                    "action": "112, 186 ve cihaz hasarı süresini kaynak, değişiklik ve tazelik kaydıyla yönet",
+                    "userBenefit": "Acil durum, dağıtım arızası ve hasar talebi birbirinden ayrılır; resmî kurum izlenimi önlenir.",
+                    "revenueImpact": "Yanlış bilgi kaynaklı terk ve güven kaybını azaltır; güvenli teknik yolculukların tamamlanma olasılığını artırır."
                 },
                 {
                     "priority": 3,
-                    "action": "Kesinti günlüğüne kişisel verisiz 10 iş günü süre planı ve yerel takvim hatırlatıcısı ekle",
-                    "userBenefit": "Cihaz hasarı işaretleyen kullanıcı belge ve resmî başvuru adımını zamanında takip eder.",
+                    "action": "Kesinti günlüğüne kişisel verisiz 30 günlük süre planı ve yerel takvim hatırlatıcısı ekle",
+                    "userBenefit": "Cihaz hasarı işaretleyen kullanıcı belge ve resmî talep adımını zamanında takip eder.",
                     "revenueImpact": "Fiyat veya kampanya yerine gerçek olay ve takip ihtiyacına dayalı tekrar ziyaret üretir."
                 }
             ],
+            "deviceDamageDeadline": CURRENT_DEADLINE,
+            "normalizedSourceFiles": normalized,
+            "verifiedDeadlineLocations": deadline_report["verifiedLocations"],
             "commercialFieldsPublished": [],
             "affiliateLinksAdded": 0,
             "officialInstitutionImpressionCreated": false
@@ -293,11 +326,10 @@ def export_bundle(output: Path, source_commit: str) -> dict[str, Any]:
         brief.read_text(encoding="utf-8")
         + "\n## Kritik bilgi tazeliği v258\n\n"
         + "Telefon, resmî kanal ve başvuru süresi iddiaları `data/critical-claims.json` kaydından uygulanır. "
-        + "Cihaz hasarı talebi için EPDK kaynağındaki 10 iş günlük süre kullanılır; 30 gün ifadesi yayımlanamaz. "
-        + "Takvim hatırlatıcısı yalnız yardımcıdır, resmî tatilleri otomatik hesaplamaz ve başvuru kararı vermez.\n",
+        + "Cihaz hasarı talebi için yürürlükteki Kalite Yönetmeliği Madde 26/1 kapsamındaki 30 günlük süre kullanılır; eski 10 iş günü ifadesi yayımlanamaz. "
+        + "Takvim hatırlatıcısı yalnız yardımcıdır ve başvuru veya tazminat kararı vermez.\n",
         encoding="utf-8",
     )
-    _assert_claim_contract(output, claims)
     _rebuild_checksums(output)
     return manifest
 
@@ -314,6 +346,7 @@ def main() -> None:
                 "ok": True,
                 "exporterVersion": VERSION,
                 "criticalClaimsVersion": manifest["criticalClaimsVersion"],
+                "deviceDamageDeadline": manifest["deviceDamageDeadline"],
                 "stats": manifest["stats"],
             },
             ensure_ascii=False,
