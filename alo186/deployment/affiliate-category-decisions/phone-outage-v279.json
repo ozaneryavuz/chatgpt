@@ -1,0 +1,50 @@
+{
+  "version": 279,
+  "category": "phone-outage-powerbank-cable",
+  "decision": "conditional-consumer-affiliate",
+  "reviewedAt": "2026-08-04",
+  "searchIntent": [
+    "elektrik kesintisinde telefon nasıl şarj edilir",
+    "kesintide telefon şarjı",
+    "telefon için powerbank seçimi"
+  ],
+  "allowedConsumerAffiliateClasses": [
+    "phone power bank with readable technical label and verified connector",
+    "marked charging cable compatible with phone and source"
+  ],
+  "excludedConsumerAffiliateClasses": [
+    "damaged swollen or recalled lithium battery",
+    "model-independent trigger or converter cable",
+    "single consumer power bank for medical life-safety or critical business communication",
+    "fixed installation backfeed battery or generator system"
+  ],
+  "conversionPolicy": {
+    "merchant": "Amazon Türkiye",
+    "tag": "alo186rehber-21",
+    "linksLockedByDefault": true,
+    "disclosureBeforeLinkRequired": true,
+    "requiredRel": ["sponsored", "nofollow", "noopener"],
+    "noBuyOutcomeRequired": true,
+    "activeHazardCommerceClosed": true,
+    "personalDataCollectionForbidden": true,
+    "noPriceStockRatingWarrantyClaims": true,
+    "officialInstitutionImpressionForbidden": true
+  },
+  "unlockRequirements": [
+    "no lithium battery or electrical hazard",
+    "phone connector and cable compatibility confirmed",
+    "power bank single-port output and energy label readable",
+    "existing phone battery or source failed a real target-duration test",
+    "use is not the sole critical medical life-safety or business communication channel",
+    "affiliate disclosure acknowledged"
+  ],
+  "repeatVisitReasons": [
+    {"days": 30, "reason": "battery swelling heat cable and connector inspection"},
+    {"days": 90, "reason": "real outage communication-duration test"}
+  ],
+  "sources": [
+    {"publisher": "Apple Support", "url": "https://support.apple.com/guide/iphone/save-battery-life-with-power-modes-on-iphone-iphcab9aecd1/26/ios/26", "checkedAt": "2026-08-04"},
+    {"publisher": "Google Pixel Help", "url": "https://support.google.com/pixelphone/answer/6187458", "checkedAt": "2026-08-04"},
+    {"publisher": "FAA PackSafe", "url": "https://www.faa.gov/hazmat/packsafe/lithium-batteries", "checkedAt": "2026-08-04"}
+  ]
+}
