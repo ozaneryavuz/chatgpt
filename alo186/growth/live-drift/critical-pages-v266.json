@@ -44,14 +44,14 @@
       "source": "alo186/amazon-elektrik-urunleri/modem-ont-mini-ups-yedekleme-secici/index.html",
       "requiredText": [
         "gerekli cihaz zincirine",
-        "Mevcut düzen yeterli — yeni ürün almayın",
+        "Mevcut güvenli düzen ihtiyacı karşılamıyor; satın almama seçeneğini değerlendirdim.",
         "30 günlük kısa kontrol",
         "90 günlük gerçek süre provası",
         "Amazon Gelir Ortağı açıklaması"
       ],
       "forbiddenText": [
         "her 12 V mini UPS uygundur",
-        "kesintisiz internet garantisi",
+        "kesintisiz internet garantisi verir",
         "fiyatımız",
         "stokta"
       ],
