@@ -1,0 +1,16 @@
+{
+  "version": 274,
+  "name": "growth-v274-alarm-continuity",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesilince-alarm-sistemi-calisir-mi/index.html",
+      "canonicalPath": "/haberler/elektrik-kesilince-alarm-sistemi-calisir-mi/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/alarm-sistemi-elektrik-kesintisi-test-plani/index.html",
+      "canonicalPath": "/hesaplama/alarm-sistemi-elektrik-kesintisi-test-plani/",
+      "type": "tool"
+    }
+  ]
+}
