@@ -111,7 +111,11 @@ def declared_pair_matches(left: dict, right: dict) -> tuple[bool, str]:
 def main() -> None:
     manifest = load_effective_manifest(REPO_ROOT)
     config = load_config()
-    route_by_path = {route["canonicalPath"]: route for route in manifest["routes"]}
+    route_by_path: dict[str, dict] = {}
+    for route in manifest["routes"]:
+        canonical = route["canonicalPath"]
+        route_by_path[canonical] = route
+        route_by_path[canonical.rstrip("/") or "/"] = route
     declared_pairs = {(item["aliasPath"], item["canonicalPath"]) for item in config["consolidations"]}
     alias_paths = {item["aliasPath"] for item in config["consolidations"]}
 
