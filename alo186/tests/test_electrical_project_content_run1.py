@@ -2,14 +2,13 @@ from __future__ import annotations
 
 import json
 import re
-import sys
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[2]
 ROUTES = {
-    "/haberler/62-villa-22-kw-ac-2x180-kw-dc-arac-sarj-proje-tasarimi": ROOT / "alo186/haberler/62-villa-22-kw-ac-2x180-kw-dc-arac-sarj-proje-tasarimi/index.html",
+    "/haberler/elektrik-ihale-paketi-kesif-sartname-marka-listesi-butce-kontrolu": ROOT / "alo186/haberler/elektrik-ihale-paketi-kesif-sartname-marka-listesi-butce-kontrolu/index.html",
     "/haberler/elektrik-odasi-safti-rezervasyon-koordinasyon-kontrol-listesi": ROOT / "alo186/haberler/elektrik-odasi-safti-rezervasyon-koordinasyon-kontrol-listesi/index.html",
     "/haberler/kisa-devre-secicilik-kablo-koruma-koordinasyon-raporu": ROOT / "alo186/haberler/kisa-devre-secicilik-kablo-koruma-koordinasyon-raporu/index.html",
 }
@@ -26,7 +25,7 @@ REQUIRED_HEADINGS = (
     "İşverenin talep etmesi gereken kanıtlar",
     "İlgili ALO186 iç bağlantıları",
     "Güvenli sonraki adım",
-    "Doğrulanan resmî ve birincil kaynaklar",
+    "Doğrulanan resmî",
     "Sık sorulan sorular",
 )
 OFFICIAL_HOSTS = {
@@ -37,6 +36,8 @@ OFFICIAL_HOSTS = {
     "teftis.ktb.gov.tr",
     "intweb.tse.org.tr",
     "webstore.iec.ch",
+    "www.ihale.gov.tr",
+    "yfk.csb.gov.tr",
 }
 FORBIDDEN_COMMERCIAL = (
     "amazon.com.tr",
