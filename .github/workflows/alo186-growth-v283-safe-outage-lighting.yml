@@ -1,0 +1,99 @@
+name: ALO186 güvenli kesinti aydınlatması v283
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/elektrik-kesintisinde-ev-nasil-aydinlatilir-mum-mu-led-fener-mi/**'
+      - 'alo186/hesaplama/elektrik-kesintisi-ev-aydinlatma-plani/**'
+      - 'alo186/amazon-elektrik-urunleri/kesinti-led-fener-kafa-lambasi-secimi/**'
+      - 'alo186/deployment/routing-overlays/growth-v283-safe-outage-lighting.json'
+      - 'alo186/deployment/affiliate-category-decisions/safe-outage-lighting-v283.json'
+      - 'alo186/deployment/affiliate_route_risk_policy_v265.json'
+      - 'alo186/tests/test_growth_v283_safe_outage_lighting.py'
+      - '.github/workflows/alo186-growth-v283-safe-outage-lighting.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/elektrik-kesintisinde-ev-nasil-aydinlatilir-mum-mu-led-fener-mi/**'
+      - 'alo186/hesaplama/elektrik-kesintisi-ev-aydinlatma-plani/**'
+      - 'alo186/amazon-elektrik-urunleri/kesinti-led-fener-kafa-lambasi-secimi/**'
+      - 'alo186/deployment/routing-overlays/growth-v283-safe-outage-lighting.json'
+      - 'alo186/deployment/affiliate-category-decisions/safe-outage-lighting-v283.json'
+      - 'alo186/deployment/affiliate_route_risk_policy_v265.json'
+      - 'alo186/tests/test_growth_v283_safe_outage_lighting.py'
+      - '.github/workflows/alo186-growth-v283-safe-outage-lighting.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-growth-v283-safe-outage-lighting-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Arama niyeti, gizlilik ve ticari sınır
+        run: |
+          set -euo pipefail
+          python -m py_compile alo186/tests/test_growth_v283_safe_outage_lighting.py alo186/tests/test_affiliate_route_risk_policy_v265.py
+          python alo186/tests/test_growth_v283_safe_outage_lighting.py
+          python alo186/tests/test_affiliate_route_risk_policy_v265.py
+          python -m json.tool alo186/deployment/routing-overlays/growth-v283-safe-outage-lighting.json >/dev/null
+          python -m json.tool alo186/deployment/affiliate-category-decisions/safe-outage-lighting-v283.json >/dev/null
+          python -m json.tool alo186/deployment/affiliate_route_risk_policy_v265.json >/dev/null
+
+      - name: Canonical production build ve static smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-v283
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-v283 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-v283
+          test -f /tmp/alo186-v283/haberler/elektrik-kesintisinde-ev-nasil-aydinlatilir-mum-mu-led-fener-mi/index.html
+          test -f /tmp/alo186-v283/hesaplama/elektrik-kesintisi-ev-aydinlatma-plani/index.html
+          test -f /tmp/alo186-v283/amazon-elektrik-urunleri/kesinti-led-fener-kafa-lambasi-secimi/index.html
+
+      - name: ChatGPT Sites aktarım paketi kabulü
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-sites-v283
+          python alo186/deployment/export_chatgpt_sites_bundle_v2.py --output /tmp/alo186-sites-v283 --commit "$GITHUB_SHA"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/alo186-sites-v283')
+          manifest = json.loads((root / 'sites-import.json').read_text(encoding='utf-8'))
+          pages = {item['canonicalPath']: item for item in manifest['pages']}
+          expected = {
+              '/haberler/elektrik-kesintisinde-ev-nasil-aydinlatilir-mum-mu-led-fener-mi/',
+              '/hesaplama/elektrik-kesintisi-ev-aydinlatma-plani/',
+              '/amazon-elektrik-urunleri/kesinti-led-fener-kafa-lambasi-secimi/',
+          }
+          assert expected.issubset(pages), expected - set(pages)
+          for path in expected:
+              assert not pages[path]['affiliate']['unsafeStaticLinks']
+          assert pages['/amazon-elektrik-urunleri/kesinti-led-fener-kafa-lambasi-secimi/']['affiliate']['hasAffiliateLinks'] is False
+          print(json.dumps({'ok': True, 'routes': sorted(expected), 'unsafeStaticLinks': 0}, ensure_ascii=False))
+          PY
+
+      - name: Özet
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ## ALO186 v283 güvenli kesinti aydınlatması
+
+          - Arama niyeti: elektrik kesintisinde ev nasıl aydınlatılır, mum mu LED fener mi
+          - Ücretsiz araç: mevcut fener, kritik rota, pil güvenliği ve gerçek test
+          - Mevcut çözüm yeterliyse: yeni ürün almayın
+          - Affiliate: yalnız Amazon Türkiye; bağlantılar açıklama ve güven kapısından sonra dinamik açılır
+          - Gevşek 18650 hücre, açık alev ve mevzuata tabi acil aydınlatma: kapsam dışı
+          - Fiyat, stok, puan, yorum, teslimat, garanti, Offer ve AggregateRating: yok
+          - 30/90/180 günlük tekrar ziyaret: yerel takvim dosyası
+          EOF
