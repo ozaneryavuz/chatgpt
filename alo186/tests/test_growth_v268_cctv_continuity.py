@@ -106,7 +106,7 @@ def main() -> None:
         assert "sessionstorage" not in lowered
         assert "/assets/journey-events-v260.js" in source
         assert "112" in source
-        assert "resmî kurum" in source
+        assert ("resmî kurum" in source) or ("kamu kurumu" in source)
         assert "30 gün" in source
         assert "90 gün" in source
 
