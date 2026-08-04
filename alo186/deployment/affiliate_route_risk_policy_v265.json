@@ -68,7 +68,12 @@
     "diafon",
     "interkom",
     "goruntulu-kapi-telefonu",
-    "sip-interkom"
+    "sip-interkom",
+    "yangin-alarmi",
+    "yangin-algilama",
+    "acil-aydinlatma",
+    "sesli-tahliye",
+    "yangin-paneli"
   ],
   "portfolioRules": {
     "genericDIYRequiresDirectElectricalContinuityOrSafetyIntent": true,
