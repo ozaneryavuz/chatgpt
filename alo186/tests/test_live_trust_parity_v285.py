@@ -18,7 +18,7 @@ from urllib.request import Request, urlopen
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE_HUB = ROOT / "amazon-elektrik-urunleri" / "index.html"
-SOURCE_ENTRY = ROOT / "amazon-elektrik-urunleri" / "guvenli-baslangic" / "index.html"
+SOURCE_ENTRY = ROOT / "hesaplama" / "elektrik-kesintisi-guvenli-urun-baslangic" / "index.html"
 
 
 @dataclass
@@ -113,7 +113,7 @@ def check_live(base_url: str, errors: list[str]) -> None:
     urls = {
         "home": f"{base_url.rstrip('/')}/",
         "hub": f"{base_url.rstrip('/')}/amazon-elektrik-urunleri/",
-        "entry": f"{base_url.rstrip('/')}/amazon-elektrik-urunleri/guvenli-baslangic/",
+        "entry": f"{base_url.rstrip('/')}/hesaplama/elektrik-kesintisi-guvenli-urun-baslangic/",
     }
     pages: dict[str, str] = {}
     for name, url in urls.items():
