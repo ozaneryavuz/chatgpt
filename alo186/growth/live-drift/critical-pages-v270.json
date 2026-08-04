@@ -1,0 +1,106 @@
+{
+  "version": 270,
+  "canonicalHost": "https://alo186.com",
+  "userAgent": "ALO186-Live-Drift/270 (+https://alo186.com/yayin-ilkeleri)",
+  "timeoutSeconds": 20,
+  "pages": [
+    {
+      "id": "homepage-evergreen-commercial-trust",
+      "url": "https://alo186.com/",
+      "source": "alo186/index.html",
+      "requiredText": [
+        "30 gün",
+        "Ürünler fiyat veya komisyon oranına göre sıralanmaz",
+        "Bağımsız bilgilendirme platformudur; EDAŞ veya kamu kurumu değildir."
+      ],
+      "forbiddenText": [
+        "EPDK tüketici bilgisinde on iş günlük başvuru süresi açıklanır",
+        "on iş günlük başvuru süresi",
+        "154 modeli doğrulanmış",
+        "154 doğrulanmış ASIN",
+        "50+ elektrik ürünü",
+        "10 rehberin tamamını gör",
+        "26 rehberin tamamını gör"
+      ],
+      "forbidDirectAmazonHref": false,
+      "priority": "P0"
+    },
+    {
+      "id": "www-alias-evergreen-commercial-trust",
+      "url": "https://www.alo186.com/",
+      "source": "alo186/index.html",
+      "requiredText": [
+        "30 gün",
+        "Ürünler fiyat veya komisyon oranına göre sıralanmaz",
+        "Bağımsız bilgilendirme platformudur; EDAŞ veya kamu kurumu değildir."
+      ],
+      "forbiddenText": [
+        "EPDK tüketici bilgisinde on iş günlük başvuru süresi açıklanır",
+        "on iş günlük başvuru süresi",
+        "154 modeli doğrulanmış",
+        "154 doğrulanmış ASIN",
+        "50+ elektrik ürünü",
+        "10 rehberin tamamını gör",
+        "26 rehberin tamamını gör"
+      ],
+      "forbidDirectAmazonHref": false,
+      "priority": "P0"
+    },
+    {
+      "id": "product-hub-evergreen",
+      "url": "https://alo186.com/amazon-elektrik-urunleri/",
+      "source": "alo186/amazon-elektrik-urunleri/index.html",
+      "requiredText": [
+        "Ürünü değil",
+        "Mevcut sistem yeterliyse satın alma yok",
+        "Amazon satış ortaklığı"
+      ],
+      "forbiddenText": [
+        "96 ürün seçim yolu",
+        "154 doğrulanmış ASIN",
+        "25+ uzun kuyruk ürün sınıfı",
+        "50+ elektrik ürünü",
+        "fiyatımız",
+        "stokta"
+      ],
+      "forbidDirectAmazonHref": true,
+      "priority": "P0"
+    },
+    {
+      "id": "equipment-maintenance-journey",
+      "url": "https://alo186.com/hesaplama/elektrik-kesintisi-ekipman-test-ve-bakim-plani/",
+      "source": "alo186/hesaplama/elektrik-kesintisi-ekipman-test-ve-bakim-plani/index.html",
+      "requiredText": [
+        "Mevcut çözüm hedefi sağlıyorsa yeni ürün almayacağım",
+        "Bu sayfada mağaza veya Amazon bağlantısı yoktur",
+        "90 günlük gerçek kesinti testi"
+      ],
+      "forbiddenText": [
+        "hemen satın al",
+        "en ucuz",
+        "stokta",
+        "garantilidir"
+      ],
+      "forbidDirectAmazonHref": true,
+      "priority": "P1"
+    },
+    {
+      "id": "powered-gate-outage-tool",
+      "url": "https://alo186.com/hesaplama/otomatik-kapi-kepenk-elektrik-kesintisi-acil-plani/",
+      "source": "alo186/hesaplama/otomatik-kapi-kepenk-elektrik-kesintisi-acil-plani/index.html",
+      "requiredText": [
+        "Kapıyı açmaya çalışmadan önce güvenli yöntemi sınıflandırın",
+        "Mevcut güvenli düzen yeterliyse yeni ürün satın almayacağım",
+        "90 günlük kesinti tatbikatı"
+      ],
+      "forbiddenText": [
+        "her otomatik kapı elle açılır",
+        "genel UPS uygundur",
+        "stokta",
+        "garantilidir"
+      ],
+      "forbidDirectAmazonHref": true,
+      "priority": "P1"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "version": 270,
+  "name": "growth-v270-trust-maintenance-gate",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesilince-otomatik-kapi-kepenk-garaj-kapisi-nasil-acilir/index.html",
+      "canonicalPath": "/haberler/elektrik-kesilince-otomatik-kapi-kepenk-garaj-kapisi-nasil-acilir/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/otomatik-kapi-kepenk-elektrik-kesintisi-acil-plani/index.html",
+      "canonicalPath": "/hesaplama/otomatik-kapi-kepenk-elektrik-kesintisi-acil-plani/",
+      "type": "tool"
+    },
+    {
+      "source": "alo186/hesaplama/elektrik-kesintisi-ekipman-test-ve-bakim-plani/index.html",
+      "canonicalPath": "/hesaplama/elektrik-kesintisi-ekipman-test-ve-bakim-plani/",
+      "type": "tool"
+    }
+  ]
+}

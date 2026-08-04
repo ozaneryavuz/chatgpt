@@ -1,0 +1,57 @@
+{
+  "version": 270,
+  "target": "ChatGPT Sites",
+  "canonicalUrl": "https://alo186.com/",
+  "reason": "Canlı ana sayfadaki hızla eskiyen ürün ve rehber sayaçlarını kaldırmak; arama önbelleğinde kalan eski cihaz hasarı süresi ifadesini engellemek.",
+  "priority": "P0",
+  "replacements": [
+    {
+      "match": "154 modeli doğrulanmış ürün için seçim kartları",
+      "replaceWith": "Teknik uygunluk kapısından geçen ürün sınıfları için seçim kartları"
+    },
+    {
+      "match": "154 doğrulanmış ASIN",
+      "replaceWith": "Teknik kimliği doğrulanan ürün sınıfları"
+    },
+    {
+      "match": "50+ elektrik ürünü için Amazon seçim kartları",
+      "replaceWith": "İhtiyaca göre güvenli ürün seçim kartları"
+    },
+    {
+      "match": "10 rehberin tamamını gör",
+      "replaceWith": "Tüm güvenli ürün rehberlerini gör"
+    },
+    {
+      "match": "26 rehberin tamamını gör",
+      "replaceWith": "Tüm güvenli ürün rehberlerini gör"
+    },
+    {
+      "match": "EPDK tüketici bilgisinde on iş günlük başvuru süresi açıklanır.",
+      "replaceWith": "Dağıtım sistemi kaynaklı cihaz hasarı talebinde güncel mevzuat kapsamını ve 30 günlük başvuru süresini resmî kaynaktan doğrulayın."
+    }
+  ],
+  "requiredAfterPatch": [
+    "30 gün",
+    "Ürünler fiyat veya komisyon oranına göre sıralanmaz",
+    "Bağımsız bilgilendirme platformudur; EDAŞ veya kamu kurumu değildir."
+  ],
+  "forbiddenAfterPatch": [
+    "154 modeli doğrulanmış",
+    "154 doğrulanmış ASIN",
+    "50+ elektrik ürünü",
+    "10 rehberin tamamını gör",
+    "26 rehberin tamamını gör",
+    "on iş günlük başvuru süresi"
+  ],
+  "commercialConstraints": {
+    "noDirectAmazonBeforeTechnicalGate": true,
+    "affiliateDisclosureBeforeOutboundLink": true,
+    "noPriceStockRatingWarrantyClaims": true,
+    "noBuyOutcomeRequired": true
+  },
+  "institutionalConstraints": {
+    "independentPlatformDisclosureRequired": true,
+    "mustNotImplyEdasOrPublicAuthority": true,
+    "mustNotClaimOutageRegistration": true
+  }
+}
