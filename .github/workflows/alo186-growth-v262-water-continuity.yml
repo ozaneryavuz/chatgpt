@@ -1,0 +1,71 @@
+name: ALO186 su sürekliliği ve güvenli alarm seçimi v262
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/hidrofor-elektrik-kesintisi-yedekleme-plani/**'
+      - 'alo186/amazon-elektrik-urunleri/pilli-su-kacagi-alarmi-secimi/**'
+      - 'alo186/deployment/routing-overlays/growth-v262-water-continuity.json'
+      - 'alo186/tests/test_growth_v262_water_continuity.py'
+      - '.github/workflows/alo186-growth-v262-water-continuity.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/hidrofor-elektrik-kesintisi-yedekleme-plani/**'
+      - 'alo186/amazon-elektrik-urunleri/pilli-su-kacagi-alarmi-secimi/**'
+      - 'alo186/deployment/routing-overlays/growth-v262-water-continuity.json'
+      - 'alo186/tests/test_growth_v262_water_continuity.py'
+      - '.github/workflows/alo186-growth-v262-water-continuity.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-growth-v262-water-continuity-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Hidrofor, su kaçağı alarmı ve güven sözleşmesi
+        run: |
+          set -euo pipefail
+          python -m py_compile alo186/tests/test_growth_v262_water_continuity.py
+          python alo186/tests/test_growth_v262_water_continuity.py
+          python -m json.tool alo186/deployment/routing-overlays/growth-v262-water-continuity.json >/dev/null
+
+      - name: Canonical production build ve smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-v262
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-v262 \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-v262
+          test -f /tmp/alo186-v262/hesaplama/hidrofor-elektrik-kesintisi-yedekleme-plani/index.html
+          test -f /tmp/alo186-v262/amazon-elektrik-urunleri/pilli-su-kacagi-alarmi-secimi/index.html
+          test -f /tmp/alo186-v262/assets/journey-events-v260.js
+
+      - name: Özet
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ## ALO186 v262 su sürekliliği büyüme paketi
+
+          - Hidrofor kesintisi ve kullanılabilir su rezervi aracı: doğrulandı
+          - Apartman/ticari/üç faz motor yedeklemesi: profesyonel yol, affiliate kapalı
+          - Pilli/problu/bağlantılı su kaçağı alarmı sınıfları: doğrulandı
+          - Amazon bağlantıları: statik href olmadan kilitli
+          - Satın almama sonucu: zorunlu
+          - 30/90 günlük kişisel verisiz yerel bakım döngüsü: doğrulandı
+          - Fiyat, stok, puan, garanti, Offer ve AggregateRating: yok
+          - Canonical build ve smoke: başarılı
+          EOF
