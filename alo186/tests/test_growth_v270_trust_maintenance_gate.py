@@ -22,9 +22,9 @@ def read(path: Path) -> str:
 
 
 def assert_no_unsafe_commerce(html: str, label: str) -> None:
-    lowered = html.lower()
+    lowered = html.casefold()
     assert not re.search(r'href=["\'][^"\']*amazon\.', lowered), f"{label}: statik Amazon href bulundu"
-    for token in ('"@type":"offer"', '"@type": "offer"', 'aggregaterating', '"@type":"review"'):
+    for token in ('"@type":"offer"', '"@type": "offer"', "aggregaterating", '"@type":"review"'):
         assert token not in lowered, f"{label}: yasak ticari schema bulundu: {token}"
     for token in ("localstorage", "sessionstorage", "xmlhttprequest", "fetch("):
         assert token not in lowered, f"{label}: gereksiz veri/ağ yüzeyi bulundu: {token}"
@@ -54,14 +54,15 @@ def main() -> None:
 
     for html, label in ((article, "article"), (gate, "gate tool"), (maintenance, "maintenance tool")):
         assert_no_unsafe_commerce(html, label)
-        assert "Bağımsız" in html and "kamu kurumu değildir" in html, f"{label}: bağımsızlık açıklaması eksik"
+        lowered = html.casefold()
+        assert "bağımsız" in lowered and "kamu kurumu değildir" in lowered, f"{label}: bağımsızlık açıklaması eksik"
         assert "112" in html, f"{label}: acil güvenlik sınırı eksik"
-        assert "fiyat" not in html.lower() or "fiyat" in maintenance.lower(), "beklenmeyen fiyat iddiası"
 
     assert "Mevcut sistem güvenli çalışıyorsa yeni ürün almayın" in article
     assert "Mevcut güvenli düzen yeterliyse yeni ürün satın almayacağım" in gate
     assert "Mevcut çözüm hedefi sağlıyorsa yeni ürün almayacağım" in maintenance
     assert "Bu sayfada mağaza veya Amazon bağlantısı yoktur" in maintenance
+    assert "Fiyat, stok, puan veya garanti bilgisi kullanılmaz" in maintenance
     assert "90 günlük gerçek kesinti testi" in maintenance
     assert "90 günlük kesinti tatbikatı" in gate
     assert "text/calendar" in gate and "text/calendar" in maintenance
@@ -114,7 +115,6 @@ def main() -> None:
     assert patch["commercialConstraints"]["noBuyOutcomeRequired"] is True
     assert patch["institutionalConstraints"]["mustNotImplyEdasOrPublicAuthority"] is True
 
-    # Qualifying gaps may route only to existing internal governed selectors; no marketplace URL here.
     for internal_path in (
         "/amazon-elektrik-urunleri/modem-ont-mini-ups-yedekleme-secici/",
         "/amazon-elektrik-urunleri/kamera-nvr-ups-yedek-guc-secimi/",
