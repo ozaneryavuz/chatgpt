@@ -1,0 +1,16 @@
+{
+  "version": 271,
+  "name": "growth-v271-solar-backup-intent",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesilince-gunes-paneli-calisir-mi/index.html",
+      "canonicalPath": "/haberler/elektrik-kesilince-gunes-paneli-calisir-mi/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/ges-elektrik-kesintisi-yedek-guc-uygunluk-kontrolu/index.html",
+      "canonicalPath": "/hesaplama/ges-elektrik-kesintisi-yedek-guc-uygunluk-kontrolu/",
+      "type": "tool"
+    }
+  ]
+}
