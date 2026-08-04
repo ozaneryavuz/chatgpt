@@ -1,0 +1,110 @@
+name: ALO186 jeneratör CO güvenliği ve alarm seçimi v267
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/jenerator-karbonmonoksit-guvenlik-kontrolu/**'
+      - 'alo186/amazon-elektrik-urunleri/pilli-karbonmonoksit-alarmi-secimi/**'
+      - 'alo186/haberler/jenerator-balkonda-garajda-calistirilir-mi/**'
+      - 'alo186/deployment/routing-overlays/growth-v267-co-safety.json'
+      - 'alo186/deployment/affiliate_route_risk_policy_v265.json'
+      - 'alo186/tests/test_growth_v267_co_safety.py'
+      - 'alo186/tests/test_affiliate_route_risk_policy_v265.py'
+      - '.github/workflows/alo186-growth-v267-co-safety.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/jenerator-karbonmonoksit-guvenlik-kontrolu/**'
+      - 'alo186/amazon-elektrik-urunleri/pilli-karbonmonoksit-alarmi-secimi/**'
+      - 'alo186/haberler/jenerator-balkonda-garajda-calistirilir-mi/**'
+      - 'alo186/deployment/routing-overlays/growth-v267-co-safety.json'
+      - 'alo186/deployment/affiliate_route_risk_policy_v265.json'
+      - 'alo186/tests/test_growth_v267_co_safety.py'
+      - 'alo186/tests/test_affiliate_route_risk_policy_v265.py'
+      - '.github/workflows/alo186-growth-v267-co-safety.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-growth-v267-co-safety-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: CO güvenliği, affiliate kapısı ve portföy yönetişimi
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            alo186/tests/test_growth_v267_co_safety.py \
+            alo186/tests/test_affiliate_route_risk_policy_v265.py
+          python alo186/tests/test_growth_v267_co_safety.py
+          python alo186/tests/test_affiliate_route_risk_policy_v265.py
+          python -m json.tool alo186/deployment/routing-overlays/growth-v267-co-safety.json >/dev/null
+          python -m json.tool alo186/deployment/affiliate_route_risk_policy_v265.json >/dev/null
+
+      - name: Canonical production build ve static smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-v267
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-v267 \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-v267
+          test -f /tmp/alo186-v267/hesaplama/jenerator-karbonmonoksit-guvenlik-kontrolu/index.html
+          test -f /tmp/alo186-v267/amazon-elektrik-urunleri/pilli-karbonmonoksit-alarmi-secimi/index.html
+          test -f /tmp/alo186-v267/haberler/jenerator-balkonda-garajda-calistirilir-mi/index.html
+          test -f /tmp/alo186-v267/assets/journey-events-v260.js
+
+      - name: ChatGPT Sites aktarım paketi kabulü
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-sites-v267
+          python alo186/deployment/export_chatgpt_sites_bundle_v2.py \
+            --output /tmp/alo186-sites-v267 \
+            --commit "$GITHUB_SHA"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path('/tmp/alo186-sites-v267')
+          manifest = json.loads((root / 'sites-import.json').read_text(encoding='utf-8'))
+          pages = {item['canonicalPath']: item for item in manifest['pages']}
+          expected = {
+              '/hesaplama/jenerator-karbonmonoksit-guvenlik-kontrolu/',
+              '/amazon-elektrik-urunleri/pilli-karbonmonoksit-alarmi-secimi/',
+          }
+          assert expected.issubset(pages), expected - set(pages)
+          assert pages['/hesaplama/jenerator-karbonmonoksit-guvenlik-kontrolu/']['affiliate']['hasAffiliateLinks'] is False
+          commerce = pages['/amazon-elektrik-urunleri/pilli-karbonmonoksit-alarmi-secimi/']
+          assert commerce['affiliate']['safe'] is True
+          assert commerce['affiliate']['disclosureVisible'] is True
+          assert commerce['affiliate']['noBuyOutcomeVisible'] is True
+          assert not commerce['affiliate']['unsafeStaticLinks']
+          print(json.dumps({'ok': True, 'routes': sorted(expected)}, ensure_ascii=False))
+          PY
+
+      - name: Özet
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ## ALO186 v267 karbonmonoksit güvenliği büyüme paketi
+
+          - Jeneratör konumu, yaklaşık 6 metre açıklık mesafesi, egzoz ve belirti kontrolü: doğrulandı
+          - Belirti veya çalan CO alarmında: temiz hava + 112, ticaret kapalı
+          - Pilli / pil yedekli / birbirine bağlı CO alarmı sınıfları: doğrulandı
+          - Amazon Türkiye bağlantıları: teknik ve ticari kapının arkasında, statik href yok
+          - Satın almama sonucu: zorunlu
+          - 30/90 günlük kişisel verisiz test döngüsü: doğrulandı
+          - Fiyat, stok, puan, yorum, garanti, Offer ve AggregateRating: yok
+          - Canonical build, static smoke ve ChatGPT Sites import kabulü: başarılı
+          EOF

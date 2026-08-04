@@ -1,0 +1,16 @@
+{
+  "version": 267,
+  "name": "growth-v267-co-safety",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/jenerator-karbonmonoksit-guvenlik-kontrolu/index.html",
+      "canonicalPath": "/hesaplama/jenerator-karbonmonoksit-guvenlik-kontrolu/",
+      "type": "tool"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/pilli-karbonmonoksit-alarmi-secimi/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/pilli-karbonmonoksit-alarmi-secimi/",
+      "type": "commerce-guide"
+    }
+  ]
+}
