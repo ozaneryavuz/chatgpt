@@ -1,0 +1,59 @@
+{
+  "version": 276,
+  "reviewDate": "2026-08-04",
+  "intent": "elektrik kesilince pelet sobasi calisir mi / pelet sobasi UPS ile calisir mi",
+  "decision": "professional-only-with-existing-low-risk-safety-crosslink",
+  "reason": "Pelet sobasi; yanma, baca, fan, kontrol karti, atesleme ve elektrik beslemesini birlikte kullanan sabit bir isitma cihazidir. Model kılavuzu ve yetkili servis onayi olmadan genel UPS, inverter veya aku onermek duman, karbonmonoksit, kontrol karti ve guvenli kapanma riskini artirabilir.",
+  "searchDemandEvidence": {
+    "checkedAt": "2026-08-04",
+    "observedGap": "Turkce arama sonuclarinda model bagimsiz olarak kucuk UPS yeter veya kesintide guvenli soner benzeri genellemeler bulunuyor; model, baca, fan ve gecis suresi ayrimi eksik.",
+    "primarySources": [
+      "https://www.epa.gov/burnwise/pellet-stoves",
+      "https://www.comfortbilt.net/blogs/stoves/ensuring-seamless-power-backup-for-your-comfortbilt-pellet-stove",
+      "https://www.cdc.gov/natural-disasters/response/what-to-do-protect-yourself-during-a-power-outage.html"
+    ]
+  },
+  "conversionPolicy": {
+    "directAffiliateLinksAllowed": false,
+    "activeHazardCommerceClosed": true,
+    "manufacturerManualRequired": true,
+    "authorizedServiceOrProfessionalReviewRequiredForBackupPower": true,
+    "noBuyOutcomeRequired": true,
+    "personalDataCollectionForbidden": true,
+    "noPriceStockRatingWarrantyClaims": true,
+    "officialInstitutionImpressionForbidden": true
+  },
+  "permittedConversionPaths": [
+    {
+      "type": "no-buy",
+      "condition": "Uretici onayli mevcut yedekleme ve son 90 gundeki kontrollu test yeterli"
+    },
+    {
+      "type": "manufacturer-or-authorized-service",
+      "condition": "Model kılavuzu, guvenli kapanma veya yedek guc uygunlugu belirsiz"
+    },
+    {
+      "type": "professional-engineering-lead",
+      "condition": "Pelet kazani, hidronik sistem, ortak baca, merkezi sistem veya basarisiz test"
+    },
+    {
+      "type": "existing-low-risk-affiliate-guide",
+      "route": "/amazon-elektrik-urunleri/pilli-karbonmonoksit-alarmi-secimi/",
+      "condition": "Aktif tehlike yok, soba ve baca guvenligi ayrica dogrulandi, CO alarmi yok veya test/omur eksiği var; hedef sayfada satis ortakligi aciklamasi baglantidan once gorunur"
+    }
+  ],
+  "excludedConsumerAffiliateClasses": [
+    "model-independent pellet stove UPS",
+    "pellet stove inverter",
+    "pellet stove battery bank",
+    "control board or ignition component",
+    "chimney or flue component",
+    "pellet boiler or hydronic heater backup system",
+    "generator or building transfer system"
+  ],
+  "repeatVisitReasons": [
+    {"days": 30, "reason": "CO alarmi, duman sızıntısı ve gorsel elektrik guvenligi kontrolu"},
+    {"days": 90, "reason": "Uretici proseduruyle kontrollu kesinti ve guvenli kapanma testi"},
+    {"days": 365, "reason": "Soba, baca, yanma ve elektrik sisteminin profesyonel yillik kontrolu"}
+  ]
+}

@@ -66,7 +66,9 @@
     "trafo",
     "jenerator",
     "ats",
-    "sabit-tesisat"
+    "sabit-tesisat",
+    "pelet-sobasi",
+    "pelet-kazani"
   ],
   "portfolioRules": {
     "genericDIYRequiresDirectElectricalContinuityOrSafetyIntent": true,

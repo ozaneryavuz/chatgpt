@@ -1,0 +1,16 @@
+{
+  "version": 276,
+  "name": "growth-v276-pellet-stove-outage",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesilince-pelet-sobasi-calisir-mi/index.html",
+      "canonicalPath": "/haberler/elektrik-kesilince-pelet-sobasi-calisir-mi/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/pelet-sobasi-elektrik-kesintisi-guvenli-kapanma-plani/index.html",
+      "canonicalPath": "/hesaplama/pelet-sobasi-elektrik-kesintisi-guvenli-kapanma-plani/",
+      "type": "tool"
+    }
+  ]
+}
