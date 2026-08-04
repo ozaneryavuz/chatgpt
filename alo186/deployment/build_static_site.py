@@ -80,6 +80,8 @@ except ImportError:
 ACCESSIBILITY_MARKER = 'data-alo186-accessibility-v215="true"'
 ACCESSIBILITY_SOURCE = Path("alo186/assets/alo186-accessibility-v215.css")
 ACCESSIBILITY_TARGET = Path("assets/alo186-accessibility-v215.css")
+JOURNEY_EVENTS_SOURCE = Path("alo186/assets/journey-events-v260.js")
+JOURNEY_EVENTS_TARGET = Path("assets/journey-events-v260.js")
 COMMERCIAL_HUB = Path("amazon-elektrik-urunleri/index.html")
 MALFORMED_COMMERCIAL_PREFIX = re.compile(
     r"(https://alo186\.com/amazon-elektrik-urunleri)(?=[a-z0-9])",
@@ -173,6 +175,46 @@ def install_accessibility_hardening(repo_root: Path, output: Path) -> dict[str, 
     }
 
 
+def install_privacy_safe_journey_events(repo_root: Path, output: Path) -> dict[str, object]:
+    """Publish the consent-gated, categorical journey event contract.
+
+    Pages may dispatch local CustomEvents without consent. The asset itself only
+    writes to dataLayer when explicit analytics consent is already true, and it
+    accepts no free-text or personal-data fields.
+    """
+
+    source = repo_root / JOURNEY_EVENTS_SOURCE
+    if not source.is_file():
+        raise FileNotFoundError(f"Yolculuk ölçüm assetı eksik: {source}")
+    text = source.read_text(encoding="utf-8", errors="strict")
+    lowered = text.casefold()
+    for forbidden in ("fetch(", "xmlhttprequest", "localstorage", "sessionstorage", "email", "phone", "address", "user_id"):
+        if forbidden in lowered:
+            raise RuntimeError(f"Yolculuk ölçüm assetında yasaklı ifade bulundu: {forbidden}")
+    for required in (
+        "window.ALO186_ANALYTICS_CONSENT === true",
+        "new CustomEvent('alo186:journey'",
+        "affiliate_clicked",
+        "no_buy_selected",
+        "reminder_downloaded",
+    ):
+        if required not in text:
+            raise RuntimeError(f"Yolculuk ölçüm assetı sözleşme alanını taşımıyor: {required}")
+
+    target = output / JOURNEY_EVENTS_TARGET
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(source, target)
+    return {
+        "version": 260,
+        "asset": f"/{JOURNEY_EVENTS_TARGET.as_posix()}",
+        "networkRequests": 0,
+        "browserStorage": False,
+        "personalDataFields": 0,
+        "dataLayerRequiresExplicitConsent": True,
+        "eventFields": ["journey", "step", "outcome", "product_class"],
+    }
+
+
 def _build_with_platform_hardening(
     repo_root: Path,
     output: Path,
@@ -185,12 +227,14 @@ def _build_with_platform_hardening(
     location_schema_report = _apply_location_schema_v253(repo_root, output)
     commercial_report = normalize_commercial_hub_urls(output)
     accessibility_report = install_accessibility_hardening(repo_root, output)
+    journey_events_report = install_privacy_safe_journey_events(repo_root, output)
     ai_commerce_report = apply_ai_commerce_aeo(repo_root, output)
     ai_commerce_breadcrumb_report = _apply_ai_commerce_breadcrumb_v250(output)
     release["locationPagesV253"] = location_pages_report
     release["locationSchemaV253"] = location_schema_report
     release["commercialCanonicalV217"] = commercial_report
     release["accessibilityHardeningV215"] = accessibility_report
+    release["privacySafeJourneyEventsV260"] = journey_events_report
     release["competitorGapAffiliateV250"] = competitor_gap_report
     release["competitorGapAffiliateV251"] = competitor_gap_v251_report
     release["aiCommerceAeoV250"] = ai_commerce_report

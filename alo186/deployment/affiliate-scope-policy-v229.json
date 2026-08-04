@@ -1,6 +1,6 @@
 {
   "version": 229,
-  "mission": "ALO186 affiliate kapsamını elektrik güvenliği, enerji sürekliliği, ölçüm, erken uyarı ve düşük gerilimli kritik cihaz sürekliliğiyle sınırla.",
+  "mission": "ALO186 affiliate kapsamını elektrik güvenliği, enerji sürekliliği, ölçüm, erken uyarı ve düşük gerilimli kritik cihaz/canlı sistem sürekliliğiyle sınırla.",
   "approvedRouteTokens": [
     "elektrik",
     "enerji",
@@ -34,7 +34,8 @@
     "ges",
     "solar",
     "sarj",
-    "wallbox"
+    "wallbox",
+    "akvaryum-pilli-usb-hava-motoru"
   ],
   "blockedGenericRouteTokens": [
     "usb-bellek",
