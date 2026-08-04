@@ -1,0 +1,98 @@
+name: ALO186 laptop kesinti şarjı v275
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/elektrik-kesintisinde-laptop-nasil-sarj-edilir/**'
+      - 'alo186/hesaplama/laptop-elektrik-kesintisi-sarj-uygunluk-plani/**'
+      - 'alo186/amazon-elektrik-urunleri/laptop-usb-c-pd-powerbank-secimi/**'
+      - 'alo186/deployment/routing-overlays/growth-v275-laptop-outage.json'
+      - 'alo186/deployment/affiliate-category-decisions/laptop-outage-v275.json'
+      - 'alo186/deployment/affiliate_route_risk_policy_v265.json'
+      - 'alo186/tests/test_growth_v275_laptop_outage.py'
+      - '.github/workflows/alo186-growth-v275-laptop-outage.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/elektrik-kesintisinde-laptop-nasil-sarj-edilir/**'
+      - 'alo186/hesaplama/laptop-elektrik-kesintisi-sarj-uygunluk-plani/**'
+      - 'alo186/amazon-elektrik-urunleri/laptop-usb-c-pd-powerbank-secimi/**'
+      - 'alo186/deployment/routing-overlays/growth-v275-laptop-outage.json'
+      - 'alo186/deployment/affiliate-category-decisions/laptop-outage-v275.json'
+      - 'alo186/deployment/affiliate_route_risk_policy_v265.json'
+      - 'alo186/tests/test_growth_v275_laptop_outage.py'
+      - '.github/workflows/alo186-growth-v275-laptop-outage.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-growth-v275-laptop-outage-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Laptop kesinti şarjı, gizlilik ve ticari sınır
+        run: |
+          set -euo pipefail
+          python -m py_compile alo186/tests/test_growth_v275_laptop_outage.py
+          python alo186/tests/test_growth_v275_laptop_outage.py
+          python -m json.tool alo186/deployment/routing-overlays/growth-v275-laptop-outage.json >/dev/null
+          python -m json.tool alo186/deployment/affiliate-category-decisions/laptop-outage-v275.json >/dev/null
+          python -m json.tool alo186/deployment/affiliate_route_risk_policy_v265.json >/dev/null
+
+      - name: Canonical production build ve static smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-v275
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-v275 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-v275
+          test -f /tmp/alo186-v275/haberler/elektrik-kesintisinde-laptop-nasil-sarj-edilir/index.html
+          test -f /tmp/alo186-v275/hesaplama/laptop-elektrik-kesintisi-sarj-uygunluk-plani/index.html
+          test -f /tmp/alo186-v275/amazon-elektrik-urunleri/laptop-usb-c-pd-powerbank-secimi/index.html
+
+      - name: ChatGPT Sites aktarım paketi kabulü
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-sites-v275
+          python alo186/deployment/export_chatgpt_sites_bundle_v2.py --output /tmp/alo186-sites-v275 --commit "$GITHUB_SHA"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/alo186-sites-v275')
+          manifest = json.loads((root / 'sites-import.json').read_text(encoding='utf-8'))
+          pages = {item['canonicalPath']: item for item in manifest['pages']}
+          expected = {
+              '/haberler/elektrik-kesintisinde-laptop-nasil-sarj-edilir/',
+              '/hesaplama/laptop-elektrik-kesintisi-sarj-uygunluk-plani/',
+              '/amazon-elektrik-urunleri/laptop-usb-c-pd-powerbank-secimi/',
+          }
+          assert expected.issubset(pages), expected - set(pages)
+          for path in expected:
+              assert not pages[path]['affiliate']['unsafeStaticLinks']
+          assert pages['/amazon-elektrik-urunleri/laptop-usb-c-pd-powerbank-secimi/']['affiliate']['hasAffiliateLinks'] is True
+          print(json.dumps({'ok': True, 'routes': sorted(expected)}, ensure_ascii=False))
+          PY
+
+      - name: Özet
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ## ALO186 v275 laptop kesinti şarj yolculuğu
+
+          - Arama niyeti: elektrik kesintisinde laptop nasıl şarj edilir / powerbank ile laptop şarj edilir mi
+          - Ücretsiz araç: USB-C PD, adaptör W, tek port W, kablo W, Wh ve gerçek test
+          - Mevcut çözüm yeterliyse: yeni ürün almayın
+          - Hasarlı batarya ve kritik kullanımda: ticari yol kapalı
+          - Affiliate: yalnız Amazon Türkiye; bağlantılar başlangıçta kilitli ve açıklamadan sonra açılır
+          - Fiyat, stok, puan, yorum, teslimat, garanti, Offer ve AggregateRating: yok
+          - 30/90 günlük tekrar ziyaret: yerel takvim dosyası
+          EOF
