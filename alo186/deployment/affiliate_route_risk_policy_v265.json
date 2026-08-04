@@ -1,0 +1,80 @@
+{
+  "version": 265,
+  "canonicalHost": "https://alo186.com",
+  "purpose": "ALO186 affiliate portföyünü elektrik güvenliği, kesinti hazırlığı ve doğrulanabilir kullanıcı ihtiyacıyla sınırlamak; genel teknoloji mağazasına dönüşmeyi ve yüksek riskli sabit tesisat DIY yönlendirmelerini engellemek.",
+  "affiliateProgram": {
+    "merchant": "Amazon Türkiye",
+    "tag": "alo186rehber-21",
+    "requiredRel": [
+      "sponsored",
+      "nofollow",
+      "noopener"
+    ],
+    "disclosureBeforeLinkRequired": true,
+    "noBuyOutcomeRequired": true
+  },
+  "trustRules": {
+    "officialInstitutionImpressionForbidden": true,
+    "activeHazardCommerceClosed": true,
+    "personalDataCollectionForbidden": true,
+    "locationAndEmergencyPagesZeroAffiliate": true,
+    "unverifiedCommercialFieldsForbidden": [
+      "offers",
+      "price",
+      "priceCurrency",
+      "availability",
+      "aggregateRating",
+      "review",
+      "warranty",
+      "delivery"
+    ],
+    "productSchemaWithoutVerifiedOffer": "generic-class-only"
+  },
+  "zeroAffiliatePrefixes": [
+    "/il/",
+    "/dagitim-sirketleri/",
+    "/acil-numaralar/"
+  ],
+  "governedAffiliateRoutePatterns": [
+    "akvaryum-pilli-usb-hava-motoru",
+    "pilli-su-kacagi-alarmi",
+    "duvar-kablo-metal-dedektoru",
+    "akilli-priz-enerji-olcer"
+  ],
+  "legacyMigrationQueue": [
+    "modem-mini-ups",
+    "ont-mini-ups"
+  ],
+  "reviewOnlyRoutePatterns": [
+    "lazer-metre",
+    "lazer-hizalama",
+    "genel-el-aleti",
+    "usb-c-hub",
+    "seyahat-priz-adaptoru"
+  ],
+  "professionalLeadOnlyRoutePatterns": [
+    "kablo-soyma",
+    "terminal-hazirlama",
+    "krimp",
+    "pano",
+    "uc-faz",
+    "orta-gerilim",
+    "trafo",
+    "jenerator",
+    "ats",
+    "sabit-tesisat"
+  ],
+  "portfolioRules": {
+    "genericDIYRequiresDirectElectricalContinuityOrSafetyIntent": true,
+    "fixedInstallationDIYCannotUseConsumerAffiliate": true,
+    "professionalPowerSystemsUseEngineeringLead": true,
+    "newCategoryNeedsSearchDemandEvidence": true,
+    "newCategoryNeedsDistinctCanonicalIntent": true,
+    "newCategoryNeedsSafeNoBuyOutcome": true,
+    "legacyRoutesMigrateBeforeExpansion": true
+  },
+  "blockedCandidateRoutes": [
+    "/amazon-elektrik-urunleri/lazer-metre-lazer-hizalama-secimi/",
+    "/amazon-elektrik-urunleri/kablo-soyma-terminal-hazirlama-secimi/"
+  ]
+}
