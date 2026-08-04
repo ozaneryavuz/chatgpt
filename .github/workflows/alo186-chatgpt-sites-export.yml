@@ -37,22 +37,27 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Kaynak, manifest ve politika doğrulaması
+      - name: Kaynak, manifest, kritik bilgi ve politika doğrulaması
         run: |
           set -euo pipefail
           python -m py_compile \
             alo186/deployment/export_chatgpt_sites_bundle.py \
-            alo186/deployment/export_chatgpt_sites_bundle_v2.py
+            alo186/deployment/export_chatgpt_sites_bundle_v2.py \
+            alo186/deployment/export_chatgpt_sites_bundle_v3.py \
+            alo186/tests/test_growth_trust_v258.py
           python -m json.tool alo186/deployment/chatgpt-sites-export-policy.json >/dev/null
           python -m json.tool alo186/sites-sync/sites-source-manifest.json >/dev/null
+          python -m json.tool alo186/growth/critical-claims-v258.json >/dev/null
           test -s alo186/sites-sync/sites-import-prompt.md
+          node --check alo186/hesaplama/kesinti-gunlugu/damage-deadline-v258.js
           python alo186/tests/test_chatgpt_sites_export.py
+          python alo186/tests/test_growth_trust_v258.py
 
       - name: ChatGPT Sites aktarım paketini üret
         run: |
           set -euo pipefail
           rm -rf /tmp/alo186-chatgpt-sites /tmp/alo186-chatgpt-sites.zip
-          python alo186/deployment/export_chatgpt_sites_bundle_v2.py \
+          python alo186/deployment/export_chatgpt_sites_bundle_v3.py \
             --output /tmp/alo186-chatgpt-sites \
             --commit "$GITHUB_SHA"
 
@@ -75,6 +80,9 @@ jobs:
           stats = json.loads((root / 'data/export-stats.json').read_text(encoding='utf-8'))
           manifest = json.loads((root / 'sites-source-manifest.json').read_text(encoding='utf-8'))
           policy = json.loads(Path('alo186/deployment/chatgpt-sites-export-policy.json').read_text(encoding='utf-8'))
+          sites_import = json.loads((root / 'sites-import.json').read_text(encoding='utf-8'))
+          claims = json.loads((root / 'data/critical-claims.json').read_text(encoding='utf-8'))
+          action = json.loads((root / 'data/growth-action-v258.json').read_text(encoding='utf-8'))
 
           assert stats['provincePages'] == 81
           assert stats['companyPages'] == 21
@@ -86,6 +94,13 @@ jobs:
           assert policy['migrationRules']['doNotChangeDns'] is True
           assert policy['migrationRules']['doNotAttachCustomDomainToGitHubPages'] is True
           assert policy['migrationRules']['undocumentedSitesApiAllowed'] is False
+          assert sites_import['exporterVersion'] == 3
+          assert sites_import['criticalClaimsVersion'] == 258
+          assert claims['verifiedAt'] == '2026-08-04'
+          assert len(claims['claims']) == 3
+          assert action['affiliateLinksAdded'] == 0
+          assert action['commercialFieldsPublished'] == []
+          assert action['officialInstitutionImpressionCreated'] is False
 
           files = []
           for path in sorted(root.rglob('*')):
@@ -117,6 +132,7 @@ jobs:
               'packageDigest': digest,
               'livePresentationAndPublishing': 'ChatGPT Sites',
               'contentSourceQualityAndRollback': 'GitHub',
+              'criticalClaimsVersion': 258,
               'dnsChanged': False,
               'githubPagesCustomDomainEnabled': False,
               'liveSitesMutationPerformedByWorkflow': False,
@@ -151,10 +167,12 @@ jobs:
           root = Path('/tmp/alo186-chatgpt-sites')
           data = json.loads((root / 'data/export-stats.json').read_text(encoding='utf-8'))
           authority = json.loads((root / 'data/source-authority.json').read_text(encoding='utf-8'))
+          action = json.loads((root / 'data/growth-action-v258.json').read_text(encoding='utf-8'))
           print('# ALO186 → ChatGPT Sites aktarım paketi')
           print()
           print(f"- Kaynak commit: `{authority['sourceCommit']}`")
           print(f"- Paket digest: `{authority['packageDigest']}`")
+          print(f"- Kritik bilgi sürümü: **{authority['criticalClaimsVersion']}**")
           print(f"- Aktarıma hazır sayfa: **{data['importReady']}**")
           print(f"- İnceleme kuyruğu: **{data['reviewOnly']}**")
           print(f"- İl sayfası: **{data['provincePages']}**")
@@ -164,8 +182,15 @@ jobs:
           print(f"- Affiliate rehberi: **{data['affiliateGuides']}**")
           print(f"- Redirect: **{data['redirectCount']}**")
           print()
+          print('## Bu çalıştırmanın üç güven ve büyüme aksiyonu')
+          print()
+          for item in action['actions']:
+              print(f"{item['priority']}. {item['action']}")
+          print()
           print('- Canlı otorite: **ChatGPT Sites**')
           print('- DNS / GitHub Pages özel alan adı değişikliği: **yok**')
+          print('- Yeni affiliate bağlantısı: **yok**')
+          print('- Fiyat, stok, puan veya garanti: **yok**')
           print('- Artifact içi uygulama talimatı: `sites-import-prompt.md`')
           print('- Paket kendi başına canlı mutasyon yapmaz; yayın makbuzu @Sites uygulamasından sonra oluşur.')
           PY

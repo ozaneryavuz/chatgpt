@@ -1,0 +1,76 @@
+{
+  "version": 258,
+  "verifiedAt": "2026-08-04",
+  "siteDomain": "alo186.com",
+  "purpose": "Kullanıcı güvenini etkileyen telefon, başvuru süresi ve resmî kanal iddialarını tek kaynakta izlemek; eski veya çelişkili ifadeleri ChatGPT Sites aktarımından çıkarmak.",
+  "claims": [
+    {
+      "id": "device-damage-claim-deadline",
+      "label": "Dağıtım sistemi kaynaklı cihaz hasarı talep süresi",
+      "value": "30 gün",
+      "scope": "Elektrik dağıtım sisteminden kaynaklanan kalite sorunları nedeniyle teçhizatta oluşan hasarın tazmini için dağıtım şirketine yapılacak talep.",
+      "sourcePublisher": "T.C. Resmî Gazete",
+      "sourceUrl": "https://www.resmigazete.gov.tr/eskiler/2020/12/20201229M1-1.htm",
+      "sourceSection": "Elektrik Piyasasında Dağıtım ve Perakende Satış Faaliyetlerine İlişkin Kalite Yönetmeliği, Madde 26/1",
+      "amendmentUrl": "https://www.resmigazete.gov.tr/eskiler/2025/10/20251023-5.htm",
+      "maximumVerificationAgeDays": 30,
+      "routes": [
+        "/elektrik-portali",
+        "/hesaplama/kesinti-gunlugu/",
+        "/haberler/elektrik-kesintisi-cihaz-hasari-edas-basvurusu"
+      ],
+      "requiredCaveats": [
+        "Hasarın dağıtım sisteminden kaynaklandığı teknik rapor sonucunda tespit edilmelidir.",
+        "ALO186 başvuru, hasar veya tazminat kararı almaz.",
+        "Eski EPDK tüketici SSS sayfasındaki 10 iş günü ifadesi güncel Kalite Yönetmeliği Madde 26/1 ile çelişmektedir; bağlayıcı güncel düzenleme esas alınır."
+      ],
+      "conflictingSource": {
+        "publisher": "Enerji Piyasası Düzenleme Kurumu (EPDK)",
+        "url": "https://www.epdk.gov.tr/Detay/Icerik/12-3/1-elektrik-aboneligini-kendi-adima-almak-zorunda",
+        "staleValue": "10 iş günü",
+        "handling": "Yayımlanmaz; güncel Kalite Yönetmeliği Madde 26/1 ve 23 Ekim 2025 değişikliği birlikte doğrulanır."
+      },
+      "forbiddenPhrases": [
+        "Cihaz hasarında başvuru süresi 10 iş günüdür",
+        "zararın ortaya çıktığı tarihten itibaren 10 iş günü içinde",
+        "cihaz hasarı için 10 iş günlük başvuru süresi"
+      ]
+    },
+    {
+      "id": "emergency-call-112",
+      "label": "Aktif can ve yangın güvenliği tehlikesi",
+      "value": "112",
+      "scope": "Elektrik çarpması, yangın, duman, ark, düşmüş iletken veya başka aktif acil risk.",
+      "sourcePublisher": "112 Acil Çağrı Merkezi",
+      "sourceUrl": "https://www.112.gov.tr/",
+      "maximumVerificationAgeDays": 90,
+      "routes": [
+        "/acil-numaralar/",
+        "/karar-motoru",
+        "/edas-bul"
+      ],
+      "requiredCaveats": [
+        "Tehlikeli bölgeye yaklaşmayın veya enerjili ekipmana dokunmayın.",
+        "Aktif tehlikede ticari ve affiliate yol kapalıdır."
+      ]
+    },
+    {
+      "id": "distribution-fault-channel",
+      "label": "Elektrik dağıtım arıza yönlendirmesi",
+      "value": "186 veya ilgili dağıtım şirketinin güncel resmî kanalı",
+      "scope": "Şebeke kesintisi ve dağıtım arızası; aktif acil risk bulunmayan durumlar.",
+      "sourcePublisher": "Enerji Piyasası Düzenleme Kurumu (EPDK)",
+      "sourceUrl": "https://www.epdk.gov.tr/Detay/Icerik/18/tuketici-kosesi",
+      "maximumVerificationAgeDays": 90,
+      "routes": [
+        "/edas-bul",
+        "/il/",
+        "/dagitim-sirketleri/"
+      ],
+      "requiredCaveats": [
+        "Dağıtım şirketlerinin güncel çağrı ve dijital kanalları farklılaşabilir.",
+        "ALO186 resmî kurum değildir ve arıza kaydı almaz."
+      ]
+    }
+  ]
+}
