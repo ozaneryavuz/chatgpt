@@ -1,0 +1,90 @@
+name: ALO186 v259 soğuk zincir ve Sites drift
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Her 6 saatte bir; ChatGPT Sites canlı yüzeyi kritik rotalarda kontrol edilir.
+    - cron: '17 */6 * * *'
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/kesinti-soguk-zincir-zamanlayici/**'
+      - 'alo186/amazon-elektrik-urunleri/buzdolabi-dondurucu-termometresi-secimi/**'
+      - 'alo186/growth/live-drift/**'
+      - 'alo186/deployment/routing-overlays/growth-v259-cold-chain.json'
+      - 'alo186/tests/test_growth_v259_cold_chain_and_drift.py'
+      - '.github/workflows/alo186-growth-v259-cold-chain-drift.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/kesinti-soguk-zincir-zamanlayici/**'
+      - 'alo186/amazon-elektrik-urunleri/buzdolabi-dondurucu-termometresi-secimi/**'
+      - 'alo186/growth/live-drift/**'
+      - 'alo186/deployment/routing-overlays/growth-v259-cold-chain.json'
+      - 'alo186/tests/test_growth_v259_cold_chain_and_drift.py'
+      - '.github/workflows/alo186-growth-v259-cold-chain-drift.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-growth-v259-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Kod, içerik, güven ve çevrimdışı drift regresyonu
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            alo186/growth/live-drift/chatgpt_sites_live_drift.py \
+            alo186/tests/test_growth_v259_cold_chain_and_drift.py
+          python -m json.tool alo186/growth/live-drift/critical-pages-v259.json >/dev/null
+          python -m json.tool alo186/deployment/routing-overlays/growth-v259-cold-chain.json >/dev/null
+          python alo186/tests/test_growth_v259_cold_chain_and_drift.py
+      - name: Canonical production build ve smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-v259
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-v259 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-v259
+          test -f /tmp/alo186-v259/hesaplama/kesinti-soguk-zincir-zamanlayici/index.html
+          test -f /tmp/alo186-v259/amazon-elektrik-urunleri/buzdolabi-dondurucu-termometresi-secimi/index.html
+          grep -Fq 'https://alo186.com/hesaplama/kesinti-soguk-zincir-zamanlayici/' /tmp/alo186-v259/sitemap.xml
+          grep -Fq 'https://alo186.com/amazon-elektrik-urunleri/buzdolabi-dondurucu-termometresi-secimi/' /tmp/alo186-v259/sitemap.xml
+
+  live-drift:
+    if: github.event_name != 'pull_request'
+    needs: validate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: ChatGPT Sites canlı kritik sayfa drift denetimi
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-live-drift-v259
+          python alo186/growth/live-drift/chatgpt_sites_live_drift.py \
+            --config alo186/growth/live-drift/critical-pages-v259.json \
+            --output /tmp/alo186-live-drift-v259
+      - name: Drift raporu ve Sites delta patch artifactı
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-chatgpt-sites-delta-v259-${{ github.run_id }}
+          path: /tmp/alo186-live-drift-v259
+          if-no-files-found: error
+          retention-days: 90
+      - name: İlk üç kritik aksiyonu özetle
+        run: |
+          cat /tmp/alo186-live-drift-v259/SUMMARY.md >> "$GITHUB_STEP_SUMMARY"
+          echo '' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Artifact üretimi canlı Sites yayını değildir; bağlı ChatGPT Sites yazma erişimi gerekir.' >> "$GITHUB_STEP_SUMMARY"
