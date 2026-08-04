@@ -49,18 +49,17 @@
     "laptop-usb-c-pd-powerbank",
     "telefon-powerbank-kablo",
     "buzdolabi-dondurucu-termometre-soguk-zincir",
-    "kesinti-led-fener-kafa-lambasi"
+    "kesinti-led-fener-kafa-lambasi",
+    "modem-ont-mini-ups-yedekleme"
   ],
-  "legacyMigrationQueue": [
-    "modem-mini-ups",
-    "ont-mini-ups"
-  ],
+  "legacyMigrationQueue": [],
   "reviewOnlyRoutePatterns": [
     "lazer-metre",
     "lazer-hizalama",
     "genel-el-aleti",
     "usb-c-hub",
-    "seyahat-priz-adaptoru"
+    "seyahat-priz-adaptoru",
+    "post-outage-appliance-restart"
   ],
   "professionalLeadOnlyRoutePatterns": [
     "kablo-soyma",
