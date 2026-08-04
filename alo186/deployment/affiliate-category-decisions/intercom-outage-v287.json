@@ -1,0 +1,68 @@
+{
+  "version": 287,
+  "category": "building-intercom-outage",
+  "decision": "professional-lead-only",
+  "reviewedAt": "2026-08-05",
+  "searchIntent": [
+    "elektrik kesilince diafon çalışır mı",
+    "elektrik kesintisinde görüntülü kapı telefonu",
+    "apartman diafonu elektrik kesintisi",
+    "IP interkom UPS ile çalışır mı",
+    "elektrik kesilince kapı otomatiği açar mı"
+  ],
+  "consumerAffiliateDecision": {
+    "allowed": false,
+    "reason": "A building intercom may depend on a central power supply, PoE switch, router, cloud service, door-release power and life-safety egress. A generic consumer UPS or replacement panel cannot safely resolve an unknown system architecture."
+  },
+  "excludedConsumerAffiliateClasses": [
+    "generic intercom UPS or unverified DC backup adapter",
+    "video door phone panel or indoor monitor",
+    "PoE switch or router presented as a complete continuity solution",
+    "electric strike magnetic lock door-release relay or access controller",
+    "battery pack connected without the exact manufacturer design",
+    "elevator emergency communication backup equipment",
+    "fixed building wiring power supply or fire-interface component"
+  ],
+  "conversionPolicy": {
+    "merchantLinks": false,
+    "professionalScopeOnly": true,
+    "noBuyOutcomeRequired": true,
+    "activeHazardCommerceClosed": true,
+    "blockedEgressCommerceClosed": true,
+    "personalDataCollectionForbidden": true,
+    "noPriceStockRatingWarrantyClaims": true,
+    "officialInstitutionImpressionForbidden": true
+  },
+  "professionalConversionPoints": [
+    "authorized intercom or door-entry service",
+    "low-voltage and electrical system continuity assessment",
+    "building manager inventory and controlled outage test",
+    "PoE network router cloud and door-release dependency review",
+    "battery health runtime and maintenance record"
+  ],
+  "repeatVisitReasons": [
+    {"days": 30, "reason": "visual check of power-supply battery network and fault indicators"},
+    {"days": 90, "reason": "controlled call audio video and door-release outage test"},
+    {"days": 365, "reason": "documented maintenance and full dependency review"}
+  ],
+  "sources": [
+    {
+      "publisher": "Akuvox",
+      "title": "Power Supply for Intercom Devices",
+      "url": "https://knowledge.akuvox.com/docs/power-supply-for-intercom-devices",
+      "checkedAt": "2026-08-05"
+    },
+    {
+      "publisher": "Aiphone",
+      "title": "GT-DMB-N Specifications",
+      "url": "https://www.aiphone.com/products/gt-dmb-n/",
+      "checkedAt": "2026-08-05"
+    },
+    {
+      "publisher": "2N",
+      "title": "2N Access Unit 2.0 Technical Parameters",
+      "url": "https://www.2n.com/en-US/manuals/40836/3_1/technical-parameters/",
+      "checkedAt": "2026-08-05"
+    }
+  ]
+}
