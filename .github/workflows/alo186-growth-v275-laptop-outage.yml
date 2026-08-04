@@ -79,8 +79,14 @@ jobs:
           assert expected.issubset(pages), expected - set(pages)
           for path in expected:
               assert not pages[path]['affiliate']['unsafeStaticLinks']
-          assert pages['/amazon-elektrik-urunleri/laptop-usb-c-pd-powerbank-secimi/']['affiliate']['hasAffiliateLinks'] is True
-          print(json.dumps({'ok': True, 'routes': sorted(expected)}, ensure_ascii=False))
+          commerce = pages['/amazon-elektrik-urunleri/laptop-usb-c-pd-powerbank-secimi/']
+          assert commerce['affiliate']['hasAffiliateLinks'] is False
+          print(json.dumps({
+              'ok': True,
+              'routes': sorted(expected),
+              'commerceMode': 'dynamic-fail-closed',
+              'unsafeStaticLinks': 0,
+          }, ensure_ascii=False))
           PY
 
       - name: Özet
@@ -92,7 +98,7 @@ jobs:
           - Ücretsiz araç: USB-C PD, adaptör W, tek port W, kablo W, Wh ve gerçek test
           - Mevcut çözüm yeterliyse: yeni ürün almayın
           - Hasarlı batarya ve kritik kullanımda: ticari yol kapalı
-          - Affiliate: yalnız Amazon Türkiye; bağlantılar başlangıçta kilitli ve açıklamadan sonra açılır
+          - Affiliate: yalnız Amazon Türkiye; dinamik bağlantılar başlangıçta kilitli ve açıklamadan sonra açılır; statik affiliate bağlantısı yok
           - Fiyat, stok, puan, yorum, teslimat, garanti, Offer ve AggregateRating: yok
           - 30/90 günlük tekrar ziyaret: yerel takvim dosyası
           EOF
