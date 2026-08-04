@@ -54,6 +54,9 @@ SEARCH_FORBIDDEN_FIELDS = {
     "asin",
     "affiliateCommission",
 }
+BASE_PATH_AWARE_INLINE_SCRIPT_MARKERS = (
+    "data-alo186-ga4-consent",
+)
 
 
 class PageParser(HTMLParser):
@@ -120,10 +123,22 @@ def public_url(base_path: str, route: str) -> str:
 
 
 def executable_html_text(text: str) -> str:
-    """Return inline script/style bodies while excluding logical data-* metadata."""
+    """Return executable inline bodies, excluding explicitly base-path-aware runtimes."""
     chunks: list[str] = []
-    for pattern in (r'<script\b[^>]*>(.*?)</script>', r'<style\b[^>]*>(.*?)</style>'):
-        chunks.extend(re.findall(pattern, text, re.I | re.S))
+    script_pattern = re.compile(
+        r"<script\b(?P<attrs>[^>]*)>(?P<body>.*?)</script>",
+        re.IGNORECASE | re.DOTALL,
+    )
+    for match in script_pattern.finditer(text):
+        attrs = match.group("attrs").casefold()
+        body = match.group("body")
+        is_marked_base_path_runtime = any(
+            marker in attrs for marker in BASE_PATH_AWARE_INLINE_SCRIPT_MARKERS
+        ) and re.search(r"\bconst\s+BASE\s*=", body)
+        if is_marked_base_path_runtime:
+            continue
+        chunks.append(body)
+    chunks.extend(re.findall(r"<style\b[^>]*>(.*?)</style>", text, re.IGNORECASE | re.DOTALL))
     return "\n".join(chunks)
 
 
