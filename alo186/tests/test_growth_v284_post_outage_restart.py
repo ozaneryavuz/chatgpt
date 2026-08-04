@@ -51,7 +51,7 @@ def main() -> None:
     article = text(ARTICLE)
     for required in (
         "Enerji geri geldiğinde önce tehlikeyi dışlayın",
-        "Koruma tekrar atıyorsa zorlamayın",
+        "Koruma yeniden açıyorsa zorlamayın",
         "yeni ürün almanız gerekmez",
         "ALO186 EDAŞ, servis, üretici veya kamu kurumu değildir",
         "/hesaplama/elektrik-geldikten-sonra-cihaz-yeniden-baslatma-plani/",
