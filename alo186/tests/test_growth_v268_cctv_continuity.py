@@ -90,7 +90,7 @@ def main() -> None:
         "yeni ürün almayacağım",
         "fiyat, stok, satıcı puanı, ürün puanı, yorum, teslimat veya garanti",
         "Aktif tehlikede mağaza yolu kapalıdır",
-        "ALO186 resmî kurum",
+        "Bağımsız bilgilendirme platformudur",
     ):
         assert phrase.casefold() in selector.casefold(), phrase
     assert selector.index("Satış ortaklığı açıklaması") < selector.index("data-affiliate-href")
