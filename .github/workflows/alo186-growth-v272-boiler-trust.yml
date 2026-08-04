@@ -1,0 +1,30 @@
+name: ALO186 growth v272 boiler trust
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/haberler/elektrik-kesilince-kombi-calisir-mi/**'
+      - 'alo186/hesaplama/kombi-elektrik-kesintisi-ups-uygunluk-kontrolu/**'
+      - 'alo186/amazon-elektrik-urunleri/kombi-ups-yedek-guc-secimi/**'
+      - 'alo186/deployment/routing-overlays/growth-v272-boiler-trust.json'
+      - 'alo186/growth/live-drift/sites-delta-v272-homepage-evergreen-canonical.json'
+      - 'alo186/tests/test_growth_v272_boiler_trust.py'
+      - '.github/workflows/alo186-growth-v272-boiler-trust.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  trust-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run v272 trust regression
+        run: python -m unittest alo186.tests.test_growth_v272_boiler_trust

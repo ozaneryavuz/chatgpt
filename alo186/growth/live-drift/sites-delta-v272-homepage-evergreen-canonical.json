@@ -1,0 +1,80 @@
+{
+  "version": 272,
+  "target": "ChatGPT Sites and canonical source",
+  "canonicalUrl": "https://alo186.com/",
+  "reason": "Canlı ana sayfada görülen hızla eskiyen ürün/rehber sayaçlarını kaldırmak, ana canonical adresi tekilleştirmek ve ticari güven metinlerini kalıcı hale getirmek.",
+  "priority": "P0",
+  "observedAt": "2026-08-04",
+  "replacements": [
+    {
+      "match": "25 rehberin tamamını gör",
+      "replaceWith": "Tüm güvenli ürün rehberlerini gör"
+    },
+    {
+      "match": "26 rehberin tamamını gör",
+      "replaceWith": "Tüm güvenli ürün rehberlerini gör"
+    },
+    {
+      "match": "10 rehberin tamamını gör",
+      "replaceWith": "Tüm güvenli ürün rehberlerini gör"
+    },
+    {
+      "match": "152 modeli doğrulanmış ürün için seçim kartları",
+      "replaceWith": "Teknik uygunluk kapısından geçen ürün sınıfları için seçim kartları"
+    },
+    {
+      "match": "154 modeli doğrulanmış ürün için seçim kartları",
+      "replaceWith": "Teknik uygunluk kapısından geçen ürün sınıfları için seçim kartları"
+    },
+    {
+      "match": "152 doğrulanmış ASIN",
+      "replaceWith": "Teknik kimliği doğrulanan ürün sınıfları"
+    },
+    {
+      "match": "154 doğrulanmış ASIN",
+      "replaceWith": "Teknik kimliği doğrulanan ürün sınıfları"
+    },
+    {
+      "match": "50+ elektrik ürünü için Amazon seçim kartları",
+      "replaceWith": "İhtiyaca göre güvenli ürün seçim kartları"
+    },
+    {
+      "match": "https://www.alo186.com/elektrik-portali",
+      "replaceWith": "https://alo186.com/"
+    },
+    {
+      "match": "EPDK tüketici bilgisinde on iş günlük başvuru süresi açıklanır.",
+      "replaceWith": "Dağıtım sistemi kaynaklı cihaz hasarı talebinde güncel mevzuat kapsamını ve 30 günlük başvuru süresini resmî kaynaktan doğrulayın."
+    }
+  ],
+  "requiredAfterPatch": [
+    "https://alo186.com/",
+    "30 gün",
+    "Ürünler fiyat veya komisyon oranına göre sıralanmaz",
+    "Bağımsız bilgilendirme platformudur; EDAŞ veya kamu kurumu değildir.",
+    "Tüm güvenli ürün rehberlerini gör"
+  ],
+  "forbiddenAfterPatch": [
+    "25 rehberin tamamını gör",
+    "26 rehberin tamamını gör",
+    "10 rehberin tamamını gör",
+    "152 modeli doğrulanmış",
+    "154 modeli doğrulanmış",
+    "152 doğrulanmış ASIN",
+    "154 doğrulanmış ASIN",
+    "50+ elektrik ürünü",
+    "https://www.alo186.com/elektrik-portali",
+    "on iş günlük başvuru süresi"
+  ],
+  "commercialConstraints": {
+    "noDirectAmazonBeforeTechnicalGate": true,
+    "affiliateDisclosureBeforeOutboundLink": true,
+    "noPriceStockRatingWarrantyClaims": true,
+    "noBuyOutcomeRequired": true
+  },
+  "institutionalConstraints": {
+    "independentPlatformDisclosureRequired": true,
+    "mustNotImplyEdasOrPublicAuthority": true,
+    "mustNotClaimOutageRegistration": true
+  }
+}
