@@ -38,6 +38,7 @@
   "governedAffiliateRoutePatterns": [
     "akvaryum-pilli-usb-hava-motoru",
     "pilli-su-kacagi-alarmi",
+    "pilli-karbonmonoksit-alarmi",
     "duvar-kablo-metal-dedektoru",
     "akilli-priz-enerji-olcer"
   ],
