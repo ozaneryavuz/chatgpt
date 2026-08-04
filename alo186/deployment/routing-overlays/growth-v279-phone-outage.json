@@ -1,0 +1,21 @@
+{
+  "version": 279,
+  "name": "growth-v279-phone-outage",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesintisinde-telefon-nasil-sarj-edilir/index.html",
+      "canonicalPath": "/haberler/elektrik-kesintisinde-telefon-nasil-sarj-edilir/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/telefon-elektrik-kesintisi-sarj-plani/index.html",
+      "canonicalPath": "/hesaplama/telefon-elektrik-kesintisi-sarj-plani/",
+      "type": "tool"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/telefon-powerbank-kablo-secimi/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/telefon-powerbank-kablo-secimi/",
+      "type": "commerce"
+    }
+  ]
+}
