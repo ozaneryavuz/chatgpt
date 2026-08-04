@@ -1,0 +1,58 @@
+{
+  "version": 259,
+  "canonicalHost": "https://alo186.com",
+  "userAgent": "ALO186-Live-Drift/259 (+https://alo186.com/yayin-ilkeleri)",
+  "timeoutSeconds": 20,
+  "pages": [
+    {
+      "id": "product-hub",
+      "url": "https://alo186.com/amazon-elektrik-urunleri/",
+      "source": "alo186/amazon-elektrik-urunleri/index.html",
+      "requiredText": [
+        "Ürünü değil",
+        "Mevcut sistem yeterliyse satın alma yok",
+        "Amazon satış ortaklığı"
+      ],
+      "forbiddenText": [
+        "96 ürün seçim yolu",
+        "154 doğrulanmış ASIN",
+        "25+ uzun kuyruk ürün sınıfı"
+      ],
+      "forbidDirectAmazonHref": true,
+      "priority": "P0"
+    },
+    {
+      "id": "cold-chain-timer",
+      "url": "https://alo186.com/hesaplama/kesinti-soguk-zincir-zamanlayici/",
+      "source": "alo186/hesaplama/kesinti-soguk-zincir-zamanlayici/index.html",
+      "requiredText": [
+        "Kesinti süresini ölçün",
+        "yaklaşık 4 saat",
+        "Şüpheli gıdayı tatmayın"
+      ],
+      "forbiddenText": [
+        "gıda kesin güvenlidir",
+        "kesin güvenlik garantisi verir"
+      ],
+      "forbidDirectAmazonHref": true,
+      "priority": "P1"
+    },
+    {
+      "id": "thermometer-selector",
+      "url": "https://alo186.com/amazon-elektrik-urunleri/buzdolabi-dondurucu-termometresi-secimi/",
+      "source": "alo186/amazon-elektrik-urunleri/buzdolabi-dondurucu-termometresi-secimi/index.html",
+      "requiredText": [
+        "Termometreyi değil",
+        "satış ortaklığı açıklaması",
+        "Mevcut çözümüm yeterli"
+      ],
+      "forbiddenText": [
+        "fiyatımız",
+        "stokta",
+        "garantilidir"
+      ],
+      "forbidDirectAmazonHref": true,
+      "priority": "P1"
+    }
+  ]
+}
