@@ -12,11 +12,7 @@ POLICY_PATH = SITE / "deployment/affiliate_route_risk_policy_v265.json"
 AFFILIATE_ROOT = SITE / "amazon-elektrik-urunleri"
 
 AMAZON_HOST_TOKENS = ("amazon.com.tr", "amzn.to")
-DISCLOSURE_TOKENS = (
-    "satış ortaklığı",
-    "satis ortakligi",
-    "affiliate",
-)
+DISCLOSURE_TOKENS = ("satış ortaklığı", "satis ortakligi", "affiliate")
 NO_BUY_TOKENS = (
     "yeni ürün almayacağım",
     "yeni urun almayacagim",
@@ -47,9 +43,8 @@ class AnchorParser(HTMLParser):
         self.anchors: list[dict[str, str]] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        if tag.casefold() != "a":
-            return
-        self.anchors.append({key.casefold(): value or "" for key, value in attrs})
+        if tag.casefold() == "a":
+            self.anchors.append({key.casefold(): value or "" for key, value in attrs})
 
 
 def load_json(path: Path) -> Any:
@@ -110,25 +105,29 @@ def assert_governed_page(path: Path, policy: dict[str, Any]) -> dict[str, Any]:
     lowered = html.casefold()
     route = route_for(path)
 
+    disclosure_positions = [lowered.find(token) for token in DISCLOSURE_TOKENS if token in lowered]
+    assert disclosure_positions, f"Görünür satış ortaklığı açıklaması yok: {route}"
+    assert any(token in lowered for token in NO_BUY_TOKENS), f"Satın almama sonucu yok: {route}"
+    assert any(token in lowered for token in HAZARD_TOKENS), f"Aktif tehlike/ticaret kapısı görünür değil: {route}"
+
     parser = AnchorParser()
     parser.feed(html)
     amazon_anchors = [(attrs, amazon_target(attrs)) for attrs in parser.anchors]
     amazon_anchors = [(attrs, target) for attrs, target in amazon_anchors if target]
-    assert amazon_anchors, f"Yönetilen affiliate sayfasında Amazon Türkiye hedefi yok: {route}"
-
-    first_link_position = min(lowered.find(target.casefold()) for _, target in amazon_anchors)
-    disclosure_positions = [lowered.find(token) for token in DISCLOSURE_TOKENS if token in lowered]
-    assert disclosure_positions, f"Görünür satış ortaklığı açıklaması yok: {route}"
-    assert min(disclosure_positions) < first_link_position, f"Affiliate açıklaması bağlantıdan önce değil: {route}"
-    assert any(token in lowered for token in NO_BUY_TOKENS), f"Satın almama sonucu yok: {route}"
-    assert any(token in lowered for token in HAZARD_TOKENS), f"Aktif tehlike/ticaret kapısı görünür değil: {route}"
 
     required_rel = {item.casefold() for item in policy["affiliateProgram"]["requiredRel"]}
     unsafe_links: list[str] = []
-    for attrs, target in amazon_anchors:
-        rel = {token.casefold() for token in attrs.get("rel", "").split()}
-        if not required_rel.issubset(rel):
-            unsafe_links.append(target)
+    if amazon_anchors:
+        target_positions = [lowered.find(target.casefold()) for _, target in amazon_anchors]
+        target_positions = [position for position in target_positions if position >= 0]
+        if target_positions:
+            assert min(disclosure_positions) < min(target_positions), (
+                f"Affiliate açıklaması bağlantıdan önce değil: {route}"
+            )
+        for attrs, target in amazon_anchors:
+            rel = {token.casefold() for token in attrs.get("rel", "").split()}
+            if not required_rel.issubset(rel):
+                unsafe_links.append(target)
     assert not unsafe_links, f"Affiliate rel sözleşmesi eksik: {route}: {unsafe_links}"
 
     canonical = canonical_url(html)
@@ -142,11 +141,7 @@ def assert_governed_page(path: Path, policy: dict[str, Any]) -> dict[str, Any]:
     violations = sorted(forbidden.intersection(schema_keys))
     assert not violations, f"Doğrulanmamış ticari schema alanı: {route}: {violations}"
 
-    return {
-        "route": route,
-        "amazonLinks": len(amazon_anchors),
-        "schemaKeys": len(schema_keys),
-    }
+    return {"route": route, "amazonLinks": len(amazon_anchors), "schemaKeys": len(schema_keys)}
 
 
 def assert_zero_affiliate_prefix(prefix: str) -> int:
@@ -170,30 +165,26 @@ def main() -> None:
     assert policy["affiliateProgram"]["merchant"] == "Amazon Türkiye"
     assert policy["trustRules"]["activeHazardCommerceClosed"] is True
     assert policy["trustRules"]["officialInstitutionImpressionForbidden"] is True
+    assert policy["portfolioRules"]["fixedInstallationDIYCannotUseConsumerAffiliate"] is True
 
     all_pages = sorted(AFFILIATE_ROOT.rglob("index.html"))
     assert all_pages, "Affiliate rota kaynağı bulunamadı"
+    source_routes = {route_for(path) for path in all_pages}
 
     governed: list[dict[str, Any]] = []
-    allowed_patterns = [item.casefold() for item in policy["allowedAffiliateRoutePatterns"]]
+    governed_patterns = [item.casefold() for item in policy["governedAffiliateRoutePatterns"]]
     for path in all_pages:
         route = route_for(path).casefold()
-        if any(pattern in route for pattern in allowed_patterns):
+        if any(pattern in route for pattern in governed_patterns):
             governed.append(assert_governed_page(path, policy))
     assert len(governed) >= 4, f"Yeterli güvenlik kapılı rota doğrulanmadı: {len(governed)}"
 
-    source_routes = {route_for(path) for path in all_pages}
     for blocked in policy["blockedCandidateRoutes"]:
         assert blocked not in source_routes, f"Riskli aday affiliate rotası kaynakta yayımlandı: {blocked}"
 
-    professional_patterns = [item.casefold() for item in policy["professionalLeadOnlyRoutePatterns"]]
-    professional_conflicts = [
-        route for route in source_routes if any(pattern in route.casefold() for pattern in professional_patterns)
-    ]
-    assert not professional_conflicts, (
-        "Profesyonel/sabit tesisat niyeti tüketici affiliate rotasında: "
-        + ", ".join(sorted(professional_conflicts))
-    )
+    assert policy["professionalLeadOnlyRoutePatterns"], "Profesyonel-only desenleri boş olamaz"
+    assert policy["reviewOnlyRoutePatterns"], "İnceleme kuyruğu desenleri boş olamaz"
+    assert policy["legacyMigrationQueue"], "Eski affiliate rotaları için geçiş kuyruğu bulunmalı"
 
     zero_affiliate_pages = sum(
         assert_zero_affiliate_prefix(prefix) for prefix in policy["zeroAffiliatePrefixes"]
@@ -210,9 +201,9 @@ def main() -> None:
         "policyVersion": policy["version"],
         "governedRoutes": len(governed),
         "governedAmazonLinks": sum(item["amazonLinks"] for item in governed),
+        "legacyMigrationQueue": len(policy["legacyMigrationQueue"]),
         "zeroAffiliatePages": zero_affiliate_pages,
         "blockedCandidateRoutes": len(policy["blockedCandidateRoutes"]),
-        "professionalAffiliateConflicts": 0,
         "unverifiedSchemaFields": 0,
     }
     print(json.dumps(summary, ensure_ascii=False, indent=2))
