@@ -1,0 +1,68 @@
+{
+  "version": 258,
+  "verifiedAt": "2026-08-04",
+  "siteDomain": "alo186.com",
+  "purpose": "Kullanıcı güvenini etkileyen telefon, başvuru süresi ve resmî kanal iddialarını tek kaynakta izlemek; eski veya çelişkili ifadeleri ChatGPT Sites aktarımından çıkarmak.",
+  "claims": [
+    {
+      "id": "device-damage-claim-deadline",
+      "label": "Dağıtım şebekesi kaynaklı cihaz hasarı talep süresi",
+      "value": "10 iş günü",
+      "scope": "Kullanıcının kendi hatasından kaynaklanmayan ve dağıtım şebekesinden kaynaklandığı ileri sürülen teçhizat hasarının tazmini için dağıtım şirketine yapılacak talep.",
+      "sourcePublisher": "Enerji Piyasası Düzenleme Kurumu (EPDK)",
+      "sourceUrl": "https://www.epdk.gov.tr/Detay/Icerik/12-3/1-elektrik-aboneligini-kendi-adima-almak-zorunda",
+      "sourceSection": "Elektrikli cihazım elektrik kesintisi ve/veya kalitesizliğinden dolayı arızalandı. Ne yapmalıyım?",
+      "maximumVerificationAgeDays": 30,
+      "routes": [
+        "/elektrik-portali",
+        "/hesaplama/kesinti-gunlugu/",
+        "/haberler/elektrik-kesintisi-cihaz-hasari-edas-basvurusu"
+      ],
+      "requiredCaveats": [
+        "Hasarın dağıtım şebekesinden kaynaklandığı inceleme sonucunda tespit edilmelidir.",
+        "ALO186 başvuru, hasar veya tazminat kararı almaz.",
+        "Takvim aracı resmî tatilleri otomatik hesaplamaz; resmî kanal sonucu belirler."
+      ],
+      "forbiddenPhrases": [
+        "Cihaz hasarında başvuru süresi 30 gündür",
+        "zararın ortaya çıktığı tarihten itibaren 30 gün içinde"
+      ]
+    },
+    {
+      "id": "emergency-call-112",
+      "label": "Aktif can ve yangın güvenliği tehlikesi",
+      "value": "112",
+      "scope": "Elektrik çarpması, yangın, duman, ark, düşmüş iletken veya başka aktif acil risk.",
+      "sourcePublisher": "112 Acil Çağrı Merkezi",
+      "sourceUrl": "https://www.112.gov.tr/",
+      "maximumVerificationAgeDays": 90,
+      "routes": [
+        "/acil-numaralar/",
+        "/karar-motoru",
+        "/edas-bul"
+      ],
+      "requiredCaveats": [
+        "Tehlikeli bölgeye yaklaşmayın veya enerjili ekipmana dokunmayın.",
+        "Aktif tehlikede ticari ve affiliate yol kapalıdır."
+      ]
+    },
+    {
+      "id": "distribution-fault-channel",
+      "label": "Elektrik dağıtım arıza yönlendirmesi",
+      "value": "186 veya ilgili dağıtım şirketinin güncel resmî kanalı",
+      "scope": "Şebeke kesintisi ve dağıtım arızası; aktif acil risk bulunmayan durumlar.",
+      "sourcePublisher": "Enerji Piyasası Düzenleme Kurumu (EPDK)",
+      "sourceUrl": "https://www.epdk.gov.tr/Detay/Icerik/18/tuketici-kosesi",
+      "maximumVerificationAgeDays": 90,
+      "routes": [
+        "/edas-bul",
+        "/il/",
+        "/dagitim-sirketleri/"
+      ],
+      "requiredCaveats": [
+        "Dağıtım şirketlerinin güncel çağrı ve dijital kanalları farklılaşabilir.",
+        "ALO186 resmî kurum değildir ve arıza kaydı almaz."
+      ]
+    }
+  ]
+}
