@@ -76,7 +76,12 @@
     "hidrofor",
     "pompa",
     "kuyu-pompasi",
-    "yangin-pompasi"
+    "yangin-pompasi",
+    "elektrikli-arac-sarj-kesinti",
+    "ev-sarj-istasyonu-kesinti",
+    "wallbox-yedekleme",
+    "evse-yedekleme",
+    "sarj-istasyonu-surekliligi"
   ],
   "portfolioRules": {
     "genericDIYRequiresDirectElectricalContinuityOrSafetyIntent": true,
