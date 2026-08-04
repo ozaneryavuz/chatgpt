@@ -120,7 +120,13 @@ def main() -> None:
         target_route = route_by_path.get(item["canonicalPath"])
         assert alias_route, f"Birleştirilecek alias routing envanterinde yok: {item['aliasPath']}"
         assert target_route, f"Canonical hedef routing envanterinde yok: {item['canonicalPath']}"
-        assert alias_route["type"] == "article" and target_route["type"] == "article"
+        assert alias_route["type"] == target_route["type"], (
+            f"Birleştirilen rotaların içerik türü aynı olmalı: {item['aliasPath']} "
+            f"({alias_route['type']}) → {item['canonicalPath']} ({target_route['type']})"
+        )
+        assert alias_route["type"] in {"article", "commerce-guide"}, (
+            f"Desteklenmeyen canonical birleştirme türü: {alias_route['type']}"
+        )
         alias_signature = article_signature(alias_route["source"])
         target_signature = article_signature(target_route["source"])
         matches, evidence = declared_pair_matches(alias_signature, target_signature)
@@ -158,6 +164,7 @@ def main() -> None:
                 "effectiveArticleCount": len([route for route in manifest["routes"] if route["type"] == "article"]),
                 "activeCanonicalArticleCountAfterConsolidation": len(active_articles),
                 "consolidationCount": len(config["consolidations"]),
+                "supportedConsolidationTypes": ["article", "commerce-guide"],
                 "undeclaredHighSimilarityCollisions": 0,
             },
             ensure_ascii=False,
