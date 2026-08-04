@@ -1,0 +1,16 @@
+{
+  "version": 259,
+  "name": "growth-v259-cold-chain",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/kesinti-soguk-zincir-zamanlayici/index.html",
+      "canonicalPath": "/hesaplama/kesinti-soguk-zincir-zamanlayici/",
+      "type": "tool"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/buzdolabi-dondurucu-termometresi-secimi/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/buzdolabi-dondurucu-termometresi-secimi/",
+      "type": "commerce-guide"
+    }
+  ]
+}
