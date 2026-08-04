@@ -1,0 +1,73 @@
+{
+  "version": 288,
+  "category": "fire-alarm-emergency-lighting-outage",
+  "decision": "professional-lead-only",
+  "reviewedAt": "2026-08-05",
+  "searchIntent": [
+    "elektrik kesilince yangın alarmı çalışır mı",
+    "yangın alarmı aküsü kaç saat dayanır",
+    "elektrik kesintisinde acil aydınlatma çalışır mı",
+    "otel yangın alarmı kesinti testi",
+    "yangın paneli akü arızası"
+  ],
+  "consumerAffiliateDecision": {
+    "allowed": false,
+    "reason": "Fire detection, alarm, voice evacuation and emergency lighting are life-safety systems whose backup power, supervision, interfaces and test requirements depend on the approved project, building use, applicable rules and exact manufacturer design. A generic UPS, battery or retail device cannot safely establish compliance or continuity."
+  },
+  "excludedConsumerAffiliateClasses": [
+    "generic UPS or external power supply presented as a fire-alarm continuity solution",
+    "replacement fire-panel battery without exact manufacturer project and charging-system verification",
+    "standalone smoke alarm presented as a substitute for a required building fire-alarm system",
+    "emergency light presented as proof of escape-route compliance or guaranteed runtime",
+    "fire alarm panel detector manual call point siren strobe or voice-evacuation component",
+    "door-holder elevator smoke-control access-control or monitoring interface component",
+    "fixed wiring circuit modification or bypass of fault supervision"
+  ],
+  "conversionPolicy": {
+    "merchantLinks": false,
+    "professionalScopeOnly": true,
+    "noBuyOutcomeRequired": true,
+    "activeHazardCommerceClosed": true,
+    "personalDataCollectionForbidden": true,
+    "noPriceStockRatingWarrantyClaims": true,
+    "officialInstitutionImpressionForbidden": true
+  },
+  "professionalConversionPoints": [
+    "competent fire detection and alarm service inspection",
+    "electrical and emergency-lighting functional assessment",
+    "documented mains-failure alarm and building-interface test",
+    "hotel business school healthcare or common-area continuity matrix",
+    "maintenance contract scope fault closure and repeat-test record"
+  ],
+  "repeatVisitReasons": [
+    {"days": 30, "reason": "review panel trouble disabled-zone and emergency-lighting fault records"},
+    {"days": 90, "reason": "review documented integrated alarm notification monitoring and lighting test status"},
+    {"days": 365, "reason": "review building-use project interface and maintenance-scope changes"}
+  ],
+  "sources": [
+    {
+      "publisher": "T.C. Çevre, Şehircilik ve İklim Değişikliği Bakanlığı",
+      "title": "Elektrik tesisatı genel teknik şartnameleri",
+      "url": "https://yfk.csb.gov.tr/sartnameler-330",
+      "checkedAt": "2026-08-05"
+    },
+    {
+      "publisher": "Resmî Gazete",
+      "title": "Yangın Algılama ve Alarm Sistemleri Tesisatı Genel Teknik Şartnamesi",
+      "url": "https://www.resmigazete.gov.tr/eskiler/2021/12/20211216-6.htm",
+      "checkedAt": "2026-08-05"
+    },
+    {
+      "publisher": "GOV.UK",
+      "title": "Fire safety risk assessment: sleeping accommodation",
+      "url": "https://www.gov.uk/government/publications/fire-safety-risk-assessment-sleeping-accommodation/fire-safety-risk-assessment-sleeping-accommodation-accessible",
+      "checkedAt": "2026-08-05"
+    },
+    {
+      "publisher": "OSHA",
+      "title": "Employee alarm systems maintenance and testing",
+      "url": "https://www.osha.gov/etools/evacuation-plans-procedures/emergency-standards/employee-alarms/",
+      "checkedAt": "2026-08-05"
+    }
+  ]
+}

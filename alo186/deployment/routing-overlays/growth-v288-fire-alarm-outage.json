@@ -1,0 +1,21 @@
+{
+  "version": 288,
+  "name": "growth-v288-fire-alarm-outage",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesilince-yangin-alarmi-calisir-mi/index.html",
+      "canonicalPath": "/haberler/elektrik-kesilince-yangin-alarmi-calisir-mi/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/yangin-alarmi-elektrik-kesintisi-test-plani/index.html",
+      "canonicalPath": "/hesaplama/yangin-alarmi-elektrik-kesintisi-test-plani/",
+      "type": "tool"
+    },
+    {
+      "source": "alo186/sektor-rehberi/otel-isletme-yangin-alarmi-acil-aydinlatma-kesinti-surekliligi/index.html",
+      "canonicalPath": "/sektor-rehberi/otel-isletme-yangin-alarmi-acil-aydinlatma-kesinti-surekliligi/",
+      "type": "professional-guide"
+    }
+  ]
+}
