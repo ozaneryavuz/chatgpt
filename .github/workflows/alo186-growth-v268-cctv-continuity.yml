@@ -1,0 +1,111 @@
+name: ALO186 kamera sürekliliği ve güvenli UPS seçimi v268
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/guvenlik-kamerasi-elektrik-kesintisi-sureklilik-plani/**'
+      - 'alo186/haberler/elektrik-kesilince-guvenlik-kamerasi-calisir-mi/**'
+      - 'alo186/amazon-elektrik-urunleri/kamera-nvr-ups-yedek-guc-secimi/**'
+      - 'alo186/deployment/routing-overlays/growth-v268-cctv-continuity.json'
+      - 'alo186/deployment/affiliate_route_risk_policy_v265.json'
+      - 'alo186/tests/test_growth_v268_cctv_continuity.py'
+      - '.github/workflows/alo186-growth-v268-cctv-continuity.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/guvenlik-kamerasi-elektrik-kesintisi-sureklilik-plani/**'
+      - 'alo186/haberler/elektrik-kesilince-guvenlik-kamerasi-calisir-mi/**'
+      - 'alo186/amazon-elektrik-urunleri/kamera-nvr-ups-yedek-guc-secimi/**'
+      - 'alo186/deployment/routing-overlays/growth-v268-cctv-continuity.json'
+      - 'alo186/deployment/affiliate_route_risk_policy_v265.json'
+      - 'alo186/tests/test_growth_v268_cctv_continuity.py'
+      - '.github/workflows/alo186-growth-v268-cctv-continuity.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-growth-v268-cctv-continuity-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Kamera sürekliliği, affiliate kapısı ve portföy yönetişimi
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            alo186/tests/test_growth_v268_cctv_continuity.py \
+            alo186/tests/test_affiliate_route_risk_policy_v265.py
+          python alo186/tests/test_growth_v268_cctv_continuity.py
+          python alo186/tests/test_affiliate_route_risk_policy_v265.py
+          python -m json.tool alo186/deployment/routing-overlays/growth-v268-cctv-continuity.json >/dev/null
+          python -m json.tool alo186/deployment/affiliate_route_risk_policy_v265.json >/dev/null
+
+      - name: Canonical production build ve static smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-v268
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-v268 \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-v268
+          test -f /tmp/alo186-v268/hesaplama/guvenlik-kamerasi-elektrik-kesintisi-sureklilik-plani/index.html
+          test -f /tmp/alo186-v268/haberler/elektrik-kesilince-guvenlik-kamerasi-calisir-mi/index.html
+          test -f /tmp/alo186-v268/amazon-elektrik-urunleri/kamera-nvr-ups-yedek-guc-secimi/index.html
+          test -f /tmp/alo186-v268/assets/journey-events-v260.js
+
+      - name: ChatGPT Sites aktarım paketi kabulü
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-sites-v268
+          python alo186/deployment/export_chatgpt_sites_bundle_v2.py \
+            --output /tmp/alo186-sites-v268 \
+            --commit "$GITHUB_SHA"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path('/tmp/alo186-sites-v268')
+          manifest = json.loads((root / 'sites-import.json').read_text(encoding='utf-8'))
+          pages = {item['canonicalPath']: item for item in manifest['pages']}
+          expected = {
+              '/hesaplama/guvenlik-kamerasi-elektrik-kesintisi-sureklilik-plani/',
+              '/haberler/elektrik-kesilince-guvenlik-kamerasi-calisir-mi/',
+              '/amazon-elektrik-urunleri/kamera-nvr-ups-yedek-guc-secimi/',
+          }
+          assert expected.issubset(pages), expected - set(pages)
+          assert pages['/hesaplama/guvenlik-kamerasi-elektrik-kesintisi-sureklilik-plani/']['affiliate']['hasAffiliateLinks'] is False
+          assert pages['/haberler/elektrik-kesilince-guvenlik-kamerasi-calisir-mi/']['affiliate']['hasAffiliateLinks'] is False
+          commerce = pages['/amazon-elektrik-urunleri/kamera-nvr-ups-yedek-guc-secimi/']
+          assert commerce['affiliate']['safe'] is True
+          assert commerce['affiliate']['disclosureVisible'] is True
+          assert commerce['affiliate']['noBuyOutcomeVisible'] is True
+          assert not commerce['affiliate']['unsafeStaticLinks']
+          print(json.dumps({'ok': True, 'routes': sorted(expected)}, ensure_ascii=False))
+          PY
+
+      - name: Özet
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ## ALO186 v268 kamera sürekliliği büyüme paketi
+
+          - “Elektrik kesilince güvenlik kamerası çalışır mı?” arama niyeti: kaynak doğrulamalı canonical rehber
+          - Kamera + NVR/DVR + PoE + router/ONT yük zinciri: kişisel verisiz ücretsiz planlayıcı
+          - Yerel kayıt ile uzaktan erişim ayrımı: doğrulandı
+          - Mevcut çözüm hedef süreyi sağlıyorsa: satın almama sonucu
+          - Amazon Türkiye bağlantıları: güven ve teknik kapının arkasında, statik href yok
+          - Merkezi/profesyonel ve yaşam güvenliği sistemleri: consumer affiliate kapalı
+          - 30/90 günlük bakım ve gerçek kesinti test döngüsü: doğrulandı
+          - Fiyat, stok, puan, yorum, garanti, Offer ve AggregateRating: yok
+          - Canonical build, static smoke ve ChatGPT Sites import kabulü: başarılı
+          EOF
