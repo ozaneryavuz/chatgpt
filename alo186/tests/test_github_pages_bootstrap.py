@@ -22,6 +22,7 @@ from bootstrap_github_pages import (  # noqa: E402
     ensure_pages,
     main,
 )
+from smoke_github_pages import executable_html_text  # noqa: E402
 
 
 class FakePagesHandler(BaseHTTPRequestHandler):
@@ -201,6 +202,24 @@ class PagesBootstrapTests(unittest.TestCase):
     def test_domain_constants_are_apex_first(self) -> None:
         self.assertEqual(DEFAULT_CUSTOM_DOMAIN, "alo186.com")
         self.assertEqual(LEGACY_CUSTOM_DOMAIN, "www.alo186.com")
+
+    def test_marked_base_path_aware_ga4_runtime_is_excluded_from_root_scan(self) -> None:
+        html = """
+        <script data-alo186-ga4-consent="true">
+        const BASE="/chatgpt";
+        const logicalPath=location.pathname.slice(BASE.length)||"/";
+        </script>
+        <script>const target="/unsafe-root";</script>
+        """
+        executable = executable_html_text(html)
+        self.assertNotIn("logicalPath", executable)
+        self.assertIn('const target="/unsafe-root"', executable)
+
+    def test_unmarked_or_non_base_aware_scripts_remain_fail_closed(self) -> None:
+        unmarked = '<script>const target="/";</script>'
+        falsely_marked = '<script data-alo186-ga4-consent="true">const target="/";</script>'
+        self.assertIn('const target="/"', executable_html_text(unmarked))
+        self.assertIn('const target="/"', executable_html_text(falsely_marked))
 
 
 if __name__ == "__main__":
