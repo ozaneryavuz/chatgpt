@@ -1,0 +1,52 @@
+{
+  "version": 286,
+  "category": "automatic-door-access-control-outage",
+  "decision": "professional-lead-only",
+  "reviewedAt": "2026-08-05",
+  "searchIntent": [
+    "elektrik kesilince otomatik kapı açılır mı",
+    "elektrik kesilince manyetik kilit ne olur",
+    "kartlı geçiş elektrik kesintisi",
+    "otomatik kayar kapı elektrik kesintisi manuel açma"
+  ],
+  "consumerAffiliateDecision": {
+    "allowed": false,
+    "reason": "Door, lock, egress, fire-alarm integration and backup power must be verified as one life-safety and security system; a consumer product cannot safely resolve an unknown fail state."
+  },
+  "excludedConsumerAffiliateClasses": [
+    "magnetic lock",
+    "electric strike or electrified lock",
+    "automatic door operator",
+    "access-control power supply or controller",
+    "door UPS or battery pack",
+    "emergency release button or break-glass unit",
+    "fire-alarm interface module",
+    "building access-control network equipment"
+  ],
+  "conversionPolicy": {
+    "merchantLinks": false,
+    "professionalScopeOnly": true,
+    "noBuyOutcomeRequired": true,
+    "activeHazardCommerceClosed": true,
+    "personalDataCollectionForbidden": true,
+    "noPriceStockRatingWarrantyClaims": true,
+    "officialInstitutionImpressionForbidden": true
+  },
+  "professionalConversionPoints": [
+    "authorized automatic-door or access-control service",
+    "fire and egress strategy review by a competent professional",
+    "backup-power runtime and battery test",
+    "multi-door hotel site or workplace continuity assessment"
+  ],
+  "repeatVisitReasons": [
+    {"days": 30, "reason": "visual inspection of door leaf lock release and battery indicators"},
+    {"days": 90, "reason": "controlled power-loss and free-egress drill"},
+    {"days": 365, "reason": "documented maintenance fire-interface and continuity review"}
+  ],
+  "sources": [
+    {"publisher": "CIBSE", "title": "Top Tips 5: Automatic Doors & Gates", "url": "https://www.cibse.org/knowledge-research/knowledge-resources/engineering-guidance/cibse-top-tips/cibse-top-tips-5-automatic-doors-gates-2015/", "checkedAt": "2026-08-05"},
+    {"publisher": "Allegion", "title": "Fail Safe vs. Fail Secure", "url": "https://us.allegion.com/en/resources/education/leading-the-industry/decoded/fail-safe-vs-fail-secure.html", "checkedAt": "2026-08-05"},
+    {"publisher": "Buckinghamshire Fire & Rescue Service", "title": "Fire doors in flats and shared residential buildings", "url": "https://bucksfire.gov.uk/safety-hub/fire-doors-in-flats-and-shared-residential-buildings-2/", "checkedAt": "2026-08-05"},
+    {"publisher": "Axis Communications", "title": "Fail-safe vs fail-secure", "url": "https://newsroom.axis.com/en-us/blog/fail-safe-vs-fail-secure", "checkedAt": "2026-08-05"}
+  ]
+}
