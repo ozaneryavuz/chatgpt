@@ -67,7 +67,7 @@ class GrowthV272BoilerTrustTests(unittest.TestCase):
             self.assertIn(text, self.article)
         self.assertLess(
             self.article.index("Acil sınır: ürün düşünmeyin"),
-            self.article.index("Satış ortaklığı açıklamalı seçiciyi aç"),
+            self.article.index("Güvenlik kapılı seçiciyi aç"),
         )
 
     def test_tool_is_privacy_preserving_and_has_no_store_link(self) -> None:
@@ -111,7 +111,8 @@ class GrowthV272BoilerTrustTests(unittest.TestCase):
             self.commerce.index("Kilitli Amazon Türkiye arama bağlantıları"),
         )
         self.assertEqual(self.commerce.count('class="button primary store-link"'), 3)
-        self.assertEqual(self.commerce.count('aria-disabled="true"'), 3)
+        locked_anchors = re.findall(r'<a\b[^>]*class="button primary store-link"[^>]*aria-disabled="true"', self.commerce)
+        self.assertEqual(len(locked_anchors), 3)
         self.assertIsNone(
             re.search(r'(?i)href\s*=\s*[\"\']https://www\.amazon\.com\.tr', self.commerce),
             "Amazon linkleri kaynak HTML içinde aktif href olarak bulunmamalı",
