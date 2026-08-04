@@ -31,8 +31,8 @@
         "Şüpheli gıdayı tatmayın"
       ],
       "forbiddenText": [
-        "kesin güvenlidir",
-        "garanti eder"
+        "gıda kesin güvenlidir",
+        "kesin güvenlik garantisi verir"
       ],
       "forbidDirectAmazonHref": true,
       "priority": "P1"
