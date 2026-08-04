@@ -53,7 +53,7 @@ DEADLINE_SCRIPT = ROOT / "alo186/hesaplama/kesinti-gunlugu/damage-deadline-v258.
 HOME_ROUTE = "/elektrik-portali"
 JOURNAL_ROUTE = "/hesaplama/kesinti-gunlugu/"
 ARTICLE_ROUTE = "/haberler/elektrik-kesintisi-cihaz-hasari-edas-basvurusu"
-SOURCES_ROUTE = "/kaynaklar/"
+SOURCES_ROUTE = "/kaynaklar"
 CURRENT_HOME_TITLE = "Cihaz hasarında başvuru süresi 30 gündür"
 CURRENT_HOME_BODY = "zararın ortaya çıktığı tarihten itibaren <strong>30 gün içinde</strong>"
 
