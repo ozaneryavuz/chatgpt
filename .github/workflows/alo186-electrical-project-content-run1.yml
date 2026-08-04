@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
-      - 'alo186/haberler/62-villa-22-kw-ac-2x180-kw-dc-arac-sarj-proje-tasarimi/**'
+      - 'alo186/haberler/elektrik-ihale-paketi-kesif-sartname-marka-listesi-butce-kontrolu/**'
       - 'alo186/haberler/elektrik-odasi-safti-rezervasyon-koordinasyon-kontrol-listesi/**'
       - 'alo186/haberler/kisa-devre-secicilik-kablo-koruma-koordinasyon-raporu/**'
       - 'alo186/deployment/routing-overlays/electrical-project-content-run1-v256.json'
@@ -13,7 +13,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'alo186/haberler/62-villa-22-kw-ac-2x180-kw-dc-arac-sarj-proje-tasarimi/**'
+      - 'alo186/haberler/elektrik-ihale-paketi-kesif-sartname-marka-listesi-butce-kontrolu/**'
       - 'alo186/haberler/elektrik-odasi-safti-rezervasyon-koordinasyon-kontrol-listesi/**'
       - 'alo186/haberler/kisa-devre-secicilik-kablo-koruma-koordinasyon-raporu/**'
       - 'alo186/deployment/routing-overlays/electrical-project-content-run1-v256.json'
@@ -42,6 +42,7 @@ jobs:
         run: |
           set -euo pipefail
           python alo186/tests/test_electrical_project_content_run1.py
+          python alo186/tests/test_content_intent_consolidation.py
 
       - name: Canonical site paketini oluştur
         run: |
@@ -62,7 +63,7 @@ jobs:
 
           root = Path('/tmp/alo186-electrical-project-run1')
           routes = [
-              '/haberler/62-villa-22-kw-ac-2x180-kw-dc-arac-sarj-proje-tasarimi',
+              '/haberler/elektrik-ihale-paketi-kesif-sartname-marka-listesi-butce-kontrolu',
               '/haberler/elektrik-odasi-safti-rezervasyon-koordinasyon-kontrol-listesi',
               '/haberler/kisa-devre-secicilik-kablo-koruma-koordinasyon-raporu',
           ]
@@ -84,6 +85,7 @@ jobs:
               'sitemap': True,
               'canonical': True,
               'affiliateBlocked': True,
+              'globalCannibalizationGuard': True,
           }, ensure_ascii=False, indent=2))
           PY
 
