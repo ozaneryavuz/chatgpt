@@ -1,0 +1,108 @@
+name: ALO186 güven, bakım ve otomatik kapı büyümesi v270
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/elektrik-kesilince-otomatik-kapi-kepenk-garaj-kapisi-nasil-acilir/**'
+      - 'alo186/hesaplama/otomatik-kapi-kepenk-elektrik-kesintisi-acil-plani/**'
+      - 'alo186/hesaplama/elektrik-kesintisi-ekipman-test-ve-bakim-plani/**'
+      - 'alo186/deployment/routing-overlays/growth-v270-trust-maintenance-gate.json'
+      - 'alo186/growth/live-drift/critical-pages-v270.json'
+      - 'alo186/growth/live-drift/sites-delta-v270-homepage-evergreen.json'
+      - 'alo186/tests/test_growth_v270_trust_maintenance_gate.py'
+      - '.github/workflows/alo186-growth-v270-trust-maintenance-gate.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/elektrik-kesilince-otomatik-kapi-kepenk-garaj-kapisi-nasil-acilir/**'
+      - 'alo186/hesaplama/otomatik-kapi-kepenk-elektrik-kesintisi-acil-plani/**'
+      - 'alo186/hesaplama/elektrik-kesintisi-ekipman-test-ve-bakim-plani/**'
+      - 'alo186/deployment/routing-overlays/growth-v270-trust-maintenance-gate.json'
+      - 'alo186/growth/live-drift/critical-pages-v270.json'
+      - 'alo186/growth/live-drift/sites-delta-v270-homepage-evergreen.json'
+      - 'alo186/tests/test_growth_v270_trust_maintenance_gate.py'
+      - '.github/workflows/alo186-growth-v270-trust-maintenance-gate.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-growth-v270-trust-maintenance-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: İçerik, kullanıcı yolculuğu ve güven sözleşmesi
+        run: |
+          set -euo pipefail
+          python -m py_compile alo186/tests/test_growth_v270_trust_maintenance_gate.py
+          python alo186/tests/test_growth_v270_trust_maintenance_gate.py
+          python -m json.tool alo186/deployment/routing-overlays/growth-v270-trust-maintenance-gate.json >/dev/null
+          python -m json.tool alo186/growth/live-drift/critical-pages-v270.json >/dev/null
+          python -m json.tool alo186/growth/live-drift/sites-delta-v270-homepage-evergreen.json >/dev/null
+
+      - name: Canonical production build ve static smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-v270
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-v270 \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-v270
+          test -f /tmp/alo186-v270/haberler/elektrik-kesilince-otomatik-kapi-kepenk-garaj-kapisi-nasil-acilir/index.html
+          test -f /tmp/alo186-v270/hesaplama/otomatik-kapi-kepenk-elektrik-kesintisi-acil-plani/index.html
+          test -f /tmp/alo186-v270/hesaplama/elektrik-kesintisi-ekipman-test-ve-bakim-plani/index.html
+          test -f /tmp/alo186-v270/assets/journey-events-v260.js
+
+      - name: ChatGPT Sites aktarım paketi kabulü
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-sites-v270
+          python alo186/deployment/export_chatgpt_sites_bundle_v2.py \
+            --output /tmp/alo186-sites-v270 \
+            --commit "$GITHUB_SHA"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path('/tmp/alo186-sites-v270')
+          manifest = json.loads((root / 'sites-import.json').read_text(encoding='utf-8'))
+          pages = {item['canonicalPath']: item for item in manifest['pages']}
+          expected = {
+              '/haberler/elektrik-kesilince-otomatik-kapi-kepenk-garaj-kapisi-nasil-acilir/',
+              '/hesaplama/otomatik-kapi-kepenk-elektrik-kesintisi-acil-plani/',
+              '/hesaplama/elektrik-kesintisi-ekipman-test-ve-bakim-plani/',
+          }
+          assert expected.issubset(pages), expected - set(pages)
+          for path in expected:
+              page = pages[path]
+              assert page['affiliate']['hasAffiliateLinks'] is False
+              assert not page['affiliate']['unsafeStaticLinks']
+          print(json.dumps({'ok': True, 'routes': sorted(expected)}, ensure_ascii=False))
+          PY
+
+      - name: Özet
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ## ALO186 v270 güvenli büyüme paketi
+
+          - Arama boşluğu: elektrik kesilince otomatik kapı, kepenk ve garaj kapısı güvenliği
+          - Kullanıcı aracı: modele göre risk, manuel açma, akü ve profesyonel sınır
+          - Dönüşüm kalitesi: gerçek test hedefi sağlıyorsa açık satın almama sonucu
+          - Tekrar ziyaret: 30 günlük kısa kontrol ve 90 günlük gerçek kesinti tatbikatı
+          - Affiliate geçişi: yalnız mevcut güvenlik kapılı iç rehberlere, doğrudan mağaza linki yok
+          - Canlı güven drift'i: eski ürün/rehber sayaçları ve eski cihaz hasarı süresi ifadesi P0 yasak
+          - Resmî kurum izlenimi: yok
+          - Fiyat, stok, puan, garanti, Offer ve AggregateRating: yok
+          - Canonical build, static smoke ve ChatGPT Sites import kabulü: başarılı
+          EOF
