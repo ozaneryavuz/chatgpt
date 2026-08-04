@@ -64,8 +64,12 @@ def main() -> None:
     for forbidden in ('"price"', '"pricecurrency"', '"availability"', '"offers"', '"aggregaterating"'):
         assert forbidden not in combined_schema, forbidden
 
-    # Amazon Türkiye bağlantıları, güven kapısı tamamlanmadan statik href taşımaz.
-    assert 'href="https://www.amazon.com.tr' not in selector
+    # Amazon Türkiye bağlantıları, güven kapısı tamamlanmadan gerçek href taşımaz.
+    assert not re.search(
+        r'<a\b(?=[^>]*\bhref="https://www\.amazon\.com\.tr)[^>]*>',
+        selector,
+        flags=re.I,
+    )
     locked_links = re.findall(r'<a\b[^>]*data-affiliate-href="([^"]+)"[^>]*>', selector, flags=re.I)
     assert len(locked_links) == 3
     assert all('amazon.com.tr/' in link and 'tag=alo186rehber-21' in link for link in locked_links)
