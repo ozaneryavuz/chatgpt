@@ -1,0 +1,57 @@
+{
+  "version": 280,
+  "category": "ev-charging-outage-continuity",
+  "decision": "professional-only",
+  "reviewedAt": "2026-08-04",
+  "searchIntent": [
+    "elektrik kesilince elektrikli araç şarjı ne olur",
+    "şarj istasyonu elektrik kesintisinde çalışır mı",
+    "elektrik kesintisinde şarj kablosu kilitli kaldı",
+    "wallbox elektrik gelince yeniden başlar mı"
+  ],
+  "allowedConsumerAffiliateClasses": [],
+  "excludedConsumerAffiliateClasses": [
+    "wallbox or portable EVSE chosen without installation and protection assessment",
+    "Type 2 or DC charging cable presented as a cable-lock recovery solution",
+    "consumer UPS or portable power station for EV charging equipment",
+    "portable generator or building backfeed for EV charging",
+    "automatic transfer switch or fixed installation kit sold as DIY",
+    "V2H V2G inverter battery or islanding kit without engineered compatibility"
+  ],
+  "conversionPolicy": {
+    "merchant": null,
+    "directAffiliateLinksForbidden": true,
+    "noBuyOutcomeRequired": true,
+    "activeHazardCommerceClosed": true,
+    "personalDataCollectionForbidden": true,
+    "noPriceStockRatingWarrantyClaims": true,
+    "officialInstitutionImpressionForbidden": true,
+    "paidProfessionalServiceDisclosureRequired": true
+  },
+  "safeConversionRoutes": [
+    "existing compliant system passes controlled restart test: no purchase",
+    "public charging station: licensed operator support and EPDK Şarj@TR",
+    "single home charger model-specific fault: manufacturer or authorised service",
+    "site hotel fleet multi-charger load management or backup interaction: professional continuity assessment"
+  ],
+  "professionalScope": [
+    "charger and vehicle model-specific outage and lock behaviour",
+    "RCD RCBO earthing overcurrent and thermal protection",
+    "access application schedule and communication recovery",
+    "dynamic or group load management",
+    "transformer generator solar battery and transfer coordination",
+    "controlled outage restoration and commissioning evidence"
+  ],
+  "repeatVisitReasons": [
+    {"days": 30, "reason": "charging cable connector enclosure and visible safety inspection"},
+    {"days": 90, "reason": "controlled outage authorisation load-management and safe-restart test"},
+    {"days": 365, "reason": "professional protection earthing selectivity and continuity review"},
+    {"event": "planned-outage", "reason": "recheck official DSO notice and prepare a local calendar reminder"}
+  ],
+  "sources": [
+    {"publisher": "EPDK", "title": "Serbest Erişim Platformu Şarj@TR", "url": "https://www.epdk.gov.tr/Detay/Icerik/1-3428/serbest-erisim-platformu--sarj%40tr", "checkedAt": "2026-08-04"},
+    {"publisher": "EPDK", "title": "Şarj hizmeti sıkça sorulan sorular", "url": "https://www.epdk.gov.tr/Detay/Icerik/12-1040/enerji-donusumu", "checkedAt": "2026-08-04"},
+    {"publisher": "Tesla Energy Library", "title": "Wall Connector power outages", "url": "https://energylibrary.tesla.com/docs/Public/Charging/WallConnector/Gen3/Install/UniversalWC/en-us/GUID-80C5FCFB-E627-43E8-AFAE-B26FADCCC550.html", "checkedAt": "2026-08-04"},
+    {"publisher": "Wallbox Help Center", "title": "Restart a charger through the app", "url": "https://support.wallbox.com/en/knowledge-base/how-to-restart-a-charger-through-the-mywallbox-app/", "checkedAt": "2026-08-04"}
+  ]
+}
