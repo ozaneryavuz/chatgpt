@@ -318,7 +318,7 @@ def export_bundle(output: Path, source_commit: str) -> dict[str, Any]:
             "verifiedDeadlineLocations": deadline_report["verifiedLocations"],
             "commercialFieldsPublished": [],
             "affiliateLinksAdded": 0,
-            "officialInstitutionImpressionCreated": false
+            "officialInstitutionImpressionCreated": False
         },
     )
     brief = output / "SITE_BRIEF.md"
