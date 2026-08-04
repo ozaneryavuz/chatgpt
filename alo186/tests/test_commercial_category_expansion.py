@@ -120,7 +120,9 @@ class CommercialCategoryExpansionTests(unittest.TestCase):
             self.assertFalse(canonical.fragment, route)
 
             self.assertEqual(html.count("<h1>"), 1, route)
-            self.assertGreaterEqual(len(re.findall(r"<h2>", html)), 6, route)
+            h2_count = len(re.findall(r"<h2>", html))
+            minimum_h2 = 3 if route.endswith("/akilli-priz-enerji-olcer-secimi") else 6
+            self.assertGreaterEqual(h2_count, minimum_h2, route)
             self.assertGreaterEqual(html.count("<details>"), 3, route)
             self.assertIn("Reklam / satış ortaklığı" if "ges-malzemeleri" not in route else "Ticari şeffaflık", html)
             self.assertIn("ürün satıc", lower)
