@@ -16,7 +16,7 @@ from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[1]
 SOURCE_HUB = ROOT / "amazon-elektrik-urunleri" / "index.html"
 SOURCE_ENTRY = ROOT / "amazon-elektrik-urunleri" / "guvenli-baslangic" / "index.html"
 
