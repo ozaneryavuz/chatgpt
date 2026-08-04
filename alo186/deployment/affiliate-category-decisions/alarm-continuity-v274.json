@@ -1,0 +1,75 @@
+{
+  "version": 274,
+  "category": "alarm-system-outage-continuity",
+  "decision": "professional-only",
+  "reviewedAt": "2026-08-04",
+  "searchIntent": [
+    "elektrik kesilince alarm sistemi çalışır mı",
+    "alarm aküsü elektrik kesintisinde kaç saat gider",
+    "elektrik kesintisinde alarm telefona bildirim gönderir mi",
+    "alarm paneli düşük batarya uyarısı"
+  ],
+  "reason": "Alarm paneli, siren, sensör, haberleşme modülü ve izleme merkezi zinciri model ve kurulum özeldir. Gerilim veya Ah etiketi tek başına akü, güç kaynağı ya da UPS uygunluğunu doğrulamaz. Yanlış seçim gözetim, şarj ve yaşam güvenliği işlevlerini etkileyebilir.",
+  "excludedConsumerAffiliateClasses": [
+    "model-specific alarm panel battery",
+    "alarm panel power supply or charger",
+    "siren battery",
+    "fire alarm control panel battery",
+    "life-safety system backup battery",
+    "model-independent alarm UPS"
+  ],
+  "allowedUserOutcomes": [
+    "existing-system-sufficient-no-buy",
+    "test-first-no-purchase",
+    "authorized-service",
+    "modem-ont-continuity-tool",
+    "professional-continuity-assessment",
+    "emergency-commercial-path-closed"
+  ],
+  "conversionPolicy": {
+    "consumerStoreLinks": false,
+    "directAmazonLinks": false,
+    "affiliateDisclosureRequiredIfPolicyChanges": true,
+    "professionalServiceDisclosureRequired": true,
+    "noBuyOutcomeRequired": true,
+    "noPriceStockRatingWarrantyClaims": true,
+    "noOfferAggregateRatingReview": true
+  },
+  "institutionalConstraints": {
+    "independentPlatformDisclosureRequired": true,
+    "mustNotImplyAlarmCompanyMonitoringCenterPoliceEdasOrPublicAuthority": true,
+    "mustNotClaimAlarmOrFaultRegistration": true
+  },
+  "repeatVisitReasons": [
+    {
+      "days": 30,
+      "purpose": "panel AC/battery warning, siren and communication status check"
+    },
+    {
+      "days": 90,
+      "purpose": "real outage test for panel, local alarm and required communication channels"
+    },
+    {
+      "days": 365,
+      "purpose": "professional battery capacity, charging, supervision and event-log review"
+    }
+  ],
+  "measurement": {
+    "personalData": false,
+    "allowedEvents": [
+      "tool_started",
+      "tool_completed",
+      "no_buy_selected",
+      "reminder_downloaded"
+    ],
+    "forbiddenFields": [
+      "name",
+      "email",
+      "phone",
+      "address",
+      "alarm_code",
+      "subscription_number",
+      "serial_number"
+    ]
+  }
+}
