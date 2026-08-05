@@ -1,0 +1,67 @@
+{
+  "version": 295,
+  "name": "pool-outage-continuity",
+  "decision": "professional-lead-only-no-consumer-affiliate",
+  "searchIntent": [
+    "elektrik kesilince havuz pompası çalışır mı",
+    "elektrik geldikten sonra havuz pompası nasıl çalıştırılır",
+    "havuz pompası elektrik kesintisi sonrası çalışmıyor",
+    "otel havuzu elektrik kesintisi",
+    "havuz filtrasyonu kesintide ne olur"
+  ],
+  "contentGap": {
+    "problem": "Search results often collapse circulation, filtration, chemical dosing and water quality into a single pump-restart instruction.",
+    "distinctIntent": "Separate active electrical or chemical hazard, real water flow, dosing interlock, measured water quality and authorized reopening before any equipment decision."
+  },
+  "excludedProfessionalOrSafetyClasses": [
+    "pool circulation or filtration pump",
+    "chemical dosing pump or chlorine/pH controller",
+    "salt chlorination system",
+    "pool control panel, contactor or variable-frequency drive",
+    "pool heater or heat pump",
+    "underwater lighting, transformer or junction box",
+    "UPS, generator, ATS or transfer panel",
+    "earthing or equipotential bonding modification"
+  ],
+  "conversionPolicy": {
+    "merchantLinks": 0,
+    "consumerAffiliateClosed": true,
+    "professionalOnly": true,
+    "noBuyOutcomeRequired": true,
+    "activeElectricalOrChemicalHazardCommerceClosed": true,
+    "circulationAndDosingVerificationRequired": true,
+    "measuredWaterQualityRequiredBeforeReopening": true,
+    "publicAndCommercialPoolOperatorRequired": true,
+    "personalDataCollectionForbidden": true,
+    "noPriceStockRatingWarrantyClaims": true,
+    "affiliateDisclosure": "No affiliate or merchant links are used in this journey.",
+    "officialInstitutionImpressionForbidden": true
+  },
+  "conversionPoints": [
+    "authorized pool pump and filtration service",
+    "qualified electrician or electrical engineer",
+    "trained pool operator and chemical dosing service",
+    "facility management and occupational safety team",
+    "authorized laboratory or local health authority where required"
+  ],
+  "repeatVisitReasons": [
+    {
+      "days": 7,
+      "reason": "pump-room, leakage, pressure, flow indicator and timer visual check"
+    },
+    {
+      "days": 30,
+      "reason": "supervised outage-restart drill and chemical-dosing interlock record"
+    },
+    {
+      "days": 365,
+      "reason": "electrical protection, equipotential bonding, automation, energy efficiency and maintenance-scope review"
+    }
+  ],
+  "expectedImpact": {
+    "userBenefit": "Users distinguish grid outage, electrical hazard, hydraulic no-flow, chemical dosing risk and water-quality verification before reopening or purchasing equipment.",
+    "revenue": "High-value hotel, site and commercial-pool demand is routed to qualified electrical, pump, dosing and continuity services instead of low-trust consumer affiliate clicks.",
+    "trust": "A passing existing system produces a clear no-buy result; official health and electricity channels remain visibly separate from ALO186."
+  },
+  "sourceReviewDate": "2026-08-05"
+}
