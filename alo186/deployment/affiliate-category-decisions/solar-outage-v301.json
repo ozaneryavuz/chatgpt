@@ -1,0 +1,47 @@
+{
+  "version": 301,
+  "topic": "grid-connected-solar-outage-backup-continuity",
+  "decision": "professional-lead-only",
+  "newMerchantLinks": 0,
+  "conversionPolicy": {
+    "merchant": null,
+    "activeElectricalHazardCommerceClosed": true,
+    "batteryFireOrDamageCommerceClosed": true,
+    "fixedSolarEquipmentConsumerAffiliateClosed": true,
+    "batteryAndHybridInverterConsumerAffiliateClosed": true,
+    "generatorAndTransferConsumerAffiliateClosed": true,
+    "noBuyOutcomeRequired": true,
+    "personalDataCollectionForbidden": true,
+    "productionDataCollectionForbidden": true,
+    "noPriceStockRatingWarrantyClaims": true,
+    "affiliateDisclosureRequiredBeforeAnyFutureMerchantLink": true,
+    "officialInstitutionImpressionForbidden": true,
+    "professionalScopeForComplexSystems": true,
+    "batteryPresenceAloneCannotClaimBackup": true,
+    "antiIslandingBypassInstructionsForbidden": true,
+    "universalBackupDurationClaimsForbidden": true
+  },
+  "professionalClasses": [
+    "hybrid and battery inverters",
+    "stationary battery systems",
+    "backup interfaces and automatic transfer equipment",
+    "generator and PV-battery coordination",
+    "fixed UPS and critical-load panels",
+    "DC isolators, fuses and surge protection",
+    "PV DC cables, connectors and combiner equipment",
+    "neutral-earth and island-mode protection design",
+    "multi-inverter and three-phase backup systems",
+    "hotel, commercial, agricultural and industrial continuity systems",
+    "grid-code, connection agreement and commissioning changes",
+    "energy-management controllers and load-shedding systems"
+  ],
+  "repeatVisitReasons": [
+    {"days": 30, "reason": "inverter and battery event log, alarm path and critical-load list review"},
+    {"days": 90, "reason": "controlled transfer, load-shedding and grid-return functional test"},
+    {"days": 365, "reason": "single-line diagram, protection, firmware, battery health and load-growth review"}
+  ],
+  "expectedImpact": {
+    "userBenefit": "separates normal anti-islanding behavior from real backup architecture and prevents unsafe DIY or unnecessary battery purchases",
+    "revenueImpact": "creates qualified solar retrofit, battery feasibility, protection, commissioning and continuity-service demand instead of unsafe consumer-product clicks"
+  }
+}
