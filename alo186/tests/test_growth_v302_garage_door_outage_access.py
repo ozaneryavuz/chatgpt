@@ -99,7 +99,8 @@ def main() -> None:
         "Affiliate ürün kategorisi kararı",
         "Bu sayfada Amazon veya başka mağaza bağlantısı yoktur",
         "Doğrulanmamış fiyat, stok, puan, yorum, teslimat veya garanti bilgisi kullanılmaz",
-        "Mevcut sistem görev testini geçiyor ve kullanım değişmediyse yeni ürün almayın",
+        "Mevcut sistem görev testini geçiyor ve kullanım değişmediyse",
+        "yeni ürün almayın",
         "ALO186 bağımsız bilgilendirme platformudur",
     ))
 
