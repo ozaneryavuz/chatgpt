@@ -1,0 +1,72 @@
+{
+  "version": 303,
+  "cluster": "refrigerator-freezer-power-outage-food-safety",
+  "decision": "guarded-low-risk-affiliate-plus-professional-boundary",
+  "routes": {
+    "article": "/haberler/elektrik-kesilince-buzdolabi-derin-dondurucu-ne-kadar-dayanir/",
+    "tool": "/hesaplama/buzdolabi-dondurucu-elektrik-kesintisi-gida-guvenligi-plani/",
+    "selector": "/amazon-elektrik-urunleri/buzdolabi-dondurucu-termometre-soguk-zincir-secimi/"
+  },
+  "searchIntentGap": {
+    "primaryQueries": [
+      "elektrik kesilince buzdolabı kaç saat dayanır",
+      "derin dondurucu elektrik kesintisinde ne kadar dayanır",
+      "elektrik kesintisinden sonra yiyecekler bozulur mu",
+      "buzdolabı termometresi kesinti"
+    ],
+    "intentLayers": [
+      "active outage immediate safety",
+      "post-outage keep-or-discard decision",
+      "future outage preparation",
+      "home appliance thermometer selection",
+      "commercial or medical cold-chain escalation"
+    ],
+    "alo186Differentiator": "Aktif kesintiyi alışverişten ayıran; 4/24/48 saat bilgisini garanti olarak sunmayan; gerçek sıcaklık, kapı açılması, buz kristali, ev-ticari-tıbbi kapsam ve satın almama sonucunu tek karar zincirinde birleştiren bağımsız yolculuk."
+  },
+  "consumerAffiliateClasses": [
+    "analog refrigerator-freezer appliance thermometer",
+    "digital min-max refrigerator-freezer appliance thermometer"
+  ],
+  "professionalOnlyClasses": [
+    "restaurant hotel market and catering cold-chain monitoring",
+    "walk-in cold rooms and refrigeration plant",
+    "pharmacy vaccine clinical sample and medical refrigeration",
+    "compliance data loggers and calibrated monitoring systems",
+    "refrigerator compressor UPS inverter and generator sizing",
+    "ATS transfer panels and fixed backup power",
+    "voltage relays stabilizers grounding and fixed electrical work",
+    "appliance repair refrigerant and compressor intervention",
+    "dry ice confined-space handling",
+    "food-safety consultancy and HACCP records"
+  ],
+  "conversionPolicy": {
+    "merchant": "Amazon Turkey",
+    "affiliateTag": "alo186rehber-21",
+    "activeOutageCommerceClosed": true,
+    "postOutageFoodDecisionBeforeCommerce": true,
+    "futurePreparationOnlyUnlock": true,
+    "homeUseOnly": true,
+    "medicalAndCommercialAffiliateClosed": true,
+    "realMeasurementGapRequired": true,
+    "noBuyOutcomeRequired": true,
+    "linksLockedByDefault": true,
+    "affiliateDisclosureBeforeLinks": true,
+    "relSponsoredNofollowNoopenerRequired": true,
+    "noPriceStockSellerRatingReviewDeliveryWarrantyClaims": true,
+    "personalDataCollectionForbidden": true,
+    "officialInstitutionImpressionForbidden": true,
+    "fourTwentyFourFortyEightHourGuaranteeClaimsForbidden": true,
+    "tasteSmellAppearanceSafetyTestForbidden": true,
+    "genericFridgeUpsGeneratorRecommendationForbidden": true
+  },
+  "repeatVisitReasons": [
+    {"days": 30, "reason": "thermometer readability, battery, placement and normal operating temperature check"},
+    {"days": 90, "reason": "door-closed outage timestamp, insulated carrier and cold-pack rehearsal"},
+    {"days": 180, "reason": "seasonal room temperature, gasket, loading and food-discard plan review"}
+  ],
+  "expectedImpact": {
+    "userBenefit": "reduces unsafe taste-based decisions, repeated door opening, false certainty from duration tables and unnecessary refrigerator UPS purchases by moving the decision to measured temperature and scope",
+    "revenueImpact": "captures high-intent outage searches and permits only future-preparation, home-use thermometer referrals while routing commercial, hotel, market and medical systems to higher-value professional cold-chain work",
+    "trustImpact": "affiliate disclosure is visible before links; active outage never becomes a commerce trigger; no official-body impression or unverified commercial claims are used"
+  }
+}
