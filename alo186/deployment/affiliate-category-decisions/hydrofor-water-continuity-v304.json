@@ -1,0 +1,64 @@
+{
+  "version": 304,
+  "cluster": "hydrofor-water-pressure-outage-continuity",
+  "decision": "professional-lead-only",
+  "newMerchantLinks": 0,
+  "routes": {
+    "article": "/haberler/elektrik-kesilince-hidrofor-calisir-mi/",
+    "tool": "/hesaplama/hidrofor-elektrik-kesintisi-su-surekliligi-plani/",
+    "guide": "/sektor-rehberi/apartman-otel-hidrofor-su-surekliligi/"
+  },
+  "searchIntentGap": {
+    "primaryQueries": [
+      "elektrik kesilince hidrofor çalışır mı",
+      "elektrik kesilince üst katlara su gelir mi",
+      "hidrofor için jeneratör",
+      "hidrofor elektrik gelince çalışmıyor",
+      "hidrofor kuru çalışma koruması"
+    ],
+    "observedGap": "Türkçe sonuçların önemli bölümü şebeke suyu, depo kotu, basınç tankı, kuru çalışma, gerçek kat basıncı, enerji geri dönüşü, hijyen ve yangın suyu ayrımını yapmadan doğrudan pompa, UPS veya jeneratör öneriyor.",
+    "alo186Differentiator": "Aktif su-elektrik tehlikesinde testi ve ticareti kapatan; şebeke, depo, pompa, pano, koruma, basınç, yedek enerji, hijyen ve kayıtlı görev testini satın alma öncesinde birleştiren karar zinciri."
+  },
+  "conversionPolicy": {
+    "merchant": null,
+    "activeWaterElectricalOrFireHazardCommerceClosed": true,
+    "dryRunProtectionBypassForbidden": true,
+    "fixedPumpEquipmentConsumerAffiliateClosed": true,
+    "generatorAtsAndFixedUpsConsumerAffiliateClosed": true,
+    "fireAndCriticalWaterProfessionalOnly": true,
+    "potableWaterHygieneProfessionalOnly": true,
+    "noBuyOutcomeRequired": true,
+    "personalDataCollectionForbidden": true,
+    "addressTankLocationAndSerialCollectionForbidden": true,
+    "noPriceStockRatingWarrantyClaims": true,
+    "affiliateDisclosureRequiredBeforeAnyFutureMerchantLink": true,
+    "officialInstitutionImpressionForbidden": true,
+    "professionalScopeForSharedCommercialWellAndCriticalSystems": true,
+    "universalRuntimePressureOrRestartClaimsForbidden": true,
+    "pressureVesselAsLongDurationBackupClaimForbidden": true
+  },
+  "professionalClasses": [
+    "hydrofor and booster pump sets",
+    "pump control panels and variable-frequency drives",
+    "pressure vessels and diaphragm tanks",
+    "level switches and pressure transmitters",
+    "check valves, isolation valves and hydraulic zoning",
+    "water storage tanks and potable-water hygiene",
+    "well and submersible pumps",
+    "generators and automatic transfer switches",
+    "fixed UPS and building backup power",
+    "fire pumps and fire-water systems",
+    "apartment, site, hotel, school, healthcare and workplace systems",
+    "commissioning, pressure-flow testing and maintenance contracts"
+  ],
+  "repeatVisitReasons": [
+    {"days": 30, "reason": "tank level, panel alarm history, representative pressure record and duty-standby alternation review"},
+    {"days": 90, "reason": "controlled outage, generator or backup transfer, pump duty and safe grid-return rehearsal"},
+    {"days": 365, "reason": "pump, panel, drive, pressure vessel, water hygiene, protection and continuity professional inspection"}
+  ],
+  "expectedImpact": {
+    "userBenefit": "separates public-water interruption, tank reserve, pump power, pressure vessel, dry-run protection, true service pressure and safe restart, reducing unsafe resets and unnecessary equipment purchases",
+    "revenueImpact": "creates qualified hydraulic measurement, pump service, generator coordination, water-hygiene and facility-continuity demand instead of unsafe pump, UPS or generator product clicks",
+    "trustImpact": "no unverified price, stock, rating, delivery or warranty claims; no official-institution impression; active water-electrical or critical-service danger never becomes a commerce trigger"
+  }
+}
