@@ -86,3 +86,17 @@ def test_decision_governance_matches_page_behavior():
     assert policy["noPriceStockRatingWarrantyClaims"] is True
     assert len(decision["allowedLowRiskClasses"]) == 3
     assert [x["days"] for x in decision["repeatVisitReasons"]] == [7, 30, 90]
+
+
+if __name__ == "__main__":
+    tests = [
+        test_v293_files_exist_and_routes_are_canonical,
+        test_visible_independence_privacy_and_no_buy_contract,
+        test_affiliate_links_are_disclosed_and_fail_closed,
+        test_no_unverified_commercial_claims_or_rich_result_abuse,
+        test_health_and_scope_gates_precede_commerce,
+        test_decision_governance_matches_page_behavior,
+    ]
+    for test in tests:
+        test()
+    print("ok: v293 pet feeder outage trust contract")
