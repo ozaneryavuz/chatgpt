@@ -116,7 +116,8 @@ def main() -> None:
         assert "localstorage" not in lowered
         assert "sessionstorage" not in lowered
         assert "112" in source
-        assert ("resmî kurum" in source) or ("kamu kurumu" in source)
+        assert "bağımsız bilgilendirme platformudur" in lowered
+        assert "edaş" in lowered
 
     for required in (
         "NVR/DVR",
