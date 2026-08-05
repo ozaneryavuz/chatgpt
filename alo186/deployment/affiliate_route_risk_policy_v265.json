@@ -105,7 +105,13 @@
     "solenoid-vana",
     "peyzaj-sulama",
     "merkezi-sulama",
-    "pompa-start"
+    "pompa-start",
+    "kombi",
+    "dogalgazli-kombi",
+    "kombi-ups",
+    "isitma-kazani",
+    "kazan-dairesi",
+    "sirkulasyon-pompasi"
   ],
   "portfolioRules": {
     "genericDIYRequiresDirectElectricalContinuityOrSafetyIntent": true,
