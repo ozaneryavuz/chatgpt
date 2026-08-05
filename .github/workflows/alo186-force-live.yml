@@ -57,6 +57,9 @@ jobs:
       - name: Prepare canonical Pages artifact
         run: |
           set -euo pipefail
+          if [[ ! -s /tmp/alo186-live/index.html ]]; then
+            cp /tmp/alo186-live/elektrik-portali/index.html /tmp/alo186-live/index.html
+          fi
           printf 'alo186.com\n' > /tmp/alo186-live/CNAME
           touch /tmp/alo186-live/.nojekyll
           required=(
