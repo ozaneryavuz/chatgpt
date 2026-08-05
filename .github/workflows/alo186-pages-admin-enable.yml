@@ -1,4 +1,4 @@
-name: ALO186 Pages Admin Enable
+name: ALO186 Emergency Live Verification
 
 on:
   push:
@@ -19,55 +19,32 @@ permissions:
   id-token: write
 
 env:
-  EMERGENCY_ORIGIN: https://rawcdn.githack.com/ozaneryavuz/chatgpt/d5cdf480f10055577277e5b741473c48d9b9d07c
+  EMERGENCY_ORIGIN: https://rawcdn.githack.com/ozaneryavuz/chatgpt/f6fb97539a8a62e3adbda765c6e0a76f9e70a7ce
 
 jobs:
-  enable:
-    name: Enable Pages or verify immutable emergency mirror
+  verify:
+    name: Verify immutable emergency mirror
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     env:
       PAGES_ADMIN_TOKEN: ${{ secrets.PAGES_PAT || secrets.GH_PAT || secrets.PAT || secrets.PERSONAL_ACCESS_TOKEN || secrets.GITHUB_PAT || secrets.GITHUB_PERSONAL_ACCESS_TOKEN || secrets.DEPLOY_TOKEN || secrets.REPO_PAT }}
-      HAS_PAGES_PAT: ${{ secrets.PAGES_PAT != '' }}
-      HAS_GH_PAT: ${{ secrets.GH_PAT != '' }}
-      HAS_PAT: ${{ secrets.PAT != '' }}
-      HAS_PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN != '' }}
-      HAS_GITHUB_PAT: ${{ secrets.GITHUB_PAT != '' }}
-      HAS_GITHUB_PERSONAL_ACCESS_TOKEN: ${{ secrets.GITHUB_PERSONAL_ACCESS_TOKEN != '' }}
-      HAS_DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN != '' }}
-      HAS_REPO_PAT: ${{ secrets.REPO_PAT != '' }}
-      HAS_CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
-      HAS_NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN != '' }}
-      HAS_VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN != '' }}
-      HAS_FTP_SERVER: ${{ secrets.FTP_SERVER != '' }}
-      HAS_FTP_USERNAME: ${{ secrets.FTP_USERNAME != '' }}
-      HAS_FTP_PASSWORD: ${{ secrets.FTP_PASSWORD != '' }}
     steps:
-      - name: Report available deployment credential classes
+      - name: Explain canonical-domain state
         run: |
-          set -euo pipefail
-          for name in \
-            HAS_PAGES_PAT HAS_GH_PAT HAS_PAT HAS_PERSONAL_ACCESS_TOKEN \
-            HAS_GITHUB_PAT HAS_GITHUB_PERSONAL_ACCESS_TOKEN HAS_DEPLOY_TOKEN \
-            HAS_REPO_PAT HAS_CLOUDFLARE_API_TOKEN HAS_NETLIFY_AUTH_TOKEN \
-            HAS_VERCEL_TOKEN HAS_FTP_SERVER HAS_FTP_USERNAME HAS_FTP_PASSWORD; do
-            value="${!name}"
-            printf '%s=%s\n' "$name" "$value"
-          done
+          if [[ -n "$PAGES_ADMIN_TOKEN" ]]; then
+            echo 'Administrator token is available; canonical Pages enablement may run.'
+          else
+            echo 'No administrator token is configured. The immutable public mirror remains the immediate live surface.'
+          fi
 
-      - name: Note unavailable repository administrator token
-        if: env.PAGES_ADMIN_TOKEN == ''
-        run: |
-          echo 'No repository administrator PAT is configured; publishing immutable emergency mirror instead.'
-
-      - name: Enable GitHub Pages through the official action
+      - name: Enable GitHub Pages when an administrator token exists
         if: env.PAGES_ADMIN_TOKEN != ''
         uses: actions/configure-pages@v5
         with:
           token: ${{ env.PAGES_ADMIN_TOKEN }}
           enablement: true
 
-      - name: Bind gh-pages root and custom domain
+      - name: Bind gh-pages root and alo186.com when enabled
         if: env.PAGES_ADMIN_TOKEN != ''
         env:
           GH_TOKEN: ${{ env.PAGES_ADMIN_TOKEN }}
@@ -80,48 +57,55 @@ jobs:
             "source": {"branch": "gh-pages", "path": "/"}
           }
           JSON
-          gh api --method PUT -H 'X-GitHub-Api-Version: 2022-11-28' \
-            "repos/${GITHUB_REPOSITORY}/pages" --input /tmp/pages.json
-          gh api --method POST -H 'X-GitHub-Api-Version: 2022-11-28' \
+          gh api --method PUT \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "repos/${GITHUB_REPOSITORY}/pages" \
+            --input /tmp/pages.json
+          gh api --method POST \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
             "repos/${GITHUB_REPOSITORY}/pages/builds"
 
-      - name: Verify immutable emergency live mirror
+      - name: Verify entry, navigation and all public routes
         run: |
           set -euo pipefail
-          verify() {
+          fetch_and_check() {
             local path="$1"
             local marker="$2"
             local body
-            for attempt in $(seq 1 18); do
-              body="$(mktemp)"
-              if curl --fail --silent --show-error --location \
-                --connect-timeout 10 --max-time 30 \
-                "${EMERGENCY_ORIGIN}${path}" -o "$body" \
-                && grep -q "$marker" "$body"; then
-                echo "LIVE VERIFIED: ${EMERGENCY_ORIGIN}${path}"
-                rm -f "$body"
-                return 0
-              fi
-              rm -f "$body"
-              sleep 10
-            done
-            echo "Emergency mirror verification failed: ${EMERGENCY_ORIGIN}${path}" >&2
-            return 1
+            body="$(mktemp)"
+            curl --fail --silent --show-error --location \
+              --connect-timeout 10 --max-time 30 \
+              "${EMERGENCY_ORIGIN}${path}" -o "$body"
+            grep -q "$marker" "$body"
+            echo "LIVE VERIFIED: ${EMERGENCY_ORIGIN}${path}"
+            printf '%s' "$body"
           }
-          verify '/canli/index.html' 'Duman ve karbonmonoksit alarmı kesinti rehberleri yayında'
-          verify '/haberler/elektrik-kesilince-duman-dedektoru-calisir-mi/index.html' 'Elektrik Kesilince Duman Dedektörü Çalışır mı'
-          verify '/hesaplama/duman-karbonmonoksit-alarmi-elektrik-kesintisi-kontrolu/index.html' 'Duman ve Karbonmonoksit Alarmı Kesinti Kontrolü'
-          verify '/amazon-elektrik-urunleri/duman-alarmi-pil-yedegi-kesinti-hazirligi/index.html' 'Duman Alarmı ve Pil Yedeği Kesinti Hazırlığı'
 
-      - name: Write live receipt
+          entry="$(fetch_and_check '/canli/index.html' 'Duman ve karbonmonoksit alarmı kesinti rehberleri yayında')"
+          grep -q 'href="../haberler/elektrik-kesilince-duman-dedektoru-calisir-mi/index.html"' "$entry"
+          grep -q 'href="../hesaplama/duman-karbonmonoksit-alarmi-elektrik-kesintisi-kontrolu/index.html"' "$entry"
+          grep -q 'href="../amazon-elektrik-urunleri/duman-alarmi-pil-yedegi-kesinti-hazirligi/index.html"' "$entry"
+          rm -f "$entry"
+
+          article="$(fetch_and_check '/haberler/elektrik-kesilince-duman-dedektoru-calisir-mi/index.html' 'Elektrik Kesilince Duman Dedektörü Çalışır mı')"
+          calculator="$(fetch_and_check '/hesaplama/duman-karbonmonoksit-alarmi-elektrik-kesintisi-kontrolu/index.html' 'Duman ve Karbonmonoksit Alarmı Kesinti Kontrolü')"
+          affiliate="$(fetch_and_check '/amazon-elektrik-urunleri/duman-alarmi-pil-yedegi-kesinti-hazirligi/index.html' 'Duman Alarmı ve Pil Yedeği Kesinti Hazırlığı')"
+          grep -q 'Amazon Türkiye bağlantıları satış ortaklığı bağlantısıdır' "$affiliate"
+          grep -q 'yeni ürün almayın' "$calculator"
+          rm -f "$article" "$calculator" "$affiliate"
+
+      - name: Write live verification receipt
         run: |
           cat > /tmp/alo186-emergency-live.json <<JSON
           {
             "status": "live-verified",
             "mode": "immutable-emergency-mirror",
-            "sourceCommit": "d5cdf480f10055577277e5b741473c48d9b9d07c",
+            "sourceCommit": "f6fb97539a8a62e3adbda765c6e0a76f9e70a7ce",
             "entryUrl": "${EMERGENCY_ORIGIN}/canli/index.html",
-            "canonicalCutoverPending": ${{ env.PAGES_ADMIN_TOKEN == '' }}
+            "canonicalCutoverPending": ${{ env.PAGES_ADMIN_TOKEN == '' }},
+            "navigationVerified": true,
+            "affiliateDisclosureVerified": true,
+            "noBuyOutcomeVerified": true
           }
           JSON
           cat /tmp/alo186-emergency-live.json
