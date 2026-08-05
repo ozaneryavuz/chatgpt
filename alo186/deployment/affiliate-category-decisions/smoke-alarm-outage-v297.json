@@ -1,0 +1,92 @@
+{
+  "version": 297,
+  "name": "smoke-alarm-outage-trust",
+  "decision": "guarded-low-risk-consumer-affiliate",
+  "searchIntent": [
+    "elektrik kesilince duman dedektörü çalışır mı",
+    "elektrik kesintisinde yangın alarmı çalışır mı",
+    "duman dedektörü pil yedeği gerekli mi",
+    "elektrik geldikten sonra duman alarmı ötüyor",
+    "duman alarmı düşük pil sesi ne demek"
+  ],
+  "allowedLowRiskClasses": [
+    {
+      "class": "standalone-optical-residential-smoke-alarm",
+      "scope": "future-independent-household-preparedness-only",
+      "requiredChecks": [
+        "current-conformity-declaration",
+        "sensor-type",
+        "test-hush-button",
+        "alarm-life",
+        "power-source",
+        "manufacturer-placement-instructions",
+        "existing-device-need"
+      ]
+    },
+    {
+      "class": "sealed-long-life-battery-smoke-alarm",
+      "scope": "future-independent-household-preparedness-only",
+      "requiredChecks": [
+        "sealed-battery-design",
+        "declared-alarm-life",
+        "end-of-life-warning",
+        "whole-unit-replacement-rule",
+        "monthly-test-requirement",
+        "existing-device-need"
+      ]
+    },
+    {
+      "class": "manufacturer-specified-replacement-alarm-battery",
+      "scope": "existing-replaceable-battery-alarm-within-service-life-only",
+      "requiredChecks": [
+        "replaceable-battery-permitted",
+        "alarm-within-service-life",
+        "exact-size",
+        "chemistry",
+        "polarity",
+        "post-replacement-test"
+      ]
+    }
+  ],
+  "excludedProfessionalOrSafetyClasses": [
+    "active smoke, fire, natural-gas or carbon-monoxide alarm event",
+    "hardwired, interconnected, addressable or central fire-alarm system",
+    "apartment common area, hotel, workplace, school, hospital and dormitory systems",
+    "fire alarm panel battery, siren, module, loop, cabling and commissioning",
+    "fire door, smoke control, suppression and voice evacuation systems",
+    "alarm disabling, battery removal, covering, bypass or nuisance-alarm workaround",
+    "unknown end-of-life warning or expired alarm treated as battery-only problem"
+  ],
+  "conversionPolicy": {
+    "merchant": "Amazon Türkiye",
+    "newMerchantLinks": true,
+    "linksLockedByDefault": true,
+    "futurePreparednessOnly": true,
+    "noBuyOutcomeRequired": true,
+    "activeHazardCommerceClosed": true,
+    "centralSystemCommerceClosed": true,
+    "personalDataCollectionForbidden": true,
+    "noPriceStockRatingWarrantyClaims": true,
+    "affiliateDisclosureRequiredBeforeAnyMerchantLink": true,
+    "officialInstitutionImpressionForbidden": true,
+    "professionalScopeForComplexSystems": true
+  },
+  "repeatVisitReasons": [
+    {
+      "days": 30,
+      "reason": "manufacturer test button, sounder, indicators and low-battery warning check"
+    },
+    {
+      "days": 180,
+      "reason": "alarm cleaning, placement and household escape-plan review"
+    },
+    {
+      "days": 365,
+      "reason": "manufacture-installation date, service life, battery type and outage-backup record review"
+    }
+  ],
+  "expectedImpact": {
+    "userBenefit": "Users separate battery-only, mains-powered, backup battery, local siren, interconnection and app notification before buying, while active hazards and central systems are routed away from commerce.",
+    "revenue": "Qualified Amazon Turkey clicks are limited to future independent household preparation and verified replacement needs; active alarms, hardwired systems and professional fire-safety infrastructure remain non-commercial."
+  }
+}
