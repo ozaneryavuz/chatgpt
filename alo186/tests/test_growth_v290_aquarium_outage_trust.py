@@ -94,9 +94,9 @@ def main() -> None:
     overlay = json.loads(txt(OVERLAY))
     assert overlay['version'] == 290
     assert overlay['name'] == 'growth-v290-aquarium-outage-trust'
-    assert len(overlay['routes']) == 3
-    assert {item['canonicalPath'] for item in overlay['routes']} == {
-        '/haberler/elektrik-kesilince-akvaryum-baligi-ne-yapilir/',
+    assert len(overlay['routes']) == 1
+    assert overlay['routes'][0]['canonicalPath'] == '/haberler/elektrik-kesilince-akvaryum-baligi-ne-yapilir/'
+    assert set(overlay['updatedExistingRoutes']) == {
         '/hesaplama/akvaryum-elektrik-kesintisi-oksijen-sicaklik-plani/',
         '/amazon-elektrik-urunleri/akvaryum-kesinti-hava-pompasi-termometre-secici/',
     }
@@ -129,7 +129,8 @@ def main() -> None:
     print(json.dumps({
         'ok': True,
         'version': 290,
-        'routes': 3,
+        'newRoutes': 1,
+        'updatedRoutes': 2,
         'initialActiveMerchantLinks': 0,
         'guardedProductClasses': 3,
         'repeatVisitDays': [30, 90, 180],
