@@ -36,7 +36,7 @@ def test_visible_independence_safety_privacy_and_no_buy_contract():
     combined = "\n".join(read(path) for path in (ARTICLE, TOOL, SECTOR)).lower()
     for phrase in (
         "bağımsız",
-        "kamu kurumu",
+        "sağlık bakanlığı",
         "112",
         "186",
         "yeni ürün almayın",
