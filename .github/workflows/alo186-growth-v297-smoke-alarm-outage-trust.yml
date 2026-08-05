@@ -1,0 +1,113 @@
+name: ALO186 duman alarmı kesinti güveni v297
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/elektrik-kesilince-duman-dedektoru-calisir-mi/**'
+      - 'alo186/hesaplama/duman-karbonmonoksit-alarmi-elektrik-kesintisi-kontrolu/**'
+      - 'alo186/amazon-elektrik-urunleri/duman-alarmi-pil-yedegi-kesinti-hazirligi/**'
+      - 'alo186/deployment/affiliate-category-decisions/smoke-alarm-outage-v297.json'
+      - 'alo186/deployment/routing-overlays/growth-v297-smoke-alarm-outage-trust.json'
+      - 'alo186/deployment/affiliate_route_risk_policy_v265.json'
+      - 'alo186/tests/test_growth_v297_smoke_alarm_outage_trust.py'
+      - '.github/workflows/alo186-growth-v297-smoke-alarm-outage-trust.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/elektrik-kesilince-duman-dedektoru-calisir-mi/**'
+      - 'alo186/hesaplama/duman-karbonmonoksit-alarmi-elektrik-kesintisi-kontrolu/**'
+      - 'alo186/amazon-elektrik-urunleri/duman-alarmi-pil-yedegi-kesinti-hazirligi/**'
+      - 'alo186/deployment/affiliate-category-decisions/smoke-alarm-outage-v297.json'
+      - 'alo186/deployment/routing-overlays/growth-v297-smoke-alarm-outage-trust.json'
+      - 'alo186/deployment/affiliate_route_risk_policy_v265.json'
+      - 'alo186/tests/test_growth_v297_smoke_alarm_outage_trust.py'
+      - '.github/workflows/alo186-growth-v297-smoke-alarm-outage-trust.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-growth-v297-smoke-alarm-outage-trust-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Duman alarmı güveni ve affiliate yönetişimi
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            alo186/tests/test_growth_v297_smoke_alarm_outage_trust.py \
+            alo186/tests/test_affiliate_route_risk_policy_v265.py
+          python alo186/tests/test_growth_v297_smoke_alarm_outage_trust.py
+          python alo186/tests/test_affiliate_route_risk_policy_v265.py
+          python -m json.tool alo186/deployment/affiliate-category-decisions/smoke-alarm-outage-v297.json >/dev/null
+          python -m json.tool alo186/deployment/routing-overlays/growth-v297-smoke-alarm-outage-trust.json >/dev/null
+          python -m json.tool alo186/deployment/affiliate_route_risk_policy_v265.json >/dev/null
+
+      - name: Canonical production build ve static smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-v297
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-v297 \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-v297
+          test -f /tmp/alo186-v297/haberler/elektrik-kesilince-duman-dedektoru-calisir-mi/index.html
+          test -f /tmp/alo186-v297/hesaplama/duman-karbonmonoksit-alarmi-elektrik-kesintisi-kontrolu/index.html
+          test -f /tmp/alo186-v297/amazon-elektrik-urunleri/duman-alarmi-pil-yedegi-kesinti-hazirligi/index.html
+
+      - name: ChatGPT Sites aktarım paketi kabulü
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-sites-v297
+          python alo186/deployment/export_chatgpt_sites_bundle_v2.py \
+            --output /tmp/alo186-sites-v297 \
+            --commit "$GITHUB_SHA"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path('/tmp/alo186-sites-v297')
+          manifest = json.loads((root / 'sites-import.json').read_text(encoding='utf-8'))
+          pages = {item['canonicalPath']: item for item in manifest['pages']}
+          expected = {
+              '/haberler/elektrik-kesilince-duman-dedektoru-calisir-mi/',
+              '/hesaplama/duman-karbonmonoksit-alarmi-elektrik-kesintisi-kontrolu/',
+              '/amazon-elektrik-urunleri/duman-alarmi-pil-yedegi-kesinti-hazirligi/',
+          }
+          assert expected.issubset(pages), expected - set(pages)
+          assert pages['/haberler/elektrik-kesilince-duman-dedektoru-calisir-mi/']['affiliate']['hasAffiliateLinks'] is False
+          assert pages['/hesaplama/duman-karbonmonoksit-alarmi-elektrik-kesintisi-kontrolu/']['affiliate']['hasAffiliateLinks'] is False
+          commerce = pages['/amazon-elektrik-urunleri/duman-alarmi-pil-yedegi-kesinti-hazirligi/']
+          assert commerce['affiliate']['safe'] is True
+          assert commerce['affiliate']['disclosureVisible'] is True
+          assert commerce['affiliate']['noBuyOutcomeVisible'] is True
+          assert not commerce['affiliate']['unsafeStaticLinks']
+          print(json.dumps({'ok': True, 'routes': sorted(expected)}, ensure_ascii=False))
+          PY
+
+      - name: Özet
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ## ALO186 v297 duman alarmı kesinti güven paketi
+
+          - “Elektrik kesilince duman dedektörü çalışır mı?” niyeti: kaynak doğrulamalı canonical rehber
+          - Pilli + şebekeli + yedek batarya + yerel siren + uygulama: kişisel verisiz ücretsiz kontrol
+          - Bağımsız optik alarm, kapalı uzun ömürlü batarya ve üretici uyumlu pil: yalnız gelecek hazırlığında güven kapılı
+          - Aktif alarm, duman, gaz, CO ve merkezi sistem: mağaza yolu kapalı
+          - Mevcut alarm yeterliyse: satın almama sonucu
+          - Amazon Türkiye bağlantıları: açıklama ve teknik kapı arkasında, başlangıçta statik href yok
+          - 30/180/365 günlük test, kaçış planı ve yaşam döngüsü: doğrulandı
+          - Fiyat, stok, puan, yorum, garanti, Offer ve AggregateRating: yok
+          - Canonical build, static smoke ve ChatGPT Sites import kabulü: başarılı
+          EOF
