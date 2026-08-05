@@ -15,15 +15,20 @@ MARKER_END = "# END ALO186 CONTENT CONSOLIDATIONS"
 
 
 def normalize_path(value: str) -> str:
-    text = str(value or "").strip()
-    trailing = text.endswith("/") and text.strip("/") != ""
-    raw = "/" + text.strip("/")
+    raw = "/" + str(value or "").strip().strip("/")
     if raw == "/":
         raise ValueError("İçerik birleştirme rotası kök dizin olamaz")
-    if trailing:
-        raw += "/"
     if "//" in raw or not re.fullmatch(r"/[a-z0-9\-/]+", raw):
         raise ValueError(f"Geçersiz içerik birleştirme rotası: {value!r}")
+    return raw
+
+
+def normalize_canonical_path(value: str) -> str:
+    text = str(value or "").strip()
+    trailing = text.endswith("/") and text.strip("/") != ""
+    raw = normalize_path(text)
+    if trailing and not raw.endswith("/"):
+        raw += "/"
     return raw
 
 
@@ -49,7 +54,7 @@ def canonical_route_path(value: str, base_path: str) -> str:
 
 
 def public_url(base_path: str, route: str) -> str:
-    route = normalize_path(route)
+    route = normalize_canonical_path(route)
     return f"{base_path}{route}" if base_path else route
 
 
@@ -71,7 +76,7 @@ def load_config(path: Path = DEFAULT_CONFIG) -> dict:
     normalized: list[dict] = []
     for index, raw in enumerate(items, start=1):
         alias = normalize_path(raw.get("aliasPath"))
-        canonical = normalize_path(raw.get("canonicalPath"))
+        canonical = normalize_canonical_path(raw.get("canonicalPath"))
         intent_key = str(raw.get("intentKey") or "").strip()
         if alias == canonical:
             raise ValueError(f"Alias ve canonical aynı olamaz: {alias}")
@@ -222,7 +227,7 @@ def update_htaccess(site: Path, items: list[dict]) -> bool:
     block_pattern = re.compile(re.escape(MARKER_START) + r".*?" + re.escape(MARKER_END), re.S)
     rules = [MARKER_START, "<IfModule mod_rewrite.c>", "  RewriteEngine On"]
     for item in items:
-        source = item["aliasPath"].strip("/")
+        source = item["aliasPath"].lstrip("/")
         destination = f"{CANONICAL_HOST}{item['canonicalPath']}"
         rules.append(f"  RewriteRule ^{source}/?$ {destination} [R=301,L,NE]")
     rules.extend(["</IfModule>", MARKER_END])
