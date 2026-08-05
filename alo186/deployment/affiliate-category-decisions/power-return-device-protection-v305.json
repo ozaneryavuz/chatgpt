@@ -1,0 +1,93 @@
+{
+  "version": 305,
+  "sourceCheckedOn": "2026-08-06",
+  "cluster": "power-return-device-protection-damage-evidence",
+  "decision": "conditional-consumer-affiliate-plus-professional-lead",
+  "newMerchantLinks": 2,
+  "merchant": "Amazon Türkiye",
+  "affiliateTag": "alo186rehber-21",
+  "routes": {
+    "article": "/haberler/elektrik-gidip-gelince-cihazlar-bozulur-mu/",
+    "tool": "/hesaplama/elektrik-gidip-gelince-cihaz-koruma-plani/",
+    "selector": "/amazon-elektrik-urunleri/kesinti-sonrasi-elektronik-koruma-secimi/"
+  },
+  "searchIntentGap": {
+    "primaryQueries": [
+      "elektrik gidip gelince cihazlar bozulur mu",
+      "elektrik geldiğinde cihazları ne zaman açmalı",
+      "fişleri çekmek gerekir mi",
+      "akım korumalı priz gerilim rölesi farkı",
+      "elektrik kesintisi cihaz hasarı tazmin"
+    ],
+    "observedGap": "Türkçe sonuçlar çoğunlukla evrensel 5-10 dakika bekleme süresi, bütün cihazlar için fiş çekme veya tek ürünle koruma öneriyor; transient, sürekli gerilim, nötr, cihaz kılavuzu, resmî hasar süreci ve professional-only sınırını birlikte kurmuyor.",
+    "alo186Differentiator": "Aktif tehlikede ticareti kapatan; olay türünü, kullanım kapsamını, gerçek koruma kanıtını, resmî başvuru süresini ve yalnız düşük güçlü elektronik için kilitli affiliate seçimini aynı yolculukta birleştirir."
+  },
+  "consumerAffiliateClasses": [
+    {
+      "class": "surge-protected power strip for low-power plug-in electronics",
+      "conditions": [
+        "verified grounded outlet",
+        "verified total load and label",
+        "no high-power or fixed appliance",
+        "protection indicator and overload protection checked"
+      ]
+    },
+    {
+      "class": "plug-in voltage and energy observation device",
+      "conditions": [
+        "observation only",
+        "not treated as protection or calibrated evidence",
+        "no hazardous or whole-building diagnosis"
+      ]
+    }
+  ],
+  "professionalClasses": [
+    "panel surge protective devices and coordination",
+    "voltage monitoring relays, contactors and shunt trips",
+    "neutral-fault investigation",
+    "refrigerators, freezers, air conditioners and compressor loads",
+    "boilers, pumps, gates and fixed electrical systems",
+    "UPS, inverter, generator and automatic transfer systems",
+    "medical and life-support equipment",
+    "apartment common areas, hotels, workplaces and industrial systems",
+    "earthing, equipotential bonding and distribution-board inspection",
+    "power-quality logging and forensic damage reports"
+  ],
+  "conversionPolicy": {
+    "activeOutageCommerceClosed": true,
+    "activeHazardCommerceClosed": true,
+    "repeatedCyclingCommerceClosed": true,
+    "wholeHomeOrNeutralSuspicionProfessionalOnly": true,
+    "highPowerCompressorAndFixedLoadsProfessionalOnly": true,
+    "medicalSharedAndCommercialProfessionalOnly": true,
+    "universalRestartDelayClaimForbidden": true,
+    "surgeStripAsWholeHomeProtectionClaimForbidden": true,
+    "observationDeviceAsProtectionOrCalibratedEvidenceClaimForbidden": true,
+    "affiliateDisclosureBeforeMerchantLinks": true,
+    "merchantLinksLockedByDefault": true,
+    "noBuyOutcomeRequired": true,
+    "noPriceStockRatingDeliveryWarrantyClaims": true,
+    "officialInstitutionImpressionForbidden": true,
+    "personalDataCollectionForbidden": true,
+    "epdkDamageClaimNoGuarantee": true
+  },
+  "repeatVisitReasons": [
+    {
+      "days": 30,
+      "reason": "cord, outlet, protection indicator and event-log visual review"
+    },
+    {
+      "days": 90,
+      "reason": "outage history, true need and current protection evidence review"
+    },
+    {
+      "days": 365,
+      "reason": "professional earthing, panel SPD, voltage monitoring and connection inspection when incidents repeat"
+    }
+  ],
+  "expectedImpact": {
+    "userBenefit": "replaces blanket unplugging and universal wait-time advice with event classification, manufacturer restart rules, evidence preservation and a no-buy outcome",
+    "revenueImpact": "opens only two low-risk Amazon Türkiye categories after six checks while directing whole-home, fixed, commercial and recurring problems to qualified measurement and continuity services",
+    "trustImpact": "affiliate relationship is visible before links; unverified commercial claims and official-institution impression are prohibited"
+  }
+}
