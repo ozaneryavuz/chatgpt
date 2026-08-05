@@ -111,7 +111,14 @@
     "kombi-ups",
     "isitma-kazani",
     "kazan-dairesi",
-    "sirkulasyon-pompasi"
+    "sirkulasyon-pompasi",
+    "havuz-pompasi",
+    "havuz-filtrasyon",
+    "havuz-kimyasal-dozaj",
+    "havuz-kontrol-panosu",
+    "havuz-isitma",
+    "havuz-aydinlatma",
+    "havuz-yedek-guc"
   ],
   "portfolioRules": {
     "genericDIYRequiresDirectElectricalContinuityOrSafetyIntent": true,
