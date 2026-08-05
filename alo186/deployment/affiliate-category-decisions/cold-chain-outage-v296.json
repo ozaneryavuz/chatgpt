@@ -1,0 +1,89 @@
+{
+  "version": 296,
+  "name": "cold-chain-outage-trust",
+  "decision": "guarded-low-risk-consumer-affiliate",
+  "searchIntent": [
+    "elektrik kesilince buzdolabı kaç saat soğuk kalır",
+    "elektrik kesilince derin dondurucu kaç saat dayanır",
+    "elektrik geldikten sonra buzdolabındaki yemek yenir mi",
+    "buzdolabı termometresi gerekli mi",
+    "elektrik kesintisi için soğutucu kutu ve buz aküsü"
+  ],
+  "allowedLowRiskClasses": [
+    {
+      "class": "refrigerator-freezer-appliance-thermometer",
+      "scope": "future-household-food-preparedness-only",
+      "requiredChecks": [
+        "cold-temperature-measurement-range",
+        "readability",
+        "placement-instructions",
+        "battery-or-display-check",
+        "existing-device-need"
+      ]
+    },
+    {
+      "class": "insulated-cooler-box",
+      "scope": "future-household-food-transfer-only",
+      "requiredChecks": [
+        "capacity",
+        "cleanable-interior",
+        "closure",
+        "ice-pack-placement",
+        "existing-equipment-need"
+      ]
+    },
+    {
+      "class": "reusable-gel-ice-pack",
+      "scope": "future-household-preparedness-only",
+      "requiredChecks": [
+        "seal-integrity",
+        "outer-surface-condition",
+        "pre-freezing-instructions",
+        "cooler-fit",
+        "no-direct-food-safety-claim"
+      ]
+    }
+  ],
+  "excludedProfessionalOrSafetyClasses": [
+    "refrigerator or freezer UPS, inverter, vehicle battery, generator or ATS",
+    "medicine, insulin, vaccine and healthcare cold chain",
+    "breast milk, infant formula and special feeding cold chain",
+    "restaurant, hotel, market, warehouse and commercial cold chain",
+    "dry ice and chemical cooling intervention",
+    "active outage urgent-delivery commerce",
+    "flood, sewage, smoke, fire-suppression-water or chemical contamination"
+  ],
+  "conversionPolicy": {
+    "merchant": "Amazon Türkiye",
+    "newMerchantLinks": true,
+    "linksLockedByDefault": true,
+    "futurePreparednessOnly": true,
+    "noBuyOutcomeRequired": true,
+    "activeOutageCommerceClosed": true,
+    "contaminationCommerceClosed": true,
+    "specialColdChainCommerceClosed": true,
+    "personalDataCollectionForbidden": true,
+    "noPriceStockRatingWarrantyClaims": true,
+    "affiliateDisclosureRequiredBeforeAnyMerchantLink": true,
+    "officialInstitutionImpressionForbidden": true,
+    "professionalScopeForComplexSystems": true
+  },
+  "repeatVisitReasons": [
+    {
+      "days": 30,
+      "reason": "thermometer display, battery and refrigerator-freezer temperature check"
+    },
+    {
+      "days": 90,
+      "reason": "cooler, reusable ice pack, cleanliness and outage-plan readiness review"
+    },
+    {
+      "days": 180,
+      "reason": "seasonal ambient-temperature and perishable-food inventory review"
+    }
+  ],
+  "expectedImpact": {
+    "userBenefit": "Users separate outage duration, door opening, measured temperature, ice crystals, contamination and food type before consuming or purchasing, while a complete existing kit produces an explicit no-buy result.",
+    "revenue": "Qualified Amazon Turkey clicks are limited to future low-risk household preparation; active food-safety decisions, backup power and special or commercial cold chains remain non-commercial or professional-led."
+  }
+}

@@ -23,6 +23,15 @@ def normalize_path(value: str) -> str:
     return raw
 
 
+def normalize_canonical_path(value: str) -> str:
+    text = str(value or "").strip()
+    trailing = text.endswith("/") and text.strip("/") != ""
+    raw = normalize_path(text)
+    if trailing and not raw.endswith("/"):
+        raw += "/"
+    return raw
+
+
 def normalize_base_path(value: str) -> str:
     cleaned = str(value or "").strip()
     if not cleaned or cleaned == "/":
@@ -45,7 +54,7 @@ def canonical_route_path(value: str, base_path: str) -> str:
 
 
 def public_url(base_path: str, route: str) -> str:
-    route = normalize_path(route)
+    route = normalize_canonical_path(route)
     return f"{base_path}{route}" if base_path else route
 
 
@@ -67,7 +76,7 @@ def load_config(path: Path = DEFAULT_CONFIG) -> dict:
     normalized: list[dict] = []
     for index, raw in enumerate(items, start=1):
         alias = normalize_path(raw.get("aliasPath"))
-        canonical = normalize_path(raw.get("canonicalPath"))
+        canonical = normalize_canonical_path(raw.get("canonicalPath"))
         intent_key = str(raw.get("intentKey") or "").strip()
         if alias == canonical:
             raise ValueError(f"Alias ve canonical aynı olamaz: {alias}")
