@@ -1,0 +1,21 @@
+{
+  "version": 291,
+  "name": "growth-v291-irrigation-outage-trust",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesilince-otomatik-sulama-programi-silinir-mi/index.html",
+      "canonicalPath": "/haberler/elektrik-kesilince-otomatik-sulama-programi-silinir-mi/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/otomatik-sulama-elektrik-kesintisi-plani/index.html",
+      "canonicalPath": "/hesaplama/otomatik-sulama-elektrik-kesintisi-plani/",
+      "type": "tool"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/pilli-sulama-zamanlayici-nem-sensoru-secimi/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/pilli-sulama-zamanlayici-nem-sensoru-secimi/",
+      "type": "affiliate-decision"
+    }
+  ]
+}
