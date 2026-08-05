@@ -1,0 +1,92 @@
+{
+  "version": 299,
+  "cluster": "security-camera-outage-continuity",
+  "decision": "guarded-low-risk-consumer-affiliate-with-professional-exclusions",
+  "routes": {
+    "article": "/haberler/elektrik-kesilince-guvenlik-kamerasi-calisir-mi/",
+    "tool": "/hesaplama/guvenlik-kamerasi-elektrik-kesintisi-sureklilik-plani/",
+    "selector": "/amazon-elektrik-urunleri/kamera-nvr-ups-yedek-guc-secimi/"
+  },
+  "searchIntentGap": {
+    "primaryQueries": [
+      "elektrik kesilince güvenlik kamerası çalışır mı",
+      "internet yokken kamera kayıt yapar mı",
+      "kamera için mini UPS",
+      "kamera microSD kesintide kayıt"
+    ],
+    "observedGap": "Türkçe sonuçların önemli bölümü kamera gücü, yerel kayıt, uzaktan erişim, PoE/NVR zinciri ve kişisel veri sorumluluğunu ayırmadan doğrudan UPS veya sistem satışına geçiyor.",
+    "alo186Differentiator": "Güç kesintisi ile internet kesintisini ayıran, kayıt geri oynatmayı kanıt sayan, gizlilik kapsamını görünür yapan ve mevcut sistem yeterliyse satın almama sonucu veren karar zinciri."
+  },
+  "conversionPolicy": {
+    "merchant": "Amazon Türkiye",
+    "newMerchantLinks": true,
+    "linksLockedByDefault": true,
+    "noBuyOutcomeRequired": true,
+    "activeSecurityIncidentCommerceClosed": true,
+    "electricalOrBatteryHazardCommerceClosed": true,
+    "personalDataCollectionForbidden": true,
+    "footageCredentialOrAddressCollectionForbidden": true,
+    "noPriceStockRatingWarrantyClaims": true,
+    "affiliateDisclosureRequiredBeforeAnyMerchantLink": true,
+    "officialInstitutionImpressionForbidden": true,
+    "professionalScopeForComplexSystems": true
+  },
+  "allowedLowRiskClasses": [
+    {
+      "class": "high-endurance-microsd",
+      "allowedOnlyWhen": [
+        "single personal camera",
+        "camera remains powered",
+        "exact model supports local microSD",
+        "capacity and file-system support verified",
+        "real playback test planned"
+      ],
+      "doesNotSolve": "camera power outage"
+    },
+    {
+      "class": "single-camera-low-voltage-mini-ups",
+      "allowedOnlyWhen": [
+        "single personal low-voltage camera",
+        "exact voltage verified",
+        "maximum current verified",
+        "polarity and connector verified",
+        "real outage test planned"
+      ],
+      "excluded": [
+        "PoE",
+        "NVR or DVR",
+        "central 12 V distribution",
+        "multiple cameras"
+      ]
+    }
+  ],
+  "excludedProfessionalClasses": [
+    "PoE switch or injector continuity",
+    "NVR or DVR and disk arrays",
+    "central camera power distribution",
+    "fixed UPS or external battery bank",
+    "generator, ATS or solar storage",
+    "apartment, hotel, workplace or public-area CCTV",
+    "access control, alarm or life-safety integration"
+  ],
+  "repeatVisitReasons": [
+    {
+      "days": 30,
+      "reason": "local recording playback, date-time and battery status check"
+    },
+    {
+      "days": 90,
+      "reason": "controlled outage rehearsal covering camera, recording and network layers"
+    },
+    {
+      "days": 180,
+      "reason": "privacy scope, retention, access permissions and equipment lifecycle review"
+    }
+  ],
+  "expectedImpact": {
+    "userBenefit": "Remote-app outage, actual recording loss, power failure and storage incompatibility are separated before purchase.",
+    "affiliateImpact": "Fewer but higher-intent Amazon Türkiye transitions for exact single-camera microSD or low-voltage backup needs.",
+    "professionalImpact": "PoE, NVR, multi-camera and commercial systems are converted to qualified continuity and engineering leads instead of unsafe consumer-product clicks.",
+    "trustImpact": "No unverified price, stock, rating, delivery or warranty claims; affiliate disclosure remains before merchant access."
+  }
+}
