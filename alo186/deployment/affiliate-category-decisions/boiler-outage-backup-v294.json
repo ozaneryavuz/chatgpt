@@ -1,0 +1,78 @@
+{
+  "version": 294,
+  "name": "boiler-outage-backup-trust",
+  "decision": "professional-lead-only-no-consumer-affiliate",
+  "searchIntent": [
+    "elektrik kesilince kombi çalışır mı",
+    "elektrik geldikten sonra kombi neden çalışmıyor",
+    "kombi elektrik kesintisi sonrası reset",
+    "kombi için UPS gerekli mi",
+    "kombi UPS saf sinüs kaç watt"
+  ],
+  "contentGap": {
+    "problem": "Search results often collapse boiler restart, model-specific error codes and UPS shopping into one step, while gas safety, repeated reset, freeze protection, grounding and manufacturer approval require separate decisions.",
+    "resolution": "Keep the existing canonical article, tool and product-path route, but turn the commercial route into a professional-only decision center with zero merchant links."
+  },
+  "professionalOnlyClasses": [
+    "boiler or heating-appliance UPS",
+    "external battery pack",
+    "inverter or vehicle-battery backup",
+    "generator and ATS",
+    "neutral-earth modification",
+    "hardwired heating system",
+    "central or cascade boiler plant",
+    "external circulation pump and controls"
+  ],
+  "conversionPolicy": {
+    "merchantLinks": 0,
+    "consumerAffiliateClosed": true,
+    "noBuyOutcomeRequired": true,
+    "activeGasOrElectricalHazardCommerceClosed": true,
+    "repeatedResetRequiresAuthorizedService": true,
+    "manufacturerOrAuthorizedServiceApprovalRequired": true,
+    "electricalProfessionalRequiredForPowerPath": true,
+    "personalDataCollectionForbidden": true,
+    "noPriceStockRatingWarrantyClaims": true,
+    "officialInstitutionImpressionForbidden": true
+  },
+  "conversionPoints": [
+    {
+      "intent": "model-specific error or repeated reset",
+      "destination": "boiler manufacturer manual and authorized service"
+    },
+    {
+      "intent": "socket, earthing, neutral or protective-device uncertainty",
+      "destination": "qualified electrician or electrical engineer"
+    },
+    {
+      "intent": "UPS waveform, W/VA, transfer and runtime",
+      "destination": "UPS manufacturer or power-quality specialist"
+    },
+    {
+      "intent": "central heating, cascade, pump or BMS continuity",
+      "destination": "electrical-mechanical professional assessment"
+    },
+    {
+      "intent": "gas smell or gas emergency",
+      "destination": "187 from a safe location; 112 for life safety"
+    }
+  ],
+  "repeatVisitReasons": [
+    {
+      "days": 30,
+      "reason": "error log, plug/socket, leak, pressure and backup indicators"
+    },
+    {
+      "days": 90,
+      "reason": "authorized and supervised outage task test"
+    },
+    {
+      "days": 365,
+      "reason": "authorized maintenance, battery health, electrical connection and freeze plan review"
+    }
+  ],
+  "expectedImpact": {
+    "userBenefit": "Users separate gas emergency, unstable supply, model-specific restart, repeated error, freeze risk and backup-power engineering before buying anything; a passing existing system produces a clear no-buy result.",
+    "revenue": "The route trades low-trust boiler-UPS affiliate clicks for higher-value authorized-service, electrical and power-quality evaluation intent while protecting the wider ALO186 affiliate brand from unsafe recommendations."
+  }
+}
