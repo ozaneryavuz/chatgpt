@@ -7,14 +7,23 @@ on:
     paths:
       - '.github/workflows/alo186-force-live.yml'
       - 'alo186/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/alo186-force-live.yml'
+      - 'alo186/**'
 
 permissions:
   contents: write
   pages: write
   id-token: write
 
+defaults:
+  run:
+    shell: bash
+
 concurrency:
-  group: alo186-production-pages
+  group: alo186-production-pages-${{ github.event_name }}
   cancel-in-progress: true
 
 jobs:
@@ -23,15 +32,15 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
-      - name: Checkout main
-        uses: actions/checkout@v6
+      - name: Checkout source
+        uses: actions/checkout@v4
 
       - name: Setup Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
-      - name: Build production site
+      - name: Build and validate production site
         run: |
           set -euo pipefail
           rm -rf /tmp/alo186-live
@@ -46,6 +55,21 @@ jobs:
           test -f /tmp/alo186-live/haberler/elektrik-kesilince-duman-dedektoru-calisir-mi/index.html
           test -f /tmp/alo186-live/hesaplama/duman-karbonmonoksit-alarmi-elektrik-kesintisi-kontrolu/index.html
           test -f /tmp/alo186-live/amazon-elektrik-urunleri/duman-alarmi-pil-yedegi-kesinti-hazirligi/index.html
+          grep -q 'elektrik-kesilince-duman-dedektoru-calisir-mi' /tmp/alo186-live/haberler/elektrik-kesilince-duman-dedektoru-calisir-mi/index.html
+          grep -q 'duman-karbonmonoksit-alarmi-elektrik-kesintisi-kontrolu' /tmp/alo186-live/hesaplama/duman-karbonmonoksit-alarmi-elektrik-kesintisi-kontrolu/index.html
+          grep -q 'duman-alarmi-pil-yedegi-kesinti-hazirligi' /tmp/alo186-live/amazon-elektrik-urunleri/duman-alarmi-pil-yedegi-kesinti-hazirligi/index.html
+
+      - name: Publish canonical bundle to gh-pages fallback branch
+        if: github.event_name != 'pull_request'
+        continue-on-error: true
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: /tmp/alo186-live
+          publish_branch: gh-pages
+          force_orphan: true
+          enable_jekyll: false
+          full_commit_message: 'deploy: ALO186 production ${{ github.sha }}'
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
@@ -57,9 +81,14 @@ jobs:
 
   deploy:
     name: Deploy production
+    if: github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 30
+    permissions:
+      pages: write
+      id-token: write
+      contents: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -68,8 +97,37 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-      - name: Checkout main for receipt
-        uses: actions/checkout@v6
+      - name: Verify canonical live routes
+        env:
+          CANONICAL_ORIGIN: https://alo186.com
+        run: |
+          set -euo pipefail
+          verify_route() {
+            local path="$1"
+            local marker="$2"
+            local body
+            for attempt in $(seq 1 24); do
+              body="$(mktemp)"
+              if curl --fail --silent --show-error --location \
+                --connect-timeout 10 --max-time 30 \
+                "${CANONICAL_ORIGIN}${path}" -o "$body" \
+                && grep -q "$marker" "$body"; then
+                rm -f "$body"
+                echo "Verified ${CANONICAL_ORIGIN}${path}"
+                return 0
+              fi
+              rm -f "$body"
+              sleep 10
+            done
+            echo "Live verification failed for ${CANONICAL_ORIGIN}${path}" >&2
+            return 1
+          }
+          verify_route '/haberler/elektrik-kesilince-duman-dedektoru-calisir-mi/' 'elektrik-kesilince-duman-dedektoru-calisir-mi'
+          verify_route '/hesaplama/duman-karbonmonoksit-alarmi-elektrik-kesintisi-kontrolu/' 'duman-karbonmonoksit-alarmi-elektrik-kesintisi-kontrolu'
+          verify_route '/amazon-elektrik-urunleri/duman-alarmi-pil-yedegi-kesinti-hazirligi/' 'duman-alarmi-pil-yedegi-kesinti-hazirligi'
+
+      - name: Checkout main for deployment receipt
+        uses: actions/checkout@v4
         with:
           ref: main
 
@@ -90,7 +148,7 @@ jobs:
           from pathlib import Path
 
           receipt = {
-              "status": "deployed",
+              "status": "deployed-and-live-verified",
               "environment": "github-pages",
               "canonicalOrigin": "https://alo186.com",
               "pageUrl": os.environ["PAGE_URL"],
@@ -99,10 +157,10 @@ jobs:
               "workflowRunAttempt": int(os.environ["RUN_ATTEMPT"]),
               "workflowRunUrl": f"https://github.com/{os.environ['REPOSITORY']}/actions/runs/{os.environ['RUN_ID']}",
               "deployedAt": datetime.now(timezone.utc).isoformat(),
-              "verifiedRoutesInArtifact": [
-                  "/haberler/elektrik-kesilince-duman-dedektoru-calisir-mi/",
-                  "/hesaplama/duman-karbonmonoksit-alarmi-elektrik-kesintisi-kontrolu/",
-                  "/amazon-elektrik-urunleri/duman-alarmi-pil-yedegi-kesinti-hazirligi/"
+              "verifiedRoutes": [
+                  "https://alo186.com/haberler/elektrik-kesilince-duman-dedektoru-calisir-mi/",
+                  "https://alo186.com/hesaplama/duman-karbonmonoksit-alarmi-elektrik-kesintisi-kontrolu/",
+                  "https://alo186.com/amazon-elektrik-urunleri/duman-alarmi-pil-yedegi-kesinti-hazirligi/"
               ]
           }
           Path('.github/deploy-receipts/alo186-live.json').write_text(
