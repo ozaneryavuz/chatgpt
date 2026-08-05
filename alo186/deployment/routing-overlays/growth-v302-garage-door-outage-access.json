@@ -1,0 +1,21 @@
+{
+  "version": 302,
+  "name": "growth-v302-garage-door-outage-access",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesilince-garaj-kapisi-nasil-acilir/index.html",
+      "canonicalPath": "/haberler/elektrik-kesilince-garaj-kapisi-nasil-acilir/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/garaj-kapisi-elektrik-kesintisi-erisim-plani/index.html",
+      "canonicalPath": "/hesaplama/garaj-kapisi-elektrik-kesintisi-erisim-plani/",
+      "type": "tool"
+    },
+    {
+      "source": "alo186/sektor-rehberi/apartman-otel-garaj-kapisi-kesinti-surekliligi/index.html",
+      "canonicalPath": "/sektor-rehberi/apartman-otel-garaj-kapisi-kesinti-surekliligi/",
+      "type": "professional-lead"
+    }
+  ]
+}
