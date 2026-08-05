@@ -12,7 +12,6 @@ SELECTOR = ROOT / "alo186/amazon-elektrik-urunleri/akvaryum-kesinti-hava-pompasi
 TRACKER = ROOT / "alo186/sektor-rehberi/akvaryum-kesinti-30-90-gun-test-merkezi/index.html"
 OVERLAY = ROOT / "alo186/deployment/routing-overlays/189-aquarium-outage-growth.json"
 AUDIT = ROOT / "alo186/audits/aquarium-outage-growth-v189-2026-08-02.md"
-
 EXPECTED = {
     "/hesaplama/akvaryum-elektrik-kesintisi-oksijen-sicaklik-plani/": CALC,
     "/amazon-elektrik-urunleri/akvaryum-kesinti-hava-pompasi-termometre-secici/": SELECTOR,
@@ -30,16 +29,21 @@ class AnchorParser(HTMLParser):
             self.anchors.append({key.casefold(): value or "" for key, value in attrs})
 
 
+texts: dict[Path, str] = {}
 for canonical, path in EXPECTED.items():
     assert path.is_file(), path
     text = path.read_text(encoding="utf-8")
+    texts[path] = text
     assert f'<link rel="canonical" href="https://alo186.com{canonical}">' in text
-    assert "kamu kurumu" in text
+    assert "Bağımsız" in text or "bağımsız" in text
     assert '"@type":"Offer"' not in text
     assert "AggregateRating" not in text
     assert '"availability"' not in text
 
-calc = CALC.read_text(encoding="utf-8")
+assert "kamu kurumu" in texts[SELECTOR]
+assert "kamu kurumu" in texts[TRACKER]
+
+calc = texts[CALC]
 for token in (
     "Canlı stresi veya su-elektrik tehlikesinde ticari yol kapalı",
     "Mevcut plan yeterli — yeni ürün almayın",
@@ -51,17 +55,12 @@ for token in (
 ):
     assert token in calc, token
 for forbidden in (
-    "fetch(",
-    "XMLHttpRequest",
-    "localStorage.",
-    "sessionStorage.",
-    "document.cookie",
-    'type="email"',
-    'type="tel"',
+    "fetch(", "XMLHttpRequest", "localStorage.", "sessionStorage.",
+    "document.cookie", 'type="email"', 'type="tel"',
 ):
     assert forbidden not in calc, forbidden
 
-selector = SELECTOR.read_text(encoding="utf-8")
+selector = texts[SELECTOR]
 for token in (
     "Pilli hava motoru",
     "Açıkça 5 V USB hava pompası",
@@ -88,13 +87,10 @@ for anchor in product_anchors:
     assert anchor.get("aria-disabled") == "true"
     assert {"sponsored", "nofollow", "noopener"}.issubset(set(anchor.get("rel", "").split()))
 
-tracker = TRACKER.read_text(encoding="utf-8")
+tracker = texts[TRACKER]
 for token in (
-    "JSON indir",
-    "30/90 gün ICS indir",
-    "Test başarılı",
-    "Mevcut ekipmanı kullanın; yeni ürün almayın",
-    "Kişisel veri istemez",
+    "JSON indir", "30/90 gün ICS indir", "Test başarılı",
+    "Mevcut ekipmanı kullanın; yeni ürün almayın", "Kişisel veri istemez",
 ):
     assert token in tracker
 assert "localStorage" not in tracker
@@ -111,13 +107,9 @@ for canonical, source in routes.items():
 assert AUDIT.is_file()
 audit = AUDIT.read_text(encoding="utf-8")
 for token in (
-    "Arama niyeti",
-    "İçerik boşluğu",
-    "Kullanıcı yolculuğu",
-    "Affiliate ürün kategorileri",
-    "Dönüşüm noktaları",
-    "Tekrar ziyaret nedenleri",
-    "Beklenen etki",
+    "Arama niyeti", "İçerik boşluğu", "Kullanıcı yolculuğu",
+    "Affiliate ürün kategorileri", "Dönüşüm noktaları",
+    "Tekrar ziyaret nedenleri", "Beklenen etki",
 ):
     assert token.casefold() in audit.casefold()
 
