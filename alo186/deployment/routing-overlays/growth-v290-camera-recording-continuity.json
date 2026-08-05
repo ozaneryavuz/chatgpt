@@ -1,0 +1,21 @@
+{
+  "version": 290,
+  "name": "growth-v290-camera-recording-continuity",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesilince-guvenlik-kamerasi-kayit-yapar-mi/index.html",
+      "canonicalPath": "/haberler/elektrik-kesilince-guvenlik-kamerasi-kayit-yapar-mi/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/guvenlik-kamerasi-kesinti-sonrasi-kayit-kontrolu/index.html",
+      "canonicalPath": "/hesaplama/guvenlik-kamerasi-kesinti-sonrasi-kayit-kontrolu/",
+      "type": "tool"
+    },
+    {
+      "source": "alo186/sektor-rehberi/otel-site-magaza-kamera-nvr-kesinti-surekliligi/index.html",
+      "canonicalPath": "/sektor-rehberi/otel-site-magaza-kamera-nvr-kesinti-surekliligi/",
+      "type": "professional-guide"
+    }
+  ]
+}
