@@ -70,29 +70,47 @@ jobs:
           assert spec and spec.loader
           spec.loader.exec_module(module)
 
-          with tempfile.TemporaryDirectory() as tmp:
-              root = Path(tmp)
+          def write_routes(root: Path, html: str) -> None:
               for route in module.ROUTES:
                   page = root / route.strip('/') / 'index.html'
                   page.parent.mkdir(parents=True, exist_ok=True)
-                  page.write_text(
-                      '<!doctype html><main>'
-                      '<div class="trust-boundary" data-alo186-commerce-trust-v212="true">'
-                      '<strong>Satın almama sınırı:</strong> Mevcut ekipman yeterliyse yeni ürün almayın.'
-                      '</div></main>',
-                      encoding='utf-8',
-                  )
+                  page.write_text(html, encoding='utf-8')
 
-              result = module.run(root)
-              assert result['ok'] is True
-              assert result['restoredAffiliateDisclosures'] == len(module.ROUTES)
-              assert result['affiliateRelationshipVisible'] is True
+          def assert_boundaries(root: Path) -> None:
               for route in module.ROUTES:
                   html = (root / route.strip('/') / 'index.html').read_text(encoding='utf-8')
                   assert 'data-alo186-affiliate-disclosure="true"' in html
                   assert 'Amazon Türkiye satış ortaklığı açıklaması' in html
                   assert 'data-alo186-commercial-trust="true"' in html
                   assert 'yeni ürün satın almayın' in html or 'yeni ürün almayın' in html
+
+          with tempfile.TemporaryDirectory() as tmp:
+              legacy_root = Path(tmp) / 'legacy'
+              write_routes(
+                  legacy_root,
+                  '<!doctype html><main>'
+                  '<div class="trust-boundary" data-alo186-commerce-trust-v212="true">'
+                  '<strong>Satın almama sınırı:</strong> Mevcut ekipman yeterliyse yeni ürün almayın.'
+                  '</div></main>',
+              )
+              legacy_result = module.run(legacy_root)
+              assert legacy_result['ok'] is True
+              assert legacy_result['restoredAffiliateDisclosures'] == len(module.ROUTES)
+              assert legacy_result['reconstructedBoundaries'] == 0
+              assert_boundaries(legacy_root)
+
+              rewritten_root = Path(tmp) / 'rewritten'
+              write_routes(
+                  rewritten_root,
+                  '<!doctype html><main><section><h1>Güvenli ürün seçimi</h1></section></main>',
+              )
+              rewritten_result = module.run(rewritten_root)
+              assert rewritten_result['ok'] is True
+              assert rewritten_result['restoredAffiliateDisclosures'] == len(module.ROUTES)
+              assert rewritten_result['reconstructedBoundaries'] == len(module.ROUTES)
+              assert rewritten_result['affiliateRelationshipVisible'] is True
+              assert rewritten_result['officialInstitutionImpression'] is False
+              assert_boundaries(rewritten_root)
           PY
 
       - name: Canonical production build ve static smoke
@@ -149,7 +167,7 @@ jobs:
           - Aktif alarm, duman, gaz, CO ve merkezi sistem: mağaza yolu kapalı
           - Mevcut alarm yeterliyse: satın almama sonucu
           - Amazon Türkiye bağlantıları: açıklama ve teknik kapı arkasında, başlangıçta statik href yok
-          - Statik dönüşüm açıklamayı kaldırırsa: fail-closed geri yükleme regresyonu
+          - Statik dönüşüm açıklamayı veya eski işareti kaldırırsa: görünür affiliate + bağımsızlık/no-buy sınırı yeniden kurulur
           - 30/180/365 günlük test, kaçış planı ve yaşam döngüsü: doğrulandı
           - Fiyat, stok, puan, yorum, garanti, Offer ve AggregateRating: yok
           - Canonical build, static smoke ve ChatGPT Sites import kabulü: başarılı
