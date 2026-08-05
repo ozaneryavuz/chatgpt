@@ -1,0 +1,62 @@
+{
+  "version": 302,
+  "cluster": "garage-door-automatic-gate-outage-access",
+  "decision": "professional-lead-only",
+  "newMerchantLinks": 0,
+  "routes": {
+    "article": "/haberler/elektrik-kesilince-garaj-kapisi-nasil-acilir/",
+    "tool": "/hesaplama/garaj-kapisi-elektrik-kesintisi-erisim-plani/",
+    "guide": "/sektor-rehberi/apartman-otel-garaj-kapisi-kesinti-surekliligi/"
+  },
+  "searchIntentGap": {
+    "primaryQueries": [
+      "elektrik kesilince garaj kapısı nasıl açılır",
+      "elektrik kesilince otomatik kapı açma",
+      "garaj kapısı manuel açma",
+      "garaj kapısı yedek batarya"
+    ],
+    "observedGap": "Türkçe sonuçların önemli bölümü kapı türü, kırık yay-kablo, mekanik denge, alternatif çıkış, erişim kontrolü ve yangın senaryosunu ayırmadan genel manuel açma adımı veya ürün satışı sunuyor.",
+    "alo186Differentiator": "Aktif tehlikede testi ve ticareti kapatan; kapı türü, mekanik bütünlük, tam model kılavuzu, alternatif çıkış, anahtar sorumlusu ve gerçek görev testini satın alma öncesinde birleştiren karar zinciri."
+  },
+  "conversionPolicy": {
+    "merchant": null,
+    "activeEntrapmentFireOrSecurityCommerceClosed": true,
+    "mechanicalDamageManualReleaseForbidden": true,
+    "fixedDoorEquipmentConsumerAffiliateClosed": true,
+    "batteryAndUpsConsumerAffiliateClosed": true,
+    "springsCablesRailsConsumerAffiliateClosed": true,
+    "noBuyOutcomeRequired": true,
+    "personalDataCollectionForbidden": true,
+    "accessCodeAddressPlateCollectionForbidden": true,
+    "noPriceStockRatingWarrantyClaims": true,
+    "affiliateDisclosureRequiredBeforeAnyFutureMerchantLink": true,
+    "officialInstitutionImpressionForbidden": true,
+    "professionalScopeForSharedCommercialAndEgressSystems": true,
+    "universalManualReleaseInstructionsForbidden": true,
+    "universalFailSafeFailSecureClaimsForbidden": true
+  },
+  "professionalClasses": [
+    "garage door and gate operators",
+    "control boards and radio receivers",
+    "springs, cables, drums, rails and counterweights",
+    "manual release locks, chains and cranks",
+    "operator replacement batteries",
+    "fixed UPS and backup power",
+    "photo eyes and safety edges",
+    "access control, intercom and license-plate systems",
+    "fire alarm and emergency-egress integration",
+    "apartment, hotel, workplace and public parking doors",
+    "automatic pedestrian doors",
+    "commissioning, force testing and maintenance contracts"
+  ],
+  "repeatVisitReasons": [
+    {"days": 30, "reason": "manual key custody, alternative pedestrian exit, emergency lighting and service contact review"},
+    {"days": 90, "reason": "supervised outage, manual release, safety sensor and grid-return rehearsal"},
+    {"days": 180, "reason": "spring, cable, rail, brake, battery, access-control and fire-scenario professional inspection"}
+  ],
+  "expectedImpact": {
+    "userBenefit": "replaces universal pull-the-rope advice with door-type, mechanical-damage, alternative-exit and real-test checks, reducing entrapment, falling-door and unnecessary-purchase risk",
+    "revenueImpact": "creates qualified door-service, maintenance-contract, access-control, fire-integration and continuity-review demand instead of unsafe motor, battery or spring product clicks",
+    "trustImpact": "no unverified price, stock, rating, delivery or warranty claims; no official-institution impression; active danger never becomes a commerce trigger"
+  }
+}
