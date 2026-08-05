@@ -10,6 +10,7 @@ on:
       - 'alo186/deployment/affiliate-category-decisions/smoke-alarm-outage-v297.json'
       - 'alo186/deployment/routing-overlays/growth-v297-smoke-alarm-outage-trust.json'
       - 'alo186/deployment/affiliate_route_risk_policy_v265.json'
+      - 'alo186/deployment/inject_commerce_trust.py'
       - 'alo186/tests/test_growth_v297_smoke_alarm_outage_trust.py'
       - '.github/workflows/alo186-growth-v297-smoke-alarm-outage-trust.yml'
   push:
@@ -21,6 +22,7 @@ on:
       - 'alo186/deployment/affiliate-category-decisions/smoke-alarm-outage-v297.json'
       - 'alo186/deployment/routing-overlays/growth-v297-smoke-alarm-outage-trust.json'
       - 'alo186/deployment/affiliate_route_risk_policy_v265.json'
+      - 'alo186/deployment/inject_commerce_trust.py'
       - 'alo186/tests/test_growth_v297_smoke_alarm_outage_trust.py'
       - '.github/workflows/alo186-growth-v297-smoke-alarm-outage-trust.yml'
 
@@ -45,6 +47,7 @@ jobs:
         run: |
           set -euo pipefail
           python -m py_compile \
+            alo186/deployment/inject_commerce_trust.py \
             alo186/tests/test_growth_v297_smoke_alarm_outage_trust.py \
             alo186/tests/test_affiliate_route_risk_policy_v265.py
           python alo186/tests/test_growth_v297_smoke_alarm_outage_trust.py
@@ -52,6 +55,45 @@ jobs:
           python -m json.tool alo186/deployment/affiliate-category-decisions/smoke-alarm-outage-v297.json >/dev/null
           python -m json.tool alo186/deployment/routing-overlays/growth-v297-smoke-alarm-outage-trust.json >/dev/null
           python -m json.tool alo186/deployment/affiliate_route_risk_policy_v265.json >/dev/null
+
+      - name: Statik dönüşüm sonrası affiliate açıklamasını geri yükle
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import importlib.util
+          import tempfile
+          from pathlib import Path
+
+          module_path = Path('alo186/deployment/inject_commerce_trust.py')
+          spec = importlib.util.spec_from_file_location('inject_commerce_trust', module_path)
+          module = importlib.util.module_from_spec(spec)
+          assert spec and spec.loader
+          spec.loader.exec_module(module)
+
+          with tempfile.TemporaryDirectory() as tmp:
+              root = Path(tmp)
+              for route in module.ROUTES:
+                  page = root / route.strip('/') / 'index.html'
+                  page.parent.mkdir(parents=True, exist_ok=True)
+                  page.write_text(
+                      '<!doctype html><main>'
+                      '<div class="trust-boundary" data-alo186-commerce-trust-v212="true">'
+                      '<strong>Satın almama sınırı:</strong> Mevcut ekipman yeterliyse yeni ürün almayın.'
+                      '</div></main>',
+                      encoding='utf-8',
+                  )
+
+              result = module.run(root)
+              assert result['ok'] is True
+              assert result['restoredAffiliateDisclosures'] == len(module.ROUTES)
+              assert result['affiliateRelationshipVisible'] is True
+              for route in module.ROUTES:
+                  html = (root / route.strip('/') / 'index.html').read_text(encoding='utf-8')
+                  assert 'data-alo186-affiliate-disclosure="true"' in html
+                  assert 'Amazon Türkiye satış ortaklığı açıklaması' in html
+                  assert 'data-alo186-commercial-trust="true"' in html
+                  assert 'yeni ürün satın almayın' in html or 'yeni ürün almayın' in html
+          PY
 
       - name: Canonical production build ve static smoke
         run: |
@@ -107,6 +149,7 @@ jobs:
           - Aktif alarm, duman, gaz, CO ve merkezi sistem: mağaza yolu kapalı
           - Mevcut alarm yeterliyse: satın almama sonucu
           - Amazon Türkiye bağlantıları: açıklama ve teknik kapı arkasında, başlangıçta statik href yok
+          - Statik dönüşüm açıklamayı kaldırırsa: fail-closed geri yükleme regresyonu
           - 30/180/365 günlük test, kaçış planı ve yaşam döngüsü: doğrulandı
           - Fiyat, stok, puan, yorum, garanti, Offer ve AggregateRating: yok
           - Canonical build, static smoke ve ChatGPT Sites import kabulü: başarılı
