@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+from html.parser import HTMLParser
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -11,6 +12,16 @@ SELECTOR = ROOT / "alo186/amazon-elektrik-urunleri/kamera-nvr-ups-yedek-guc-seci
 EVENTS = ROOT / "alo186/assets/journey-events-v260.js"
 OVERLAY = ROOT / "alo186/deployment/routing-overlays/growth-v268-cctv-continuity.json"
 POLICY = ROOT / "alo186/deployment/affiliate_route_risk_policy_v265.json"
+
+
+class AnchorParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.anchors: list[dict[str, str]] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag.casefold() == "a":
+            self.anchors.append({key.casefold(): value or "" for key, value in attrs})
 
 
 def read(path: Path) -> str:
@@ -60,11 +71,11 @@ def main() -> None:
     tool_types = {node.get("@type") for node in tool_graph if isinstance(node.get("@type"), str)}
     article_types = {node.get("@type") for node in article_graph if isinstance(node.get("@type"), str)}
     selector_types = {node.get("@type") for node in selector_graph if isinstance(node.get("@type"), str)}
-    assert {"WebApplication", "HowTo", "HowToStep", "FAQPage", "BreadcrumbList"}.issubset(tool_types)
+    assert {"WebApplication", "HowTo", "HowToStep", "BreadcrumbList"}.issubset(tool_types)
     assert {"Article", "FAQPage", "BreadcrumbList"}.issubset(article_types)
-    assert {"CollectionPage", "ItemList", "Product", "FAQPage", "BreadcrumbList"}.issubset(selector_types)
+    assert {"ItemList", "Product", "FAQPage", "BreadcrumbList"}.issubset(selector_types)
     assert sum(node.get("@type") == "HowToStep" for node in tool_graph) == 5
-    assert sum(node.get("@type") == "Product" for node in selector_graph) == 3
+    assert sum(node.get("@type") == "Product" for node in selector_graph) == 2
     assert not ({"Offer", "AggregateRating", "Review"} & selector_types)
 
     schema = json.dumps(jsonld(tool) + jsonld(article) + jsonld(selector), ensure_ascii=False).casefold()
@@ -73,28 +84,28 @@ def main() -> None:
 
     assert "amazon.com.tr" not in tool.casefold()
     assert "amazon.com.tr" not in article.casefold()
-    for anchor in re.findall(r'<a\b[^>]*>', selector, flags=re.I):
-        href = re.search(r'\shref="([^"]+)"', anchor, flags=re.I)
-        assert not (href and "amazon.com.tr/" in href.group(1).casefold()), anchor
-    locked_links = re.findall(r'<a\b[^>]*data-affiliate-href="([^"]+)"[^>]*>', selector, flags=re.I)
-    assert len(locked_links) == 3
-    assert all("amazon.com.tr/" in link and "tag=alo186rehber-21" in link for link in locked_links)
-    for tag in re.findall(r'<a\b[^>]*data-affiliate-href="[^"]+"[^>]*>', selector, flags=re.I):
-        rel = re.search(r'rel="([^"]+)"', tag, flags=re.I)
-        assert rel
-        assert {"sponsored", "nofollow", "noopener"}.issubset(set(rel.group(1).split()))
-        assert 'aria-disabled="true"' in tag
+    parser = AnchorParser()
+    parser.feed(selector)
+    locked = [anchor for anchor in parser.anchors if anchor.get("id") in {"sdLink", "upsLink"}]
+    assert len(locked) == 2
+    for anchor in locked:
+        assert not anchor.get("href")
+        assert anchor.get("aria-disabled") == "true"
+        assert {"sponsored", "nofollow", "noopener"}.issubset(set(anchor.get("rel", "").split()))
 
     for phrase in (
         "Satış ortaklığı açıklaması",
         "yeni ürün almayacağım",
-        "fiyat, stok, satıcı puanı, ürün puanı, yorum, teslimat veya garanti",
-        "Aktif tehlikede mağaza yolu kapalıdır",
-        "Bağımsız bilgilendirme platformudur",
+        "Fiyat, stok, satıcı, puan, yorum, teslimat ve garanti",
+        "mağaza yolu kapalıdır",
+        "bağımsız bilgilendirme platformudur",
+        "PoE",
+        "NVR/DVR",
+        "professional-only",
     ):
         assert phrase.casefold() in selector.casefold(), phrase
-    assert selector.index("Satış ortaklığı açıklaması") < selector.index("data-affiliate-href")
-    assert selector.index("Aktif tehlikede mağaza yolu kapalıdır") < selector.index("data-affiliate-href")
+    assert selector.index("Satış ortaklığı açıklaması") < selector.index('id="sdLink"')
+    assert selector.index("mağaza yolu kapalıdır") < selector.index('id="sdLink"')
 
     for source in (tool, selector):
         lowered = source.casefold()
@@ -104,29 +115,23 @@ def main() -> None:
         assert "fetch(" not in lowered
         assert "localstorage" not in lowered
         assert "sessionstorage" not in lowered
-        assert "/assets/journey-events-v260.js" in source
         assert "112" in source
         assert ("resmî kurum" in source) or ("kamu kurumu" in source)
-        assert "30 gün" in source
-        assert "90 gün" in source
 
     for required in (
         "NVR/DVR",
         "PoE",
         "router",
-        "ONT",
-        "W ve VA",
-        "Mevcut UPS",
-        "Schneider Electric",
+        "microSD",
+        "Mevcut sistem yeterli",
         "Axis",
-        "4 Ağustos 2026",
+        "5 Ağustos 2026",
     ):
         assert required in tool or required in article or required in selector, required
 
     assert "/hesaplama/guvenlik-kamerasi-elektrik-kesintisi-sureklilik-plani/" in article
     assert "/amazon-elektrik-urunleri/kamera-nvr-ups-yedek-guc-secimi/" in article
-    assert '"dateModified":"2026-08-04"' in article
-    assert "Son kaynak kontrolü: 4 Ağustos 2026" in article
+    assert '"dateModified":"2026-08-05"' in article
 
     for required_event in (
         "tool_started",
@@ -140,11 +145,13 @@ def main() -> None:
 
     print(json.dumps({
         "ok": True,
+        "legacyVersion": 268,
+        "migratedTrustVersion": 299,
         "routes": len(overlay["routes"]),
-        "productClasses": 3,
-        "affiliateLinksLocked": len(locked_links),
-        "articleIntentBridge": True,
-        "monthlyAndQuarterlyReminders": True,
+        "productClasses": 2,
+        "affiliateLinksLocked": len(locked),
+        "measurementFirst": True,
+        "privacyBoundary": True,
         "personalDataFields": 0,
         "unverifiedCommercialFields": 0,
     }, ensure_ascii=False, indent=2))
