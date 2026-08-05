@@ -8,11 +8,7 @@
   "affiliateProgram": {
     "merchant": "Amazon Türkiye",
     "tag": "alo186rehber-21",
-    "requiredRel": [
-      "sponsored",
-      "nofollow",
-      "noopener"
-    ],
+    "requiredRel": ["sponsored", "nofollow", "noopener"],
     "disclosureBeforeLinkRequired": true,
     "noBuyOutcomeRequired": true
   },
@@ -21,23 +17,10 @@
     "activeHazardCommerceClosed": true,
     "personalDataCollectionForbidden": true,
     "locationAndEmergencyPagesZeroAffiliate": true,
-    "unverifiedCommercialFieldsForbidden": [
-      "offers",
-      "price",
-      "priceCurrency",
-      "availability",
-      "aggregateRating",
-      "review",
-      "warranty",
-      "delivery"
-    ],
+    "unverifiedCommercialFieldsForbidden": ["offers", "price", "priceCurrency", "availability", "aggregateRating", "review", "warranty", "delivery"],
     "productSchemaWithoutVerifiedOffer": "generic-class-only"
   },
-  "zeroAffiliatePrefixes": [
-    "/il/",
-    "/dagitim-sirketleri/",
-    "/acil-numaralar/"
-  ],
+  "zeroAffiliatePrefixes": ["/il/", "/dagitim-sirketleri/", "/acil-numaralar/"],
   "governedAffiliateRoutePatterns": [
     "akvaryum-pilli-usb-hava-motoru",
     "akvaryum-kesinti-hava-pompasi-termometre-secici",
@@ -76,6 +59,14 @@
     "jenerator",
     "ats",
     "sabit-tesisat",
+    "gunes-paneli-kesinti",
+    "ges-kesinti-yedekleme",
+    "ges-yedek-guc",
+    "hybrid-inverter",
+    "batarya-depolama",
+    "backup-interface",
+    "ada-isletmesi",
+    "kritik-yuk-panosu",
     "pelet-sobasi",
     "pelet-kazani",
     "hidrofor",
