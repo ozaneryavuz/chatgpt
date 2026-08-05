@@ -1,0 +1,78 @@
+{
+  "version": 290,
+  "category": "aquarium-outage-aeration-temperature",
+  "decision": "guarded-low-risk-consumer-affiliate",
+  "reviewedAt": "2026-08-05",
+  "searchIntent": [
+    "elektrik kesilince akvaryum balıkları ne yapılır",
+    "akvaryum elektrik kesintisi pilli hava motoru",
+    "akvaryum hava motoru UPS kaç saat",
+    "akvaryum kesintide oksijensiz kalır mı",
+    "akvaryum kesintisi sıcaklık filtre"
+  ],
+  "contentGap": "Turkish search results contain recurring forum and blog questions about aquarium outages, oxygen and UPS runtime, but commonly lack a privacy-first decision flow that rejects universal safe-time claims, preserves a no-buy result, separates animal distress from future preparation and distinguishes low-risk aeration from complex life-support backup.",
+  "allowedLowRiskClasses": [
+    "standard-battery aquarium air pump for a personal single freshwater tank",
+    "manufacturer-specified 5 V USB aquarium air pump with an already available compatible power source",
+    "aquarium thermometer used for observing temperature trend rather than guaranteeing animal safety"
+  ],
+  "excludedProfessionalOrHealthClasses": [
+    "aquarium heater filter sump or central-system UPS",
+    "generator vehicle-battery inverter or modified UPS",
+    "marine reef high-density multi-tank production or commercial life-support system",
+    "chemical oxygen water conditioner medication or animal-health product"
+  ],
+  "conversionPolicy": {
+    "newMerchantLinks": true,
+    "merchant": "Amazon Türkiye",
+    "linksLockedByDefault": true,
+    "noBuyOutcomeRequired": true,
+    "activeHazardCommerceClosed": true,
+    "animalDistressCommerceClosed": true,
+    "personalDataCollectionForbidden": true,
+    "noPriceStockRatingWarrantyClaims": true,
+    "affiliateDisclosureRequiredBeforeAnyMerchantLink": true,
+    "officialInstitutionImpressionForbidden": true,
+    "professionalScopeForComplexSystems": true
+  },
+  "conversionPoints": [
+    "no-buy result when existing aeration and temperature monitoring pass a recent real-tank test",
+    "measurement-first result when behavior temperature or water quality is uncertain",
+    "aquarium specialist or aquatic-veterinary result for animal distress and complex systems",
+    "guarded Amazon Turkey search for a standard-battery aquarium air pump",
+    "guarded Amazon Turkey search for a manufacturer-specified 5 V USB aquarium air pump",
+    "guarded Amazon Turkey search for an aquarium thermometer"
+  ],
+  "repeatVisitReasons": [
+    {"days": 30, "reason": "inspect batteries air hose air stone check valve and thermometer"},
+    {"days": 90, "reason": "repeat a controlled real-tank backup-aeration drill"},
+    {"days": 180, "reason": "review seasonal room-temperature and aquarium outage assumptions"},
+    {"trigger": "change", "reason": "repeat after a tank filter livestock-density room-temperature or backup-device change"}
+  ],
+  "sources": [
+    {
+      "publisher": "UK Government",
+      "title": "Selling animals as pets licensing statutory guidance — fish welfare and water quality",
+      "url": "https://www.gov.uk/government/publications/animal-activities-licensing-guidance-for-local-authorities/selling-animals-as-pets-licensing-statutory-guidance-for-local-authorities--2",
+      "checkedAt": "2026-08-05"
+    },
+    {
+      "publisher": "PetMD",
+      "title": "How Do Fish Breathe?",
+      "url": "https://www.petmd.com/fish/how-do-fish-breathe",
+      "checkedAt": "2026-08-05"
+    },
+    {
+      "publisher": "PetMD",
+      "title": "Common Aquatic Emergencies",
+      "url": "https://www.petmd.com/fish/emergency/common-emergencies/e_fi_emergencies",
+      "checkedAt": "2026-08-05"
+    },
+    {
+      "publisher": "Aquarium Co-Op",
+      "title": "How to Prepare Your Aquarium for a Power Outage",
+      "url": "https://www.aquariumcoop.com/blogs/aquarium/power-outage",
+      "checkedAt": "2026-08-05"
+    }
+  ]
+}
