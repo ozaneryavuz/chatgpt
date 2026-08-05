@@ -1,0 +1,21 @@
+{
+  "version": 298,
+  "name": "growth-v298-drainage-pump-outage-trust",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesilince-bodrum-drenaj-pompasi-calisir-mi/index.html",
+      "canonicalPath": "/haberler/elektrik-kesilince-bodrum-drenaj-pompasi-calisir-mi/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/bodrum-drenaj-pompasi-elektrik-kesintisi-su-baskini-plani/index.html",
+      "canonicalPath": "/hesaplama/bodrum-drenaj-pompasi-elektrik-kesintisi-su-baskini-plani/",
+      "type": "tool"
+    },
+    {
+      "source": "alo186/sektor-rehberi/apartman-otel-bodrum-drenaj-pompasi-kesinti-surekliligi/index.html",
+      "canonicalPath": "/sektor-rehberi/apartman-otel-bodrum-drenaj-pompasi-kesinti-surekliligi/",
+      "type": "professional-lead"
+    }
+  ]
+}
