@@ -10,8 +10,7 @@ ROOT = Path(__file__).resolve().parents[2]
 ARTICLE = ROOT / "alo186/haberler/elektrik-kesilince-akvaryum-baligi-ne-yapilir/index.html"
 TOOL = ROOT / "alo186/hesaplama/akvaryum-elektrik-kesintisi-oksijen-sicaklik-plani/index.html"
 SELECTOR = ROOT / "alo186/amazon-elektrik-urunleri/akvaryum-kesinti-hava-pompasi-termometre-secici/index.html"
-OVERLAY = ROOT / "alo186/deployment/routing-overlays/growth-v290-aquarium-outage-trust.json"
-DECISION = ROOT / "alo186/deployment/affiliate-category-decisions/aquarium-outage-v290.json"
+DECISION = ROOT / "alo186/deployment/affiliate-category-decisions/aquarium-outage-v300.json"
 POLICY = ROOT / "alo186/deployment/affiliate_route_risk_policy_v265.json"
 ROUTES = {
     ARTICLE: "https://alo186.com/haberler/elektrik-kesilince-akvaryum-baligi-ne-yapilir/",
@@ -35,7 +34,7 @@ def read(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
-def check_page(path: Path, canonical: str) -> str:
+def validate_page(path: Path, canonical: str) -> str:
     html = read(path)
     assert re.findall(r'<link\s+rel="canonical"\s+href="([^"]+)"', html, re.I) == [canonical]
     blocks = re.findall(r'<script\s+type="application/ld\+json">(.*?)</script>', html, re.I | re.S)
@@ -56,15 +55,17 @@ def check_page(path: Path, canonical: str) -> str:
 
 
 def main() -> None:
-    article = check_page(ARTICLE, ROUTES[ARTICLE])
-    tool = check_page(TOOL, ROUTES[TOOL])
-    selector = check_page(SELECTOR, ROUTES[SELECTOR])
+    article = validate_page(ARTICLE, ROUTES[ARTICLE])
+    tool = validate_page(TOOL, ROUTES[TOOL])
+    selector = validate_page(SELECTOR, ROUTES[SELECTOR])
 
     for required in (
         "Kesintide “kaç saat dayanır?” yerine",
+        "Kesin yaşam süresi yayımlamayın",
+        "Kesinti devam ederken yem vermeyin",
         "Mevcut plan yeterliyse yeni ürün almayın",
-        "/hesaplama/akvaryum-elektrik-kesintisi-oksijen-sicaklik-plani/",
-        "/amazon-elektrik-urunleri/akvaryum-kesinti-hava-pompasi-termometre-secici/",
+        "Bu rehberde Amazon veya başka mağaza bağlantısı yoktur",
+        "professional-only",
         "ALO186 bağımsız bilgilendirme platformudur",
     ):
         assert required in article, required
@@ -72,31 +73,44 @@ def main() -> None:
 
     for required in (
         "Ücretsiz · kişisel veri yok · mağaza bağlantısı yok",
+        "Canlı stresi veya su-elektrik tehlikesinde ticari yol kapalı",
         "Mevcut plan yeterli — yeni ürün almayın",
         "30 gün: pil, hortum ve termometre",
         "90 gün: gözetimli kesinti provası",
         "180 gün: sıcaklık, stok ve filtre planı",
         "Bu araçta Amazon veya başka mağaza bağlantısı yoktur",
-        "ticari yol kapalı",
+        "professional-only",
     ):
         assert required in tool, required
     for forbidden in (
-        "fetch(", "XMLHttpRequest", "localStorage.", "sessionStorage.",
-        "document.cookie", 'type="email"', 'type="tel"',
+        "fetch(",
+        "XMLHttpRequest",
+        "localStorage.",
+        "sessionStorage.",
+        "document.cookie",
+        'type="email"',
+        'type="tel"',
+        'type="text"',
     ):
         assert forbidden not in tool, forbidden
     assert "amazon.com.tr" not in tool.casefold()
 
     for required in (
         "Amazon Türkiye satış ortaklığı",
+        "bağlantılar başlangıçta kilitlidir",
         "Satın almama geçerli sonuçtur",
         "yeni ürün almayacağım",
-        "mağaza yolu kapalıdır",
-        "Bağlantılar başlangıçta kilitlidir",
+        "Aktif kesinti, canlı sıkıntısı veya elektrik tehlikesinde mağaza yolu kapalıdır",
+        "Pilli hava motoru",
+        "Açıkça 5 V USB hava pompası",
+        "Basit akvaryum termometresi",
         'rel="sponsored nofollow noopener"',
         "Fiyat, stok, satıcı, puan, yorum, teslimat ve garanti bilgisi ALO186 tarafından yayımlanmaz",
+        "professional-only",
     ):
         assert required in selector, required
+    for anchor_id in ("batteryLink", "usbLink", "tempLink"):
+        assert selector.index("Satış ortaklığı açıklaması") < selector.index(f'id="{anchor_id}"')
     assert 'href="https://www.amazon.com.tr' not in selector.casefold()
     assert 'data-url="https://www.amazon.com.tr' not in selector.casefold()
 
@@ -110,28 +124,45 @@ def main() -> None:
         assert anchor.get("aria-disabled") == "true"
         assert {"sponsored", "nofollow", "noopener"}.issubset(set(anchor.get("rel", "").split()))
 
-    overlay = json.loads(read(OVERLAY))
-    assert overlay["version"] == 290
-    assert overlay["name"] == "growth-v290-aquarium-outage-trust"
-    assert overlay["routes"][0]["canonicalPath"] == "/haberler/elektrik-kesilince-akvaryum-baligi-ne-yapilir/"
-
     decision = json.loads(read(DECISION))
-    assert decision["version"] == 290
-    assert decision["conversionPolicy"]["linksLockedByDefault"] is True
-    assert decision["conversionPolicy"]["noBuyOutcomeRequired"] is True
-    assert decision["conversionPolicy"]["animalDistressCommerceClosed"] is True
-    assert decision["conversionPolicy"]["affiliateDisclosureRequiredBeforeAnyMerchantLink"] is True
+    assert decision["version"] == 300
+    assert decision["decision"] == "guarded-low-risk-consumer-affiliate-with-professional-exclusions"
+    policy = decision["conversionPolicy"]
+    expected = {
+        "newMerchantLinks": True,
+        "linksLockedByDefault": True,
+        "noBuyOutcomeRequired": True,
+        "activeOutageCommerceClosed": True,
+        "animalDistressCommerceClosed": True,
+        "electricalHazardCommerceClosed": True,
+        "personalDataCollectionForbidden": True,
+        "animalHealthRecordCollectionForbidden": True,
+        "noPriceStockRatingWarrantyClaims": True,
+        "affiliateDisclosureRequiredBeforeAnyMerchantLink": True,
+        "officialInstitutionImpressionForbidden": True,
+        "professionalScopeForComplexSystems": True,
+        "universalSurvivalTimeClaimsForbidden": True,
+    }
+    for key, value in expected.items():
+        assert policy[key] is value, (key, policy[key])
+    assert policy["merchant"] == "Amazon Türkiye"
+    assert len(decision["allowedLowRiskClasses"]) == 3
+    assert len(decision["excludedProfessionalClasses"]) >= 9
+    assert [item["days"] for item in decision["repeatVisitReasons"]] == [30, 90, 180]
 
-    policy = json.loads(read(POLICY))
-    assert "akvaryum-kesinti-hava-pompasi-termometre-secici" in policy["governedAffiliateRoutePatterns"]
+    central_policy = json.loads(read(POLICY))
+    governed = central_policy["governedAffiliateRoutePatterns"]
+    assert "akvaryum-kesinti-hava-pompasi-termometre-secici" in governed
 
     print(json.dumps({
         "ok": True,
-        "legacyVersion": 290,
-        "migratedToCurrentTrustContract": True,
+        "version": 300,
+        "updatedRoutes": 3,
         "initialActiveMerchantLinks": 0,
         "guardedProductClasses": 3,
+        "professionalExclusions": len(decision["excludedProfessionalClasses"]),
         "repeatVisitDays": [30, 90, 180],
+        "personalDataFields": 0,
     }, ensure_ascii=False))
 
 

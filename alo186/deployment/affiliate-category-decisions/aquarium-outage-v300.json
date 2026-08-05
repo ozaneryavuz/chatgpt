@@ -1,0 +1,107 @@
+{
+  "version": 300,
+  "cluster": "aquarium-outage-oxygen-temperature",
+  "decision": "guarded-low-risk-consumer-affiliate-with-professional-exclusions",
+  "routes": {
+    "article": "/haberler/elektrik-kesilince-akvaryum-baligi-ne-yapilir/",
+    "tool": "/hesaplama/akvaryum-elektrik-kesintisi-oksijen-sicaklik-plani/",
+    "selector": "/amazon-elektrik-urunleri/akvaryum-kesinti-hava-pompasi-termometre-secici/"
+  },
+  "searchIntentGap": {
+    "primaryQueries": [
+      "elektrik kesilince akvaryum filtresi çalışır mı",
+      "balıklar oksijensiz kaç saat yaşar",
+      "akvaryum elektrik kesintisi hava motoru",
+      "akvaryum için UPS"
+    ],
+    "observedGap": "Türkçe sonuçların önemli bölümü tek bir dayanma süresi, forum deneyimi veya doğrudan UPS ve hava pompası alışverişi etrafında kalıyor; oksijen, gerçek yüzey hareketi, sıcaklık, filtre dönüşü, su kalitesi ve canlı stresi ayrı karar katmanları olarak ele alınmıyor.",
+    "alo186Differentiator": "Aktif kesintide ticareti kapatan, canlı davranışı ve gerçek yüzey hareketini kanıt sayan, mevcut plan yeterliyse satın almama sonucu veren ve yalnız gelecekteki düşük riskli hazırlığı güven kapısıyla açan karar zinciri."
+  },
+  "conversionPolicy": {
+    "merchant": "Amazon Türkiye",
+    "newMerchantLinks": true,
+    "linksLockedByDefault": true,
+    "noBuyOutcomeRequired": true,
+    "activeOutageCommerceClosed": true,
+    "animalDistressCommerceClosed": true,
+    "electricalHazardCommerceClosed": true,
+    "personalDataCollectionForbidden": true,
+    "animalHealthRecordCollectionForbidden": true,
+    "noPriceStockRatingWarrantyClaims": true,
+    "affiliateDisclosureRequiredBeforeAnyMerchantLink": true,
+    "officialInstitutionImpressionForbidden": true,
+    "professionalScopeForComplexSystems": true,
+    "universalSurvivalTimeClaimsForbidden": true
+  },
+  "allowedLowRiskClasses": [
+    {
+      "class": "battery-aquarium-air-pump",
+      "allowedOnlyWhen": [
+        "future preparedness only",
+        "single personal freshwater aquarium",
+        "no animal distress or electrical hazard",
+        "real aeration gap confirmed",
+        "battery type and real surface movement tested",
+        "safe dry placement or manufacturer-approved check valve"
+      ],
+      "doesNotSolve": "filter, heater, sump or whole-tank continuity"
+    },
+    {
+      "class": "explicit-5v-usb-aquarium-air-pump",
+      "allowedOnlyWhen": [
+        "manufacturer explicitly specifies 5 V USB input",
+        "existing power source behavior is verified",
+        "real tank aeration test is planned",
+        "future preparedness only"
+      ],
+      "excluded": [
+        "voltage converters",
+        "main filter backup",
+        "heater backup",
+        "sump or central systems"
+      ]
+    },
+    {
+      "class": "simple-aquarium-thermometer",
+      "allowedOnlyWhen": [
+        "temperature monitoring gap confirmed",
+        "measurement method is aquarium-appropriate",
+        "reading will be cross-checked",
+        "not used as veterinary diagnosis or safety guarantee"
+      ],
+      "doesNotSolve": "oxygen, filtration or animal health"
+    }
+  ],
+  "excludedProfessionalClasses": [
+    "aquarium heater or main filter UPS",
+    "sump, overflow or central life-support continuity",
+    "marine, reef or coral systems",
+    "sensitive species, treatment tanks or high stocking density",
+    "pet shop, breeding, hotel, restaurant or exhibition systems",
+    "pond, aquaponics or multi-tank systems",
+    "oxygen cylinders or chemical oxygen products",
+    "generator, inverter, vehicle battery or modified UPS",
+    "fixed electrical installation near water"
+  ],
+  "repeatVisitReasons": [
+    {
+      "days": 30,
+      "reason": "battery, hose, air stone, check valve and thermometer inspection"
+    },
+    {
+      "days": 90,
+      "reason": "supervised outage rehearsal with real surface movement verification"
+    },
+    {
+      "days": 180,
+      "reason": "seasonal temperature, stocking level, filtration and emergency-plan review"
+    }
+  ],
+  "expectedImpact": {
+    "userBenefit": "Fixed survival-time claims and product-first advice are replaced with hazard, animal behavior, real aeration, temperature, filtration and water-quality checks.",
+    "affiliateImpact": "Fewer but higher-intent Amazon Türkiye transitions for a verified battery air-pump, explicit 5 V USB air-pump or simple thermometer gap.",
+    "professionalImpact": "Marine, reef, sensitive, commercial and central systems are converted to qualified aquarium, veterinary and electrical continuity support instead of unsafe consumer-product clicks.",
+    "repeatVisitImpact": "The user returns for 30/90/180-day function tests rather than promotions.",
+    "trustImpact": "No unverified price, stock, rating, delivery or warranty claims; affiliate disclosure remains before merchant access and active outages never become shopping triggers."
+  }
+}
