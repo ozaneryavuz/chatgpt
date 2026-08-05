@@ -55,7 +55,7 @@ def main() -> None:
     for required in (
         "standart şebeke bağlantılı GES, elektrik kesintisinde çoğunlukla enerji vermez",
         "anti-adalanma",
-        "Batarya tek başına",
+        "yalnız “batarya var” demek yeterli değildir",
         "Backup sistemi UPS ile aynı olmayabilir",
         "yeni ürün almayın",
         "bu kümede tüketici ürünü yönlendirmesi yoktur",
