@@ -1,0 +1,98 @@
+{
+  "version": 292,
+  "category": "building-water-pressure-hydrophore-outage",
+  "decision": "decision-first-professional-led",
+  "reviewedAt": "2026-08-05",
+  "searchIntent": [
+    "elektrik kesilince apartmanda su kesilir mi",
+    "elektrik kesilince hidrofor çalışır mı",
+    "elektrik var ama üst katlarda su yok",
+    "apartman hidrofor elektrik kesintisi",
+    "otele hidrofor için ups gerekir mi"
+  ],
+  "consumerAffiliateDecision": {
+    "newMerchantLinksAllowed": false,
+    "reason": "Hydrophores, pumps, motor drives, control panels, fixed UPS systems, generators and transfer equipment are installation-, motor-, phase-, protection- and building-specific. Generic consumer recommendations can create dry-run, backfeed, electric-shock, flooding and equipment-damage risks."
+  },
+  "professionalOnlyClasses": [
+    "hydrophore and pressure booster pump",
+    "booster control panel contactor and motor protection",
+    "variable-speed drive or pressure controller",
+    "fixed UPS feeding a pump or control panel",
+    "generator ATS and building transfer system",
+    "three-phase pump and fixed wiring",
+    "water tank level control and solenoid valve",
+    "hotel site and multi-zone water-pressure system"
+  ],
+  "existingLowRiskAffiliateRoutesMayBeReusedOnlyWhen": [
+    "the active leak and all water-electricity hazards have been fully resolved",
+    "the remaining need is a standalone battery-powered water-leak alarm rather than pump control or fixed wiring",
+    "the existing governed route displays the Amazon Turkey affiliate disclosure before any merchant link",
+    "the no-buy outcome has been considered and the current monitoring arrangement is genuinely insufficient",
+    "the product is not presented as preventing floods or guaranteeing building water continuity"
+  ],
+  "conversionPolicy": {
+    "newMerchantLinks": false,
+    "professionalScopeForHydrophoreAndFixedPower": true,
+    "noBuyOutcomeRequired": true,
+    "activeHazardCommerceClosed": true,
+    "activeLeakCommerceClosed": true,
+    "dryRunCommerceClosed": true,
+    "personalDataCollectionForbidden": true,
+    "noPriceStockRatingWarrantyClaims": true,
+    "affiliateDisclosureRequiredBeforeAnyDownstreamMerchantLink": true,
+    "officialInstitutionImpressionForbidden": true
+  },
+  "conversionPoints": [
+    "local water utility or municipality for area-wide water interruption verification",
+    "building management for tank hydrophore and maintenance records",
+    "authorized pump service for alarms pressure dry-run and mechanical faults",
+    "qualified electrician or electrical engineer for panel protection supply and transfer",
+    "mechanical-plumbing assessment for tanks zones valves leaks and pressure",
+    "documented continuity test and maintenance scope for sites hotels and multi-pump systems"
+  ],
+  "repeatVisitReasons": [
+    {
+      "days": 30,
+      "reason": "inspect visible leak alarm panel and pump-room fault indicators"
+    },
+    {
+      "days": 90,
+      "reason": "repeat a controlled water-continuity and upper-floor pressure test"
+    },
+    {
+      "days": 365,
+      "reason": "review pump maintenance electrical protection tank hygiene and energy efficiency"
+    },
+    {
+      "trigger": "change",
+      "reason": "repeat after pump panel tank pressure-zone generator or building-use changes"
+    }
+  ],
+  "sources": [
+    {
+      "publisher": "Grundfos",
+      "title": "Do SCALA water booster pumps work during a power outage?",
+      "url": "https://www.grundfos.com/solutions/support/faq/can-the-scala-pumps-work-during-a-power-outage-",
+      "checkedAt": "2026-08-05"
+    },
+    {
+      "publisher": "Grundfos",
+      "title": "Pressure boosting system configurations",
+      "url": "https://www.grundfos.com/uk/learn/research-and-insights/pressure-boosting-system",
+      "checkedAt": "2026-08-05"
+    },
+    {
+      "publisher": "Grundfos",
+      "title": "Operational risks in a pressure boosting system",
+      "url": "https://www.grundfos.com/solutions/learn/research-and-insights/operational-risks-in-a-pressure-boosting-system",
+      "checkedAt": "2026-08-05"
+    },
+    {
+      "publisher": "Edirne Belediyesi",
+      "title": "Elektrik kesintisine bağlı su kesintisi duyurusu örneği",
+      "url": "https://www.edirne.bel.tr/gundem/duyurudetay?duyuruid=26b7f8ae-2691-47d2-bd0b-645a903f994d",
+      "checkedAt": "2026-08-05"
+    }
+  ]
+}
