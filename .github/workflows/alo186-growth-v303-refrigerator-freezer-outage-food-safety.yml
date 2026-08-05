@@ -8,7 +8,6 @@ on:
       - 'alo186/hesaplama/buzdolabi-dondurucu-elektrik-kesintisi-gida-guvenligi-plani/**'
       - 'alo186/amazon-elektrik-urunleri/buzdolabi-dondurucu-termometre-soguk-zincir-secimi/**'
       - 'alo186/deployment/affiliate-category-decisions/refrigerator-freezer-outage-v303.json'
-      - 'alo186/deployment/routing-overlays/growth-v303-refrigerator-freezer-outage-food-safety.json'
       - 'alo186/tests/test_growth_v303_refrigerator_freezer_outage_food_safety.py'
       - '.github/workflows/alo186-growth-v303-refrigerator-freezer-outage-food-safety.yml'
   push:
@@ -18,7 +17,6 @@ on:
       - 'alo186/hesaplama/buzdolabi-dondurucu-elektrik-kesintisi-gida-guvenligi-plani/**'
       - 'alo186/amazon-elektrik-urunleri/buzdolabi-dondurucu-termometre-soguk-zincir-secimi/**'
       - 'alo186/deployment/affiliate-category-decisions/refrigerator-freezer-outage-v303.json'
-      - 'alo186/deployment/routing-overlays/growth-v303-refrigerator-freezer-outage-food-safety.json'
       - 'alo186/tests/test_growth_v303_refrigerator_freezer_outage_food_safety.py'
       - '.github/workflows/alo186-growth-v303-refrigerator-freezer-outage-food-safety.yml'
 
@@ -45,7 +43,6 @@ jobs:
           python -m py_compile alo186/tests/test_growth_v303_refrigerator_freezer_outage_food_safety.py
           python alo186/tests/test_growth_v303_refrigerator_freezer_outage_food_safety.py
           python -m json.tool alo186/deployment/affiliate-category-decisions/refrigerator-freezer-outage-v303.json >/dev/null
-          python -m json.tool alo186/deployment/routing-overlays/growth-v303-refrigerator-freezer-outage-food-safety.json >/dev/null
 
       - name: Canonical production build ve static smoke
         run: |
