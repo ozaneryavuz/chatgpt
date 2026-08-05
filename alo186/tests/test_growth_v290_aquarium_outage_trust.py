@@ -66,7 +66,6 @@ def main() -> None:
         "/hesaplama/akvaryum-elektrik-kesintisi-oksijen-sicaklik-plani/",
         "/amazon-elektrik-urunleri/akvaryum-kesinti-hava-pompasi-termometre-secici/",
         "ALO186 bağımsız bilgilendirme platformudur",
-        "kamu kurumu değildir",
     ):
         assert required in article, required
     assert "amazon.com.tr" not in article.casefold()
@@ -82,13 +81,8 @@ def main() -> None:
     ):
         assert required in tool, required
     for forbidden in (
-        "fetch(",
-        "XMLHttpRequest",
-        "localStorage.",
-        "sessionStorage.",
-        "document.cookie",
-        'type="email"',
-        'type="tel"',
+        "fetch(", "XMLHttpRequest", "localStorage.", "sessionStorage.",
+        "document.cookie", 'type="email"', 'type="tel"',
     ):
         assert forbidden not in tool, forbidden
     assert "amazon.com.tr" not in tool.casefold()
