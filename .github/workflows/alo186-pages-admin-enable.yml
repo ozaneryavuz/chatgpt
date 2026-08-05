@@ -1,6 +1,11 @@
 name: ALO186 Pages Admin Enable
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/alo186-pages-admin-enable.yml'
+      - 'alo186/**'
   pull_request:
     branches: [main]
     paths:
