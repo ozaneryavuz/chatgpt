@@ -1,0 +1,114 @@
+name: ALO186 havuz kesintisi sürekliliği v295
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/elektrik-kesilince-havuz-pompasi-calisir-mi/**'
+      - 'alo186/hesaplama/havuz-elektrik-kesintisi-yeniden-baslatma-plani/**'
+      - 'alo186/sektor-rehberi/otel-site-havuz-elektrik-kesintisi-surekliligi/**'
+      - 'alo186/deployment/affiliate-category-decisions/pool-outage-continuity-v295.json'
+      - 'alo186/deployment/routing-overlays/growth-v295-pool-outage-continuity.json'
+      - 'alo186/deployment/affiliate_route_risk_policy_v265.json'
+      - 'alo186/tests/test_growth_v295_pool_outage_continuity.py'
+      - 'alo186/tests/test_affiliate_route_risk_policy_v265.py'
+      - '.github/workflows/alo186-growth-v295-pool-outage-continuity.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/elektrik-kesilince-havuz-pompasi-calisir-mi/**'
+      - 'alo186/hesaplama/havuz-elektrik-kesintisi-yeniden-baslatma-plani/**'
+      - 'alo186/sektor-rehberi/otel-site-havuz-elektrik-kesintisi-surekliligi/**'
+      - 'alo186/deployment/affiliate-category-decisions/pool-outage-continuity-v295.json'
+      - 'alo186/deployment/routing-overlays/growth-v295-pool-outage-continuity.json'
+      - 'alo186/deployment/affiliate_route_risk_policy_v265.json'
+      - 'alo186/tests/test_growth_v295_pool_outage_continuity.py'
+      - 'alo186/tests/test_affiliate_route_risk_policy_v265.py'
+      - '.github/workflows/alo186-growth-v295-pool-outage-continuity.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-growth-v295-pool-outage-continuity-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Havuz sürekliliği ve affiliate yönetişimi
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            alo186/tests/test_growth_v295_pool_outage_continuity.py \
+            alo186/tests/test_affiliate_route_risk_policy_v265.py
+          python alo186/tests/test_growth_v295_pool_outage_continuity.py
+          python alo186/tests/test_affiliate_route_risk_policy_v265.py
+          python -m json.tool alo186/deployment/affiliate-category-decisions/pool-outage-continuity-v295.json >/dev/null
+          python -m json.tool alo186/deployment/routing-overlays/growth-v295-pool-outage-continuity.json >/dev/null
+          python -m json.tool alo186/deployment/affiliate_route_risk_policy_v265.json >/dev/null
+
+      - name: Canonical production build ve static smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-v295
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-v295 \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-v295
+          test -f /tmp/alo186-v295/haberler/elektrik-kesilince-havuz-pompasi-calisir-mi/index.html
+          test -f /tmp/alo186-v295/hesaplama/havuz-elektrik-kesintisi-yeniden-baslatma-plani/index.html
+          test -f /tmp/alo186-v295/sektor-rehberi/otel-site-havuz-elektrik-kesintisi-surekliligi/index.html
+
+      - name: ChatGPT Sites aktarım paketi kabulü
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-sites-v295
+          python alo186/deployment/export_chatgpt_sites_bundle_v2.py \
+            --output /tmp/alo186-sites-v295 \
+            --commit "$GITHUB_SHA"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path('/tmp/alo186-sites-v295')
+          manifest = json.loads((root / 'sites-import.json').read_text(encoding='utf-8'))
+          pages = {item['canonicalPath']: item for item in manifest['pages']}
+          article = '/haberler/elektrik-kesilince-havuz-pompasi-calisir-mi/'
+          tool = '/hesaplama/havuz-elektrik-kesintisi-yeniden-baslatma-plani/'
+          sector = '/sektor-rehberi/otel-site-havuz-elektrik-kesintisi-surekliligi/'
+          expected = {article, tool, sector}
+          assert expected.issubset(pages), expected - set(pages)
+          for route in expected:
+              assert pages[route]['affiliate']['hasAffiliateLinks'] is False, route
+              assert not pages[route]['affiliate']['unsafeStaticLinks'], route
+          print(json.dumps({
+              'ok': True,
+              'routes': sorted(expected),
+              'affiliateLinks': 0,
+              'unsafeStaticLinks': 0,
+          }, ensure_ascii=False))
+          PY
+
+      - name: Özet
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ## ALO186 v295 havuz elektrik kesintisi sürekliliği
+
+          - “Elektrik kesilince havuz pompası çalışır mı?” niyeti: kaynak doğrulamalı canonical rehber
+          - Elektrik tehlikesi, gerçek akış, dozaj kilitlemesi, ölçülmüş su kalitesi ve yeniden açma: kişisel verisiz araç
+          - Otel, site, spa ve ticari havuzlar: professional-only süreklilik matrisi
+          - Pompa, dozaj, kontrol panosu, ısıtma, su altı aydınlatması, UPS, jeneratör ve ATS: consumer affiliate kapalı
+          - Mevcut sistem kayıtlı testte yeterliyse: yeni ürün almayın
+          - 7/30/365 günlük görsel kontrol, prova ve profesyonel inceleme döngüsü
+          - Fiyat, stok, puan, yorum, teslimat, garanti, Product ve Offer: yok
+          - Canonical build, static smoke ve ChatGPT Sites import kabulü: başarılı
+          EOF
