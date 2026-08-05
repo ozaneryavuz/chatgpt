@@ -1,0 +1,21 @@
+{
+  "version": 293,
+  "name": "growth-v293-pet-feeder-outage",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesilince-otomatik-mama-makinesi-calisir-mi/index.html",
+      "canonicalPath": "/haberler/elektrik-kesilince-otomatik-mama-makinesi-calisir-mi/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/otomatik-mama-makinesi-kesinti-plani/index.html",
+      "canonicalPath": "/hesaplama/otomatik-mama-makinesi-kesinti-plani/",
+      "type": "tool"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/pil-yedekli-otomatik-mama-makinesi-secimi/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/pil-yedekli-otomatik-mama-makinesi-secimi/",
+      "type": "guarded-affiliate-guide"
+    }
+  ]
+}

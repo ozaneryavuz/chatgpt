@@ -1,0 +1,86 @@
+{
+  "version": 293,
+  "name": "pet-feeder-outage-trust",
+  "decision": "guarded-low-risk-consumer-affiliate",
+  "searchIntent": [
+    "elektrik kesilince otomatik mama makinesi çalışır mı",
+    "wifi yokken otomatik mama kabı mama verir mi",
+    "pil yedekli otomatik kedi mama kabı",
+    "otomatik mama makinesi elektrik kesintisi"
+  ],
+  "allowedLowRiskClasses": [
+    {
+      "class": "dual-power-dry-food-feeder",
+      "scope": "personal-home-dry-food-only",
+      "requiredChecks": [
+        "manufacturer-documented-battery-backup",
+        "offline-schedule-behaviour",
+        "kibble-size",
+        "real-dispense-test",
+        "responsible-person-check"
+      ]
+    },
+    {
+      "class": "offline-battery-timed-feeder",
+      "scope": "personal-home-dry-food-only",
+      "requiredChecks": [
+        "device-local-schedule",
+        "battery-type",
+        "portion-test",
+        "stable-placement",
+        "responsible-person-check"
+      ]
+    },
+    {
+      "class": "manufacturer-specified-alkaline-battery",
+      "scope": "exact-size-and-chemistry-only",
+      "requiredChecks": [
+        "battery-size",
+        "chemistry",
+        "polarity",
+        "leak-inspection",
+        "manual"
+      ]
+    }
+  ],
+  "excludedProfessionalOrSafetyClasses": [
+    "wet-food or refrigerated meal feeder",
+    "medicated meal or veterinary diet automation",
+    "young, elderly, ill or dehydrated animal feeding",
+    "multi-animal access-control feeding without supervised validation",
+    "unattended long-duration pet care",
+    "modified adapter, external battery or improvised wiring"
+  ],
+  "conversionPolicy": {
+    "merchant": "Amazon Türkiye",
+    "newMerchantLinks": true,
+    "linksLockedByDefault": true,
+    "noBuyOutcomeRequired": true,
+    "activeAnimalHealthRiskCommerceClosed": true,
+    "waterAccessRequired": true,
+    "responsiblePersonCheckRequired": true,
+    "personalDataCollectionForbidden": true,
+    "noPriceStockRatingWarrantyClaims": true,
+    "affiliateDisclosureRequiredBeforeAnyMerchantLink": true,
+    "officialInstitutionImpressionForbidden": true,
+    "veterinaryScopeForComplexCases": true
+  },
+  "repeatVisitReasons": [
+    {
+      "days": 7,
+      "reason": "battery indicator, food level, water and dispensing path visual check"
+    },
+    {
+      "days": 30,
+      "reason": "supervised power-cut and real-portion dispensing test"
+    },
+    {
+      "days": 90,
+      "reason": "schedule, portion, battery leakage, cleaning and responsible-person plan review"
+    }
+  ],
+  "expectedImpact": {
+    "userBenefit": "Users distinguish power, battery, offline schedule, mechanical dispensing, water and human supervision before purchasing; a passing existing setup produces a clear no-buy result.",
+    "revenue": "Amazon Turkey clicks are limited to verified dry-food consumer needs, improving intent quality while health, special-diet and unattended-care cases remain outside commerce."
+  }
+}

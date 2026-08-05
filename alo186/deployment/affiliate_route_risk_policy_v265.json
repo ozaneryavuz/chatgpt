@@ -52,7 +52,8 @@
     "buzdolabi-dondurucu-termometre-soguk-zincir",
     "kesinti-led-fener-kafa-lambasi",
     "modem-ont-mini-ups-yedekleme",
-    "pilli-sulama-zamanlayici-nem-sensoru"
+    "pilli-sulama-zamanlayici-nem-sensoru",
+    "pil-yedekli-otomatik-mama-makinesi"
   ],
   "legacyMigrationQueue": [],
   "reviewOnlyRoutePatterns": [
