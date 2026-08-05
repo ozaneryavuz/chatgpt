@@ -1,0 +1,84 @@
+{
+  "version": 289,
+  "category": "small-business-pos-cash-register-outage",
+  "decision": "decision-first-professional-led",
+  "reviewedAt": "2026-08-05",
+  "searchIntent": [
+    "elektrik kesilince pos cihazı çalışır mı",
+    "elektrik kesilince yazar kasa çalışır mı",
+    "pos işlemi yarıda kaldı ne yapmalıyım",
+    "market elektrik kesintisi satış sürekliliği",
+    "kafe pos yazar kasa ups"
+  ],
+  "consumerAffiliateDecision": {
+    "newMerchantLinksAllowed": false,
+    "reason": "Payment terminals, new-generation cash registers, fiscal printers and their transaction records are provider-, model-, authorization- and installation-specific. A generic UPS, adapter or battery recommendation can create electrical, transaction and fiscal-record risks and cannot prove continuity."
+  },
+  "professionalOnlyClasses": [
+    "EFT-POS enabled new-generation cash register",
+    "separate new-generation cash register or fiscal printer",
+    "fixed desktop POS terminal and powered base",
+    "cash-register or POS manufacturer power supply replacement",
+    "multi-terminal or multi-branch payment system",
+    "fixed UPS feeding fiscal or payment equipment",
+    "store server switch cabinet or fixed network wiring",
+    "device opening seal bypass or unauthorized battery modification"
+  ],
+  "existingLowRiskAffiliateRoutesMayBeReusedOnlyWhen": [
+    "the need is limited to a separately powered modem ONT or router rather than the fiscal or payment device",
+    "exact voltage current connector polarity and provider tolerance are verified",
+    "the existing governed route displays the Amazon Turkey affiliate disclosure before any merchant link",
+    "the current system has failed a controlled test and the no-buy outcome is not applicable",
+    "the use is not an active outage transaction or a substitute for authorized fiscal procedure"
+  ],
+  "conversionPolicy": {
+    "newMerchantLinks": false,
+    "professionalScopeForFiscalAndPaymentHardware": true,
+    "noBuyOutcomeRequired": true,
+    "activeHazardCommerceClosed": true,
+    "uncertainTransactionCommerceClosed": true,
+    "personalDataCollectionForbidden": true,
+    "noPriceStockRatingWarrantyClaims": true,
+    "affiliateDisclosureRequiredBeforeAnyDownstreamMerchantLink": true,
+    "officialInstitutionImpressionForbidden": true
+  },
+  "conversionPoints": [
+    "bank or payment-institution merchant support for transaction-state verification",
+    "authorized new-generation cash-register service for fiscal-device faults",
+    "accountant and official GIB sources for business-specific document procedure",
+    "electrical and network continuity assessment for fixed or multi-device systems",
+    "documented staff procedure and controlled continuity review for branches"
+  ],
+  "repeatVisitReasons": [
+    {"days": 30, "reason": "inspect adapters cables battery indicators printers and fault records"},
+    {"days": 90, "reason": "review payment fiscal-record network and staff continuity procedure"},
+    {"days": 365, "reason": "renew provider device branch network and electrical continuity scope"},
+    {"trigger": "change", "reason": "repeat after a terminal provider modem software branch or electrical change"}
+  ],
+  "sources": [
+    {
+      "publisher": "Gelir İdaresi Başkanlığı",
+      "title": "Yeni Nesil Ödeme Kaydedici Cihaz Sıkça Sorulan Sorular",
+      "url": "https://ynokc.gib.gov.tr/Home/SSS",
+      "checkedAt": "2026-08-05"
+    },
+    {
+      "publisher": "Gelir İdaresi Başkanlığı",
+      "title": "YN ÖKC mevzuat ve teknik kılavuzları",
+      "url": "https://ynokc.gib.gov.tr/Home/Mevzuat?topic=Kullan",
+      "checkedAt": "2026-08-05"
+    },
+    {
+      "publisher": "Verifone",
+      "title": "Model-based terminal support centre",
+      "url": "https://helpcenter.verifone.com/",
+      "checkedAt": "2026-08-05"
+    },
+    {
+      "publisher": "Ingenico",
+      "title": "Model-based terminal user guides",
+      "url": "https://ingenico.com/apac/resources/user-guides",
+      "checkedAt": "2026-08-05"
+    }
+  ]
+}
