@@ -1,0 +1,21 @@
+{
+  "version": 296,
+  "name": "growth-v296-cold-chain-outage-trust",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesilince-buzdolabi-kac-saat-soguk-kalir/index.html",
+      "canonicalPath": "/haberler/elektrik-kesilince-buzdolabi-kac-saat-soguk-kalir/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/buzdolabi-derin-dondurucu-elektrik-kesintisi-gida-plani/index.html",
+      "canonicalPath": "/hesaplama/buzdolabi-derin-dondurucu-elektrik-kesintisi-gida-plani/",
+      "type": "tool"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/buzdolabi-dondurucu-termometre-soguk-zincir/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/buzdolabi-dondurucu-termometre-soguk-zincir/",
+      "type": "guarded-affiliate-selector"
+    }
+  ]
+}
