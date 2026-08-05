@@ -1,0 +1,84 @@
+{
+  "version": 291,
+  "name": "irrigation-outage-trust",
+  "decision": "guarded-low-risk-consumer-affiliate",
+  "searchIntent": [
+    "elektrik kesilince otomatik sulama programı silinir mi",
+    "elektrik gelince sulama sistemi yeniden başlar mı",
+    "sulama kontrolörü pil yedeği gerekli mi",
+    "pilli sulama zamanlayıcısı elektrik kesintisinde çalışır mı"
+  ],
+  "allowedLowRiskClasses": [
+    {
+      "class": "battery-operated-tap-timer",
+      "scope": "personal-single-tap-small-garden-only",
+      "requiredChecks": [
+        "thread",
+        "water-pressure",
+        "safe-close-on-low-battery",
+        "leak-test",
+        "weather-exposure"
+      ]
+    },
+    {
+      "class": "compatible-soil-moisture-sensor",
+      "scope": "only-if-explicitly-supported-by-existing-controller",
+      "requiredChecks": [
+        "model-compatibility",
+        "connection-type",
+        "placement",
+        "skip-cycle-behaviour"
+      ]
+    },
+    {
+      "class": "manufacturer-specified-standard-battery",
+      "scope": "exact-size-and-chemistry-only",
+      "requiredChecks": [
+        "battery-size",
+        "chemistry",
+        "polarity",
+        "leak-inspection",
+        "manual"
+      ]
+    }
+  ],
+  "excludedProfessionalOrSafetyClasses": [
+    "230V irrigation controller",
+    "24V solenoid valve and fixed wiring",
+    "pump, hydrofor, well pump or pump-start relay",
+    "hotel, site, park, field, greenhouse or multi-zone central irrigation",
+    "fire irrigation and fire pump systems",
+    "outdoor electrical panel and buried cable work"
+  ],
+  "conversionPolicy": {
+    "merchant": "Amazon Türkiye",
+    "newMerchantLinks": true,
+    "linksLockedByDefault": true,
+    "noBuyOutcomeRequired": true,
+    "activeHazardCommerceClosed": true,
+    "activeLeakCommerceClosed": true,
+    "personalDataCollectionForbidden": true,
+    "noPriceStockRatingWarrantyClaims": true,
+    "affiliateDisclosureRequiredBeforeAnyMerchantLink": true,
+    "officialInstitutionImpressionForbidden": true,
+    "professionalScopeForComplexSystems": true
+  },
+  "repeatVisitReasons": [
+    {
+      "days": 30,
+      "reason": "battery, connection, leak and valve visual check"
+    },
+    {
+      "days": 90,
+      "reason": "controlled real-task watering test"
+    },
+    {
+      "days": 180,
+      "reason": "seasonal schedule and moisture assumptions review"
+    }
+  ],
+  "expectedImpact": {
+    "userBenefit": "Users distinguish memory, clock, valve, pump and network behaviour before purchasing and avoid unnecessary replacement when the existing system passes a real task test.",
+    "revenue": "Qualified Amazon Turkey clicks are limited to low-risk single-tap needs; fixed and central systems become higher-value professional assessment opportunities."
+  }
+}
