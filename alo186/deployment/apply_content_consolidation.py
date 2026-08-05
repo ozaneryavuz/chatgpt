@@ -15,9 +15,13 @@ MARKER_END = "# END ALO186 CONTENT CONSOLIDATIONS"
 
 
 def normalize_path(value: str) -> str:
-    raw = "/" + str(value or "").strip().strip("/")
+    text = str(value or "").strip()
+    trailing = text.endswith("/") and text.strip("/") != ""
+    raw = "/" + text.strip("/")
     if raw == "/":
         raise ValueError("İçerik birleştirme rotası kök dizin olamaz")
+    if trailing:
+        raw += "/"
     if "//" in raw or not re.fullmatch(r"/[a-z0-9\-/]+", raw):
         raise ValueError(f"Geçersiz içerik birleştirme rotası: {value!r}")
     return raw
@@ -218,7 +222,7 @@ def update_htaccess(site: Path, items: list[dict]) -> bool:
     block_pattern = re.compile(re.escape(MARKER_START) + r".*?" + re.escape(MARKER_END), re.S)
     rules = [MARKER_START, "<IfModule mod_rewrite.c>", "  RewriteEngine On"]
     for item in items:
-        source = item["aliasPath"].lstrip("/")
+        source = item["aliasPath"].strip("/")
         destination = f"{CANONICAL_HOST}{item['canonicalPath']}"
         rules.append(f"  RewriteRule ^{source}/?$ {destination} [R=301,L,NE]")
     rules.extend(["</IfModule>", MARKER_END])
