@@ -18,6 +18,10 @@ DISCLOSURE = re.compile(
     r'(<div\b[^>]*class=["\'][^"\']*\baffiliate-disclosure\b[^"\']*["\'][^>]*>.*?</div>)',
     re.I | re.S,
 )
+STANDARD_BOUNDARY = re.compile(
+    r'(<div\b[^>]*data-alo186-commercial-trust=["\']true["\'][^>]*>.*?</div>)',
+    re.I | re.S,
+)
 LEGACY_BOUNDARY = re.compile(
     r'(<div\b[^>]*data-alo186-commerce-trust(?:-[^=\s>]+)?=["\']true["\'][^>]*>.*?</div>)',
     re.I | re.S,
@@ -88,13 +92,10 @@ def run(site: Path, base_path: str = "") -> dict:
         # sınırını korur. Affiliate açıklaması kaybolduysa fail-open davranmak
         # yerine görünür ve doğrulanabilir açıklamayı güven sınırının önüne geri koy.
         if not disclosure:
-            boundary = LEGACY_BOUNDARY.search(html)
-            if not boundary and MARKER not in html:
+            boundary = STANDARD_BOUNDARY.search(html) or LEGACY_BOUNDARY.search(html)
+            if not boundary:
                 raise RuntimeError(f"Ticari sayfada affiliate açıklaması bulunamadı: {route}")
-            insert_at = boundary.start() if boundary else html.find(MARKER)
-            if insert_at < 0:
-                raise RuntimeError(f"Ticari sayfada güven sınırı bulunamadı: {route}")
-            html = html[:insert_at] + AFFILIATE_DISCLOSURE + "\n  " + html[insert_at:]
+            html = html[: boundary.start()] + AFFILIATE_DISCLOSURE + "\n  " + html[boundary.start() :]
             restored_disclosures += 1
 
         if MARKER not in html:
