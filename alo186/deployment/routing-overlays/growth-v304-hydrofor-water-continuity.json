@@ -1,0 +1,15 @@
+{
+  "version": 304,
+  "name": "growth-v304-hydrofor-water-continuity",
+  "routes": [
+    {
+      "source": "alo186/sektor-rehberi/apartman-otel-hidrofor-su-surekliligi/index.html",
+      "canonicalPath": "/sektor-rehberi/apartman-otel-hidrofor-su-surekliligi/",
+      "type": "professional-lead"
+    }
+  ],
+  "existingCanonicalRoutesValidated": [
+    "/haberler/elektrik-kesilince-hidrofor-calisir-mi/",
+    "/hesaplama/hidrofor-elektrik-kesintisi-su-surekliligi-plani/"
+  ]
+}
