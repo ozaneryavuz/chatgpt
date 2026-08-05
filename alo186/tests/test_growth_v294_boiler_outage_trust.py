@@ -7,6 +7,7 @@ ARTICLE = ROOT / "alo186/haberler/elektrik-kesilince-kombi-calisir-mi/index.html
 TOOL = ROOT / "alo186/hesaplama/kombi-elektrik-kesintisi-ups-uygunluk-kontrolu/index.html"
 DECISION_PAGE = ROOT / "alo186/amazon-elektrik-urunleri/kombi-ups-yedek-guc-secimi/index.html"
 ROUTING = ROOT / "alo186/deployment/routing-overlays/growth-v294-boiler-outage-trust.json"
+CANONICAL_REGISTRATION = ROOT / "alo186/deployment/routing-overlays/growth-v272-boiler-trust.json"
 DECISION = ROOT / "alo186/deployment/affiliate-category-decisions/boiler-outage-backup-v294.json"
 POLICY = ROOT / "alo186/deployment/affiliate_route_risk_policy_v265.json"
 
@@ -15,21 +16,26 @@ def read(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
-def test_v294_files_exist_and_routes_are_canonical():
-    for path in (ARTICLE, TOOL, DECISION_PAGE, ROUTING, DECISION, POLICY):
+def test_v294_files_exist_and_canonical_registration_is_not_duplicated():
+    for path in (ARTICLE, TOOL, DECISION_PAGE, ROUTING, CANONICAL_REGISTRATION, DECISION, POLICY):
         assert path.exists(), path
+
     routing = json.loads(read(ROUTING))
     assert routing["version"] == 294
-    assert len(routing["routes"]) == 3
-    assert {route["type"] for route in routing["routes"]} == {
-        "article",
-        "tool",
-        "professional-only-decision-guide",
+    assert routing["routes"] == []
+    assert routing["extendsCanonicalRegistration"] == "growth-v272-boiler-trust.json"
+
+    canonical = json.loads(read(CANONICAL_REGISTRATION))
+    expected = {
+        ("alo186/haberler/elektrik-kesilince-kombi-calisir-mi/index.html", "/haberler/elektrik-kesilince-kombi-calisir-mi/"),
+        ("alo186/hesaplama/kombi-elektrik-kesintisi-ups-uygunluk-kontrolu/index.html", "/hesaplama/kombi-elektrik-kesintisi-ups-uygunluk-kontrolu/"),
+        ("alo186/amazon-elektrik-urunleri/kombi-ups-yedek-guc-secimi/index.html", "/amazon-elektrik-urunleri/kombi-ups-yedek-guc-secimi/"),
     }
-    for route in routing["routes"]:
-        assert route["canonicalPath"].startswith("/")
-        assert route["canonicalPath"].endswith("/")
-        assert (ROOT / route["source"]).exists()
+    registered = {(route["source"], route["canonicalPath"]) for route in canonical["routes"]}
+    assert expected.issubset(registered), expected - registered
+    for source, canonical_path in expected:
+        assert canonical_path.startswith("/") and canonical_path.endswith("/")
+        assert (ROOT / source).exists()
 
 
 def test_visible_independence_safety_privacy_and_no_buy_contract():
@@ -156,7 +162,7 @@ def test_source_freshness_and_model_specific_language():
 
 if __name__ == "__main__":
     tests = [
-        test_v294_files_exist_and_routes_are_canonical,
+        test_v294_files_exist_and_canonical_registration_is_not_duplicated,
         test_visible_independence_safety_privacy_and_no_buy_contract,
         test_commerce_is_zero_and_route_is_fail_closed,
         test_no_unverified_commercial_claims_or_rich_result_abuse,
