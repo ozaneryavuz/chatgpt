@@ -1,0 +1,39 @@
+{
+  "version": 298,
+  "topic": "basement-drainage-pump-outage-continuity",
+  "decision": "professional-lead-only",
+  "newMerchantLinks": 0,
+  "conversionPolicy": {
+    "merchant": null,
+    "activeFloodCommerceClosed": true,
+    "waterElectricalHazardCommerceClosed": true,
+    "fixedPumpConsumerAffiliateClosed": true,
+    "generatorAndTransferConsumerAffiliateClosed": true,
+    "sewageSystemConsumerAffiliateClosed": true,
+    "noBuyOutcomeRequired": true,
+    "personalDataCollectionForbidden": true,
+    "noPriceStockRatingWarrantyClaims": true,
+    "affiliateDisclosureRequiredBeforeAnyFutureMerchantLink": true,
+    "officialInstitutionImpressionForbidden": true,
+    "professionalScopeForComplexSystems": true
+  },
+  "professionalClasses": [
+    "fixed drainage and submersible pumps",
+    "sewage and wastewater pumps",
+    "pump control panels and level switches",
+    "generator and automatic transfer systems",
+    "fixed UPS and battery systems",
+    "check valves and discharge piping",
+    "high-water alarm integration",
+    "building-wide flood continuity design"
+  ],
+  "repeatVisitReasons": [
+    {"days": 7, "reason": "heavy-rain visual inspection and high-water alarm status"},
+    {"days": 30, "reason": "duty-standby alternation, alarm and check-valve record"},
+    {"days": 180, "reason": "controlled wet test, backup transfer and response drill"}
+  ],
+  "expectedImpact": {
+    "userBenefit": "separates active flood danger from pump, control, alarm, discharge and power faults without purchase pressure",
+    "revenueImpact": "creates qualified professional pump, electrical and facility-continuity leads instead of unsafe consumer product clicks"
+  }
+}
