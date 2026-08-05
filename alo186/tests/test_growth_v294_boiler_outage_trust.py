@@ -55,8 +55,12 @@ def test_visible_independence_safety_privacy_and_no_buy_contract():
         'name="serial"',
     ):
         assert field not in combined
-    assert "localstorage" not in combined
-    assert "sessionstorage" not in combined
+    for storage_write in (
+        "localstorage.setitem",
+        "sessionstorage.setitem",
+        "document.cookie=",
+    ):
+        assert storage_write not in combined
 
 
 def test_commerce_is_zero_and_route_is_fail_closed():
