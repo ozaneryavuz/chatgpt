@@ -1,0 +1,21 @@
+{
+  "version": 294,
+  "name": "growth-v294-boiler-outage-trust",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesilince-kombi-calisir-mi/index.html",
+      "canonicalPath": "/haberler/elektrik-kesilince-kombi-calisir-mi/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/kombi-elektrik-kesintisi-ups-uygunluk-kontrolu/index.html",
+      "canonicalPath": "/hesaplama/kombi-elektrik-kesintisi-ups-uygunluk-kontrolu/",
+      "type": "tool"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/kombi-ups-yedek-guc-secimi/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/kombi-ups-yedek-guc-secimi/",
+      "type": "professional-only-decision-guide"
+    }
+  ]
+}
