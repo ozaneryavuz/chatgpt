@@ -26,6 +26,7 @@ LEGACY_BOUNDARY = re.compile(
     r'(<div\b[^>]*data-alo186-commerce-trust(?:-[^=\s>]+)?=["\']true["\'][^>]*>.*?</div>)',
     re.I | re.S,
 )
+MAIN_END = re.compile(r'</main\s*>', re.I)
 AFFILIATE_DISCLOSURE = '''<div class="affiliate-disclosure" data-alo186-affiliate-disclosure="true"><strong>Amazon Türkiye satış ortaklığı açıklaması:</strong> Bu sayfanın ilerletebildiği Amazon Türkiye bağlantıları satış ortaklığı bağlantısıdır. ALO186 nitelikli satın alımlardan komisyon kazanabilir; ürün sınıfları komisyon oranına göre sıralanmaz. Fiyat, stok, puan ve garanti bilgileri ALO186 tarafından doğrulanmış kabul edilmez; güncel bilgi mağazada kontrol edilmelidir.</div>'''
 NOTICE = '''<div class="affiliate-disclosure commercial-trust-boundary" data-alo186-commercial-trust="true"><strong>Bağımsızlık ve satın almama sınırı:</strong> ALO186 bağımsız bilgi platformudur; EDAŞ, kamu kurumu veya ürün satıcısı değildir. Mevcut ekipman ihtiyacı güvenli biçimde karşılıyorsa yeni ürün satın almayın.</div>'''
 
@@ -45,17 +46,18 @@ def recompute(site: Path) -> None:
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def update_release(site: Path, injected: int, restored_disclosures: int) -> None:
+def update_release(site: Path, injected: int, restored_disclosures: int, reconstructed_boundaries: int) -> None:
     for name in ("alo186-release.json", "pages-release.json"):
         path = site / name
         if not path.is_file():
             continue
         payload = json.loads(path.read_text(encoding="utf-8"))
         payload["commercialTrustBoundary"] = {
-            "version": 2,
+            "version": 3,
             "routeCount": len(ROUTES),
             "injectedThisPass": injected,
             "restoredAffiliateDisclosures": restored_disclosures,
+            "reconstructedBoundaries": reconstructed_boundaries,
             "officialInstitutionImpression": False,
             "affiliateRelationshipVisible": True,
             "noBuyOutcomeVisible": True,
@@ -72,11 +74,20 @@ def tag_legacy_boundary(html: str) -> tuple[str, bool]:
     return html[: match.start()] + tagged + html[match.end() :], True
 
 
+def reconstruct_before_main_end(html: str, route: str) -> str:
+    anchor = MAIN_END.search(html)
+    if not anchor:
+        raise RuntimeError(f"Ticari güven açıklaması için güvenli yerleşim noktası bulunamadı: {route}")
+    block = AFFILIATE_DISCLOSURE + "\n  " + NOTICE + "\n  "
+    return html[: anchor.start()] + block + html[anchor.start() :]
+
+
 def run(site: Path, base_path: str = "") -> dict:
     del base_path  # Metin ve canonical kimlik base-path'ten bağımsızdır.
     site = site.resolve()
     injected = 0
     restored_disclosures = 0
+    reconstructed_boundaries = 0
     checked = 0
     missing: list[str] = []
     for route in ROUTES:
@@ -87,18 +98,23 @@ def run(site: Path, base_path: str = "") -> dict:
         checked += 1
         html = path.read_text(encoding="utf-8", errors="ignore")
         disclosure = DISCLOSURE.search(html)
+        reconstructed = False
 
-        # Bazı üretim enjektörleri ticari metni sadeleştirirken mevcut v212 güven
-        # sınırını korur. Affiliate açıklaması kaybolduysa fail-open davranmak
-        # yerine görünür ve doğrulanabilir açıklamayı güven sınırının önüne geri koy.
+        # Üretim dönüşümleri açıklamayı veya eski güven işaretini kaldırabilir.
+        # Rota listesi kapalı ve ticari sayfalarla sınırlıdır: eksik metni sessizce
+        # kabul etmek yerine görünür affiliate + bağımsızlık/no-buy sınırını yeniden kur.
         if not disclosure:
             boundary = STANDARD_BOUNDARY.search(html) or LEGACY_BOUNDARY.search(html)
-            if not boundary:
-                raise RuntimeError(f"Ticari sayfada affiliate açıklaması bulunamadı: {route}")
-            html = html[: boundary.start()] + AFFILIATE_DISCLOSURE + "\n  " + html[boundary.start() :]
+            if boundary:
+                html = html[: boundary.start()] + AFFILIATE_DISCLOSURE + "\n  " + html[boundary.start() :]
+            else:
+                html = reconstruct_before_main_end(html, route)
+                reconstructed = True
+                reconstructed_boundaries += 1
+                injected += 1
             restored_disclosures += 1
 
-        if MARKER not in html:
+        if MARKER not in html and not reconstructed:
             html, tagged = tag_legacy_boundary(html)
             if not tagged:
                 disclosure = DISCLOSURE.search(html)
@@ -107,17 +123,20 @@ def run(site: Path, base_path: str = "") -> dict:
                 html = html[: disclosure.end()] + "\n  " + NOTICE + html[disclosure.end() :]
             injected += 1
 
+        if not DISCLOSURE.search(html) or MARKER not in html:
+            raise RuntimeError(f"Ticari güven sınırı doğrulanamadı: {route}")
         path.write_text(html, encoding="utf-8")
 
     if missing:
         raise FileNotFoundError("Ticari güven sınırı uygulanacak rotalar eksik: " + ", ".join(missing))
-    update_release(site, injected, restored_disclosures)
+    update_release(site, injected, restored_disclosures, reconstructed_boundaries)
     recompute(site)
     return {
         "ok": True,
         "checkedRoutes": checked,
         "injectedRoutes": injected,
         "restoredAffiliateDisclosures": restored_disclosures,
+        "reconstructedBoundaries": reconstructed_boundaries,
         "remainingWithoutBoundary": 0,
         "officialInstitutionImpression": False,
         "affiliateRelationshipVisible": True,
