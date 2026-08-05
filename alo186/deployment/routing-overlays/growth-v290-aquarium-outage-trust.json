@@ -6,16 +6,10 @@
       "source": "alo186/haberler/elektrik-kesilince-akvaryum-baligi-ne-yapilir/index.html",
       "canonicalPath": "/haberler/elektrik-kesilince-akvaryum-baligi-ne-yapilir/",
       "type": "article"
-    },
-    {
-      "source": "alo186/hesaplama/akvaryum-elektrik-kesintisi-oksijen-sicaklik-plani/index.html",
-      "canonicalPath": "/hesaplama/akvaryum-elektrik-kesintisi-oksijen-sicaklik-plani/",
-      "type": "tool"
-    },
-    {
-      "source": "alo186/amazon-elektrik-urunleri/akvaryum-kesinti-hava-pompasi-termometre-secici/index.html",
-      "canonicalPath": "/amazon-elektrik-urunleri/akvaryum-kesinti-hava-pompasi-termometre-secici/",
-      "type": "guarded-affiliate-selector"
     }
+  ],
+  "updatedExistingRoutes": [
+    "/hesaplama/akvaryum-elektrik-kesintisi-oksijen-sicaklik-plani/",
+    "/amazon-elektrik-urunleri/akvaryum-kesinti-hava-pompasi-termometre-secici/"
   ]
 }
