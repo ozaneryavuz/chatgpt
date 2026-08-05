@@ -23,6 +23,7 @@
   "zeroAffiliatePrefixes": ["/il/", "/dagitim-sirketleri/", "/acil-numaralar/"],
   "governedAffiliateRoutePatterns": [
     "akvaryum-pilli-usb-hava-motoru",
+    "akvaryum-kesinti-hava-pompasi-termometre-secici",
     "pilli-su-kacagi-alarmi",
     "pilli-karbonmonoksit-alarmi",
     "duvar-kablo-metal-dedektoru",
