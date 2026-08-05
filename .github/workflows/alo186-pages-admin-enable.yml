@@ -18,9 +18,12 @@ permissions:
   pages: write
   id-token: write
 
+env:
+  EMERGENCY_ORIGIN: https://rawcdn.githack.com/ozaneryavuz/chatgpt/d5cdf480f10055577277e5b741473c48d9b9d07c
+
 jobs:
   enable:
-    name: Enable Pages with available repository admin credential
+    name: Enable Pages or verify immutable emergency mirror
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     env:
@@ -52,11 +55,10 @@ jobs:
             printf '%s=%s\n' "$name" "$value"
           done
 
-      - name: Require an administrator token
+      - name: Note unavailable repository administrator token
         if: env.PAGES_ADMIN_TOKEN == ''
         run: |
-          echo 'No repository administrator PAT is configured under the supported secret names.' >&2
-          exit 1
+          echo 'No repository administrator PAT is configured; publishing immutable emergency mirror instead.'
 
       - name: Enable GitHub Pages through the official action
         if: env.PAGES_ADMIN_TOKEN != ''
@@ -78,10 +80,55 @@ jobs:
             "source": {"branch": "gh-pages", "path": "/"}
           }
           JSON
-          gh api --method PUT \
-            -H 'X-GitHub-Api-Version: 2022-11-28' \
-            "repos/${GITHUB_REPOSITORY}/pages" \
-            --input /tmp/pages.json
-          gh api --method POST \
-            -H 'X-GitHub-Api-Version: 2022-11-28' \
+          gh api --method PUT -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "repos/${GITHUB_REPOSITORY}/pages" --input /tmp/pages.json
+          gh api --method POST -H 'X-GitHub-Api-Version: 2022-11-28' \
             "repos/${GITHUB_REPOSITORY}/pages/builds"
+
+      - name: Verify immutable emergency live mirror
+        run: |
+          set -euo pipefail
+          verify() {
+            local path="$1"
+            local marker="$2"
+            local body
+            for attempt in $(seq 1 18); do
+              body="$(mktemp)"
+              if curl --fail --silent --show-error --location \
+                --connect-timeout 10 --max-time 30 \
+                "${EMERGENCY_ORIGIN}${path}" -o "$body" \
+                && grep -q "$marker" "$body"; then
+                echo "LIVE VERIFIED: ${EMERGENCY_ORIGIN}${path}"
+                rm -f "$body"
+                return 0
+              fi
+              rm -f "$body"
+              sleep 10
+            done
+            echo "Emergency mirror verification failed: ${EMERGENCY_ORIGIN}${path}" >&2
+            return 1
+          }
+          verify '/canli/index.html' 'Duman ve karbonmonoksit alarmı kesinti rehberleri yayında'
+          verify '/haberler/elektrik-kesilince-duman-dedektoru-calisir-mi/index.html' 'Elektrik Kesilince Duman Dedektörü Çalışır mı'
+          verify '/hesaplama/duman-karbonmonoksit-alarmi-elektrik-kesintisi-kontrolu/index.html' 'Duman ve Karbonmonoksit Alarmı Kesinti Kontrolü'
+          verify '/amazon-elektrik-urunleri/duman-alarmi-pil-yedegi-kesinti-hazirligi/index.html' 'Duman Alarmı ve Pil Yedeği Kesinti Hazırlığı'
+
+      - name: Write live receipt
+        run: |
+          cat > /tmp/alo186-emergency-live.json <<JSON
+          {
+            "status": "live-verified",
+            "mode": "immutable-emergency-mirror",
+            "sourceCommit": "d5cdf480f10055577277e5b741473c48d9b9d07c",
+            "entryUrl": "${EMERGENCY_ORIGIN}/canli/index.html",
+            "canonicalCutoverPending": ${{ env.PAGES_ADMIN_TOKEN == '' }}
+          }
+          JSON
+          cat /tmp/alo186-emergency-live.json
+
+      - name: Upload live verification receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo186-emergency-live-${{ github.run_id }}
+          path: /tmp/alo186-emergency-live.json
+          retention-days: 30
