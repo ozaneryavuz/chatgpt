@@ -18,7 +18,7 @@ on:
       - 'alo186/hesaplama/hidrofor-elektrik-kesintisi-su-surekliligi-plani/**'
       - 'alo186/sektor-rehberi/apartman-otel-hidrofor-su-surekliligi/**'
       - 'alo186/deployment/affiliate-category-decisions/hydrofor-water-continuity-v304.json'
-      - 'alo186/deployment/routing-overlays/growth-v304-hidrofor-water-continuity.json'
+      - 'alo186/deployment/routing-overlays/growth-v304-hydrofor-water-continuity.json'
       - 'alo186/tests/test_growth_v304_hydrofor_water_continuity.py'
       - '.github/workflows/alo186-growth-v304-hydrofor-water-continuity.yml'
 
