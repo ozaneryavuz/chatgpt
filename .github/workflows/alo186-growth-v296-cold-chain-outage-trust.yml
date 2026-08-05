@@ -1,0 +1,113 @@
+name: ALO186 buzdolabı ve soğuk zincir kesinti güveni v296
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/elektrik-kesilince-buzdolabi-kac-saat-soguk-kalir/**'
+      - 'alo186/hesaplama/buzdolabi-derin-dondurucu-elektrik-kesintisi-gida-plani/**'
+      - 'alo186/amazon-elektrik-urunleri/buzdolabi-dondurucu-termometre-soguk-zincir/**'
+      - 'alo186/deployment/affiliate-category-decisions/cold-chain-outage-v296.json'
+      - 'alo186/deployment/routing-overlays/growth-v296-cold-chain-outage-trust.json'
+      - 'alo186/deployment/affiliate_route_risk_policy_v265.json'
+      - 'alo186/tests/test_growth_v296_cold_chain_outage_trust.py'
+      - '.github/workflows/alo186-growth-v296-cold-chain-outage-trust.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/elektrik-kesilince-buzdolabi-kac-saat-soguk-kalir/**'
+      - 'alo186/hesaplama/buzdolabi-derin-dondurucu-elektrik-kesintisi-gida-plani/**'
+      - 'alo186/amazon-elektrik-urunleri/buzdolabi-dondurucu-termometre-soguk-zincir/**'
+      - 'alo186/deployment/affiliate-category-decisions/cold-chain-outage-v296.json'
+      - 'alo186/deployment/routing-overlays/growth-v296-cold-chain-outage-trust.json'
+      - 'alo186/deployment/affiliate_route_risk_policy_v265.json'
+      - 'alo186/tests/test_growth_v296_cold_chain_outage_trust.py'
+      - '.github/workflows/alo186-growth-v296-cold-chain-outage-trust.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-growth-v296-cold-chain-outage-trust-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Soğuk zincir güveni ve affiliate yönetişimi
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            alo186/tests/test_growth_v296_cold_chain_outage_trust.py \
+            alo186/tests/test_affiliate_route_risk_policy_v265.py
+          python alo186/tests/test_growth_v296_cold_chain_outage_trust.py
+          python alo186/tests/test_affiliate_route_risk_policy_v265.py
+          python -m json.tool alo186/deployment/affiliate-category-decisions/cold-chain-outage-v296.json >/dev/null
+          python -m json.tool alo186/deployment/routing-overlays/growth-v296-cold-chain-outage-trust.json >/dev/null
+          python -m json.tool alo186/deployment/affiliate_route_risk_policy_v265.json >/dev/null
+
+      - name: Canonical production build ve static smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-v296
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-v296 \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-v296
+          test -f /tmp/alo186-v296/haberler/elektrik-kesilince-buzdolabi-kac-saat-soguk-kalir/index.html
+          test -f /tmp/alo186-v296/hesaplama/buzdolabi-derin-dondurucu-elektrik-kesintisi-gida-plani/index.html
+          test -f /tmp/alo186-v296/amazon-elektrik-urunleri/buzdolabi-dondurucu-termometre-soguk-zincir/index.html
+
+      - name: ChatGPT Sites aktarım paketi kabulü
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-sites-v296
+          python alo186/deployment/export_chatgpt_sites_bundle_v2.py \
+            --output /tmp/alo186-sites-v296 \
+            --commit "$GITHUB_SHA"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path('/tmp/alo186-sites-v296')
+          manifest = json.loads((root / 'sites-import.json').read_text(encoding='utf-8'))
+          pages = {item['canonicalPath']: item for item in manifest['pages']}
+          expected = {
+              '/haberler/elektrik-kesilince-buzdolabi-kac-saat-soguk-kalir/',
+              '/hesaplama/buzdolabi-derin-dondurucu-elektrik-kesintisi-gida-plani/',
+              '/amazon-elektrik-urunleri/buzdolabi-dondurucu-termometre-soguk-zincir/',
+          }
+          assert expected.issubset(pages), expected - set(pages)
+          assert pages['/haberler/elektrik-kesilince-buzdolabi-kac-saat-soguk-kalir/']['affiliate']['hasAffiliateLinks'] is False
+          assert pages['/hesaplama/buzdolabi-derin-dondurucu-elektrik-kesintisi-gida-plani/']['affiliate']['hasAffiliateLinks'] is False
+          commerce = pages['/amazon-elektrik-urunleri/buzdolabi-dondurucu-termometre-soguk-zincir/']
+          assert commerce['affiliate']['safe'] is True
+          assert commerce['affiliate']['disclosureVisible'] is True
+          assert commerce['affiliate']['noBuyOutcomeVisible'] is True
+          assert not commerce['affiliate']['unsafeStaticLinks']
+          print(json.dumps({'ok': True, 'routes': sorted(expected)}, ensure_ascii=False))
+          PY
+
+      - name: Özet
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ## ALO186 v296 buzdolabı ve soğuk zincir kesinti güven paketi
+
+          - “Elektrik kesilince buzdolabı kaç saat soğuk kalır?” niyeti: kaynak doğrulamalı canonical rehber
+          - Süre + kapı + gerçek sıcaklık + buz kristali + kontaminasyon: kişisel verisiz ücretsiz planlayıcı
+          - Termometre, yalıtımlı soğutucu ve buz aküsü: yalnız gelecek hazırlığında güven kapılı
+          - Aktif kesinti, şüpheli gıda, sağlık/özel soğuk zincir ve ticari soğuk zincir: mağaza yolu kapalı
+          - Mevcut hazırlık yeterliyse: satın almama sonucu
+          - Amazon Türkiye bağlantıları: açıklama ve teknik kapı arkasında, başlangıçta statik href yok
+          - 30/90/180 günlük ölçüm, hazırlık ve mevsim döngüsü: doğrulandı
+          - Fiyat, stok, puan, yorum, garanti, Offer ve AggregateRating: yok
+          - Canonical build, static smoke ve ChatGPT Sites import kabulü: başarılı
+          EOF
