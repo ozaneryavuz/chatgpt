@@ -1,0 +1,88 @@
+{
+  "version": 290,
+  "category": "camera-recording-outage-continuity",
+  "decision": "reuse-governed-consumer-route-and-professional-segment",
+  "reviewedAt": "2026-08-05",
+  "searchIntent": [
+    "elektrik kesilince güvenlik kamerası kayıt yapar mı",
+    "elektrik gelince kamera kayıt yapmıyor",
+    "nvr elektrik kesintisinde çalışır mı",
+    "kamera sistemi ups seçimi",
+    "otel site mağaza kamera kesinti sürekliliği"
+  ],
+  "contentGap": "Türkçe sonuçlarda kamera görüntüsü, yerel kayıt, SD kart veya NVR depolama, PoE besleme, modem-ONT, bulut erişimi ve kesinti sonrası kayıt bütünlüğü çoğunlukla tek işlev gibi ele alınıyor. Yeni yolculuk bu katmanları ayırır ve canlı görüntünün geri gelmesini kayıt bütünlüğü kanıtı olarak kabul etmez.",
+  "consumerAffiliateDecision": {
+    "newMerchantLinksAllowed": false,
+    "reuseExistingGovernedRoute": "/amazon-elektrik-urunleri/kamera-nvr-ups-yedek-guc-secimi/",
+    "reason": "Küçük tak-çalıştır sistemler için mevcut güven kapılı rota zaten gerçek W, VA, hedef süre, tehlike ve satın almama kontrollerini içeriyor. Yeni bir ürün sayfası arama niyetini böler ve gereksiz mağaza yüzeyi oluşturur."
+  },
+  "professionalOnlyClasses": [
+    "hotel apartment site or multi-branch camera system",
+    "multi-recorder rack or centralized VMS",
+    "fixed UPS distribution or panel-fed surveillance system",
+    "camera system integrated with fire alarm access control or emergency response",
+    "redundant recording server failover or regulated retention design",
+    "three-phase generator ATS or building-level continuity integration"
+  ],
+  "existingAffiliateRouteMayBeReusedOnlyWhen": [
+    "the system is a home or small-business plug-in single-phase setup",
+    "battery swelling leakage heat smell water contact and active electrical hazards are absent",
+    "camera recorder PoE switch router and ONT loads are listed and verified in watts",
+    "the current UPS is absent or failed a controlled runtime and restart test",
+    "the user understands that remote access also depends on router ONT internet and provider infrastructure",
+    "the affiliate disclosure appears before the downstream governed route",
+    "the no-buy result does not apply"
+  ],
+  "conversionPolicy": {
+    "newMerchantLinks": false,
+    "reuseGovernedAffiliateRoute": true,
+    "professionalScopeForCentralSystems": true,
+    "noBuyOutcomeRequired": true,
+    "activeHazardCommerceClosed": true,
+    "recordingGapMustNotBeSolvedByBlindPurchase": true,
+    "personalDataCollectionForbidden": true,
+    "cameraCredentialsAndFootageCollectionForbidden": true,
+    "noPriceStockRatingWarrantyClaims": true,
+    "affiliateDisclosureRequiredBeforeAnyDownstreamCommercialRoute": true,
+    "officialInstitutionImpressionForbidden": true
+  },
+  "conversionPoints": [
+    "no-buy and scheduled retest when local recording and restart are verified",
+    "manufacturer or authorized installer support when storage errors or missing footage are detected",
+    "existing governed Amazon Turkey selector only for verified low-risk plug-in power gaps",
+    "network continuity assessment when local recording works but remote access fails",
+    "professional electrical security and IT continuity assessment for centralized systems"
+  ],
+  "repeatVisitReasons": [
+    {"days": 30, "reason": "inspect UPS battery indicators storage health camera disconnects and time synchronization"},
+    {"days": 90, "reason": "perform a controlled power-loss restart and recording-gap test"},
+    {"days": 365, "reason": "renew load inventory retention policy battery scope and professional continuity plan"},
+    {"trigger": "change", "reason": "repeat after adding a camera disk PoE switch recorder router ONT UPS or firmware update"}
+  ],
+  "sources": [
+    {
+      "publisher": "Axis Communications",
+      "title": "AXIS camera recording and storage documentation",
+      "url": "https://help.axis.com/en-us/axis-m2025-le",
+      "checkedAt": "2026-08-05"
+    },
+    {
+      "publisher": "Synology",
+      "title": "Surveillance Station edge recording retrieval",
+      "url": "https://kb.synology.com/en-id/SurveillanceStation/help/SurveillanceStation/edge_storage_retrieve",
+      "checkedAt": "2026-08-05"
+    },
+    {
+      "publisher": "Synology",
+      "title": "Surveillance Station system log",
+      "url": "https://kb.synology.com/en-ca/SurveillanceStation/help/SurveillanceStation/log_systemlog?version=9",
+      "checkedAt": "2026-08-05"
+    },
+    {
+      "publisher": "APC by Schneider Electric",
+      "title": "UPS buying guide for watts VA and runtime",
+      "url": "https://www.apc.com/us/en/support/product-support/ups-buying-guide-for-selecting-a-battery-backup-system.jsp",
+      "checkedAt": "2026-08-05"
+    }
+  ]
+}
