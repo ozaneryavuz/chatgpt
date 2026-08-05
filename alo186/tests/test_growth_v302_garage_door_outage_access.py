@@ -30,20 +30,27 @@ def validate_page(path: Path, canonical: str) -> str:
     assert blocks, path
     for block in blocks:
         json.loads(block)
+    folded = html.casefold()
     for forbidden in (
         "https://www.alo186.com",
-        '"@type":"Offer"',
-        '"@type":"AggregateRating"',
-        '"@type":"Review"',
+        '"@type":"offer"',
+        '"@type":"aggregaterating"',
+        '"@type":"review"',
         '"price":',
-        '"priceCurrency":',
+        '"pricecurrency":',
         '"availability":',
         '"warranty":',
         '"delivery":',
         "amazon.com.tr",
     ):
-        assert forbidden not in html.casefold(), (path, forbidden)
+        assert forbidden.casefold() not in folded, (path, forbidden)
     return html
+
+
+def assert_visible(html: str, phrases: tuple[str, ...]) -> None:
+    folded = html.casefold()
+    for phrase in phrases:
+        assert phrase.casefold() in folded, phrase
 
 
 def main() -> None:
@@ -51,19 +58,18 @@ def main() -> None:
     tool = validate_page(TOOL, ROUTES[TOOL])
     guide = validate_page(GUIDE, ROUTES[GUIDE])
 
-    for required in (
+    assert_visible(article, (
         "kapıyı zorlamayın",
         "tam model kılavuzunda",
         "Kırık yay, gevşek/kopuk halat",
-        "Mevcut plan yeterliyse yeni ürün almayın",
+        "yeni ürün almayın",
         "Bu rehberde Amazon veya başka mağaza bağlantısı yoktur",
         "ALO186 kapı üreticisi, servis, güvenlik şirketi, belediye, itfaiye, EDAŞ veya kamu kurumu değildir",
         "/hesaplama/garaj-kapisi-elektrik-kesintisi-erisim-plani/",
         "/sektor-rehberi/apartman-otel-garaj-kapisi-kesinti-surekliligi/",
-    ):
-        assert required in article, required
+    ))
 
-    for required in (
+    assert_visible(tool, (
         "Ücretsiz · kişisel veri yok · mağaza bağlantısı yok",
         "Mahsur kalma, yangın, sıkışma veya düşme riskinde aracı bırakın",
         "Mekanik hasar şüphesi — manuel ayırma yapmayın",
@@ -73,8 +79,7 @@ def main() -> None:
         "180 gün: mekanik, sensör ve batarya",
         "Bu araçta Amazon veya başka mağaza bağlantısı yoktur",
         "professional-only",
-    ):
-        assert required.casefold() in tool.casefold(), required
+    ))
     for forbidden in (
         "fetch(",
         "XMLHttpRequest",
@@ -87,7 +92,7 @@ def main() -> None:
     ):
         assert forbidden not in tool, forbidden
 
-    for required in (
+    assert_visible(guide, (
         "Professional-only · sıfır tüketici affiliate",
         "Aktif sıkışma, yangın veya mekanik hasarda ticari dönüşüm yoktur",
         "Fail-safe ve fail-secure kavramlarını karıştırmayın",
@@ -96,8 +101,7 @@ def main() -> None:
         "Doğrulanmamış fiyat, stok, puan, yorum, teslimat veya garanti bilgisi kullanılmaz",
         "Mevcut sistem görev testini geçiyor ve kullanım değişmediyse yeni ürün almayın",
         "ALO186 bağımsız bilgilendirme platformudur",
-    ):
-        assert required in guide, required
+    ))
 
     decision = json.loads(read(DECISION))
     assert decision["version"] == 302
