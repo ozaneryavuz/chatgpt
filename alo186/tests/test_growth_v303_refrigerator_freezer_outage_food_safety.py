@@ -83,7 +83,7 @@ def main() -> None:
         "Mevcut hazırlık yeterli — yeni ürün almayın",
         "30 günlük termometre kontrolü",
         "90 günlük kesinti tatbikatı",
-        "180 günlük",
+        'data-days="180"',
         "Bu sayfada Amazon veya başka mağaza bağlantısı yoktur",
     )
     for forbidden in (
