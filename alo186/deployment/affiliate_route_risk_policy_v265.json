@@ -73,7 +73,12 @@
     "yangin-algilama",
     "acil-aydinlatma",
     "sesli-tahliye",
-    "yangin-paneli"
+    "yangin-paneli",
+    "merkezi-kamera",
+    "cctv-rack",
+    "kamera-nvr-kesinti-surekliligi",
+    "kayit-sunucusu",
+    "otel-site-magaza-kamera"
   ],
   "portfolioRules": {
     "genericDIYRequiresDirectElectricalContinuityOrSafetyIntent": true,
