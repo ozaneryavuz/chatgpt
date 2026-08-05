@@ -67,6 +67,9 @@ jobs:
             '/tmp/alo186-live/haberler/elektrik-kesilince-duman-dedektoru-calisir-mi/index.html'
             '/tmp/alo186-live/hesaplama/duman-karbonmonoksit-alarmi-elektrik-kesintisi-kontrolu/index.html'
             '/tmp/alo186-live/amazon-elektrik-urunleri/duman-alarmi-pil-yedegi-kesinti-hazirligi/index.html'
+            '/tmp/alo186-live/haberler/elektrik-kesilince-bodrum-drenaj-pompasi-calisir-mi/index.html'
+            '/tmp/alo186-live/hesaplama/bodrum-drenaj-pompasi-elektrik-kesintisi-su-baskini-plani/index.html'
+            '/tmp/alo186-live/sektor-rehberi/apartman-otel-bodrum-drenaj-pompasi-kesinti-surekliligi/index.html'
           )
           for file in "${required[@]}"; do
             if [[ ! -s "$file" ]]; then
@@ -74,7 +77,7 @@ jobs:
               exit 1
             fi
           done
-          echo "All required ALO186 v297 production files are present."
+          echo "All required ALO186 v297 and v298 production files are present."
 
       - name: Publish canonical bundle to gh-pages fallback branch
         if: github.event_name != 'pull_request'
@@ -142,6 +145,9 @@ jobs:
           verify_route '/haberler/elektrik-kesilince-duman-dedektoru-calisir-mi/' 'elektrik-kesilince-duman-dedektoru-calisir-mi'
           verify_route '/hesaplama/duman-karbonmonoksit-alarmi-elektrik-kesintisi-kontrolu/' 'duman-karbonmonoksit-alarmi-elektrik-kesintisi-kontrolu'
           verify_route '/amazon-elektrik-urunleri/duman-alarmi-pil-yedegi-kesinti-hazirligi/' 'duman-alarmi-pil-yedegi-kesinti-hazirligi'
+          verify_route '/haberler/elektrik-kesilince-bodrum-drenaj-pompasi-calisir-mi/' 'elektrik-kesilince-bodrum-drenaj-pompasi-calisir-mi'
+          verify_route '/hesaplama/bodrum-drenaj-pompasi-elektrik-kesintisi-su-baskini-plani/' 'bodrum-drenaj-pompasi-elektrik-kesintisi-su-baskini-plani'
+          verify_route '/sektor-rehberi/apartman-otel-bodrum-drenaj-pompasi-kesinti-surekliligi/' 'apartman-otel-bodrum-drenaj-pompasi-kesinti-surekliligi'
 
       - name: Checkout main for deployment receipt
         uses: actions/checkout@v4
@@ -177,7 +183,10 @@ jobs:
               "verifiedRoutes": [
                   "https://alo186.com/haberler/elektrik-kesilince-duman-dedektoru-calisir-mi/",
                   "https://alo186.com/hesaplama/duman-karbonmonoksit-alarmi-elektrik-kesintisi-kontrolu/",
-                  "https://alo186.com/amazon-elektrik-urunleri/duman-alarmi-pil-yedegi-kesinti-hazirligi/"
+                  "https://alo186.com/amazon-elektrik-urunleri/duman-alarmi-pil-yedegi-kesinti-hazirligi/",
+                  "https://alo186.com/haberler/elektrik-kesilince-bodrum-drenaj-pompasi-calisir-mi/",
+                  "https://alo186.com/hesaplama/bodrum-drenaj-pompasi-elektrik-kesintisi-su-baskini-plani/",
+                  "https://alo186.com/sektor-rehberi/apartman-otel-bodrum-drenaj-pompasi-kesinti-surekliligi/"
               ]
           }
           Path('.github/deploy-receipts/alo186-live.json').write_text(
