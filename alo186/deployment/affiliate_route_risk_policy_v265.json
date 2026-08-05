@@ -8,7 +8,11 @@
   "affiliateProgram": {
     "merchant": "Amazon Türkiye",
     "tag": "alo186rehber-21",
-    "requiredRel": ["sponsored", "nofollow", "noopener"],
+    "requiredRel": [
+      "sponsored",
+      "nofollow",
+      "noopener"
+    ],
     "disclosureBeforeLinkRequired": true,
     "noBuyOutcomeRequired": true
   },
@@ -17,10 +21,23 @@
     "activeHazardCommerceClosed": true,
     "personalDataCollectionForbidden": true,
     "locationAndEmergencyPagesZeroAffiliate": true,
-    "unverifiedCommercialFieldsForbidden": ["offers", "price", "priceCurrency", "availability", "aggregateRating", "review", "warranty", "delivery"],
+    "unverifiedCommercialFieldsForbidden": [
+      "offers",
+      "price",
+      "priceCurrency",
+      "availability",
+      "aggregateRating",
+      "review",
+      "warranty",
+      "delivery"
+    ],
     "productSchemaWithoutVerifiedOffer": "generic-class-only"
   },
-  "zeroAffiliatePrefixes": ["/il/", "/dagitim-sirketleri/", "/acil-numaralar/"],
+  "zeroAffiliatePrefixes": [
+    "/il/",
+    "/dagitim-sirketleri/",
+    "/acil-numaralar/"
+  ],
   "governedAffiliateRoutePatterns": [
     "akvaryum-pilli-usb-hava-motoru",
     "akvaryum-kesinti-hava-pompasi-termometre-secici",
@@ -34,10 +51,18 @@
     "telefon-powerbank-kablo",
     "buzdolabi-dondurucu-termometre-soguk-zincir",
     "kesinti-led-fener-kafa-lambasi",
-    "modem-ont-mini-ups-yedekleme"
+    "modem-ont-mini-ups-yedekleme",
+    "pilli-sulama-zamanlayici-nem-sensoru"
   ],
   "legacyMigrationQueue": [],
-  "reviewOnlyRoutePatterns": ["lazer-metre", "lazer-hizalama", "genel-el-aleti", "usb-c-hub", "seyahat-priz-adaptoru", "post-outage-appliance-restart"],
+  "reviewOnlyRoutePatterns": [
+    "lazer-metre",
+    "lazer-hizalama",
+    "genel-el-aleti",
+    "usb-c-hub",
+    "seyahat-priz-adaptoru",
+    "post-outage-appliance-restart"
+  ],
   "professionalLeadOnlyRoutePatterns": [
     "kablo-soyma",
     "terminal-hazirlama",
@@ -74,7 +99,12 @@
     "yangin-algilama",
     "acil-aydinlatma",
     "sesli-tahliye",
-    "yangin-paneli"
+    "yangin-paneli",
+    "otomatik-sulama-kontroloru",
+    "solenoid-vana",
+    "peyzaj-sulama",
+    "merkezi-sulama",
+    "pompa-start"
   ],
   "portfolioRules": {
     "genericDIYRequiresDirectElectricalContinuityOrSafetyIntent": true,
