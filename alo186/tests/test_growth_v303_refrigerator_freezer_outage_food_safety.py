@@ -10,7 +10,6 @@ ARTICLE = ROOT / "alo186/haberler/elektrik-kesilince-buzdolabi-derin-dondurucu-n
 TOOL = ROOT / "alo186/hesaplama/buzdolabi-dondurucu-elektrik-kesintisi-gida-guvenligi-plani/index.html"
 SELECTOR = ROOT / "alo186/amazon-elektrik-urunleri/buzdolabi-dondurucu-termometre-soguk-zincir-secimi/index.html"
 DECISION = ROOT / "alo186/deployment/affiliate-category-decisions/refrigerator-freezer-outage-v303.json"
-OVERLAY = ROOT / "alo186/deployment/routing-overlays/growth-v303-refrigerator-freezer-outage-food-safety.json"
 ROUTES = {
     ARTICLE: "https://alo186.com/haberler/elektrik-kesilince-buzdolabi-derin-dondurucu-ne-kadar-dayanir/",
     TOOL: "https://alo186.com/hesaplama/buzdolabi-dondurucu-elektrik-kesintisi-gida-guvenligi-plani/",
@@ -124,6 +123,11 @@ def main() -> None:
     decision = json.loads(read(DECISION))
     assert decision["version"] == 303
     assert decision["decision"] == "guarded-low-risk-affiliate-plus-professional-boundary"
+    assert decision["routes"] == {
+        "article": "/haberler/elektrik-kesilince-buzdolabi-derin-dondurucu-ne-kadar-dayanir/",
+        "tool": "/hesaplama/buzdolabi-dondurucu-elektrik-kesintisi-gida-guvenligi-plani/",
+        "selector": "/amazon-elektrik-urunleri/buzdolabi-dondurucu-termometre-soguk-zincir-secimi/",
+    }
     assert len(decision["consumerAffiliateClasses"]) == 2
     assert len(decision["professionalOnlyClasses"]) >= 10
     policy = decision["conversionPolicy"]
@@ -147,15 +151,6 @@ def main() -> None:
     ):
         assert policy[key] is True, key
     assert [item["days"] for item in decision["repeatVisitReasons"]] == [30, 90, 180]
-
-    overlay = json.loads(read(OVERLAY))
-    assert overlay["version"] == 303
-    assert overlay["name"] == "growth-v303-refrigerator-freezer-outage-food-safety"
-    assert {item["canonicalPath"] for item in overlay["routes"]} == {
-        "/haberler/elektrik-kesilince-buzdolabi-derin-dondurucu-ne-kadar-dayanir/",
-        "/hesaplama/buzdolabi-dondurucu-elektrik-kesintisi-gida-guvenligi-plani/",
-        "/amazon-elektrik-urunleri/buzdolabi-dondurucu-termometre-soguk-zincir-secimi/",
-    }
 
     print(json.dumps({
         "ok": True,
