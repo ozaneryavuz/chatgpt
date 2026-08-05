@@ -1,0 +1,98 @@
+name: ALO186 güvenlik kamerası kesinti güveni v299
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/elektrik-kesilince-guvenlik-kamerasi-calisir-mi/**'
+      - 'alo186/hesaplama/guvenlik-kamerasi-elektrik-kesintisi-sureklilik-plani/**'
+      - 'alo186/amazon-elektrik-urunleri/kamera-nvr-ups-yedek-guc-secimi/**'
+      - 'alo186/deployment/affiliate-category-decisions/security-camera-outage-v299.json'
+      - 'alo186/tests/test_growth_v299_security_camera_outage_trust.py'
+      - '.github/workflows/alo186-growth-v299-security-camera-outage-trust.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/elektrik-kesilince-guvenlik-kamerasi-calisir-mi/**'
+      - 'alo186/hesaplama/guvenlik-kamerasi-elektrik-kesintisi-sureklilik-plani/**'
+      - 'alo186/amazon-elektrik-urunleri/kamera-nvr-ups-yedek-guc-secimi/**'
+      - 'alo186/deployment/affiliate-category-decisions/security-camera-outage-v299.json'
+      - 'alo186/tests/test_growth_v299_security_camera_outage_trust.py'
+      - '.github/workflows/alo186-growth-v299-security-camera-outage-trust.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-growth-v299-security-camera-outage-trust-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Kamera arama niyeti gizlilik ve ticari güven
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            alo186/tests/test_growth_v299_security_camera_outage_trust.py \
+            alo186/tests/test_affiliate_route_risk_policy_v265.py
+          python alo186/tests/test_growth_v299_security_camera_outage_trust.py
+          python alo186/tests/test_affiliate_route_risk_policy_v265.py
+          python -m json.tool alo186/deployment/affiliate-category-decisions/security-camera-outage-v299.json >/dev/null
+          python -m json.tool alo186/deployment/affiliate_route_risk_policy_v265.json >/dev/null
+
+      - name: Canonical production build ve static smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-v299
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-v299 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-v299
+          test -f /tmp/alo186-v299/haberler/elektrik-kesilince-guvenlik-kamerasi-calisir-mi/index.html
+          test -f /tmp/alo186-v299/hesaplama/guvenlik-kamerasi-elektrik-kesintisi-sureklilik-plani/index.html
+          test -f /tmp/alo186-v299/amazon-elektrik-urunleri/kamera-nvr-ups-yedek-guc-secimi/index.html
+
+      - name: ChatGPT Sites aktarım paketi kabulü
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-sites-v299
+          python alo186/deployment/export_chatgpt_sites_bundle_v2.py --output /tmp/alo186-sites-v299 --commit "$GITHUB_SHA"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/alo186-sites-v299')
+          manifest = json.loads((root / 'sites-import.json').read_text(encoding='utf-8'))
+          pages = {item['canonicalPath']: item for item in manifest['pages']}
+          article = '/haberler/elektrik-kesilince-guvenlik-kamerasi-calisir-mi/'
+          tool = '/hesaplama/guvenlik-kamerasi-elektrik-kesintisi-sureklilik-plani/'
+          selector = '/amazon-elektrik-urunleri/kamera-nvr-ups-yedek-guc-secimi/'
+          expected = {article, tool, selector}
+          assert expected.issubset(pages), expected - set(pages)
+          assert pages[article]['affiliate']['hasAffiliateLinks'] is False
+          assert pages[tool]['affiliate']['hasAffiliateLinks'] is False
+          for route in expected:
+              assert not pages[route]['affiliate']['unsafeStaticLinks'], (route, pages[route]['affiliate']['unsafeStaticLinks'])
+          print(json.dumps({'ok': True, 'routes': sorted(expected), 'unsafeStaticLinks': 0}, ensure_ascii=False))
+          PY
+
+      - name: Özet
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ## ALO186 v299 güvenlik kamerası kesinti güven paketi
+
+          - Güç kesintisi, internet kesintisi, yerel kayıt ve uzaktan erişim ayrı katmanlar
+          - Edge storage yalnız kamera enerjiliyse değerlendirilir
+          - Görüntü, adres, hesap, şifre veya seri numarası toplanmaz
+          - Mevcut kayıt zinciri gerçek testte yeterliyse: yeni ürün almayın
+          - Düşük riskli sınıflar: model uyumlu yüksek dayanımlı microSD ve tek düşük gerilim kamera mini UPS
+          - PoE, NVR/DVR, merkezi güç, çoklu kamera ve ticari tesis: professional-only
+          - Amazon Türkiye bağlantıları başlangıçta kilitli ve açıklamadan sonra açılır
+          - Fiyat, stok, puan, yorum, teslimat ve garanti: yok
+          - 30/90/180 günlük tekrar ziyaret: kayıt, kesinti provası ve gizlilik kontrolü
+          EOF
