@@ -68,31 +68,33 @@ jobs:
       - name: Verify entry, navigation and all public routes
         run: |
           set -euo pipefail
-          fetch_and_check() {
-            local path="$1"
-            local marker="$2"
-            local body
-            body="$(mktemp)"
-            curl --fail --silent --show-error --location \
-              --connect-timeout 10 --max-time 30 \
-              "${EMERGENCY_ORIGIN}${path}" -o "$body"
-            grep -q "$marker" "$body"
-            echo "LIVE VERIFIED: ${EMERGENCY_ORIGIN}${path}"
-            printf '%s' "$body"
-          }
+          work="$(mktemp -d)"
+          trap 'rm -rf "$work"' EXIT
 
-          entry="$(fetch_and_check '/canli/index.html' 'Duman ve karbonmonoksit alarmı kesinti rehberleri yayında')"
-          grep -q 'href="../haberler/elektrik-kesilince-duman-dedektoru-calisir-mi/index.html"' "$entry"
-          grep -q 'href="../hesaplama/duman-karbonmonoksit-alarmi-elektrik-kesintisi-kontrolu/index.html"' "$entry"
-          grep -q 'href="../amazon-elektrik-urunleri/duman-alarmi-pil-yedegi-kesinti-hazirligi/index.html"' "$entry"
-          rm -f "$entry"
+          curl --fail --silent --show-error --location --connect-timeout 10 --max-time 30 \
+            "${EMERGENCY_ORIGIN}/canli/index.html" -o "$work/entry.html"
+          grep -q 'Duman ve karbonmonoksit alarmı kesinti rehberleri yayında' "$work/entry.html"
+          grep -q 'href="../haberler/elektrik-kesilince-duman-dedektoru-calisir-mi/index.html"' "$work/entry.html"
+          grep -q 'href="../hesaplama/duman-karbonmonoksit-alarmi-elektrik-kesintisi-kontrolu/index.html"' "$work/entry.html"
+          grep -q 'href="../amazon-elektrik-urunleri/duman-alarmi-pil-yedegi-kesinti-hazirligi/index.html"' "$work/entry.html"
+          echo "LIVE VERIFIED: ${EMERGENCY_ORIGIN}/canli/index.html"
 
-          article="$(fetch_and_check '/haberler/elektrik-kesilince-duman-dedektoru-calisir-mi/index.html' 'Elektrik Kesilince Duman Dedektörü Çalışır mı')"
-          calculator="$(fetch_and_check '/hesaplama/duman-karbonmonoksit-alarmi-elektrik-kesintisi-kontrolu/index.html' 'Duman ve Karbonmonoksit Alarmı Kesinti Kontrolü')"
-          affiliate="$(fetch_and_check '/amazon-elektrik-urunleri/duman-alarmi-pil-yedegi-kesinti-hazirligi/index.html' 'Duman Alarmı ve Pil Yedeği Kesinti Hazırlığı')"
-          grep -q 'Amazon Türkiye bağlantıları satış ortaklığı bağlantısıdır' "$affiliate"
-          grep -q 'yeni ürün almayın' "$calculator"
-          rm -f "$article" "$calculator" "$affiliate"
+          curl --fail --silent --show-error --location --connect-timeout 10 --max-time 30 \
+            "${EMERGENCY_ORIGIN}/haberler/elektrik-kesilince-duman-dedektoru-calisir-mi/index.html" -o "$work/article.html"
+          grep -q 'Elektrik Kesilince Duman Dedektörü Çalışır mı' "$work/article.html"
+          echo "LIVE VERIFIED: article"
+
+          curl --fail --silent --show-error --location --connect-timeout 10 --max-time 30 \
+            "${EMERGENCY_ORIGIN}/hesaplama/duman-karbonmonoksit-alarmi-elektrik-kesintisi-kontrolu/index.html" -o "$work/calculator.html"
+          grep -q 'Duman ve Karbonmonoksit Alarmı Kesinti Kontrolü' "$work/calculator.html"
+          grep -q 'yeni ürün almayın' "$work/calculator.html"
+          echo "LIVE VERIFIED: calculator and no-buy outcome"
+
+          curl --fail --silent --show-error --location --connect-timeout 10 --max-time 30 \
+            "${EMERGENCY_ORIGIN}/amazon-elektrik-urunleri/duman-alarmi-pil-yedegi-kesinti-hazirligi/index.html" -o "$work/affiliate.html"
+          grep -q 'Duman Alarmı ve Pil Yedeği Kesinti Hazırlığı' "$work/affiliate.html"
+          grep -q 'Amazon Türkiye bağlantıları satış ortaklığı bağlantısıdır' "$work/affiliate.html"
+          echo "LIVE VERIFIED: affiliate route and disclosure"
 
       - name: Write live verification receipt
         run: |
