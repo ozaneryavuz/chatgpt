@@ -61,12 +61,14 @@ def main() -> None:
         "Bütün cihazlar için geçerli tek bir dakika değeri yoktur",
         "Transient darbe",
         "Nötr arızası",
-        "on iş günü içinde",
+        "30 gün içinde",
+        "Kalite Yönetmeliği Madde 26",
         "ALO186 arıza kaydı almaz",
         "Mevcut ürün ve tesisat ihtiyacı karşılıyorsa yeni ürün almayın",
         "/hesaplama/elektrik-gidip-gelince-cihaz-koruma-plani/",
         "/amazon-elektrik-urunleri/kesinti-sonrasi-elektronik-koruma-secimi/",
     ))
+    assert "on iş günü" not in article.casefold()
 
     assert_visible(tool, (
         "Kişisel veri yok",
@@ -129,6 +131,7 @@ def main() -> None:
         "newCanonicalRoutes": 3,
         "newMerchantLinks": 2,
         "merchantLinksLockedByDefault": True,
+        "deviceDamageClaimDays": 30,
         "professionalClasses": len(decision["professionalClasses"]),
         "repeatVisitDays": [30, 90, 365],
         "personalDataFields": 0,
