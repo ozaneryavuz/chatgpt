@@ -1,0 +1,21 @@
+{
+  "version": 305,
+  "name": "growth-v305-power-return-device-protection",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-gidip-gelince-cihazlar-bozulur-mu/index.html",
+      "canonicalPath": "/haberler/elektrik-gidip-gelince-cihazlar-bozulur-mu/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/elektrik-gidip-gelince-cihaz-koruma-plani/index.html",
+      "canonicalPath": "/hesaplama/elektrik-gidip-gelince-cihaz-koruma-plani/",
+      "type": "web-application"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/kesinti-sonrasi-elektronik-koruma-secimi/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/kesinti-sonrasi-elektronik-koruma-secimi/",
+      "type": "conditional-affiliate"
+    }
+  ]
+}
