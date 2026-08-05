@@ -1,0 +1,21 @@
+{
+  "version": 301,
+  "name": "growth-v301-solar-outage-continuity",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesilince-gunes-paneli-elektrik-verir-mi/index.html",
+      "canonicalPath": "/haberler/elektrik-kesilince-gunes-paneli-elektrik-verir-mi/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/gunes-paneli-elektrik-kesintisi-yedekleme-uygunluk-kontrolu/index.html",
+      "canonicalPath": "/hesaplama/gunes-paneli-elektrik-kesintisi-yedekleme-uygunluk-kontrolu/",
+      "type": "tool"
+    },
+    {
+      "source": "alo186/sektor-rehberi/ev-isletme-ges-kesinti-yedek-guc-surekliligi/index.html",
+      "canonicalPath": "/sektor-rehberi/ev-isletme-ges-kesinti-yedek-guc-surekliligi/",
+      "type": "professional-lead"
+    }
+  ]
+}
