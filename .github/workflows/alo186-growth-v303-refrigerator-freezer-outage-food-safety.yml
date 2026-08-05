@@ -1,0 +1,97 @@
+name: ALO186 buzdolabı dondurucu kesinti gıda güvenliği v303
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/elektrik-kesilince-buzdolabi-derin-dondurucu-ne-kadar-dayanir/**'
+      - 'alo186/hesaplama/buzdolabi-dondurucu-elektrik-kesintisi-gida-guvenligi-plani/**'
+      - 'alo186/amazon-elektrik-urunleri/buzdolabi-dondurucu-termometre-soguk-zincir-secimi/**'
+      - 'alo186/deployment/affiliate-category-decisions/refrigerator-freezer-outage-v303.json'
+      - 'alo186/deployment/routing-overlays/growth-v303-refrigerator-freezer-outage-food-safety.json'
+      - 'alo186/tests/test_growth_v303_refrigerator_freezer_outage_food_safety.py'
+      - '.github/workflows/alo186-growth-v303-refrigerator-freezer-outage-food-safety.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/elektrik-kesilince-buzdolabi-derin-dondurucu-ne-kadar-dayanir/**'
+      - 'alo186/hesaplama/buzdolabi-dondurucu-elektrik-kesintisi-gida-guvenligi-plani/**'
+      - 'alo186/amazon-elektrik-urunleri/buzdolabi-dondurucu-termometre-soguk-zincir-secimi/**'
+      - 'alo186/deployment/affiliate-category-decisions/refrigerator-freezer-outage-v303.json'
+      - 'alo186/deployment/routing-overlays/growth-v303-refrigerator-freezer-outage-food-safety.json'
+      - 'alo186/tests/test_growth_v303_refrigerator_freezer_outage_food_safety.py'
+      - '.github/workflows/alo186-growth-v303-refrigerator-freezer-outage-food-safety.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-growth-v303-refrigerator-freezer-outage-food-safety-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Gıda güvenliği ve affiliate yönetişimi
+        run: |
+          set -euo pipefail
+          python -m py_compile alo186/tests/test_growth_v303_refrigerator_freezer_outage_food_safety.py
+          python alo186/tests/test_growth_v303_refrigerator_freezer_outage_food_safety.py
+          python -m json.tool alo186/deployment/affiliate-category-decisions/refrigerator-freezer-outage-v303.json >/dev/null
+          python -m json.tool alo186/deployment/routing-overlays/growth-v303-refrigerator-freezer-outage-food-safety.json >/dev/null
+
+      - name: Canonical production build ve static smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-v303
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-v303 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-v303
+          test -f /tmp/alo186-v303/haberler/elektrik-kesilince-buzdolabi-derin-dondurucu-ne-kadar-dayanir/index.html
+          test -f /tmp/alo186-v303/hesaplama/buzdolabi-dondurucu-elektrik-kesintisi-gida-guvenligi-plani/index.html
+          test -f /tmp/alo186-v303/amazon-elektrik-urunleri/buzdolabi-dondurucu-termometre-soguk-zincir-secimi/index.html
+
+      - name: ChatGPT Sites aktarım paketi kabulü
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-sites-v303
+          python alo186/deployment/export_chatgpt_sites_bundle_v2.py --output /tmp/alo186-sites-v303 --commit "$GITHUB_SHA"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/alo186-sites-v303')
+          manifest = json.loads((root / 'sites-import.json').read_text(encoding='utf-8'))
+          pages = {item['canonicalPath']: item for item in manifest['pages']}
+          expected = {
+              '/haberler/elektrik-kesilince-buzdolabi-derin-dondurucu-ne-kadar-dayanir/',
+              '/hesaplama/buzdolabi-dondurucu-elektrik-kesintisi-gida-guvenligi-plani/',
+              '/amazon-elektrik-urunleri/buzdolabi-dondurucu-termometre-soguk-zincir-secimi/',
+          }
+          assert expected.issubset(pages), expected - set(pages)
+          for route in expected:
+              assert not pages[route]['affiliate']['unsafeStaticLinks'], route
+          assert pages['/haberler/elektrik-kesilince-buzdolabi-derin-dondurucu-ne-kadar-dayanir/']['affiliate']['hasAffiliateLinks'] is False
+          assert pages['/hesaplama/buzdolabi-dondurucu-elektrik-kesintisi-gida-guvenligi-plani/']['affiliate']['hasAffiliateLinks'] is False
+          print(json.dumps({'ok': True, 'routes': sorted(expected), 'unsafeStaticLinks': 0}, ensure_ascii=False))
+          PY
+
+      - name: Özet
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ## ALO186 v303 buzdolabı ve dondurucu kesintisi
+
+          - Aktif kesinti, elektrik tehlikesi ve belirsiz gıda kararında ticaret kapalı
+          - 4/24/48 saat bilgisi garanti değil; süre, kapı, sıcaklık ve buz kristali birlikte
+          - Ev tipi hazırlıkta yalnız analog ve dijital min/max termometre sınıfları
+          - Restoran, otel, market, soğuk oda ve tıbbi saklama professional-only
+          - Affiliate açıklaması bağlantılardan önce; bağlantılar başlangıçta kilitli
+          - Mevcut termometre yeterliyse: yeni ürün almayın
+          - Fiyat, stok, satıcı, puan, yorum, teslimat ve garanti iddiası yok
+          - 30/90/180 günlük ölçüm, prova ve mevsimsel kontrol döngüsü
+          EOF
