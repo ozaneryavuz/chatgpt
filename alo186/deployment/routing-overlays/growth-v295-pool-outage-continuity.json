@@ -1,0 +1,21 @@
+{
+  "version": 295,
+  "name": "growth-v295-pool-outage-continuity",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesilince-havuz-pompasi-calisir-mi/index.html",
+      "canonicalPath": "/haberler/elektrik-kesilince-havuz-pompasi-calisir-mi/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/havuz-elektrik-kesintisi-yeniden-baslatma-plani/index.html",
+      "canonicalPath": "/hesaplama/havuz-elektrik-kesintisi-yeniden-baslatma-plani/",
+      "type": "tool"
+    },
+    {
+      "source": "alo186/sektor-rehberi/otel-site-havuz-elektrik-kesintisi-surekliligi/index.html",
+      "canonicalPath": "/sektor-rehberi/otel-site-havuz-elektrik-kesintisi-surekliligi/",
+      "type": "professional-only-sector-guide"
+    }
+  ]
+}
