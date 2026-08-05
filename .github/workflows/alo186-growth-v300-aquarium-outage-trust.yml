@@ -1,0 +1,98 @@
+name: ALO186 akvaryum kesinti güveni v300
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/elektrik-kesilince-akvaryum-baligi-ne-yapilir/**'
+      - 'alo186/hesaplama/akvaryum-elektrik-kesintisi-oksijen-sicaklik-plani/**'
+      - 'alo186/amazon-elektrik-urunleri/akvaryum-kesinti-hava-pompasi-termometre-secici/**'
+      - 'alo186/deployment/affiliate-category-decisions/aquarium-outage-v300.json'
+      - 'alo186/tests/test_growth_v300_aquarium_outage_trust.py'
+      - '.github/workflows/alo186-growth-v300-aquarium-outage-trust.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/elektrik-kesilince-akvaryum-baligi-ne-yapilir/**'
+      - 'alo186/hesaplama/akvaryum-elektrik-kesintisi-oksijen-sicaklik-plani/**'
+      - 'alo186/amazon-elektrik-urunleri/akvaryum-kesinti-hava-pompasi-termometre-secici/**'
+      - 'alo186/deployment/affiliate-category-decisions/aquarium-outage-v300.json'
+      - 'alo186/tests/test_growth_v300_aquarium_outage_trust.py'
+      - '.github/workflows/alo186-growth-v300-aquarium-outage-trust.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-growth-v300-aquarium-outage-trust-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Akvaryum arama niyeti canlı güveni ve ticari sınırlar
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            alo186/tests/test_growth_v300_aquarium_outage_trust.py \
+            alo186/tests/test_affiliate_route_risk_policy_v265.py
+          python alo186/tests/test_growth_v300_aquarium_outage_trust.py
+          python alo186/tests/test_affiliate_route_risk_policy_v265.py
+          python -m json.tool alo186/deployment/affiliate-category-decisions/aquarium-outage-v300.json >/dev/null
+          python -m json.tool alo186/deployment/affiliate_route_risk_policy_v265.json >/dev/null
+
+      - name: Canonical production build ve static smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-v300
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-v300 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-v300
+          test -f /tmp/alo186-v300/haberler/elektrik-kesilince-akvaryum-baligi-ne-yapilir/index.html
+          test -f /tmp/alo186-v300/hesaplama/akvaryum-elektrik-kesintisi-oksijen-sicaklik-plani/index.html
+          test -f /tmp/alo186-v300/amazon-elektrik-urunleri/akvaryum-kesinti-hava-pompasi-termometre-secici/index.html
+
+      - name: ChatGPT Sites aktarım paketi kabulü
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-sites-v300
+          python alo186/deployment/export_chatgpt_sites_bundle_v2.py --output /tmp/alo186-sites-v300 --commit "$GITHUB_SHA"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/alo186-sites-v300')
+          manifest = json.loads((root / 'sites-import.json').read_text(encoding='utf-8'))
+          pages = {item['canonicalPath']: item for item in manifest['pages']}
+          article = '/haberler/elektrik-kesilince-akvaryum-baligi-ne-yapilir/'
+          tool = '/hesaplama/akvaryum-elektrik-kesintisi-oksijen-sicaklik-plani/'
+          selector = '/amazon-elektrik-urunleri/akvaryum-kesinti-hava-pompasi-termometre-secici/'
+          expected = {article, tool, selector}
+          assert expected.issubset(pages), expected - set(pages)
+          assert pages[article]['affiliate']['hasAffiliateLinks'] is False
+          assert pages[tool]['affiliate']['hasAffiliateLinks'] is False
+          for route in expected:
+              assert not pages[route]['affiliate']['unsafeStaticLinks'], (route, pages[route]['affiliate']['unsafeStaticLinks'])
+          print(json.dumps({'ok': True, 'routes': sorted(expected), 'unsafeStaticLinks': 0}, ensure_ascii=False))
+          PY
+
+      - name: Özet
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ## ALO186 v300 akvaryum kesinti güven paketi
+
+          - Oksijen, gerçek yüzey hareketi, filtre, sıcaklık ve su kalitesi ayrı katmanlar
+          - Bütün tanklara genellenen sabit yaşam süresi iddiası yok
+          - Aktif kesinti, canlı stresi veya elektrik tehlikesinde ticaret kapalı
+          - Mevcut plan gerçek testte yeterliyse: yeni ürün almayın
+          - Düşük riskli sınıflar: pilli hava motoru, açıkça 5 V USB hava pompası, basit termometre
+          - Deniz/resif, hassas tür, sump, ticari ve merkezi sistem: professional-only
+          - Amazon Türkiye bağlantıları başlangıçta kilitli ve açıklamadan sonra açılır
+          - Fiyat, stok, puan, yorum, teslimat ve garanti: yok
+          - 30/90/180 günlük tekrar ziyaret: ekipman kontrolü, prova ve mevsim planı
+          EOF
