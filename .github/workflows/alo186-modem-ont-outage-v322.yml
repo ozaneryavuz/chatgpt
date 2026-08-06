@@ -8,6 +8,7 @@ on:
       - 'alo186/hesaplama/modem-ont-elektrik-kesintisi-internet-hazirlik-plani/**'
       - 'alo186/amazon-elektrik-urunleri/modem-ont-yedek-guc-secimi/**'
       - 'alo186/deployment/routing-overlays/modem-ont-outage-journey-v322.json'
+      - 'alo186/deployment/content-consolidations.json'
       - 'alo186/tests/test_modem_ont_outage_journey_v322.py'
       - '.github/workflows/alo186-modem-ont-outage-v322.yml'
   push:
@@ -17,6 +18,7 @@ on:
       - 'alo186/hesaplama/modem-ont-elektrik-kesintisi-internet-hazirlik-plani/**'
       - 'alo186/amazon-elektrik-urunleri/modem-ont-yedek-guc-secimi/**'
       - 'alo186/deployment/routing-overlays/modem-ont-outage-journey-v322.json'
+      - 'alo186/deployment/content-consolidations.json'
       - 'alo186/tests/test_modem_ont_outage_journey_v322.py'
       - '.github/workflows/alo186-modem-ont-outage-v322.yml'
 
@@ -36,17 +38,18 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - name: Modem, ONT, gizlilik ve affiliate sınır kontrolleri
+      - name: Modem, ONT, gizlilik ve canonical affiliate sınır kontrolleri
         run: |
           set -euo pipefail
           python alo186/tests/test_modem_ont_outage_journey_v322.py
+          python alo186/tests/test_content_intent_consolidation.py
       - name: Canonical site paketini oluştur
         run: |
           set -euo pipefail
           rm -rf /tmp/alo186-modem-ont-v322
           python alo186/deployment/build_static_site.py --output /tmp/alo186-modem-ont-v322 --commit "$GITHUB_SHA"
           python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-modem-ont-v322
-      - name: Yeni rotalar, sitemap, güven kapısı ve yerel takvim kabulü
+      - name: Yeni rotalar, canonical seçici, sitemap ve yerel takvim kabulü
         run: |
           set -euo pipefail
           python - <<'PY'
@@ -57,50 +60,63 @@ jobs:
           root = Path('/tmp/alo186-modem-ont-v322')
           guide_route = '/haberler/elektrik-kesilince-modem-internet-calisir-mi/'
           planner_route = '/hesaplama/modem-ont-elektrik-kesintisi-internet-hazirlik-plani/'
-          affiliate_route = '/amazon-elektrik-urunleri/modem-ont-yedek-guc-secimi/'
-          routes = [guide_route, planner_route, affiliate_route]
+          alias_route = '/amazon-elektrik-urunleri/modem-ont-yedek-guc-secimi/'
+          selector_route = '/amazon-elektrik-urunleri/modem-ont-mini-ups-yedekleme-secici/'
           sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
           release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
           assert release['routingVersion'] >= 322, release['routingVersion']
 
-          pages = {}
-          for route in routes:
+          def page(route):
               file = root / route.strip('/') / 'index.html'
               assert file.is_file(), file
               html = file.read_text(encoding='utf-8')
-              pages[route] = html
-              assert f'rel="canonical" href="https://alo186.com{route}"' in html
-              assert f'https://alo186.com{route}' in sitemap
               assert '<meta name="viewport"' in html
+              return html
+
+          guide = page(guide_route)
+          planner = page(planner_route)
+          alias = page(alias_route)
+          selector = page(selector_route)
+
+          assert f'rel="canonical" href="https://alo186.com{guide_route}"' in guide
+          assert f'rel="canonical" href="https://alo186.com{planner_route}"' in planner
+          assert f'rel="canonical" href="https://alo186.com{selector_route}"' in selector
+          assert f'https://alo186.com{guide_route}' in sitemap
+          assert f'https://alo186.com{planner_route}' in sitemap
+          assert f'https://alo186.com{selector_route}' in sitemap
+          assert f'https://alo186.com{alias_route}' not in sitemap
+          assert selector_route in alias
+          assert 'noindex' in alias.casefold()
+
+          for html in (guide, planner, selector):
               blocks = re.findall(r'<script type="application/ld\+json">(.*?)</script>', html, re.S)
               assert len(blocks) == 1
               serialized = json.dumps(json.loads(blocks[0]), ensure_ascii=False)
               for commercial in ('Product', 'Offer', 'AggregateRating', 'Review'):
                   assert f'"@type": "{commercial}"' not in serialized
 
-          guide = pages[guide_route].casefold()
-          planner = pages[planner_route]
-          affiliate = pages[affiliate_route]
-          assert 'amazon.com.tr' not in guide and 'alo186rehber-21' not in guide
+          assert 'amazon.com.tr' not in guide.casefold() and 'alo186rehber-21' not in guide.casefold()
           assert 'amazon.com.tr' not in planner.casefold() and 'alo186rehber-21' not in planner.casefold()
           assert 'new Blob' in planner and 'BEGIN:VCALENDAR' in planner and 'URL.createObjectURL' in planner
           assert 'fetch(' not in planner.casefold() and 'sendbeacon' not in planner.casefold()
           assert 'localStorage.setItem' not in planner and 'sessionStorage.setItem' not in planner
           assert not re.search(r'<input[^>]+type=["\'](?:text|email|tel|file|hidden)["\']', planner, re.I)
-          assert affiliate.count('class="gate"') == 9
-          assert affiliate.count('data-merchant-url=') == 2
-          assert affiliate.count('rel="sponsored noopener"') == 2
-          assert affiliate.count('tag=alo186rehber-21') == 2
-          assert not re.search(r'<a[^>]+href=["\']https://www\.amazon\.com\.tr', affiliate, re.I)
+          assert selector.count('class="gatebox"') == 3
+          assert 'Amazon Gelir Ortağı açıklaması' in selector
+          assert 'gerilim' in selector.casefold() and 'polarite' in selector.casefold() and 'ont' in selector.casefold()
+
           print(json.dumps({
               'ok': True,
               'routingVersion': release['routingVersion'],
-              'routes': routes,
-              'merchantLinksAdded': 2,
-              'initialMerchantLinksLocked': True,
-              'affiliateGateCount': 9,
+              'newRoutes': [guide_route, planner_route],
+              'consolidatedAlias': alias_route,
+              'canonicalSelector': selector_route,
+              'newMerchantLinksAdded': 0,
+              'existingAffiliateClassesReused': 3,
+              'canonicalSelectorFinalGateCount': 3,
               'calendarLocalOnly': True,
               'providerNetworkGuarantee': False,
+              'duplicateIntentConsolidated': True,
               'unverifiedCommercialClaims': 0,
           }, ensure_ascii=False, indent=2))
           PY
