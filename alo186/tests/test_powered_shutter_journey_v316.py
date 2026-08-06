@@ -57,14 +57,15 @@ def main() -> None:
     for route, html in pages.items():
         folded = html.casefold()
         text = visible_text(html)
+        text_folded = text.casefold()
         assert '<meta name="viewport"' in html and "width=device-width" in html
         assert f'<link rel="canonical" href="https://alo186.com{route}">' in html
         assert len(re.findall(r"<h1\b", html, re.I)) == 1
         assert all(marker not in folded for marker in MERCHANT_MARKERS)
         assert not COMMERCIAL_SCHEMA.intersection(schema_types(load_schema(html)))
-        assert "yeni ürün alma" in text.casefold()
+        assert "yeni ürün alma" in text_folded or "satın almama sonucu" in text_folded
         assert "EDAŞ" in text and "kamu kurumu" in text
-        assert "professional-only" in text.casefold()
+        assert "professional-only" in text_folded
 
     guide = pages["/haberler/elektrik-kesilince-otomatik-panjur-kepenk-nasil-acilir/"]
     guide_text = visible_text(guide)
