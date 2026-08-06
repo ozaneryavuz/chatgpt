@@ -1,0 +1,21 @@
+{
+  "version": 306,
+  "name": "growth-v306-heat-pump-outage-continuity",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesilince-isi-pompasi-calisir-mi/index.html",
+      "canonicalPath": "/haberler/elektrik-kesilince-isi-pompasi-calisir-mi/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/isi-pompasi-elektrik-kesintisi-donma-sureklilik-plani/index.html",
+      "canonicalPath": "/hesaplama/isi-pompasi-elektrik-kesintisi-donma-sureklilik-plani/",
+      "type": "web-application"
+    },
+    {
+      "source": "alo186/sektor-rehberi/villa-otel-isi-pompasi-kesinti-surekliligi/index.html",
+      "canonicalPath": "/sektor-rehberi/villa-otel-isi-pompasi-kesinti-surekliligi/",
+      "type": "professional-guide"
+    }
+  ]
+}
