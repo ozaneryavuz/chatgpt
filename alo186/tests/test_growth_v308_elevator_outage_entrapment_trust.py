@@ -62,7 +62,7 @@ def main() -> None:
     assert_visible(article, (
         "Kapıyı zorlamayın",
         "kendi başınıza çıkmaya çalışmayın",
-        "alarm veya acil haberleşmeyi kullanın",
+        "Kabin alarmını veya acil haberleşmeyi kullanın",
         "can güvenliği riskinde 112",
         "yılda en az bir periyodik kontrol",
         "yılda en az bir kez eğitim",
