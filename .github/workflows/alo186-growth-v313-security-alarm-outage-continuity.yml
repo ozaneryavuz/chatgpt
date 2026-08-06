@@ -1,0 +1,42 @@
+name: ALO186 growth v313 security alarm outage continuity
+
+on:
+  push:
+    branches: [main, "automation/growth-v313-security-alarm-outage-continuity"]
+    paths:
+      - "alo186/haberler/elektrik-kesilince-guvenlik-alarmi-calisir-mi/index.html"
+      - "alo186/hesaplama/guvenlik-alarmi-elektrik-kesintisi-hazirlik-plani/index.html"
+      - "alo186/sektor-rehberi/apartman-otel-guvenlik-alarmi-kesinti-surekliligi/index.html"
+      - "alo186/deployment/affiliate-category-decisions/security-alarm-outage-continuity-v313.json"
+      - "alo186/deployment/routing-overlays/growth-v313-security-alarm-outage-continuity.json"
+      - "alo186/sitemap-growth-v313.xml"
+      - "alo186/robots.txt"
+      - "alo186/tests/test_growth_v313_security_alarm_outage_continuity.py"
+      - ".github/workflows/alo186-growth-v313-security-alarm-outage-continuity.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "alo186/haberler/elektrik-kesilince-guvenlik-alarmi-calisir-mi/index.html"
+      - "alo186/hesaplama/guvenlik-alarmi-elektrik-kesintisi-hazirlik-plani/index.html"
+      - "alo186/sektor-rehberi/apartman-otel-guvenlik-alarmi-kesinti-surekliligi/index.html"
+      - "alo186/deployment/affiliate-category-decisions/security-alarm-outage-continuity-v313.json"
+      - "alo186/deployment/routing-overlays/growth-v313-security-alarm-outage-continuity.json"
+      - "alo186/sitemap-growth-v313.xml"
+      - "alo186/robots.txt"
+      - "alo186/tests/test_growth_v313_security_alarm_outage_continuity.py"
+      - ".github/workflows/alo186-growth-v313-security-alarm-outage-continuity.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  trust-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate v313 trust privacy zero-affiliate and discovery boundaries
+        run: python alo186/tests/test_growth_v313_security_alarm_outage_continuity.py
