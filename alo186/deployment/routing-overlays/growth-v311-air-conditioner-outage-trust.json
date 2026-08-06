@@ -1,0 +1,27 @@
+{
+  "version": 311,
+  "name": "growth-v311-air-conditioner-outage-trust",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/klima-elektrik-kesintisi-guvenli-yeniden-baslatma-plani/index.html",
+      "canonicalPath": "/hesaplama/klima-elektrik-kesintisi-guvenli-yeniden-baslatma-plani/",
+      "type": "web-application"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/yaz-kesintisi-serinleme-olcum-secimi/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/yaz-kesintisi-serinleme-olcum-secimi/",
+      "type": "article"
+    }
+  ],
+  "updatedExistingRoutes": [
+    {
+      "source": "alo186/haberler/elektrik-kesilince-klima-calisir-mi/index.html",
+      "canonicalPath": "/haberler/elektrik-kesilince-klima-calisir-mi/",
+      "type": "article"
+    }
+  ],
+  "sourceAuditAssets": [
+    "alo186/sitemap-growth-v311.xml",
+    "alo186/deployment/affiliate-category-decisions/air-conditioner-outage-trust-v311.json"
+  ]
+}
