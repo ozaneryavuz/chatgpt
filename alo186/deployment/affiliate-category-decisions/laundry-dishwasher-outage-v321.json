@@ -1,0 +1,48 @@
+{
+  "version": 321,
+  "generatedAt": "2026-08-06",
+  "topic": "laundry-dishwasher-outage-continuity",
+  "newMerchantLinks": 0,
+  "affiliatePolicy": {
+    "consumerAffiliateClasses": 0,
+    "activeHazardCommerceClosed": true,
+    "activeOutageCommerceClosed": true,
+    "highLoadWetApplianceCommerceClosed": true,
+    "noBuyOutcomeRequired": true,
+    "disclosureRequiredBeforeAnyFutureMerchantLink": true,
+    "unverifiedCommercialClaims": 0
+  },
+  "professionalOnlyClasses": [
+    "washing-machine",
+    "dishwasher",
+    "commercial-laundry-equipment",
+    "commercial-dishwasher",
+    "extension-cord-or-multi-plug",
+    "plug-in-voltage-regulator",
+    "ups-or-portable-power-station",
+    "generator-or-ats",
+    "pump-valve-door-lock-or-control-board",
+    "water-inlet-drainage-or-fixed-electrical-work",
+    "chemical-dosing-equipment",
+    "temporary-power-connections"
+  ],
+  "privacyPolicy": {
+    "personalDataFields": 0,
+    "serverSubmission": false,
+    "persistentBrowserStorage": false,
+    "localIcsGeneration": true
+  },
+  "conversionPoints": [
+    "electrical-supply-and-protection-measurement",
+    "manufacturer-authorized-appliance-service",
+    "water-and-drainage-inspection",
+    "generator-ats-restart-acceptance",
+    "hygiene-reprocessing-procedure",
+    "maintenance-contract-and-incident-review"
+  ],
+  "repeatVisitReasons": [
+    {"days": 30, "reason": "plug-hose-leak-seal-and-error-log-check"},
+    {"days": 90, "reason": "exact-model-power-return-procedure-review-without-intentional-outage"},
+    {"days": 365, "reason": "appliance-electrical-water-and-drainage-professional-review"}
+  ]
+}
