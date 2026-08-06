@@ -1,0 +1,113 @@
+name: ALO186 elektrik proje içerikleri v313
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/62-villa-22-kw-ac-2x180-kw-dc-arac-sarj-altyapisi-projesi/**'
+      - 'alo186/haberler/elektrik-odasi-safti-busbar-kablo-tavasi-yangin-durdurucu-detaylari/**'
+      - 'alo186/haberler/yangin-algilama-acil-anons-cctv-kartli-gecis-data-entegrasyon-projesi/**'
+      - 'alo186/deployment/routing-overlays/electrical-project-content-run3-v313.json'
+      - 'alo186/tests/test_electrical_project_content_v313.py'
+      - '.github/workflows/alo186-electrical-project-content-v313.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/62-villa-22-kw-ac-2x180-kw-dc-arac-sarj-altyapisi-projesi/**'
+      - 'alo186/haberler/elektrik-odasi-safti-busbar-kablo-tavasi-yangin-durdurucu-detaylari/**'
+      - 'alo186/haberler/yangin-algilama-acil-anons-cctv-kartli-gecis-data-entegrasyon-projesi/**'
+      - 'alo186/deployment/routing-overlays/electrical-project-content-run3-v313.json'
+      - 'alo186/tests/test_electrical_project_content_v313.py'
+      - '.github/workflows/alo186-electrical-project-content-v313.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-electrical-project-content-v313-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: İçerik, schema, kaynak ve çakışma kontrolleri
+        run: |
+          set -euo pipefail
+          python alo186/tests/test_electrical_project_content_v313.py
+          python alo186/tests/test_content_intent_consolidation.py
+
+      - name: Canonical site paketini oluştur
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-electrical-project-v313
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-electrical-project-v313 \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-electrical-project-v313
+
+      - name: Sitemap, canonical, schema ve mobil kabulü
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+
+          root = Path('/tmp/alo186-electrical-project-v313')
+          routes = [
+              '/haberler/62-villa-22-kw-ac-2x180-kw-dc-arac-sarj-altyapisi-projesi',
+              '/haberler/elektrik-odasi-safti-busbar-kablo-tavasi-yangin-durdurucu-detaylari',
+              '/haberler/yangin-algilama-acil-anons-cctv-kartli-gecis-data-entegrasyon-projesi',
+          ]
+          sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
+          release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
+          assert release['routingVersion'] >= 313, release['routingVersion']
+          for route in routes:
+              page = root / route.strip('/') / 'index.html'
+              assert page.is_file(), page
+              html = page.read_text(encoding='utf-8')
+              folded = html.casefold()
+              assert f'rel="canonical" href="https://alo186.com{route}"' in html
+              assert f'https://alo186.com{route}' in sitemap
+              assert '<meta name="viewport"' in html and 'width=device-width' in html
+              blocks = re.findall(r'<script type="application/ld\+json">(.*?)</script>', html, re.S)
+              assert len(blocks) == 1
+              schema = json.loads(blocks[0])
+              serialized = json.dumps(schema, ensure_ascii=False)
+              assert 'Article' in serialized
+              assert 'FAQPage' in serialized
+              assert 'BreadcrumbList' in serialized
+              assert 'amazon.com.tr' not in folded and 'amzn.to' not in folded
+              assert '"@type": "Product"' not in serialized
+              assert '"@type": "Offer"' not in serialized
+              assert '"@type": "AggregateRating"' not in serialized
+          print(json.dumps({
+              'ok': True,
+              'routingVersion': release['routingVersion'],
+              'routes': routes,
+              'sitemap': True,
+              'canonical': True,
+              'articleFaqBreadcrumb': True,
+              'mobile': True,
+              'affiliateBlocked': True,
+              'globalCannibalizationGuard': True,
+          }, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Doğrulanmış içerik artifactı
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-electrical-project-content-v313-${{ github.sha }}
+          path: /tmp/alo186-electrical-project-v313
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
