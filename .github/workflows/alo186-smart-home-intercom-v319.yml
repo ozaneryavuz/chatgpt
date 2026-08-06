@@ -1,5 +1,6 @@
 name: ALO186 akıllı ev ve diafon sürekliliği v319
 
+# v319 içerik ifadesi ile kalite kapısı hizalandı; tam doğrulama yeniden çalıştırılır.
 on:
   workflow_dispatch:
   pull_request:
