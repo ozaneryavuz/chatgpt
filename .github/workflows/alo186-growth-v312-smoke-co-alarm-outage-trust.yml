@@ -1,0 +1,42 @@
+name: ALO186 growth v312 smoke CO alarm outage trust
+
+on:
+  push:
+    branches: [main, "automation/growth-v312-smoke-co-alarm-outage-trust"]
+    paths:
+      - "alo186/haberler/elektrik-kesilince-duman-karbonmonoksit-alarmi-calisir-mi/index.html"
+      - "alo186/hesaplama/duman-karbonmonoksit-alarmi-kesinti-hazirlik-plani/index.html"
+      - "alo186/amazon-elektrik-urunleri/ev-tipi-duman-karbonmonoksit-alarmi-secimi/index.html"
+      - "alo186/deployment/affiliate-category-decisions/smoke-co-alarm-outage-trust-v312.json"
+      - "alo186/deployment/routing-overlays/growth-v312-smoke-co-alarm-outage-trust.json"
+      - "alo186/sitemap-growth-v312.xml"
+      - "alo186/robots.txt"
+      - "alo186/tests/test_growth_v312_smoke_co_alarm_outage_trust.py"
+      - ".github/workflows/alo186-growth-v312-smoke-co-alarm-outage-trust.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "alo186/haberler/elektrik-kesilince-duman-karbonmonoksit-alarmi-calisir-mi/index.html"
+      - "alo186/hesaplama/duman-karbonmonoksit-alarmi-kesinti-hazirlik-plani/index.html"
+      - "alo186/amazon-elektrik-urunleri/ev-tipi-duman-karbonmonoksit-alarmi-secimi/index.html"
+      - "alo186/deployment/affiliate-category-decisions/smoke-co-alarm-outage-trust-v312.json"
+      - "alo186/deployment/routing-overlays/growth-v312-smoke-co-alarm-outage-trust.json"
+      - "alo186/sitemap-growth-v312.xml"
+      - "alo186/robots.txt"
+      - "alo186/tests/test_growth_v312_smoke_co_alarm_outage_trust.py"
+      - ".github/workflows/alo186-growth-v312-smoke-co-alarm-outage-trust.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  trust-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate v312 trust privacy affiliate and discovery boundaries
+        run: python alo186/tests/test_growth_v312_smoke_co_alarm_outage_trust.py
