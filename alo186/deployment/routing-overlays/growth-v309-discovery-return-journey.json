@@ -15,8 +15,10 @@
       "type": "collection-page"
     }
   ],
-  "staticAssets": [
-    "alo186/sitemap-growth-v309.xml",
+  "publicRootAssets": [
     "alo186/robots.txt"
+  ],
+  "sourceAuditAssets": [
+    "alo186/sitemap-growth-v309.xml"
   ]
 }
