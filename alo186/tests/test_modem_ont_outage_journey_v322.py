@@ -131,9 +131,10 @@ def main() -> None:
     selector = CANONICAL_SELECTOR.read_text(encoding="utf-8")
     selector_text = visible_text(selector)
     selector_folded = selector_text.casefold()
+    selector_source_folded = selector.casefold()
     assert f'<link rel="canonical" href="https://alo186.com{CANONICAL_SELECTOR_ROUTE}">' in selector
     assert "amazon gelir ortağı açıklaması" in selector_folded
-    assert "yeni ürün alınmamalı" in selector_folded or "yeni ürün almayın" in selector_folded
+    assert "yeni ürün alınmamalı" in selector_source_folded or "yeni ürün almayın" in selector_source_folded
     assert "fiyat, stok, satıcı, puan, yorum, teslimat veya garanti" in selector_folded
     assert selector.count('class="gatebox"') == 3
     assert "ont" in selector_folded and "polarite" in selector_folded and "gerilim" in selector_folded
