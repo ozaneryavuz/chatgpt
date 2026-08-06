@@ -124,9 +124,9 @@ def main() -> None:
         "new Blob", "URL.createObjectURL", "BEGIN:VCALENDAR", "30/90/365",
         "Aktif tehlikede planlama ve ticari yol kapalıdır",
         "Satın almama sonucu", "Yeni ürün almayın",
-        "satış ortaklığı bağlantısı yoktur",
+        "Amazon Türkiye veya başka mağaza bağlantısı yoktur",
     ):
-        assert required in planner
+        assert required in planner, required
     assert "Ad, telefon, e-posta, adres" in planner_text
     assert "Seçimler sunucuya gönderilmez" in planner_text
     assert "EDAŞ veya kamu kurumu değildir" in planner_text
