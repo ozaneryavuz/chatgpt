@@ -1,0 +1,21 @@
+{
+  "version": 325,
+  "generatedAt": "2026-08-06",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesintisi-sonrasi-cihazlar-nasil-kontrol-edilir/index.html",
+      "canonicalPath": "/haberler/elektrik-kesintisi-sonrasi-cihazlar-nasil-kontrol-edilir/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/elektrik-kesintisi-sonrasi-guvenli-devreye-alma-plani/index.html",
+      "canonicalPath": "/hesaplama/elektrik-kesintisi-sonrasi-guvenli-devreye-alma-plani/",
+      "type": "business-tool"
+    },
+    {
+      "source": "alo186/sektor-rehberi/otel-isletme-elektrik-kesintisi-sonrasi-devreye-alma/index.html",
+      "canonicalPath": "/sektor-rehberi/otel-isletme-elektrik-kesintisi-sonrasi-devreye-alma/",
+      "type": "sector-guide"
+    }
+  ]
+}
