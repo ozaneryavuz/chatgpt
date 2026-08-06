@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
-      - 'alo186/haberler/62-villa-22-kw-ac-2x180-kw-dc-arac-sarj-altyapisi-projesi/**'
+      - 'alo186/haberler/peyzaj-dis-alan-elektrik-aydinlatma-priz-sulama-projesi/**'
       - 'alo186/haberler/elektrik-odasi-safti-busbar-kablo-tavasi-yangin-durdurucu-detaylari/**'
       - 'alo186/haberler/yangin-algilama-acil-anons-cctv-kartli-gecis-data-entegrasyon-projesi/**'
       - 'alo186/deployment/routing-overlays/electrical-project-content-run3-v313.json'
@@ -13,7 +13,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'alo186/haberler/62-villa-22-kw-ac-2x180-kw-dc-arac-sarj-altyapisi-projesi/**'
+      - 'alo186/haberler/peyzaj-dis-alan-elektrik-aydinlatma-priz-sulama-projesi/**'
       - 'alo186/haberler/elektrik-odasi-safti-busbar-kablo-tavasi-yangin-durdurucu-detaylari/**'
       - 'alo186/haberler/yangin-algilama-acil-anons-cctv-kartli-gecis-data-entegrasyon-projesi/**'
       - 'alo186/deployment/routing-overlays/electrical-project-content-run3-v313.json'
@@ -64,7 +64,7 @@ jobs:
 
           root = Path('/tmp/alo186-electrical-project-v313')
           routes = [
-              '/haberler/62-villa-22-kw-ac-2x180-kw-dc-arac-sarj-altyapisi-projesi',
+              '/haberler/peyzaj-dis-alan-elektrik-aydinlatma-priz-sulama-projesi',
               '/haberler/elektrik-odasi-safti-busbar-kablo-tavasi-yangin-durdurucu-detaylari',
               '/haberler/yangin-algilama-acil-anons-cctv-kartli-gecis-data-entegrasyon-projesi',
           ]
