@@ -63,7 +63,7 @@ def main() -> None:
         "Kapıyı zorlamayın",
         "kendi başınıza çıkmaya çalışmayın",
         "Kabin alarmını veya acil haberleşmeyi kullanın",
-        "can güvenliği riskinde 112",
+        "can güvenliği riski varsa 112’yi arayın",
         "yılda en az bir periyodik kontrol",
         "yılda en az bir kez eğitim",
         "Amazon veya başka mağaza bağlantısı yoktur",
