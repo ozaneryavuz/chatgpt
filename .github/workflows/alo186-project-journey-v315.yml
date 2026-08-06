@@ -1,0 +1,119 @@
+name: ALO186 proje yolculuğu v315
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/elektrik-proje-karar-merkezi/**'
+      - 'alo186/hesaplama/elektrik-proje-hazirlik-plani/**'
+      - 'alo186/haberler/elektrik-odasi-safti-busbar-kablo-tavasi-yangin-durdurucu-detaylari/**'
+      - 'alo186/deployment/routing-overlays/project-journey-v315.json'
+      - 'alo186/tests/test_project_journey_v315.py'
+      - '.github/workflows/alo186-project-journey-v315.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/elektrik-proje-karar-merkezi/**'
+      - 'alo186/hesaplama/elektrik-proje-hazirlik-plani/**'
+      - 'alo186/haberler/elektrik-odasi-safti-busbar-kablo-tavasi-yangin-durdurucu-detaylari/**'
+      - 'alo186/deployment/routing-overlays/project-journey-v315.json'
+      - 'alo186/tests/test_project_journey_v315.py'
+      - '.github/workflows/alo186-project-journey-v315.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-project-journey-v315-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Niyet ayrımı, gizlilik ve ticari sınır kontrolleri
+        run: |
+          set -euo pipefail
+          python alo186/tests/test_project_journey_v315.py
+          python alo186/tests/test_electrical_project_content_v313.py
+          python alo186/tests/test_electrical_project_content_run4.py
+          python alo186/tests/test_content_intent_consolidation.py
+
+      - name: Canonical site paketini oluştur
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-project-journey-v315
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-project-journey-v315 \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-project-journey-v315
+
+      - name: Yeni rotalar, sitemap ve kişisel verisiz araç kabulü
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+
+          root = Path('/tmp/alo186-project-journey-v315')
+          routes = [
+              '/elektrik-proje-karar-merkezi',
+              '/hesaplama/elektrik-proje-hazirlik-plani/',
+          ]
+          sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
+          release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
+          assert release['routingVersion'] >= 315, release['routingVersion']
+          for route in routes:
+              file = root / route.strip('/') / 'index.html'
+              assert file.is_file(), file
+              html = file.read_text(encoding='utf-8')
+              folded = html.casefold()
+              assert f'rel="canonical" href="https://alo186.com{route}"' in html
+              assert f'https://alo186.com{route}' in sitemap
+              assert '<meta name="viewport"' in html
+              assert 'amazon.com.tr' not in folded and 'amzn.to' not in folded
+              assert 'alo186rehber-21' not in folded
+              blocks = re.findall(r'<script type="application/ld\+json">(.*?)</script>', html, re.S)
+              assert len(blocks) == 1
+              schema = json.loads(blocks[0])
+              serialized = json.dumps(schema, ensure_ascii=False)
+              for commercial in ('Product', 'Offer', 'AggregateRating', 'Review'):
+                  assert f'"@type": "{commercial}"' not in serialized
+          planner = (root / 'hesaplama/elektrik-proje-hazirlik-plani/index.html').read_text(encoding='utf-8')
+          assert 'new Blob' in planner and 'BEGIN:VCALENDAR' in planner
+          assert 'localStorage' not in planner and 'sessionStorage' not in planner and 'fetch(' not in planner
+          assert not re.search(r'<input[^>]+type=["\'](?:text|email|tel|file|hidden)["\']', planner, re.I)
+          field = (root / 'haberler/elektrik-odasi-safti-busbar-kablo-tavasi-yangin-durdurucu-detaylari/index.html').read_text(encoding='utf-8')
+          assert 'Koordinasyon değil, saha kanıtı' in field
+          assert '/elektrik-proje-karar-merkezi' in field
+          print(json.dumps({
+              'ok': True,
+              'routingVersion': release['routingVersion'],
+              'routes': routes,
+              'sitemap': True,
+              'canonical': True,
+              'personalDataFields': 0,
+              'merchantLinksAdded': 0,
+              'commercialSchemaAdded': False,
+              'calendarLocalOnly': True,
+              'intentSplit': True,
+          }, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Doğrulanmış proje yolculuğu artifactı
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-project-journey-v315-${{ github.sha }}
+          path: /tmp/alo186-project-journey-v315
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
