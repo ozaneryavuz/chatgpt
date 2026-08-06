@@ -1,0 +1,74 @@
+name: ALO186 aquarium outage journey v323
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/elektrik-kesintisinde-akvaryum-baliklari-ne-yapilmali/**'
+      - 'alo186/hesaplama/akvaryum-elektrik-kesintisi-hazirlik-plani/**'
+      - 'alo186/amazon-elektrik-urunleri/akvaryum-kesinti-hazirlik-secimi/**'
+      - 'alo186/deployment/routing-overlays/aquarium-outage-journey-v323.json'
+      - 'alo186/tests/test_aquarium_outage_journey_v323.py'
+      - '.github/workflows/alo186-aquarium-outage-v323.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/elektrik-kesintisinde-akvaryum-baliklari-ne-yapilmali/**'
+      - 'alo186/hesaplama/akvaryum-elektrik-kesintisi-hazirlik-plani/**'
+      - 'alo186/amazon-elektrik-urunleri/akvaryum-kesinti-hazirlik-secimi/**'
+      - 'alo186/deployment/routing-overlays/aquarium-outage-journey-v323.json'
+      - 'alo186/tests/test_aquarium_outage_journey_v323.py'
+      - '.github/workflows/alo186-aquarium-outage-v323.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-aquarium-v323-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Trust, privacy and affiliate gate checks
+        run: python alo186/tests/test_aquarium_outage_journey_v323.py
+      - name: Build canonical site bundle
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-aquarium-v323
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-aquarium-v323 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-aquarium-v323
+      - name: Verify routes and sitemap
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/alo186-aquarium-v323')
+          routes = [
+            '/haberler/elektrik-kesintisinde-akvaryum-baliklari-ne-yapilmali/',
+            '/hesaplama/akvaryum-elektrik-kesintisi-hazirlik-plani/',
+            '/amazon-elektrik-urunleri/akvaryum-kesinti-hazirlik-secimi/',
+          ]
+          sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
+          release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
+          assert release['routingVersion'] >= 323
+          for route in routes:
+              page = root / route.strip('/') / 'index.html'
+              assert page.is_file(), page
+              assert f'https://alo186.com{route}' in sitemap
+          print({'ok': True, 'routingVersion': release['routingVersion'], 'routes': routes})
+          PY
+      - name: Upload verified bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-aquarium-v323-${{ github.sha }}
+          path: /tmp/alo186-aquarium-v323
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
