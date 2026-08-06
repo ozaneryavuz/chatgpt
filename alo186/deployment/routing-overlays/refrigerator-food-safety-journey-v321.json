@@ -1,0 +1,21 @@
+{
+  "version": 321,
+  "generatedAt": "2026-08-06",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesintisinde-buzdolabi-ve-derin-dondurucu-ne-kadar-dayanir/index.html",
+      "canonicalPath": "/haberler/elektrik-kesintisinde-buzdolabi-ve-derin-dondurucu-ne-kadar-dayanir/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/buzdolabi-derin-dondurucu-elektrik-kesintisi-gida-guvenligi-plani/index.html",
+      "canonicalPath": "/hesaplama/buzdolabi-derin-dondurucu-elektrik-kesintisi-gida-guvenligi-plani/",
+      "type": "business-tool"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/buzdolabi-dondurucu-kesinti-hazirlik-secimi/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/buzdolabi-dondurucu-kesinti-hazirlik-secimi/",
+      "type": "article"
+    }
+  ]
+}
