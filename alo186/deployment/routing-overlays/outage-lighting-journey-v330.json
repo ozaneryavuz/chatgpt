@@ -1,0 +1,21 @@
+{
+  "version": 330,
+  "generatedAt": "2026-08-07",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesintisinde-mum-mu-el-feneri-mi/index.html",
+      "canonicalPath": "/haberler/elektrik-kesintisinde-mum-mu-el-feneri-mi/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/elektrik-kesintisi-acil-aydinlatma-hazirlik-plani/index.html",
+      "canonicalPath": "/hesaplama/elektrik-kesintisi-acil-aydinlatma-hazirlik-plani/",
+      "type": "business-tool"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/elektrik-kesintisi-acil-aydinlatma-secimi/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/elektrik-kesintisi-acil-aydinlatma-secimi/",
+      "type": "article"
+    }
+  ]
+}
