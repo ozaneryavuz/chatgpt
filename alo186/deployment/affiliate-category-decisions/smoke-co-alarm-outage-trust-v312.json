@@ -1,0 +1,87 @@
+{
+  "version": 312,
+  "name": "smoke-co-alarm-outage-trust",
+  "decision": "gated-home-only-affiliate-plus-professional-only",
+  "evaluatedAt": "2026-08-06",
+  "newMerchantLinks": 2,
+  "selectedActions": [
+    {
+      "priority": 1,
+      "action": "cover-smoke-co-alarm-outage-intent",
+      "route": "/haberler/elektrik-kesilince-duman-karbonmonoksit-alarmi-calisir-mi/",
+      "userBenefit": "Pilli, şebeke-batarya yedekli ve bina tipi alarm sistemlerini ayırır; aktif alarmda tahliye ve 112 yolunu öne alır.",
+      "revenueImpact": "Yüksek güven niyetli aramayı ücretsiz planlayıcıya, yalnız doğrulanmış ev tipi eksikte affiliate seçicisine veya profesyonel sisteme taşır."
+    },
+    {
+      "priority": 2,
+      "action": "create-private-alarm-readiness-planner",
+      "route": "/hesaplama/duman-karbonmonoksit-alarmi-kesinti-hazirlik-plani/",
+      "userBenefit": "Aktif olayda form ve ticareti kapatır; yedek besleme, kullanım ömrü, test ve geri çağırma kanıtını satın almadan önce kontrol eder.",
+      "revenueImpact": "Tek seferlik ziyareti 30/90/365 günlük gerçek işlev kontrolüne ve nitelikli bakım ihtiyacına bağlar."
+    },
+    {
+      "priority": 3,
+      "action": "open-two-gated-home-alarm-classes",
+      "route": "/amazon-elektrik-urunleri/ev-tipi-duman-karbonmonoksit-alarmi-secimi/",
+      "userBenefit": "Bina sisteminin yerine geçmeyecek biçimde yalnız tek konuttaki gerçek algılama eksiği için güvenli ürün sınırı sunar.",
+      "revenueImpact": "Sekiz güven koşulundan sonra iki düşük riskli Amazon Türkiye kategori geçişi üretir; sabit ve ticari sistemleri profesyonel hizmete yönlendirir."
+    }
+  ],
+  "affiliatePolicy": {
+    "consumerAffiliateClasses": 2,
+    "classes": ["standalone-battery-smoke-alarm", "home-carbon-monoxide-alarm-with-battery-or-backup"],
+    "merchant": "Amazon Türkiye",
+    "merchantLinks": 2,
+    "affiliateDisclosureBeforeLinks": true,
+    "relSponsoredNoopenerRequired": true,
+    "activeAlarmCommerceClosed": true,
+    "fireOrCoSymptomCommerceClosed": true,
+    "buildingSystemCommerceClosed": true,
+    "homeOnly": true,
+    "gateCount": 8,
+    "noBuyOutcomeRequired": true,
+    "unverifiedPriceStockRatingWarrantyForbidden": true
+  },
+  "professionalOnlyClasses": [
+    "fire-alarm-control-panel",
+    "addressable-or-conventional-building-detectors",
+    "interconnected-fixed-wiring-alarm-system",
+    "building-sirens-and-line-monitoring",
+    "fire-alarm-power-supply-and-battery-sizing",
+    "apartment-hotel-workplace-school-healthcare-industrial-systems",
+    "gas-shutoff-and-combustion-appliance-work",
+    "chimney-and-ventilation-work",
+    "generator-and-ats-integration",
+    "commissioning-acceptance-periodic-inspection",
+    "accessible-building-alerting",
+    "evacuation-scenario-design"
+  ],
+  "privacyPolicy": {
+    "personalDataFields": 0,
+    "serverSubmission": false,
+    "persistentBrowserStorage": false,
+    "localIcsGeneration": true,
+    "locationCollection": false,
+    "brandModelOrSerialCollection": false
+  },
+  "safetyPolicy": {
+    "emergencyNumber": "112",
+    "gridOutageNumber": "186",
+    "noBatteryRemovalInstruction": true,
+    "noAlarmSilencingAsResolution": true,
+    "testButtonDoesNotProveCoSensorAccuracy": true,
+    "noUniversalBackupClaim": true,
+    "independentPlatformDisclosureRequired": true,
+    "officialAffiliationImpressionForbidden": true
+  },
+  "repeatVisitReasons": [
+    {"days": 30, "reason": "manufacturer-test-indicator-audibility-and-physical-condition"},
+    {"days": 90, "reason": "manual-based-backup-power-duty-test"},
+    {"days": 365, "reason": "model-end-of-life-recall-placement-and-accessibility-review"}
+  ],
+  "sources": [
+    "https://www.usfa.fema.gov/prevention/home-fires/prepare-for-fire/smoke-alarms/",
+    "https://www.cpsc.gov/Safety-Education/Safety-Education-Centers/Carbon-Monoxide-Information-Center",
+    "https://www.cpsc.gov/Recalls"
+  ]
+}
