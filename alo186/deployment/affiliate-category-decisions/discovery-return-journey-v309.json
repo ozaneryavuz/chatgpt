@@ -16,8 +16,10 @@
   ],
   "discoveryPolicy": {
     "staticInternalLinksRequired": true,
-    "sitemapAdvertisedInRobots": true,
-    "growthSitemapUrlCount": 38,
+    "canonicalGeneratedSitemapRequired": true,
+    "canonicalSitemapAdvertisedInRobots": true,
+    "focusedDiscoveryInventoryUrlCount": 38,
+    "focusedDiscoveryInventoryPublic": false,
     "javascriptOnlyNavigationForbidden": true,
     "canonicalHost": "https://alo186.com"
   },
