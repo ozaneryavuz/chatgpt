@@ -1,0 +1,21 @@
+{
+  "version": 328,
+  "generatedAt": "2026-08-06",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesilince-gunes-panelleri-calisir-mi/index.html",
+      "canonicalPath": "/haberler/elektrik-kesilince-gunes-panelleri-calisir-mi/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/ges-elektrik-kesintisi-yedekleme-hazirlik-plani/index.html",
+      "canonicalPath": "/hesaplama/ges-elektrik-kesintisi-yedekleme-hazirlik-plani/",
+      "type": "business-tool"
+    },
+    {
+      "source": "alo186/sektor-rehberi/otel-isletme-ges-elektrik-kesintisi-yedekleme-surekliligi/index.html",
+      "canonicalPath": "/sektor-rehberi/otel-isletme-ges-elektrik-kesintisi-yedekleme-surekliligi/",
+      "type": "article"
+    }
+  ]
+}
