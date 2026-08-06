@@ -1,0 +1,40 @@
+name: ALO186 growth v310 boiler outage trust
+
+on:
+  push:
+    branches: [main, "automation/growth-v310-boiler-outage-trust"]
+    paths:
+      - "alo186/haberler/elektrik-kesilince-kombi-calisir-mi/index.html"
+      - "alo186/hesaplama/kombi-elektrik-kesintisi-ups-uygunluk-kontrolu/index.html"
+      - "alo186/sektor-rehberi/apartman-otel-kazan-kombi-kesinti-surekliligi/index.html"
+      - "alo186/deployment/affiliate-category-decisions/boiler-outage-trust-v310.json"
+      - "alo186/deployment/routing-overlays/growth-v310-boiler-outage-trust.json"
+      - "alo186/sitemap-growth-v310.xml"
+      - "alo186/tests/test_growth_v310_boiler_outage_trust.py"
+      - ".github/workflows/alo186-growth-v310-boiler-outage-trust.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "alo186/haberler/elektrik-kesilince-kombi-calisir-mi/index.html"
+      - "alo186/hesaplama/kombi-elektrik-kesintisi-ups-uygunluk-kontrolu/index.html"
+      - "alo186/sektor-rehberi/apartman-otel-kazan-kombi-kesinti-surekliligi/index.html"
+      - "alo186/deployment/affiliate-category-decisions/boiler-outage-trust-v310.json"
+      - "alo186/deployment/routing-overlays/growth-v310-boiler-outage-trust.json"
+      - "alo186/sitemap-growth-v310.xml"
+      - "alo186/tests/test_growth_v310_boiler_outage_trust.py"
+      - ".github/workflows/alo186-growth-v310-boiler-outage-trust.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  trust-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate v310 trust and conversion boundaries
+        run: python alo186/tests/test_growth_v310_boiler_outage_trust.py

@@ -1,0 +1,66 @@
+{
+  "version": 310,
+  "name": "boiler-outage-trust-v310",
+  "decision": "professional-only-no-consumer-affiliate",
+  "newMerchantLinks": 0,
+  "updatedCanonicalRoutes": [
+    "/haberler/elektrik-kesilince-kombi-calisir-mi/",
+    "/hesaplama/kombi-elektrik-kesintisi-ups-uygunluk-kontrolu/"
+  ],
+  "newCanonicalRoutes": [
+    "/sektor-rehberi/apartman-otel-kazan-kombi-kesinti-surekliligi/"
+  ],
+  "searchIntentSegments": [
+    "boiler-stops-during-outage",
+    "boiler-does-not-restart-after-power-return",
+    "boiler-ups-compatibility",
+    "apartment-hotel-boiler-continuity"
+  ],
+  "affiliatePolicy": {
+    "consumerAffiliateClasses": 0,
+    "merchantLinks": 0,
+    "affiliateDisclosureRequiredIfPolicyChanges": true,
+    "unverifiedPriceStockRatingWarrantyForbidden": true,
+    "activeOutageCommerceClosed": true,
+    "gasOrElectricalDangerCommerceClosed": true,
+    "noBuyOutcomeRequired": true
+  },
+  "professionalOnlyClasses": [
+    "boiler-and-combi",
+    "fixed-ups-and-external-battery",
+    "inverter-and-generator",
+    "automatic-transfer-switch",
+    "neutral-earth-or-fixed-wiring-change",
+    "cascade-boiler-and-central-heating",
+    "pump-valve-burner-and-bms",
+    "gas-alarm-and-boiler-room-safety"
+  ],
+  "conversionPolicy": {
+    "singleApplianceFault": "manufacturer-authorized-service",
+    "electricalTripVoltageGrounding": "electrician-or-electrical-engineer",
+    "hydronicFreezePressurePump": "mechanical-heating-specialist",
+    "generatorAtsLoadSequence": "generator-ats-and-electrical-engineering",
+    "hotelSiteOperations": "facility-management-bms-and-continuity"
+  },
+  "repeatVisitReasons": [
+    {"days": 30, "purpose": "display-error-pressure-cable-condensate-and-ventilation-check"},
+    {"days": 90, "purpose": "supervised-outage-safe-restart-and-transfer-duty-test"},
+    {"days": 365, "purpose": "authorized-maintenance-electrical-gas-ventilation-and-ats-review"}
+  ],
+  "privacyPolicy": {
+    "personalDataFields": 0,
+    "serverSubmission": false,
+    "persistentBrowserStorage": false,
+    "localIcsGeneration": true
+  },
+  "trustPolicy": {
+    "officialInstitutionImpersonationForbidden": true,
+    "alo186IsNotGasDistributorOrEdas": true,
+    "faultRegistrationForbidden": true,
+    "gasSmellUses187": true,
+    "lifeSafetyUses112": true,
+    "gridOutageUses186": true,
+    "evidenceBeforeEquipment": true,
+    "noBuyIsSuccess": true
+  }
+}

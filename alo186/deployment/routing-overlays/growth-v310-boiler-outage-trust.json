@@ -1,0 +1,26 @@
+{
+  "version": 310,
+  "name": "growth-v310-boiler-outage-trust",
+  "routes": [
+    {
+      "source": "alo186/sektor-rehberi/apartman-otel-kazan-kombi-kesinti-surekliligi/index.html",
+      "canonicalPath": "/sektor-rehberi/apartman-otel-kazan-kombi-kesinti-surekliligi/",
+      "type": "article"
+    }
+  ],
+  "updatedExistingRoutes": [
+    {
+      "source": "alo186/haberler/elektrik-kesilince-kombi-calisir-mi/index.html",
+      "canonicalPath": "/haberler/elektrik-kesilince-kombi-calisir-mi/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/kombi-elektrik-kesintisi-ups-uygunluk-kontrolu/index.html",
+      "canonicalPath": "/hesaplama/kombi-elektrik-kesintisi-ups-uygunluk-kontrolu/",
+      "type": "web-application"
+    }
+  ],
+  "sourceAuditAssets": [
+    "alo186/sitemap-growth-v310.xml"
+  ]
+}
