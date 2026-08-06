@@ -1,0 +1,72 @@
+{
+  "version": 309,
+  "name": "discovery-return-journey-v309",
+  "decision": "discovery-first-no-new-consumer-affiliate",
+  "newMerchantLinks": 0,
+  "updatedCanonicalRoutes": [
+    "/kesinti-cihaz-surekliligi-karar-merkezi/"
+  ],
+  "newCanonicalRoutes": [
+    "/hesaplama/kesinti-hazirlik-takvimi/"
+  ],
+  "searchIntentSegments": [
+    "active-outage",
+    "power-return-or-flapping",
+    "future-preparation"
+  ],
+  "discoveryPolicy": {
+    "staticInternalLinksRequired": true,
+    "sitemapAdvertisedInRobots": true,
+    "growthSitemapUrlCount": 32,
+    "javascriptOnlyNavigationForbidden": true,
+    "canonicalHost": "https://alo186.com"
+  },
+  "affiliatePolicy": {
+    "directMerchantLinksOnHub": false,
+    "directMerchantLinksOnCalendar": false,
+    "internalSelectorLinksAllowed": true,
+    "affiliateDisclosureBeforeMerchantOnDestination": true,
+    "unverifiedPriceStockRatingWarrantyForbidden": true,
+    "activeOutageCommerceClosed": true,
+    "activeDangerCommerceClosed": true,
+    "noBuyOutcomeRequired": true
+  },
+  "conditionallyLowRiskDestinationClasses": [
+    "model-compatible-high-endurance-camera-microsd",
+    "single-low-voltage-personal-camera-mini-ups",
+    "battery-or-explicit-5v-usb-aquarium-air-pump",
+    "aquarium-thermometer",
+    "refrigerator-freezer-thermometer",
+    "surge-protected-strip-for-low-power-personal-electronics",
+    "plug-in-voltage-monitor-as-observation-only"
+  ],
+  "professionalOnlyClusters": [
+    "solar-backup-and-fixed-battery",
+    "generator-ats-and-fixed-ups",
+    "hydrofor-and-pump-control",
+    "heat-pump-and-freeze-protection",
+    "elevator-and-automatic-rescue",
+    "garage-door-and-access-control",
+    "commercial-and-medical-cold-chain",
+    "poe-nvr-and-multi-camera-systems",
+    "building-electrical-protection-and-power-quality"
+  ],
+  "repeatVisitReasons": [
+    {"days": 30, "purpose": "visual-status-battery-alarm-thermometer-cable-and-record-check"},
+    {"days": 90, "purpose": "supervised-real-outage-transfer-recording-or-restart-test"},
+    {"days": 365, "purpose": "manufacturer-service-protection-mechanical-and-continuity-review"}
+  ],
+  "privacyPolicy": {
+    "personalDataFields": 0,
+    "serverSubmission": false,
+    "persistentBrowserStorage": false,
+    "localIcsGeneration": true
+  },
+  "conversionPolicy": {
+    "trustBeforeClick": true,
+    "evidenceBeforeProduct": true,
+    "noBuyIsSuccess": true,
+    "professionalLeadWhenSystemCritical": true,
+    "officialInstitutionImpersonationForbidden": true
+  }
+}
