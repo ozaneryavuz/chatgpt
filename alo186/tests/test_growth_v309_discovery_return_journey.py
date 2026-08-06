@@ -120,7 +120,7 @@ def main() -> None:
     root = ET.fromstring(read(SITEMAP))
     ns = {"s": "http://www.sitemaps.org/schemas/sitemap/0.9"}
     urls = [node.text for node in root.findall("s:url/s:loc", ns)]
-    assert len(urls) == 32, len(urls)
+    assert len(urls) == 38, len(urls)
     assert len(urls) == len(set(urls)), "duplicate sitemap URL"
     assert all(url and url.startswith("https://alo186.com/") for url in urls)
     assert all("www.alo186.com" not in url for url in urls)
@@ -137,7 +137,7 @@ def main() -> None:
     assert decision["version"] == 309
     assert decision["decision"] == "discovery-first-no-new-consumer-affiliate"
     assert decision["newMerchantLinks"] == 0
-    assert decision["discoveryPolicy"]["growthSitemapUrlCount"] == 32
+    assert decision["discoveryPolicy"]["growthSitemapUrlCount"] == 38
     assert decision["affiliatePolicy"]["directMerchantLinksOnHub"] is False
     assert decision["affiliatePolicy"]["directMerchantLinksOnCalendar"] is False
     assert decision["affiliatePolicy"]["activeOutageCommerceClosed"] is True
