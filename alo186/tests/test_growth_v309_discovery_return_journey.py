@@ -151,8 +151,10 @@ def main() -> None:
     assert overlay["version"] == 309
     assert overlay["name"] == "growth-v309-discovery-return-journey"
     assert [item["canonicalPath"] for item in overlay["routes"]] == [
-        "/kesinti-cihaz-surekliligi-karar-merkezi/",
         "/hesaplama/kesinti-hazirlik-takvimi/",
+    ]
+    assert [item["canonicalPath"] for item in overlay["updatedExistingRoutes"]] == [
+        "/kesinti-cihaz-surekliligi-karar-merkezi/",
     ]
     assert "alo186/sitemap-growth-v309.xml" in overlay["staticAssets"]
     assert "alo186/robots.txt" in overlay["staticAssets"]
