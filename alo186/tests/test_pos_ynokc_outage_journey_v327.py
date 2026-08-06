@@ -69,7 +69,7 @@ def main() -> None:
         "Aktif elektrik tehlikesinde test ve ticaret kapalıdır",
         "VİMER 189",
         "çevrimdışı işlem",
-        "alternatif mali belge yöntemi uydurmaz",
+        "Mali belge veya kart kabul yükümlülüğünün kesintide nasıl uygulanacağı",
     ):
         assert required.casefold() in guide_visible.casefold()
 
