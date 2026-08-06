@@ -17,7 +17,7 @@
   "discoveryPolicy": {
     "staticInternalLinksRequired": true,
     "sitemapAdvertisedInRobots": true,
-    "growthSitemapUrlCount": 32,
+    "growthSitemapUrlCount": 38,
     "javascriptOnlyNavigationForbidden": true,
     "canonicalHost": "https://alo186.com"
   },
