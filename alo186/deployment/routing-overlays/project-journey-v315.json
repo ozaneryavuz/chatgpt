@@ -1,0 +1,16 @@
+{
+  "version": 315,
+  "generatedAt": "2026-08-06",
+  "routes": [
+    {
+      "source": "alo186/elektrik-proje-karar-merkezi/index.html",
+      "canonicalPath": "/elektrik-proje-karar-merkezi",
+      "type": "collection"
+    },
+    {
+      "source": "alo186/hesaplama/elektrik-proje-hazirlik-plani/index.html",
+      "canonicalPath": "/hesaplama/elektrik-proje-hazirlik-plani/",
+      "type": "business-tool"
+    }
+  ]
+}
