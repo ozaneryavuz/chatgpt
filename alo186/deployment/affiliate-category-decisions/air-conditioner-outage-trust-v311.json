@@ -1,0 +1,90 @@
+{
+  "version": 311,
+  "name": "air-conditioner-outage-trust",
+  "decision": "gated-low-risk-consumer-affiliate-plus-professional-only",
+  "evaluatedAt": "2026-08-06",
+  "newMerchantLinks": 2,
+  "selectedActions": [
+    {
+      "priority": 1,
+      "action": "strengthen-seasonal-air-conditioner-outage-intent",
+      "route": "/haberler/elektrik-kesilince-klima-calisir-mi/",
+      "userBenefit": "Kesinti, modele özgü auto-restart, kompresör gecikmesi, kararsız gerilim ve sıcak hava sağlık riskini birbirinden ayırır.",
+      "revenueImpact": "Yüksek mevsimsel arama niyetini ücretsiz karar aracına, düşük riskli hazırlık kategorisine veya yetkili servis ve elektrik incelemesine taşır."
+    },
+    {
+      "priority": 2,
+      "action": "create-personal-data-free-restart-planner",
+      "route": "/hesaplama/klima-elektrik-kesintisi-guvenli-yeniden-baslatma-plani/",
+      "userBenefit": "Aktif olayda ticareti kapatır; model prosedürü, gerçek görev testi ve satın almama sonucunu önceliklendirir.",
+      "revenueImpact": "Tek seferlik aramayı 30/90/365 günlük kontrol döngüsüne ve yalnız kanıtlanan eksikte nitelikli dönüşüme bağlar."
+    },
+    {
+      "priority": 3,
+      "action": "open-two-gated-summer-preparedness-classes",
+      "route": "/amazon-elektrik-urunleri/yaz-kesintisi-serinleme-olcum-secimi/",
+      "userBenefit": "Fanı klima yerine koymadan, ölçüm ve sınırlı kişisel hava hareketi için güvenli ürün sınırlarını açıklar.",
+      "revenueImpact": "Yalnız geleceğe hazırlık ve gerçek eksik doğrulandığında iki düşük riskli Amazon Türkiye kategori geçişi üretir."
+    }
+  ],
+  "affiliatePolicy": {
+    "consumerAffiliateClasses": 2,
+    "classes": [
+      "indoor-room-thermometer-hygrometer",
+      "rechargeable-or-usb-personal-desk-fan"
+    ],
+    "merchantLinks": 2,
+    "merchant": "Amazon Türkiye",
+    "affiliateDisclosureBeforeLinks": true,
+    "relSponsoredNoopenerRequired": true,
+    "activeOutageCommerceClosed": true,
+    "unstablePowerCommerceClosed": true,
+    "heatHealthRiskCommerceClosed": true,
+    "approximately32COrHigherFanOnlyCommerceClosed": true,
+    "noBuyOutcomeRequired": true,
+    "unverifiedPriceStockRatingWarrantyForbidden": true
+  },
+  "professionalOnlyClasses": [
+    "split-air-conditioner",
+    "multi-split-air-conditioner",
+    "vrf-and-central-hvac",
+    "air-conditioner-ups",
+    "inverter-and-fixed-battery",
+    "generator-and-ats",
+    "voltage-regulator",
+    "panel-spd-and-voltage-relay",
+    "fixed-electrical-installation",
+    "hotel-business-shared-area-hvac",
+    "medical-and-critical-cooling",
+    "server-room-cooling"
+  ],
+  "privacyPolicy": {
+    "personalDataFields": 0,
+    "serverSubmission": false,
+    "persistentBrowserStorage": false,
+    "localIcsGeneration": true,
+    "locationCollection": false,
+    "deviceModelOrSerialCollection": false
+  },
+  "safetyPolicy": {
+    "emergencyNumber": "112",
+    "gridOutageNumber": "186",
+    "noUniversalRestartDelayClaim": true,
+    "noRepeatedResetInstruction": true,
+    "noSmallUpsForCompressorRecommendation": true,
+    "fanIsNotAirConditioning": true,
+    "independentPlatformDisclosureRequired": true,
+    "officialAffiliationImpressionForbidden": true
+  },
+  "repeatVisitReasons": [
+    {"days": 30, "reason": "filter-remote-cable-drain-and-error-log-check"},
+    {"days": 90, "reason": "manual-based-controlled-restart-test"},
+    {"days": 365, "reason": "maintenance-electrical-supply-drain-and-commercial-continuity-review"}
+  ],
+  "sources": [
+    "https://www.daikin.eu/en_us/products/product.html/FTXP-N.html",
+    "https://www.samsung.com/sg/support/home-appliances/is-a-voltage-stabilizer-required-for-my-air-conditioner/",
+    "https://www.cdc.gov/disasters/extremeheat/",
+    "https://www.cdc.gov/natural-disasters/psa-toolkit/power-failures-in-hot-weather.html"
+  ]
+}
