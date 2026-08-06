@@ -5,6 +5,7 @@ User-agent: *
 Allow: /
 Allow: /haberler/
 Allow: /hesaplama/
+Allow: /sektor-rehberi/
 Allow: /urun-rehberleri/
 Allow: /amazon-elektrik-urunleri/
 Allow: /rehber/
@@ -14,6 +15,7 @@ User-agent: OAI-SearchBot
 Allow: /
 Allow: /haberler/
 Allow: /hesaplama/
+Allow: /sektor-rehberi/
 Allow: /urun-rehberleri/
 Allow: /amazon-elektrik-urunleri/
 Allow: /rehber/
@@ -23,6 +25,7 @@ User-agent: GPTBot
 Allow: /
 Allow: /haberler/
 Allow: /hesaplama/
+Allow: /sektor-rehberi/
 Allow: /urun-rehberleri/
 Allow: /amazon-elektrik-urunleri/
 Allow: /rehber/
@@ -35,6 +38,7 @@ User-agent: PerplexityBot
 Allow: /
 Allow: /haberler/
 Allow: /hesaplama/
+Allow: /sektor-rehberi/
 Allow: /urun-rehberleri/
 Allow: /amazon-elektrik-urunleri/
 Allow: /rehber/
@@ -44,6 +48,7 @@ User-agent: ClaudeBot
 Allow: /
 Allow: /haberler/
 Allow: /hesaplama/
+Allow: /sektor-rehberi/
 Allow: /urun-rehberleri/
 Allow: /amazon-elektrik-urunleri/
 Allow: /rehber/
@@ -56,6 +61,7 @@ User-agent: Bytespider
 Allow: /
 Allow: /haberler/
 Allow: /hesaplama/
+Allow: /sektor-rehberi/
 Allow: /urun-rehberleri/
 Allow: /amazon-elektrik-urunleri/
 Allow: /rehber/
@@ -65,6 +71,7 @@ User-agent: Google-Extended
 Allow: /
 Allow: /haberler/
 Allow: /hesaplama/
+Allow: /sektor-rehberi/
 Allow: /urun-rehberleri/
 Allow: /amazon-elektrik-urunleri/
 Allow: /rehber/
@@ -73,3 +80,4 @@ Allow: /urunler/
 Sitemap: https://alo186.com/sitemap.xml
 Sitemap: https://alo186.com/sitemap-electric-project-v200.xml
 Sitemap: https://alo186.com/sitemap-growth-v207.xml
+Sitemap: https://alo186.com/sitemap-growth-v309.xml
