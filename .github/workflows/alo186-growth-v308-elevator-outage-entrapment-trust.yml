@@ -1,0 +1,96 @@
+name: ALO186 asansör kesinti ve mahsur kalma güveni v308
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/elektrik-kesilince-asansorde-kalinirsa-ne-yapilir/**'
+      - 'alo186/hesaplama/asansor-elektrik-kesintisi-kurtarma-hazirlik-plani/**'
+      - 'alo186/sektor-rehberi/apartman-otel-asansor-kesinti-surekliligi/**'
+      - 'alo186/deployment/affiliate-category-decisions/elevator-outage-entrapment-continuity-v308.json'
+      - 'alo186/deployment/routing-overlays/growth-v308-elevator-outage-entrapment-trust.json'
+      - 'alo186/tests/test_growth_v308_elevator_outage_entrapment_trust.py'
+      - '.github/workflows/alo186-growth-v308-elevator-outage-entrapment-trust.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/elektrik-kesilince-asansorde-kalinirsa-ne-yapilir/**'
+      - 'alo186/hesaplama/asansor-elektrik-kesintisi-kurtarma-hazirlik-plani/**'
+      - 'alo186/sektor-rehberi/apartman-otel-asansor-kesinti-surekliligi/**'
+      - 'alo186/deployment/affiliate-category-decisions/elevator-outage-entrapment-continuity-v308.json'
+      - 'alo186/deployment/routing-overlays/growth-v308-elevator-outage-entrapment-trust.json'
+      - 'alo186/tests/test_growth_v308_elevator_outage_entrapment_trust.py'
+      - '.github/workflows/alo186-growth-v308-elevator-outage-entrapment-trust.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-growth-v308-elevator-outage-entrapment-trust-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Asansör mahsur kalma güveni ve sıfır affiliate sözleşmesi
+        run: |
+          set -euo pipefail
+          python -m py_compile alo186/tests/test_growth_v308_elevator_outage_entrapment_trust.py
+          python alo186/tests/test_growth_v308_elevator_outage_entrapment_trust.py
+          python -m json.tool alo186/deployment/affiliate-category-decisions/elevator-outage-entrapment-continuity-v308.json >/dev/null
+          python -m json.tool alo186/deployment/routing-overlays/growth-v308-elevator-outage-entrapment-trust.json >/dev/null
+
+      - name: Canonical production build ve static smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-v308
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-v308 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-v308
+          test -f /tmp/alo186-v308/haberler/elektrik-kesilince-asansorde-kalinirsa-ne-yapilir/index.html
+          test -f /tmp/alo186-v308/hesaplama/asansor-elektrik-kesintisi-kurtarma-hazirlik-plani/index.html
+          test -f /tmp/alo186-v308/sektor-rehberi/apartman-otel-asansor-kesinti-surekliligi/index.html
+
+      - name: ChatGPT Sites aktarım paketi kabulü
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-sites-v308
+          python alo186/deployment/export_chatgpt_sites_bundle_v2.py --output /tmp/alo186-sites-v308 --commit "$GITHUB_SHA"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/alo186-sites-v308')
+          manifest = json.loads((root / 'sites-import.json').read_text(encoding='utf-8'))
+          pages = {item['canonicalPath']: item for item in manifest['pages']}
+          expected = {
+              '/haberler/elektrik-kesilince-asansorde-kalinirsa-ne-yapilir/',
+              '/hesaplama/asansor-elektrik-kesintisi-kurtarma-hazirlik-plani/',
+              '/sektor-rehberi/apartman-otel-asansor-kesinti-surekliligi/',
+          }
+          assert expected.issubset(pages), expected - set(pages)
+          for route in expected:
+              assert pages[route]['affiliate']['hasAffiliateLinks'] is False, route
+              assert not pages[route]['affiliate']['unsafeStaticLinks'], route
+          print(json.dumps({'ok': True, 'routes': sorted(expected), 'affiliateLinks': 0, 'unsafeStaticLinks': 0}, ensure_ascii=False))
+          PY
+
+      - name: Özet
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ## ALO186 v308 asansör kesinti ve mahsur kalma güveni
+
+          - Aktif mahsur kalmada form ve ticaret kapalı
+          - Alarm, iki yönlü haberleşme, güvenli bekleme ve 112 sınırı görünür
+          - Kapıyı zorlama, kendi kendine tahliye ve eğitimsiz kurtarma talimatı yok
+          - Otomatik kurtarma ve jeneratör varlığı süreklilik kanıtı sayılmıyor; gerçek görev testi aranıyor
+          - Apartman, otel, AVM, işyeri ve kritik erişim sistemleri professional-only
+          - Yeni Amazon veya başka mağaza bağlantısı: 0
+          - Mevcut plan yeterliyse: yeni ürün almayın
+          - 30/90/365 günlük alarm, görev testi ve yıllık kontrol döngüsü
+          EOF
