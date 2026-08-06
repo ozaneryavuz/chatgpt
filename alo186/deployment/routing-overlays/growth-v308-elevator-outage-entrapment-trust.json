@@ -1,0 +1,21 @@
+{
+  "version": 308,
+  "name": "growth-v308-elevator-outage-entrapment-trust",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesilince-asansorde-kalinirsa-ne-yapilir/index.html",
+      "canonicalPath": "/haberler/elektrik-kesilince-asansorde-kalinirsa-ne-yapilir/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/asansor-elektrik-kesintisi-kurtarma-hazirlik-plani/index.html",
+      "canonicalPath": "/hesaplama/asansor-elektrik-kesintisi-kurtarma-hazirlik-plani/",
+      "type": "web-application"
+    },
+    {
+      "source": "alo186/sektor-rehberi/apartman-otel-asansor-kesinti-surekliligi/index.html",
+      "canonicalPath": "/sektor-rehberi/apartman-otel-asansor-kesinti-surekliligi/",
+      "type": "professional-guide"
+    }
+  ]
+}

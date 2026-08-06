@@ -1,0 +1,81 @@
+{
+  "version": 308,
+  "sourceCheckedOn": "2026-08-06",
+  "cluster": "elevator-outage-entrapment-rescue-continuity",
+  "decision": "professional-only-no-consumer-affiliate",
+  "newMerchantLinks": 0,
+  "merchant": null,
+  "routes": {
+    "article": "/haberler/elektrik-kesilince-asansorde-kalinirsa-ne-yapilir/",
+    "tool": "/hesaplama/asansor-elektrik-kesintisi-kurtarma-hazirlik-plani/",
+    "sectorGuide": "/sektor-rehberi/apartman-otel-asansor-kesinti-surekliligi/"
+  },
+  "searchIntentGap": {
+    "primaryQueries": [
+      "elektrik kesilince asansörde kalınca ne yapılır",
+      "asansörde mahsur kalınca kapı nasıl açılır",
+      "asansör elektrik kesintisinde otomatik kata gider mi",
+      "asansör kurtarma cihazı batarya jeneratör",
+      "apartman asansörü elektrik kesintisi planı"
+    ],
+    "observedGap": "Türkçe sonuçlarda aktif mahsur kalma, kabin alarmı, iki yönlü haberleşme, kendi kendine tahliye yasağı, yıllık kurtarma eğitimi, otomatik kurtarma görev testi, jeneratör-ATS önceliği ve bina sorumlusu kayıtlarını tek güvenli yolculukta birleştiren bağımsız içerik sınırlı.",
+    "alo186Differentiator": "Aktif olayda ticareti tamamen kapatan; mahsur kalan kişi akışı, kişisel verisiz hazırlık kontrolü ve apartman-otel professional-only süreklilik matrisini aynı canonical kümede birleştirir."
+  },
+  "consumerAffiliateClasses": [],
+  "professionalClasses": [
+    "passenger, service and residential elevators",
+    "automatic rescue devices and rescue batteries",
+    "car alarm, emergency lighting and two-way communication",
+    "GSM, fixed telephone and monitored call systems",
+    "elevator controllers, drives, door operators and locks",
+    "leveling, landing and car-door safety systems",
+    "fixed UPS, inverter and battery systems",
+    "generator and automatic transfer systems",
+    "fire recall, emergency operation and building fire integration",
+    "annual periodic inspection and corrective actions",
+    "authorized maintenance, rescue training and operating records",
+    "accessibility continuity for apartments, hotels, workplaces and care buildings",
+    "commissioning, acceptance testing and power-quality measurement"
+  ],
+  "conversionPolicy": {
+    "activeEntrapmentCommerceClosed": true,
+    "activeHazardCommerceClosed": true,
+    "selfRescueAndDoorPryingForbidden": true,
+    "untrainedRescueForbidden": true,
+    "fireElevatorUseGeneralizationForbidden": true,
+    "automaticRescuePresenceAsProofForbidden": true,
+    "generatorPresenceAsContinuityProofForbidden": true,
+    "sharedCommercialCriticalSystemsProfessionalOnly": true,
+    "merchantLinksForbiddenInCluster": true,
+    "noBuyOutcomeRequired": true,
+    "noPriceStockRatingDeliveryWarrantyClaims": true,
+    "officialInstitutionImpressionForbidden": true,
+    "personalDataCollectionForbidden": true
+  },
+  "repeatVisitReasons": [
+    {
+      "days": 30,
+      "reason": "car alarm, emergency lighting, two-way communication response and visible service-card review"
+    },
+    {
+      "days": 90,
+      "reason": "authorized-service outage, automatic rescue, door, communication and generator/ATS duty test"
+    },
+    {
+      "days": 365,
+      "reason": "rescue training, annual periodic inspection, maintenance records, accessibility and fire-plan review"
+    }
+  ],
+  "expectedImpact": {
+    "userBenefit": "prevents door prying and self-evacuation, separates active rescue from future readiness, and exposes missing alarm, communication, training or duty-test evidence before equipment decisions",
+    "revenueImpact": "creates qualified professional leads for authorized elevator service, communication acceptance, automatic rescue testing, generator/ATS coordination, accessibility and building continuity instead of unsafe product clicks",
+    "trustImpact": "zero merchant links, visible independent-platform statement, active-incident commerce closure, no unverified commercial claims and an explicit no-buy outcome"
+  },
+  "sourceNotes": [
+    "NYC Department of Buildings advises trapped passengers to use the emergency call button, remain calm, wait for help and never pry doors or exit without responders.",
+    "Maryland Department of Labor advises against attempting to exit a stuck elevator and directs occupants to use in-car emergency devices.",
+    "Istanbul Fire Department lists elevator entrapment among its professional rescue interventions.",
+    "Turkey's Elevator Operation and Maintenance Regulation requires annual emergency rescue training for designated building personnel after a maintenance contract and recorded instructions.",
+    "Turkey's Elevator Periodic Control Regulation requires continuously used elevators to undergo periodic control at least annually."
+  ]
+}
