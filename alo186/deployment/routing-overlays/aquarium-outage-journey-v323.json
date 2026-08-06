@@ -1,0 +1,21 @@
+{
+  "version": 323,
+  "generatedAt": "2026-08-06",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesintisinde-akvaryum-baliklari-ne-yapilmali/index.html",
+      "canonicalPath": "/haberler/elektrik-kesintisinde-akvaryum-baliklari-ne-yapilmali/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/akvaryum-elektrik-kesintisi-hazirlik-plani/index.html",
+      "canonicalPath": "/hesaplama/akvaryum-elektrik-kesintisi-hazirlik-plani/",
+      "type": "business-tool"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/akvaryum-kesinti-hazirlik-secimi/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/akvaryum-kesinti-hazirlik-secimi/",
+      "type": "commerce-guide"
+    }
+  ]
+}
