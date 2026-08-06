@@ -1,0 +1,26 @@
+{
+  "version": 312,
+  "name": "growth-v312-smoke-co-alarm-outage-trust",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesilince-duman-karbonmonoksit-alarmi-calisir-mi/index.html",
+      "canonicalPath": "/haberler/elektrik-kesilince-duman-karbonmonoksit-alarmi-calisir-mi/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/duman-karbonmonoksit-alarmi-kesinti-hazirlik-plani/index.html",
+      "canonicalPath": "/hesaplama/duman-karbonmonoksit-alarmi-kesinti-hazirlik-plani/",
+      "type": "web-application"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/ev-tipi-duman-karbonmonoksit-alarmi-secimi/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/ev-tipi-duman-karbonmonoksit-alarmi-secimi/",
+      "type": "article"
+    }
+  ],
+  "updatedExistingRoutes": [],
+  "sourceAuditAssets": [
+    "alo186/sitemap-growth-v312.xml",
+    "alo186/deployment/affiliate-category-decisions/smoke-co-alarm-outage-trust-v312.json"
+  ]
+}
