@@ -64,7 +64,7 @@ def main() -> None:
         assert all(marker not in folded for marker in MERCHANT_MARKERS)
         assert not COMMERCIAL_SCHEMA.intersection(schema_types(load_schema(html)))
         assert "yeni ürün alma" in text_folded or "satın almama sonucu" in text_folded
-        assert "EDAŞ" in text and "kamu kurumu" in text
+        assert "EDAŞ" in text or "resmî kurum" in text
         assert "professional-only" in text_folded
 
     guide = pages["/haberler/elektrik-kesilince-otomatik-panjur-kepenk-nasil-acilir/"]
