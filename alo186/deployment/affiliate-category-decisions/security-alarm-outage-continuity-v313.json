@@ -1,0 +1,94 @@
+{
+  "version": 313,
+  "name": "security-alarm-outage-continuity",
+  "decision": "zero-consumer-affiliate-professional-only",
+  "evaluatedAt": "2026-08-06",
+  "newMerchantLinks": 0,
+  "selectedActions": [
+    {
+      "priority": 1,
+      "action": "cover-security-alarm-outage-intent",
+      "route": "/haberler/elektrik-kesilince-guvenlik-alarmi-calisir-mi/",
+      "userBenefit": "Panel, sensör, siren, internet, hücresel iletişim ve izleme merkezini ayırır; aktif güvenlik olayında 112 yolunu ve ticaret kapanışını öne alır.",
+      "revenueImpact": "Satış ağırlıklı ve genelleyici rakip içeriklerden farklılaşarak yüksek güvenli aramayı planlayıcıya ve profesyonel görev testine taşır."
+    },
+    {
+      "priority": 2,
+      "action": "create-private-security-alarm-readiness-planner",
+      "route": "/hesaplama/guvenlik-alarmi-elektrik-kesintisi-hazirlik-plani/",
+      "userBenefit": "Alarm kodu, adres veya cihaz kimliği toplamadan gerçek kesinti kanıtlarını sınıflandırır; aktif olayda form ve ticareti kapatır.",
+      "revenueImpact": "Tek seferlik ziyareti 30/90/365 günlük test, bakım ve kabul döngüsüne bağlar."
+    },
+    {
+      "priority": 3,
+      "action": "create-professional-security-alarm-continuity-matrix",
+      "route": "/sektor-rehberi/apartman-otel-guvenlik-alarmi-kesinti-surekliligi/",
+      "userBenefit": "Apartman, otel ve işletmelerde panel, batarya, siren, iletişim, izleme merkezi, jeneratör ve erişim kontrolünü tek matriste toplar.",
+      "revenueImpact": "Batarya kapasite testi, çift iletişim, devreye alma, bakım sözleşmesi ve jeneratör/UPS kabulü için nitelikli profesyonel talep oluşturur."
+    }
+  ],
+  "affiliatePolicy": {
+    "consumerAffiliateClasses": 0,
+    "classes": [],
+    "merchant": null,
+    "merchantLinks": 0,
+    "affiliateDisclosureRequiredWhenLinksExist": true,
+    "activeSecurityEventCommerceClosed": true,
+    "unknownArchitectureCommerceClosed": true,
+    "sharedCommercialSystemCommerceClosed": true,
+    "noBuyOutcomeRequired": true,
+    "unverifiedPriceStockRatingWarrantyForbidden": true
+  },
+  "professionalOnlyClasses": [
+    "intrusion-alarm-control-panel",
+    "alarm-backup-battery-and-power-supply",
+    "wired-or-wireless-detectors",
+    "indoor-and-outdoor-sirens",
+    "gsm-lte-communicator-and-subscription",
+    "alarm-receiving-centre-integration",
+    "ups-generator-and-ats",
+    "access-control-and-electric-locks",
+    "cctv-nvr-poe-network-continuity",
+    "fixed-wiring-and-tamper-circuits",
+    "commissioning-acceptance-and-periodic-maintenance",
+    "apartment-hotel-workplace-warehouse-systems"
+  ],
+  "privacyPolicy": {
+    "personalDataFields": 0,
+    "serverSubmission": false,
+    "persistentBrowserStorage": false,
+    "localIcsGeneration": true,
+    "locationCollection": false,
+    "addressOrAlarmCodeCollection": false,
+    "brandModelOrSerialCollection": false
+  },
+  "safetyPolicy": {
+    "emergencyNumber": "112",
+    "gridOutageNumber": "186",
+    "noBatteryRemovalInstruction": true,
+    "noTamperBypassInstruction": true,
+    "noUniversalRuntimeClaim": true,
+    "localAlarmAndRemoteNotificationSeparated": true,
+    "independentPlatformDisclosureRequired": true,
+    "officialAffiliationImpressionForbidden": true
+  },
+  "repeatVisitReasons": [
+    {
+      "days": 30,
+      "reason": "panel-event-log-siren-sensor-and-communication-fault-review"
+    },
+    {
+      "days": 90,
+      "reason": "supervised-power-and-internet-outage-duty-test"
+    },
+    {
+      "days": 365,
+      "reason": "battery-capacity-coverage-dual-path-and-service-review"
+    }
+  ],
+  "sources": [
+    "https://support.ajax.systems/en/how-an-ajax-system-operates-in-case-of-a-power-outage/",
+    "https://ring.com/support/articles/laku4/Using-Ring-Alarm-Pro-during-power-and-internet-outages",
+    "https://www.112.gov.tr/kilis/acil-durumlarda-tek-numara-112"
+  ]
+}
