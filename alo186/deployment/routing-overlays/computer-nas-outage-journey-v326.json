@@ -1,0 +1,21 @@
+{
+  "version": 326,
+  "generatedAt": "2026-08-06",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesintisi-bilgisayara-zarar-verir-mi/index.html",
+      "canonicalPath": "/haberler/elektrik-kesintisi-bilgisayara-zarar-verir-mi/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/bilgisayar-nas-elektrik-kesintisi-hazirlik-plani/index.html",
+      "canonicalPath": "/hesaplama/bilgisayar-nas-elektrik-kesintisi-hazirlik-plani/",
+      "type": "business-tool"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/bilgisayar-nas-ups-secimi/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/bilgisayar-nas-ups-secimi/",
+      "type": "article"
+    }
+  ]
+}
