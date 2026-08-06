@@ -9,7 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 HUB = ROOT / "alo186/kesinti-cihaz-surekliligi-karar-merkezi/index.html"
 CALENDAR = ROOT / "alo186/hesaplama/kesinti-hazirlik-takvimi/index.html"
-SITEMAP = ROOT / "alo186/sitemap-growth-v309.xml"
+DISCOVERY_INVENTORY = ROOT / "alo186/sitemap-growth-v309.xml"
 ROBOTS = ROOT / "alo186/robots.txt"
 DECISION = ROOT / "alo186/deployment/affiliate-category-decisions/discovery-return-journey-v309.json"
 OVERLAY = ROOT / "alo186/deployment/routing-overlays/growth-v309-discovery-return-journey.json"
@@ -117,11 +117,11 @@ def main() -> None:
     ):
         assert forbidden not in calendar, forbidden
 
-    root = ET.fromstring(read(SITEMAP))
+    root = ET.fromstring(read(DISCOVERY_INVENTORY))
     ns = {"s": "http://www.sitemaps.org/schemas/sitemap/0.9"}
     urls = [node.text for node in root.findall("s:url/s:loc", ns)]
     assert len(urls) == 38, len(urls)
-    assert len(urls) == len(set(urls)), "duplicate sitemap URL"
+    assert len(urls) == len(set(urls)), "duplicate discovery inventory URL"
     assert all(url and url.startswith("https://alo186.com/") for url in urls)
     assert all("www.alo186.com" not in url for url in urls)
     assert CANONICALS[HUB] in urls
@@ -131,13 +131,18 @@ def main() -> None:
 
     robots = read(ROBOTS)
     assert "Allow: /sektor-rehberi/" in robots
-    assert "Sitemap: https://alo186.com/sitemap-growth-v309.xml" in robots
+    assert "Sitemap: https://alo186.com/sitemap.xml" in robots
+    assert "sitemap-growth-v309.xml" not in robots
 
     decision = json.loads(read(DECISION))
     assert decision["version"] == 309
     assert decision["decision"] == "discovery-first-no-new-consumer-affiliate"
     assert decision["newMerchantLinks"] == 0
-    assert decision["discoveryPolicy"]["growthSitemapUrlCount"] == 38
+    discovery = decision["discoveryPolicy"]
+    assert discovery["canonicalGeneratedSitemapRequired"] is True
+    assert discovery["canonicalSitemapAdvertisedInRobots"] is True
+    assert discovery["focusedDiscoveryInventoryUrlCount"] == 38
+    assert discovery["focusedDiscoveryInventoryPublic"] is False
     assert decision["affiliatePolicy"]["directMerchantLinksOnHub"] is False
     assert decision["affiliatePolicy"]["directMerchantLinksOnCalendar"] is False
     assert decision["affiliatePolicy"]["activeOutageCommerceClosed"] is True
@@ -156,8 +161,8 @@ def main() -> None:
     assert [item["canonicalPath"] for item in overlay["updatedExistingRoutes"]] == [
         "/kesinti-cihaz-surekliligi-karar-merkezi/",
     ]
-    assert "alo186/sitemap-growth-v309.xml" in overlay["staticAssets"]
-    assert "alo186/robots.txt" in overlay["staticAssets"]
+    assert overlay["publicRootAssets"] == ["alo186/robots.txt"]
+    assert overlay["sourceAuditAssets"] == ["alo186/sitemap-growth-v309.xml"]
 
     print(json.dumps({
         "ok": True,
@@ -165,7 +170,8 @@ def main() -> None:
         "updatedCanonicalRoutes": 1,
         "newCanonicalRoutes": 1,
         "staticJourneyLinks": len(REQUIRED_JOURNEY_PATHS),
-        "growthSitemapUrls": len(urls),
+        "focusedDiscoveryInventoryUrls": len(urls),
+        "canonicalGeneratedSitemapRequired": True,
         "newMerchantLinks": 0,
         "personalDataFields": 0,
         "activeOutageCommerceClosed": True,
