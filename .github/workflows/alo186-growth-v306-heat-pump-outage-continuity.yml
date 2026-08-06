@@ -1,0 +1,95 @@
+name: ALO186 ısı pompası kesinti sürekliliği v306
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/elektrik-kesilince-isi-pompasi-calisir-mi/**'
+      - 'alo186/hesaplama/isi-pompasi-elektrik-kesintisi-donma-sureklilik-plani/**'
+      - 'alo186/sektor-rehberi/villa-otel-isi-pompasi-kesinti-surekliligi/**'
+      - 'alo186/deployment/affiliate-category-decisions/heat-pump-outage-continuity-v306.json'
+      - 'alo186/deployment/routing-overlays/growth-v306-heat-pump-outage-continuity.json'
+      - 'alo186/tests/test_growth_v306_heat_pump_outage_continuity.py'
+      - '.github/workflows/alo186-growth-v306-heat-pump-outage-continuity.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/elektrik-kesilince-isi-pompasi-calisir-mi/**'
+      - 'alo186/hesaplama/isi-pompasi-elektrik-kesintisi-donma-sureklilik-plani/**'
+      - 'alo186/sektor-rehberi/villa-otel-isi-pompasi-kesinti-surekliligi/**'
+      - 'alo186/deployment/affiliate-category-decisions/heat-pump-outage-continuity-v306.json'
+      - 'alo186/deployment/routing-overlays/growth-v306-heat-pump-outage-continuity.json'
+      - 'alo186/tests/test_growth_v306_heat_pump_outage_continuity.py'
+      - '.github/workflows/alo186-growth-v306-heat-pump-outage-continuity.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-growth-v306-heat-pump-outage-continuity-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Isı pompası güven, sıfır affiliate ve süreklilik sözleşmesi
+        run: |
+          set -euo pipefail
+          python -m py_compile alo186/tests/test_growth_v306_heat_pump_outage_continuity.py
+          python alo186/tests/test_growth_v306_heat_pump_outage_continuity.py
+          python -m json.tool alo186/deployment/affiliate-category-decisions/heat-pump-outage-continuity-v306.json >/dev/null
+          python -m json.tool alo186/deployment/routing-overlays/growth-v306-heat-pump-outage-continuity.json >/dev/null
+
+      - name: Canonical production build ve static smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-v306
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-v306 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-v306
+          test -f /tmp/alo186-v306/haberler/elektrik-kesilince-isi-pompasi-calisir-mi/index.html
+          test -f /tmp/alo186-v306/hesaplama/isi-pompasi-elektrik-kesintisi-donma-sureklilik-plani/index.html
+          test -f /tmp/alo186-v306/sektor-rehberi/villa-otel-isi-pompasi-kesinti-surekliligi/index.html
+
+      - name: ChatGPT Sites aktarım paketi kabulü
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-sites-v306
+          python alo186/deployment/export_chatgpt_sites_bundle_v2.py --output /tmp/alo186-sites-v306 --commit "$GITHUB_SHA"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/alo186-sites-v306')
+          manifest = json.loads((root / 'sites-import.json').read_text(encoding='utf-8'))
+          pages = {item['canonicalPath']: item for item in manifest['pages']}
+          expected = {
+              '/haberler/elektrik-kesilince-isi-pompasi-calisir-mi/',
+              '/hesaplama/isi-pompasi-elektrik-kesintisi-donma-sureklilik-plani/',
+              '/sektor-rehberi/villa-otel-isi-pompasi-kesinti-surekliligi/',
+          }
+          assert expected.issubset(pages), expected - set(pages)
+          for route in expected:
+              assert pages[route]['affiliate']['hasAffiliateLinks'] is False, route
+              assert not pages[route]['affiliate']['unsafeStaticLinks'], route
+          print(json.dumps({'ok': True, 'routes': sorted(expected), 'affiliateLinks': 0, 'unsafeStaticLinks': 0}, ensure_ascii=False))
+          PY
+
+      - name: Özet
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ## ALO186 v306 ısı pompası kesinti sürekliliği
+
+          - Hava-hava, hava-su split, monoblok, kaynak devreli ve merkezi sistemler ayrı
+          - Aktif tehlike, donma kanıtı eksikliği ve kararsız enerji dönüşünde ticaret kapalı
+          - Model özelindeki otomatik yeniden başlatma ve ayar saklama davranışı genellenmiyor
+          - Küçük UPS, doğaçlama geri besleme ve koruma bypass önerisi yok
+          - Yeni Amazon veya başka mağaza bağlantısı: 0
+          - Mevcut belgeli plan yeterliyse: yeni ürün almayın
+          - 30/90/365 günlük kayıt, görev testi ve profesyonel inceleme döngüsü
+          EOF
