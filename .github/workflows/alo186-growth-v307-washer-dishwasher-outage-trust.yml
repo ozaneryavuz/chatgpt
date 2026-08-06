@@ -1,0 +1,95 @@
+name: ALO186 çamaşır bulaşık makinesi kesinti güveni v307
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/elektrik-kesilince-camasir-bulasik-makinesi-yarida-kalirsa-ne-yapilir/**'
+      - 'alo186/hesaplama/camasir-bulasik-makinesi-elektrik-kesintisi-guvenli-yeniden-baslatma-plani/**'
+      - 'alo186/sektor-rehberi/otel-camasirhane-endustriyel-mutfak-kesinti-surekliligi/**'
+      - 'alo186/deployment/affiliate-category-decisions/washer-dishwasher-outage-continuity-v307.json'
+      - 'alo186/deployment/routing-overlays/growth-v307-washer-dishwasher-outage-trust.json'
+      - 'alo186/tests/test_growth_v307_washer_dishwasher_outage_trust.py'
+      - '.github/workflows/alo186-growth-v307-washer-dishwasher-outage-trust.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/elektrik-kesilince-camasir-bulasik-makinesi-yarida-kalirsa-ne-yapilir/**'
+      - 'alo186/hesaplama/camasir-bulasik-makinesi-elektrik-kesintisi-guvenli-yeniden-baslatma-plani/**'
+      - 'alo186/sektor-rehberi/otel-camasirhane-endustriyel-mutfak-kesinti-surekliligi/**'
+      - 'alo186/deployment/affiliate-category-decisions/washer-dishwasher-outage-continuity-v307.json'
+      - 'alo186/deployment/routing-overlays/growth-v307-washer-dishwasher-outage-trust.json'
+      - 'alo186/tests/test_growth_v307_washer_dishwasher_outage_trust.py'
+      - '.github/workflows/alo186-growth-v307-washer-dishwasher-outage-trust.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-growth-v307-washer-dishwasher-outage-trust-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Çamaşır-bulaşık kesinti güveni ve sıfır affiliate sözleşmesi
+        run: |
+          set -euo pipefail
+          python -m py_compile alo186/tests/test_growth_v307_washer_dishwasher_outage_trust.py
+          python alo186/tests/test_growth_v307_washer_dishwasher_outage_trust.py
+          python -m json.tool alo186/deployment/affiliate-category-decisions/washer-dishwasher-outage-continuity-v307.json >/dev/null
+          python -m json.tool alo186/deployment/routing-overlays/growth-v307-washer-dishwasher-outage-trust.json >/dev/null
+
+      - name: Canonical production build ve static smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-v307
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-v307 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-v307
+          test -f /tmp/alo186-v307/haberler/elektrik-kesilince-camasir-bulasik-makinesi-yarida-kalirsa-ne-yapilir/index.html
+          test -f /tmp/alo186-v307/hesaplama/camasir-bulasik-makinesi-elektrik-kesintisi-guvenli-yeniden-baslatma-plani/index.html
+          test -f /tmp/alo186-v307/sektor-rehberi/otel-camasirhane-endustriyel-mutfak-kesinti-surekliligi/index.html
+
+      - name: ChatGPT Sites aktarım paketi kabulü
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-sites-v307
+          python alo186/deployment/export_chatgpt_sites_bundle_v2.py --output /tmp/alo186-sites-v307 --commit "$GITHUB_SHA"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/alo186-sites-v307')
+          manifest = json.loads((root / 'sites-import.json').read_text(encoding='utf-8'))
+          pages = {item['canonicalPath']: item for item in manifest['pages']}
+          expected = {
+              '/haberler/elektrik-kesilince-camasir-bulasik-makinesi-yarida-kalirsa-ne-yapilir/',
+              '/hesaplama/camasir-bulasik-makinesi-elektrik-kesintisi-guvenli-yeniden-baslatma-plani/',
+              '/sektor-rehberi/otel-camasirhane-endustriyel-mutfak-kesinti-surekliligi/',
+          }
+          assert expected.issubset(pages), expected - set(pages)
+          for route in expected:
+              assert pages[route]['affiliate']['hasAffiliateLinks'] is False, route
+              assert not pages[route]['affiliate']['unsafeStaticLinks'], route
+          print(json.dumps({'ok': True, 'routes': sorted(expected), 'affiliateLinks': 0, 'unsafeStaticLinks': 0}, ensure_ascii=False))
+          PY
+
+      - name: Özet
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ## ALO186 v307 çamaşır ve bulaşık makinesi kesinti güveni
+
+          - Kapı kilidi, içeride su/sıcaklık, program hafızası ve model özelindeki yeniden başlama ayrı
+          - Su-elektrik, kaçak, duman ve tekrarlayan koruma açmasında test ve ticaret kapalı
+          - Kapıyı zorlama, reset döngüsü ve modelden bağımsız fiş çek-tak talimatı yok
+          - Otel, çamaşırhane, restoran ve kritik hijyen sistemleri professional-only
+          - Yeni Amazon veya başka mağaza bağlantısı: 0
+          - Mevcut güvenli plan yeterliyse: yeni ürün almayın
+          - 30/90/365 günlük kontrol, görev testi ve profesyonel inceleme döngüsü
+          EOF

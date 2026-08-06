@@ -1,0 +1,82 @@
+{
+  "version": 307,
+  "sourceCheckedOn": "2026-08-06",
+  "cluster": "washer-dishwasher-outage-lock-water-restart-continuity",
+  "decision": "professional-only-no-new-consumer-affiliate",
+  "newMerchantLinks": 0,
+  "merchant": null,
+  "routes": {
+    "article": "/haberler/elektrik-kesilince-camasir-bulasik-makinesi-yarida-kalirsa-ne-yapilir/",
+    "tool": "/hesaplama/camasir-bulasik-makinesi-elektrik-kesintisi-guvenli-yeniden-baslatma-plani/",
+    "sectorGuide": "/sektor-rehberi/otel-camasirhane-endustriyel-mutfak-kesinti-surekliligi/"
+  },
+  "searchIntentGap": {
+    "primaryQueries": [
+      "elektrik kesilince çamaşır makinesi yarıda kaldı ne yapmalıyım",
+      "elektrik kesilince bulaşık makinesi devam eder mi",
+      "çamaşır makinesi kapağı elektrik kesilince açılmıyor",
+      "elektrik gelince çamaşır makinesi yeniden başlar mı",
+      "bulaşık makinesi elektrik kesintisi sonrası hata verdi"
+    ],
+    "observedGap": "Türkçe sonuçlar çoğunlukla modelden bağımsız fiş çekme, resetleme veya kapı açma önerileri veriyor; kapı kilidi, içeride su ve sıcaklık, taban kaçağı, program hafızası, kararsız enerji dönüşü, tekrarlayan koruma açması ve ticari hijyen kabulünü tek güvenli yolculukta birleştirmiyor.",
+    "alo186Differentiator": "Aktif su-elektrik tehlikesinde ticareti kapatan; kapı kilidi, retained water, model özelindeki program davranışı, gerçek kontrollü test, no-buy ve otel/çamaşırhane/endüstriyel mutfak sürekliliğini aynı karar zincirinde birleştirir."
+  },
+  "consumerAffiliateClasses": [],
+  "professionalClasses": [
+    "residential washing machines and dishwashers requiring model-specific service",
+    "washer-dryer combinations and heated drying systems",
+    "built-in and fixed-wired appliances",
+    "commercial laundries and laundromat equipment",
+    "hotel laundry and linen-processing systems",
+    "commercial and industrial dishwashers",
+    "restaurant, catering and care-facility hygiene systems",
+    "door locks, pumps, control boards, valves and internal wiring",
+    "dedicated circuits, RCD/RCBO, sockets and fixed electrical protection",
+    "voltage regulators, fixed UPS, inverter and battery systems",
+    "generator and automatic transfer systems",
+    "water preparation, hot-water, drain and backflow systems",
+    "leak, base-tray and overflow protection systems",
+    "power-quality measurement, commissioning and acceptance testing"
+  ],
+  "conversionPolicy": {
+    "activeHazardCommerceClosed": true,
+    "activeOutageCommerceClosed": true,
+    "wetApplianceProfessionalOnly": true,
+    "repeatedBreakerResetForbidden": true,
+    "forcedDoorOpeningForbidden": true,
+    "modelSpecificResumeGeneralizationForbidden": true,
+    "sharedCommercialCriticalSystemsProfessionalOnly": true,
+    "extensionCordAndGroupPlugRecommendationForbidden": true,
+    "merchantLinksForbiddenInCluster": true,
+    "noBuyOutcomeRequired": true,
+    "noPriceStockRatingDeliveryWarrantyClaims": true,
+    "officialInstitutionImpressionForbidden": true,
+    "personalDataCollectionForbidden": true
+  },
+  "repeatVisitReasons": [
+    {
+      "days": 30,
+      "reason": "plug, cable, socket, hose, drain, filter, seal and leak-evidence review"
+    },
+    {
+      "days": 90,
+      "reason": "controlled power-loss and model-specific restart exercise under safe conditions"
+    },
+    {
+      "days": 365,
+      "reason": "appliance, electrical protection, water, drain, hygiene and maintenance-record review"
+    }
+  ],
+  "expectedImpact": {
+    "userBenefit": "separates locked-door and retained-water conditions, model-specific resume behavior, unstable power, leak and repeated breaker trips; prevents forced opening, reset loops and unnecessary purchases",
+    "revenueImpact": "creates qualified service, electrical, power-quality, water-drain, generator/ATS and hotel-laundry or commercial-kitchen continuity leads instead of low-trust product clicks",
+    "trustImpact": "zero new merchant links, visible independent-platform statement, no unverified commercial claims, active-hazard commerce closure and an explicit no-buy outcome"
+  },
+  "sourceNotes": [
+    "Samsung support explains that washer doors remain locked during cycles to prevent water leakage and should not be forced while the lock indicator is active.",
+    "Bosch support explains that retained water can prevent a washer door from opening and directs users to model-specific drainage guidance.",
+    "Electrolux support examples show that post-outage resume or start behavior can be model-specific rather than universal.",
+    "Bosch support treats dishwasher base-water or leakage conditions as a stop-and-service event.",
+    "Commercial hygiene and restart acceptance require operating records beyond a powered display or resumed program."
+  ]
+}
