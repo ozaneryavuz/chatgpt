@@ -1,0 +1,107 @@
+name: ALO186 keşif ve tekrar ziyaret yolculuğu v309
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/kesinti-cihaz-surekliligi-karar-merkezi/**'
+      - 'alo186/hesaplama/kesinti-hazirlik-takvimi/**'
+      - 'alo186/sitemap-growth-v309.xml'
+      - 'alo186/robots.txt'
+      - 'alo186/deployment/affiliate-category-decisions/discovery-return-journey-v309.json'
+      - 'alo186/deployment/routing-overlays/growth-v309-discovery-return-journey.json'
+      - 'alo186/tests/test_growth_v309_discovery_return_journey.py'
+      - '.github/workflows/alo186-growth-v309-discovery-return-journey.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/kesinti-cihaz-surekliligi-karar-merkezi/**'
+      - 'alo186/hesaplama/kesinti-hazirlik-takvimi/**'
+      - 'alo186/sitemap-growth-v309.xml'
+      - 'alo186/robots.txt'
+      - 'alo186/deployment/affiliate-category-decisions/discovery-return-journey-v309.json'
+      - 'alo186/deployment/routing-overlays/growth-v309-discovery-return-journey.json'
+      - 'alo186/tests/test_growth_v309_discovery_return_journey.py'
+      - '.github/workflows/alo186-growth-v309-discovery-return-journey.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-growth-v309-discovery-return-journey-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Keşif, güven, affiliate ve tekrar ziyaret sözleşmesi
+        run: |
+          set -euo pipefail
+          python -m py_compile alo186/tests/test_growth_v309_discovery_return_journey.py
+          python alo186/tests/test_growth_v309_discovery_return_journey.py
+          python -m json.tool alo186/deployment/affiliate-category-decisions/discovery-return-journey-v309.json >/dev/null
+          python -m json.tool alo186/deployment/routing-overlays/growth-v309-discovery-return-journey.json >/dev/null
+          python - <<'PY'
+          import xml.etree.ElementTree as ET
+          ET.parse('alo186/sitemap-growth-v309.xml')
+          print('focused discovery inventory xml ok')
+          PY
+
+      - name: Canonical production build ve static smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-v309
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-v309 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-v309
+          test -f /tmp/alo186-v309/kesinti-cihaz-surekliligi-karar-merkezi/index.html
+          test -f /tmp/alo186-v309/hesaplama/kesinti-hazirlik-takvimi/index.html
+          test -f /tmp/alo186-v309/sitemap.xml
+          grep -q 'https://alo186.com/kesinti-cihaz-surekliligi-karar-merkezi/' /tmp/alo186-v309/sitemap.xml
+          grep -q 'https://alo186.com/hesaplama/kesinti-hazirlik-takvimi/' /tmp/alo186-v309/sitemap.xml
+          grep -q 'Sitemap: https://alo186.com/sitemap.xml' /tmp/alo186-v309/robots.txt
+          ! grep -q 'sitemap-growth-v309.xml' /tmp/alo186-v309/robots.txt
+
+      - name: ChatGPT Sites aktarım paketi kabulü
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-sites-v309
+          python alo186/deployment/export_chatgpt_sites_bundle_v2.py --output /tmp/alo186-sites-v309 --commit "$GITHUB_SHA"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/alo186-sites-v309')
+          manifest = json.loads((root / 'sites-import.json').read_text(encoding='utf-8'))
+          pages = {item['canonicalPath']: item for item in manifest['pages']}
+          expected = {
+              '/kesinti-cihaz-surekliligi-karar-merkezi/',
+              '/hesaplama/kesinti-hazirlik-takvimi/',
+          }
+          assert expected.issubset(pages), expected - set(pages)
+          for route in expected:
+              assert pages[route]['affiliate']['hasAffiliateLinks'] is False, route
+              assert not pages[route]['affiliate']['unsafeStaticLinks'], route
+          print(json.dumps({'ok': True, 'routes': sorted(expected), 'affiliateLinks': 0, 'unsafeStaticLinks': 0}, ensure_ascii=False))
+          PY
+
+      - name: Özet
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ## ALO186 v309 keşif ve tekrar ziyaret yolculuğu
+
+          - Aktif kesinti, enerji dönüşü ve geleceğe hazırlık niyetleri ayrıldı
+          - 16 önemli kullanıcı yolculuğuna statik ve açıklayıcı iç bağlantı eklendi
+          - Canonical build tarafından üretilen kök sitemap yeni merkez ve takvim rotalarını içeriyor
+          - 38 URL'li odak keşif envanteri kaynak kalite kapısı olarak doğrulanıyor
+          - Kişisel verisiz 30/90/365 günlük yerel ICS kontrol takvimi
+          - Hub ve takvimde doğrudan merchant bağlantısı: 0
+          - Aktif tehlike ve aktif kesintide ticaret kapalı
+          - Mevcut sistem yeterliyse: yeni ürün almayın
+          - Sabit, yüksek güçlü, medikal, ticari ve güvenlik kritik sistemler professional-only
+          EOF

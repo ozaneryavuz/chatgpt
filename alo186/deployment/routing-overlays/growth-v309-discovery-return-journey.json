@@ -1,0 +1,24 @@
+{
+  "version": 309,
+  "name": "growth-v309-discovery-return-journey",
+  "routes": [
+    {
+      "source": "alo186/hesaplama/kesinti-hazirlik-takvimi/index.html",
+      "canonicalPath": "/hesaplama/kesinti-hazirlik-takvimi/",
+      "type": "web-application"
+    }
+  ],
+  "updatedExistingRoutes": [
+    {
+      "source": "alo186/kesinti-cihaz-surekliligi-karar-merkezi/index.html",
+      "canonicalPath": "/kesinti-cihaz-surekliligi-karar-merkezi/",
+      "type": "collection-page"
+    }
+  ],
+  "publicRootAssets": [
+    "alo186/robots.txt"
+  ],
+  "sourceAuditAssets": [
+    "alo186/sitemap-growth-v309.xml"
+  ]
+}
