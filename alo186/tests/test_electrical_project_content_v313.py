@@ -202,12 +202,12 @@ def main() -> None:
             score = jaccard(left_words, right_words)
             assert score < 0.34, (left_route, right_route, score)
 
-    # Existing article direct answers must not be near-duplicates of the new pages.
+    # Compare only pages that use the same explicit direct-answer contract.
     for existing in sorted((SITE / "haberler").glob("*/index.html")):
         if existing in PAGES.values():
             continue
         html = existing.read_text(encoding="utf-8")
-        if '<div class="answer">' not in html:
+        if '<strong>Doğrudan cevap</strong>' not in html:
             continue
         existing_words = direct_answer_words(html)
         for route, words in answers.items():
