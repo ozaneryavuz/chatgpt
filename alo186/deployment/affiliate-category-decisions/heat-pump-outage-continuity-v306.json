@@ -1,0 +1,79 @@
+{
+  "version": 306,
+  "sourceCheckedOn": "2026-08-06",
+  "cluster": "heat-pump-outage-freeze-restart-continuity",
+  "decision": "professional-only-no-consumer-affiliate",
+  "newMerchantLinks": 0,
+  "merchant": null,
+  "routes": {
+    "article": "/haberler/elektrik-kesilince-isi-pompasi-calisir-mi/",
+    "tool": "/hesaplama/isi-pompasi-elektrik-kesintisi-donma-sureklilik-plani/",
+    "sectorGuide": "/sektor-rehberi/villa-otel-isi-pompasi-kesinti-surekliligi/"
+  },
+  "searchIntentGap": {
+    "primaryQueries": [
+      "elektrik kesilince ısı pompası çalışır mı",
+      "ısı pompası elektrik kesintisinde donar mı",
+      "elektrik gelince ısı pompası yeniden başlar mı",
+      "monoblok ısı pompası donma koruması",
+      "ısı pompası jeneratör veya UPS ile çalışır mı"
+    ],
+    "observedGap": "Türkçe sonuçlar çoğunlukla yalnız cihazın elektriksiz çalışmayacağını veya doğrudan jeneratör/UPS seçimini anlatıyor; monoblok-split ayrımı, hidronik donma, model özelindeki yeniden başlama, kritik yük, pasif yaşanabilirlik ve gerçek görev testini tek yolculukta birleştirmiyor.",
+    "alo186Differentiator": "Aktif tehlikede ticareti kapatan; sistem mimarisi, donma koruma kanıtı, enerji dönüş sırası, kritik hizmet, jeneratör-ATS ve no-buy sonucunu aynı karar zincirinde birleştirir."
+  },
+  "consumerAffiliateClasses": [],
+  "professionalClasses": [
+    "air-to-water monobloc and split heat pumps",
+    "ground and water source heat pumps",
+    "VRF, chiller and central HVAC systems",
+    "electric auxiliary and immersion heaters",
+    "fixed UPS, inverter and battery systems",
+    "generator and automatic transfer systems",
+    "circulation pumps, valves and buffer tanks",
+    "glycol, water chemistry, drain-down and freeze protection",
+    "heat tracing and fixed electrical protection",
+    "BMS, controls, alarms and remote communication",
+    "apartment, villa, hotel, spa and commercial hot-water systems",
+    "commissioning, acceptance testing and power-quality measurement"
+  ],
+  "conversionPolicy": {
+    "activeHazardCommerceClosed": true,
+    "activeOutageCommerceClosed": true,
+    "freezeRiskWithoutEvidenceProfessionalOnly": true,
+    "sharedCommercialCriticalSystemsProfessionalOnly": true,
+    "modelSpecificRestartGeneralizationForbidden": true,
+    "smallUpsForCompressorRecommendationForbidden": true,
+    "backfeedAndProtectionBypassForbidden": true,
+    "merchantLinksForbiddenInCluster": true,
+    "noBuyOutcomeRequired": true,
+    "noPriceStockRatingDeliveryWarrantyClaims": true,
+    "officialInstitutionImpressionForbidden": true,
+    "personalDataCollectionForbidden": true
+  },
+  "repeatVisitReasons": [
+    {
+      "days": 30,
+      "reason": "alarm, pressure, filter, outdoor airflow and outage-log review"
+    },
+    {
+      "days": 90,
+      "reason": "controlled power-loss, transfer and staged restart exercise by qualified personnel"
+    },
+    {
+      "days": 365,
+      "reason": "freeze protection, hydronic quality, electrical protection, generator/ATS and BMS review"
+    }
+  ],
+  "expectedImpact": {
+    "userBenefit": "separates air-air, split hydronic, monobloc, source-loop and central systems; prevents unsafe resets, improvised backup power and unnecessary purchases",
+    "revenueImpact": "creates qualified engineering and service leads for heat-pump commissioning, freeze protection, generator/ATS coordination, staged restart and hotel/villa continuity instead of low-trust product clicks",
+    "trustImpact": "zero merchant links, visible independent-platform statement, no unverified commercial claims and an explicit no-buy outcome"
+  },
+  "sourceNotes": [
+    "Mitsubishi Electric Ecodan homeowner guide describes model-specific power-failure setting retention and warns users not to bypass safety devices.",
+    "Mitsubishi Electric Ecodan technical material shows power-recovery operating priority can be model/configuration specific.",
+    "Mitsubishi Electric explains defrost and freeze-stat behavior for Ecodan systems.",
+    "Daikin air-to-water manuals describe model-specific auto-restart after power failure.",
+    "U.S. DOE Better Buildings frames passive survivability and backup power as resilience layers."
+  ]
+}
