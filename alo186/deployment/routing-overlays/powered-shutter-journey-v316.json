@@ -1,0 +1,21 @@
+{
+  "version": 316,
+  "generatedAt": "2026-08-06",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesilince-otomatik-panjur-kepenk-nasil-acilir/index.html",
+      "canonicalPath": "/haberler/elektrik-kesilince-otomatik-panjur-kepenk-nasil-acilir/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/otomatik-panjur-kepenk-elektrik-kesintisi-hazirlik-plani/index.html",
+      "canonicalPath": "/hesaplama/otomatik-panjur-kepenk-elektrik-kesintisi-hazirlik-plani/",
+      "type": "business-tool"
+    },
+    {
+      "source": "alo186/sektor-rehberi/otel-magaza-apartman-panjur-kepenk-kesinti-surekliligi/index.html",
+      "canonicalPath": "/sektor-rehberi/otel-magaza-apartman-panjur-kepenk-kesinti-surekliligi/",
+      "type": "article"
+    }
+  ]
+}
