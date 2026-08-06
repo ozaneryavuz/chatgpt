@@ -1,0 +1,78 @@
+name: ALO186 outage lighting journey v330
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/elektrik-kesintisinde-mum-mu-el-feneri-mi/**'
+      - 'alo186/hesaplama/elektrik-kesintisi-acil-aydinlatma-hazirlik-plani/**'
+      - 'alo186/amazon-elektrik-urunleri/elektrik-kesintisi-acil-aydinlatma-secimi/**'
+      - 'alo186/deployment/routing-overlays/outage-lighting-journey-v330.json'
+      - 'alo186/tests/test_outage_lighting_journey_v330.py'
+      - '.github/workflows/alo186-outage-lighting-v330.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/elektrik-kesintisinde-mum-mu-el-feneri-mi/**'
+      - 'alo186/hesaplama/elektrik-kesintisi-acil-aydinlatma-hazirlik-plani/**'
+      - 'alo186/amazon-elektrik-urunleri/elektrik-kesintisi-acil-aydinlatma-secimi/**'
+      - 'alo186/deployment/routing-overlays/outage-lighting-journey-v330.json'
+      - 'alo186/tests/test_outage_lighting_journey_v330.py'
+      - '.github/workflows/alo186-outage-lighting-v330.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-outage-lighting-v330-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Trust privacy affiliate and no-buy checks
+        run: python alo186/tests/test_outage_lighting_journey_v330.py
+      - name: Build canonical site bundle
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-lighting-v330
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-lighting-v330 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-lighting-v330
+      - name: Verify routes sitemap and gated merchant links
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/alo186-lighting-v330')
+          routes = [
+            '/haberler/elektrik-kesintisinde-mum-mu-el-feneri-mi/',
+            '/hesaplama/elektrik-kesintisi-acil-aydinlatma-hazirlik-plani/',
+            '/amazon-elektrik-urunleri/elektrik-kesintisi-acil-aydinlatma-secimi/',
+          ]
+          sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
+          release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
+          assert release['routingVersion'] >= 330
+          for route in routes:
+              page = root / route.strip('/') / 'index.html'
+              assert page.is_file(), page
+              assert f'https://alo186.com{route}' in sitemap
+          selector = (root / 'amazon-elektrik-urunleri/elektrik-kesintisi-acil-aydinlatma-secimi/index.html').read_text(encoding='utf-8')
+          assert selector.count('data-merchant-url="https://www.amazon.com.tr/') == 2
+          assert selector.count('rel="sponsored noopener"') == 2
+          assert 'href="https://www.amazon.com.tr/' not in selector
+          print({'ok': True, 'routingVersion': release['routingVersion'], 'routes': routes, 'gatedMerchantLinks': 2})
+          PY
+      - name: Upload verified bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-lighting-v330-${{ github.sha }}
+          path: /tmp/alo186-lighting-v330
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
