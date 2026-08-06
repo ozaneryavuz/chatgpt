@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[2]
 ROUTES = {
-    "/haberler/62-villa-22-kw-ac-2x180-kw-dc-sarj-altyapisi-proje-tasarimi": ROOT / "alo186/haberler/62-villa-22-kw-ac-2x180-kw-dc-sarj-altyapisi-proje-tasarimi/index.html",
+    "/haberler/cati-ges-avan-uygulama-proje-dc-ac-koruma-kabul-raporu": ROOT / "alo186/haberler/cati-ges-avan-uygulama-proje-dc-ac-koruma-kabul-raporu/index.html",
     "/haberler/elektrik-odalari-saft-busbar-kablo-tava-yangin-durdurucu-koordinasyonu": ROOT / "alo186/haberler/elektrik-odalari-saft-busbar-kablo-tava-yangin-durdurucu-koordinasyonu/index.html",
     "/haberler/elektrik-ihale-paketi-kesif-metraj-sartname-marka-listesi-butce": ROOT / "alo186/haberler/elektrik-ihale-paketi-kesif-metraj-sartname-marka-listesi-butce/index.html",
 }
