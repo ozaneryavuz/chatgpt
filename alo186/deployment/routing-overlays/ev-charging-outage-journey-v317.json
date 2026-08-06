@@ -1,0 +1,21 @@
+{
+  "version": 317,
+  "generatedAt": "2026-08-06",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesilince-elektrikli-arac-sarji-ne-olur/index.html",
+      "canonicalPath": "/haberler/elektrik-kesilince-elektrikli-arac-sarji-ne-olur/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/elektrikli-arac-sarj-istasyonu-kesinti-guvenlik-plani/index.html",
+      "canonicalPath": "/hesaplama/elektrikli-arac-sarj-istasyonu-kesinti-guvenlik-plani/",
+      "type": "business-tool"
+    },
+    {
+      "source": "alo186/sektor-rehberi/apartman-site-otel-elektrikli-arac-sarj-surekliligi/index.html",
+      "canonicalPath": "/sektor-rehberi/apartman-site-otel-elektrikli-arac-sarj-surekliligi/",
+      "type": "article"
+    }
+  ]
+}
