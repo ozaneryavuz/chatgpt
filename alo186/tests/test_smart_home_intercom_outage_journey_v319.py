@@ -73,7 +73,7 @@ def main() -> None:
     for required in (
         "Bir cihazın çevrim içi görünmesi",
         "Aktif güvenlik ve can güvenliği olayında ticaret kapalıdır",
-        "Güvenli manuel giriş ve çıkış",
+        "güvenli manuel çıkış",
         "Neden evrensel yedekleme süresi verilmez?",
         "/hesaplama/akilli-ev-diafon-elektrik-kesintisi-hazirlik-plani/",
         "/sektor-rehberi/apartman-otel-akilli-ev-diafon-kesinti-surekliligi/",
