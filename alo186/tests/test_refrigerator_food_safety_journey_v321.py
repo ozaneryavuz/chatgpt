@@ -106,6 +106,7 @@ def main() -> None:
 
     affiliate = pages[AFFILIATE_ROUTE]
     affiliate_text = visible_text(affiliate)
+    affiliate_folded = affiliate_text.casefold()
     assert {"Article", "FAQPage", "BreadcrumbList", "Question", "Answer"}.issubset(schema_types(load_schema(affiliate)))
     assert affiliate.count('class="gate"') == 8
     assert affiliate.count("data-merchant-url=") == 2
@@ -113,14 +114,14 @@ def main() -> None:
     assert affiliate.count("tag=alo186rehber-21") == 2
     assert not re.search(r'<a[^>]+href=["\']https://www\.amazon\.com\.tr', affiliate, re.I)
     for required in (
-        "Reklam / Amazon Türkiye satış ortaklığı açıklaması",
-        "Aktif kesintide ticaret kapalıdır",
-        "Cihaz termometresi",
-        "Yalıtımlı soğutucu ve tekrar kullanılabilir jel paket",
-        "Professional-only veya affiliate dışı sınıflar",
-        "Koşullar doğrulandı: iki Amazon Türkiye satış ortaklığı kategori bağlantısı açıldı",
+        "reklam / amazon türkiye satış ortaklığı açıklaması",
+        "aktif kesintide ticaret kapalıdır",
+        "cihaz termometresi",
+        "yalıtımlı soğutucu ve tekrar kullanılabilir jel paket",
+        "professional-only veya affiliate dışı sınıflar",
     ):
-        assert required in affiliate or required in affiliate_text, required
+        assert required in affiliate_folded, required
+    assert "Koşullar doğrulandı: iki Amazon Türkiye satış ortaklığı kategori bağlantısı açıldı" in affiliate
 
     print(json.dumps({
         "ok": True,
