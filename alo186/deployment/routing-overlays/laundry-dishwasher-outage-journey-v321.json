@@ -1,0 +1,21 @@
+{
+  "version": 321,
+  "generatedAt": "2026-08-06",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesilince-camasir-bulasik-makinesi-programi-yarida-kalir-mi/index.html",
+      "canonicalPath": "/haberler/elektrik-kesilince-camasir-bulasik-makinesi-programi-yarida-kalir-mi/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/camasir-bulasik-makinesi-elektrik-kesintisi-guvenli-devam-plani/index.html",
+      "canonicalPath": "/hesaplama/camasir-bulasik-makinesi-elektrik-kesintisi-guvenli-devam-plani/",
+      "type": "business-tool"
+    },
+    {
+      "source": "alo186/sektor-rehberi/otel-camasirhane-mutfak-bulasik-makinesi-kesinti-surekliligi/index.html",
+      "canonicalPath": "/sektor-rehberi/otel-camasirhane-mutfak-bulasik-makinesi-kesinti-surekliligi/",
+      "type": "article"
+    }
+  ]
+}
