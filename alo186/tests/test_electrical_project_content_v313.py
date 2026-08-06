@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[2]
 SITE = ROOT / "alo186"
 OVERLAY = SITE / "deployment/routing-overlays/electrical-project-content-run3-v313.json"
 PAGES = {
-    "/haberler/62-villa-22-kw-ac-2x180-kw-dc-arac-sarj-altyapisi-projesi": SITE / "haberler/62-villa-22-kw-ac-2x180-kw-dc-arac-sarj-altyapisi-projesi/index.html",
+    "/haberler/peyzaj-dis-alan-elektrik-aydinlatma-priz-sulama-projesi": SITE / "haberler/peyzaj-dis-alan-elektrik-aydinlatma-priz-sulama-projesi/index.html",
     "/haberler/elektrik-odasi-safti-busbar-kablo-tavasi-yangin-durdurucu-detaylari": SITE / "haberler/elektrik-odasi-safti-busbar-kablo-tavasi-yangin-durdurucu-detaylari/index.html",
     "/haberler/yangin-algilama-acil-anons-cctv-kartli-gecis-data-entegrasyon-projesi": SITE / "haberler/yangin-algilama-acil-anons-cctv-kartli-gecis-data-entegrasyon-projesi/index.html",
 }
