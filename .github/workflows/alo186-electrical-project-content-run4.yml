@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
-      - 'alo186/haberler/62-villa-22-kw-ac-2x180-kw-dc-sarj-altyapisi-proje-tasarimi/**'
+      - 'alo186/haberler/cati-ges-avan-uygulama-proje-dc-ac-koruma-kabul-raporu/**'
       - 'alo186/haberler/elektrik-odalari-saft-busbar-kablo-tava-yangin-durdurucu-koordinasyonu/**'
       - 'alo186/haberler/elektrik-ihale-paketi-kesif-metraj-sartname-marka-listesi-butce/**'
       - 'alo186/deployment/routing-overlays/electrical-project-content-run4-v314.json'
@@ -13,7 +13,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'alo186/haberler/62-villa-22-kw-ac-2x180-kw-dc-sarj-altyapisi-proje-tasarimi/**'
+      - 'alo186/haberler/cati-ges-avan-uygulama-proje-dc-ac-koruma-kabul-raporu/**'
       - 'alo186/haberler/elektrik-odalari-saft-busbar-kablo-tava-yangin-durdurucu-koordinasyonu/**'
       - 'alo186/haberler/elektrik-ihale-paketi-kesif-metraj-sartname-marka-listesi-butce/**'
       - 'alo186/deployment/routing-overlays/electrical-project-content-run4-v314.json'
@@ -64,7 +64,7 @@ jobs:
 
           root = Path('/tmp/alo186-electrical-project-run4')
           routes = [
-              '/haberler/62-villa-22-kw-ac-2x180-kw-dc-sarj-altyapisi-proje-tasarimi',
+              '/haberler/cati-ges-avan-uygulama-proje-dc-ac-koruma-kabul-raporu',
               '/haberler/elektrik-odalari-saft-busbar-kablo-tava-yangin-durdurucu-koordinasyonu',
               '/haberler/elektrik-ihale-paketi-kesif-metraj-sartname-marka-listesi-butce',
           ]
