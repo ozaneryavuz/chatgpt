@@ -1,0 +1,21 @@
+{
+  "version": 307,
+  "name": "growth-v307-washer-dishwasher-outage-trust",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesilince-camasir-bulasik-makinesi-yarida-kalirsa-ne-yapilir/index.html",
+      "canonicalPath": "/haberler/elektrik-kesilince-camasir-bulasik-makinesi-yarida-kalirsa-ne-yapilir/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/camasir-bulasik-makinesi-elektrik-kesintisi-guvenli-yeniden-baslatma-plani/index.html",
+      "canonicalPath": "/hesaplama/camasir-bulasik-makinesi-elektrik-kesintisi-guvenli-yeniden-baslatma-plani/",
+      "type": "web-application"
+    },
+    {
+      "source": "alo186/sektor-rehberi/otel-camasirhane-endustriyel-mutfak-kesinti-surekliligi/index.html",
+      "canonicalPath": "/sektor-rehberi/otel-camasirhane-endustriyel-mutfak-kesinti-surekliligi/",
+      "type": "professional-guide"
+    }
+  ]
+}
