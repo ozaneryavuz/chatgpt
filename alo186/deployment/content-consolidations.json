@@ -1,6 +1,6 @@
 {
-  "version": 11,
-  "generatedAt": "2026-08-04",
+  "version": 12,
+  "generatedAt": "2026-08-06",
   "consolidations": [
     {
       "intentKey": "lifepo4-low-temperature-charging",
@@ -148,6 +148,20 @@
       "canonicalPath": "/amazon-elektrik-urunleri/modem-ont-mini-ups-yedekleme-secici/",
       "label": "Modem, fiber ONT ve mini UPS güvenli seçim rotası",
       "reason": "Aynı gerilim, polarite, cihaz zinciri, çalışma süresi ve satın almama kararını hedefleyen eski ürün merkezi rotası; güvenlik kapılı ve üç onaylı güncel seçicide birleştirildi."
+    },
+    {
+      "intentKey": "ev-charging-outage-behavior",
+      "aliasPath": "/haberler/elektrik-kesilince-elektrikli-arac-sarji-ne-olur/",
+      "canonicalPath": "/haberler/elektrik-kesilince-elektrikli-arac-sarji-durur-mu/",
+      "label": "Elektrik kesintisinde elektrikli araç şarj davranışı",
+      "reason": "İki rehber aynı kesintide şarjın durması, enerji dönüşü, otomatik yeniden başlatma, kablo kilidi ve güvenli kabul niyetini hedefliyor. Daha güncel, kapsamlı ve kişisel verisiz hazırlık yolculuğuna bağlı rota canonical seçildi."
+    },
+    {
+      "intentKey": "modem-ont-backup-power-selector-v322-alias",
+      "aliasPath": "/amazon-elektrik-urunleri/modem-ont-yedek-guc-secimi/",
+      "canonicalPath": "/amazon-elektrik-urunleri/modem-ont-mini-ups-yedekleme-secici/",
+      "label": "Modem, router ve fiber ONT yedek güç seçimi",
+      "reason": "Aynı cihaz zinciri, gerilim, akım, polarite, konnektör, çalışma süresi ve satın almama kararını hedefleyen rota; mevcut güvenlik kapılı canonical seçicide birleştirildi. Yeni arama rehberi ve kişisel verisiz planlayıcı bu tek seçiciye nitelikli trafik taşır."
     }
   ]
 }

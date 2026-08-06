@@ -1,0 +1,21 @@
+{
+  "version": 322,
+  "generatedAt": "2026-08-06",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesilince-modem-internet-calisir-mi/index.html",
+      "canonicalPath": "/haberler/elektrik-kesilince-modem-internet-calisir-mi/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/modem-ont-elektrik-kesintisi-internet-hazirlik-plani/index.html",
+      "canonicalPath": "/hesaplama/modem-ont-elektrik-kesintisi-internet-hazirlik-plani/",
+      "type": "business-tool"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/modem-ont-yedek-guc-secimi/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/modem-ont-yedek-guc-secimi/",
+      "type": "commerce-guide"
+    }
+  ]
+}
