@@ -21,6 +21,12 @@ STOPWORDS = {
 }
 
 
+def normalize_route(value: str) -> str:
+    """Karşılaştırmalarda /rota ve /rota/ biçimlerini tek kimlikte birleştir."""
+    cleaned = "/" + str(value or "").strip().strip("/")
+    return cleaned if cleaned != "" else "/"
+
+
 def html_text(html: str, tag: str) -> str:
     match = re.search(fr"<{tag}\b[^>]*>(.*?)</{tag}>", html, re.I | re.S)
     if not match:
@@ -129,8 +135,11 @@ def main() -> None:
         canonical = route["canonicalPath"]
         route_by_path[canonical] = route
         route_by_path[canonical.rstrip("/") or "/"] = route
-    declared_pairs = {(item["aliasPath"], item["canonicalPath"]) for item in config["consolidations"]}
-    alias_paths = {item["aliasPath"] for item in config["consolidations"]}
+    declared_pairs = {
+        (normalize_route(item["aliasPath"]), normalize_route(item["canonicalPath"]))
+        for item in config["consolidations"]
+    }
+    alias_paths = {normalize_route(item["aliasPath"]) for item in config["consolidations"]}
 
     for item in config["consolidations"]:
         alias_route = route_by_path.get(item["aliasPath"])
@@ -157,7 +166,7 @@ def main() -> None:
 
     active_articles = [
         route for route in manifest["routes"]
-        if route["type"] == "article" and route["canonicalPath"] not in alias_paths
+        if route["type"] == "article" and normalize_route(route["canonicalPath"]) not in alias_paths
     ]
     signatures = [(route, article_signature(route["source"])) for route in active_articles]
     collisions: list[str] = []
@@ -165,7 +174,10 @@ def main() -> None:
         for right_route, right in signatures[index + 1 :]:
             score, common, field = pair_score(left, right)
             if score >= 0.74 and common >= 4:
-                pair = (left_route["canonicalPath"], right_route["canonicalPath"])
+                pair = (
+                    normalize_route(left_route["canonicalPath"]),
+                    normalize_route(right_route["canonicalPath"]),
+                )
                 reverse = (pair[1], pair[0])
                 if pair not in declared_pairs and reverse not in declared_pairs:
                     collisions.append(
@@ -185,6 +197,7 @@ def main() -> None:
                 "activeCanonicalArticleCountAfterConsolidation": len(active_articles),
                 "consolidationCount": len(config["consolidations"]),
                 "supportedConsolidationTypes": ["article", "commerce-guide"],
+                "trailingSlashNormalization": True,
                 "undeclaredHighSimilarityCollisions": 0,
             },
             ensure_ascii=False,
