@@ -1,0 +1,26 @@
+{
+  "version": 313,
+  "name": "growth-v313-security-alarm-outage-continuity",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesilince-guvenlik-alarmi-calisir-mi/index.html",
+      "canonicalPath": "/haberler/elektrik-kesilince-guvenlik-alarmi-calisir-mi/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/guvenlik-alarmi-elektrik-kesintisi-hazirlik-plani/index.html",
+      "canonicalPath": "/hesaplama/guvenlik-alarmi-elektrik-kesintisi-hazirlik-plani/",
+      "type": "web-application"
+    },
+    {
+      "source": "alo186/sektor-rehberi/apartman-otel-guvenlik-alarmi-kesinti-surekliligi/index.html",
+      "canonicalPath": "/sektor-rehberi/apartman-otel-guvenlik-alarmi-kesinti-surekliligi/",
+      "type": "article"
+    }
+  ],
+  "updatedExistingRoutes": [],
+  "sourceAuditAssets": [
+    "alo186/sitemap-growth-v313.xml",
+    "alo186/deployment/affiliate-category-decisions/security-alarm-outage-continuity-v313.json"
+  ]
+}
