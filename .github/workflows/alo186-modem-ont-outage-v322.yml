@@ -1,0 +1,114 @@
+name: ALO186 modem ve ONT kesinti hazırlığı v322
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/elektrik-kesilince-modem-internet-calisir-mi/**'
+      - 'alo186/hesaplama/modem-ont-elektrik-kesintisi-internet-hazirlik-plani/**'
+      - 'alo186/amazon-elektrik-urunleri/modem-ont-yedek-guc-secimi/**'
+      - 'alo186/deployment/routing-overlays/modem-ont-outage-journey-v322.json'
+      - 'alo186/tests/test_modem_ont_outage_journey_v322.py'
+      - '.github/workflows/alo186-modem-ont-outage-v322.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/elektrik-kesilince-modem-internet-calisir-mi/**'
+      - 'alo186/hesaplama/modem-ont-elektrik-kesintisi-internet-hazirlik-plani/**'
+      - 'alo186/amazon-elektrik-urunleri/modem-ont-yedek-guc-secimi/**'
+      - 'alo186/deployment/routing-overlays/modem-ont-outage-journey-v322.json'
+      - 'alo186/tests/test_modem_ont_outage_journey_v322.py'
+      - '.github/workflows/alo186-modem-ont-outage-v322.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-modem-ont-v322-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Modem, ONT, gizlilik ve affiliate sınır kontrolleri
+        run: |
+          set -euo pipefail
+          python alo186/tests/test_modem_ont_outage_journey_v322.py
+      - name: Canonical site paketini oluştur
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-modem-ont-v322
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-modem-ont-v322 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-modem-ont-v322
+      - name: Yeni rotalar, sitemap, güven kapısı ve yerel takvim kabulü
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+
+          root = Path('/tmp/alo186-modem-ont-v322')
+          guide_route = '/haberler/elektrik-kesilince-modem-internet-calisir-mi/'
+          planner_route = '/hesaplama/modem-ont-elektrik-kesintisi-internet-hazirlik-plani/'
+          affiliate_route = '/amazon-elektrik-urunleri/modem-ont-yedek-guc-secimi/'
+          routes = [guide_route, planner_route, affiliate_route]
+          sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
+          release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
+          assert release['routingVersion'] >= 322, release['routingVersion']
+
+          pages = {}
+          for route in routes:
+              file = root / route.strip('/') / 'index.html'
+              assert file.is_file(), file
+              html = file.read_text(encoding='utf-8')
+              pages[route] = html
+              assert f'rel="canonical" href="https://alo186.com{route}"' in html
+              assert f'https://alo186.com{route}' in sitemap
+              assert '<meta name="viewport"' in html
+              blocks = re.findall(r'<script type="application/ld\+json">(.*?)</script>', html, re.S)
+              assert len(blocks) == 1
+              serialized = json.dumps(json.loads(blocks[0]), ensure_ascii=False)
+              for commercial in ('Product', 'Offer', 'AggregateRating', 'Review'):
+                  assert f'"@type": "{commercial}"' not in serialized
+
+          guide = pages[guide_route].casefold()
+          planner = pages[planner_route]
+          affiliate = pages[affiliate_route]
+          assert 'amazon.com.tr' not in guide and 'alo186rehber-21' not in guide
+          assert 'amazon.com.tr' not in planner.casefold() and 'alo186rehber-21' not in planner.casefold()
+          assert 'new Blob' in planner and 'BEGIN:VCALENDAR' in planner and 'URL.createObjectURL' in planner
+          assert 'fetch(' not in planner.casefold() and 'sendbeacon' not in planner.casefold()
+          assert 'localStorage.setItem' not in planner and 'sessionStorage.setItem' not in planner
+          assert not re.search(r'<input[^>]+type=["\'](?:text|email|tel|file|hidden)["\']', planner, re.I)
+          assert affiliate.count('class="gate"') == 9
+          assert affiliate.count('data-merchant-url=') == 2
+          assert affiliate.count('rel="sponsored noopener"') == 2
+          assert affiliate.count('tag=alo186rehber-21') == 2
+          assert not re.search(r'<a[^>]+href=["\']https://www\.amazon\.com\.tr', affiliate, re.I)
+          print(json.dumps({
+              'ok': True,
+              'routingVersion': release['routingVersion'],
+              'routes': routes,
+              'merchantLinksAdded': 2,
+              'initialMerchantLinksLocked': True,
+              'affiliateGateCount': 9,
+              'calendarLocalOnly': True,
+              'providerNetworkGuarantee': False,
+              'unverifiedCommercialClaims': 0,
+          }, ensure_ascii=False, indent=2))
+          PY
+      - name: Doğrulanmış modem ve ONT hazırlık artifactı
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-modem-ont-v322-${{ github.sha }}
+          path: /tmp/alo186-modem-ont-v322
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
