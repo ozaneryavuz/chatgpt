@@ -51,7 +51,7 @@ jobs:
           python - <<'PY'
           import xml.etree.ElementTree as ET
           ET.parse('alo186/sitemap-growth-v309.xml')
-          print('sitemap xml ok')
+          print('focused discovery inventory xml ok')
           PY
 
       - name: Canonical production build ve static smoke
@@ -62,8 +62,11 @@ jobs:
           python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-v309
           test -f /tmp/alo186-v309/kesinti-cihaz-surekliligi-karar-merkezi/index.html
           test -f /tmp/alo186-v309/hesaplama/kesinti-hazirlik-takvimi/index.html
-          test -f /tmp/alo186-v309/sitemap-growth-v309.xml
-          grep -q 'sitemap-growth-v309.xml' /tmp/alo186-v309/robots.txt
+          test -f /tmp/alo186-v309/sitemap.xml
+          grep -q 'https://alo186.com/kesinti-cihaz-surekliligi-karar-merkezi/' /tmp/alo186-v309/sitemap.xml
+          grep -q 'https://alo186.com/hesaplama/kesinti-hazirlik-takvimi/' /tmp/alo186-v309/sitemap.xml
+          grep -q 'Sitemap: https://alo186.com/sitemap.xml' /tmp/alo186-v309/robots.txt
+          ! grep -q 'sitemap-growth-v309.xml' /tmp/alo186-v309/robots.txt
 
       - name: ChatGPT Sites aktarım paketi kabulü
         run: |
@@ -94,7 +97,8 @@ jobs:
 
           - Aktif kesinti, enerji dönüşü ve geleceğe hazırlık niyetleri ayrıldı
           - 16 önemli kullanıcı yolculuğuna statik ve açıklayıcı iç bağlantı eklendi
-          - 38 URL güncel büyüme sitemap'inde ve robots.txt bildirimi altında
+          - Canonical build tarafından üretilen kök sitemap yeni merkez ve takvim rotalarını içeriyor
+          - 38 URL'li odak keşif envanteri kaynak kalite kapısı olarak doğrulanıyor
           - Kişisel verisiz 30/90/365 günlük yerel ICS kontrol takvimi
           - Hub ve takvimde doğrudan merchant bağlantısı: 0
           - Aktif tehlike ve aktif kesintide ticaret kapalı
