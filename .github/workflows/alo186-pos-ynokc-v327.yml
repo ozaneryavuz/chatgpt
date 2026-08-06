@@ -1,0 +1,74 @@
+name: ALO186 POS and YN OKC outage journey v327
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/elektrik-kesilince-pos-yazar-kasa-calisir-mi/**'
+      - 'alo186/hesaplama/pos-yazar-kasa-elektrik-kesintisi-sureklilik-plani/**'
+      - 'alo186/sektor-rehberi/magaza-restoran-kafe-pos-yazar-kasa-kesinti-surekliligi/**'
+      - 'alo186/deployment/routing-overlays/pos-ynokc-outage-journey-v327.json'
+      - 'alo186/tests/test_pos_ynokc_outage_journey_v327.py'
+      - '.github/workflows/alo186-pos-ynokc-v327.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/elektrik-kesilince-pos-yazar-kasa-calisir-mi/**'
+      - 'alo186/hesaplama/pos-yazar-kasa-elektrik-kesintisi-sureklilik-plani/**'
+      - 'alo186/sektor-rehberi/magaza-restoran-kafe-pos-yazar-kasa-kesinti-surekliligi/**'
+      - 'alo186/deployment/routing-overlays/pos-ynokc-outage-journey-v327.json'
+      - 'alo186/tests/test_pos_ynokc_outage_journey_v327.py'
+      - '.github/workflows/alo186-pos-ynokc-v327.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-pos-ynokc-v327-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Trust privacy fiscal and professional-only checks
+        run: python alo186/tests/test_pos_ynokc_outage_journey_v327.py
+      - name: Build canonical site bundle
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-pos-ynokc-v327
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-pos-ynokc-v327 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-pos-ynokc-v327
+      - name: Verify routes and sitemap
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/alo186-pos-ynokc-v327')
+          routes = [
+            '/haberler/elektrik-kesilince-pos-yazar-kasa-calisir-mi/',
+            '/hesaplama/pos-yazar-kasa-elektrik-kesintisi-sureklilik-plani/',
+            '/sektor-rehberi/magaza-restoran-kafe-pos-yazar-kasa-kesinti-surekliligi/',
+          ]
+          sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
+          release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
+          assert release['routingVersion'] >= 327
+          for route in routes:
+              page = root / route.strip('/') / 'index.html'
+              assert page.is_file(), page
+              assert f'https://alo186.com{route}' in sitemap
+          print({'ok': True, 'routingVersion': release['routingVersion'], 'routes': routes})
+          PY
+      - name: Upload verified bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-pos-ynokc-v327-${{ github.sha }}
+          path: /tmp/alo186-pos-ynokc-v327
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
