@@ -1,0 +1,21 @@
+{
+  "version": 320,
+  "generatedAt": "2026-08-06",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesilince-elektrikli-arac-sarji-durur-mu/index.html",
+      "canonicalPath": "/haberler/elektrik-kesilince-elektrikli-arac-sarji-durur-mu/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/elektrikli-arac-sarj-elektrik-kesintisi-hazirlik-plani/index.html",
+      "canonicalPath": "/hesaplama/elektrikli-arac-sarj-elektrik-kesintisi-hazirlik-plani/",
+      "type": "business-tool"
+    },
+    {
+      "source": "alo186/sektor-rehberi/site-otel-isletme-elektrikli-arac-sarj-kesinti-surekliligi/index.html",
+      "canonicalPath": "/sektor-rehberi/site-otel-isletme-elektrikli-arac-sarj-kesinti-surekliligi/",
+      "type": "article"
+    }
+  ]
+}
