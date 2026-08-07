@@ -1,0 +1,32 @@
+name: ALO186 growth v334 discovery journey
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/robots.txt'
+      - 'alo186/kesintiye-hazirlik-atolyesi-v334/**'
+      - 'alo186/deployment/routing-overlays/preparation-hub-discovery-v334.json'
+      - 'alo186/tests/test_discovery_growth_v333.py'
+      - 'alo186/tests/test_growth_v334_discovery_journey.py'
+      - '.github/workflows/alo186-growth-v334-discovery-journey.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/robots.txt'
+      - 'alo186/kesintiye-hazirlik-atolyesi-v334/**'
+      - 'alo186/deployment/routing-overlays/preparation-hub-discovery-v334.json'
+      - 'alo186/tests/test_discovery_growth_v333.py'
+      - 'alo186/tests/test_growth_v334_discovery_journey.py'
+
+jobs:
+  trust-and-production:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: v333 discovery regression
+        run: python alo186/tests/test_discovery_growth_v333.py
+      - name: v334 discovery and journey regression
+        run: python alo186/tests/test_growth_v334_discovery_journey.py
