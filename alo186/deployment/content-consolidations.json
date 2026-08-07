@@ -1,5 +1,5 @@
 {
-  "version": 13,
+  "version": 14,
   "generatedAt": "2026-08-07",
   "consolidations": [
     {
@@ -147,7 +147,7 @@
       "aliasPath": "/amazon-elektrik-urunleri/modem-mini-ups-secimi/",
       "canonicalPath": "/amazon-elektrik-urunleri/modem-ont-mini-ups-yedekleme-secici/",
       "label": "Modem, fiber ONT ve mini UPS güvenli seçim rotası",
-      "reason": "Aynı gerilim, polarite, cihaz zinciri, çalışma süresi ve satın almama kararını hedefleyen eski ürün merkezi rotası; güvenlik kapılı ve üç onaylı güncel seçicide birleştirildi."
+      "reason": "Aynı gerilim, polarite, cihaz zinciri, çalışma süresi ve satın almama kararını hedefleyen eski ürün merkezi rotası; güvenlik kapılı ve üç onaylı güncel seçicide birleştirildi. Yeni arama rehberi ve kişisel verisiz planlayıcı bu tek seçiciye nitelikli trafik taşır."
     },
     {
       "intentKey": "ev-charging-outage-behavior",
@@ -169,6 +169,13 @@
       "canonicalPath": "/haberler/elektrik-kesilince-pos-yazar-kasa-calisir-mi",
       "label": "Elektrik kesintisinde POS ve Yeni Nesil ÖKC sürekliliği",
       "reason": "İki rehber aynı POS terminali, Yeni Nesil ÖKC, ağ/iletişim, ödeme doğrulama ve kesinti sürekliliği niyetini hedefliyor. 6 Ağustos 2026 tarihli daha güncel ve daha kısa URL canonical tutuldu; eski paylaşılmış rota kalıcı alias olarak korunur."
+    },
+    {
+      "intentKey": "pv-grid-outage-behavior",
+      "aliasPath": "/haberler/ges-elektrik-kesintisinde-calisir-mi",
+      "canonicalPath": "/haberler/elektrik-kesilince-gunes-paneli-calisir-mi/",
+      "label": "Elektrik kesintisinde güneş paneli ve GES davranışı",
+      "reason": "İki rehber aynı on-grid anti-islanding, hibrit/off-grid ayrımı, yedek çıkış, transfer ve kritik yük niyetini hedefliyor. 4 Ağustos 2026 tarihli, kişisel verisiz yedek güç uygunluk aracına bağlı kapsamlı rota canonical tutuldu; eski URL kalıcı alias olarak korunur."
     }
   ]
 }
