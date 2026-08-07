@@ -1,0 +1,21 @@
+{
+  "version": 340,
+  "generatedAt": "2026-08-07",
+  "routes": [
+    {
+      "source": "alo186/haberler/uzatma-kablosu-coklu-priz-kac-watt-guvenli-kullanim/index.html",
+      "canonicalPath": "/haberler/uzatma-kablosu-coklu-priz-kac-watt-guvenli-kullanim/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/coklu-priz-uzatma-kablosu-yuk-kontrolu/index.html",
+      "canonicalPath": "/hesaplama/coklu-priz-uzatma-kablosu-yuk-kontrolu/",
+      "type": "business-tool"
+    },
+    {
+      "source": "alo186/amazon-elektrik-urunleri/coklu-priz-uzatma-kablosu-secimi/index.html",
+      "canonicalPath": "/amazon-elektrik-urunleri/coklu-priz-uzatma-kablosu-secimi/",
+      "type": "article"
+    }
+  ]
+}
