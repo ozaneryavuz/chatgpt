@@ -100,8 +100,10 @@ def main() -> None:
         assert "mevzuata tam uyum garantisi vermez" in visible
         for required in REQUIRED_VISIBLE:
             assert required in visible, (route, required)
-        assert "affiliate" in visible or "mağaza" in visible
+        # These are professional engineering pages: commerce must stay absent rather
+        # than forcing affiliate wording into content that does not need a product path.
         assert "amazon.com.tr" not in fold(html)
+        assert not re.search(r'href=["\'][^"\']*(?:amazon\.com\.tr|amzn\.to)', html, re.I)
         assert not COMMERCIAL_SCHEMA.intersection(schema_types(schema(html)))
         assert {"Article", "FAQPage", "BreadcrumbList"}.issubset(schema_types(schema(html)))
         assert html.count('href="/') >= 3
