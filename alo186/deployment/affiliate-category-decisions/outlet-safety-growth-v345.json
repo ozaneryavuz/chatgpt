@@ -1,0 +1,54 @@
+{
+  "version": 345,
+  "generatedAt": "2026-08-07",
+  "topic": "outlet-plug-home-electrical-safety",
+  "decision": "reuse-existing-low-risk-affiliate-only-after-hazard-clearance",
+  "newAffiliateClasses": 0,
+  "newMerchantLinks": 0,
+  "canonicalGuide": "/haberler/priz-isiniyor-cizirti-yanik-kokusu-ne-yapmali/",
+  "decisionTool": "/hesaplama/priz-fis-elektrik-guvenlik-belirti-ayirici/",
+  "retentionHub": "/ev-elektrik-guvenlik-kontrol-merkezi/",
+  "reusedAffiliateRoutes": [
+    "/amazon-elektrik-urunleri/led-ampul-uygunluk-secimi/"
+  ],
+  "reusedNonCommercialDecisionRoutes": [
+    "/hesaplama/coklu-priz-uzatma-kablosu-yuk-kontrolu/",
+    "/hesaplama/aydinlatma-titreme-guvenlik-ayirici/",
+    "/hesaplama/gerilim-koruma-cozum-secici/"
+  ],
+  "affiliateMayOpenOnlyWhen": [
+    "no-active-smoke-flame-shock-spark-heat-burn-smell-or-buzzing",
+    "fixed-wall-outlet-and-wiring-are-not-the-suspected-fault",
+    "no-repeating-protection-trip",
+    "need-is-a-low-risk-plug-and-play-replacement-already-owned-by-an-existing-selector",
+    "existing-safe-solution-is-not-already-sufficient"
+  ],
+  "blockedConsumerAffiliateClasses": [
+    "wall-outlet-or-switch",
+    "socket-wiring-tester",
+    "non-contact-voltage-detector",
+    "terminal-or-connector",
+    "electrical-hand-tools",
+    "breaker-or-rcd",
+    "fixed-wiring",
+    "high-power-extension-for-major-appliance",
+    "generator-backfeed-accessory"
+  ],
+  "professionalOnly": [
+    "hot-buzzing-charred-or-loose-wall-outlet",
+    "repeated-breaker-or-rcd-trip",
+    "fixed-wiring-and-neutral-fault",
+    "outlet-replacement-and-torque-verification",
+    "earthing-and-protection-testing"
+  ],
+  "mustNotClaim": [
+    "a-cool-looking-outlet-is-electrically-safe-without-inspection",
+    "surge-protected-power-strip-repairs-a-wall-outlet-fault",
+    "socket-tester-or-non-contact-detector-proves-a-circuit-safe",
+    "a-larger-breaker-solves-repeated-tripping",
+    "unverified-price",
+    "unverified-stock",
+    "unverified-rating",
+    "unverified-warranty"
+  ]
+}
