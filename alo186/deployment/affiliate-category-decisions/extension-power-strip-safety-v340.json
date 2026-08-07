@@ -1,0 +1,50 @@
+{
+  "version": 340,
+  "generatedAt": "2026-08-07",
+  "topic": "extension-cord-and-power-strip-safety",
+  "decision": "reuse-existing-trust-gated-surge-strip-affiliate-journey",
+  "newAffiliateClasses": 0,
+  "newMerchantLinks": 0,
+  "reusedAffiliateClass": "surge-strip-after-suitability-tool",
+  "existingDecisionRoute": "/hesaplama/akim-korumali-grup-priz-uygunluk/",
+  "reason": "avoid duplicate commercial intent and canonical cannibalization; qualify extension/power-strip search intent with a non-commercial guide and quick load check before the existing advanced suitability gate",
+  "allowedOnlyWhen": [
+    "product-label-max-power-and-connected-device-total-are-compared-first",
+    "dry-indoor-intact-wall-outlet-plugs-and-cords",
+    "no-daisy-chain-or-adapter-chain",
+    "connected-device-manufacturer-does-not-prohibit-extension-or-power-strip-use",
+    "existing-safe-product-is-insufficient",
+    "advanced-existing-suitability-tool-passes-its-own-technical-gates",
+    "affiliate-relationship-is-disclosed-before-any-existing-merchant-link"
+  ],
+  "blockedClasses": [
+    "electric-heater-kettle-iron-oven-microwave",
+    "air-conditioner-refrigerator-freezer-washer-dishwasher",
+    "pump-compressor-or-high-inrush-motor-load",
+    "ev-charging",
+    "power-tools-and-worksite-use",
+    "outdoor-or-wet-location-use",
+    "generator-backfeed-or-male-to-male-extension-cord",
+    "electrical-panel-or-fixed-installation-work",
+    "damaged-loose-overheated-or-wet-outlet-cord-or-plug",
+    "daisy-chained-power-strips-extension-cords-or-adapters"
+  ],
+  "mustNotClaim": [
+    "below-label-load-alone-proves-safe-use",
+    "surge-protection-is-the-same-as-overload-protection",
+    "a-new-power-strip-fixes-an-overloaded-circuit",
+    "unverified-certification",
+    "unverified-price",
+    "unverified-stock",
+    "unverified-rating",
+    "unverified-warranty"
+  ],
+  "professionalOnly": [
+    "new-fixed-wall-outlet-or-circuit",
+    "high-power-appliance-supply",
+    "motor-or-compressor-load-analysis",
+    "generator-transfer-and-backfeed-prevention",
+    "worksite-or-wet-location-distribution",
+    "damaged-or-overheating-electrical-installation"
+  ]
+}
