@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>HDMI ve DisplayPort Çözünürlük-Yenileme Uygunluk Testi | ALO186</title>
+<meta name="description" content="Kaynak cihaz, ekran, bağlantı türü, çözünürlük, yenileme hızı, HDR ve kablo sınıfını birlikte değerlendirerek mevcut görüntü kablosunun yeterli olup olmadığını kişisel veri vermeden kontrol edin.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta name="theme-color" content="#071631">
+<link rel="canonical" href="https://alo186.com/hesaplama/hdmi-displayport-cozunurluk-yenileme-uygunluk/">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"HDMI ve DisplayPort Çözünürlük-Yenileme Uygunluk Testi","url":"https://alo186.com/hesaplama/hdmi-displayport-cozunurluk-yenileme-uygunluk/","applicationCategory":"UtilitiesApplication","operatingSystem":"Web","isAccessibleForFree":true,"description":"Kaynak, ekran ve kablo zincirini çözünürlük, yenileme, HDR ve bağlantı sınıfına göre değerlendiren ücretsiz araç.","provider":{"@type":"Organization","name":"ALO186","url":"https://alo186.com","description":"Bağımsız bilgi platformudur; VESA, HDMI LA, üretici, servis, satıcı veya resmî kurum değildir."}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"4K 120 Hz için her HDMI kablosu yeterli midir?","acceptedAnswer":{"@type":"Answer","text":"Hayır. Kaynak ve ekran portlarının ilgili görüntü biçimini desteklemesi, kablonun uygun resmî sınıfta olması ve bütün zincirin gerçek kullanımda doğrulanması gerekir."}},{"@type":"Question","name":"DisplayPort kablosunda yalnız sürüm numarasına bakmak yeterli midir?","acceptedAnswer":{"@type":"Answer","text":"Hayır. Kaynak ve ekranın link hızı, DSC desteği, kablo sertifikası ve istenen çözünürlük-yenileme-renk derinliği birlikte kontrol edilmelidir."}},{"@type":"Question","name":"USB-C portu her zaman görüntü verir mi?","acceptedAnswer":{"@type":"Answer","text":"Hayır. USB-C konektörü tek başına görüntü desteğini kanıtlamaz; kaynak portta DisplayPort Alt Mode, USB4 veya üreticinin açıkça belirttiği eşdeğer görüntü çıkışı gerekir."}}]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ALO186","item":"https://alo186.com/"},{"@type":"ListItem","position":2,"name":"Hesaplama Merkezi","item":"https://alo186.com/hesaplama/"},{"@type":"ListItem","position":3,"name":"HDMI ve DisplayPort uygunluk testi"}]}]}</script>
+<style>
+:root{--navy:#071631;--ink:#14213d;--muted:#58647a;--line:#dbe3ee;--soft:#f4f7fb;--accent:#1f5fd1;--ok:#0b6b46;--warn:#8b5a00;--danger:#a11b1b}
+*{box-sizing:border-box}body{margin:0;font:16px/1.58 system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink);background:#fff}a{color:var(--accent)}
+header{background:var(--navy);color:#fff}.bar{max-width:1120px;margin:auto;padding:14px 20px;display:flex;justify-content:space-between;gap:18px;align-items:center}.brand{color:#fff;text-decoration:none;font-weight:850}.brand small{display:block;font-weight:500;opacity:.78}.bar nav{display:flex;gap:14px;flex-wrap:wrap}.bar nav a{color:#fff}
+main{max-width:1120px;margin:auto;padding:28px 20px 64px}.notice,.panel,.result,.hero aside{border:1px solid var(--line);border-radius:18px;padding:20px}.notice{background:#fff8e9}.hero{display:grid;grid-template-columns:1.45fr .85fr;gap:24px;padding:34px 0}.hero h1{font-size:clamp(2rem,5vw,3.3rem);line-height:1.07;margin:.25em 0}.hero em{font-style:normal;color:var(--accent)}.eyebrow{font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:.78rem;color:var(--accent)}.chips{display:flex;gap:8px;flex-wrap:wrap}.chips span{background:var(--soft);padding:7px 10px;border-radius:999px;font-size:.88rem}
+form{display:grid;gap:18px}.panel{margin:18px 0}.panel h2{margin-top:0}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}label>span{display:block;font-weight:700;margin-bottom:5px}select,input[type=number]{width:100%;padding:12px;border:1px solid #aeb9c8;border-radius:10px;background:#fff;font:inherit}.check{display:flex;gap:10px;align-items:flex-start;padding:11px;border:1px solid var(--line);border-radius:12px}.check input{margin-top:5px}.danger{border-color:#e4a2a2;background:#fff6f6}.actions{display:flex;gap:10px;flex-wrap:wrap}button,.cta{border:0;border-radius:12px;padding:13px 18px;background:var(--accent);color:#fff;font-weight:800;cursor:pointer;text-decoration:none;display:inline-block}.ghost{background:var(--soft);color:var(--ink)}.result{margin-top:20px;background:var(--soft)}.result.ok{border-color:#8bd2b4}.result.stop{border-color:#e3a2a2}.result.warn{border-color:#e3c36a}.metric{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0}.metric div{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px}.metric strong{display:block;font-size:1.05rem}.affiliate{margin-top:16px;padding:16px;border:1px dashed #9fb5d2;border-radius:14px;background:#fff}.fine{font-size:.9rem;color:var(--muted)}footer{background:var(--soft);padding:24px;text-align:center;color:var(--muted)}
+@media(max-width:760px){.hero,.grid,.metric{grid-template-columns:1fr}.bar{align-items:flex-start;flex-direction:column}}
+</style>
+<link rel="stylesheet" href="/assets/alo186-accessibility-v215.css" data-alo186-accessibility-v215="true">
+</head>
+<body>
+<header><div class="bar"><a class="brand" href="/">ALO186<small>Bağımsız elektrik bilgi ağı</small></a><nav><a href="/hesaplama/hdmi-displayport-sinyal-sorunu-kok-neden/">Sinyal sorununu ayır</a><a href="/sektor-rehberi/goruntu-baglanti-kablo-test-merkezi/">Tekrar test merkezi</a><a href="/amazon-elektrik-urunleri/">Ürün karar merkezi</a></nav></div></header>
+<main>
+<section class="notice"><strong>Önce bütün zinciri doğrulayın.</strong> Kablonun üzerinde yazan pazarlama ifadesi tek başına görüntü garantisi değildir. Kaynak cihaz, ekran, port, adaptör/dock, kablo ve istenen görüntü biçimi birlikte değerlendirilmelidir. ALO186; VESA, HDMI Licensing Administrator, üretici, servis, satıcı veya resmî kurum değildir. Doğrulanmamış fiyat, stok, puan ve garanti bilgisi yayımlanmaz.</section>
+<section class="hero"><div><span class="eyebrow">Kaynak · ekran · port · kablo · gerçek test</span><h1>Yeni kablo almadan önce <em>hangi halkada sınır olduğunu</em> bulun.</h1><p>Çözünürlük ve yenileme hedefi yalnız kabloyla belirlenmez. Kaynak ve ekranın aynı modu desteklemesi, adaptör veya dock varsa onun da zincire dâhil edilmesi gerekir.</p><div class="chips"><span>HDMI resmî kablo sınıfları</span><span>VESA DP sertifikası</span><span>USB-C görüntü kanıtı</span><span>Satın almama sonucu</span></div></div><aside><strong>Karar sırası</strong><ol><li>Bağlantı ve kullanım kapsamı</li><li>İstenen çözünürlük-yenileme</li><li>Kaynak ve ekran port kanıtı</li><li>Kablo sınıfı ve uzunluk/model doğrulaması</li><li>Gerçek kullanım testi</li></ol></aside></section>
+
+<form id="fitForm" novalidate>
+<section class="panel"><h2>1. Bağlantı hedefi</h2><div class="grid">
+<label><span>Durum</span><select name="status"><option value="planning">Satın alma öncesi planlama</option><option value="working">Mevcut bağlantı çalışıyor</option><option value="fault">Sinyal sorunu var</option></select></label>
+<label><span>Kapsam</span><select name="scope"><option value="home">Ev / ev ofisi</option><option value="professional">Otel / toplantı salonu / yayın / kritik kullanım</option></select></label>
+<label><span>Bağlantı türü</span><select name="link"><option value="hdmi">HDMI–HDMI</option><option value="dp">DisplayPort–DisplayPort</option><option value="usbc">USB-C görüntü çıkışı</option><option value="convert">HDMI–DisplayPort dönüştürme</option></select></label>
+<label><span>Hedef görüntü</span><select name="mode"><option value="1080p60">1080p 60 Hz</option><option value="4k60hdr">4K 60 Hz HDR</option><option value="4k120">4K 120 Hz / VRR</option><option value="8k60">8K 60 Hz</option><option value="4k240">4K 240 Hz veya üzeri</option></select></label>
+<label><span>Mevcut kablo sınıfı</span><select name="cable"><option value="unknown">Bilinmiyor / yalnız pazarlama adı var</option><option value="hdmi-high">High Speed HDMI</option><option value="hdmi-premium">Premium High Speed HDMI (18 Gbps)</option><option value="hdmi-ultra48">Ultra High Speed HDMI (48 Gbps)</option><option value="hdmi-ultra96">Ultra96 HDMI (96 Gbps)</option><option value="dp-hbr3">VESA DP8K / HBR3 sertifikalı</option><option value="dp54">VESA DP54 sertifikalı</option><option value="dp80">VESA DP80 sertifikalı</option><option value="usbc-full">Tam özellikli USB-C / üretici onaylı görüntü kablosu</option></select></label>
+<label><span>Adaptör, dönüştürücü veya dock var mı?</span><select name="adapter"><option value="none">Hayır, doğrudan bağlantı</option><option value="passive">Pasif adaptör/kablo</option><option value="active">Aktif dönüştürücü veya dock</option><option value="unknown">Türü bilinmiyor</option></select></label>
+</div>
+<label class="check danger"><input name="hazard" type="checkbox"><span>Kablo, port, adaptör veya dockta aşırı ısınma, yanık kokusu, erime, gevşeklik, ezilme, sıvı teması ya da açık iletken var.</span></label>
+</section>
+
+<section class="panel"><h2>2. Kanıtlar</h2>
+<label class="check"><input name="source" type="checkbox"><span>Kaynak cihazın tam modelinde hedef çözünürlük, yenileme, HDR/VRR ve ilgili port desteği üretici belgesinden doğrulandı.</span></label>
+<label class="check"><input name="display" type="checkbox"><span>Ekranın tam modelinde aynı hedef görüntü biçimi ve kullanılacak giriş portu doğrulandı.</span></label>
+<label class="check"><input name="cableLabel" type="checkbox"><span>Kablonun resmî sınıfı, modeli ve uzunluğu ambalaj/etiket veya resmî sertifika kaydından doğrulandı.</span></label>
+<label class="check"><input name="altmode" type="checkbox"><span>USB-C kullanılıyorsa kaynak portta DisplayPort Alt Mode, USB4 veya üreticinin açık görüntü çıkışı beyanı doğrulandı; kullanılmıyorsa bu kutuyu işaretleyin.</span></label>
+<label class="check"><input name="actual" type="checkbox"><span>Mevcut kablo hedef çözünürlük, yenileme, renk/HDR ve kullanım süresinde kararlı çalıştı.</span></label>
+</section>
+
+<div class="actions"><button type="submit">Uygunluğu değerlendir</button><button class="ghost" type="reset">Temizle</button></div>
+</form>
+<section id="result" class="result" tabindex="-1" hidden aria-live="polite"></section>
+
+<section class="panel"><h2>Resmî teknik kaynaklar ve sınırlar</h2><p>HDMI LA, resmî kablo adları ve sertifika etiketleriyle kablo sınıfının doğrulanmasını önerir. VESA ise DP54 ve DP80 gibi sertifika programlarını kaynak–ekran–kablo birlikte çalışabilirliği için kullanır. Bu araç kesin bant genişliği mühendisliği veya ürün onayı vermez; renk alt örnekleme, bit derinliği, DSC ve cihaz yazılımı sonucu değiştirebilir.</p><ul>
+<li><a href="https://www.hdmi.org/resource/cables" target="_blank" rel="noopener">HDMI LA — resmî HDMI kablo sınıfları</a></li>
+<li><a href="https://vesa.org/press/vesa-announces-displayport-updates-and-extensions-for-gaming-and-automotive-market-at-ces/" target="_blank" rel="noopener">VESA — DP54 ve DisplayPort 2.1a güncellemesi</a></li>
+<li><a href="https://www.displayport.org/" target="_blank" rel="noopener">VESA DisplayPort — sertifikalı DP80/DP54 yaklaşımı</a></li>
+<li><a href="/hesaplama/usb-c-hub-goruntu-pd-uygunluk/">ALO186 — USB-C hub, görüntü ve PD uygunluk testi</a></li>
+</ul></section>
+</main>
+<footer>ALO186 bağımsız bilgilendirme platformudur; bağlantı performansı, ürün uyumluluğu veya garanti sonucu taahhüt etmez.</footer>
+
+<script>
+const form=document.getElementById('fitForm'),out=document.getElementById('result');
+const checked=(d,k)=>d.get(k)==='on';
+const rank={unknown:0,'hdmi-high':1,'hdmi-premium':2,'hdmi-ultra48':3,'hdmi-ultra96':4,'dp-hbr3':2,dp54:3,dp80:4,'usbc-full':2};
+
+function affiliate(query){
+  return `<div class="affiliate"><strong>Satış ortaklığı açıklaması</strong><p>Bu bağlantı Amazon satış ortaklığı bağlantısıdır. Nitelikli satın alımlardan gelir elde edilebilir; kullanıcıya ek maliyet yansımaz. Fiyat, stok, puan, satıcı, teslimat ve garanti yalnız mağazanın güncel sayfasında doğrulanmalıdır.</p>
+  <label class="check"><input id="need" type="checkbox"> Mevcut güvenli kablonun hedef görevi karşılamadığı teknik olarak doğrulandı.</label>
+  <label class="check"><input id="spec" type="checkbox"> Konektör, resmî kablo sınıfı, uzunluk ve cihaz uyumluluğunu mağaza sayfasında yeniden kontrol edeceğim.</label>
+  <label class="check"><input id="ad" type="checkbox"> Bağlantının Amazon satış ortaklığı bağlantısı olduğunu anladım.</label>
+  <p><a id="shop" class="cta" href="#" rel="sponsored nofollow noopener" aria-disabled="true">Kategori seçeneklerini aç</a></p><p class="fine">Mevcut kablo yeterliyse satın alma gerekli değildir.</p></div>`;
+}
+function wireShop(query){
+  const link=document.getElementById('shop'); if(!link)return;
+  const refresh=()=>{
+    const ok=['need','spec','ad'].every(id=>document.getElementById(id).checked);
+    link.setAttribute('aria-disabled',String(!ok));
+    link.href=ok?`https://www.amazon.com.tr/s?k=${encodeURIComponent(query)}&tag=alo186rehber-21`:'#';
+    link.rel=ok?'sponsored nofollow noopener':'';
+    link.target=ok?'_blank':'';
+  };
+  ['need','spec','ad'].forEach(id=>document.getElementById(id).addEventListener('change',refresh));refresh();
+}
+function expected(link,mode){
+  if(link==='hdmi'){
+    if(mode==='1080p60') return {need:1,label:'High Speed HDMI veya üstü'};
+    if(mode==='4k60hdr') return {need:2,label:'Premium High Speed HDMI veya üstü'};
+    if(mode==='4k120'||mode==='8k60') return {need:3,label:'Ultra High Speed HDMI veya üstü'};
+    return {need:4,label:'Ultra96 HDMI ve HDMI 2.2 cihaz zinciri'};
+  }
+  if(link==='dp'){
+    if(mode==='1080p60') return {need:2,label:'Sertifikalı HBR3/DP8K, DP54 veya DP80'};
+    if(mode==='4k60hdr') return {need:2,label:'Sertifikalı HBR3/DP8K veya üstü; renk/bit derinliği ayrıca doğrulanmalı'};
+    if(mode==='4k120') return {need:3,label:'DP54/DP80 veya HBR3+DSC kanıtı'};
+    return {need:4,label:'DP80 ve kaynak-ekran DSC/link hızı kanıtı'};
+  }
+  if(link==='usbc') return {need:2,label:'Kaynakta görüntü çıkışı + tam özellikli/üretici onaylı USB-C görüntü kablosu'};
+  return {need:99,label:'Dönüştürme yönü ve aktif/pasif adaptör desteği tam modelle doğrulanmalı'};
+}
+form.addEventListener('submit',e=>{
+  e.preventDefault();const d=new FormData(form),status=d.get('status'),scope=d.get('scope'),link=d.get('link'),mode=d.get('mode'),cable=d.get('cable'),adapter=d.get('adapter');
+  let cls='warn',title='Kanıt eksik',body='',shop='';
+  if(checked(d,'hazard')){
+    cls='stop';title='Kullanmayı durdurun';body='Hasarlı veya aşırı ısınan kablo, port, adaptör ya da dock kullanılmamalıdır. Enerjiyi güvenle ayırın; sabit veya hasarlı bağlantıda yetkili servis/uzman incelemesi gerekir. Ticari yol kapalıdır.';
+  }else if(scope==='professional'){
+    cls='warn';title='Profesyonel tasarım ve kabul gerekir';body='Otel, toplantı salonu, yayın, uzun hat veya kritik görüntü sistemlerinde EDID/HDCP, aktif optik kablo, yedeklilik ve saha kabulü birlikte değerlendirilmelidir. Tüketici tipi affiliate yolu kapalıdır.';
+  }else if(link==='convert' || adapter==='unknown'){
+    cls='warn';title='Dönüştürme yönü doğrulanmadan kablo seçmeyin';body='HDMI–DisplayPort dönüşümü her iki yönde aynı çalışmaz. Kaynak port, hedef giriş, aktif/pasif dönüştürme ve güç gereksinimi tam model belgeleriyle doğrulanmalıdır. Önce sinyal kök neden aracını kullanın.';
+  }else if(status==='fault'){
+    cls='warn';title='Önce sinyal sorununu ayırın';body='Sinyal yokluğu veya titreme yalnız kablo arızası değildir. Port, giriş seçimi, sürücü/firmware, adaptör/dock ve kaynak-ekran sınırları ayrılmadan yeni kablo almayın.';
+  }else{
+    const req=expected(link,mode);
+    const evidence=checked(d,'source')&&checked(d,'display')&&checked(d,'cableLabel')&&checked(d,'altmode');
+    const current=rank[cable]||0;
+    if(!evidence){
+      cls='warn';title='Dört temel kanıt tamamlanmadı';body=`Hedef için başlangıç kablo sınıfı: <strong>${req.label}</strong>. Ancak kaynak, ekran, kablo etiketi ve USB-C görüntü kanıtı tamamlanmadan ürün uygunluğu veya satın alma kararı verilmez.`;
+    }else if(checked(d,'actual')){
+      cls='ok';title='Mevcut kablo hedefte kararlı çalışıyor — yeni ürün almayın';body='Kaynak, ekran, kablo sınıfı ve gerçek kullanım testi hedef görevi karşılıyor. Yeni kablo almak için teknik gerekçe görünmüyor; yalnız fiziksel hasar veya yeni görev oluşursa yeniden değerlendirin.';
+    }else if(current>=req.need && req.need<99){
+      cls='warn';title='Kablo sınıfı kâğıt üzerinde yeterli; gerçek test eksik';body=`Seçilen sınıf hedef için başlangıçta yeterli görünüyor: <strong>${req.label}</strong>. Kararlılık, HDR/VRR, renk derinliği, DSC ve cihaz yazılımı gerçek testle doğrulanmadan yeni ürün almayın.`;
+    }else if(req.need===4 && (mode==='4k240'||mode==='8k60')){
+      cls='warn';title='İleri seviye zincir doğrulaması gerekir';body=`Hedef için <strong>${req.label}</strong> gerekir. Kaynak ve ekran aynı HDMI/DisplayPort link seviyesini, renk biçimini ve varsa DSC'yi desteklemiyorsa yalnız kablo değişimi çözmez. Bu nedenle affiliate yolu kapalıdır.`;
+    }else{
+      cls='warn';title='Doğrulanmış kablo sınıfı açığı var';body=`Hedef için başlangıç sınıfı: <strong>${req.label}</strong>. Mevcut kablonun daha düşük sınıfta olduğu veya sınıfının doğrulanamadığı görülüyor. Yalnız doğru bağlantı türünde kablo kategorisine ilerleyin.`;
+      const q=link==='hdmi'?(req.need>=3?'Ultra High Speed HDMI sertifikalı kablo':'Premium High Speed HDMI sertifikalı kablo'):link==='dp'?(req.need>=3?'VESA DP54 DP80 sertifikalı DisplayPort kablo':'VESA sertifikalı DisplayPort kablo'):'USB-C görüntü kablosu DisplayPort Alt Mode';
+      shop=affiliate(q);
+    }
+  }
+  out.className=`result ${cls}`;out.hidden=false;out.innerHTML=`<h2>${title}</h2><p>${body}</p>${shop}<p class="fine">Sonuç ürün, cihaz veya bağlantı garantisi değildir; tam model belgeleri ve gerçek test önceliklidir.</p>`;out.focus();
+  if(shop)wireShop(link==='hdmi'?'HDMI sertifikalı görüntü kablosu':link==='dp'?'DisplayPort sertifikalı görüntü kablosu':'USB-C görüntü kablosu');
+});
+form.addEventListener('reset',()=>{out.hidden=true;out.innerHTML='';});
+</script>
+</body>
+</html>

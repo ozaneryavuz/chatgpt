@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>GES Elektrik Kesintisi Yedek Güç Uygunluk Kontrolü | ALO186</title>
+  <meta name="description" content="On-grid, hibrit ve off-grid güneş sisteminizin kesintide yedek güç verip veremeyeceğini; inverter, akü, transfer, kritik yük ve gerçek test üzerinden kişisel veri vermeden sınıflandırın.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta name="theme-color" content="#071631">
+  <link rel="canonical" href="https://alo186.com/hesaplama/ges-elektrik-kesintisi-yedek-guc-uygunluk-kontrolu/">
+  <style>
+    :root{--ink:#10213b;--muted:#58677a;--line:#d7e0eb;--soft:#f4f7fb;--brand:#0759ca;--safe:#17643a;--warn:#9a5b00;--danger:#a21d26;--radius:18px}*{box-sizing:border-box}body{margin:0;font:16px/1.55 system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink);background:var(--soft)}a{color:#064fae}.shell{width:min(1060px,calc(100% - 32px));margin:auto}.top,footer{background:#071631;color:#fff}.top .shell{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:18px 0}.top a,footer a{color:#dbe7ff}.brand{font-weight:900;text-decoration:none}.hero{padding:46px 0 20px}.eyebrow{display:block;font-size:.78rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#1759a9}.hero h1{font-size:clamp(2rem,5vw,3.6rem);line-height:1.05;margin:.35rem 0 1rem}.lead{max-width:850px;font-size:1.12rem;color:var(--muted)}.card,.notice,.result{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:0 10px 28px rgba(8,31,67,.06)}.notice{border-left:6px solid var(--danger);margin:20px 0}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.card h2,.card h3{margin-top:0}label{display:block;font-weight:760;margin:12px 0 6px}select,button{font:inherit}select{width:100%;padding:12px;border:1px solid #aebdce;border-radius:10px;background:#fff}fieldset{border:1px solid var(--line);border-radius:13px;margin:15px 0;padding:14px}fieldset label{display:flex;gap:9px;align-items:flex-start;font-weight:500;margin:10px 0}fieldset input{margin-top:5px}.buttons{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.button,button{border:0;border-radius:999px;padding:12px 18px;font-weight:850;text-decoration:none;cursor:pointer}.primary{background:var(--brand);color:#fff}.secondary{background:#e8eef7;color:var(--ink)}.result{margin:22px 0}.result[data-level="safe"]{border-left:6px solid var(--safe)}.result[data-level="watch"]{border-left:6px solid var(--warn)}.result[data-level="stop"]{border-left:6px solid var(--danger)}.hidden{display:none!important}.small{font-size:.9rem;color:var(--muted)}.links{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.links a{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px;text-decoration:none;font-weight:800}section{margin:26px 0}footer{margin-top:42px;padding:26px 0}@media(max-width:780px){.grid,.links{grid-template-columns:1fr}.top .shell{align-items:flex-start;flex-direction:column}}
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@graph":[
+      {"@type":"WebApplication","name":"GES Elektrik Kesintisi Yedek Güç Uygunluk Kontrolü","url":"https://alo186.com/hesaplama/ges-elektrik-kesintisi-yedek-guc-uygunluk-kontrolu/","applicationCategory":"UtilitiesApplication","operatingSystem":"Web","isAccessibleForFree":true,"description":"On-grid, hibrit ve off-grid güneş sistemlerinde kesinti davranışını; yedek çıkış, akü, transfer, kritik yük ve gerçek test üzerinden kişisel veri saklamadan sınıflandıran araç."},
+      {"@type":"HowTo","name":"GES yedek güç uygunluğunu kontrol etme","step":[
+        {"@type":"HowToStep","position":1,"name":"Sistem türünü belirleyin","text":"İnverterin on-grid, hibrit veya off-grid olduğunu üretici belgesinden doğrulayın."},
+        {"@type":"HowToStep","position":2,"name":"Yedek güç donanımını doğrulayın","text":"Backup/EPS çıkışı, uyumlu ayırma-transfer cihazı, akü ve kritik yük panosunun kurulu olup olmadığını kontrol edin."},
+        {"@type":"HowToStep","position":3,"name":"Kritik yük sınıfını belirleyin","text":"Konut tipi düşük güçlü yükleri; motorlu, üç fazlı, işletme ve yaşam güvenliği yüklerinden ayırın."},
+        {"@type":"HowToStep","position":4,"name":"Gerçek testi değerlendirin","text":"Sistemin kesintide hedef yükleri güvenli biçimde çalıştırdığı kayıtlı testle doğrulanmamışsa satın alma kararı vermeyin."},
+        {"@type":"HowToStep","position":5,"name":"Bakım ve tatbikat takvimi oluşturun","text":"30 günlük belge kontrolü, 90 günlük kesinti tatbikatı ve yıllık profesyonel kontrol planlayın."}
+      ]},
+      {"@type":"FAQPage","mainEntity":[
+        {"@type":"Question","name":"Bu araç ürün önerir mi?","acceptedAnswer":{"@type":"Answer","text":"Hayır. Bu sayfada Amazon veya mağaza bağlantısı yoktur. Sistem türü ve güvenlik sınırı doğrulanmadan akü, inverter veya transfer ekipmanı önerilmez."}},
+        {"@type":"Question","name":"Mevcut sistem yeterliyse ne olur?","acceptedAnswer":{"@type":"Answer","text":"Gerçek kesinti testinde hedef yükleri güvenle çalıştırıyorsa yeni ürün almayın; bakım, akü sağlığı ve tekrar test planını sürdürün."}},
+        {"@type":"Question","name":"Otel veya üç fazlı sistem bu araçla seçilebilir mi?","acceptedAnswer":{"@type":"Answer","text":"Hayır. Otel, site, ticari tesis, üç fazlı motorlar, yangın ve yaşam güvenliği sistemleri profesyonel tasarım ve kabul testi gerektirir."}}
+      ]},
+      {"@type":"BreadcrumbList","itemListElement":[
+        {"@type":"ListItem","position":1,"name":"ALO186","item":"https://alo186.com/"},
+        {"@type":"ListItem","position":2,"name":"Hesaplama","item":"https://alo186.com/hesaplama/"},
+        {"@type":"ListItem","position":3,"name":"GES yedek güç uygunluk kontrolü"}
+      ]}
+    ]
+  }
+  </script>
+  <script src="/assets/journey-events-v260.js" defer></script>
+<link rel="stylesheet" href="/assets/alo186-accessibility-v215.css" data-alo186-accessibility-v215="true">
+</head>
+<body>
+<header class="top"><div class="shell"><a class="brand" href="/">ALO186 · bağımsız elektrik bilgi ağı</a><nav aria-label="Ana menü"><a href="/elektrik-kesintisi">Kesinti</a> · <a href="/hesaplama/">Araçlar</a> · <a href="/haberler/">Makaleler</a></nav></div></header>
+<main class="shell">
+  <section class="hero"><span class="eyebrow">60 saniye · kişisel verisiz · doğrudan ürün satışı yok</span><h1>GES'in kesintide gerçekten yedek güç verip veremeyeceğini sınıflandırın.</h1><p class="lead">Panel sayısına veya akü kapasitesine bakarak karar vermeyin. İnverter türü, üretici onaylı yedek çıkış, şebekeden ayırma/transfer düzeni, kritik yük devresi ve kayıtlı gerçek test birlikte değerlendirilmelidir.</p></section>
+
+  <div class="notice"><strong>Acil sınır:</strong> İnverter, batarya, DC kablo, pano veya transfer ekipmanında duman, yanık kokusu, ark, su teması ya da fiziksel hasar varsa yaklaşmayın. Can güvenliği riski varsa 112'yi arayın. Prizden prize veya şebekeye geri besleme bağlantısı yapmayın. ALO186 EDAŞ, kamu kurumu, GES üreticisi veya proje onay mercii değildir.</div>
+
+  <section class="grid">
+    <form class="card" id="solarForm">
+      <h2>Sistemi sınıflandırın</h2>
+      <label for="systemType">İnverter / sistem türü</label>
+      <select id="systemType">
+        <option value="unknown">Bilmiyorum / belge yok</option>
+        <option value="ongrid">Standart on-grid şebeke bağlantılı</option>
+        <option value="hybrid">Hibrit inverter</option>
+        <option value="offgrid">Off-grid / şebekeden bağımsız</option>
+        <option value="micro">Mikroinverterli şebeke bağlantılı</option>
+      </select>
+      <label for="backupHardware">Yedek güç donanımı</label>
+      <select id="backupHardware">
+        <option value="unknown">Bilmiyorum / proje belgesi yok</option>
+        <option value="none">Yedek çıkış, transfer veya kritik yük panosu yok</option>
+        <option value="partial">Backup/EPS çıkışı var; transfer veya kritik yük devresi belirsiz</option>
+        <option value="complete">Üretici uyumlu yedek çıkış + ayırma/transfer + kritik yük devresi var</option>
+      </select>
+      <label for="loadClass">Kesintide çalışması istenen yükler</label>
+      <select id="loadClass">
+        <option value="home">Konut tipi düşük güçlü kritik yükler</option>
+        <option value="motor">Pompa, kompresör veya yüksek kalkış akımlı yük</option>
+        <option value="business">Otel, site, işyeri, üç fazlı veya merkezi sistem</option>
+        <option value="life">Yangın, kaçış, medikal veya yaşam güvenliği sistemi</option>
+      </select>
+      <fieldset><legend>Güvenlik ve test</legend>
+        <label><input id="hazard" type="checkbox"> Duman, koku, ark, su teması, şişmiş batarya veya fiziksel hasar var.</label>
+        <label><input id="batteryKnown" type="checkbox"> Varsa batarya modeli, kullanılabilir enerji ve üretici uyumu belgede doğrulandı.</label>
+        <label><input id="transferKnown" type="checkbox"> Şebekeden güvenli ayırma/transfer ve kritik yük devresi projede açıkça gösteriliyor.</label>
+        <label><input id="tested" type="checkbox"> Sistem son 90 günde gerçek kesinti testinde hedef yükleri güvenle çalıştırdı.</label>
+        <label><input id="noBuy" type="checkbox"> Mevcut sistem yeterliyse yeni ürün satın almayacağım.</label>
+      </fieldset>
+      <div class="buttons"><button class="primary" type="submit">Uygunluk sonucunu göster</button><button class="secondary" type="button" id="resetBtn">Sıfırla</button></div>
+      <p class="small">Yanıtlar yalnız bu sayfada işlenir; sunucuya gönderilmez, çerez veya tarayıcı depolamasına yazılmaz.</p>
+    </form>
+
+    <article class="card"><h2>Bu araç neyi ayırır?</h2><ul>
+      <li><strong>On-grid sistem:</strong> kesintide anti-islanding nedeniyle ayrılabilir.</li>
+      <li><strong>Hibrit sistem:</strong> yalnız uyumlu yedek çıkış ve transfer varsa enerji verebilir.</li>
+      <li><strong>Akü:</strong> tek başına bina yedeklemesi oluşturmaz.</li>
+      <li><strong>Konut:</strong> düşük güçlü seçilmiş kritik yükler ayrı değerlendirilir.</li>
+      <li><strong>İşletme ve motorlar:</strong> tüketici ürünü değil profesyonel tasarım gerekir.</li>
+      <li><strong>Mevcut sistem yeterli:</strong> satın almama ve test takvimi doğru sonuçtur.</li>
+    </ul><p><strong>Bu sayfada mağaza veya Amazon bağlantısı yoktur.</strong> Fiyat, stok, puan veya garanti bilgisi kullanılmaz.</p></article>
+  </section>
+
+  <section id="result" class="result hidden" aria-live="polite" data-level="watch"><h2 id="resultTitle"></h2><p id="resultText"></p><ul id="resultSteps"></ul><div class="buttons" id="resultActions"></div></section>
+
+  <section class="card"><h2>Tekrar ziyaret ve kanıt döngüsü</h2><p>Kampanya veya indirim için değil, sistemin kesintide güvenli işlevini kanıtlamak için geri dönün. Takvim ve kapsam dosyaları yalnız cihazınızda oluşturulur.</p><div class="buttons"><button class="secondary" id="calendar30" type="button">30 günlük belge kontrolünü ekle</button><button class="secondary" id="calendar90" type="button">90 günlük kesinti tatbikatını ekle</button><button class="secondary" id="calendar365" type="button">Yıllık profesyonel kontrolü ekle</button><button class="secondary" id="scopeDownload" type="button">Teknik ön değerlendirme kapsamını indir</button></div><ul><li>İnverter, batarya ve transfer cihazı model belgeleri güncel mi?</li><li>Kritik yük listesi ve gerçek W değerleri değişti mi?</li><li>Yedek çıkış, akü rezervi ve şebeke geri dönüşü gerçek testte doğrulandı mı?</li><li>Batarya, kablo, pano ve havalandırmada fiziksel risk var mı?</li></ul></section>
+
+  <section class="links"><a href="/haberler/elektrik-kesilince-gunes-paneli-calisir-mi/">Kaynak doğrulamalı rehber</a><a href="/haberler/ups-mi-tasinabilir-guc-istasyonu-mu">UPS ve güç istasyonu farkı</a><a href="/isletme-surekliligi">İşletme yedek güç değerlendirmesi</a></section>
+</main>
+<footer><div class="shell"><strong>ALO186 bağımsız bilgilendirme platformudur.</strong><p>EDAŞ veya kamu kurumu değildir; arıza kaydı almaz, GES ürünü satmaz ve proje onayı vermez.</p></div></footer>
+<script>
+(function(){
+  const form=document.getElementById('solarForm');
+  const result=document.getElementById('result');
+  const title=document.getElementById('resultTitle');
+  const text=document.getElementById('resultText');
+  const steps=document.getElementById('resultSteps');
+  const actions=document.getElementById('resultActions');
+  function checked(id){return document.getElementById(id).checked}
+  function track(outcome){try{window.ALO186JourneyEvents?.track?.('tool_completed',{journey:'solar_backup_intent_v271',outcome});}catch(e){}}
+  function render(level,t,p,list,links,outcome){result.classList.remove('hidden');result.dataset.level=level;title.textContent=t;text.textContent=p;steps.innerHTML=list.map(x=>'<li>'+x+'</li>').join('');actions.innerHTML=links.map(x=>'<a class="button '+(x.secondary?'secondary':'primary')+'" href="'+x.href+'">'+x.label+'</a>').join('');track(outcome);result.scrollIntoView({behavior:'smooth',block:'center'});}
+  form.addEventListener('submit',function(e){e.preventDefault();
+    const system=document.getElementById('systemType').value;
+    const backup=document.getElementById('backupHardware').value;
+    const load=document.getElementById('loadClass').value;
+    if(checked('hazard')){
+      render('stop','Sisteme yaklaşmayın; ticari yol kapalı.','Duman, ark, su teması, fiziksel hasar veya batarya riski varken inverteri, DC ayırıcıyı, panoyu ya da bataryayı kullanmayın.',[
+        'Can güvenliği riski varsa 112\'yi arayın.','Enerjili bölüme müdahale etmeyin.','Yetkin GES ve elektrik uzmanından güvenli inceleme isteyin.'
+      ],[{href:'tel:112',label:'112’yi ara'},{href:'/acil-numaralar/',label:'Acil numaralar',secondary:true}],'hazard_stop');return;
+    }
+    if(load==='life'){
+      render('watch','Yaşam güvenliği sistemi için tüketici çözümü kullanmayın.','Yangın, kaçış, medikal ve yaşam güvenliği yükleri; bağımsız standart, üretici onayı, yedeklilik ve kabul testi gerektirir.',[
+        'Kritik sistemin kendi standardını ve üretici şartını doğrulayın.','GES yedeklemesini tek koruma katmanı olarak kabul etmeyin.','Profesyonel tasarım ve kayıtlı kabul testi oluşturun.'
+      ],[{href:'/isletme-surekliligi',label:'Profesyonel kapsamı aç'}],'life_safety_professional');return;
+    }
+    if(load==='business'||load==='motor'){
+      render('watch','Profesyonel güç, transfer ve kalkış analizi gerekir.','Motorlu, üç fazlı, merkezi veya işletme yükleri tüketici tipi akü/inverter seçimiyle güvenle çözülemez.',[
+        'Kritik yük matrisi ve gerçek W/VA/kalkış değerlerini çıkarın.','İnverter, jeneratör, akü ve transfer koordinasyonunu hesaplatın.','Ada işletimi, seçicilik, nötr-toprak ve kabul senaryosunu doğrulatın.'
+      ],[{href:'/isletme-surekliligi',label:'İşletme sürekliliği değerlendirmesi'}],'professional_only');return;
+    }
+    if(system==='ongrid'||system==='micro'){
+      render('watch','Standart şebeke bağlantılı sistem kesintide evinizi beslemeyebilir.','Anti-islanding nedeniyle inverter şebeke kaybında ayrılır. Panel üretse bile uyumlu yedek çıkış ve güvenli transfer yoksa normal prizler çalışmaz.',[
+        'İnverter model belgesinde backup/EPS özelliğini kontrol edin.','Prizden prize veya şebekeye geri besleme yapmayın.','Akü almadan önce uyumlu inverter, transfer ve kritik yük devresini projelendirin.'
+      ],[{href:'/haberler/elektrik-kesilince-gunes-paneli-calisir-mi/',label:'Nedenini ayrıntılı oku'},{href:'/isletme-surekliligi',label:'Teknik ön değerlendirme',secondary:true}],'ongrid_no_backup');return;
+    }
+    if(system==='unknown'||backup==='unknown'){
+      render('watch','Önce sistem kimliğini ve proje belgesini doğrulayın.','Model, yedek çıkış ve transfer düzeni bilinmeden akü ya da inverter satın alma kararı verilmemelidir.',[
+        'İnverter modelini ve seri dokümanını bulun.','Varsa batarya ve transfer cihazının modelini kaydedin.','Teknik kapsam dosyasını indirip yetkin kişiden doğrulama isteyin.'
+      ],[{href:'#scopeDownload',label:'Kapsam dosyasını indir'},{href:'/haberler/elektrik-kesilince-gunes-paneli-calisir-mi/',label:'Rehberi aç',secondary:true}],'identity_unknown');return;
+    }
+    if(backup==='none'||backup==='partial'||!checked('transferKnown')){
+      render('watch','Yedek güç zinciri tamamlanmamış veya belgelenmemiş.','Hibrit inverter ya da akü bulunması, güvenli bina yedeklemesi için tek başına yeterli değildir.',[
+        'Üretici uyumlu yedek çıkış ve ayırma/transfer donanımını doğrulayın.','Kritik yükleri ayrı devre ve güç sınırıyla tanımlayın.','Donanım tamamlanmadan gerçek kesinti testi veya ürün seçimi yapmayın.'
+      ],[{href:'#scopeDownload',label:'Teknik kapsamı indir'},{href:'/isletme-surekliligi',label:'Profesyonel değerlendirme',secondary:true}],'backup_chain_incomplete');return;
+    }
+    if(backup==='complete'&&checked('batteryKnown')&&checked('transferKnown')&&checked('tested')&&checked('noBuy')){
+      render('safe','Mevcut sistem yeterli: yeni ürün almayın.','Üretici uyumu, güvenli transfer ve kritik yük devresi belgeli; sistem son 90 günde gerçek kesinti testinde hedefi sağladı.',[
+        '30 günlük fiziksel ve belge kontrolünü sürdürün.','90 günlük gerçek kesinti tatbikatını tekrarlayın.','Yük listesi değişirse güç ve süre hesabını yenileyin.'
+      ],[{href:'#calendar90',label:'90 günlük tatbikat ekle'},{href:'/hesaplama/elektrik-kesintisi-ekipman-test-ve-bakim-plani/',label:'Diğer ekipmanları test et',secondary:true}],'no_buy');return;
+    }
+    render('watch','Gerçek kesinti testi tamamlanmadan satın alma yapmayın.','Yedek güç donanımı mevcut görünüyor; fakat batarya uyumu, transfer veya hedef süre kayıtlı testle tam doğrulanmadı.',[
+      'Kritik yüklerin gerçek W değerini ve hedef süreyi kaydedin.','Yetkin kişi gözetiminde transfer ve şebeke geri dönüş testini yapın.','Test sonucu yeterliyse yeni ürün almayın; yetersizse yalnız doğrulanan eksik için proje güncelleyin.'
+    ],[{href:'#calendar90',label:'Tatbikat takvimi ekle'},{href:'#scopeDownload',label:'Kapsam dosyasını indir',secondary:true}],'test_due');
+  });
+  document.getElementById('resetBtn').addEventListener('click',()=>{form.reset();result.classList.add('hidden')});
+  function ics(days,titleText,desc){const d=new Date();d.setDate(d.getDate()+days);d.setHours(9,0,0,0);const end=new Date(d.getTime()+45*60000);const fmt=x=>x.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z/,'Z');const body=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//ALO186//TR','BEGIN:VEVENT','UID:'+Date.now()+'-'+days+'@alo186.com','DTSTAMP:'+fmt(new Date()),'DTSTART:'+fmt(d),'DTEND:'+fmt(end),'SUMMARY:'+titleText,'DESCRIPTION:'+desc,'END:VEVENT','END:VCALENDAR'].join('\r\n');const blob=new Blob([body],{type:'text/calendar;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='alo186-ges-yedek-guc-kontrol-'+days+'gun.ics';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);try{window.ALO186JourneyEvents?.track?.('reminder_downloaded',{journey:'solar_backup_intent_v271',step:String(days)});}catch(e){}}
+  document.getElementById('calendar30').addEventListener('click',()=>ics(30,'ALO186 GES belge ve fiziksel kontrolü','İnverter, batarya, transfer cihazı, kritik yük listesi ve görünür fiziksel güvenlik durumunu kontrol edin. Ürün satın alma hatırlatıcısı değildir.'));
+  document.getElementById('calendar90').addEventListener('click',()=>ics(90,'ALO186 GES gerçek kesinti tatbikatı','Yetkin kişi gözetiminde yedek çıkış, kritik yükler, akü rezervi, transfer ve şebeke geri dönüş davranışını test edin.'));
+  document.getElementById('calendar365').addEventListener('click',()=>ics(365,'ALO186 yıllık GES yedek güç profesyonel kontrolü','Proje, koruma, seçicilik, transfer, batarya sağlığı, termal durum ve kabul kayıtlarını yetkin kişilerle yenileyin.'));
+  document.getElementById('scopeDownload').addEventListener('click',()=>{
+    const scope=['ALO186 GES YEDEK GÜÇ TEKNİK ÖN DEĞERLENDİRME KAPSAMI','','Bu dosya ürün siparişi veya proje onayı değildir. ALO186 bağımsız bilgi platformudur.','',
+      '1. İnverter marka, model, faz sayısı ve üretici yedek güç belgesi','2. PV kurulu güç ve mevcut tek hat şeması','3. Varsa batarya marka/model, kullanılabilir kWh ve deşarj gücü','4. Varsa backup/EPS çıkışı, ayırma-transfer cihazı ve kritik yük panosu','5. Kritik yüklerin gerçek W/VA değeri, kalkış davranışı ve hedef çalışma süresi','6. Şebeke-jeneratör-GES-UPS koordinasyonu','7. Nötr-toprak, koruma, seçicilik ve geri besleme önleme düzeni','8. Son gerçek kesinti testi ve şebeke geri dönüş kaydı','9. Batarya, pano, kablo, havalandırma ve fiziksel güvenlik kontrolü','10. Konut / işletme / yaşam güvenliği kapsam ayrımı','','Mevcut sistem hedefi sağlıyorsa yeni ürün alınmamalıdır.'].join('\n');
+    const blob=new Blob([scope],{type:'text/plain;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='alo186-ges-yedek-guc-on-degerlendirme-kapsami.txt';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);try{window.ALO186JourneyEvents?.track?.('tool_completed',{journey:'solar_backup_intent_v271',outcome:'scope_downloaded'});}catch(e){}
+  });
+})();
+</script>
+</body>
+</html>

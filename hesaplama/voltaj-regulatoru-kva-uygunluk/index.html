@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Voltaj Regülatörü kVA ve Faz Uygunluk Testi | ALO186</title>
+  <meta name="description" content="Monofaze veya trifaze yük, güç faktörü, motor kalkışı ve ölçülen gerilim aralığına göre yaklaşık regülatör kVA sınıfını; AVR, servo/statik regülatör veya UPS yönünü değerlendirin.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta name="theme-color" content="#071631">
+  <link rel="canonical" href="https://alo186.com/hesaplama/voltaj-regulatoru-kva-uygunluk/">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"Voltaj Regülatörü kVA ve Faz Uygunluk Testi","url":"https://alo186.com/hesaplama/voltaj-regulatoru-kva-uygunluk/","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","isAccessibleForFree":true,"description":"Yük, faz, güç faktörü, motor kalkışı ve gerilim aralığına göre yaklaşık regülatör kVA sınıfı ve çözüm yönü üretir."},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Regülatör kVA değeri nasıl seçilir?","acceptedAnswer":{"@type":"Answer","text":"Toplam gerçek güç, güç faktörü, sürekli çalışma payı, en büyük motorun kalkış çarpanı ve cihazın giriş gerilim aralığı birlikte değerlendirilmelidir."}},{"@type":"Question","name":"Düşük gerilimde her zaman regülatör gerekir mi?","acceptedAnswer":{"@type":"Answer","text":"Hayır. Sorun dağıtım şebekesi, gevşek nötr, hat kesiti, bağlantı veya tesisat arızasından kaynaklanıyorsa önce kök neden ve resmî kayıt değerlendirilmelidir."}},{"@type":"Question","name":"Regülatör kesintisiz enerji sağlar mı?","acceptedAnswer":{"@type":"Answer","text":"Hayır. Regülatör gerilimi düzenler fakat enerji kesildiğinde yükü beslemez. Kesintisiz veya sıfıra yakın transfer gerekiyorsa UPS veya başka bir yedek güç çözümü değerlendirilir."}},{"@type":"Question","name":"Motorlu yükte neden daha yüksek kVA gerekir?","acceptedAnswer":{"@type":"Answer","text":"Motor ve kompresörler kalkışta nominal güçlerinin birkaç katı akım çekebilir. Regülatörün kısa süreli aşırı yük kabiliyeti üretici tablosuyla doğrulanmalıdır."}}]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Ana sayfa","item":"https://alo186.com/"},{"@type":"ListItem","position":2,"name":"Hesaplama Merkezi","item":"https://alo186.com/hesaplama/"},{"@type":"ListItem","position":3,"name":"Voltaj regülatörü kVA testi","item":"https://alo186.com/hesaplama/voltaj-regulatoru-kva-uygunluk/"}]}]}</script>
+<link rel="stylesheet" href="/assets/alo186-accessibility-v215.css" data-alo186-accessibility-v215="true">
+</head>
+<body>
+<a class="skip-link" href="#test">Teste geç</a>
+<header><div class="shell header-row"><a class="brand" href="/"><span>186</span><div><strong>ALO186</strong><small>Bağımsız elektrik bilgi ağı</small></div></a><nav aria-label="Üst menü"><a href="/hesaplama/">Hesaplayıcılar</a><a href="/hesaplama/gerilim-koruma-cozum-secici/">Gerilim çözüm seçici</a><a href="/akilli-urun-secimi">Ürün merkezi</a></nav></div></header>
+<main class="shell">
+  <section class="hero"><div><span class="eyebrow">Monofaze · trifaze · kVA · motor kalkışı · giriş gerilim aralığı</span><h1>Regülatörü yalnız toplam watt değerine bakarak seçmeyin.</h1><p>Ölçülen en düşük ve en yüksek gerilimi, faz yapısını, güç faktörünü, toplam yükü ve en büyük motorun kalkışını birlikte değerlendirin. Sonuç marka veya model onayı değil; doğru çözüm sınıfını ve yaklaşık teknik alt sınırı belirleyen ön kontroldür.</p><div class="chips"><span>Kişisel veri yok</span><span>Tarayıcıda hesaplama</span><span>Mobil uyumlu</span><span>Satın almama sonucu var</span></div></div><aside><strong>Önce kök neden</strong><p>Nötr kopması, yanık bağlantı, faz dengesizliği, su teması veya aşırı gerilim varsa regülatör satın almak sorunu çözmez. Enerjiyi güvenli biçimde kestirin ve yetkili inceleme alın.</p></aside></section>
+
+  <section class="trust"><strong>ALO186 ürün satıcısı veya resmî kurum değildir.</strong> Regülatör; pano tipi SPD, uygun topraklama, doğru kablo kesiti, kaçak akım koruması, şebeke başvurusu veya tesisat onarımının yerine geçmez. Gerilim ölçümü güvenilir bir cihazla ve farklı zamanlarda doğrulanmalıdır.</section>
+
+  <form id="test" novalidate>
+    <fieldset><legend>1. Besleme ve gerilim</legend><div class="grid">
+      <label>Besleme yapısı<select id="phase" required><option value="mono">Monofaze 230 V</option><option value="three">Trifaze 400 V</option></select></label>
+      <label>Ölçülen en düşük gerilim<input id="vmin" type="number" min="80" max="500" step="1" value="185" inputmode="decimal" required><span>V · trifazede fazlar arası ölçüm</span></label>
+      <label>Ölçülen en yüksek gerilim<input id="vmax" type="number" min="80" max="520" step="1" value="250" inputmode="decimal" required><span>V · güvenilir ölçümle doğrulayın</span></label>
+      <label>Sorunun görülme sıklığı<select id="frequency"><option value="rare">Nadiren, birkaç saniye</option><option value="repeated" selected>Her gün / sık tekrarlıyor</option><option value="continuous">Uzun süre devam ediyor</option></select></label>
+    </div></fieldset>
+
+    <fieldset><legend>2. Yük ve kalkış</legend><div class="grid">
+      <label>Kullanım senaryosu<select id="use"><option value="electronics">Bilgisayar, TV, modem ve elektronik</option><option value="mixed">Ev / küçük ofis karma yük</option><option value="motor">Buzdolabı, klima, pompa veya kompresör</option><option value="business">Otel, site, atölye veya işletme</option><option value="critical">Sunucu, sağlık, yangın veya kritik proses</option></select></label>
+      <label>Toplam eşzamanlı gerçek güç<input id="loadKw" type="number" min="0.05" max="500" step="0.05" value="1.2" inputmode="decimal" required><span>kW</span></label>
+      <label>Güç faktörü<select id="pf"><option value="auto">Bilinmiyor — muhafazakâr varsayım</option><option value="0.60">0,60</option><option value="0.80">0,80</option><option value="0.90">0,90</option><option value="0.95">0,95</option></select></label>
+      <label>En büyük motor/kompresör gücü<input id="motorKw" type="number" min="0" max="250" step="0.05" value="0" inputmode="decimal"><span>kW · toplam yüke dâhilse de yazın</span></label>
+      <label>Motor kalkış çarpanı<select id="startFactor"><option value="3">3 × — yumuşak kalkış / inverterli</option><option value="5" selected>5 × — tipik doğrudan kalkış</option><option value="7">7 × — ağır kalkış / bilinmiyor</option></select></label>
+      <label>Kurulum biçimi<select id="installation"><option value="plug">Tek cihaz / prize takılan çözüm</option><option value="panel">Pano veya hat beslemesi</option><option value="facility">Bina / işletme ana beslemesi</option></select></label>
+    </div></fieldset>
+
+    <fieldset><legend>3. Beklenen işlev</legend><div class="grid">
+      <label>Kesintide çalışma beklentisi<select id="continuity"><option value="none">Kesintide çalışması gerekmiyor</option><option value="brief">Kısa transfer tolere edilebilir</option><option value="zero">Sıfıra yakın transfer / kesintisiz çalışma gerekli</option></select></label>
+      <label>Öncelikli sorun<select id="problem"><option value="low">Sürekli veya tekrarlayan düşük gerilim</option><option value="high">Sürekli veya tekrarlayan yüksek gerilim</option><option value="both">Hem düşük hem yüksek gerilim</option><option value="spike">Ani darbe / yıldırım endişesi</option><option value="unknown">Sorun türü net değil</option></select></label>
+    </div></fieldset>
+
+    <fieldset class="hazard"><legend>4. Güvenlik kapısı</legend><p>Aşağıdakilerden biri varsa ürün seçmeyin; enerjiyi güvenli biçimde kestirin ve uzman değerlendirmesi alın.</p><div class="checks"><label><input id="neutral" type="checkbox"> Lambalarda aniden aşırı parlama, nötr şüphesi veya fazlar arasında belirgin dengesizlik</label><label><input id="smoke" type="checkbox"> Duman, kıvılcım, yanık kokusu, erime veya ısınan bağlantı</label><label><input id="water" type="checkbox"> Su teması, açık iletken veya elektrik çarpması riski</label></div></fieldset>
+
+    <button class="primary" type="submit">Regülatör kVA sınıfını ve doğru çözüm yönünü hesapla</button>
+    <p class="privacy">Ad, adres, telefon, e-posta, abonelik veya sayaç bilgisi istenmez. Girdiler sunucuya gönderilmez ve tarayıcıda saklanmaz.</p>
+  </form>
+
+  <section id="result" class="result hidden" aria-live="polite" tabindex="-1">
+    <span id="state" class="pill">—</span><h2 id="title">Sonuç</h2><p id="summary"></p>
+    <div class="metrics"><article><span>Yaklaşık alt güç</span><strong id="designKw">—</strong></article><article><span>Yaklaşık alt regülatör sınıfı</span><strong id="designKva">—</strong></article><article><span>Gerilim sapması</span><strong id="deviation">—</strong></article><article><span>Çözüm yönü</span><strong id="solution">—</strong></article></div>
+    <h3>Satın alma veya teklif öncesi doğrulanacaklar</h3><ol id="steps"></ol>
+    <div class="actions"><a href="/hesaplama/gerilim-koruma-cozum-secici/">Sorun türünü yeniden ayır</a><a href="/hesaplama/kablo-gerilim-dusumu/">Hat gerilim düşümünü hesapla</a><a id="upsTool" href="/hesaplama/ups-va-topoloji-uygunluk/">UPS seçeneğini karşılaştır</a><button id="print" type="button">Yazdır / PDF kaydet</button></div>
+    <div id="commerce" class="commerce hidden"><strong>Reklam / satış ortaklığı açıklaması:</strong><p>Aşağıdaki Amazon Türkiye bağlantısı yalnız düşük güçlü, prize takılan ürün sınıfına yönelik kategori aramasıdır. Nitelikli satın alımlardan komisyon kazanılabilir; kullanıcıya ek maliyet yansımaz. Fiyat, stok, puan, satıcı, teslimat, garanti ve tam model uyumu mağazanın güncel sayfasında doğrulanır.</p><div class="gate"><label><input class="confirm" type="checkbox"> Gerilim ölçümünü güvenilir cihazla ve farklı zamanlarda doğruladım.</label><label><input class="confirm" type="checkbox"> Cihazın gerçek W/VA değerini ve giriş gerilim aralığını kontrol edeceğim.</label><label><input class="confirm" type="checkbox"> Bağlantının satış ortaklığı bağlantısı olduğunu anladım.</label></div><a id="affiliate" aria-disabled="true" tabindex="-1" target="_blank" rel="sponsored nofollow noopener">Amazon'da uygun AVR / regülatör sınıfını ara</a></div>
+    <div id="professional" class="professional hidden"><strong>Doğrudan ürün yönlendirmesi kapalıdır.</strong><p id="professionalText"></p><a href="/kurumsal-elektrik-surekliligi-on-degerlendirme">Profesyonel kapsamı incele</a></div>
+  </section>
+
+  <section class="faq"><h2>Sık sorulanlar</h2><details><summary>10 kW yük için 10 kVA regülatör yeterli midir?</summary><p>Her zaman değil. Güç faktörü, sürekli çalışma payı, motor kalkışı ve regülatörün düşük giriş gerilimindeki derating değeri kVA ihtiyacını artırabilir.</p></details><details><summary>Servo regülatör ile statik regülatör arasındaki fark nedir?</summary><p>Servo regülatör mekanik hareketli düzenekle, statik regülatör ise güç elektroniğiyle düzeltme yapar. Tepki süresi, hassasiyet, bakım, bypass ve kısa devre dayanımı uygulamaya göre karşılaştırılmalıdır.</p></details><details><summary>Regülatör yıldırımdan korur mu?</summary><p>Regülatör sürekli veya tekrarlayan gerilim sapmasını düzenleyebilir; yıldırım ve ani darbe için uygun koordinasyona sahip SPD/parafudr gerekir.</p></details><details><summary>Trifaze regülatörde fazlar ayrı mı kontrol edilmelidir?</summary><p>Evet. Faz gerilimleri, dengesizlik, nötr yapısı, yük dağılımı, bypass ve koruma koordinasyonu projede ayrı değerlendirilmelidir.</p></details></section>
+</main>
+<footer><div class="shell footer-row"><div><strong>ALO186</strong><p>Bağımsız bilgilendirme platformudur; EDAŞ, kamu kurumu veya ürün satıcısı değildir.</p></div><div><a href="/yayin-ilkeleri">Yayın ilkeleri</a><a href="/yasal/amazon-satis-ortakligi">Affiliate açıklaması</a></div></div></footer>
+<noscript><div class="noscript">Bu araç JavaScript gerektirir.</div></noscript>
+<script src="./app.js"></script>
+</body>
+</html>

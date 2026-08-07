@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://alo186.com/schemas/electric-continuity-passport-v1.json",
+  "title": "ALO186 Electric Continuity Passport v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "schemaVersion",
+    "passportId",
+    "generatedAt",
+    "nextReviewAt",
+    "facilityType",
+    "criticalLoadCategories",
+    "backupSourceClasses",
+    "evidence",
+    "evidenceScore",
+    "evidenceBand",
+    "priorityGaps",
+    "handoff",
+    "privacy",
+    "disclaimer"
+  ],
+  "properties": {
+    "schema": { "const": "https://alo186.com/schemas/electric-continuity-passport-v1.json" },
+    "schemaVersion": { "const": 1 },
+    "passportId": { "type": "string", "pattern": "^alo186-passport-[A-Za-z0-9-]+$", "maxLength": 120 },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "nextReviewAt": { "type": "string", "format": "date-time" },
+    "facilityType": { "enum": ["hotel", "site", "business", "other"] },
+    "criticalLoadCategories": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": ["life-safety", "it-comms", "cold-chain", "water-pumps", "security", "operations", "elevator-access", "other-critical"]
+      }
+    },
+    "backupSourceClasses": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "enum": ["generator", "ups", "battery-inverter", "power-station", "dual-feed", "none"] }
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "title", "status", "statusLabel", "weight"],
+        "properties": {
+          "id": { "type": "string", "maxLength": 80 },
+          "title": { "type": "string", "maxLength": 180 },
+          "status": { "enum": ["current", "due", "planned", "missing"] },
+          "statusLabel": { "type": "string", "maxLength": 80 },
+          "weight": { "type": "number", "minimum": 0, "maximum": 100 }
+        }
+      }
+    },
+    "evidenceScore": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "evidenceBand": { "enum": ["controlled", "developing", "fragile", "uncontrolled"] },
+    "priorityGaps": {
+      "type": "array",
+      "maxItems": 30,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "priority", "status", "action"],
+        "properties": {
+          "id": { "type": "string", "maxLength": 100 },
+          "priority": { "enum": ["P0", "P1", "P2"] },
+          "status": { "enum": ["due", "planned", "missing"] },
+          "action": { "type": "string", "maxLength": 500 }
+        }
+      }
+    },
+    "importedMaturity": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["source", "facilityType", "score", "band", "dimensions", "privacy"],
+      "properties": {
+        "source": { "const": "alo186-continuity-maturity-v1" },
+        "facilityType": { "enum": ["hotel", "site", "business", "other"] },
+        "score": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "band": { "type": "string", "maxLength": 80 },
+        "dimensions": {
+          "type": "array",
+          "maxItems": 12,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "score"],
+            "properties": {
+              "id": { "type": "string", "maxLength": 50 },
+              "score": { "type": "integer", "minimum": 0, "maximum": 100 }
+            }
+          }
+        },
+        "privacy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["containsPersonalData"],
+          "properties": { "containsPersonalData": { "const": false } }
+        }
+      }
+    },
+    "handoff": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["target", "compatibleVersion", "suggestedRoute"],
+      "properties": {
+        "target": { "const": "alo186-continuity-panel" },
+        "compatibleVersion": { "const": 1 },
+        "suggestedRoute": { "const": "https://alo186.com/isletme-surekliligi?passport=1" }
+      }
+    },
+    "privacy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["containsPersonalData", "personalFieldsCollected", "freeTextIncluded", "lifeSupportFlagIncluded", "immediateDangerFlagIncluded"],
+      "properties": {
+        "containsPersonalData": { "const": false },
+        "personalFieldsCollected": { "type": "array", "maxItems": 0 },
+        "freeTextIncluded": { "const": false },
+        "lifeSupportFlagIncluded": { "const": false },
+        "immediateDangerFlagIncluded": { "const": false }
+      }
+    },
+    "disclaimer": { "type": "string", "maxLength": 500 }
+  }
+}

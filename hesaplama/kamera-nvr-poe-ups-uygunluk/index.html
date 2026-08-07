@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Kamera, NVR ve PoE Switch UPS Hesaplama | ALO186</title>
+  <meta name="description" content="IP kamera, NVR/DVR, PoE switch, modem ve alarm yükleri için gerekli W, VA ve Wh değerini hesaplayın; mevcut UPS'in kayıt sürekliliğini kişisel veri vermeden test edin.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta name="theme-color" content="#071631">
+  <link rel="canonical" href="https://alo186.com/hesaplama/kamera-nvr-poe-ups-uygunluk/">
+  <link rel="stylesheet" href="../../assets/critical-continuity-v126.css">
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"Kamera NVR PoE UPS Uygunluk Testi","url":"https://alo186.com/hesaplama/kamera-nvr-poe-ups-uygunluk/","applicationCategory":"UtilitiesApplication","operatingSystem":"Web","isAccessibleForFree":true,"description":"Kamera, NVR/DVR, PoE switch, modem/ONT ve alarm yükleri için W, VA, Wh ve gerçek kayıt sürekliliğini değerlendiren kişisel verisiz araç.","provider":{"@type":"Organization","name":"ALO186","url":"https://alo186.com","description":"Bağımsız elektrik bilgi platformudur; EDAŞ, kamu kurumu, güvenlik şirketi, ürün satıcısı veya yetkili servis değildir."}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Kamera sistemi için kaç VA UPS gerekir?","acceptedAnswer":{"@type":"Answer","text":"NVR/DVR, PoE switch, bütün kameralar, modem/ONT ve diğer kritik cihazların gerçek wattı toplanmalı; UPS'in hem aktif W hem VA sınırı ve hedef çalışma süresi doğrulanmalıdır."}},{"@type":"Question","name":"PoE switch wattı kameraları da içerir mi?","acceptedAnswer":{"@type":"Answer","text":"Her modelde sunum biçimi farklı olabilir. Switch'in kendi tüketimi ile kameralar için ayrılan PoE güç bütçesi teknik belgede ayrı doğrulanmalıdır; port sayısı tek başına güç bütçesi değildir."}},{"@type":"Question","name":"UPS açıkken NVR kaydı kesin devam eder mi?","acceptedAnswer":{"@type":"Answer","text":"Hayır. NVR, disk, PoE switch, kameralar, zaman damgası ve ağ bağlantısı gerçek kesinti testiyle birlikte doğrulanmalıdır."}},{"@type":"Question","name":"Mevcut UPS yeterliyse yeni ürün gerekir mi?","acceptedAnswer":{"@type":"Answer","text":"W, VA, Wh, çıkış uyumu, transfer, gerçek süre ve kayıt testi yeterliyse araç yeni ürün almayın sonucu verir."}}]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ALO186","item":"https://alo186.com/"},{"@type":"ListItem","position":2,"name":"Hesaplama Merkezi","item":"https://alo186.com/hesaplama/"},{"@type":"ListItem","position":3,"name":"Kamera NVR PoE UPS Uygunluğu"}]}]}</script>
+<link rel="stylesheet" href="/assets/alo186-accessibility-v215.css" data-alo186-accessibility-v215="true">
+</head>
+<body>
+<a class="skip-link" href="#cctvForm">Araca geç</a>
+<header><div class="header-inner"><a class="brand" href="../../"><span>186</span><b>ALO186<small>Bağımsız elektrik bilgi ağı</small></b></a><nav aria-label="Üst menü"><a href="../">Hesaplayıcılar</a><a href="../ups-va-topoloji-uygunluk/">UPS seçimi</a><a href="../modem-internet-yedekleme/">Modem/ONT</a></nav></div></header>
+<main>
+  <section class="trust"><strong>Kesinti kaydı yalnız NVR'nin açık kalması değildir.</strong> PoE switch, bütün kameralar, disk, modem/ONT, zaman damgası ve kayıt dosyası gerçek kesinti testiyle birlikte doğrulanmalıdır. Yangın alarmı, acil çıkış veya kritik erişim kontrolü tüketici tipi ürün seçimine bırakılamaz.</section>
+  <section class="hero">
+    <div><span class="eyebrow">CCTV · IP kamera · NVR/DVR · PoE switch · UPS · Wh</span><h1>Kamera sisteminin yedek gücünü <em>port sayısına değil gerçek güç ağacına</em> göre hesaplayın.</h1><p>NVR, PoE switch, kamera sayısı, kamera başına azami watt, modem/ONT ve hedef süreyi girin; gerekli W, VA ve Wh değerini görün.</p><div class="chips"><span>Kişisel veri yok</span><span>Kayıt testi</span><span>Satın almama sonucu</span><span>90 günlük bakım takvimi</span></div></div>
+    <aside><strong>Beş doğrulama</strong><ol><li>NVR/DVR ve disk yükü</li><li>Switch'in kendi tüketimi</li><li>Kameraların PoE güç bütçesi</li><li>Modem/ONT ve ağ yolu</li><li>Transfer sonrası gerçek kayıt</li></ol><p>Çok kabinetli, bina ölçekli veya yaşam güvenliği sistemlerinde profesyonel proje gerekir.</p></aside>
+  </section>
+
+  <form id="cctvForm" novalidate>
+    <section class="panel"><h2>1. Sistem kapsamı ve güvenlik</h2>
+      <label class="check danger"><input id="emergency" type="checkbox"><span>Duman, kıvılcım, erime, su teması, yanık kokusu, aşırı ısınma veya elektrik çarpması riski var.</span></label>
+      <div class="grid">
+        <label><span>Senaryo</span><select id="scenario"><option value="planning">Gelecek kesintiye hazırlık</option><option value="active">Şu anda kesinti var</option><option value="existing">Mevcut kaynağı değerlendiriyorum</option></select></label>
+        <label><span>Sistem kapsamı</span><select id="systemScope"><option value="home">Ev / küçük ofis tek kabinet</option><option value="small_business">Küçük işletme tek kabinet</option><option value="multi_closet">Birden fazla kabinet / bina / saha</option><option value="life_safety">Yangın, acil çıkış veya kritik erişim kontrolü</option></select></label>
+        <label><span>Kesinti hedefi</span><select id="continuity"><option value="no_restart">Kayıt kesilmeden devam etsin</option><option value="graceful">Güvenli kapatma için süre kazanayım</option><option value="restart_ok">Yeniden başlama kabul edilebilir</option></select></label>
+        <label><span>Bağlantı düzeni</span><select id="connection"><option value="direct">UPS çıkışına doğrudan / onaylı tek dağıtım</option><option value="daisy">Çoklayıcı veya adaptör zinciri</option><option value="unknown">Bilmiyorum</option></select></label>
+      </div>
+    </section>
+
+    <section class="panel"><h2>2. Gerçek güç ağacını girin</h2><p class="hint">PoE switch'in kendi tüketimi ile kameralar için ayırdığı güç bütçesini karıştırmayın. Kamera başına değeri tam model teknik belgesinden veya ölçümden alın.</p>
+      <div class="grid loads">
+        <label><span>NVR / DVR + diskler</span><div class="unit"><input id="nvrW" type="number" min="0" max="1000" step="1" inputmode="numeric" value="45"><b>W</b></div></label>
+        <label><span>PoE switch kendi tüketimi</span><div class="unit"><input id="poeSwitchW" type="number" min="0" max="1000" step="1" inputmode="numeric" value="18"><b>W</b></div></label>
+        <label><span>Kamera adedi</span><div class="unit"><input id="cameraCount" type="number" min="0" max="128" step="1" inputmode="numeric" value="8"><b>adet</b></div></label>
+        <label><span>Kamera başına azami yük</span><div class="unit"><input id="cameraW" type="number" min="0" max="100" step="0.1" inputmode="decimal" value="10"><b>W</b></div></label>
+        <label><span>Modem + ONT + router</span><div class="unit"><input id="routerW" type="number" min="0" max="500" step="1" inputmode="numeric" value="25"><b>W</b></div></label>
+        <label><span>Monitör</span><div class="unit"><input id="monitorW" type="number" min="0" max="500" step="1" inputmode="numeric" value="0"><b>W</b></div></label>
+        <label><span>Alarm / interkom / erişim</span><div class="unit"><input id="alarmW" type="number" min="0" max="1000" step="1" inputmode="numeric" value="0"><b>W</b></div></label>
+        <label><span>Diğer kritik ağ yükü</span><div class="unit"><input id="otherW" type="number" min="0" max="1000" step="1" inputmode="numeric" value="0"><b>W</b></div></label>
+        <label><span>Hedef çalışma süresi</span><div class="unit"><input id="targetHours" type="number" min="0.1" max="24" step="0.1" inputmode="decimal" value="2"><b>saat</b></div></label>
+        <label><span>Yük kanıtı</span><select id="loadEvidence"><option value="measured">UPS/PDU/priz ölçer ile ölçüldü</option><option value="technical">Tam model teknik belgeleri</option><option value="estimated">Yaklaşık / genel internet değeri</option></select></label>
+      </div>
+    </section>
+
+    <section class="panel"><h2>3. Mevcut UPS veya güç istasyonu varsa doğrulayın</h2>
+      <div class="grid"><label><span>Kaynak durumu</span><select id="sourceStatus"><option value="none">Henüz kaynak yok</option><option value="existing">Mevcut UPS / güç istasyonu var</option></select></label></div>
+      <div id="existingFields" class="grid hidden">
+        <label><span>Sürekli aktif çıkış</span><div class="unit"><input id="sourceW" type="number" min="50" max="20000" step="1"><b>W</b></div></label>
+        <label><span>Görünür güç kapasitesi</span><div class="unit"><input id="sourceVA" type="number" min="100" max="30000" step="10"><b>VA</b></div></label>
+        <label><span>Batarya nominal enerjisi</span><div class="unit"><input id="sourceWh" type="number" min="50" max="100000" step="1"><b>Wh</b></div></label>
+        <label><span>Çıkış uyumu</span><select id="waveform"><option value="unknown">Bilmiyorum</option><option value="approved">Saf sinüs veya üretici uyumu doğrulandı</option><option value="not_approved">Doğrulanmadı / uyumsuz</option></select></label>
+        <label><span>Gerçek transfer testi</span><select id="transferTest"><option value="untested">Yapılmadı</option><option value="success">NVR ve switch yeniden başlamadan geçti</option><option value="restart">NVR/switch yeniden başladı</option></select></label>
+        <label><span>Gerçek süre testi</span><select id="runtimeTest"><option value="untested">Yapılmadı</option><option value="success">Hedef süreyi alarm/ısınma olmadan karşıladı</option><option value="failed">Erken kapandı, alarm veya ısınma oldu</option></select></label>
+        <label><span>Gerçek kayıt testi</span><select id="recordingTest"><option value="untested">Yapılmadı</option><option value="success">Bütün kameralar kayıtta kaldı ve dosya açıldı</option><option value="failed">Kamera, disk, zaman veya kayıt boşluğu oluştu</option></select></label>
+      </div>
+      <div class="actions"><button class="button primary" type="submit">Uygunluk sonucunu oluştur</button><button class="button" type="reset">Sıfırla</button></div>
+      <p class="privacy">Kamera görüntüsü, adres, konum, IP, kullanıcı adı, şifre veya seri numarası istenmez. Hesaplama yalnız tarayıcıda yapılır.</p>
+    </section>
+  </form>
+
+  <section id="result" class="panel result hidden" aria-live="polite" tabindex="-1"></section>
+
+  <section class="panel"><h2>Gerçek kayıt sürekliliği kontrol listesi</h2><ol class="steps"><li>UPS'e yalnız NVR/DVR, PoE switch ve gerekli ağ cihazlarını bağlayın; monitörü kritik değilse ayırın.</li><li>Kontrollü kesinti testinde NVR'nin yeniden başlamadığını ve bütün kameraların kayıtta kaldığını doğrulayın.</li><li>Gece IR modu, PTZ hareketi veya disk yoğunluğu gibi yüksek yük durumlarını ayrıca test edin.</li><li>Kesinti sonrası kayıt dosyasını açın; zaman damgası, görüntü, disk ve uzaktan erişim sürekliliğini kontrol edin.</li></ol></section>
+
+  <section class="panel faq"><h2>Kısa cevaplar</h2>
+    <details><summary>Monitörü UPS'e bağlamalı mıyım?</summary><p>Kayıt sürekliliği öncelikliyse monitör çoğu senaryoda batarya çıkışından ayrılabilir. Bu karar kullanım ihtiyacına göre verilmelidir.</p></details>
+    <details><summary>PoE port sayısı UPS seçmek için yeterli mi?</summary><p>Hayır. Switch'in kendi tüketimi, bağlı kameraların gerçek/azami PoE yükü, NVR ve ağ cihazları ayrı toplanmalıdır.</p></details>
+    <details><summary>Evde modem çalışırsa uzaktan görüntü kesin devam eder mi?</summary><p>Hayır. ONT/router, bina/operatör saha ekipmanı ve internet erişimi de çalışmalıdır. Yerel kayıt ile uzaktan erişim ayrı test edilmelidir.</p></details>
+  </section>
+
+  <section class="panel"><h2>Birincil teknik kaynaklar</h2><div class="links"><a class="button" href="https://tripplite.eaton.com/products/voip-ups-finder" target="_blank" rel="noopener noreferrer">Eaton — PoE ve ağ dolabı UPS planlama aracı</a><a class="button" href="https://www.se.com/tr/tr/work/support/product-support/ups-buying-guide-for-selecting-a-battery-backup-system/" target="_blank" rel="noopener noreferrer">Schneider Electric — UPS W, VA ve süre rehberi</a></div><p class="privacy">ALO186 güvenlik sistemi projesi, kayıt garantisi veya ürün uygunluk garantisi sunmaz. Çok kabinetli ve yaşam güvenliği sistemlerinde yetkin tasarım ve bakım sorumluluğu gerekir.</p></section>
+
+  <section class="panel"><h2>İlgili araçlar</h2><div class="cards"><a class="card" href="../modem-internet-yedekleme/"><strong>Modem ve ONT yedekleme testi</strong><span>İnternet tarafındaki DC yükleri ayrı değerlendirin.</span><small>Aracı aç →</small></a><a class="card" href="../ups-va-topoloji-uygunluk/"><strong>UPS VA ve topoloji testi</strong><span>W, VA, transfer ve topoloji sınırlarını ayırın.</span><small>Aracı aç →</small></a><a class="card" href="../../sektor-rehberi/kritik-sistemler-yedek-guc-test-merkezi/"><strong>Kritik sistem test merkezi</strong><span>Kamera, akvaryum, internet ve diğer kritik cihazlar için tekrar test planı oluşturun.</span><small>Merkezi aç →</small></a></div></section>
+</main>
+<footer><div class="footer-inner"><strong>ALO186 bağımsız bilgi platformudur.</strong><p>EDAŞ, kamu kurumu, güvenlik şirketi, üretici, ürün satıcısı veya yetkili servis değildir. Arıza ya da güvenlik ihbarı almaz.</p></div></footer>
+<script src="./app.js" defer></script>
+</body>
+</html>

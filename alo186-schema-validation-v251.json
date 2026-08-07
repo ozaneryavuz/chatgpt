@@ -1,0 +1,119 @@
+{
+  "version": 251,
+  "revision": 252,
+  "validation": {
+    "schemaOrgValidator": {
+      "status": "pass",
+      "method": "all injected JSON-LD blocks parsed as JSON and required schema.org type/property contracts were verified",
+      "externalUiApiAvailable": false
+    },
+    "googleRichResultsAssessment": {
+      "status": "pass-with-feature-boundaries",
+      "BreadcrumbList": "supported markup retained",
+      "FAQPage": "valid markup retained; display is search-engine discretionary",
+      "HowTo": "schema.org-valid; no current Google HowTo rich-result claim",
+      "Product": "generic product-class entities only; no Offer, price, stock, rating or merchant-listing claim"
+    },
+    "visibleContentParity": "pass",
+    "jsonLdSyntax": "pass",
+    "questionProblemSolutionProductChain": "pass",
+    "questionProblemSolutionProductItems": 4,
+    "primaryAffiliateAnchor": "urun-ups-3000va",
+    "primaryAffiliateAnchorStatus": "pass",
+    "ssrNamedModules": [
+      "akilli-yol-ssr",
+      "kisisel-hazirlik-kontrolu-ssr"
+    ],
+    "howToSteps": 5,
+    "genericProductEntities": 3,
+    "offerEntities": 0,
+    "ssrAffiliateLinks": 3,
+    "provinceServices": 81,
+    "serviceChannels": 81,
+    "servicePhone186": 81,
+    "privateEdasGovernmentService": 0,
+    "aiCrawlersExplicitlyAllowed": [
+      "GPTBot",
+      "OAI-SearchBot",
+      "ChatGPT-User",
+      "PerplexityBot",
+      "ClaudeBot",
+      "Bytespider",
+      "Google-Extended"
+    ],
+    "reports": {
+      "howTo": {
+        "visibleSteps": 5,
+        "structuredStepUrls": 5,
+        "visibleContentParity": true,
+        "questionProblemSolutionProductItems": 4,
+        "primaryAffiliateAnchor": "urun-ups-3000va",
+        "fixed3000VaRecommendation": false
+      },
+      "edas": {
+        "centralProvinceServices": 81,
+        "serviceChannels": 81,
+        "servicePhone": "186",
+        "provincePagesEnhanced": 81,
+        "companyPagesEnhanced": 21,
+        "privateEdasGovernmentServiceCount": 0
+      },
+      "ssr": {
+        "pagesWithStaticFallback": 2,
+        "affiliateLinksOnEmergencyDecisionPages": 0,
+        "namedModules": [
+          "akilli-yol-ssr",
+          "kisisel-hazirlik-kontrolu-ssr"
+        ]
+      },
+      "robots": {
+        "explicitAllow": [
+          "GPTBot",
+          "OAI-SearchBot",
+          "ChatGPT-User",
+          "PerplexityBot",
+          "ClaudeBot",
+          "Bytespider",
+          "Google-Extended"
+        ],
+        "chatGptSearchCrawler": "OAI-SearchBot"
+      }
+    }
+  },
+  "howTo": {
+    "visibleSteps": 5,
+    "structuredStepUrls": 5,
+    "visibleContentParity": true,
+    "questionProblemSolutionProductItems": 4,
+    "primaryAffiliateAnchor": "urun-ups-3000va",
+    "fixed3000VaRecommendation": false
+  },
+  "edas": {
+    "centralProvinceServices": 81,
+    "serviceChannels": 81,
+    "servicePhone": "186",
+    "provincePagesEnhanced": 81,
+    "companyPagesEnhanced": 21,
+    "privateEdasGovernmentServiceCount": 0
+  },
+  "ssr": {
+    "pagesWithStaticFallback": 2,
+    "affiliateLinksOnEmergencyDecisionPages": 0,
+    "namedModules": [
+      "akilli-yol-ssr",
+      "kisisel-hazirlik-kontrolu-ssr"
+    ]
+  },
+  "robots": {
+    "explicitAllow": [
+      "GPTBot",
+      "OAI-SearchBot",
+      "ChatGPT-User",
+      "PerplexityBot",
+      "ClaudeBot",
+      "Bytespider",
+      "Google-Extended"
+    ],
+    "chatGptSearchCrawler": "OAI-SearchBot"
+  }
+}

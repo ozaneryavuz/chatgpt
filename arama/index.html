@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>ALO186 Teknik Arama | Elektrik Sorunu, Rehber ve Hesaplayıcı Bul</title>
+  <meta name="description" content="ALO186 teknik rehberleri, elektrik karar araçları ve hesaplayıcılarında kişisel veri göndermeden arama yapın; acil, resmî, teknik veya ürün niyetinde güvenli sonraki adıma ilerleyin.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta name="theme-color" content="#071631">
+  <link rel="canonical" href="https://alo186.com/arama/">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"ALO186 Teknik Arama","url":"https://alo186.com/arama/","applicationCategory":"UtilitiesApplication","operatingSystem":"Web","isAccessibleForFree":true,"description":"ALO186 teknik rehberleri, hesaplayıcıları ve karar araçlarında tarayıcı içinde çalışan kişisel verisiz arama."},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Arama metni ALO186 sunucusuna gönderilir mi?","acceptedAnswer":{"@type":"Answer","text":"Hayır. Arama, indirilen statik indeks üzerinde tarayıcıda çalışır. Metin analitik olaya, yerel depolamaya veya form sunucusuna gönderilmez."}},{"@type":"Question","name":"Acil elektrik sorununda arama sonucu beklenmeli mi?","acceptedAnswer":{"@type":"Answer","text":"Hayır. Duman, alev, elektrik çarpması veya kopmuş hat varsa güvenli uzaklığa çıkın ve 112'yi arayın. Bölgesel şebeke arızasında 186 veya resmî dağıtım şirketini kullanın."}},{"@type":"Question","name":"Ürün aramasında doğrudan mağazaya gidilir mi?","acceptedAnswer":{"@type":"Answer","text":"Hayır. Ürün niyetinde önce ilgili ücretsiz uygunluk testi veya güvenlik kontrolü gösterilir. Affiliate bağlantısı varsa niteliği ürün rotasından önce açıkça belirtilir."}}]}]}</script>
+<link rel="stylesheet" href="/assets/alo186-accessibility-v215.css" data-alo186-accessibility-v215="true">
+</head>
+<body>
+  <a class="skip-link" href="#searchInput">Aramaya geç</a>
+  <header class="site-header"><div class="shell header-inner"><a class="brand" href="https://alo186.com"><span>186</span><div><strong>ALO186</strong><small>Bağımsız elektrik bilgi ağı</small></div></a><nav aria-label="Üst menü"><a href="/karar-motoru">Karar motoru</a><a href="/hesaplama/">Hesaplayıcılar</a><a href="/elektrik-portali">Portal</a></nav></div></header>
+
+  <main class="shell">
+    <section class="hero">
+      <span class="eyebrow">Tarayıcı içi arama · ham sorgu gönderilmez</span>
+      <h1>Elektrik sorununu yazın; <em>doğru rehber veya aracı bulun.</em></h1>
+      <p>ALO186’in teknik rehberleri, hesaplayıcıları, karar araçları ve işletme modülleri tek indekste aranır. Sonuçlar fiyat, stok, puan veya garantiye göre değil; kullanıcı niyeti ve teknik uygunluğa göre sıralanır.</p>
+      <div class="privacy"><strong>Gizlilik:</strong> Ad, telefon, adres veya abonelik yazmayın. Arama metni sunucuya, analitiğe veya yerel depolamaya gönderilmez; yalnız bu sayfanın açık olduğu tarayıcıda işlenir.</div>
+    </section>
+
+    <section class="search-panel" aria-labelledby="searchTitle">
+      <div><span class="eyebrow">Teknik içerik bulucu</span><h2 id="searchTitle">Ne çözmeye çalışıyorsunuz?</h2></div>
+      <label for="searchInput">Sorun, cihaz veya işlem</label>
+      <input id="searchInput" type="search" inputmode="search" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="120" placeholder="Örnek: UPS sürekli ötüyor, EV kablosu ısınıyor, EDAŞ ölçüm talebi">
+      <div class="controls">
+        <label for="typeFilter">İçerik türü</label>
+        <select id="typeFilter">
+          <option value="all">Tümü</option>
+          <option value="article">Teknik rehber</option>
+          <option value="tool">Karar ve uygunluk aracı</option>
+          <option value="calculator">Hesaplayıcı</option>
+          <option value="business">İşletme ve mühendislik</option>
+        </select>
+        <button id="clearButton" type="button">Temizle</button>
+      </div>
+      <div class="quick" aria-label="Sık aranan konular">
+        <button type="button" data-query="elektrik kesintisi">Elektrik kesintisi</button>
+        <button type="button" data-query="UPS süre akü">UPS ve akü</button>
+        <button type="button" data-query="jeneratör çalışmıyor">Jeneratör</button>
+        <button type="button" data-query="kaçak akım rölesi">Kaçak akım</button>
+        <button type="button" data-query="GES inverter hata">GES inverter</button>
+        <button type="button" data-query="EV şarj wallbox">EV şarj</button>
+      </div>
+    </section>
+
+    <section id="emergencyCard" class="intent-card emergency hidden" aria-live="polite">
+      <strong>Acil güvenlik niyeti algılandı</strong>
+      <p>Duman, alev, elektrik çarpması, kopmuş hat veya yoğun kıvılcım varsa arama sonucunu uygulamak yerine güvenli uzaklığa çıkın ve 112’yi arayın.</p>
+      <div class="actions"><a href="tel:112">112’yi ara</a><a class="secondary" href="/karar-motoru">Güvenli kanal ayrımını aç</a></div>
+    </section>
+
+    <section id="officialCard" class="intent-card official hidden" aria-live="polite">
+      <strong>Resmî şebeke veya EDAŞ niyeti</strong>
+      <p>ALO186 arıza ya da şikâyet kaydı almaz. Kesinti, sayaç, faz kaybı ve şebeke gerilimi için bölgenizdeki resmî dağıtım kanalını bulun.</p>
+      <div class="actions"><a href="/edas-bul">EDAŞ Bulucu</a><a class="secondary" href="/hesaplama/kesinti-gunlugu/">Kesinti günlüğü</a></div>
+    </section>
+
+    <section class="results-section" aria-labelledby="resultsTitle">
+      <div class="results-heading"><div><span class="eyebrow">Sonuçlar</span><h2 id="resultsTitle">Güvenli sonraki adımlar</h2></div><p id="resultStatus" role="status" aria-live="polite">Arama indeksi yükleniyor…</p></div>
+      <div id="results" class="results"></div>
+      <div id="emptyState" class="empty hidden"><strong>Uygun sonuç bulunamadı</strong><p>Daha kısa teknik terimler deneyin veya 112/186/elektrikçi ayrımı için Karar Motoru’nu kullanın.</p><a href="/karar-motoru">Karar Motoru’nu aç →</a></div>
+    </section>
+
+    <section class="principles">
+      <article><strong>Güvenlik önce</strong><p>Acil sözcüklerde ticari sonuçlar öne çıkarılmaz.</p></article>
+      <article><strong>Önce teknik araç</strong><p>Ürün niyetinde doğrudan mağaza yerine uygunluk testi gösterilir.</p></article>
+      <article><strong>Ham sorgu yok</strong><p>Arama metni analitik olaya veya depolamaya yazılmaz.</p></article>
+    </section>
+  </main>
+
+  <footer><div class="shell"><strong>ALO186</strong><p>Bağımsız bilgilendirme platformudur; EDAŞ, kamu kurumu veya ürün satıcısı değildir.</p></div></footer>
+  <noscript><div class="noscript">Teknik arama JavaScript gerektirir. Can güvenliği riskinde 112; şebeke arızasında 186 veya resmî EDAŞ kanalını kullanın.</div></noscript>
+  <script src="./core.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>

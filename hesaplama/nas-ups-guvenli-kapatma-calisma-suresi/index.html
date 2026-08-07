@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>NAS UPS Çalışma Süresi ve Güvenli Kapatma Hesabı | ALO186</title>
+<meta name="description" content="NAS, diskler, switch ve router için W–Wh tabanlı UPS süresini hesaplayın; USB/SNMP bildirimi, güvenli kapatma ve yeniden başlatma zincirini doğrulayın.">
+<meta name="robots" content="index,follow,max-image-preview:large"><meta name="theme-color" content="#071631">
+<link rel="canonical" href="https://alo186.com/hesaplama/nas-ups-guvenli-kapatma-calisma-suresi/">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"NAS UPS Çalışma Süresi ve Güvenli Kapatma Hesabı","url":"https://alo186.com/hesaplama/nas-ups-guvenli-kapatma-calisma-suresi/","applicationCategory":"UtilitiesApplication","operatingSystem":"Web","description":"NAS, disk, switch ve router yükleri için W–Wh tabanlı UPS süre ve güvenli kapatma ön hesabı.","isPartOf":{"@type":"WebSite","name":"ALO186","url":"https://alo186.com"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"NAS için UPS yalnız enerji vermek için mi kullanılır?","acceptedAnswer":{"@type":"Answer","text":"Hayır. Kritik amaç, elektrik kesintisini NAS'a USB, SNMP veya desteklenen ağ yöntemiyle bildirip hizmetleri durdurması, birimleri ayırması ve güvenli kapanması için yeterli süre sağlamaktır."}},{"@type":"Question","name":"VA değeri NAS çalışma süresini gösterir mi?","acceptedAnswer":{"@type":"Answer","text":"Hayır. Süre; gerçek watt yükü, UPS'in modele özgü batarya ve yük-eğrisi, batarya yaşı, sıcaklık ve kapatma eşiğine bağlıdır."}},{"@type":"Question","name":"Mevcut UPS güvenli kapatma provasını geçiyorsa yenisi gerekir mi?","acceptedAnswer":{"@type":"Answer","text":"Hayır. Tam model uyumluluğu, iletişim ve gerçek kesinti provası hedefi karşılıyorsa yeni ürün alınmamalıdır."}}]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ALO186","item":"https://alo186.com/"},{"@type":"ListItem","position":2,"name":"Hesaplama","item":"https://alo186.com/hesaplama/"},{"@type":"ListItem","position":3,"name":"NAS UPS güvenli kapatma süresi"}]}]}</script>
+<style>:root{--n:#071631;--i:#17213a;--m:#5c687d;--l:#d9e2ef;--s:#f4f7fb;--b:#185fc7;--w:#fff8e7;--d:#fff0f0;--g:#eaf8f0}*{box-sizing:border-box}body{margin:0;font:16px/1.62 system-ui,-apple-system,Segoe UI,sans-serif;color:var(--i)}a{color:var(--b)}header{background:var(--n);color:#fff}.bar,main{max-width:1120px;margin:auto}.bar{padding:14px 20px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}.bar a{color:#fff}.brand{font-weight:900;text-decoration:none}main{padding:28px 20px 72px}.notice,.panel,.result,.source{border:1px solid var(--l);border-radius:18px;padding:20px;margin:18px 0}.notice{background:var(--w)}.hero h1{font-size:clamp(2rem,5vw,3.1rem);line-height:1.08;margin:.2em 0}.eyebrow{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;font-weight:900;color:var(--b)}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.field{display:flex;flex-direction:column;gap:6px}.field input,.field select{border:1px solid var(--l);border-radius:11px;padding:12px;font:inherit}.check{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--l);border-radius:12px;padding:11px;margin:9px 0}.check input{margin-top:5px}.danger{background:var(--d);border-color:#e2a4a4}.actions{display:flex;gap:10px;flex-wrap:wrap}button,.cta{border:0;border-radius:12px;padding:13px 18px;background:var(--b);color:#fff;font-weight:850;text-decoration:none;cursor:pointer;display:inline-block}.result{background:var(--s)}.result.ok{background:var(--g)}.result.stop{background:var(--d)}.result.warn{background:var(--w)}.metrics,.sources{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.metric,.source{margin:0;background:#fff}.metric strong{display:block;font-size:1.5rem}.fine{color:var(--m);font-size:.92rem}footer{background:var(--s);padding:24px;text-align:center;color:var(--m)}@media(max-width:850px){.grid,.metrics,.sources{grid-template-columns:1fr}.bar nav{width:100%}}</style><link rel="stylesheet" href="/assets/alo186-accessibility-v215.css" data-alo186-accessibility-v215="true">
+</head><body>
+<header><div class="bar"><a class="brand" href="/">ALO186</a><nav><a href="/amazon-elektrik-urunleri/nas-ups-usb-snmp-uygunluk-secici/">Uygunluk seçici</a> · <a href="/sektor-rehberi/nas-elektrik-kesintisi-30-90-gun-test-merkezi/">Test merkezi</a></nav></div></header>
+<main>
+<section class="notice"><strong>Bağımsızlık ve veri güvenliği sınırı:</strong> ALO186 resmî kurum, EDAŞ, veri kurtarma şirketi, NAS/UPS üreticisi, servis sağlayıcısı veya satıcı değildir. Bu araç veri kaybını, dosya sistemi bütünlüğünü, UPS uyumluluğunu veya kesintisiz çalışma süresini garanti etmez. Yanık kokusu, duman, ıslak priz, şişmiş batarya ya da elektrik çarpması riski varsa sistemi kullanmayın; güvenli alana geçin ve gerekirse 112'yi arayın.</section>
+<section class="hero"><span class="eyebrow">Önce güvenli kapatma zinciri · sonra süre</span><h1>NAS için UPS süresini yalnız “kaç saat çalışır?” diye değil, güvenli kapanmaya kadar hesaplayın.</h1><p>NAS kasası, diskler, switch, router/ONT ve UPS'in kendi dönüşüm kaybı toplam yükü belirler. USB veya SNMP bildirimi çalışmıyorsa uzun batarya süresi tek başına veri bütünlüğü sağlamaz.</p></section>
+<section class="panel"><h2>1. Yük ve güvenli kapatma hesabı</h2><div class="grid">
+<label class="field"><span>NAS ve disklerin gerçek/belgeli gücü (W)</span><input id="nasW" type="number" min="1" step="0.1" value="45"></label>
+<label class="field"><span>Aynı UPS'teki switch + router/ONT yükü (W)</span><input id="networkW" type="number" min="0" step="0.1" value="15"></label>
+<label class="field"><span>Diğer zorunlu yükler (W)</span><input id="otherW" type="number" min="0" step="0.1" value="0"></label>
+<label class="field"><span>UPS'in kullanılabilir enerji kapasitesi (Wh)</span><input id="batteryWh" type="number" min="1" step="0.1" value="216"></label>
+<label class="field"><span>Dönüşüm verimi (%)</span><input id="eff" type="number" min="40" max="100" step="1" value="80"></label>
+<label class="field"><span>Batarya yaşlanma/güvenlik rezervi (%)</span><input id="reserve" type="number" min="0" max="70" step="1" value="30"></label>
+<label class="field"><span>Kesintiden sonra kapanma komutu süresi (dakika)</span><input id="shutdownDelay" type="number" min="1" step="1" value="10"></label>
+<label class="field"><span>Kapanma işlemi ve ağ bildirimi rezervi (dakika)</span><input id="shutdownReserve" type="number" min="1" step="1" value="10"></label>
+<label class="field"><span>UPS sürekli çıkış sınırı (W)</span><input id="upsW" type="number" min="1" step="1" value="360"></label>
+<label class="field"><span>Güç verisinin kaynağı</span><select id="loadBasis"><option value="measured">Güvenli gerçek ölçüm</option><option value="documented">Tam model üretici belgesi</option><option value="unknown">Tahmin / doğrulanmamış</option></select></label>
+<label class="field"><span>Kesinti bildirimi</span><select id="signal"><option value="usb">NAS'ın desteklediği USB UPS bağlantısı</option><option value="snmp">Aynı UPS'te tutulan ağ üzerinden SNMP/UPS sunucusu</option><option value="none">Yok veya doğrulanmadı</option></select></label>
+<label class="field"><span>Disk faaliyeti</span><select id="diskState"><option value="included">Yoğun disk yükü W değerine dâhil</option><option value="idle">Yalnız boşta tüketim biliniyor</option><option value="unknown">Belirsiz</option></select></label>
+</div>
+<label class="check"><input id="modelVerified" type="checkbox"><span>NAS'ın tam modeli/işletim sistemi sürümü ile UPS'in USB, SNMP veya ağ UPS yöntemi güncel uyumluluk belgesinden doğrulandı.</span></label>
+<label class="check"><input id="networkBacked" type="checkbox"><span>Ağ üzerinden kapanma bildirimi kullanılıyorsa gerekli switch/router da aynı UPS'te ve bağlantı kesinti boyunca ayakta kalıyor.</span></label>
+<label class="check"><input id="existing" type="checkbox"><span>Mevcut düzen güvenli gerçek provada bildirimi aldı, hizmetleri durdurdu, birimleri ayırdı ve hedef eşikten önce güvenli kapandı.</span></label>
+<label class="check danger"><input id="hazard" type="checkbox"><span>Islak priz/kablo, yanık kokusu, şişmiş/sızdıran batarya, aşırı ısınma, hasarlı kasa veya elektrik çarpması şüphesi var.</span></label>
+<div class="actions"><button id="calculate" type="button">Süreyi ve güvenli sonraki adımı hesapla</button></div></section>
+<section id="result" class="result" hidden aria-live="polite"></section>
+<section class="panel"><h2>Hesaplama yöntemi ve sınırlar</h2><p><code>tahmini süre = Wh × verim × (1 − rezerv) ÷ toplam gerçek W</code></p><p><code>güvenli kapatma penceresi = kapanma komutu gecikmesi + kapanma/ağ rezervi</code></p><p class="fine">Bu doğrusal ön hesap gerçek UPS yük-eğrisinin yerine geçmez. Üreticinin tam model runtime tablosu, batarya yaşı, sıcaklık, disk kalkış/yoğunluk yükü, UPS boşta tüketimi ve düşük batarya eşiği sonucu değiştirir. Kapatma eşiğini, UPS'in düşük batarya sınırına çok yakın ayarlamayın.</p></section>
+<section class="panel"><h2>Güvenli kullanıcı yolculuğu</h2><ol><li>NAS, diskler ve bildirim için gerekli ağ cihazlarının gerçek yükünü çıkarın.</li><li>UPS'in hem W hem VA sınırını ve modele özgü yük–süre tablosunu kontrol edin.</li><li>USB/SNMP/ağ UPS uyumluluğunu NAS'ın güncel destek sayfasından doğrulayın.</li><li>İlk provayı bakım penceresinde, güncel yedek ve dosya sistemi kontrol planıyla yapın.</li><li>Kesinti sonrası dosya sistemi, depolama havuzu, SMART uyarıları ve yeniden başlatma davranışını doğrulayın.</li></ol><p><a href="/hesaplama/ups-suresi/">Genel UPS süresi</a> · <a href="/haberler/ups-mi-tasinabilir-guc-istasyonu-mu">UPS–güç istasyonu farkı</a> · <a href="/sektor-rehberi/planli-elektrik-kesintisi-sorgulama">Planlı kesinti doğrulama</a></p></section>
+<section class="panel"><h2>Doğrulanan birincil kaynaklar</h2><div class="sources"><article class="source"><a href="https://kb.synology.com/en-global/DSM/help/DSM/AdminCenter/system_hardware_ups" rel="noopener">Synology — DSM UPS desteği</a><p>UPS'in NAS'a veri kaybını azaltacak güvenli mod/standby süresi vermesi; USB, SNMP ve ağ UPS yöntemlerinde gerekli ağ cihazlarının da yedeklenmesi gerektiğini açıklar.</p></article><article class="source"><a href="https://www.qnap.com/en-uk/how-to/faq/article/how-to-avoid-sudden-shutdown-from-power-outage" rel="noopener">QNAP — Ani kapanmayı önleme</a><p>Uyumlu UPS, otomatik kapanma/koruma modu ve beklenmeyen kapanma sonrası dosya sistemi kontrolü yaklaşımını açıklar.</p></article><article class="source"><a href="https://www.apc.com/us/en/support/product-support/ups-buying-guide-for-selecting-a-battery-backup-system.jsp" rel="noopener">APC — UPS seçimi</a><p>W ve VA sınırlarının ayrı doğrulanmasını, kritik olmayan yüklerin batarya çıkışına eklenmemesini ve yük arttıkça sürenin azalmasını belirtir.</p></article></div><p class="fine">Kaynak kontrolü: 2 Ağustos 2026. Tam NAS işletim sistemi sürümü, UPS uyumluluk listesi ve üreticinin modele özgü runtime belgesi önceliklidir.</p></section>
+<section class="panel"><h2>Sonraki adım</h2><p><a class="cta" href="/amazon-elektrik-urunleri/nas-ups-usb-snmp-uygunluk-secici/">Yalnız gerçek kapasite veya iletişim açığı varsa ürün sınıfını değerlendir</a></p><p class="fine">Mevcut güvenli düzen hedefi karşılıyorsa yeni ürün almayın. ALO186 bağlantı üzerinden gelir elde edebilir; fiyat, stok, puan ve garanti yalnız mağazanın güncel sayfasında doğrulanır.</p></section>
+</main><footer>ALO186 bağımsız bilgilendirme platformudur; EDAŞ veya kamu kurumu değildir.</footer>
+<script>
+const $ = id => document.getElementById(id);
+const numericIds = ['nasW', 'networkW', 'otherW', 'batteryWh', 'eff', 'reserve', 'shutdownDelay', 'shutdownReserve', 'upsW'];
+function eventPush(name, detail = {}) {
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({event: name, ...detail});
+}
+function readBoundedInput(id) {
+  const input = $(id);
+  const raw = input.value.trim();
+  const value = raw === '' ? NaN : Number(raw);
+  const min = input.min === '' ? -Infinity : Number(input.min);
+  const max = input.max === '' ? Infinity : Number(input.max);
+  const valid = Number.isFinite(value) && value >= min && value <= max;
+  input.setAttribute('aria-invalid', valid ? 'false' : 'true');
+  return valid ? value : null;
+}
+$('calculate').addEventListener('click', () => {
+  const nums = numericIds.map(readBoundedInput);
+  const r = $('result');
+  r.hidden = false;
+  r.className = 'result';
+  if (nums.some(value => value === null)) {
+    r.classList.add('stop');
+    r.innerHTML = '<h2>Geçersiz veya sınır dışı değer</h2><p>Alanları gösterilen alt ve üst sınırlar içinde düzeltmeden hesaplamaya devam etmeyin.</p>';
+    return;
+  }
+  const [nasW, networkW, otherW, wh, eff, reserve, delay, closeReserve, upsW] = nums;
+  const total = nasW + networkW + otherW;
+  const hours = wh * (eff / 100) * (1 - reserve / 100) / Math.max(total, .1);
+  const minutes = hours * 60;
+  const need = delay + closeReserve;
+  eventPush('nas_runtime_calculated', {load_w: Math.round(total), runtime_min: Math.round(minutes)});
+  if ($('hazard').checked) {
+    r.classList.add('stop');
+    r.innerHTML = '<h2>Ticari yol kapalıdır</h2><p>Hasarlı, ıslak veya aşırı ısınan ekipmanı kullanmayın. Enerjiyi güvenli biçimde kestirin ve yetkin teknik destek alın; can güvenliği riski varsa 112.</p>';
+    return;
+  }
+  if ($('existing').checked && $('modelVerified').checked) {
+    r.classList.add('ok');
+    r.innerHTML = '<h2>Mevcut düzen hedefi karşılıyor — yeni ürün almayın.</h2><p>Prova kaydını saklayın; batarya yaşı, disk sayısı, ağ topolojisi veya NAS yazılımı değiştiğinde yeniden test edin.</p>';
+    return;
+  }
+  if (total > upsW) {
+    r.classList.add('stop');
+    r.innerHTML = '<h2>UPS sürekli W sınırı aşılıyor</h2><p>Yük bağlamayın. W ve VA sınırlarını tam model belgesinden yeniden doğrulayın; kritik olmayan yükleri ayırın.</p>';
+    return;
+  }
+  if ($('loadBasis').value === 'unknown' || $('signal').value === 'none' || !$('modelVerified').checked || ($('signal').value === 'snmp' && !$('networkBacked').checked)) {
+    r.classList.add('warn');
+    r.innerHTML = '<h2>Hesap tamamlanmadan mağaza yoluna geçmeyin</h2><p>Tam model uyumluluğu, gerçek/belgeli W ve kesinti bildirim zinciri doğrulanmadı. Önce NAS ve UPS üretici belgelerini tamamlayın.</p>';
+    return;
+  }
+  if ($('diskState').value !== 'included') {
+    r.classList.add('warn');
+    r.innerHTML = '<h2>Yoğun disk yükü eksik olabilir</h2><p>Boşta tüketim yerine yedekleme, RAID yeniden oluşturma veya yoğun disk erişimi senaryosunu ölçmeden süreye güvenmeyin.</p>';
+    return;
+  }
+  const ok = minutes >= need;
+  r.classList.add(ok ? 'ok' : 'warn');
+  r.innerHTML = `<h2>${ok ? 'Güvenli kapatma penceresi teorik olarak karşılanıyor' : 'Kapatma penceresi yetersiz görünüyor'}</h2><div class="metrics"><div class="metric"><span>Toplam yük</span><strong>${total.toFixed(1)} W</strong></div><div class="metric"><span>Tahmini süre</span><strong>${Math.floor(hours)} sa ${Math.round(minutes % 60)} dk</strong></div><div class="metric"><span>Gerekli pencere</span><strong>${need.toFixed(0)} dk</strong></div></div><p>${ok ? 'Şimdi güvenli bakım penceresinde gerçek kesinti provası yapın; sonucu garanti saymayın.' : 'Kapatma eşiğini düşürmek yerine gerçek yükü azaltın veya modele özgü daha yeterli çözümü doğrulayın.'}</p>`;
+});
+</script></body></html>

@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Akvaryum Kesinti Yedek Güç, Oksijen ve Isıtıcı Hesabı | ALO186</title>
+  <meta name="description" content="Akvaryum hava motoru, filtre, dönüş pompası ve ısıtıcının kesintide kaç W ve Wh yedek güç istediğini hesaplayın; pilli hava motoru, power station veya satın almama sonucunu görün.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta name="theme-color" content="#071631">
+  <link rel="canonical" href="https://alo186.com/hesaplama/akvaryum-kesinti-yedek-guc-uygunluk/">
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@graph":[
+      {
+        "@type":"WebApplication",
+        "@id":"https://alo186.com/hesaplama/akvaryum-kesinti-yedek-guc-uygunluk/#app",
+        "name":"Akvaryum Kesinti Yedek Güç ve Oksijen Uygunluk Testi",
+        "url":"https://alo186.com/hesaplama/akvaryum-kesinti-yedek-guc-uygunluk/",
+        "applicationCategory":"UtilitiesApplication",
+        "operatingSystem":"Web",
+        "isAccessibleForFree":true,
+        "description":"Hava motoru, filtre, sirkülasyon, ısıtıcı ve hedef kesinti süresine göre kritik W, nominal Wh ve güvenli yedek güç sınıfını hesaplayan kişisel verisiz araç."
+      },
+      {
+        "@type":"DefinedTermSet",
+        "name":"Akvaryum kesinti sürekliliği terimleri",
+        "hasDefinedTerm":[
+          {"@type":"DefinedTerm","name":"Yaşam destek yükü","description":"Hava, filtre, sirkülasyon ve gerekli ortalama ısıtma gücünün toplamı."},
+          {"@type":"DefinedTerm","name":"Nominal Wh","description":"Dönüşüm kaybı ve kullanılabilir enerji payı hesaba katılmış yedek enerji alt sınırı."},
+          {"@type":"DefinedTerm","name":"Damlama halkası","description":"Kabloda ilerleyen suyun fiş veya prize ulaşmasını azaltan aşağı yönlü kablo kıvrımı."},
+          {"@type":"DefinedTerm","name":"Satın almama sonucu","description":"Mevcut kaynak güç, enerji, saf sinüs ve gerçek kesinti testini karşılıyorsa yeni ürün önerilmemesi."}
+        ]
+      },
+      {
+        "@type":"FAQPage",
+        "mainEntity":[
+          {
+            "@type":"Question",
+            "name":"Akvaryum için kaç saatlik yedek güç gerekir?",
+            "acceptedAnswer":{"@type":"Answer","text":"Tek bir evrensel süre yoktur. Tür, stok yoğunluğu, su sıcaklığı, salinite, akış ve filtrasyon gereksinimi değişir. Araç hedef süreyi kullanıcıdan alır ve canlı türüne özel bakım planını ayrıca zorunlu tutar."}
+          },
+          {
+            "@type":"Question",
+            "name":"Akvaryum aydınlatması yedek güç hesabına dahil edilmeli mi?",
+            "acceptedAnswer":{"@type":"Answer","text":"Yaşam destek ön hesabında aydınlatma dışarıda bırakılır; hava, filtre, sirkülasyon ve gerekli ısıtma önceliklendirilir. Tam sistem tüketimi ayrıca gösterilir."}
+          },
+          {
+            "@type":"Question",
+            "name":"Pilli hava motoru yeterli olur mu?",
+            "acceptedAnswer":{"@type":"Answer","text":"Yalnız hava motoru kritikse ve hesaplanan güç ile enerji düşükse pilli veya USB yedek hava motoru öncelikli olabilir. Filtre, dönüş pompası veya ısıtıcı da zorunluysa saf sinüs yedek kaynak gerekir."}
+          },
+          {
+            "@type":"Question",
+            "name":"Mevcut power station yeterliyse yenisi alınmalı mı?",
+            "acceptedAnswer":{"@type":"Answer","text":"Hayır. Mevcut kaynak sürekli W, nominal Wh, saf sinüs ve gerçek kesinti testini karşılıyorsa sonuç satın alma yok olarak kapanır."}
+          },
+          {
+            "@type":"Question",
+            "name":"Islak priz veya kabloda ne yapılmalı?",
+            "acceptedAnswer":{"@type":"Answer","text":"Islak fiş, priz, uzatma veya açık iletkene dokunulmamalıdır. Enerji güvenli biçimde kestirilmeli ve yetkili elektrikçi desteği alınmalıdır; yangın veya elektrik çarpması riski varsa 112 aranmalıdır."}
+          }
+        ]
+      },
+      {
+        "@type":"BreadcrumbList",
+        "itemListElement":[
+          {"@type":"ListItem","position":1,"name":"ALO186","item":"https://alo186.com/"},
+          {"@type":"ListItem","position":2,"name":"Hesaplama Merkezi","item":"https://alo186.com/hesaplama/"},
+          {"@type":"ListItem","position":3,"name":"Akvaryum Yedek Güç Uygunluğu","item":"https://alo186.com/hesaplama/akvaryum-kesinti-yedek-guc-uygunluk/"}
+        ]
+      }
+    ]
+  }
+  </script>
+<link rel="stylesheet" href="/assets/alo186-accessibility-v215.css" data-alo186-accessibility-v215="true">
+</head>
+<body>
+  <a class="skip-link" href="#arac">Araca geç</a>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="https://alo186.com" aria-label="ALO186 ana sayfa">
+        <span class="brand-mark" aria-hidden="true">186</span>
+        <span><strong>ALO186</strong><small>Bağımsız elektrik bilgi ağı</small></span>
+      </a>
+      <nav aria-label="Üst menü">
+        <a href="https://alo186.com/elektrik-kesintisi">Kesinti</a>
+        <a href="https://alo186.com/elektrik-portali">Portal</a>
+        <a href="https://alo186.com/hesaplama/">Hesaplayıcılar</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="trust-banner">
+      <strong>Canlı güvenliği ve elektrik güvenliği birlikte değerlendirilir.</strong>
+      Bu araç veterinerlik tavsiyesi, akvaryum bakım onayı veya sabit elektrik projesi değildir. Tür, stok yoğunluğu, sıcaklık ve su kalitesi gereksinimi uzmana ve üretici talimatına göre doğrulanmalıdır. Islak priz, açık iletken, kıvılcım veya elektrik çarpması riski varsa ürün seçimine devam etmeyin. ALO186 EDAŞ, kamu kurumu, veteriner, üretici veya ürün satıcısı değildir.
+    </section>
+
+    <section class="hero">
+      <div class="hero-copy">
+        <span class="eyebrow">Hava motoru · filtre · sirkülasyon · ısıtıcı · W · Wh</span>
+        <h1>Kesintide akvaryumun <em>yaşam destek yükünü</em> hesaplayın.</h1>
+        <p>Işıkları değil önce oksijen, su hareketi, filtrasyon ve gerekli sıcaklığı koruyun. Pilli hava motoru, küçük power station, daha yüksek kapasiteli kaynak veya satın almama sonucunu teknik kanıtla görün.</p>
+        <div class="chip-row">
+          <span class="chip">Kişisel veri yok</span>
+          <span class="chip">Tarayıcıda hesaplama</span>
+          <span class="chip">Satın almama sonucu</span>
+          <span class="chip">Fiyat ve stok iddiası yok</span>
+        </div>
+      </div>
+      <aside class="hero-card">
+        <span>Hesap zinciri</span>
+        <strong>Kritik W → süre → nominal Wh → güvenlik</strong>
+        <small>Aydınlatma yaşam destek hesabından ayrılır; mevcut kaynak gerçek kesinti testiyle doğrulanır.</small>
+        <a href="#arac">Akvaryum planını hesapla ↓</a>
+      </aside>
+    </section>
+
+    <form id="aquariumForm">
+      <section id="arac" class="layout">
+        <div class="panel">
+          <div class="section-title"><div><span class="step">1</span><h2>Akvaryum ve hedef kesinti</h2></div></div>
+          <div class="preset-grid" aria-label="Hazır örnekler">
+            <button class="preset" type="button" data-preset="nano"><strong>Nano tank</strong><small>Yalnız hava · 8 saat</small></button>
+            <button class="preset" type="button" data-preset="tropical"><strong>Tropikal</strong><small>Filtre + hava + ısıtıcı</small></button>
+            <button class="preset" type="button" data-preset="marine"><strong>Deniz</strong><small>Dönüş + sirkülasyon</small></button>
+            <button class="preset" type="button" data-preset="existing"><strong>Mevcut kaynak</strong><small>Satın almama testi</small></button>
+          </div>
+          <div class="form-grid">
+            <label class="field"><span>Sistem türü</span><select id="tankType"><option value="coldwater">Soğuk su akvaryumu</option><option value="tropical" selected>Tropikal tatlı su</option><option value="marine">Deniz akvaryumu</option><option value="reef">Resif akvaryumu</option><option value="pond">Süs havuzu / koi sistemi</option></select></label>
+            <label class="field"><span>Hacim (litre)</span><input id="volumeL" type="number" min="5" max="5000" step="1" value="120" inputmode="numeric" required></label>
+            <label class="field"><span>Hedef kesinti süresi (saat)</span><input id="outageHours" type="number" min="0.5" max="72" step="0.5" value="8" inputmode="decimal" required></label>
+            <label class="field"><span>Mevcut su sıcaklığı (°C)</span><input id="waterTempC" type="number" min="0" max="40" step="0.1" value="25" inputmode="decimal"><small class="help">Türünüze uygun hedef sıcaklığı uzman kaynağından doğrulayın.</small></label>
+          </div>
+        </div>
+        <aside class="panel side">
+          <span class="step">i</span>
+          <h2>Yaşam destek hesabı</h2>
+          <div class="formula">Nominal Wh = kritik W × saat ÷ 0,85 ÷ 0,80</div>
+          <p class="help">Aydınlatma yaşam destek hesabına katılmaz. Isıtıcı yalnız seçilen ortalama çalışma oranıyla hesaba girer.</p>
+        </aside>
+      </section>
+
+      <section class="panel settings-panel">
+        <div class="section-title"><div><span class="step">2</span><h2>Kritik ekipman etiketleri</h2></div></div>
+        <div class="form-grid three">
+          <label class="field"><span>Filtre (W)</span><input id="filterW" type="number" min="0" max="800" step="0.1" value="18" inputmode="decimal"></label>
+          <label class="field"><span>Hava motoru (W)</span><input id="airPumpW" type="number" min="0" max="150" step="0.1" value="5" inputmode="decimal"></label>
+          <label class="field"><span>Dönüş / sirkülasyon pompası (W)</span><input id="returnPumpW" type="number" min="0" max="1200" step="0.1" value="0" inputmode="decimal"></label>
+          <label class="field"><span>Isıtıcı etiket gücü (W)</span><input id="heaterW" type="number" min="0" max="3000" step="1" value="100" inputmode="numeric"></label>
+          <label class="field"><span>Isıtıcı ortalama çalışma oranı (%)</span><input id="heaterDutyPct" type="number" min="0" max="100" step="1" value="30" inputmode="numeric"><small class="help">Bilmiyorsanız geçici planlama değeri kullanın; gerçek sıcaklık ve termostat çevrimini ölçün.</small></label>
+          <label class="field"><span>Diğer kritik yük (W)</span><input id="otherW" type="number" min="0" max="1000" step="0.1" value="0" inputmode="decimal"></label>
+          <label class="field"><span>Aydınlatma (W)</span><input id="lightingW" type="number" min="0" max="1500" step="0.1" value="35" inputmode="decimal"><small class="help">Yalnız tam sistem karşılaştırmasında gösterilir.</small></label>
+        </div>
+      </section>
+
+      <section class="layout">
+        <div class="panel">
+          <div class="section-title"><div><span class="step">3</span><h2>Güvenlik ve canlı bakım kanıtları</h2></div></div>
+          <div class="safety-grid">
+            <label class="check-item danger"><input id="electricalHazard" type="checkbox"><span><strong>Kıvılcım, yanık kokusu, açık iletken veya çarpılma riski var</strong><small>Bütün ticari yollar kapanır.</small></span></label>
+            <label class="check-item danger"><input id="wetPlugOrCable" type="checkbox"><span><strong>Priz, fiş, uzatma veya bağlantı ıslak</strong><small>Islak ekipmana dokunmayın.</small></span></label>
+            <label class="check-item"><input id="activeOutage" type="checkbox"><span><strong>Kesinti şu anda devam ediyor</strong><small>Ürün teslimatı anlık çözüm sayılmaz.</small></span></label>
+            <label class="check-item"><input id="rcdVerified" type="checkbox" checked><span><strong>Kaçak akım koruması doğrulandı</strong><small>Gerçek test ve tesisat uygunluğu yetkili kişiyle doğrulanmalıdır.</small></span></label>
+            <label class="check-item"><input id="dripLoopVerified" type="checkbox" checked><span><strong>Kablolarda damlama halkası ve kuru bağlantı var</strong><small>Priz su seviyesinin altında veya yerde değil.</small></span></label>
+            <label class="check-item"><input id="speciesPlanVerified" type="checkbox" checked><span><strong>Tür ve stok yoğunluğuna özel acil bakım planı var</strong><small>Evrensel yaşam süresi varsayılmıyor.</small></span></label>
+            <label class="check-item"><input id="thermometerAvailable" type="checkbox" checked><span><strong>Çalışan termometre var</strong><small>Sıcaklık değişimi izlenebiliyor.</small></span></label>
+            <label class="check-item"><input id="fixedInstallation" type="checkbox"><span><strong>Sabit tesisat veya pano bağlantısı gerekiyor</strong><small>Profesyonel tasarım gerekir.</small></span></label>
+            <label class="check-item"><input id="commercialSystem" type="checkbox"><span><strong>Ticari üretim / satış sistemi</strong><small>Alarm ve N+1 süreklilik planı gerekir.</small></span></label>
+            <label class="check-item"><input id="centralSump" type="checkbox"><span><strong>Merkezi sump veya birden çok tank bağlı</strong><small>Tek cihaz hesabı yeterli değildir.</small></span></label>
+            <label class="check-item"><input id="highValueLivestock" type="checkbox"><span><strong>Yüksek değerli veya çok hassas canlı yükü</strong><small>Uzman süreklilik planı gerekir.</small></span></label>
+          </div>
+        </div>
+        <aside class="panel side source-card">
+          <span class="step">↗</span>
+          <h2>Kaynak sınırı</h2>
+          <p>Balıkların oksijen ihtiyacı tür, boy, yemleme, sıcaklık, CO₂ ve saliniteye göre değişir. Yüksek sıcaklıkta ek havalandırma gerekebilir; sıcaklık ve su kalitesi kararlı tutulmalıdır.</p>
+          <a href="https://www.gov.uk/government/publications/care-and-accommodation-of-animals-in-science-advisory-standards/advisory-standards-for-the-care-and-accommodation-of-animals-bred-supplied-or-used-for-scientific-purposes-accessible" target="_blank" rel="noopener">GOV.UK balık bakım standartları ↗</a>
+          <a href="https://www.gov.uk/government/publications/animal-activities-licensing-guidance-for-local-authorities/selling-animals-as-pets-licensing-statutory-guidance-for-local-authorities--2" target="_blank" rel="noopener">GOV.UK su kalitesi ve sıcaklık rehberi ↗</a>
+        </aside>
+      </section>
+
+      <section class="panel settings-panel">
+        <div class="section-title"><div><span class="step">4</span><h2>Mevcut yedek kaynak</h2></div></div>
+        <div class="safety-grid">
+          <label class="check-item"><input id="hasExistingSource" type="checkbox"><span><strong>Mevcut UPS / power station / bataryalı hava motoru var</strong><small>Yeni ürün yerine mevcut kaynağın yeterliliği test edilir.</small></span></label>
+          <label class="check-item"><input id="existingPureSine" type="checkbox"><span><strong>AC çıkış saf sinüs</strong><small>AC motorlu ekipman için tam ürün belgesinden doğrulanır.</small></span></label>
+          <label class="check-item"><input id="realOutageTestPassed" type="checkbox"><span><strong>Gerçek kesinti testi başarılı</strong><small>Hava, filtre, pompa ve ısıtıcı beklenen biçimde çalıştı.</small></span></label>
+        </div>
+        <div class="form-grid">
+          <label class="field"><span>Mevcut sürekli çıkış (W)</span><input id="existingContinuousW" type="number" min="0" max="10000" step="1" value="0" inputmode="numeric"></label>
+          <label class="field"><span>Mevcut nominal enerji (Wh)</span><input id="existingWh" type="number" min="0" max="50000" step="1" value="0" inputmode="numeric"></label>
+        </div>
+      </section>
+
+      <div class="actions">
+        <button class="primary" type="submit">Yedek güç uygunluğunu hesapla</button>
+        <button type="reset">Formu temizle</button>
+      </div>
+      <p id="validation" class="validation" role="alert" tabindex="-1"></p>
+    </form>
+
+    <section id="result" class="result" tabindex="-1" aria-live="polite" hidden>
+      <span id="state" class="state"></span>
+      <h2 id="resultTitle"></h2>
+      <p id="resultSummary"></p>
+      <div class="metric-grid">
+        <article><span>Kritik yaşam destek yükü</span><strong id="lifeSupportValue">—</strong></article>
+        <article><span>Önerilen sürekli çıkış</span><strong id="continuousValue">—</strong></article>
+        <article><span>Gerekli nominal enerji</span><strong id="energyValue">—</strong></article>
+        <article><span>Tam sistem</span><strong id="fullValue">—</strong></article>
+        <article><span>Isıtıcı ortalaması</span><strong id="heaterValue">—</strong></article>
+        <article><span>Mevcut kaynak açığı</span><strong id="gapValue">—</strong></article>
+      </div>
+      <details><summary>Varsayımlar ve sınırlar</summary><ul id="assumptions"></ul></details>
+      <div class="export-row">
+        <button id="jsonBtn" type="button">JSON teknik fişi indir</button>
+        <button id="icsBtn" type="button">90 günlük yeniden test takvimi</button>
+        <button type="button" onclick="window.print()">Yazdır / PDF</button>
+      </div>
+    </section>
+
+    <section id="commerce" class="commerce" hidden>
+      <span class="eyebrow">Koşullu ve şeffaf ürün yolu</span>
+      <h2 id="productClass"></h2>
+      <p id="productReason"></p>
+      <div class="affiliate-disclosure"><strong>Amazon satış ortaklığı bağlantısı:</strong> Bağlantı nitelikli satın alımlardan komisyon oluşturabilir; kullanıcıya ek maliyet yansımaz. Amazon sonucu teknik onay değildir. Fiyat, stok, puan, satıcı, teslimat ve garanti mağazada yeniden doğrulanır.</div>
+      <div class="gate-list">
+        <label class="check-item"><input id="actualNeed" class="commerce-gate" type="checkbox"><span><strong>Gerçek ihtiyaç doğrulandı</strong><small>Mevcut kaynak kritik W ve Wh ihtiyacını karşılamıyor.</small></span></label>
+        <label class="check-item"><input id="technicalCheck" class="commerce-gate" type="checkbox"><span><strong>Teknik değerleri yeniden kontrol edeceğim</strong><small>Sürekli W, Wh, saf sinüs, priz güvenliği ve gerçek kesinti testi tam ürün belgesinde doğrulanacak.</small></span></label>
+        <label class="check-item"><input id="affiliateCheck" class="commerce-gate" type="checkbox"><span><strong>Satış ortaklığı ilişkisini anladım</strong><small>ALO186 ürün satıcısı veya üretici değildir.</small></span></label>
+      </div>
+      <a id="affiliateLink" class="affiliate-link" rel="sponsored nofollow noopener" target="_blank" aria-disabled="true" tabindex="-1">Amazon’da teknik sınıfı ara ↗</a>
+    </section>
+
+    <section class="content-section">
+      <div class="panel content-panel">
+        <span class="eyebrow">Öncelik sırası</span>
+        <h2>Önce hava ve su hareketi; sonra sıcaklık, en son aydınlatma</h2>
+        <p>Kesintide bütün cihazları aynı anda çalıştırmak yerine türünüze özel yaşam destek yükünü ayırın. Hava motoru ve sirkülasyon gaz değişimini; filtre ve sump su kalitesini; ısıtıcı sıcaklık kararlılığını etkiler. Aydınlatma çoğu acil kesinti ön hesabında ertelenebilir, ancak resif ve özel türler için uzman planı gerekir.</p>
+        <p>Aktif kesintide ürün teslimatı anlık çözüm değildir. Elinizdeki pilli hava motorunu veya doğrulanmış yedek kaynağı kullanın; sıcaklığı, balık davranışını ve su kalitesini izleyin. Yemleme ve bakım adımlarını tür uzmanının acil planına göre yönetin.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div><strong>ALO186</strong><p>Bağımsız bilgilendirme platformudur; EDAŞ, veteriner veya kamu kurumu değildir.</p></div>
+      <div class="footer-links"><a href="https://alo186.com/yayin-ilkeleri">Yayın ilkeleri</a><a href="https://alo186.com/gizlilik">Gizlilik</a><a href="https://alo186.com/hesaplama/">Hesaplama Merkezi</a></div>
+    </div>
+  </footer>
+  <noscript><div class="noscript">Bu hesaplama aracı JavaScript gerektirir.</div></noscript>
+  <script src="./app.js"></script>
+</body>
+</html>

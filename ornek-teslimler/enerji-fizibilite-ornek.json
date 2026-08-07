@@ -1,0 +1,36 @@
+{
+  "schema": "alo186.sample-deliverable.v1",
+  "sampleType": "solar-storage-ev-feasibility",
+  "fictional": true,
+  "customerClaim": false,
+  "facility": "Örnek Karma Tesis — kurgusal",
+  "dataQuality": {
+    "twelveMonthBills": "available",
+    "hourlyLoadProfile": "missing",
+    "evParkingBehavior": "missing",
+    "singleLineDiagram": "partial"
+  },
+  "scenarios": [
+    {
+      "name": "Mevcut sistemi sürdür",
+      "action": "Ölçüm dönemi başlatılır; yeni yatırım kararı ertelenir."
+    },
+    {
+      "name": "Etaplı entegrasyon",
+      "action": "Önce dinamik EV yük yönetimi ve ölçüm; sonra GES/batarya kararı."
+    },
+    {
+      "name": "Bütünleşik yatırım",
+      "action": "Saatlik profil, batarya reserve ve şebeke kabul şartı doğrulanırsa uygulanır."
+    }
+  ],
+  "decisionGate": "Saatlik yük, araç park süresi, kritik kWh ve inverter/MPPT sınırı doğrulanmadan nihai kapasite seçimi yapılmaz.",
+  "excludedClaims": [
+    "sabit yatırım getirisi",
+    "garanti tasarruf",
+    "doğrulanmamış VPP geliri",
+    "güncel olmayan tarife",
+    "ürün veya marka sıralaması"
+  ],
+  "disclaimer": "Bu dosya tamamen kurgusaldır; yatırım tavsiyesi, gelir garantisi, EDAŞ bağlantı görüşü veya resmî kabul belgesi değildir."
+}

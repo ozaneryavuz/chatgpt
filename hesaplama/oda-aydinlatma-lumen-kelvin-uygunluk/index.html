@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Oda Aydınlatma Lümen, Kelvin ve LED Ampul Hesabı | ALO186</title>
+  <meta name="description" content="Oda alanı, kullanım amacı, yüzey rengi, mevcut lümen, duy tipi, dimmer ve ortam koşullarına göre yaklaşık lux, toplam lümen, Kelvin, CRI ve güvenli LED ürün sınıfını değerlendirin.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="https://alo186.com/hesaplama/oda-aydinlatma-lumen-kelvin-uygunluk/">
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@graph":[
+      {
+        "@type":"WebApplication",
+        "@id":"https://alo186.com/hesaplama/oda-aydinlatma-lumen-kelvin-uygunluk/#app",
+        "name":"Oda Aydınlatma Lümen, Kelvin ve LED Ampul Uygunluk Aracı",
+        "url":"https://alo186.com/hesaplama/oda-aydinlatma-lumen-kelvin-uygunluk/",
+        "applicationCategory":"UtilitiesApplication",
+        "operatingSystem":"Web",
+        "isAccessibleForFree":true,
+        "description":"Alan, kullanım, yüzey yansıtması, mevcut ışık, duy, dimmer ve ortam koşullarına göre yaklaşık lux, lümen, Kelvin, CRI ve güvenli ürün yolunu hesaplayan kişisel verisiz araç."
+      },
+      {
+        "@type":"BreadcrumbList",
+        "itemListElement":[
+          {"@type":"ListItem","position":1,"name":"ALO186","item":"https://alo186.com/"},
+          {"@type":"ListItem","position":2,"name":"Hesaplama Merkezi","item":"https://alo186.com/hesaplama/"},
+          {"@type":"ListItem","position":3,"name":"Oda Aydınlatma Uygunluğu","item":"https://alo186.com/hesaplama/oda-aydinlatma-lumen-kelvin-uygunluk/"}
+        ]
+      },
+      {
+        "@type":"FAQPage",
+        "mainEntity":[
+          {
+            "@type":"Question",
+            "name":"Bir oda için kaç lümen gerekir?",
+            "acceptedAnswer":{"@type":"Answer","text":"Yaklaşık başlangıç değeri oda alanı ile hedef aydınlık düzeyinin çarpımından oluşur. Yüzeylerin yansıtması, armatür dağılımı, bakım, kamaşma ve görev alanı sonucu değiştirir; araç bu nedenle bir proje değil ön değerlendirme üretir."}
+          },
+          {
+            "@type":"Question",
+            "name":"Watt mı lümen mi karşılaştırılmalı?",
+            "acceptedAnswer":{"@type":"Answer","text":"Işık miktarı için lümen, çalışma yüzeyindeki aydınlık düzeyi için lux dikkate alınmalıdır. Watt elektrik gücüdür ve farklı LED ürünlerde aynı ışık miktarını garanti etmez."}
+          },
+          {
+            "@type":"Question",
+            "name":"2700 K, 3000 K ve 4000 K arasındaki fark nedir?",
+            "acceptedAnswer":{"@type":"Answer","text":"Kelvin ışığın ilişkili renk görünümünü ifade eder. Daha düşük değerler daha sıcak, daha yüksek değerler daha nötr veya serin görünür; doğru seçim kullanım amacı, yüzeyler ve görsel konforla birlikte değerlendirilmelidir."}
+          },
+          {
+            "@type":"Question",
+            "name":"Dimmerli armatüre her LED ampul takılır mı?",
+            "acceptedAnswer":{"@type":"Answer","text":"Hayır. Ampulün dim edilebilir olması tek başına yeterli değildir. Dimmer tipi, asgari yük, sürücü uyumu ve titreme davranışı tam model düzeyinde doğrulanmalıdır."}
+          },
+          {
+            "@type":"Question",
+            "name":"Mevcut ışık yeterliyse yeni ampul alınmalı mı?",
+            "acceptedAnswer":{"@type":"Answer","text":"Hayır. Mevcut sistem güvenli ve tahmini ihtiyacı karşılıyorsa yeni ürün önerilmez. Önce yerleşim, temizlik, açık renk yüzey ve görev lambası konumu iyileştirilebilir."}
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+<link rel="stylesheet" href="/assets/alo186-accessibility-v215.css" data-alo186-accessibility-v215="true">
+</head>
+<body>
+  <a class="skip-link" href="#arac">Araca geç</a>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="https://alo186.com" aria-label="ALO186 ana sayfa">
+        <span class="brand-mark" aria-hidden="true">186</span>
+        <span><strong>ALO186</strong><small>Bağımsız elektrik bilgi ağı</small></span>
+      </a>
+      <nav aria-label="Üst menü">
+        <a href="https://alo186.com/elektrik-kesintisi">Kesinti</a>
+        <a href="https://alo186.com/elektrik-portali">Portal</a>
+        <a href="https://alo186.com/hesaplama/">Hesaplayıcılar</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="trust-banner">
+      <strong>Bağımsız teknik ön değerlendirmedir; aydınlatma projesi veya ürün onayı değildir.</strong>
+      Yanık kokusu, erime, kıvılcım, gevşek duy, açık iletken veya su teması varsa ürüne dokunmayın. Sabit tesisat, ıslak hacim, dış ortam ve bütünleşik armatürlerde yetkili elektrikçi veya aydınlatma uzmanı doğrulaması gerekir. ALO186 EDAŞ, kamu kurumu, üretici veya ürün satıcısı değildir.
+    </section>
+
+    <section class="hero">
+      <div class="hero-copy">
+        <span class="eyebrow">Lux · lümen · Kelvin · CRI · duy · dimmer</span>
+        <h1>Odanız için ışığı hesaplayın; <em>gerekmiyorsa yeni ampul almayın.</em></h1>
+        <p>Metrekareyi tek başına ampul wattına çevirmeyin. Kullanım amacı, yüzey yansıtması, mevcut ışık, renk görünümü, duy, dimmer, kapalı armatür ve ortam koşullarını aynı kararda değerlendirin.</p>
+        <div class="chip-row">
+          <span class="chip">Kişisel veri yok</span>
+          <span class="chip">Tarayıcıda hesaplama</span>
+          <span class="chip">Satın almama sonucu</span>
+          <span class="chip">Fiyat ve stok iddiası yok</span>
+        </div>
+      </div>
+      <aside class="hero-card">
+        <span>Karar zinciri</span>
+        <strong>Alan → lux → lümen → renk → güvenlik</strong>
+        <small>Yaklaşık toplam lümen, Kelvin, CRI, ışık açığı ve yalnız doğrulanmışsa düşük riskli ürün sınıfı gösterilir.</small>
+        <a href="#arac">Oda planını hesapla ↓</a>
+      </aside>
+    </section>
+
+    <form id="lightingForm">
+      <section id="arac" class="layout">
+        <div class="panel">
+          <div class="section-title">
+            <div><span class="step">1</span><h2>Oda ve kullanım amacı</h2></div>
+          </div>
+          <div class="preset-grid" aria-label="Hazır örnekler">
+            <button class="preset" type="button" data-preset="living"><strong>Salon</strong><small>22 m² · mevcut ışık</small></button>
+            <button class="preset" type="button" data-preset="study"><strong>Çalışma alanı</strong><small>10 m² · görev ışığı</small></button>
+            <button class="preset" type="button" data-preset="corridor"><strong>Koridor</strong><small>Sensörlü ışık</small></button>
+            <button class="preset" type="button" data-preset="outdoor"><strong>Balkon</strong><small>Solar yardımcı ışık</small></button>
+          </div>
+          <div class="form-grid">
+            <label class="field">
+              <span>Alan türü</span>
+              <select id="room">
+                <option value="living">Salon / oturma odası</option>
+                <option value="bedroom">Yatak odası</option>
+                <option value="kitchen">Mutfak</option>
+                <option value="study">Çalışma / okuma alanı</option>
+                <option value="corridor">Koridor / antre</option>
+                <option value="bathroom">Banyo / ayna alanı</option>
+                <option value="outdoor">Balkon / açık alan</option>
+                <option value="decorative">Dekoratif yardımcı ışık</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Ana kullanım</span>
+              <select id="use">
+                <option value="general">Genel aydınlatma</option>
+                <option value="task">Okuma / çalışma / hazırlık</option>
+                <option value="relax">Dinlenme</option>
+                <option value="night">Gece yön bulma / yardımcı ışık</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Oda alanı (m²)</span>
+              <input id="areaM2" type="number" min="1" max="250" step="0.1" value="20" inputmode="decimal" required>
+            </label>
+            <label class="field">
+              <span>Duvar ve tavan görünümü</span>
+              <select id="surface">
+                <option value="light">Açık renk / yüksek yansıtma</option>
+                <option value="medium" selected>Orta renk</option>
+                <option value="dark">Koyu renk / düşük yansıtma</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Mevcut toplam lümen</span>
+              <input id="currentLumens" type="number" min="0" max="100000" step="1" value="0" inputmode="numeric">
+              <small class="help">Ampul veya armatür etiketlerindeki lümenleri toplayın. Bilmiyorsanız 0 bırakın.</small>
+            </label>
+            <label class="field">
+              <span>Duy / armatür tipi</span>
+              <select id="socketType">
+                <option value="e27">E27 değiştirilebilir ampul</option>
+                <option value="gu10">GU10 veya farklı değiştirilebilir duy</option>
+                <option value="integrated">Bütünleşik LED armatür</option>
+                <option value="none">Duy yok / bağımsız taşınabilir ürün</option>
+                <option value="unknown">Bilinmiyor</option>
+              </select>
+            </label>
+          </div>
+        </div>
+        <aside class="panel side">
+          <span class="step">i</span>
+          <h2>Hesap yaklaşımı</h2>
+          <div class="formula">Yaklaşık lümen = alan × hedef lux ÷ yüzey ve bakım katsayısı</div>
+          <p class="help">Bu basit ön hesap; armatür fotometrisi, montaj yüksekliği, kamaşma, gün ışığı ve görev yüzeyi ölçümünün yerini tutmaz.</p>
+        </aside>
+      </section>
+
+      <section class="panel settings-panel">
+        <div class="section-title">
+          <div><span class="step">2</span><h2>Mevcut sistem ve teknik özellikler</h2></div>
+        </div>
+        <div class="safety-grid">
+          <label class="check-item"><input id="hasExisting" type="checkbox"><span><strong>Mevcut aydınlatma var</strong><small>Hesaba mevcut lümen dâhil edildi.</small></span></label>
+          <label class="check-item"><input id="existingSafe" type="checkbox"><span><strong>Mevcut sistem güvenli ve kararlı</strong><small>Gevşeklik, kararma, sık arıza, aşırı ısınma veya rahatsız edici titreme yok.</small></span></label>
+          <label class="check-item"><input id="motionSensor" type="checkbox"><span><strong>Hareket sensörü gerekli</strong><small>Koridor veya kısa süre kullanılan alanda manuel anahtara alternatif aranıyor.</small></span></label>
+          <label class="check-item"><input id="solarPossible" type="checkbox"><span><strong>Solar yardımcı ışık mümkün</strong><small>Açık alanda yeterli güneş, güvenli yerleşim ve düşük riskli bağımsız kullanım var.</small></span></label>
+          <label class="check-item"><input id="dimmerPresent" type="checkbox"><span><strong>Dimmer mevcut</strong><small>LED sürücü ve asgari yük uyumu gerekir.</small></span></label>
+          <label class="check-item"><input id="dimmerCompatible" type="checkbox"><span><strong>Dimmer uyumu tam modelde doğrulandı</strong><small>Üretici uyumluluğu ve gerçek titreme testi kontrol edildi.</small></span></label>
+          <label class="check-item"><input id="enclosedFixture" type="checkbox"><span><strong>Kapalı armatür kullanılacak</strong><small>Isı birikimi LED ömrünü ve güvenliği etkileyebilir.</small></span></label>
+          <label class="check-item"><input id="enclosedRated" type="checkbox"><span><strong>Kapalı armatür kullanımı doğrulandı</strong><small>Tam ürün kılavuzu bu kullanıma izin veriyor.</small></span></label>
+        </div>
+      </section>
+
+      <section class="panel settings-panel">
+        <div class="section-title">
+          <div><span class="step">3</span><h2>Montaj ve güvenlik kapısı</h2></div>
+        </div>
+        <div class="safety-grid">
+          <label class="check-item risk-check"><input id="electricalHazard" type="checkbox"><span><strong>Yanık kokusu, erime, kıvılcım, gevşek duy, açık iletken veya su teması var</strong><small>Seçilirse bütün ticari yollar kapanır.</small></span></label>
+          <label class="check-item"><input id="fixedInstallation" type="checkbox"><span><strong>Yeni kablo, anahtar, sürücü veya sabit armatür montajı gerekiyor</strong><small>Yetkili elektrikçi ve ürün talimatı gerekir.</small></span></label>
+          <label class="check-item"><input id="wetZone" type="checkbox"><span><strong>Islak hacim veya doğrudan hava koşulu var</strong><small>Banyo bölgesi, yağmur veya yoğun nem söz konusu.</small></span></label>
+          <label class="check-item"><input id="ipRated" type="checkbox"><span><strong>Uygun IP ve montaj bölgesi doğrulandı</strong><small>Tam ürün, kablo girişi ve montaj şekli ortama uygun.</small></span></label>
+        </div>
+        <div class="inline-note">Lux, lümen, Kelvin ve CRI aynı şey değildir. Işık miktarı kadar kamaşma, dağılım, renk görünümü, yüzeyler ve armatür güvenliği de değerlendirilmelidir.</div>
+      </section>
+
+      <div class="actions">
+        <button class="btn btn-primary" type="submit">Aydınlatma planını oluştur</button>
+        <button class="btn btn-secondary" type="reset">Sıfırla</button>
+      </div>
+      <p id="validation" class="validation" tabindex="-1" aria-live="assertive"></p>
+    </form>
+
+    <section id="result" class="result-card" tabindex="-1" aria-live="polite" hidden>
+      <div class="result-head">
+        <span id="state" class="state-pill">Sonuç</span>
+        <div><h2 id="resultTitle">Sonuç başlığı</h2><p id="resultSummary"></p></div>
+      </div>
+      <div class="metric-grid">
+        <div><span>Hedef aydınlık</span><strong id="luxValue">—</strong></div>
+        <div><span>Yaklaşık toplam ışık</span><strong id="lumenValue">—</strong></div>
+        <div><span>Renk görünümü</span><strong id="kelvinValue">—</strong></div>
+        <div><span>Renk geri verimi</span><strong id="criValue">—</strong></div>
+        <div><span>Işık açığı</span><strong id="deficitValue">—</strong></div>
+        <div><span>Başlangıç ampul dağılımı</span><strong id="countValue">—</strong></div>
+      </div>
+      <details class="assumption-box"><summary>Varsayımları ve sınırları gör</summary><ul id="assumptions"></ul></details>
+
+      <section id="commerce" class="commerce-panel" hidden>
+        <span class="eyebrow">Koşullu düşük riskli ürün yolu</span>
+        <h3 id="productClass">Ürün sınıfı</h3>
+        <p id="productReason"></p>
+        <div class="affiliate-disclosure"><strong>Reklam · Amazon satış ortaklığı bağlantısı</strong> Bir Amazon Gelir Ortağı olarak nitelikli satın alımlar üzerinden kazanç elde ediyorum. Kullanıcıya ek maliyet yansımaz. ALO186 ürün satıcısı değildir; fiyat, stok, satıcı, teslimat ve garanti bilgileri Amazon’un güncel sayfasında doğrulanmalıdır.</div>
+        <div class="gate-list">
+          <label><input class="commerce-gate" id="actualNeed" type="checkbox"> Mevcut sistemin güvenli ve yeterli olmadığını, gerçek bir ışık açığı bulunduğunu doğruladım.</label>
+          <label><input class="commerce-gate" id="technicalCheck" type="checkbox"> Duy, gerilim, lümen, Kelvin, CRI, dimmer, kapalı armatür ve ortam koşullarını yeniden kontrol edeceğim.</label>
+          <label><input class="commerce-gate" id="affiliateCheck" type="checkbox"> Açılacak bağlantının Amazon satış ortaklığı bağlantısı olduğunu anladım.</label>
+        </div>
+        <a id="affiliateLink" class="btn btn-primary" rel="sponsored nofollow noopener" target="_blank" aria-disabled="true">Teknik minimumla Amazon seçeneklerini karşılaştır</a>
+      </section>
+
+      <div class="result-actions">
+        <button id="jsonBtn" class="btn btn-secondary" type="button">JSON teknik fişi indir</button>
+        <button id="icsBtn" class="btn btn-secondary" type="button">180 günlük yeniden kontrolü takvime ekle</button>
+        <button class="btn btn-secondary" type="button" data-print>Yazdır / PDF</button>
+      </div>
+      <small class="privacy-note">Ad, e-posta, telefon, adres veya konum istenmez. Sonuç tarayıcı depolamasına yazılmaz; yalnız sizin indirdiğiniz dosyalarda kalır.</small>
+    </section>
+
+    <section class="content-section sources">
+      <div class="panel">
+        <span class="eyebrow">Kaynak ve yöntem</span>
+        <h2>İyi aydınlatma yalnız lümen sayısından oluşmaz.</h2>
+        <p>ISO/CIE 8995-1:2025, görsel görevde yeterli aydınlık düzeyinin yanında ışığın dağılımı, kamaşma ve renk özelliklerinin de değerlendirilmesini vurgular. CIE uluslararası aydınlatma sözlüğünde lux, bir metrekareye düzgün dağılan bir lümenin oluşturduğu aydınlık düzeyi olarak tanımlanır. IEC 62560 ve IEC 62612, genel aydınlatma amaçlı kendinden balastlı LED lambaların güvenlik ve performans çerçevesini açıklar.</p>
+        <ul class="source-list">
+          <li><a href="https://www.cie.co.at/publications/light-and-lighting-lighting-work-places-part-1-indoor-0" target="_blank" rel="noopener">ISO/CIE 8995-1:2025 — İç iş yerlerinin aydınlatılması</a></li>
+          <li><a href="https://cie.co.at/eilvterm/17-21-085" target="_blank" rel="noopener">CIE S 017:2020 — Lux tanımı</a></li>
+          <li><a href="https://www.cie.co.at/publications/terms-related-planckian-radiation-temperature-light-sources" target="_blank" rel="noopener">CIE TN 013:2022 — Renk sıcaklığı terimleri</a></li>
+          <li><a href="https://webstore.iec.ch/en/publication/22155" target="_blank" rel="noopener">IEC 62560 — Kendinden balastlı LED lamba güvenliği</a></li>
+          <li><a href="https://webstore.iec.ch/en/publication/63728" target="_blank" rel="noopener">IEC 62612 — LED lamba performans gerekleri</a></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="content-section faq">
+      <div class="panel">
+        <span class="eyebrow">Kısa yanıtlar</span>
+        <h2>Satın almadan önce bilinmesi gerekenler</h2>
+        <details><summary>Bir oda için kaç lümen gerekir?</summary><p>Alan × hedef lux yalnız başlangıçtır. Yüzeyler, armatür dağılımı, montaj yüksekliği, kamaşma, bakım ve gün ışığı sonucu değiştirir.</p></details>
+        <details><summary>Watt mı lümen mi karşılaştırılmalı?</summary><p>Watt elektrik gücüdür. Işık miktarı için lümen, çalışma yüzeyindeki aydınlık düzeyi için lux karşılaştırılır.</p></details>
+        <details><summary>Mevcut ışık yeterliyse ne yapılmalı?</summary><p>Yeni ürün almayın. Önce yerleşimi, yüzeyleri, armatür temizliğini ve görev ışığının konumunu iyileştirin.</p></details>
+        <details><summary>ALO186 ürün satıcısı veya resmî kurum mu?</summary><p>Hayır. ALO186 bağımsız bilgilendirme platformudur; EDAŞ, kamu kurumu, üretici, yetkili servis veya ürün satıcısı değildir.</p></details>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div><strong>ALO186</strong><p>Bağımsız bilgilendirme platformudur; EDAŞ veya kamu kurumu değildir.</p></div>
+      <div class="footer-links"><a href="https://alo186.com/yayin-ilkeleri">Yayın ilkeleri</a><a href="https://alo186.com/gizlilik">Gizlilik</a><a href="https://alo186.com/iletisim">İletişim</a></div>
+    </div>
+  </footer>
+
+  <noscript><div class="noscript">Bu hesaplama aracı JavaScript gerektirir.</div></noscript>
+  <script src="../common.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>

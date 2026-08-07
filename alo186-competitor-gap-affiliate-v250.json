@@ -1,0 +1,60 @@
+{
+  "version": 250,
+  "robots": {
+    "explicitAllow": [
+      "GPTBot",
+      "PerplexityBot",
+      "ClaudeBot",
+      "Bytespider",
+      "Google-Extended"
+    ],
+    "sitemaps": [
+      "Sitemap: https://alo186.com/sitemap.xml",
+      "Sitemap: https://alo186.com/sitemap-electric-project-v200.xml",
+      "Sitemap: https://alo186.com/sitemap-growth-v207.xml",
+      "Sitemap: https://alo186.com/sitemap-growth-v311.xml",
+      "Sitemap: https://alo186.com/sitemap-growth-v312.xml",
+      "Sitemap: https://alo186.com/sitemap-growth-v313.xml",
+      "Sitemap: https://alo186.com/sitemap-growth-v333.xml"
+    ]
+  },
+  "kombi": {
+    "howTo": true,
+    "itemList": true,
+    "genericProductEntities": 3,
+    "offers": false,
+    "ratings": false,
+    "ssrAffiliateLinks": 3
+  },
+  "anchors": {
+    "changed": [],
+    "rel": "sponsored nofollow noopener"
+  },
+  "edas": {
+    "provinceServices": 81,
+    "organizations": 21,
+    "schema": "Service + Organization",
+    "governmentServiceForPrivateEdas": false,
+    "reason": "Özel dağıtım şirketlerini GovernmentService olarak işaretlemek resmî kamu hizmeti izlenimi yaratır."
+  },
+  "governmentService": {
+    "added": true,
+    "governmentService": "112 only",
+    "privateEdasMislabelled": false
+  },
+  "validation": {
+    "jsonLdSyntax": "pass",
+    "schemaOrgTypes": [
+      "HowTo",
+      "ItemList",
+      "Product",
+      "Service",
+      "Organization",
+      "GovernmentService"
+    ],
+    "newGoogleRichResultEligibility": [],
+    "richResultsNote": "Product zengin sonucu Offer, Review veya AggregateRating ister; doğrulanmamış fiyat, stok ve puan eklenmedi. HowTo güncel Google rich-result galerisinde desteklenmez.",
+    "affiliateRel": "pass",
+    "robots": "pass"
+  }
+}

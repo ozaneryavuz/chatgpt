@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>UPS VA, Watt ve Topoloji Uygunluk Testi | ALO186</title>
+  <meta name="description" content="Yük wattı, güç faktörü, tepe güç, hedef süre ve kesinti hassasiyetine göre yaklaşık UPS VA/W sınıfını; offline, line-interactive veya online topoloji yönünü değerlendirin.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta name="theme-color" content="#071631">
+  <link rel="canonical" href="https://alo186.com/hesaplama/ups-va-topoloji-uygunluk/">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"UPS VA, Watt ve Topoloji Uygunluk Testi","url":"https://alo186.com/hesaplama/ups-va-topoloji-uygunluk/","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","isAccessibleForFree":true,"description":"Yük, güç faktörü, tepe güç, hedef süre ve hassasiyete göre UPS güç sınıfı ve topoloji yönü üretir."},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"UPS seçiminde VA mı watt mı önemlidir?","acceptedAnswer":{"@type":"Answer","text":"İkisi de önemlidir. UPS'in hem VA hem gerçek watt sınırı yükü ve varsa kısa süreli tepe gücü karşılamalıdır."}},{"@type":"Question","name":"Aktif PFC güç kaynağında saf sinüs gerekli midir?","acceptedAnswer":{"@type":"Answer","text":"Birçok aktif PFC güç kaynağı saf sinüs çıkışla daha öngörülebilir çalışır. Kesin uyum cihaz ve UPS üretici belgeleriyle doğrulanmalıdır."}},{"@type":"Question","name":"Online UPS her durumda daha mı iyidir?","acceptedAnswer":{"@type":"Answer","text":"Hayır. Online UPS sıfıra yakın transfer ve gerilim dönüşümü avantajı sağlayabilir; ancak maliyet, kayıp, ısı, fan sesi ve bakım ihtiyacı daha yüksek olabilir."}},{"@type":"Question","name":"Bu test gerçek çalışma süresini kesin verir mi?","acceptedAnswer":{"@type":"Answer","text":"Hayır. Araç yaklaşık enerji ihtiyacını verir. Gerçek süre akü kimyası, yaş, sıcaklık, yük eğrisi, verim ve üretici runtime tablosuna bağlıdır."}}]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Ana sayfa","item":"https://alo186.com/"},{"@type":"ListItem","position":2,"name":"Hesaplama Merkezi","item":"https://alo186.com/hesaplama/"},{"@type":"ListItem","position":3,"name":"UPS VA ve topoloji testi","item":"https://alo186.com/hesaplama/ups-va-topoloji-uygunluk/"}]}]}</script>
+<link rel="stylesheet" href="/assets/alo186-accessibility-v215.css" data-alo186-accessibility-v215="true">
+</head>
+<body>
+<a class="skip-link" href="#test">Teste geç</a>
+<header><div class="shell header-row"><a class="brand" href="/"><span>186</span><div><strong>ALO186</strong><small>Bağımsız elektrik bilgi ağı</small></div></a><nav aria-label="Üst menü"><a href="/hesaplama/">Hesaplayıcılar</a><a href="/akilli-urun-secimi">Ürün merkezi</a></nav></div></header>
+<main class="shell">
+  <section class="hero"><div><span class="eyebrow">VA · gerçek W · güç faktörü · transfer süresi · saf sinüs</span><h1>UPS'i yalnız VA etiketine bakarak seçmeyin.</h1><p>Toplam yükü, kısa süreli tepe gücü, güç faktörünü, hedef çalışma süresini ve kesinti hassasiyetini birlikte değerlendirin. Sonuç bir marka veya model onayı değil; doğru ürün sınıfına ulaşmak için teknik ön kontroldür.</p><div class="chips"><span>Kişisel veri yok</span><span>Tarayıcıda hesaplama</span><span>Mobil uyumlu</span><span>Satın almama sonucu var</span></div></div><aside><strong>Önemli sınır</strong><p>Sağlık, yangın, güvenlik, proses, asansör, pompa ve yüksek güçlü motor yüklerinde bu araç satın alma yönlendirmesi açmaz; proje, üretici prosedürü ve profesyonel kabul gerekir.</p></aside></section>
+
+  <section class="trust"><strong>ALO186 ürün satıcısı veya resmî kurum değildir.</strong> Sonuçlar yaklaşık ön seçimdir. UPS'in VA, gerçek watt, çıkış dalga biçimi, priz tipi, akü kartuşu, transfer süresi ve üretici uyumluluğu satın alma öncesinde güncel teknik sayfadan doğrulanmalıdır.</section>
+
+  <form id="test" novalidate>
+    <fieldset><legend>1. Yük ve kullanım</legend><div class="grid">
+      <label>Kullanım senaryosu<select id="use" required><option value="office">Masaüstü bilgisayar / çalışma istasyonu</option><option value="gaming">Oyun bilgisayarı / aktif PFC PSU</option><option value="network">Modem, ONT, NAS veya CCTV</option><option value="server">Sunucu, rack ağ ve kritik bilişim</option><option value="medical">Sağlık, yangın veya can güvenliği sistemi</option><option value="motor">Motor, pompa, buzdolabı veya kompresör</option></select></label>
+      <label>Toplam sürekli yük<input id="watts" type="number" min="10" max="5000" step="1" value="350" inputmode="decimal" required><span>W</span></label>
+      <label>Kısa süreli tepe / kalkış yükü<input id="peak" type="number" min="0" max="12000" step="1" value="0" inputmode="decimal"><span>W · bilinmiyorsa 0 bırakın</span></label>
+      <label>Güç faktörü<select id="pf"><option value="auto">Bilinmiyor — muhafazakâr varsayım</option><option value="0.60">0,60</option><option value="0.80">0,80</option><option value="0.90">0,90</option><option value="0.95">0,95</option></select></label>
+    </div></fieldset>
+
+    <fieldset><legend>2. Süre ve hassasiyet</legend><div class="grid">
+      <label>Hedef çalışma süresi<select id="runtime"><option value="5">5 dakika</option><option value="10">10 dakika</option><option value="15" selected>15 dakika</option><option value="30">30 dakika</option><option value="60">60 dakika</option><option value="120">120 dakika</option></select></label>
+      <label>Kesinti anındaki tolerans<select id="sensitivity"><option value="reboot">Kısa yeniden başlama kabul edilebilir</option><option value="brief" selected>Milisaniyelik transfer tolere edilebilir</option><option value="zero">Kesintisiz / sıfıra yakın transfer gerekli</option></select></label>
+      <label>Yükün elektriksel karakteri<select id="wave"><option value="active">Aktif PFC bilgisayar / elektronik</option><option value="simple">Basit elektronik / adaptör</option><option value="transformer">Trafo, motor veya yüksek kalkış</option><option value="unknown">Bilinmiyor</option></select></label>
+      <label>Kurulum ortamı<select id="environment"><option value="home">Ev / küçük ofis, tak-çalıştır</option><option value="rack">Rack / sunucu odası / profesyonel</option></select></label>
+    </div></fieldset>
+
+    <fieldset class="hazard"><legend>3. Güvenlik kapısı</legend><p>Aşağıdakilerden biri varsa hesap yerine enerjiyi güvenli biçimde kestirin ve uzman değerlendirmesi alın.</p><div class="checks"><label><input id="smoke" type="checkbox"> Duman, kıvılcım, yanık kokusu veya erime</label><label><input id="battery" type="checkbox"> Aküde şişme, sızıntı veya aşırı ısınma</label><label><input id="water" type="checkbox"> Su teması, açık iletken veya elektrik çarpması riski</label></div></fieldset>
+
+    <button class="primary" type="submit">UPS sınıfını ve teknik alt sınırı hesapla</button>
+    <p class="privacy">Ad, adres, telefon, e-posta, cihaz seri numarası veya sayaç bilgisi istenmez. Girdiler sunucuya gönderilmez ve tarayıcıda saklanmaz.</p>
+  </form>
+
+  <section id="result" class="result hidden" aria-live="polite" tabindex="-1">
+    <span id="state" class="pill">—</span><h2 id="title">Sonuç</h2><p id="summary"></p>
+    <div class="metrics"><article><span>Yaklaşık alt VA sınırı</span><strong id="va">—</strong></article><article><span>Yaklaşık alt gerçek güç</span><strong id="watt">—</strong></article><article><span>Yaklaşık enerji ihtiyacı</span><strong id="wh">—</strong></article><article><span>Topoloji yönü</span><strong id="topology">—</strong></article></div>
+    <h3>Satın alma öncesi doğrulanacaklar</h3><ol id="steps"></ol>
+    <div class="actions"><a id="runtimeTool" href="/hesaplama/ups-suresi/">Runtime hesabını ayrıntılandır</a><a id="batteryTool" href="/hesaplama/ups-aku-degisim-uygunluk/">Mevcut UPS aküsünü değerlendir</a><button id="print" type="button">Yazdır / PDF kaydet</button></div>
+    <div id="commerce" class="commerce hidden"><strong>Reklam / satış ortaklığı açıklaması:</strong><p>Aşağıdaki Amazon Türkiye bağlantısı teknik sınıfa yönelik kategori aramasıdır. Nitelikli satın alımlardan komisyon kazanılabilir; kullanıcıya ek maliyet yansımaz. Fiyat, stok, puan, satıcı, teslimat, garanti ve tam model uyumu mağazanın güncel sayfasında doğrulanır.</p><div class="gate"><label><input class="confirm" type="checkbox"> Toplam yükü watt cinsinden kontrol ettim.</label><label><input class="confirm" type="checkbox"> UPS'in hem VA hem gerçek watt sınırını doğrulayacağım.</label><label><input class="confirm" type="checkbox"> Bağlantının satış ortaklığı bağlantısı olduğunu anladım.</label></div><a id="affiliate" aria-disabled="true" tabindex="-1" target="_blank" rel="sponsored nofollow noopener">Amazon'da uygun UPS sınıfını ara</a></div>
+    <div id="professional" class="professional hidden"><strong>Doğrudan ürün yönlendirmesi kapalıdır.</strong><p id="professionalText"></p><a href="/kurumsal-elektrik-surekliligi-on-degerlendirme">Profesyonel kapsamı incele</a></div>
+  </section>
+
+  <section class="faq"><h2>Sık sorulanlar</h2><details><summary>1000 VA UPS kaç watt taşır?</summary><p>Tek bir sabit cevap yoktur. Gerçek watt sınırı modele göre değişir; ürün teknik sayfasındaki VA ve W sınırlarının ikisi de kontrol edilmelidir.</p></details><details><summary>Line-interactive ile online UPS arasındaki temel fark nedir?</summary><p>Line-interactive UPS kısa transferle ve gerilim düzenlemeyle çalışır. Online çift dönüşümlü UPS yükü sürekli inverter üzerinden besleyerek sıfıra yakın transfer sağlayabilir; bunun karşılığında ısı, fan sesi, kayıp ve bakım artabilir.</p></details><details><summary>Daha büyük VA her zaman daha uzun süre mi demektir?</summary><p>Hayır. VA güç kapasitesini, çalışma süresi ise esas olarak akü enerjisini ve yükü ifade eder. Aynı VA değerindeki iki UPS farklı akü kapasitesine sahip olabilir.</p></details><details><summary>Motor veya buzdolabı için bilgisayar UPS'i kullanılır mı?</summary><p>Kalkış akımı, dalga biçimi ve üretici uyumu doğrulanmadan kullanılmamalıdır. Bu yüklerde inverter, power station veya jeneratör topolojisi ayrıca değerlendirilir.</p></details></section>
+</main>
+<footer><div class="shell footer-row"><div><strong>ALO186</strong><p>Bağımsız bilgilendirme platformudur; EDAŞ, kamu kurumu veya ürün satıcısı değildir.</p></div><div><a href="/yayin-ilkeleri">Yayın ilkeleri</a><a href="/yasal/amazon-satis-ortakligi">Affiliate açıklaması</a></div></div></footer>
+<noscript><div class="noscript">Bu araç JavaScript gerektirir.</div></noscript>
+<script src="./app.js"></script>
+</body>
+</html>

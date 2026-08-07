@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Kaçak Akım Rölesi Tipi, mA ve RCCB/RCBO Uygunluk Testi | ALO186</title>
+  <meta name="description" content="Yük türü, koruma amacı, devre yapısı, amper, RCD tipi ve test kanıtlarına göre Type A/F/B ile RCCB veya RCBO ön seçimini güvenli biçimde değerlendirin.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta name="theme-color" content="#071631">
+  <link rel="canonical" href="https://alo186.com/hesaplama/kacak-akim-rolesi-tipi-uygunluk/">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"Kaçak Akım Rölesi Tipi, mA ve RCCB/RCBO Uygunluk Testi","url":"https://alo186.com/hesaplama/kacak-akim-rolesi-tipi-uygunluk/","applicationCategory":"UtilitiesApplication","operatingSystem":"Web","isAccessibleForFree":true,"description":"Yük dalga biçimi, koruma amacı, devre sayısı, anma akımı ve doğrulama testlerine göre kaçak akım koruma sınıfını ön değerlendiren kişisel verisiz karar aracı.","provider":{"@type":"Organization","name":"ALO186","url":"https://alo186.com","description":"Bağımsız elektrik bilgi platformudur; ürün üreticisi, satıcısı, EDAŞ, yetkili servis veya elektrik tesisatı onay kuruluşu değildir."}},{"@type":"DefinedTermSet","name":"Kaçak akım koruma terimleri","hasDefinedTerm":[{"@type":"DefinedTerm","name":"RCCB","description":"Kaçak akım koruması sağlar; aşırı akım ve kısa devre korumasını kendi başına içermez."},{"@type":"DefinedTerm","name":"RCBO","description":"Kaçak akım ile aşırı akım korumasını tek devre cihazında birleştirir."},{"@type":"DefinedTerm","name":"Type A","description":"Alternatif ve darbeli doğru artık akımlara duyarlı RCD sınıfı."},{"@type":"DefinedTerm","name":"Type F","description":"Tek fazlı frekans kontrollü yüklerde oluşabilen bileşik artık akımlara yönelik ilave davranış sağlayan RCD sınıfı."},{"@type":"DefinedTerm","name":"Type B","description":"Düzgün doğru artık akım dahil daha geniş dalga biçimlerine yönelik RCD sınıfı."},{"@type":"DefinedTerm","name":"IΔn","description":"RCD'nin anma artık çalışma akımıdır; cihazın taşıdığı anma akımı In ile aynı değer değildir."}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"30 mA ile 40 A aynı şey mi?","acceptedAnswer":{"@type":"Answer","text":"Hayır. 30 mA kaçak akım hassasiyetidir; 40 A cihazın taşıyabileceği anma akımıdır. İki değer ayrı ayrı doğrulanmalıdır."}},{"@type":"Question","name":"RCCB ile RCBO arasındaki fark nedir?","acceptedAnswer":{"@type":"Answer","text":"RCCB kaçak akım koruması sağlar ancak aşırı akım koruması içermez. RCBO aynı devrede kaçak akım ve aşırı akım korumasını birleştirir."}},{"@type":"Question","name":"Kaçak akım rölesi sürekli atıyorsa 300 mA takılır mı?","acceptedAnswer":{"@type":"Answer","text":"Hayır. Daha yüksek mA değeri arızayı çözme yöntemi değildir. İzolasyon, nötr-toprak hatası, toplam kaçak ve cihaz devreleri test edilmeli; gerekirse devreler RCBO ile ayrılmalıdır."}},{"@type":"Question","name":"EV şarj veya güneş inverterinde hangi tip gerekir?","acceptedAnswer":{"@type":"Answer","text":"Tam inverter ve şarj cihazı üretici talimatı belirleyicidir. EV şarjında entegre 6 mA DC algılama ile Type A veya uygun Type B çözümü; PV ve bazı sürücülerde Type B gibi sınıflar profesyonel tasarım gerektirebilir."}}]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ALO186","item":"https://alo186.com/"},{"@type":"ListItem","position":2,"name":"Hesaplama Merkezi","item":"https://alo186.com/hesaplama/"},{"@type":"ListItem","position":3,"name":"Kaçak akım rölesi uygunluk testi"}]}]}</script>
+<link rel="stylesheet" href="/assets/alo186-accessibility-v215.css" data-alo186-accessibility-v215="true">
+</head>
+<body>
+  <a class="skip-link" href="#rcdForm">Araca geç</a>
+  <header>
+    <div class="header-inner">
+      <a class="brand" href="https://alo186.com"><span aria-hidden="true">186</span><b>ALO186<small>Bağımsız elektrik bilgi ağı</small></b></a>
+      <nav aria-label="Üst menü">
+        <a href="/hesaplama/">Hesaplayıcılar</a>
+        <a href="/sektor-rehberi/kacak-akim-rolesi-neden-atar/">RCD rehberi</a>
+        <a href="/karar-motoru">Karar motoru</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="trust">
+      <strong>RCD seçimi yalnız “30 mA” seçmek değildir.</strong>
+      Dalga biçimi tipi, anma akımı, RCCB/RCBO yapısı, kutup sayısı, kısa devre koordinasyonu ve gerçek açma testi birlikte doğrulanır. Pano kapağı açmayı veya enerjili ölçüm yapmayı önermiyoruz.
+    </section>
+
+    <section class="hero">
+      <div>
+        <span class="eyebrow">Type A · Type F · Type B · 30 mA · RCCB · RCBO</span>
+        <h1>Kaçak akım rölesi <em>uygunluk testi</em></h1>
+        <p>Yük türünüzü, koruma amacını ve mevcut cihazın kanıtlarını girin. Araç doğru ürün sınıfını ön seçer; tehlike, sürekli atma veya inverterli özel yükte ticari yolu kapatır.</p>
+        <div class="chips">
+          <span>Kişisel veri yok</span>
+          <span>Mobil uyumlu</span>
+          <span>Satın almama sonucu</span>
+          <span>Şeffaf satış ortaklığı</span>
+        </div>
+      </div>
+      <aside>
+        <strong>Karar sırası</strong>
+        <ol>
+          <li>Tehlike ve aktif arıza</li>
+          <li>Koruma amacı ve devre yapısı</li>
+          <li>Yükün artık akım dalga biçimi</li>
+          <li>Amper, mA ve test kanıtları</li>
+        </ol>
+        <p>Sonuç proje, montaj veya mevzuat uygunluk belgesi değildir.</p>
+      </aside>
+    </section>
+
+    <form id="rcdForm" novalidate>
+      <section class="panel">
+        <h2>1. Güvenlik ve mevcut durum</h2>
+        <label class="check danger"><input name="emergency" type="checkbox"><span>Duman, erime, pano ısınması, su teması, elektrik çarpması veya aktif kıvılcım riski var.</span></label>
+        <div class="grid">
+          <label><span>Değerlendirme zamanı</span><select name="mode"><option value="planning">Önceden planlama</option><option value="active_fault">RCD şu an sürekli veya tekrarlı atıyor</option></select></label>
+          <label><span>Kullanım alanı</span><select name="useCase"><option value="home">Ev / küçük ofis devresi</option><option value="whole_dwelling">Konut ana giriş veya çoklu devre</option><option value="commercial">Otel, mağaza, atölye veya ticari tesis</option><option value="medical">Medikal veya yaşam destek devresi</option></select></label>
+          <label><span>Pano ve cihaz fiziksel durumu</span><select name="physical"><option value="good">Sağlam, kuru ve olağan sıcaklıkta</option><option value="hot">Isınıyor veya yanık kokusu var</option><option value="burned">Kararmış / erimiş</option><option value="wet">Islak veya nemli</option><option value="loose">Gevşek bağlantı şüphesi</option></select></label>
+          <label><span>Test düğmesi</span><select name="testButton"><option value="unknown">Henüz denenmedi</option><option value="pass">Enerji varken TEST düğmesi açtırıyor</option><option value="fail">TEST düğmesi açtırmıyor</option></select></label>
+        </div>
+        <p class="hint">TEST düğmesi mekanizmayı kontrol eder; açma süresi, topraklama, izolasyon ve gerçek kaçak akım testinin yerini tutmaz.</p>
+      </section>
+
+      <section class="panel">
+        <h2>2. Koruma amacı ve yük türü</h2>
+        <div class="grid">
+          <label><span>Koruma amacı</span><select name="goal"><option value="personal">Priz, banyo, dış ortam veya tek devrede ilave kişisel koruma</option><option value="upstream_fire">Ana girişte yangın/selectivity amaçlı üst kademe</option><option value="nuisance">Sık açmayı güvenli biçimde teşhis etme</option></select></label>
+          <label><span>Devre yapısı</span><select name="circuitScope"><option value="single">Tek devre</option><option value="multiple">Birden fazla devre aynı RCD altında</option></select></label>
+          <label><span>Besleme</span><select name="phase"><option value="single">Tek faz</option><option value="three">Trifaze</option><option value="unknown">Bilmiyorum</option></select></label>
+          <label><span>Ana yük türü</span><select name="loadType"><option value="general">Genel priz, LED, adaptör ve ev elektroniği</option><option value="resistive">Yalnız rezistif yük</option><option value="appliance">Çamaşır/bulaşık makinesi, indüksiyon, elektronik ev aleti</option><option value="single_vfd">İnverter klima, ısı pompası veya tek faz hız kontrollü motor</option><option value="ev">Elektrikli araç şarj cihazı</option><option value="pv">Güneş inverteri / enerji depolama</option><option value="ups_vfd">UPS, üç faz sürücü veya endüstriyel inverter</option><option value="unknown">Bilmiyorum / karışık</option></select></label>
+          <label><span>Üretici RCD tipi şartı</span><select name="manufacturerType"><option value="unknown">Belgede bulunamadı</option><option value="AC">Type AC</option><option value="A">Type A</option><option value="F">Type F</option><option value="B">Type B</option></select></label>
+          <label><span>EV cihazında 6 mA DC algılama</span><select name="dc6"><option value="not_applicable">Uygulanmaz</option><option value="verified">Üretici belgesinde entegre ve doğrulanmış</option><option value="missing">Yok</option><option value="unknown">Bilmiyorum</option></select></label>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>3. Akım, mA ve cihaz yapısı</h2>
+        <div class="grid">
+          <label><span>Devreyi sınırlayan sigorta/MCB</span><div class="unit"><input name="breakerA" type="number" min="6" max="125" step="1" value="16" inputmode="numeric" required><b>A</b></div></label>
+          <label><span>Mevcut RCD anma akımı In</span><div class="unit"><input name="existingRatedA" type="number" min="0" max="125" step="1" value="0" inputmode="numeric" placeholder="Bilmiyorsanız 0"><b>A</b></div></label>
+          <label><span>Mevcut hassasiyet IΔn</span><select name="existingMa"><option value="unknown">Bilmiyorum</option><option value="10">10 mA</option><option value="30">30 mA</option><option value="100">100 mA</option><option value="300">300 mA</option></select></label>
+          <label><span>Mevcut RCD tipi</span><select name="existingType"><option value="unknown">Bilmiyorum</option><option value="AC">Type AC</option><option value="A">Type A</option><option value="F">Type F</option><option value="B">Type B</option></select></label>
+          <label><span>Mevcut cihaz yapısı</span><select name="existingForm"><option value="none">Mevcut cihaz yok / yeni seçim</option><option value="RCCB">RCCB + ayrı sigorta/MCB</option><option value="RCBO">RCBO, tek cihazda iki koruma</option><option value="unknown">Bilmiyorum</option></select></label>
+          <label><span>Yetkili test sonucu</span><select name="installationTest"><option value="unknown">İzolasyon/açma testi yapılmadı</option><option value="pass">Açma süresi, izolasyon ve bağlantı testi uygun</option><option value="fail">Test başarısız veya nötr-toprak hatası bulundu</option></select></label>
+          <label><span>Mevcut sistem gerçek kullanımda</span><select name="taskTest"><option value="not_tested">Henüz doğrulanmadı</option><option value="pass">Güvenli testte gereksiz açma olmadan çalıştı</option><option value="trip">Tekrarlı/gereksiz açma devam ediyor</option></select></label>
+          <label><span>Alt devrelerde 30 mA koruma</span><select name="downstream30"><option value="not_applicable">Uygulanmaz / tek devre</option><option value="verified">Alt devrelerde doğrulanmış</option><option value="missing">Yok veya bilinmiyor</option></select></label>
+        </div>
+        <p class="hint"><strong>30 mA</strong> hassasiyet, <strong>40/63 A</strong> taşıma kapasitesidir. RCCB aşırı akım koruması içermez; ayrı MCB/sigorta koordinasyonu gerekir.</p>
+      </section>
+
+      <section class="panel confirmations">
+        <h2>4. Şeffaf ürün yolu</h2>
+        <label class="check"><input name="confirmNeed" type="checkbox"><span>Mevcut güvenli çözümün ihtiyacı karşılamadığını doğruladım.</span></label>
+        <label class="check"><input name="confirmSpecs" type="checkbox"><span>Type A/F/B, IΔn, In, kutup, kısa devre kapasitesi ve üretici şartını tam modelde yeniden kontrol edeceğim.</span></label>
+        <label class="check"><input name="confirmAffiliate" type="checkbox"><span>Sonraki ürün bağlantılarının satış ortaklığı bağlantısı olabileceğini anladım.</span></label>
+      </section>
+
+      <div class="actions">
+        <button type="submit">Uygunluğu değerlendir</button>
+        <button class="ghost" type="reset">Formu sıfırla</button>
+        <button class="ghost" id="printButton" type="button">Yazdır / PDF</button>
+        <button class="ghost" id="jsonButton" type="button">Teknik JSON indir</button>
+      </div>
+    </form>
+
+    <p id="error" class="message error" role="alert" hidden></p>
+    <section id="result" class="result" aria-live="polite" aria-atomic="true" hidden></section>
+
+    <section class="sources">
+      <h2>Kaynak ve sınırlar</h2>
+      <ul>
+        <li><a href="https://webstore.iec.ch/en/publication/67980" rel="noopener">IEC 61008-1:2024</a>: RCCB, bütünleşik aşırı akım koruması olmayan kaçak akım cihazıdır.</li>
+        <li><a href="https://webstore.iec.ch/en/publication/6998" rel="noopener">IEC 62423</a>: Type F ve Type B RCD davranışları.</li>
+        <li><a href="https://assets.sc.hager.com/uk/support/regulations-18th-edition/selection-of-rcd-types" rel="noopener">Hager RCD tip seçimi</a>: elektronik, frekans kontrollü, EV ve PV yük sınıfları.</li>
+        <li><a href="https://www.se.com/us/en/download/document/CA9UG000E/" rel="noopener">Schneider Electric rutin RCD kontrol rehberi</a>: TEST düğmesi ve düzenli işlev kontrolü.</li>
+      </ul>
+      <p>ALO186 sonucu ön seçimdir. Topraklama sistemi, kısa devre akımı, kutup/neutral düzeni, seçicilik, kablo kesiti ve yerel tesisat kuralları yetkili elektrik mühendisi veya elektrikçi tarafından doğrulanmalıdır.</p>
+    </section>
+  </main>
+
+  <footer>ALO186 bağımsız bilgilendirme platformudur; arıza kaydı almaz ve resmî kurum değildir.</footer>
+  <script src="./app.js"></script>
+</body>
+</html>

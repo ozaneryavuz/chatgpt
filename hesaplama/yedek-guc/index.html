@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>UPS ve Power Station Kapasite Hesaplama | ALO186</title>
+  <meta name="description" content="Cihazlarınızın kesintide kaç saat çalışacağını veya kaç Wh UPS, power station ve batarya gerektiğini tarayıcınızda hesaplayın. Sürekli güç, kalkış gücü ve enerji rezervini birlikte değerlendirin.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="https://alo186.com/hesaplama/yedek-guc">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Kesintide Ne Kadar Dayanır? | ALO186">
+  <meta property="og:description" content="Cihazları ve hedef süreyi seçin; gerekli enerji kapasitesini, sürekli çıkışı ve kalkış gücünü görün.">
+  <meta property="og:url" content="https://alo186.com/hesaplama/yedek-guc">
+  <meta name="theme-color" content="#071631">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"WebApplication",
+    "name":"ALO186 Yedek Güç Hesaplayıcısı",
+    "applicationCategory":"UtilitiesApplication",
+    "operatingSystem":"Web",
+    "url":"https://alo186.com/hesaplama/yedek-guc",
+    "description":"UPS, power station ve batarya kapasitesini sürekli yük, kalkış gücü, verim ve güvenli deşarj oranıyla hesaplayan ücretsiz araç.",
+    "offers":{"@type":"Offer","price":"0","priceCurrency":"TRY"},
+    "publisher":{"@type":"Organization","name":"ALO186","url":"https://alo186.com"}
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"FAQPage",
+    "mainEntity":[
+      {
+        "@type":"Question",
+        "name":"UPS çalışma süresi yalnız VA değerinden hesaplanabilir mi?",
+        "acceptedAnswer":{"@type":"Answer","text":"Hayır. Çalışma süresi için bataryanın Wh kapasitesi, yükün gerçek W değeri, inverter verimi, kullanılabilir deşarj oranı ve batarya yaşlanması birlikte değerlendirilmelidir."}
+      },
+      {
+        "@type":"Question",
+        "name":"Buzdolabı veya kombi için neden kalkış gücü gerekir?",
+        "acceptedAnswer":{"@type":"Answer","text":"Motor, kompresör ve pompa içeren cihazlar ilk çalışmada nominal gücün birkaç katına çıkabilen kısa süreli güç isteyebilir. Güç kaynağının tepe çıkışı bu değeri karşılamalıdır."}
+      },
+      {
+        "@type":"Question",
+        "name":"Bu hesap kesin ürün seçimi yerine geçer mi?",
+        "acceptedAnswer":{"@type":"Answer","text":"Hayır. Sonuç ön değerlendirmedir. Cihaz etiketleri, üretici teknik verileri, dalga biçimi, geçiş süresi, koruma koordinasyonu ve sabit tesisat koşulları ayrıca doğrulanmalıdır."}
+      }
+    ]
+  }
+  </script>
+<link rel="stylesheet" href="/assets/alo186-accessibility-v215.css" data-alo186-accessibility-v215="true">
+</head>
+<body>
+  <a class="skip-link" href="#calculator">Hesaplayıcıya geç</a>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="https://alo186.com" aria-label="ALO186 ana sayfa">
+        <span class="brand-mark" aria-hidden="true">186</span>
+        <span><strong>ALO186</strong><small>Bağımsız elektrik bilgi ağı</small></span>
+      </a>
+      <nav aria-label="Üst menü">
+        <a href="https://alo186.com/elektrik-kesintisi">Kesinti</a>
+        <a href="https://alo186.com/hesaplama">Hesaplayıcılar</a>
+        <a href="https://alo186.com/amazon-elektrik-urunleri">Ürün seçimi</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="trust-banner" aria-label="Bağımsızlık ve güvenlik açıklaması">
+      <strong>Ön değerlendirme aracıdır.</strong>
+      Sabit tesisat, üç fazlı yük, tıbbi cihaz, asansör, büyük pompa ve yangın güvenliği sistemlerinde profesyonel projelendirme gerekir.
+    </section>
+
+    <section class="hero">
+      <div class="hero-copy">
+        <span class="eyebrow">UPS · power station · batarya</span>
+        <h1>Kesintide ne kadar <em>dayanır?</em></h1>
+        <p>Cihazlarınızı ve hedef süreyi seçin. Gerekli enerji kapasitesini, sürekli çıkış gücünü ve motorlu cihazlar için kalkış gücünü birlikte görün.</p>
+        <div class="privacy-chip"><span aria-hidden="true">✓</span> Hesaplama cihazınızda yapılır; değerler sunucuya gönderilmez.</div>
+      </div>
+      <aside class="formula-card" aria-label="Hesap yaklaşımı">
+        <span>Temel yaklaşım</span>
+        <strong>Wh = W × saat</strong>
+        <small>Sonuçta verim, güvenli deşarj, yaşlanma ve kapasite rezervi ayrıca uygulanır.</small>
+      </aside>
+    </section>
+
+    <section id="calculator" class="calculator-shell">
+      <div class="calculator-card">
+        <div class="section-heading">
+          <div>
+            <span class="step">1</span>
+            <h2>Hesaplama amacınızı seçin</h2>
+          </div>
+          <button type="button" class="text-button" id="exampleBtn">Örnek senaryo</button>
+        </div>
+
+        <div class="mode-switch" role="group" aria-label="Hesaplama modu">
+          <button type="button" class="mode-button active" data-mode="need" aria-pressed="true">Ne kadar kapasite almalıyım?</button>
+          <button type="button" class="mode-button" data-mode="runtime" aria-pressed="false">Elimdeki ürün kaç saat çalıştırır?</button>
+        </div>
+
+        <div class="section-subheading">
+          <span class="step">2</span>
+          <div><h2>Çalışacak cihazları ekleyin</h2><p>Hazır değeri seçebilir veya cihaz etiketindeki gerçek watt değerini girebilirsiniz.</p></div>
+        </div>
+
+        <div class="quick-add" id="quickAdd" aria-label="Hazır cihaz ekleme"></div>
+        <div class="load-list" id="loadList" aria-live="polite"></div>
+        <button type="button" class="secondary-button add-custom" id="addCustomBtn">+ Özel cihaz ekle</button>
+
+        <div class="section-subheading settings-heading">
+          <span class="step">3</span>
+          <div><h2>Enerji ve güvenlik varsayımları</h2><p>Varsayılan değerler genel ön değerlendirme içindir.</p></div>
+        </div>
+
+        <div class="form-grid">
+          <label class="field" id="runtimeField">
+            <span>Hedef çalışma süresi</span>
+            <div class="unit-input"><input id="targetHours" inputmode="decimal" value="4" min="0.1" max="168" step="0.1"><b>saat</b></div>
+          </label>
+
+          <label class="field">
+            <span>Batarya türü</span>
+            <select id="batteryType">
+              <option value="lifepo4">LiFePO₄ / modern power station</option>
+              <option value="lithium">Lityum iyon / NMC</option>
+              <option value="agm">AGM / GEL kurşun-asit</option>
+              <option value="leadacid">Sulu kurşun-asit</option>
+              <option value="custom">Özel değer</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Dönüşüm verimi</span>
+            <div class="unit-input"><input id="efficiency" inputmode="decimal" value="88" min="50" max="99" step="1"><b>%</b></div>
+          </label>
+
+          <label class="field">
+            <span>Kapasite rezervi</span>
+            <div class="unit-input"><input id="reserve" inputmode="decimal" value="20" min="0" max="80" step="1"><b>%</b></div>
+          </label>
+
+          <label class="field custom-only hidden" id="dodField">
+            <span>Kullanılabilir deşarj oranı</span>
+            <div class="unit-input"><input id="customDod" inputmode="decimal" value="80" min="10" max="100" step="1"><b>%</b></div>
+          </label>
+
+          <label class="field custom-only hidden" id="agingField">
+            <span>Batarya sağlık katsayısı</span>
+            <div class="unit-input"><input id="customAging" inputmode="decimal" value="90" min="40" max="100" step="1"><b>%</b></div>
+          </label>
+        </div>
+
+        <div class="existing-product hidden" id="existingProduct">
+          <h3>Mevcut güç kaynağınız</h3>
+          <div class="form-grid three">
+            <label class="field"><span>Nominal enerji kapasitesi</span><div class="unit-input"><input id="existingWh" inputmode="decimal" placeholder="Örn. 512" min="1"><b>Wh</b></div></label>
+            <label class="field"><span>Sürekli çıkış gücü</span><div class="unit-input"><input id="existingContinuousW" inputmode="decimal" placeholder="Örn. 500" min="1"><b>W</b></div></label>
+            <label class="field"><span>Tepe / kalkış gücü</span><div class="unit-input"><input id="existingPeakW" inputmode="decimal" placeholder="Örn. 1000" min="1"><b>W</b></div></label>
+          </div>
+        </div>
+
+        <div class="assumption-note" id="assumptionNote" role="status"></div>
+        <div class="validation" id="validation" role="alert" aria-live="polite"></div>
+
+        <div class="form-actions">
+          <button type="button" class="primary-button" id="calculateBtn">Hesapla</button>
+          <button type="button" class="secondary-button" id="clearBtn">Temizle</button>
+        </div>
+      </div>
+
+      <aside class="method-card">
+        <span class="step">i</span>
+        <h2>Neleri dikkate alır?</h2>
+        <ul>
+          <li>Toplam sürekli yük</li>
+          <li>En yüksek kalkış gücü</li>
+          <li>İnverter verimi</li>
+          <li>Güvenli deşarj oranı</li>
+          <li>Batarya yaşlanma payı</li>
+          <li>İstenen kapasite rezervi</li>
+        </ul>
+        <p>VA ile W aynı şey değildir. Çalışma süresi için ürünün enerji kapasitesi Wh olarak bilinmelidir.</p>
+      </aside>
+    </section>
+
+    <section class="results hidden" id="results" aria-live="polite">
+      <div class="results-header">
+        <div><span class="eyebrow">Kişiselleştirilmiş ön değerlendirme</span><h2 id="resultTitle">Sonuç</h2></div>
+        <div class="result-actions">
+          <button type="button" class="secondary-button" id="copyBtn">Özeti kopyala</button>
+          <button type="button" class="secondary-button" id="printBtn">PDF / yazdır</button>
+        </div>
+      </div>
+
+      <div class="metric-grid">
+        <article class="metric-card"><span>Sürekli yük</span><strong id="totalLoad">—</strong><small>Cihazların toplam gerçek gücü</small></article>
+        <article class="metric-card"><span>Muhtemel kalkış gücü</span><strong id="surgeLoad">—</strong><small>En ağır tek kalkış varsayımı</small></article>
+        <article class="metric-card"><span id="energyMetricLabel">Önerilen nominal kapasite</span><strong id="energyMetric">—</strong><small id="energyMetricNote">—</small></article>
+        <article class="metric-card accent"><span>Sonuç durumu</span><strong id="statusLabel">—</strong><small id="statusNote">—</small></article>
+      </div>
+
+      <div class="result-layout">
+        <article class="decision-card">
+          <h3>Teknik minimumlar</h3>
+          <div class="decision-row"><span>Yükün gerçek enerji ihtiyacı</span><strong id="rawEnergy">—</strong></div>
+          <div class="decision-row"><span>Önerilen sürekli çıkış</span><strong id="recommendedContinuous">—</strong></div>
+          <div class="decision-row"><span>Önerilen tepe çıkışı</span><strong id="recommendedPeak">—</strong></div>
+          <div class="decision-row"><span>Dalga biçimi</span><strong id="waveform">—</strong></div>
+          <div class="decision-row"><span>Çözüm sınıfı</span><strong id="solutionClass">—</strong></div>
+          <div class="decision-row"><span>Hesap güveni</span><strong id="confidence">—</strong></div>
+        </article>
+
+        <article class="insight-card">
+          <h3>Karar açıklaması</h3>
+          <ul id="insightList"></ul>
+        </article>
+      </div>
+
+      <div class="warning-card hidden" id="professionalWarning">
+        <strong>Profesyonel tasarım gerekli</strong>
+        <p id="professionalReason"></p>
+      </div>
+
+      <div class="next-step" id="nextStep">
+        <div><span class="eyebrow">Sonraki adım</span><h3 id="nextStepTitle">Uygun çözüm sınıfını karşılaştırın</h3><p id="nextStepText"></p></div>
+        <a class="primary-button link-button" id="nextStepLink" href="https://alo186.com/amazon-elektrik-urunleri">Çözümleri gör</a>
+      </div>
+    </section>
+
+    <section class="content-section">
+      <div class="section-heading static"><div><span class="eyebrow">Doğru seçim için</span><h2>Hesabın sınırlarını bilin</h2></div></div>
+      <div class="faq-grid">
+        <details><summary>UPS çalışma süresi neden ürün kutusundaki VA değerinden çıkmaz?</summary><p>VA, güç kapasitesini ifade eder; enerji süresini tek başına göstermez. Çalışma süresi için batarya Wh değeri ve yükün W değeri gerekir.</p></details>
+        <details><summary>Saf sinüs çıkış ne zaman önemlidir?</summary><p>Kombi, motor, pompa, buzdolabı, hassas elektronik ve üreticinin saf sinüs istediği cihazlarda önemlidir. Cihaz üreticisinin teknik gereksinimi esas alınmalıdır.</p></details>
+        <details><summary>Birden fazla motor aynı anda kalkarsa ne olur?</summary><p>Bu araç en ağır tek cihazın kalkışını toplam sürekli yüke ekler. Birden fazla motorun eşzamanlı kalkabileceği tesislerde profesyonel kısa süreli güç ve selektivite hesabı gerekir.</p></details>
+        <details><summary>Akü kapasitesi Ah olarak verilmişse Wh nasıl bulunur?</summary><p>Yaklaşık nominal enerji Wh = voltaj × Ah formülüyle bulunur. Seri/paralel bağlantı, gerçek deşarj performansı ve üretici eğrileri ayrıca değerlendirilmelidir.</p></details>
+      </div>
+      <div class="source-box">
+        <h3>Hesap yöntemi</h3>
+        <p>Nominal kapasite; yük enerjisinin dönüşüm verimi, kullanılabilir deşarj oranı, batarya sağlık katsayısı ve kullanıcı rezerviyle düzeltilmesiyle hesaplanır. Hazır cihaz güçleri yalnız başlangıç değeridir; cihaz etiketindeki gerçek değer daha güvenilirdir.</p>
+        <p>Son teknik kontrol: 27 Temmuz 2026.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div><strong>ALO186</strong><p>Bağımsız bilgilendirme platformudur; ürün satıcısı, EDAŞ veya kamu kurumu değildir.</p></div>
+      <div class="footer-links">
+        <a href="https://alo186.com/yayin-ilkeleri">Yayın ilkeleri</a>
+        <a href="https://alo186.com/bilgi-guncelligi">Bilgi güncelliği</a>
+        <a href="https://alo186.com/yasal/gizlilik">Gizlilik</a>
+      </div>
+    </div>
+  </footer>
+
+  <noscript><div class="noscript">Bu hesaplayıcının çalışması için JavaScript etkin olmalıdır.</div></noscript>
+  <script src="./app.js" defer></script>
+</body>
+</html>

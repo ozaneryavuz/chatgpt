@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Buzdolabı ve Dondurucu Kesinti Güvenliği | ALO186</title>
+  <meta name="description" content="Kesinti süresi, kapı durumu, doluluk, ölçülen sıcaklık ve buz kristali kanıtına göre buzdolabı ve dondurucu için güvenli sonraki adımı belirleyin; yalnız gerçek hazırlık eksiğinde ürün kategorisi açın.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta name="theme-color" content="#071631">
+  <link rel="canonical" href="https://alo186.com/hesaplama/buzdolabi-dondurucu-kesinti-guvenligi/">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"Buzdolabı ve Dondurucu Kesinti Güvenliği","url":"https://alo186.com/hesaplama/buzdolabi-dondurucu-kesinti-guvenligi/","applicationCategory":"HealthApplication","operatingSystem":"Web","isAccessibleForFree":true,"description":"Elektrik kesintisinde buzdolabı ve dondurucu için süre, sıcaklık ve buz kristali kanıtına dayalı kişisel verisiz karar aracı.","provider":{"@type":"Organization","name":"ALO186","url":"https://alo186.com","description":"Bağımsız bilgilendirme platformudur; sağlık veya gıda denetim kurumu, EDAŞ, kamu kurumu ya da ürün satıcısı değildir."}},{"@type":"DefinedTermSet","name":"Kesintide soğuk zincir terimleri","hasDefinedTerm":[{"@type":"DefinedTerm","name":"4 °C güvenli soğukluk referansı"},{"@type":"DefinedTerm","name":"Buz kristali kanıtı"},{"@type":"DefinedTerm","name":"Cihaz içi termometre"},{"@type":"DefinedTerm","name":"Kapı kapalı tutma"},{"@type":"DefinedTerm","name":"Soğuk zincir"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Elektrik kesilince buzdolabı ne kadar soğuk kalır?","acceptedAnswer":{"@type":"Answer","text":"Kapısı kapalı tutulursa yaklaşık dört saat rehber başlangıcı kullanılabilir; nihai karar ölçülen sıcaklık ve bozulabilir gıdanın 4 °C üzerinde kaldığı süreyle verilmelidir."}},{"@type":"Question","name":"Dondurucu kesintide ne kadar dayanır?","acceptedAnswer":{"@type":"Answer","text":"Kapısı açılmazsa tam dolu dondurucu yaklaşık 48 saat, yarı dolu dondurucu yaklaşık 24 saat sıcaklığını koruyabilir; bunlar garanti değil rehber sürelerdir."}},{"@type":"Question","name":"Termometrem ve soğutucu kutum varsa yenisini almam gerekir mi?","acceptedAnswer":{"@type":"Answer","text":"Hayır. Mevcut ekipman güvenli ve işlevsel ise satın alma gerekli değildir; araç yalnız gerçek hazırlık eksiğinde kategori yolu açar."}},{"@type":"Question","name":"ALO186 gıdanın güvenli olduğuna karar verir mi?","acceptedAnswer":{"@type":"Answer","text":"Hayır. Araç genel rehberlik sağlar; şüpheli gıdayı tatmamak ve güncel resmî sağlık talimatını izlemek gerekir."}]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ALO186","item":"https://alo186.com/"},{"@type":"ListItem","position":2,"name":"Hesaplama Merkezi","item":"https://alo186.com/hesaplama/"},{"@type":"ListItem","position":3,"name":"Buzdolabı ve Dondurucu Kesinti Güvenliği"}]}]}</script>
+<link rel="stylesheet" href="/assets/alo186-accessibility-v215.css" data-alo186-accessibility-v215="true">
+</head>
+<body>
+<a class="skip" href="#cold-form">Araca geç</a>
+<header class="top"><div class="shell"><a class="brand" href="../../"><span>ALO186</span><small>Bağımsız elektrik bilgi ağı</small></a></div></header>
+<main class="shell">
+  <section class="hero"><span class="eyebrow">4 °C · 4/24/48 saat · termometre · kapı yönetimi</span><h1>Kesintide soğuk zinciri kanıtla yönetin.</h1><p class="lead">Kesintinin aşamasını, kapının kapalı kalıp kalmadığını, cihaz doluluğunu, ölçülen sıcaklığı ve buz kristali kanıtını birlikte değerlendirin. Aktif kesintide alışverişe değil güvenli davranışa; gelecekteki hazırlıkta yalnız gerçek ekipman eksiğine ilerleyin.</p></section>
+  <div class="notice"><strong>Bağımsızlık ve satış ortaklığı açıklaması:</strong> ALO186 sağlık veya gıda denetim kurumu, EDAŞ, kamu kurumu ya da ürün satıcısı değildir. Bu araç fiyat, stok, puan, satıcı, teslimat veya garanti bilgisi yayımlamaz. Yalnız gelecekteki hazırlık için açılabilen mağaza bağlantıları Amazon satış ortaklığı bağlantılarıdır; kullanıcıya ek maliyet yansımaz.</div>
+
+  <form id="cold-form" class="panel" novalidate>
+    <h2>1. Olay ve cihaz durumu</h2>
+    <div class="grid form-grid">
+      <div class="field"><label for="stage">Hangi aşamadasınız?</label><select id="stage"><option value="preparedness">Kesinti öncesi hazırlık</option><option value="active">Kesinti şu anda devam ediyor</option><option value="restored">Elektrik geri geldi</option></select></div>
+      <div class="field"><label for="appliance">Değerlendirilen cihaz</label><select id="appliance"><option value="fridge">Buzdolabı</option><option value="freezer_full">Tam dolu dondurucu</option><option value="freezer_half">Yarı dolu dondurucu</option><option value="both">Buzdolabı ve dondurucu</option></select></div>
+      <div class="field"><label for="hours">Kesinti süresi (saat)</label><input id="hours" type="number" min="0" max="168" step="0.25" value="0"></div>
+    </div>
+
+    <h2>2. Sıcaklık ve davranış kanıtları</h2>
+    <div class="grid form-grid">
+      <label class="check"><input id="doorsClosed" type="checkbox" checked><span>Kapı veya kapılar gereksiz yere açılmadı.</span></label>
+      <label class="check"><input id="thermometer" type="checkbox"><span>Cihaz içi termometrem var ve çalışıyor.</span></label>
+      <label class="check"><input id="cooler" type="checkbox"><span>Yalıtımlı soğutucu kutu veya çantam var.</span></label>
+      <label class="check"><input id="gelPacks" type="checkbox"><span>Donmuş jel paket veya güvenli buz kaynağım var.</span></label>
+    </div>
+    <div class="grid form-grid">
+      <div class="field"><label for="fridgeTemp">Buzdolabı sıcaklığı, °C (biliniyorsa)</label><input id="fridgeTemp" type="number" min="-10" max="30" step="0.1" placeholder="Örn. 3,8"></div>
+      <div class="field"><label for="freezerTemp">Dondurucu sıcaklığı, °C (biliniyorsa)</label><input id="freezerTemp" type="number" min="-40" max="20" step="0.1" placeholder="Örn. -12"></div>
+      <div class="field"><label for="iceCrystals">Dondurulmuş gıdada buz kristali</label><select id="iceCrystals"><option value="unknown">Bilinmiyor / bakılmadı</option><option value="yes">Var</option><option value="no">Yok</option></select></div>
+    </div>
+
+    <h2>3. Güvenlik kapısı</h2>
+    <div class="grid form-grid">
+      <label class="check"><input id="electricalHazard" type="checkbox"><span>Priz, fiş veya cihazda yanık kokusu, kıvılcım, erime, açık iletken veya elektrik çarpması belirtisi var.</span></label>
+      <label class="check"><input id="floodContact" type="checkbox"><span>Cihaz, priz veya kablo su ya da taşkınla temas etti.</span></label>
+    </div>
+    <div class="actions"><button class="button primary" type="submit">Güvenli sonraki adımı oluştur</button><a class="button" href="../../haberler/elektrik-kesintisinde-buzdolabi-dondurucu-kac-saat-dayanir/">Ayrıntılı gıda güvenliği rehberi</a></div>
+  </form>
+
+  <section id="result" class="panel result hidden" tabindex="-1" aria-live="polite"></section>
+
+  <section id="commerce" class="panel commerce hidden" aria-labelledby="commerceTitle">
+    <h2 id="commerceTitle">Gelecekteki kesinti hazırlığı için yalnız gerçek eksikler</h2>
+    <p class="muted">Aktif kesinti sırasında kapıyı sırf termometre yerleştirmek için açmayın. Bu kategoriler yalnız sonraki olaylara hazırlık içindir; elinizde çalışan eşdeğer ekipman varsa yeni ürün gerekli değildir.</p>
+    <div id="productNeeds" class="grid product-grid"></div>
+    <div class="gate">
+      <label class="check"><input id="actualMissing" type="checkbox"><span>Gösterilen ekipmanın gerçekten eksik olduğunu ve mevcut ürünün aynı işlevi karşılamadığını doğruladım.</span></label>
+      <label class="check"><input id="futurePreparedness" type="checkbox"><span>Bağlantıyı mevcut cihaz kapısını açmak için değil, gelecekteki kesinti hazırlığı için kullanacağım.</span></label>
+      <label class="check"><input id="affiliateAccepted" type="checkbox"><span>Bağlantıların Amazon satış ortaklığı bağlantıları olduğunu anlıyorum.</span></label>
+    </div>
+  </section>
+
+  <section class="panel records" aria-labelledby="recordsTitle"><h2 id="recordsTitle">Kişisel verisiz soğuk zincir günlüğü</h2><p class="muted">En fazla 8 karar yalnız bu tarayıcıda 365 gün tutulur. Sayfayı ziyaret etmek süreyi uzatmaz; ad, e-posta, telefon, adres veya hesap istenmez.</p><div id="records"></div><div class="actions"><button id="save" class="button" type="button">Sonucu kaydet</button><button id="export" class="button" type="button">JSON indir</button><button id="calendar" class="button" type="button">12 haftalık sıcaklık kontrol takvimi (.ics)</button></div></section>
+
+  <section class="panel"><h2>Karar sınırları</h2><ul><li>Buzdolabı için yaklaşık 4 saat; tam dondurucu için 48 saat, yarı dolu için 24 saat yalnız kapılar kapalıyken rehber başlangıçtır.</li><li>Gıda güvenliği yalnız görünüş, koku veya tatla doğrulanmaz; şüpheli gıdayı tatmayın.</li><li>Süre veya sıcaklık bilinmiyorsa araç güvenli olduğunu iddia etmez; güncel resmî gıda güvenliği tablosuna ilerletir.</li><li>Mevcut termometre, soğutucu ve jel paketler işlevselse satın alma sonucu kapalı kalır.</li></ul></section>
+
+  <section class="panel sources"><h2>Birincil kaynaklar</h2><p><a href="https://www.fda.gov/food/food-safety-during-emergencies/power-outages-key-tips-consumers-about-food-safety" rel="nofollow noopener">FDA — Power Outages: Key Tips for Consumers</a></p><p><a href="https://www.fda.gov/food/buy-store-serve-safe-food/food-and-water-safety-during-power-outages-and-floods" rel="nofollow noopener">FDA — Food and Water Safety During Power Outages and Floods</a></p><p><a href="https://www.foodsafety.gov/blog/three-ways-keep-food-safe-when-you-lose-power" rel="nofollow noopener">FoodSafety.gov — Three Ways to Keep Food Safe When You Lose Power</a></p><p class="muted">Kaynaklar 30 Temmuz 2026 tarihinde kontrol edildi. Türkiye’de yetkili sağlık kurumunun olaya özel güncel talimatı varsa öncelikle o talimat izlenmelidir.</p></section>
+</main>
+<footer><div class="shell">ALO186 bağımsız bilgilendirme platformudur; arıza kaydı almaz, gıda güvenliği kararı vermez, ürün satmaz ve kişisel veri istemez.</div></footer>
+<script src="./app.js"></script>
+</body>
+</html>

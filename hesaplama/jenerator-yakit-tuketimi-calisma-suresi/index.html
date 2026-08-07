@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Jeneratör Yakıt Tüketimi ve Çalışma Süresi Hesabı | ALO186</title>
+  <meta name="description" content="Jeneratörün gerçek yük oranı, üretici yakıt eğrisi, tank kapasitesi ve hedef süreyle litre/saat, yaklaşık çalışma süresi ve yakıt ihtiyacını hesaplayın.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta name="theme-color" content="#071631">
+  <link rel="canonical" href="https://alo186.com/hesaplama/jenerator-yakit-tuketimi-calisma-suresi/">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"Jeneratör Yakıt Tüketimi ve Çalışma Süresi Hesaplayıcı","url":"https://alo186.com/hesaplama/jenerator-yakit-tuketimi-calisma-suresi/","applicationCategory":"UtilitiesApplication","operatingSystem":"Web","isAccessibleForFree":true,"description":"Gerçek jeneratör yük oranını üretici veya ölçülmüş yakıt eğrisiyle eşleştirerek litre/saat, tank çalışma süresi ve hedef yakıt ihtiyacını hesaplayan kişisel verisiz araç.","provider":{"@type":"Organization","name":"ALO186","url":"https://alo186.com","description":"Bağımsız elektrik bilgi platformudur; jeneratör üreticisi, yakıt satıcısı, EDAŞ, kamu kurumu veya uygunluk kuruluşu değildir."}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Jeneratör saatte kaç litre yakar?","acceptedAnswer":{"@type":"Answer","text":"Tek bir sabit değer yoktur. Sürekli kW kapasitesi, gerçek yük oranı, motor, yakıt türü, bakım ve üreticinin yüzde 25/50/75/100 yük yakıt eğrisi birlikte değerlendirilmelidir."}},{"@type":"Question","name":"Tank kapasitesini litre/saat değerine bölmek yeterli midir?","acceptedAnswer":{"@type":"Answer","text":"Yalnız yakıtın tamamı kullanılabilir kabul edilmez. Üretici tank bilgisi, kullanılabilir yakıt payı, gerçek yükte tüketim, bakım, transfer ve güvenlik rezervi birlikte doğrulanmalıdır."}},{"@type":"Question","name":"Jeneratör garajda veya balkonda çalıştırılır mı?","acceptedAnswer":{"@type":"Answer","text":"Hayır. Jeneratör bina içinde, garajda, balkonda veya kapı, pencere ve hava girişine yakın çalıştırılmaz. Karbonmonoksit renksiz ve kokusuzdur; açık kapı güvenli kullanım sağlamaz."}},{"@type":"Question","name":"Mevcut jeneratör hedef süreyi karşılıyorsa yenisi gerekir mi?","acceptedAnswer":{"@type":"Answer","text":"Sürekli güç, doğrulanmış yakıt eğrisi, kullanılabilir tank, bakım, güvenli bağlantı ve gerçek transfer testi hedefi karşılıyorsa araç yeni ürün almayın sonucu verir."}}]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ALO186","item":"https://alo186.com/"},{"@type":"ListItem","position":2,"name":"Hesaplama Merkezi","item":"https://alo186.com/hesaplama/"},{"@type":"ListItem","position":3,"name":"Jeneratör yakıt ve süre hesabı"}]}]}</script>
+<link rel="stylesheet" href="/assets/alo186-accessibility-v215.css" data-alo186-accessibility-v215="true">
+</head>
+<body>
+<a class="skip-link" href="#generatorForm">Araca geç</a>
+<header class="site-header"><div class="header-inner"><a class="brand" href="../../"><span>186</span><b>ALO186<small>Bağımsız elektrik bilgi ağı</small></b></a><nav aria-label="Üst menü"><a href="../">Hesaplayıcılar</a><a href="../jenerator-gucu-secimi/">Jeneratör gücü</a><a href="../jenerator-guvenli-kullanim-testi/">Güvenlik testi</a></nav></div></header>
+<main>
+  <section class="safety-banner"><strong>Karbonmonoksit ve elektrik güvenliği önce gelir.</strong> CO alarmı, baş ağrısı, baş dönmesi, bulantı, bilinç değişikliği, duman, yangın veya elektrik çarpmasında jeneratöre yaklaşmayın; herkesi temiz havaya çıkarın ve 112’yi arayın. Jeneratör bina içinde, garajda, balkonda veya açıklıklara yakın çalıştırılmaz.</section>
+  <section class="hero">
+    <div><span class="eyebrow">Gerçek yük % · üretici L/saat eğrisi · tank · hedef süre</span><h1>Jeneratörün yakıtını katalog tahminiyle değil, <em>gerçek yük oranıyla</em> hesaplayın.</h1><p>Sürekli kW, eşzamanlı yük, üreticinin yüzde 25/50/75/100 yakıt tablosu ve kullanılabilir tank miktarını girin. Araç litre/saat, yaklaşık çalışma süresi, hedef yakıt ve güvenli sonraki adımı üretir.</p><div class="chips"><span>Kişisel veri yok</span><span>Tarayıcıda hesaplama</span><span>Mobil uyumlu</span><span>Satın almama sonucu</span></div></div>
+    <aside><strong>Hesap neyi kanıtlamaz?</strong><ul><li>Motor kalkış ve gerilim/frekans kabulünü</li><li>CO, egzoz ve havalandırma güvenliğini</li><li>Transfer, nötr-toprak ve koruma düzenini</li><li>Yakıt depolama uygunluğunu</li></ul><p>Bunlar ayrı olarak doğrulanmadan çalışma onayı oluşmaz.</p></aside>
+  </section>
+
+  <form id="generatorForm" novalidate>
+    <section class="panel"><h2>1. Önce can güvenliği ve kullanım bağlamı</h2>
+      <label class="danger-check"><input name="emergency" type="checkbox" value="yes"><span>CO alarmı, duman, yangın, elektrik çarpması veya kişide zehirlenme belirtisi var.</span></label>
+      <div class="grid">
+        <label><span>Karbonmonoksit durumu</span><select name="coStatus"><option value="none">Alarm veya belirti yok</option><option value="alarm">CO alarmı çalıyor</option><option value="symptoms">Baş ağrısı / baş dönmesi / bulantı / bilinç değişikliği</option></select></label>
+        <label><span>Jeneratör konumu</span><select name="location"><option value="outdoors_clear">Tamamen açık alan; açıklıklardan güvenli uzaklık üreticiye göre doğrulandı</option><option value="near_opening">Dışarıda fakat kapı/pencere/hava girişine yakın</option><option value="balcony">Balkon / teras nişi</option><option value="garage">Garaj / otopark</option><option value="indoors">Bina veya kapalı alan</option><option value="generator_room">Projeli jeneratör odası</option></select></label>
+        <label><span>Çalışma durumu</span><select name="mode"><option value="planning">Önceden planlama</option><option value="active">Aktif kesinti sürüyor</option></select></label>
+        <label><span>Jeneratör sınıfı</span><select name="generatorType"><option value="portable">Taşınabilir / fişli yükler</option><option value="fixed">Sabit / bina veya işletme beslemesi</option></select></label>
+        <label><span>Yakıt türü</span><select name="fuelType"><option value="diesel">Dizel</option><option value="gasoline">Benzin</option><option value="lpg_ng">LPG / doğal gaz</option></select></label>
+        <label><span>Bağlantı biçimi</span><select name="connection"><option value="unknown">Bilmiyorum</option><option value="individual">Yükler doğrudan jeneratörün izinli çıkışlarına bağlı</option><option value="manual_transfer">Uygun manuel transfer / şebekeden ayırma</option><option value="ats">ATS/AMF ve uygun transfer düzeni</option><option value="backfeed">Prizden binaya ters besleme / erkek-erkek kablo</option></select></label>
+      </div>
+    </section>
+
+    <section class="panel"><h2>2. Jeneratör, gerçek yük ve hedef süre</h2><p class="hint">Standby/azami kVA yerine üreticinin sürekli kW değerini; yükte ise aynı anda gerçekten çalışacak cihazların toplamını kullanın.</p>
+      <div class="grid">
+        <label><span>Sürekli jeneratör gücü</span><input name="continuousKW" type="number" min="0.5" max="5000" step="0.1" inputmode="decimal" placeholder="kW"></label>
+        <label><span>Gerçek eşzamanlı yük</span><input name="loadKW" type="number" min="0.1" max="5000" step="0.1" inputmode="decimal" placeholder="kW"></label>
+        <label><span>Tank kapasitesi</span><input name="tankLiters" type="number" min="0" max="100000" step="0.1" inputmode="decimal" placeholder="litre"></label>
+        <label><span>Kullanılabilir yakıt payı</span><input name="usablePct" type="number" min="50" max="100" step="1" value="90" inputmode="decimal"><small>Tankın tamamını kullanılabilir saymayın; üreticiye göre düzeltin.</small></label>
+        <label><span>Hedef çalışma süresi</span><input name="targetHours" type="number" min="0.5" max="720" step="0.5" inputmode="decimal" placeholder="saat"></label>
+        <label><span>Yakıt birim fiyatı — isteğe bağlı</span><input name="fuelPrice" type="number" min="0" max="10000" step="0.01" inputmode="decimal" placeholder="TL/litre"><small>ALO186 güncel fiyat yayımlamaz; kendi değerinizi girin.</small></label>
+      </div>
+    </section>
+
+    <section class="panel"><h2>3. Üretici yakıt eğrisi veya gerçek ölçüm</h2><p class="hint">Teknik föydeki litre/saat değerlerini girin. En az iki yük noktası, mevcut yükü çevreliyorsa lineer ara değer hesaplanır. Boşta tüketimi bütün yükler için kullanmayın.</p>
+      <div class="grid four">
+        <label><span>%25 yükte</span><input name="fuel25" type="number" min="0" max="1000" step="0.01" inputmode="decimal" placeholder="L/saat"></label>
+        <label><span>%50 yükte</span><input name="fuel50" type="number" min="0" max="1000" step="0.01" inputmode="decimal" placeholder="L/saat"></label>
+        <label><span>%75 yükte</span><input name="fuel75" type="number" min="0" max="1000" step="0.01" inputmode="decimal" placeholder="L/saat"></label>
+        <label><span>%100 yükte</span><input name="fuel100" type="number" min="0" max="1000" step="0.01" inputmode="decimal" placeholder="L/saat"></label>
+        <label><span>Yakıt verisinin kaynağı</span><select name="curveEvidence"><option value="none">Bilmiyorum / pazaryeri tahmini</option><option value="manufacturer">Tam model üretici teknik föyü</option><option value="measured">Yük kW ve süreyle gerçek ölçüm</option><option value="estimate">Genel internet tahmini</option></select></label>
+      </div>
+    </section>
+
+    <section class="panel"><h2>4. Mevcut sistemin görev kanıtları</h2>
+      <div class="grid">
+        <label><span>Mevcut jeneratör var mı?</span><select name="existing"><option value="yes">Evet</option><option value="no">Hayır, seçenek araştırıyorum</option></select></label>
+        <label><span>Bakım ve gündüz gerçek yük testi</span><select name="maintenance"><option value="unknown">Bilmiyorum / yapılmadı</option><option value="yes">Bakım güncel ve yük testi başarılı</option><option value="no">Bakım eksik veya test başarısız</option></select></label>
+        <label><span>Gerçek transfer/görev testi</span><select name="transferTest"><option value="unknown">Yapılmadı / bilmiyorum</option><option value="yes">Yükler kesintide başarıyla beslendi</option><option value="no">Aşırı yük, kapanma veya transfer sorunu oldu</option></select></label>
+        <label><span>Yaşam alanında CO alarmı</span><select name="coAlarm"><option value="unknown">Bilmiyorum</option><option value="yes">Çalışıyor, yaşı ve testi doğrulandı</option><option value="no">Yok / test başarısız</option></select></label>
+        <label><span>Yakıt depolama koşulu</span><select name="fuelStorage"><option value="unknown">Bilmiyorum / ek yakıt planlamıyorum</option><option value="safe">Üretici ve yerel yangın kurallarına göre doğrulandı</option><option value="unsafe">Yaşam alanı, ısı/kıvılcım veya uygunsuz kap riski var</option></select></label>
+      </div>
+    </section>
+
+    <div class="form-actions"><button type="submit">Yakıt ve süre planını oluştur</button><button type="reset" class="ghost">Formu temizle</button></div>
+  </form>
+
+  <section id="result" class="result" hidden tabindex="-1" aria-live="polite"></section>
+
+  <section id="affiliate" class="affiliate" hidden aria-labelledby="affiliate-title">
+    <span class="eyebrow">Koşullu ve şeffaf ürün yolu</span><h2 id="affiliate-title">Ürün sınıfına geçmeden önce üç koşulu doğrulayın</h2>
+    <p>Bu bağlantı doğrudan ürün uygunluğu veya fiyat iddiası değildir. Sonraki sayfadaki dış bağlantılar Amazon satış ortaklığı bağlantısı olabilir; kullanıcıya ek maliyet yansımaz.</p>
+    <label><input type="checkbox" data-affiliate-check> Mevcut güvenli jeneratör veya başka kaynak hedefi karşılamıyor.</label>
+    <label><input type="checkbox" data-affiliate-check> Sürekli kW, kalkış, yakıt eğrisi, CO, bağlantı ve transferi tam modelde yeniden kontrol edeceğim.</label>
+    <label><input type="checkbox" data-affiliate-check> Sonraki dış bağlantının satış ortaklığı bağlantısı olabileceğini anlıyorum.</label>
+    <a id="affiliateLink" class="affiliate-link disabled" href="#" rel="sponsored nofollow noopener" aria-disabled="true" tabindex="-1">Şeffaf ürün karşılaştırmasına ilerle →</a>
+  </section>
+
+  <section class="utility-actions" aria-label="Sonuç araçları"><button id="downloadJson" type="button">Kişisel verisiz JSON indir</button><button id="calendar" type="button">90 günlük kontrol takvimi</button><button id="print" type="button">Yazdır / PDF</button></section>
+
+  <section class="content">
+    <h2>Hesaplama yöntemi</h2>
+    <p>Yük oranı, gerçek yük kW değerinin jeneratörün sürekli kW değerine bölünmesiyle bulunur. Yakıt tüketimi, bu oranı çevreleyen iki üretici tablo noktası arasında lineer olarak hesaplanır. Tank çalışma süresi, kullanılabilir yakıtın litre/saat değerine bölünmesidir. Bu yöntem motor kalkışı, irtifa/sıcaklık derating’i, yakıt kalitesi veya bakım arızasını kanıtlamaz.</p>
+    <div class="notice"><strong>Yakıt ikmali:</strong> Çalışan veya sıcak jeneratöre yakıt eklemeyin. Motorun durdurulması, soğuma süresi, kap ve depolama kuralları için tam model üretici talimatını uygulayın.</div>
+    <h2>Sonuç neden ürün önerisi olmayabilir?</h2>
+    <p>Mevcut sistem hedefi karşılıyorsa yeni ürün alınmaması doğru sonuçtur. Sabit bina beslemesi, yüksek güç, belirsiz transfer, LPG/doğal gaz, CO veya yakıt depolama riski tüketici tipi ürün rotasına dönüştürülmez.</p>
+  </section>
+</main>
+<footer><div><strong>ALO186</strong><p>Bağımsız bilgilendirme platformudur; EDAŞ, kamu kurumu, jeneratör üreticisi, yakıt satıcısı veya yetkili servis değildir.</p></div><nav aria-label="Alt menü"><a href="../../yayin-ilkeleri">Yayın ilkeleri</a><a href="../../gizlilik">Gizlilik</a><a href="../../yasal/amazon-satis-ortakligi">Satış ortaklığı açıklaması</a></nav></footer>
+<script src="./app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Elektrik Faturası Zekâ Merkezi | ALO186</title>
+  <meta name="description" content="Son 12 aylık tüketiminizi analiz edin; 2026 SKTT limiti, yıl sonu tüketim tahmini, anomali ve serbest tüketici durumunuzu kişisel veri paylaşmadan görün.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="https://alo186.com/fatura-analizi">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Elektrik Faturası Zekâ Merkezi | ALO186">
+  <meta property="og:description" content="Tüketim eğiliminizi ve 2026 SKTT riskinizi tarayıcınızda analiz edin. Veriler cihazınızdan çıkmaz.">
+  <meta property="og:url" content="https://alo186.com/fatura-analizi">
+  <meta name="theme-color" content="#0b1633">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"WebApplication",
+    "name":"ALO186 Elektrik Faturası Zekâ Merkezi",
+    "applicationCategory":"UtilitiesApplication",
+    "operatingSystem":"Web",
+    "url":"https://alo186.com/fatura-analizi",
+    "description":"Elektrik tüketimi, 2026 SKTT limiti ve serbest tüketici durumunu kişisel veri istemeden analiz eden bağımsız hesaplama aracı.",
+    "offers":{"@type":"Offer","price":"0","priceCurrency":"TRY"},
+    "publisher":{"@type":"Organization","name":"ALO186","url":"https://alo186.com"}
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"FAQPage",
+    "mainEntity":[
+      {
+        "@type":"Question",
+        "name":"2026 yılında meskenler için SKTT limiti kaç kWh?",
+        "acceptedAnswer":{"@type":"Answer","text":"EPDK açıklamasına göre 2026 yılı mesken son kaynak limiti 4.000 kWh/yıldır. Limit 1 Ocak 2026'dan itibaren geçerlidir."}
+      },
+      {
+        "@type":"Question",
+        "name":"4.000 kWh sınırı aşılırsa tarife hemen değişir mi?",
+        "acceptedAnswer":{"@type":"Answer","text":"EPDK açıklamasına göre limitin aşıldığı ayı takip eden üçüncü ayın ilk gününden itibaren, ikili anlaşma yapmamış tüketiciye yüksek tüketimli son kaynak tarifesi uygulanır."}
+      },
+      {
+        "@type":"Question",
+        "name":"ALO186 fatura tutarını kesin hesaplar mı?",
+        "acceptedAnswer":{"@type":"Answer","text":"Hayır. Bu araç tüketim eğilimi ve limit riskini gösterir. Kesin fatura hesabı için EPDK'nın resmî elektrik fatura hesaplama modülü kullanılmalıdır."}
+      }
+    ]
+  }
+  </script>
+<link rel="stylesheet" href="/assets/alo186-accessibility-v215.css" data-alo186-accessibility-v215="true">
+</head>
+<body>
+  <a class="skip-link" href="#analiz">İçeriğe geç</a>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="https://alo186.com" aria-label="ALO186 ana sayfa">
+        <span class="brand-mark" aria-hidden="true">186</span>
+        <span><strong>ALO186</strong><small>Bağımsız elektrik bilgi ağı</small></span>
+      </a>
+      <nav aria-label="Üst menü">
+        <a href="https://alo186.com/elektrik-kesintisi">Kesinti</a>
+        <a href="https://alo186.com/edas">EDAŞ bul</a>
+        <a href="https://alo186.com/hesaplama">Hesaplayıcılar</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="trust-banner" aria-label="Bağımsızlık açıklaması">
+      <strong>Bağımsız bilgilendirme aracıdır.</strong>
+      EPDK, dağıtım şirketi veya görevli tedarik şirketi değildir. Hesaplamalar yön göstericidir.
+    </section>
+
+    <section class="hero">
+      <div class="hero-copy">
+        <span class="eyebrow">2026 tüketim ve tarife ön kontrolü</span>
+        <h1>Elektrik faturanızın yalnız tutarını değil, <em>yönünü</em> görün.</h1>
+        <p>Son aylardaki kWh tüketimlerinizi girin. Yıl sonu tahmininizi, 2026 SKTT limitine kalan miktarı, olası sınır aşım ayını ve sıra dışı tüketim dönemlerini görün.</p>
+        <div class="privacy-chip">
+          <span aria-hidden="true">✓</span>
+          Hesaplama cihazınızda yapılır; girdiğiniz değerler sunucuya gönderilmez.
+        </div>
+      </div>
+      <aside class="hero-stat" aria-label="2026 resmî limit özeti">
+        <span>Mesken SKTT limiti</span>
+        <strong>4.000 kWh/yıl</strong>
+        <small>Aylık ortalama karşılığı yaklaşık 333 kWh</small>
+        <a href="https://www.epdk.gov.tr/Detay/Icerik/2-16213/son-kaynak-tedarik-tarifesi-sktt-duzenlemesi-il" target="_blank" rel="noopener noreferrer">EPDK açıklamasını aç ↗</a>
+      </aside>
+    </section>
+
+    <section id="analiz" class="calculator-shell">
+      <div class="calculator-card">
+        <div class="section-heading">
+          <div>
+            <span class="step">1</span>
+            <h2>Abone grubunu ve tüketimleri girin</h2>
+          </div>
+          <button type="button" class="text-button" id="exampleBtn">Örnek veri doldur</button>
+        </div>
+
+        <div class="form-grid">
+          <label class="field">
+            <span>Abone grubu</span>
+            <select id="subscriberGroup">
+              <option value="residential">Mesken</option>
+              <option value="service">Kamu ve özel hizmetler sektörü / diğer</option>
+              <option value="industry">Sanayi</option>
+              <option value="lighting">Aydınlatma</option>
+              <option value="agriculture">Tarımsal faaliyetler</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Analiz yılı</span>
+            <select id="analysisYear">
+              <option value="2026" selected>2026</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="info-note" id="limitNote" role="status">
+          Mesken için 2026 son kaynak limiti 4.000 kWh/yıldır.
+        </div>
+
+        <div class="month-grid" id="monthGrid" aria-label="Aylık tüketimler"></div>
+
+        <div class="form-actions">
+          <button class="primary-button" type="button" id="analyzeBtn">Tüketimimi analiz et</button>
+          <button class="secondary-button" type="button" id="clearBtn">Temizle</button>
+        </div>
+
+        <div class="validation" id="validation" role="alert" aria-live="polite"></div>
+      </div>
+
+      <aside class="method-card">
+        <span class="step">2</span>
+        <h2>Nasıl hesaplanır?</h2>
+        <p>Araç iki farklı projeksiyon kullanır:</p>
+        <ol>
+          <li>Girilen ayların basit ortalaması</li>
+          <li>Son aylara daha fazla ağırlık veren eğilim hesabı</li>
+        </ol>
+        <p>Sonuç tek bir kesin sayı yerine aralık olarak verilir. Tarife tutarı hesaplanmaz.</p>
+        <a href="https://lisans.epdk.gov.tr/epvys-web/faces/pages/online/tarifeFatura/tarifeFatura.xhtml" target="_blank" rel="noopener noreferrer">EPDK resmî fatura hesaplayıcısı ↗</a>
+      </aside>
+    </section>
+
+    <section class="results hidden" id="results" aria-live="polite">
+      <div class="results-header">
+        <div>
+          <span class="eyebrow">Kişisel tüketim özeti</span>
+          <h2>Analiz sonucunuz</h2>
+        </div>
+        <div class="result-actions">
+          <button type="button" class="secondary-button" id="copyBtn">Özeti kopyala</button>
+          <button type="button" class="secondary-button" id="printBtn">PDF / yazdır</button>
+        </div>
+      </div>
+
+      <div class="metric-grid">
+        <article class="metric-card">
+          <span>Girilen toplam</span>
+          <strong id="actualTotal">—</strong>
+          <small id="monthsEntered">—</small>
+        </article>
+        <article class="metric-card">
+          <span>Aylık ortalama</span>
+          <strong id="monthlyAverage">—</strong>
+          <small>Girilen dönem ortalaması</small>
+        </article>
+        <article class="metric-card">
+          <span>Yıl sonu tahmini</span>
+          <strong id="forecastRange">—</strong>
+          <small>İki yöntemden oluşan aralık</small>
+        </article>
+        <article class="metric-card accent">
+          <span>SKTT risk seviyesi</span>
+          <strong id="riskLabel">—</strong>
+          <small id="riskExplanation">—</small>
+        </article>
+      </div>
+
+      <div class="result-layout">
+        <article class="chart-card">
+          <div class="card-title-row">
+            <div>
+              <h3>Aylık tüketim görünümü</h3>
+              <p>Turuncu çizgi, seçilen abone grubu için limitin aylık ortalama karşılığını gösterir.</p>
+            </div>
+            <span class="legend"><i></i> kWh</span>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="usageChart" width="900" height="360" aria-label="Aylık tüketim grafiği" role="img"></canvas>
+          </div>
+        </article>
+
+        <article class="decision-card">
+          <h3>Karar özeti</h3>
+          <div class="decision-row"><span>Yıllık limit</span><strong id="annualLimit">—</strong></div>
+          <div class="decision-row"><span>Mevcut tüketime göre kalan</span><strong id="remainingToLimit">—</strong></div>
+          <div class="decision-row"><span>Tahmini aşım ayı</span><strong id="crossingMonth">—</strong></div>
+          <div class="decision-row"><span>Muhtemel uygulama başlangıcı</span><strong id="applicationDate">—</strong></div>
+          <div class="decision-row"><span>Serbest tüketici hakkı</span><strong id="eligibleFreeConsumer">—</strong></div>
+        </article>
+      </div>
+
+      <div class="insight-grid">
+        <article class="insight-card">
+          <span class="step">3</span>
+          <h3>Dikkat çeken aylar</h3>
+          <ul id="anomalyList"></ul>
+        </article>
+        <article class="insight-card">
+          <span class="step">4</span>
+          <h3>Önerilen sonraki adımlar</h3>
+          <ul id="actionList"></ul>
+        </article>
+      </div>
+
+      <div class="business-cta">
+        <div>
+          <span class="eyebrow">Otel, site veya işletme misiniz?</span>
+          <h3>Faturayı tüketim, doluluk, üretim ve reaktif değerlerle birlikte analiz edin.</h3>
+          <p>Çoklu tesis, kWh/oda-gece, reaktif ceza, GES öz tüketimi ve anomali raporu için teknik ön değerlendirme oluşturun.</p>
+        </div>
+        <a class="primary-button link-button" href="https://alo186.com/iletisim?konu=enerji-fatura-analizi">İşletme analizi talep et</a>
+      </div>
+    </section>
+
+    <section class="content-section">
+      <div class="section-heading static">
+        <div>
+          <span class="eyebrow">Kısa ve doğru cevaplar</span>
+          <h2>2026 SKTT ve fatura analizi hakkında</h2>
+        </div>
+      </div>
+
+      <div class="faq-grid">
+        <details>
+          <summary>Meskenler için 4.000 kWh sınırı nasıl uygulanır?</summary>
+          <p>EPDK açıklamasına göre 2026 yılında mesken abone grubu için yıllık limit 4.000 kWh’dır. İçinde bulunulan veya bir önceki takvim yılında limit aşılırsa, ikili anlaşma yapmamış tüketici takip eden üçüncü ayın ilk gününden itibaren yüksek tüketimli son kaynak tüketicisi olarak faturalandırılır.</p>
+        </details>
+        <details>
+          <summary>Aylık 333 kWh tüketmek doğrudan SKTT’ye girmek anlamına gelir mi?</summary>
+          <p>Hayır. 333 kWh yalnızca 4.000 kWh yıllık limitin aylık aritmetik karşılığıdır. Değerlendirme takvim yılı toplamı üzerinden yapılır; mevsimsel kullanım nedeniyle aylık tüketimler farklı olabilir.</p>
+        </details>
+        <details>
+          <summary>2026 serbest tüketici limiti nedir?</summary>
+          <p>EPDK’ya göre 2026 serbest tüketici limiti yıllık 500 kWh’dır. Limiti aşan tüketiciler, mevzuattaki koşullar çerçevesinde tedarikçisini seçme hakkına sahip olabilir.</p>
+        </details>
+        <details>
+          <summary>Bu araç faturamın TL tutarını neden hesaplamıyor?</summary>
+          <p>Tarife, tüketici grubu, dönem, vergi ve güncel fiyat bileşenleri değişebilir. Kesin TL hesabı için EPDK’nın resmî hesaplama modülüne yönlendirme yapılır; ALO186 yalnız tüketim eğilimi ve risk ön değerlendirmesi sunar.</p>
+        </details>
+      </div>
+
+      <div class="source-box">
+        <h3>Resmî kaynaklar</h3>
+        <ul>
+          <li><a href="https://www.epdk.gov.tr/Detay/Icerik/2-16213/son-kaynak-tedarik-tarifesi-sktt-duzenlemesi-il" target="_blank" rel="noopener noreferrer">EPDK — 2026 Son Kaynak Tedarik Tarifesi açıklaması</a></li>
+          <li><a href="https://lisans.epdk.gov.tr/epvys-web/faces/pages/online/tarifeFatura/tarifeFatura.xhtml" target="_blank" rel="noopener noreferrer">EPDK — Elektrik Fatura Hesaplama Modülü</a></li>
+          <li><a href="https://www.epdk.gov.tr/Detay/Icerik/16/serbest-tuketici" target="_blank" rel="noopener noreferrer">EPDK — 2026 Serbest Tüketici Bilgileri</a></li>
+        </ul>
+        <p>Son kaynak kontrolü: 27 Temmuz 2026.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div>
+        <strong>ALO186</strong>
+        <p>Bağımsız bilgilendirme platformudur; EDAŞ veya kamu kurumu değildir.</p>
+      </div>
+      <div class="footer-links">
+        <a href="https://alo186.com/yayin-ilkeleri">Yayın ilkeleri</a>
+        <a href="https://alo186.com/bilgi-guncelligi">Bilgi güncelliği</a>
+        <a href="https://alo186.com/yasal/gizlilik">Gizlilik</a>
+      </div>
+    </div>
+  </footer>
+
+  <noscript><div class="noscript">Bu hesaplayıcının çalışması için JavaScript etkin olmalıdır.</div></noscript>
+  <script src="./app.js" defer></script>
+</body>
+</html>

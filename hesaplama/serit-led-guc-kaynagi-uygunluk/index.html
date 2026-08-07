@@ -1,0 +1,74 @@
+<!doctype html><html lang="tr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Şerit LED Güç Kaynağı ve Kablo Uygunluk Testi | ALO186</title>
+<meta name="description" content="Şerit LED için 5/12/24/48 V, W/m, toplam güç, akım, kablo gerilim düşümü, kontrolcü ve konnektör uygunluğunu güvenli biçimde değerlendirin.">
+<meta name="theme-color" content="#071631"><meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://alo186.com/hesaplama/serit-led-guc-kaynagi-uygunluk/"><link rel="stylesheet" href="./styles.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"Şerit LED Güç Kaynağı ve Kablo Uygunluk Testi","url":"https://alo186.com/hesaplama/serit-led-guc-kaynagi-uygunluk/","applicationCategory":"UtilitiesApplication","operatingSystem":"Web","isAccessibleForFree":true,"description":"Sabit voltajlı şerit LED için yük, güç payı, akım, kablo düşümü, kontrolcü ve bağlantı uygunluğunu kişisel verisiz değerlendiren araç.","provider":{"@type":"Organization","name":"ALO186","url":"https://alo186.com","description":"Bağımsız bilgi platformudur; EDAŞ, kamu kurumu, üretici, uygunluk kuruluşu veya satıcı değildir."}},{"@type":"DefinedTermSet","name":"Şerit LED güç planlama terimleri","hasDefinedTerm":[{"@type":"DefinedTerm","name":"W/m","description":"Şerit LED'in bir metre başına tam parlaklıktaki güç tüketimi."},{"@type":"DefinedTerm","name":"Sabit voltaj","description":"5 V, 12 V, 24 V veya 48 V gibi belirli bir DC gerilimle çalışan LED modülü."},{"@type":"DefinedTerm","name":"Gerilim düşümü","description":"Kablo direnci ve akım nedeniyle yük noktasına ulaşan gerilimin azalması."},{"@type":"DefinedTerm","name":"Besleme enjeksiyonu","description":"Uzun şeride birden fazla noktadan enerji verilerek akım ve gerilim dağılımının iyileştirilmesi."}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"5 metre şerit LED kaç amper çeker?","acceptedAnswer":{"@type":"Answer","text":"Etiketteki tam parlaklık W/m değeri toplam uzunlukla çarpılır; çıkan watt şerit gerilimine bölünerek yaklaşık amper bulunur."}},{"@type":"Question","name":"Şerit LED güç kaynağına ne kadar pay bırakılmalı?","acceptedAnswer":{"@type":"Answer","text":"Araç görünür varsayım olarak yüzde 20 başlangıç payı kullanır; üreticinin sıcaklık düşümü ve sürekli yük sınırı önceliklidir."}},{"@type":"Question","name":"12 V şeride 24 V adaptör bağlanır mı?","acceptedAnswer":{"@type":"Answer","text":"Hayır. Güç kaynağı çıkış gerilimi şerit LED'in etiket gerilimiyle eşleşmelidir."}},{"@type":"Question","name":"Mevcut güç kaynağı yeterliyse yenisini almalı mıyım?","acceptedAnswer":{"@type":"Answer","text":"Güç, akım, gerilim, kablo düşümü, kontrolcü, konnektör ve gerçek yük testi uygunsa araç yeni ürün almayın sonucu verir."}}]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ALO186","item":"https://alo186.com/"},{"@type":"ListItem","position":2,"name":"Hesaplama Merkezi","item":"https://alo186.com/hesaplama/"},{"@type":"ListItem","position":3,"name":"Şerit LED güç kaynağı uygunluğu"}]}]}</script>
+<link rel="stylesheet" href="/assets/alo186-accessibility-v215.css" data-alo186-accessibility-v215="true">
+</head><body>
+<a class="skip-link" href="#ledForm">Araca geç</a>
+<header><div class="header-inner"><a class="brand" href="../../"><span>186</span><b>ALO186<small>Bağımsız elektrik bilgi ağı</small></b></a><nav aria-label="Üst menü"><a href="../">Hesaplayıcılar</a><a href="../../amazon-elektrik-urunleri/">Ürün merkezi</a></nav></div></header>
+<main>
+<section class="trust"><strong>Duman, erime, kıvılcım veya hızla artan ısı varsa enerjiyi güvenle kesin.</strong> Bu araç açık 230 V terminal, sabit tesisat veya ticari projeyi tüketici ürünü alışverişine dönüştürmez.</section>
+<section class="hero"><div><span class="eyebrow">V · W/m · A · mm² · gerilim düşümü</span><h1>Şerit LED'i yalnız <em>“kaç watt adaptör?”</em> sorusuyla seçmeyin.</h1><p>Şerit gerilimini, tam parlaklık tüketimini, güç payını, kablo düşümünü, kontrolcü ve konnektör sınırlarını tek güvenli karar zincirinde değerlendirin.</p><div class="chips"><span>Kişisel veri yok</span><span>Satın almama sonucu</span><span>Şeffaf affiliate</span><span>180 günlük teknik kontrol</span></div></div><aside><strong>Doğru karar sırası</strong><ol><li>Etiket gerilimi ve W/m değerini doğrulayın.</li><li>Toplam W ve A ihtiyacını hesaplayın.</li><li>Kablo ve besleme noktası düşümünü kontrol edin.</li><li>Kontrolcü ve konnektör akımını doğrulayın.</li><li>Mevcut sistem yeterliyse yeni ürün almayın.</li></ol><p>IEC 61347-2-13:2024 LED kontrol donanımı; IEC 62031:2026 LED modülü güvenlik çerçevesini tanımlar. Bu araç uygunluk belgesi değildir.</p></aside></section>
+
+<form id="ledForm" novalidate>
+<section class="panel"><h2>1. Güvenlik ve kurulum sınırı</h2><div class="grid">
+<label class="check danger wide"><input id="emergency" type="checkbox"><span>Duman, kıvılcım, erime, keskin koku veya hızla artan ısı var.</span></label>
+<label><span>Fiziksel durum</span><select id="condition"><option value="unknown">Kontrol edilmedi</option><option value="sound">Sağlam, kuru, kararma ve ısınma yok</option><option value="burned">Kararmış / yanık izli</option><option value="melted">Erimiş</option><option value="wet">Islanmış</option><option value="damaged">Ezilmiş / açık iletken var</option><option value="hot">Olağandışı ısınıyor</option></select></label>
+<label><span>Kurulum türü</span><select id="installation"><option value="unknown">Seçin</option><option value="plug_in_low_voltage">Kapalı gövdeli fişli güç kaynağı, düşük gerilim tarafı</option><option value="fixed_mains">Sabit 230 V tesisat</option><option value="open_terminals">Açık 230 V terminal / metal kasa sürücü</option><option value="commercial">Otel, mağaza, ortak alan veya profesyonel proje</option><option value="vehicle">Araç, karavan veya tekne elektriği</option></select></label>
+<label><span>LED sürme biçimi</span><select id="stripMode"><option value="unknown">Etiketten doğrulanmadı</option><option value="constant_voltage">Sabit voltaj şerit LED</option><option value="constant_current">Sabit akım LED modülü</option></select></label>
+<label><span>Etiket / veri sayfası</span><select id="labelVerified"><option value="unknown">Bilinmiyor</option><option value="yes">Gerilim, W/m ve kesim bilgisi doğrulandı</option><option value="no">Yalnız pazar yeri başlığı var</option></select></label>
+</div></section>
+
+<section class="panel"><h2>2. Yük ve güç kaynağı hesabı</h2><p class="hint">RGB, RGBW ve adreslenebilir şeritlerde tam beyaz / en yüksek eşzamanlı parlaklık tüketimini kullanın.</p><div class="grid">
+<label><span>Şerit gerilimi</span><select id="stripVoltage"><option value="">Seçin</option><option value="5">5 V DC</option><option value="12">12 V DC</option><option value="24">24 V DC</option><option value="48">48 V DC</option></select></label>
+<label><span>Tam parlaklık gücü</span><input id="wattsPerMeter" type="number" min="0.1" max="100" step="0.1" inputmode="decimal" placeholder="W/m"></label>
+<label><span>Toplam şerit uzunluğu</span><input id="lengthMeters" type="number" min="0.1" max="100" step="0.1" inputmode="decimal" placeholder="metre"></label>
+<label><span>Planlama payı</span><input id="reservePercent" type="number" min="10" max="50" step="1" inputmode="numeric" value="20"><small>% — üretici sınırı önceliklidir</small></label>
+<label><span>Güç kaynağı çıkış gerilimi</span><input id="psuVoltage" type="number" min="1" max="60" step="0.1" inputmode="decimal" placeholder="V"></label>
+<label><span>Güç kaynağı sürekli gücü</span><input id="psuW" type="number" min="1" max="5000" step="1" inputmode="decimal" placeholder="W"></label>
+<label><span>Güç kaynağı sürekli akımı</span><input id="psuA" type="number" min="0.1" max="300" step="0.1" inputmode="decimal" placeholder="A"></label>
+</div></section>
+
+<section class="panel"><h2>3. Kablo, besleme ve kontrolcü</h2><p class="hint">Yaklaşık kablo düşümü bakır iletken için hesaplanır. Şerit üzerindeki bakır yol sınırı ayrı olarak üretici kılavuzundan doğrulanmalıdır.</p><div class="grid">
+<label><span>Besleme noktası sayısı</span><input id="feedCount" type="number" min="1" max="20" step="1" inputmode="numeric" placeholder="adet"></label>
+<label><span>Bir besleme kablosunun tek yön uzunluğu</span><input id="cableLengthM" type="number" min="0.1" max="100" step="0.1" inputmode="decimal" placeholder="metre"></label>
+<label><span>Bakır iletken kesiti</span><input id="cableSectionMm2" type="number" min="0.1" max="35" step="0.1" inputmode="decimal" placeholder="mm²"></label>
+<label><span>Besleme düzeni üreticiye göre doğrulandı mı?</span><select id="feedPlanVerified"><option value="unknown">Bilinmiyor</option><option value="yes">Tek uç / iki uç / çoklu besleme sınırı doğrulandı</option><option value="no">Doğrulanmadı</option></select></label>
+<label><span>Kontrolcü türü</span><select id="controllerType"><option value="none">Kontrolcü yok</option><option value="dimmer">Dimmer</option><option value="rgb">RGB/RGBW kontrolcü</option><option value="addressable">Adreslenebilir LED kontrolcü</option></select></label>
+<label><span>Kontrolcü toplam sürekli akımı</span><input id="controllerA" type="number" min="0.1" max="300" step="0.1" inputmode="decimal" placeholder="A"></label>
+<label><span>Konnektör / dağıtım elemanı sürekli akımı</span><input id="connectorA" type="number" min="0.1" max="300" step="0.1" inputmode="decimal" placeholder="A"></label>
+</div></section>
+
+<section class="panel"><h2>4. Ortam, ısı ve ürün güvenliği</h2><div class="grid">
+<label><span>Kullanım ortamı</span><select id="environment"><option value="unknown">Seçin</option><option value="dry">Kuru iç ortam</option><option value="wet_outdoor">Islak / dış ortam</option><option value="enclosed">Kapalı mobilya veya kutu hacmi</option></select></label>
+<label><span>IP ve ek noktası kanıtı</span><select id="ipEvidence"><option value="unknown">Bilinmiyor</option><option value="yes">Şerit, ek, kontrolcü ve güç kaynağı ortamla uyumlu</option><option value="no">Doğrulanmadı</option></select></label>
+<label><span>Kapalı hacim havalandırması</span><select id="ventilation"><option value="unknown">Uygulanmıyor / bilinmiyor</option><option value="yes">Üretici sıcaklık sınırına göre doğrulandı</option><option value="no">Doğrulanmadı</option></select></label>
+<label><span>Isı dağıtım yöntemi</span><select id="thermalMount"><option value="unknown">Bilinmiyor</option><option value="verified">Üreticinin istediği profil / yüzey doğrulandı</option><option value="no">Yalnız yapışkan bant</option></select></label>
+<label><span>Tam model geri çağırma kontrolü</span><select id="recallChecked"><option value="unknown">Kontrol edilmedi</option><option value="yes">Üretici ve resmî ürün güvenliği kaynaklarında kontrol edildi</option><option value="recalled">Geri çağırma / kullanım durdurma var</option></select></label>
+<label><span>Belge ve izlenebilirlik</span><select id="certification"><option value="unknown">Bilinmiyor</option><option value="yes">Üretici, model, kılavuz ve güvenlik kanıtı doğrulandı</option><option value="no">Yalnız satıcı beyanı</option></select></label>
+<label><span>Değerlendirilen sistem</span><select id="ownership"><option value="candidate">Satın almayı düşündüğüm aday</option><option value="owned">Zaten kullandığım sistem</option></select></label>
+<label><span>Gözetimli tam yük testi</span><select id="fieldTest"><option value="not_done">Yapılmadı</option><option value="pass">Titreme, koku ve olağandışı ısı olmadan geçti</option><option value="fail">Titreme, koku, ısı veya gerilim çökmesi var</option></select></label>
+</div></section>
+
+<div class="actions"><button class="primary" type="submit">Teknik uygunluğu değerlendir</button><button id="exportJson" type="button" disabled>JSON teknik fiş</button><button id="calendar" type="button" disabled>180 günlük kontrol takvimi</button><button id="printResult" type="button" disabled>Yazdır / PDF</button></div>
+</form>
+
+<section id="result" class="result" tabindex="-1" aria-live="polite" hidden></section>
+
+<section id="affiliateGate" class="affiliate" hidden>
+<h2>Satış ortaklığı bağlantısı açılmadan önce</h2>
+<p><strong>Amazon Türkiye satış ortaklığı açıklaması:</strong> Aşağıdaki bağlantı teknik sınıf aramasıdır. ALO186 uygunluk kuruluşu, üretici, satıcı, EDAŞ veya kamu kurumu değildir; uygun alışverişten komisyon kazanabilir. Fiyat, stok, puan, satıcı, teslimat ve garanti bilgisi burada yayımlanmaz.</p>
+<label class="check"><input type="checkbox" data-affiliate-check><span>Mevcut güvenli sistemin yetersiz veya eksik olduğunu teknik sonuçla doğruladım.</span></label>
+<label class="check"><input type="checkbox" data-affiliate-check><span>Gerilim, W, A, kablo düşümü, kontrolcü ve ortam koşullarını tam model belgesinden yeniden kontrol edeceğim.</span></label>
+<label class="check"><input type="checkbox" data-affiliate-check><span>Bağlantının Amazon satış ortaklığı bağlantısı olduğunu anladım; resmî kurum veya ürün onayı değildir.</span></label>
+<a id="affiliateLink" class="affiliate-link" href="#" rel="sponsored nofollow noopener" target="_blank" aria-disabled="true">Üç onayı tamamlayın</a>
+</section>
+
+<section class="sources"><h2>Kaynak ve yöntem sınırı</h2><p>Hesap: <code>W = W/m × metre</code>, <code>A = W ÷ V</code>, yaklaşık bakır kablo düşümü <code>ΔV = I × 2L × 0,0175 ÷ S</code>. Sonuç; ürün üreticisinin kablo, sıcaklık, besleme noktası ve sürekli yük sınırlarının yerine geçmez.</p><ul><li>IEC 61347-2-13:2024 — LED ışık kaynakları için elektronik kontrol donanımı güvenliği.</li><li>IEC 62031:2026 — LED modülleri için güvenlik gerekleri.</li></ul></section>
+</main>
+<footer><p>ALO186 bağımsız bilgi platformudur; arıza kaydı almaz, EDAŞ veya kamu kurumu değildir.</p></footer>
+<script src="./app.js"></script>
+</body></html>

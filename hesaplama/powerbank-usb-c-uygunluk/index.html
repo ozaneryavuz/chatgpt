@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Powerbank ve USB-C PD Uygunluk Testi | ALO186</title>
+  <meta name="description" content="Powerbank kapasitesi, gerçek kullanılabilir Wh, tahmini tam şarj sayısı, USB-C PD port gücü, kablo sınırı ve çoklu port paylaşımıyla telefon, tablet ve dizüstü uygunluğunu hesaplayın.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="https://alo186.com/hesaplama/powerbank-usb-c-uygunluk/">
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","@id":"https://alo186.com/hesaplama/powerbank-usb-c-uygunluk/#app","name":"Powerbank ve USB-C PD Uygunluk Testi","url":"https://alo186.com/hesaplama/powerbank-usb-c-uygunluk/","applicationCategory":"UtilitiesApplication","operatingSystem":"Web","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"TRY"},"description":"Powerbank mAh/Wh kapasitesi, aktarım verimi, port ve kablo gücü ile telefon, tablet, dizüstü ve USB cihazlarının şarj uygunluğunu ön değerlendiren ücretsiz araç."},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"10.000 mAh powerbank telefonu kaç kez şarj eder?","acceptedAnswer":{"@type":"Answer","text":"mAh değerlerini doğrudan bölmek doğru değildir. Powerbank ve cihaz enerjisi Wh'a çevrilmeli; gerilim dönüşümü, kablo ve cihaz şarj kayıpları için görünür verim varsayımı uygulanmalıdır."}},{"@type":"Question","name":"USB-C portu olan her powerbank dizüstü bilgisayarı şarj eder mi?","acceptedAnswer":{"@type":"Answer","text":"Hayır. USB-C konnektörü tek başına yeterli değildir. USB Power Delivery profili, tek port gücü, kablo güç etiketi ve bilgisayarın asgari giriş gücü birlikte doğrulanmalıdır."}},{"@type":"Question","name":"Birden fazla cihaz bağlanınca çıkış gücü düşer mi?","acceptedAnswer":{"@type":"Answer","text":"Çoğu çok portlu üründe toplam çıkış gücü portlar arasında paylaşılır. Tek port ve toplam paylaşımlı güç üretici kılavuzunda ayrı ayrı kontrol edilmelidir."}},{"@type":"Question","name":"Bu araç kesin ürün onayı verir mi?","acceptedAnswer":{"@type":"Answer","text":"Hayır. Araç teknik ön değerlendirme sunar. Tam model etiketi, USB PD profilleri, kablo ve üretici kılavuzu satın alma veya kullanım öncesinde yeniden doğrulanmalıdır."}}]}]}</script>
+<link rel="stylesheet" href="/assets/alo186-accessibility-v215.css" data-alo186-accessibility-v215="true">
+</head>
+<body>
+  <a class="skip-link" href="#arac">Araca geç</a>
+  <header class="site-header"><div class="header-inner"><a class="brand" href="https://alo186.com" aria-label="ALO186 ana sayfa"><span class="brand-mark" aria-hidden="true">186</span><span><strong>ALO186</strong><small>Bağımsız elektrik bilgi ağı</small></span></a><nav aria-label="Üst menü"><a href="https://alo186.com/elektrik-kesintisi">Kesinti</a><a href="https://alo186.com/elektrik-portali">Portal</a><a href="https://alo186.com/hesaplama/">Hesaplayıcılar</a></nav></div></header>
+  <main>
+    <section class="trust-banner"><strong>Ürün etiketi ön kontrolüdür; garanti veya uygunluk belgesi değildir.</strong> Şişmiş, ısınan, hasarlı veya geri çağrılmış lityum batarya kullanılmaz. Tıbbi/yaşam destek cihazında genel powerbank yönlendirmesi yapılmaz. ALO186 resmî kurum, üretici veya satıcı değildir.</section>
+    <section class="hero"><div class="hero-copy"><span class="eyebrow">mAh → Wh · gerçek şarj sayısı · USB-C PD · kablo ve port paylaşımı</span><h1>Bu powerbank cihazımı <em>kaç kez ve ne kadar hızlı</em> şarj eder?</h1><p>Etiketteki mAh sayısını doğrudan cihaz bataryasına bölmeyin. Enerjiyi Wh olarak karşılaştırın; aktarım kayıplarını, cihazın asgari watt ihtiyacını, USB PD desteğini, kabloyu ve çoklu port paylaşımını birlikte değerlendirin.</p><div class="chip-row"><span class="chip">Kişisel veri yok</span><span class="chip">Tarayıcıda hesaplama</span><span class="chip">Fiyat ve stok iddiası yok</span></div></div><aside class="hero-card"><span>Karar zinciri</span><strong>Enerji → güç → protokol → güvenlik</strong><small>Sonuçta tahmini tam şarj, kullanılabilir Wh, dar boğaz güç ve satın alma gerekip gerekmediği gösterilir.</small><a href="#arac">Uygunluğu hesapla ↓</a></aside></section>
+    <form id="powerbankForm">
+      <section id="arac" class="layout">
+        <div class="panel">
+          <div class="section-title"><div><span class="step">1</span><h2>Cihaz ihtiyacı</h2></div></div>
+          <div class="preset-grid" aria-label="Hazır örnekler"><button type="button" class="preset" data-preset="phone"><strong>Telefon · 2 tam şarj</strong><small>18 Wh · 25 W</small></button><button type="button" class="preset" data-preset="laptop"><strong>Dizüstü · USB-C PD</strong><small>60 Wh · 65 W</small></button><button type="button" class="preset" data-preset="shared"><strong>İki cihaz paylaşımı</strong><small>30 W toplam · mevcut ürün</small></button></div>
+          <div class="form-grid">
+            <label class="field"><span>Cihaz türü</span><select id="deviceType"><option value="phone">Telefon</option><option value="tablet">Tablet</option><option value="laptop">USB-C dizüstü bilgisayar</option><option value="router">USB ile beslenen modem/router</option><option value="camera">Kamera / taşınabilir cihaz</option><option value="other">Diğer düşük gerilimli USB cihazı</option></select></label>
+            <label class="field"><span>Cihaz enerji bilgisi</span><select id="deviceEnergyMode"><option value="wh">Wh etiketi biliniyor</option><option value="mah">mAh ve batarya gerilimi biliniyor</option></select></label>
+            <label id="deviceWhField" class="field"><span>Cihaz bataryası (Wh)</span><input id="deviceWh" type="number" min="1" max="1000" step="0.1" inputmode="decimal"></label>
+            <label id="deviceMahField" class="field hidden"><span>Cihaz bataryası (mAh)</span><input id="deviceMah" type="number" min="100" max="100000" step="1" inputmode="numeric"></label>
+            <label id="deviceVoltageField" class="field hidden"><span>Cihaz batarya nominal gerilimi (V)</span><input id="deviceVoltage" type="number" min="2.5" max="30" step="0.01" inputmode="decimal"></label>
+            <label class="field"><span>Hedef tam şarj sayısı</span><input id="targetCharges" type="number" min="0.25" max="20" step="0.25" inputmode="decimal" required></label>
+            <label class="field"><span>Cihaz asgari giriş gücü (W)</span><input id="deviceMinW" type="number" min="1" max="240" step="1" inputmode="decimal" required><small class="help">Çalışırken şarj için üretici önerisini kullanın.</small></label>
+            <label class="field"><span>Önerilen/azami giriş gücü (W)</span><input id="devicePreferredW" type="number" min="1" max="240" step="1" inputmode="decimal" required></label>
+          </div>
+        </div>
+        <aside class="panel side"><span class="step">i</span><h2>Neden Wh?</h2><div class="formula">Wh = (mAh ÷ 1.000) × V</div><div class="formula">Tahmini şarj = powerbank Wh × verim ÷ cihaz Wh</div><p class="help">mAh yalnız aynı gerilimde doğrudan karşılaştırılabilir. Powerbank hücresi ile USB çıkışı ve cihaz bataryası arasında dönüşüm kayıpları vardır.</p></aside>
+      </section>
+      <section class="panel settings-panel"><div class="section-title"><div><span class="step">2</span><h2>Powerbank, port ve kablo etiketi</h2></div></div>
+        <div class="form-grid">
+          <label class="field"><span>Powerbank enerji bilgisi</span><select id="bankEnergyMode"><option value="mah">mAh ve hücre gerilimi</option><option value="wh">Wh etiketi</option></select></label>
+          <label id="bankWhField" class="field hidden"><span>Powerbank enerjisi (Wh)</span><input id="bankWh" type="number" min="1" max="1000" step="0.1" inputmode="decimal"></label>
+          <label id="bankMahField" class="field"><span>Powerbank kapasitesi (mAh)</span><input id="bankMah" type="number" min="100" max="100000" step="100" inputmode="numeric"></label>
+          <label id="cellVoltageField" class="field"><span>Hücre nominal gerilimi (V)</span><input id="cellVoltage" type="number" min="2.5" max="30" step="0.01" inputmode="decimal"><small class="help">Yalnız ürün etiketindeki değeri girin; yaygın 3,6–3,7 V değeri her ürün için varsayılmamalıdır.</small></label>
+          <label class="field"><span>Toplam aktarım verimi (%)</span><input id="transferEfficiency" type="number" min="50" max="95" step="1" inputmode="decimal" required><small class="help">Powerbank, kablo ve cihaz şarj kayıplarını birlikte temsil eden görünür varsayım.</small></label>
+          <label class="field"><span>Tek port azami çıkış (W)</span><input id="singlePortW" type="number" min="2" max="240" step="1" inputmode="decimal" required></label>
+          <label class="field"><span>Tüm portların toplam çıkışı (W)</span><input id="totalOutputW" type="number" min="2" max="400" step="1" inputmode="decimal" required></label>
+          <label class="field"><span>Aynı anda bağlı cihaz sayısı</span><input id="simultaneousDevices" type="number" min="1" max="8" step="1" inputmode="numeric" required></label>
+          <label class="field"><span>Kablo güç etiketi (W)</span><input id="cableW" type="number" min="2" max="240" step="1" inputmode="decimal" required></label>
+          <label class="field full"><span>Değerlendirilen ürün</span><select id="ownership"><option value="candidate">Satın almayı düşündüğüm aday ürün</option><option value="owned">Zaten sahip olduğum powerbank</option></select></label>
+        </div>
+      </section>
+      <section class="panel settings-panel"><div class="section-title"><div><span class="step">3</span><h2>Model ve güvenlik doğrulaması</h2></div></div>
+        <div class="safety-grid">
+          <label class="check-item"><input id="capacityLabelVerified" type="checkbox"><span><strong>Kapasite ve port etiketi doğrulandı</strong><small>Wh/mAh, nominal gerilim, tek port ve toplam güç tam modelden okundu.</small></span></label>
+          <label class="check-item"><input id="usbPdConfirmed" type="checkbox"><span><strong>USB Power Delivery doğrulandı</strong><small>Özellikle dizüstü ve yüksek güçlü cihaz için gerekli profil mevcut.</small></span></label>
+          <label class="check-item"><input id="cableRated" type="checkbox"><span><strong>Kablo güç etiketi doğrulandı</strong><small>Kablo yalnız konnektör şekline göre seçilmedi.</small></span></label>
+          <label class="check-item"><input id="sharedOutputConfirmed" type="checkbox"><span><strong>Port paylaşım tablosu doğrulandı</strong><small>Birden fazla cihazda toplam gücün dağılımı üretici kılavuzundan kontrol edildi.</small></span></label>
+          <label class="check-item"><input id="manufacturerInstructionsChecked" type="checkbox"><span><strong>Üretici kılavuzları kontrol edildi</strong><small>Cihaz ve powerbank için önerilen port, protokol ve güç karşılaştırıldı.</small></span></label>
+          <label class="check-item"><input id="damageFree" type="checkbox"><span><strong>Şişme, çatlak ve aşırı ısınma yok</strong><small>Hasarlı lityum batarya kullanılmaz veya şarj edilmez.</small></span></label>
+          <label class="check-item"><input id="recallChecked" type="checkbox"><span><strong>Geri çağırma duyurusu kontrol edildi</strong><small>Tam model üretici ve resmî geri çağırma kayıtlarında kontrol edildi.</small></span></label>
+          <label class="check-item risk-check"><input id="medicalDevice" type="checkbox"><span><strong>Tıbbi / yaşam destek cihazı</strong><small>İşaretliyse ticari yönlendirme tamamen kapanır.</small></span></label>
+        </div>
+        <div id="validation" class="validation" role="alert" aria-live="assertive" tabindex="-1"></div>
+        <div class="actions"><button class="btn btn-primary" type="submit">Uygunluğu hesapla</button><button id="resetBtn" class="btn btn-secondary" type="button">Sıfırla</button></div>
+      </section>
+    </form>
+    <section id="results" class="results hidden" tabindex="-1" aria-live="polite">
+      <div class="panel result-head"><div><span class="eyebrow">Teknik ön değerlendirme</span><h2 id="resultStatus" class="status">Sonuç</h2><p id="resultSummary"></p></div><div><strong>Satın alma zorunlu sonuç değildir</strong><small>Mevcut ürün hedefi karşılıyorsa yeni ürün önerilmez.</small></div></div>
+      <div class="metric-grid powerbank-metrics"><div class="metric"><span>Etiket enerjisi</span><strong id="storedMetric">—</strong></div><div class="metric"><span>Kullanılabilir enerji</span><strong id="usableMetric">—</strong></div><div class="metric"><span>Tahmini tam şarj</span><strong id="chargesMetric">—</strong></div><div class="metric"><span>Dar boğaz güç</span><strong id="powerMetric">—</strong></div><div class="metric"><span>Yaklaşık tek şarj</span><strong id="timeMetric">—</strong></div><div class="metric"><span>Hedef için asgari</span><strong id="requiredMetric">—</strong></div></div>
+      <div id="blockerCard" class="panel danger-card hidden"><h3>Kullanmayın veya hedef için yetersiz</h3><ul id="blockerList"></ul></div>
+      <div class="panel warning-card"><h3>Koşullar ve belirsizlikler</h3><ul id="warningList"></ul></div>
+      <div class="panel"><h3>Satın alma öncesi teknik minimumlar</h3><ul id="checkList"></ul></div>
+      <div id="noPurchasePanel" class="panel no-buy-panel hidden"><span class="eyebrow">Satın almama sonucu</span><h3>Mevcut powerbank hedefinizi karşılıyor</h3><p>Fiziksel durum ve üretici bilgileri güncelse yeni ürün almanız gerekmeyebilir. Kabloyu ve port paylaşımını düzenli kontrol edin.</p></div>
+      <div id="affiliatePanel" class="affiliate-panel hidden"><span class="eyebrow">Şeffaf satış ortaklığı</span><h3>Teknik minimumlarla powerbank seçeneklerini karşılaştırın</h3><p>ALO186 ürün satmaz. Aşağıdaki bağlantı ALO186 Akıllı Ürün Seçim Merkezi’ne gider; merkezden açılan Amazon bağlantıları satış ortaklığı bağlantısı olabilir. Fiyat, stok, satıcı puanı, teslimat ve garanti Amazon’un güncel sayfasında doğrulanır.</p><label class="check-item"><input id="affiliateAck" type="checkbox"><span><strong>Wh, tek port W, toplam güç, USB PD profili ve kablo etiketini ürün sayfasında yeniden kontrol edeceğim.</strong></span></label><a id="productCenterLink" class="btn btn-primary disabled-link" aria-disabled="true" tabindex="-1" href="https://alo186.com/akilli-urun-secimi?kategori=powerbank">Powerbank ürün karar merkezini aç</a></div>
+    </section>
+    <section class="panel sources"><span class="eyebrow">Kaynaklar · 28 Temmuz 2026 doğrulaması</span><h2>Hesap ve güvenlik dayanakları</h2><ul><li><a href="https://www.usb.org/usb-charger-pd" rel="noopener">USB-IF — USB Power Delivery</a>: USB PD güç müzakeresi ve tam özellikli USB-C ile 240 W’a kadar güç sınıfları.</li><li><a href="https://www.usb.org/document-library/usb-power-delivery" rel="noopener">USB-IF — USB Power Delivery Specification</a>: güncel temel spesifikasyon kaydı.</li><li><a href="https://www.faa.gov/hazmat/packsafe/lithium-batteries" rel="noopener">FAA PackSafe — Lithium Batteries</a>: Wh = V × Ah hesabı, hasarlı/geri çağrılmış batarya ve taşıma güvenliği.</li><li><a href="https://support.apple.com/en-tm/109509" rel="noopener">Apple Support — Mac güç adaptörü</a>: USB PD ve cihaz için önerilen asgari watt değerinin kontrolü.</li><li><a href="https://service.anker.com/uk/article-description/Why-Is-the-Rated-Capacity-Marked-on-a-Power-Bank-Lower-Than-Expected" rel="noopener">Anker Support — rated capacity</a>: mAh, hücre gerilimi ve dönüşüm kayıplarının kullanılabilir kapasiteye etkisi.</li></ul><p class="help">Kaynaklar sabit ürün önerisi veya performans garantisi için kullanılmaz. Kullanıcı kendi cihaz ve powerbank etiket değerlerini girer.</p></section>
+  </main>
+  <footer><div class="footer-inner"><div><strong>ALO186</strong><p>Bağımsız bilgilendirme platformudur; EDAŞ, kamu kurumu, üretici veya satıcı değildir.</p></div><div class="footer-links"><a href="https://alo186.com/yayin-ilkeleri">Yayın ilkeleri</a><a href="https://alo186.com/gizlilik">Gizlilik</a><a href="https://alo186.com/iletisim">İletişim</a></div></div></footer>
+  <noscript><div class="noscript">Bu hesaplama aracı JavaScript gerektirir.</div></noscript>
+  <script src="./core.js"></script><script src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>UPS Kaç Saat Çalıştırır? Kapasite Hesaplama | ALO186</title><meta name="description" content="UPS veya power station çalışma süresini; watt, Wh, verim, deşarj ve yaşlanma payıyla hesaplayın.">
+<link rel="canonical" href="https://alo186.com/hesaplama/ups-suresi/"><link rel="stylesheet" href="../styles.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"UPS ve Power Station Süre Hesaplayıcısı","applicationCategory":"UtilitiesApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"TRY"}}</script><link rel="stylesheet" href="/assets/alo186-accessibility-v215.css" data-alo186-accessibility-v215="true">
+</head><body>
+
+<a class="skip-link" href="#arac">İçeriğe geç</a>
+<header class="site-header"><div class="header-inner">
+<a class="brand" href="https://alo186.com" aria-label="ALO186 ana sayfa">
+<span class="brand-mark" aria-hidden="true">186</span><span><strong>ALO186</strong><small>Bağımsız elektrik bilgi ağı</small></span></a>
+<nav aria-label="Üst menü"><a href="https://alo186.com/elektrik-kesintisi">Kesinti</a><a href="https://alo186.com/elektrik-portali">Portal</a><a href="https://alo186.com/hesaplama">Hesaplayıcılar</a></nav>
+</div></header>
+<main><section class="trust-banner"><strong>Yaklaşık sonuç verir.</strong> Motorlu cihazların kalkış gücü, akü kimyası ve gerçek cihaz tüketimi sonucu önemli ölçüde değiştirebilir.</section>
+<section class="hero"><div class="hero-copy"><span class="eyebrow">Kesintide ne kadar dayanır?</span><h1>UPS veya güç kaynağınızın <em>çalışma süresini</em> hesaplayın.</h1>
+<p>Toplam watt yükünü, batarya kapasitesini ve verim varsayımlarını girin. Elinizdeki ürünün yaklaşık süresini veya hedef süre için gereken kapasiteyi görün.</p></div>
+<aside class="hero-card"><span>Temel ilişki</span><strong>Wh ÷ W = saat</strong><small>Verim, deşarj ve yaşlanma katsayılarıyla düzeltilir.</small><button class="btn btn-secondary hidden" id="restoreBtn" type="button">Son hesabı aç</button></aside></section>
+<section id="arac" class="layout"><div class="panel"><div class="section-title"><div><span class="step">1</span><h2>Yük ve hedefi girin</h2></div></div>
+<div class="preset-grid">
+<button class="preset" data-w="20">Modem + ONT<br><b>20 W</b></button><button class="preset" data-w="65">Laptop<br><b>65 W</b></button>
+<button class="preset" data-w="110">TV<br><b>110 W</b></button><button class="preset" data-w="70">Kamera + NVR<br><b>70 W</b></button>
+<button class="preset" data-w="120">Kombi<br><b>120 W</b></button><button class="preset" data-w="180" data-motor="1">Buzdolabı<br><b>180 W</b></button>
+</div>
+<div class="form-grid">
+<label class="field"><span>Toplam sürekli yük</span><input id="loadW" type="number" min="1" step="1" value="100"><div class="help">Cihaz etiketlerindeki gerçek watt toplamı.</div></label>
+<label class="field"><span>Motor/kompresör kalkış katsayısı</span><input id="surgeFactor" type="number" min="1" max="8" step=".1" value="1.2"><div class="help">Modem/laptop için 1–1,2; buzdolabı/pompa için daha yüksek olabilir.</div></label>
+<label class="field"><span>Hesap türü</span><select id="mode"><option value="runtime">Elimdeki ürün kaç saat gider?</option><option value="capacity">Hedef süre için kaç Wh gerekir?</option></select></label>
+<label class="field" id="capacityField"><span>Nominal enerji kapasitesi</span><input id="batteryWh" type="number" min="1" value="1000"><div class="help">Ürün etiketindeki Wh değeri.</div></label>
+<label class="field hidden" id="hoursField"><span>Hedef çalışma süresi</span><input id="hours" type="number" min=".1" step=".1" value="4"></label>
+<label class="field"><span>İnverter/dönüşüm verimi</span><input id="efficiency" type="number" min="50" max="100" value="88"><div class="help">Bilinmiyorsa %85–90 aralığı yön göstericidir.</div></label>
+<label class="field"><span>Kullanılabilir deşarj</span><input id="dod" type="number" min="30" max="100" value="80"></label>
+<label class="field"><span>Akü yaşı/sıcaklık katsayısı</span><input id="aging" type="number" min="40" max="100" value="90"></label>
+<label class="field hidden" id="reserveField"><span>Ek kapasite rezervi</span><input id="reserve" type="number" min="0" max="100" value="20"></label>
+</div>
+<div class="actions"><button class="btn btn-primary" id="calcBtn">Hesapla</button><button class="btn btn-secondary" id="clearBtn">Sıfırla</button></div><div class="validation" id="validation"></div>
+</div><aside class="panel side"><span class="step">2</span><h2>Güvenli seçim</h2><p>Çıkış gücü yalnız ortalama yüke göre değil, kalkış/tepe gücüne göre de yeterli olmalıdır.</p>
+<div class="warning">Sabit bina tesisatına bağlantı, jeneratör–UPS koordinasyonu, üç faz yük veya 2 kW üzeri sistem profesyonel tasarım gerektirir.</div></aside></section>
+<section id="results" class="results hidden"><div class="metric-grid">
+<article class="metric"><span>Sürekli yük</span><strong id="rLoad">—</strong><small>Girilen toplam</small></article>
+<article class="metric"><span>Tahmini tepe güç</span><strong id="rSurge">—</strong><small>İnverterin karşılaması gereken güç</small></article>
+<article class="metric accent"><span id="primaryLabel">Tahmini süre</span><strong id="rPrimary">—</strong><small id="rPrimarySmall">—</small></article>
+<article class="metric"><span>Çözüm sınıfı</span><strong id="rClass">—</strong><small id="rConfidence">—</small></article>
+</div><div class="result-grid"><article class="result-card"><h3>Teknik karar özeti</h3><ul id="summaryList"></ul></article>
+<article class="result-card"><h3>Sonraki adım</h3><p id="nextStep"></p><div class="actions"><button class="btn btn-secondary" id="copyBtn">Özeti kopyala</button><button class="btn btn-secondary" data-print>PDF / yazdır</button></div></article></div>
+<div id="productRoute" class="business-cta hidden"><div><span class="eyebrow">İsteğe bağlı ve sonuçtan sonra</span><h3 id="productTitle">Teknik ihtiyacınıza uygun ürün sınıfını karşılaştırın.</h3><p id="productText">Önce watt, Wh, çıkış gücü ve bağlantı uyumunu doğrulayın. Bağlantı sizi ALO186 ürün seçim merkezine götürür; Amazon bağlantıları açıkça reklam / satış ortaklığı olarak işaretlenir. Fiyat, stok, satıcı, puan ve garanti yalnız Amazon’un güncel sayfasından doğrulanır.</p></div><a class="btn btn-primary" id="productLink" href="https://alo186.com/amazon-elektrik-urunleri?from=ups-calculator&amp;plan=bilgisayar-modem">Seçim merkezini aç</a></div>
+<div class="business-cta"><div><span class="eyebrow">Otel, site veya işletme?</span><h3>UPS, jeneratör ve kritik yük koordinasyonu için profesyonel ön değerlendirme alın.</h3><p>Üç faz, sabit tesisat, asansör, pompa, soğuk oda veya 2 kW üzeri yüklerde proje kontrolü gerekir.</p></div><a class="btn btn-primary" href="https://alo186.com/iletisim?konu=yedek-guc">Ön değerlendirme oluştur</a></div>
+</section>
+<section class="content-section faq"><details><summary>VA ile Wh aynı şey mi?</summary><p>Hayır. VA güç kapasitesini, Wh enerji kapasitesini ifade eder. Çalışma süresi için Wh; yükü kaldırma için W/VA gerekir.</p></details>
+<details><summary>Sonuç neden gerçek süreden farklı olabilir?</summary><p>Cihaz tüketimi, batarya sıcaklığı, yaş, inverter verimi ve kalkış akımı değişkendir.</p></details></section>
+</main>
+<footer><div class="footer-inner"><div><strong>ALO186</strong><p>Bağımsız bilgilendirme platformudur; EDAŞ veya kamu kurumu değildir.</p></div>
+<div class="footer-links"><a href="https://alo186.com/yayin-ilkeleri">Yayın ilkeleri</a><a href="https://alo186.com/gizlilik">Gizlilik</a><a href="https://alo186.com/iletisim">İletişim</a></div></div></footer>
+<noscript><div class="noscript">Bu hesaplama aracı JavaScript gerektirir.</div></noscript>
+<script src="../calc-core.js"></script><script src="../common.js"></script><script src="./app.js"></script></body></html>

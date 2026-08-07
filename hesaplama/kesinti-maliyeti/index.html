@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Elektrik Kesintisi Maliyet Hesaplama | ALO186</title>
+  <meta name="description" content="Elektrik kesintisinin ciro kaybı, personel bekleme, bozulan ürün, jeneratör yakıtı, yeniden başlatma ve cihaz hasarı maliyetini yaklaşık hesaplayın.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="https://alo186.com/hesaplama/kesinti-maliyeti">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Elektrik Kesintisi Maliyet Hesaplama | ALO186">
+  <meta property="og:description" content="Bir kesintinin olay başı ve yıllık yaklaşık maliyetini görün; hangi süreklilik yatırımının öncelikli olduğunu değerlendirin.">
+  <meta property="og:url" content="https://alo186.com/hesaplama/kesinti-maliyeti">
+  <meta name="theme-color" content="#071631">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"WebApplication","name":"ALO186 Elektrik Kesintisi Maliyet Hesaplayıcısı","applicationCategory":"BusinessApplication","operatingSystem":"Web","url":"https://alo186.com/hesaplama/kesinti-maliyeti","description":"Elektrik kesintisinin doğrudan ve dolaylı maliyetlerini yaklaşık hesaplayan ücretsiz karar aracı.","offers":{"@type":"Offer","price":"0","priceCurrency":"TRY"},"publisher":{"@type":"Organization","name":"ALO186","url":"https://alo186.com"}}
+  </script>
+<link rel="stylesheet" href="/assets/alo186-accessibility-v215.css" data-alo186-accessibility-v215="true">
+</head>
+<body>
+  <a class="skip-link" href="#calculator">Hesaplayıcıya geç</a>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="https://alo186.com" aria-label="ALO186 ana sayfa"><span class="brand-mark">186</span><span><strong>ALO186</strong><small>Bağımsız elektrik bilgi ağı</small></span></a>
+      <nav aria-label="Üst menü"><a href="https://alo186.com/elektrik-kesintisi">Kesinti</a><a href="https://alo186.com/hesaplama">Hesaplayıcılar</a><a href="https://alo186.com/isletmeler">İşletmeler</a></nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="trust-banner"><strong>Finansal ön değerlendirmedir.</strong> Sonuç; sigorta, tazminat, muhasebe veya resmî zarar tespiti yerine geçmez. Gerçek maliyet kayıt ve belgelerle doğrulanmalıdır.</section>
+
+    <section class="hero">
+      <div class="hero-copy">
+        <span class="eyebrow">Ev · site · otel · işletme · sanayi</span>
+        <h1>Elektrik kesintisi size <em>gerçekte neye mal oluyor?</em></h1>
+        <p>Ciro kaybı, personel bekleme, bozulan ürün, jeneratör yakıtı, yeniden başlatma ve cihaz hasarını birlikte hesaplayın. Sonuçları olay başı ve yıllık görün.</p>
+        <div class="privacy-chip"><span>✓</span> Hesaplama cihazınızda yapılır; girdiğiniz değerler sunucuya gönderilmez.</div>
+      </div>
+      <aside class="formula-card"><span>Karar yaklaşımı</span><strong>Doğrudan + dolaylı kayıp</strong><small>Yalnız enerji bedelini değil, hizmet ve operasyon kaybını da hesaba katar.</small></aside>
+    </section>
+
+    <section id="calculator" class="calculator-shell">
+      <div class="calculator-card">
+        <div class="section-heading"><div><span class="step">1</span><h2>Kesinti senaryosunu tanımlayın</h2></div><button type="button" class="text-button" id="exampleBtn">Otel örneği</button></div>
+        <div class="form-grid">
+          <label class="field"><span>Tesis türü</span><select id="facilityType"><option value="home">Ev / daire</option><option value="site">Site / apartman</option><option value="small_business">Küçük işletme</option><option value="hotel">Otel / konaklama</option><option value="industry">Sanayi / üretim</option><option value="other">Diğer</option></select></label>
+          <label class="field"><span>Bir kesintinin süresi</span><div class="unit-input"><input id="durationHours" inputmode="decimal" value="2" min="0.1" max="168" step="0.1"><b>saat</b></div></label>
+          <label class="field"><span>Yılda benzer kesinti sayısı</span><div class="unit-input"><input id="eventsPerYear" inputmode="numeric" value="4" min="1" max="365"><b>olay</b></div></label>
+          <label class="field"><span>Hesap para birimi</span><select id="currency"><option value="TRY">TL</option><option value="EUR">EUR</option><option value="USD">USD</option></select></label>
+        </div>
+
+        <div class="section-subheading"><span class="step">2</span><div><h2>Kayıp ve ek maliyetleri girin</h2><p>Bilmiyorsanız boş bırakın; yalnız girdiğiniz kalemler hesaba katılır.</p></div></div>
+        <div class="form-grid">
+          <label class="field"><span>Kesinti saatindeki ciro / hizmet değeri</span><div class="unit-input"><input id="revenuePerHour" inputmode="decimal" value="0" min="0"><b>/saat</b></div></label>
+          <label class="field"><span>Cironun gerçekten kaybolan kısmı</span><div class="unit-input"><input id="lostRevenuePercent" inputmode="decimal" value="100" min="0" max="100"><b>%</b></div></label>
+          <label class="field"><span>Bekleyen personel sayısı</span><div class="unit-input"><input id="idleEmployees" inputmode="numeric" value="0" min="0"><b>kişi</b></div></label>
+          <label class="field"><span>Kişi başı saatlik toplam maliyet</span><div class="unit-input"><input id="employeeCostPerHour" inputmode="decimal" value="0" min="0"><b>/saat</b></div></label>
+          <label class="field"><span>Bozulan ürün / stok / gıda</span><div class="unit-input"><input id="spoilageCost" inputmode="decimal" value="0" min="0"><b>tutar</b></div></label>
+          <label class="field"><span>Yeniden başlatma ve temizlik</span><div class="unit-input"><input id="restartCost" inputmode="decimal" value="0" min="0"><b>tutar</b></div></label>
+          <label class="field"><span>Cihaz hasarı veya servis</span><div class="unit-input"><input id="damageCost" inputmode="decimal" value="0" min="0"><b>tutar</b></div></label>
+          <label class="field"><span>Diğer olay maliyeti</span><div class="unit-input"><input id="otherCost" inputmode="decimal" value="0" min="0"><b>tutar</b></div></label>
+        </div>
+
+        <div class="section-subheading"><span class="step">3</span><div><h2>Jeneratör varsa yakıt maliyetini ekleyin</h2><p>Yaklaşık tüketim, jeneratör yükü ve özgül yakıt değerinden hesaplanır.</p></div></div>
+        <div class="toggle-row"><label><input type="checkbox" id="generatorUsed"> Kesinti sırasında jeneratör kullanılıyor</label></div>
+        <div class="form-grid generator-fields hidden" id="generatorFields">
+          <label class="field"><span>Ortalama elektrik yükü</span><div class="unit-input"><input id="generatorLoadKw" inputmode="decimal" value="50" min="0"><b>kW</b></div></label>
+          <label class="field"><span>Özgül yakıt tüketimi</span><div class="unit-input"><input id="specificFuel" inputmode="decimal" value="0.28" min="0.05" max="1" step="0.01"><b>L/kWh</b></div></label>
+          <label class="field"><span>Yakıt fiyatı</span><div class="unit-input"><input id="fuelPrice" inputmode="decimal" value="50" min="0"><b>/L</b></div></label>
+          <label class="field"><span>Jeneratör ek işletme payı</span><div class="unit-input"><input id="generatorExtraPercent" inputmode="decimal" value="10" min="0" max="100"><b>%</b></div></label>
+        </div>
+
+        <div class="validation" id="validation" role="alert" aria-live="polite"></div>
+        <div class="form-actions"><button class="primary-button" type="button" id="calculateBtn">Kesinti maliyetini hesapla</button><button class="secondary-button" type="button" id="clearBtn">Temizle</button></div>
+      </div>
+
+      <aside class="method-card"><span class="step">i</span><h2>Neleri kapsar?</h2><ul><li>Ciro veya hizmet kaybı</li><li>Personel bekleme maliyeti</li><li>Bozulan ürün ve stok</li><li>Jeneratör yakıtı</li><li>Yeniden başlatma</li><li>Cihaz hasarı</li></ul><p>Tazminat hakkı ve sigorta ödemesi ayrıca resmî kayıt ve poliçe koşullarına göre değerlendirilir.</p></aside>
+    </section>
+
+    <section class="results hidden" id="results" aria-live="polite">
+      <div class="results-header"><div><span class="eyebrow">Yaklaşık maliyet görünümü</span><h2>Kesinti maliyetiniz</h2></div><div class="result-actions"><button class="secondary-button" id="copyBtn">Özeti kopyala</button><button class="secondary-button" id="printBtn">PDF / yazdır</button></div></div>
+      <div class="metric-grid">
+        <article class="metric-card accent"><span>Olay başı toplam maliyet</span><strong id="eventCost">—</strong><small>Girdiğiniz kalemlerin toplamı</small></article>
+        <article class="metric-card"><span>Yıllık yaklaşık maliyet</span><strong id="annualCost">—</strong><small>Benzer olay sayısına göre</small></article>
+        <article class="metric-card"><span>Saat başına kayıp</span><strong id="hourlyCost">—</strong><small>Kesinti süresine bölünmüş değer</small></article>
+        <article class="metric-card"><span>24 aylık risk maruziyeti</span><strong id="twoYearExposure">—</strong><small>Yatırım üst sınırı değildir</small></article>
+      </div>
+      <div class="result-layout">
+        <article class="decision-card"><h3>Maliyet kırılımı</h3><div id="breakdown"></div></article>
+        <article class="insight-card"><h3>Öncelikli aksiyonlar</h3><ul id="actionList"></ul></article>
+      </div>
+      <div class="next-step"><div><span class="eyebrow">İşletme sürekliliği</span><h3 id="nextTitle">Kesinti planınızı güçlendirin</h3><p id="nextText"></p></div><a class="primary-button link-button" href="https://alo186.com/iletisim?konu=kesinti-maliyet-analizi">Ücretsiz ön değerlendirme</a></div>
+    </section>
+
+    <section class="content-section">
+      <div class="section-heading static"><div><span class="eyebrow">Yorumlama rehberi</span><h2>Sonucu doğru kullanın</h2></div></div>
+      <div class="faq-grid">
+        <details><summary>Ciro kaybının tamamını yazmalı mıyım?</summary><p>Kesinti sonrası telafi edilebilen satışları tam kayıp saymayın. “Gerçekten kaybolan oran” alanı bu nedenle ayrıca bulunur.</p></details>
+        <details><summary>Jeneratör varsa kesinti maliyeti sıfır olur mu?</summary><p>Hayır. Yakıt, bakım, geçiş süresi, yük atma, gürültü, personel ve kısmi hizmet kaybı devam edebilir.</p></details>
+        <details><summary>Bu sonuç tazminat hesabı mıdır?</summary><p>Hayır. Dağıtım tazminatı ve sigorta ödemesi mevzuat, kesinti kaydı, poliçe ve resmî değerlendirmeye bağlıdır.</p></details>
+        <details><summary>Yatırım kararında nasıl kullanılır?</summary><p>Kesinti sıklığı ve doğrulanmış kayıplar ile UPS, jeneratör, otomasyon veya bakım yatırımının toplam sahip olma maliyetini karşılaştırın.</p></details>
+      </div>
+    </section>
+  </main>
+
+  <footer><div class="footer-inner"><div><strong>ALO186</strong><p>Bağımsız bilgilendirme platformudur; resmî zarar tespiti, sigorta veya tazminat kararı vermez.</p></div><div class="footer-links"><a href="https://alo186.com/yayin-ilkeleri">Yayın ilkeleri</a><a href="https://alo186.com/bilgi-guncelligi">Bilgi güncelliği</a><a href="https://alo186.com/yasal/gizlilik">Gizlilik</a></div></div></footer>
+  <noscript><div class="noscript">Bu hesaplayıcının çalışması için JavaScript etkin olmalıdır.</div></noscript>
+  <script src="./app.js" defer></script>
+</body>
+</html>

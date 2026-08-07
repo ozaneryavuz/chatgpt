@@ -1,0 +1,30 @@
+(() => {
+  'use strict';
+  const $=id=>document.getElementById(id);
+  const core=window.Alo186EVCableSuitability;
+  const valueIds=['stationType','vehicleInlet','vehiclePhases','vehicleMaxKw','stationPhases','stationMaxCurrent','ownership','cableConnector','cablePhases','cableRatedCurrent','cableLength'];
+  const checkIds=['labelVerified','vehicleSpecVerified','stationSpecVerified','damageFree','storageOk','manufacturerCompatibility','noExtension','lockingWorks'];
+  const presets={eleven:{stationType:'socketed',vehicleInlet:'type2',vehiclePhases:'three',vehicleMaxKw:11,stationPhases:'three',stationMaxCurrent:32,ownership:'candidate',cableConnector:'type2-type2',cablePhases:'three',cableRatedCurrent:16,cableLength:5,labelVerified:true,vehicleSpecVerified:true,stationSpecVerified:true,damageFree:true,storageOk:true,manufacturerCompatibility:true,noExtension:true,lockingWorks:true},seven:{stationType:'socketed',vehicleInlet:'type2',vehiclePhases:'single',vehicleMaxKw:7.4,stationPhases:'three',stationMaxCurrent:32,ownership:'candidate',cableConnector:'type2-type2',cablePhases:'single',cableRatedCurrent:32,cableLength:7,labelVerified:true,vehicleSpecVerified:true,stationSpecVerified:true,damageFree:true,storageOk:true,manufacturerCompatibility:true,noExtension:true,lockingWorks:true},owned:{stationType:'socketed',vehicleInlet:'type2',vehiclePhases:'three',vehicleMaxKw:11,stationPhases:'three',stationMaxCurrent:32,ownership:'owned',cableConnector:'type2-type2',cablePhases:'three',cableRatedCurrent:32,cableLength:5,labelVerified:true,vehicleSpecVerified:true,stationSpecVerified:true,damageFree:true,storageOk:true,manufacturerCompatibility:true,noExtension:true,lockingWorks:true}};
+  const escapeHtml=value=>String(value).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  const list=items=>items.map(item=>`<li>${escapeHtml(item)}</li>`).join('');
+  const fmt=(value,digits=2)=>value==null?'—':Number(value).toLocaleString('tr-TR',{maximumFractionDigits:digits});
+  const values=()=>{const data={};valueIds.forEach(id=>data[id]=$(id).value);checkIds.forEach(id=>data[id]=$(id).checked);return data;};
+  function setValues(data){valueIds.forEach(id=>{if(data[id]!=null)$(id).value=String(data[id]);});checkIds.forEach(id=>{$(id).checked=Boolean(data[id]);});}
+  function emit(name,params={}){if(typeof window.Alo186Track==='function')window.Alo186Track(name,params);}
+  function updateAffiliate(){const enabled=$('affiliateAck').checked,link=$('productCenterLink');link.classList.toggle('disabled-link',!enabled);link.setAttribute('aria-disabled',enabled?'false':'true');link.tabIndex=enabled?0:-1;emit('ev_cable_affiliate_acknowledged',{acknowledged:enabled});}
+  function render(result){
+    $('results').classList.remove('hidden');
+    const labels={compatible:'Teknik hedefi karşılıyor',conditional:'Koşullu / bilgi doğrulaması gerekli',incompatible:'Hedefi karşılamıyor veya güvenlik engeli var','not-needed':'Ayrı kablo satın almanız gerekmiyor'};
+    $('resultStatus').textContent=labels[result.status];$('resultStatus').className=`status ${result.status==='compatible'||result.status==='not-needed'?'ok':result.status==='conditional'?'warn':'bad'}`;
+    $('targetMetric').textContent=result.targetPowerKw==null?'—':`${fmt(result.targetPowerKw)} kW`;$('cableMetric').textContent=result.cablePowerKw==null?'—':`${fmt(result.cablePowerKw)} kW`;$('classMetric').textContent=result.recommendedLabel;$('limitMetric').textContent=result.limitingComponent;
+    $('summary').textContent=result.status==='not-needed'?'Sabit kablolu şarj noktası seçildi.':`${result.input.cablePhases==='three'?'Trifaze':result.input.cablePhases==='single'?'Monofaze':'Fazı belirsiz'} · ${fmt(result.input.cableRatedCurrent,0)} A · ${fmt(result.input.cableLength,1)} m`;
+    $('blockerCard').classList.toggle('hidden',!result.blockers.length);$('blockerList').innerHTML=list(result.blockers);$('warningList').innerHTML=list(result.warnings.length?result.warnings:['Belirgin sınır veya güvenlik sorunu görülmedi; tam model kılavuzları yine doğrulanmalıdır.']);$('checkList').innerHTML=list(result.checks);
+    $('noPurchasePanel').classList.toggle('hidden',!result.noPurchaseNeeded);$('professionalPanel').classList.toggle('hidden',!result.professionalRequired);$('affiliatePanel').classList.toggle('hidden',!result.commercialAllowed);$('affiliateAck').checked=false;updateAffiliate();
+    $('results').focus({preventScroll:true});$('results').scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+    emit('ev_cable_suitability_completed',{status:result.status,commercial_allowed:result.commercialAllowed,no_purchase_needed:result.noPurchaseNeeded,required_class:result.recommendedCurrent?`${result.recommendedPhases}_${result.recommendedCurrent}`:'unknown',ownership:result.input.ownership});if(result.noPurchaseNeeded)emit('ev_cable_no_purchase',{reason:result.status==='not-needed'?'tethered_station':'owned_cable_sufficient'});
+  }
+  document.querySelectorAll('[data-preset]').forEach(button=>button.addEventListener('click',()=>{setValues(presets[button.dataset.preset]);emit('ev_cable_preset_selected',{preset:button.dataset.preset});}));
+  $('evCableForm').addEventListener('submit',event=>{event.preventDefault();try{$('validation').textContent='';render(core.analyze(values()));}catch(error){$('validation').textContent=error.message;$('validation').focus();}});
+  $('resetBtn').addEventListener('click',()=>{$('evCableForm').reset();setValues(presets.eleven);$('results').classList.add('hidden');$('validation').textContent='';emit('ev_cable_reset');});
+  $('affiliateAck').addEventListener('change',updateAffiliate);$('productCenterLink').addEventListener('click',event=>{if(event.currentTarget.getAttribute('aria-disabled')==='true'){event.preventDefault();return;}emit('ev_cable_product_center_opened',{category:'ev_sarj_kablosu'});});setValues(presets.eleven);
+})();
