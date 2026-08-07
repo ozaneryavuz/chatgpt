@@ -1,0 +1,90 @@
+name: ALO186 lighting flicker growth v344
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/led-ampul-titriyor-isiklar-neden-titriyor/**'
+      - 'alo186/hesaplama/aydinlatma-titreme-guvenlik-ayirici/**'
+      - 'alo186/amazon-elektrik-urunleri/led-ampul-uygunluk-secimi/**'
+      - 'alo186/haberler/elektrik-kesintisi-cihaz-hasari-edas-basvurusu/index.html'
+      - 'alo186/deployment/routing-overlays/lighting-flicker-growth-v344.json'
+      - 'alo186/deployment/affiliate-category-decisions/lighting-flicker-growth-v344.json'
+      - 'alo186/tests/test_lighting_flicker_growth_v344.py'
+      - '.github/workflows/alo186-lighting-flicker-v344.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/led-ampul-titriyor-isiklar-neden-titriyor/**'
+      - 'alo186/hesaplama/aydinlatma-titreme-guvenlik-ayirici/**'
+      - 'alo186/amazon-elektrik-urunleri/led-ampul-uygunluk-secimi/**'
+      - 'alo186/haberler/elektrik-kesintisi-cihaz-hasari-edas-basvurusu/index.html'
+      - 'alo186/deployment/routing-overlays/lighting-flicker-growth-v344.json'
+      - 'alo186/deployment/affiliate-category-decisions/lighting-flicker-growth-v344.json'
+      - 'alo186/tests/test_lighting_flicker_growth_v344.py'
+      - '.github/workflows/alo186-lighting-flicker-v344.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-lighting-flicker-v344-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Lighting flicker trust privacy no-buy and affiliate gates
+        run: python alo186/tests/test_lighting_flicker_growth_v344.py
+      - name: Global content intent collision guard
+        run: python alo186/tests/test_content_intent_consolidation.py
+      - name: Canonical production build and smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-lighting-v344
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-lighting-v344 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-lighting-v344
+      - name: Verify production routes deadline and locked merchant link
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/alo186-lighting-v344')
+          routes = [
+              '/haberler/led-ampul-titriyor-isiklar-neden-titriyor/',
+              '/hesaplama/aydinlatma-titreme-guvenlik-ayirici/',
+              '/amazon-elektrik-urunleri/led-ampul-uygunluk-secimi/',
+          ]
+          sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
+          release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
+          assert release['routingVersion'] >= 344
+          for route in routes:
+              page = root / route.strip('/') / 'index.html'
+              assert page.is_file(), page
+              assert f'https://alo186.com{route}' in sitemap
+          selector = (root / 'amazon-elektrik-urunleri/led-ampul-uygunluk-secimi/index.html').read_text(encoding='utf-8')
+          selector_js = (root / 'amazon-elektrik-urunleri/led-ampul-uygunluk-secimi/app.js').read_text(encoding='utf-8')
+          assert 'href="https://www.amazon.com.tr' not in selector
+          assert selector.count('data-gate') == 8
+          assert 'sponsored noopener' in selector_js
+          damage = (root / 'haberler/elektrik-kesintisi-cihaz-hasari-edas-basvurusu/index.html').read_text(encoding='utf-8')
+          assert '30 gün' in damage
+          assert 'özel süre 10 iş günüdür' not in damage
+          guide = (root / 'haberler/led-ampul-titriyor-isiklar-neden-titriyor/index.html').read_text(encoding='utf-8')
+          assert 'amazon.com.tr' not in guide.lower()
+          print({'ok': True, 'routingVersion': release['routingVersion'], 'routes': routes, 'newAffiliateClasses': 1, 'newMerchantLinks': 1, 'merchantLockedUntilEightGates': True})
+          PY
+      - name: Upload verified bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-lighting-flicker-v344-${{ github.sha }}
+          path: /tmp/alo186-lighting-v344
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
