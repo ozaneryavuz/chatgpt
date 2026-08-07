@@ -1,0 +1,76 @@
+name: ALO186 automatic access outage v331
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/elektrik-kesilince-otomatik-kepenk-garaj-kapisi-nasil-acilir/**'
+      - 'alo186/hesaplama/otomatik-kapi-kepenk-elektrik-kesintisi-sureklilik-plani/**'
+      - 'alo186/sektor-rehberi/site-otel-isletme-otomatik-kapi-kepenk-kesinti-surekliligi/**'
+      - 'alo186/deployment/routing-overlays/automatic-access-outage-v331.json'
+      - 'alo186/tests/test_automatic_access_outage_v331.py'
+      - '.github/workflows/alo186-automatic-access-v331.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/elektrik-kesilince-otomatik-kepenk-garaj-kapisi-nasil-acilir/**'
+      - 'alo186/hesaplama/otomatik-kapi-kepenk-elektrik-kesintisi-sureklilik-plani/**'
+      - 'alo186/sektor-rehberi/site-otel-isletme-otomatik-kapi-kepenk-kesinti-surekliligi/**'
+      - 'alo186/deployment/routing-overlays/automatic-access-outage-v331.json'
+      - 'alo186/tests/test_automatic_access_outage_v331.py'
+      - '.github/workflows/alo186-automatic-access-v331.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-automatic-access-v331-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Trust privacy professional-only and no-buy checks
+        run: python alo186/tests/test_automatic_access_outage_v331.py
+      - name: Build canonical site bundle
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-access-v331
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-access-v331 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-access-v331
+      - name: Verify routes sitemap and zero merchant links
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/alo186-access-v331')
+          routes = [
+            '/haberler/elektrik-kesilince-otomatik-kepenk-garaj-kapisi-nasil-acilir/',
+            '/hesaplama/otomatik-kapi-kepenk-elektrik-kesintisi-sureklilik-plani/',
+            '/sektor-rehberi/site-otel-isletme-otomatik-kapi-kepenk-kesinti-surekliligi/',
+          ]
+          sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
+          release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
+          assert release['routingVersion'] >= 331
+          for route in routes:
+              page = root / route.strip('/') / 'index.html'
+              assert page.is_file(), page
+              assert f'https://alo186.com{route}' in sitemap
+              html = page.read_text(encoding='utf-8').lower()
+              assert 'amazon.com.tr' not in html
+          print({'ok': True, 'routingVersion': release['routingVersion'], 'routes': routes, 'merchantLinks': 0})
+          PY
+      - name: Upload verified bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-automatic-access-v331-${{ github.sha }}
+          path: /tmp/alo186-access-v331
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
