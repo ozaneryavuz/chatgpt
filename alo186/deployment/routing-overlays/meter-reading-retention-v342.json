@@ -1,0 +1,21 @@
+{
+  "version": 342,
+  "generatedAt": "2026-08-07",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-sayaci-nasil-okunur-t0-t1-t2-t3-endeks/index.html",
+      "canonicalPath": "/haberler/elektrik-sayaci-nasil-okunur-t0-t1-t2-t3-endeks/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/elektrik-sayaci-endeks-kwh-gun-takibi/index.html",
+      "canonicalPath": "/hesaplama/elektrik-sayaci-endeks-kwh-gun-takibi/",
+      "type": "business-tool"
+    },
+    {
+      "source": "alo186/fatura-ve-sayac-kontrol-merkezi/index.html",
+      "canonicalPath": "/fatura-ve-sayac-kontrol-merkezi/",
+      "type": "business-tool"
+    }
+  ]
+}
