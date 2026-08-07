@@ -8,11 +8,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 SITE = ROOT / "alo186"
 OVERLAY = SITE / "deployment/routing-overlays/automatic-access-outage-v331.json"
-GUIDE = SITE / "haberler/elektrik-kesilince-otomatik-kepenk-garaj-kapisi-nasil-acilir/index.html"
+GUIDE = SITE / "haberler/elektrik-kesilince-otomatik-kapi-kepenk-garaj-kapisi-nasil-acilir/index.html"
 PLANNER = SITE / "hesaplama/otomatik-kapi-kepenk-elektrik-kesintisi-sureklilik-plani/index.html"
 SECTOR = SITE / "sektor-rehberi/site-otel-isletme-otomatik-kapi-kepenk-kesinti-surekliligi/index.html"
 ROUTES = {
-    "/haberler/elektrik-kesilince-otomatik-kepenk-garaj-kapisi-nasil-acilir/": GUIDE,
+    "/haberler/elektrik-kesilince-otomatik-kapi-kepenk-garaj-kapisi-nasil-acilir/": GUIDE,
     "/hesaplama/otomatik-kapi-kepenk-elektrik-kesintisi-sureklilik-plani/": PLANNER,
     "/sektor-rehberi/site-otel-isletme-otomatik-kapi-kepenk-kesinti-surekliligi/": SECTOR,
 }
@@ -99,7 +99,8 @@ def main() -> None:
     print(json.dumps({
         "ok": True,
         "routingVersion": 331,
-        "newRoutes": list(ROUTES),
+        "routes": list(ROUTES),
+        "updatedExistingCanonical": True,
         "newAffiliateClasses": 0,
         "merchantLinks": 0,
         "personalDataFields": 0,
