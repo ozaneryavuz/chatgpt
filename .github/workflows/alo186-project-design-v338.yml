@@ -1,0 +1,84 @@
+name: ALO186 project design v338
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/62-villa-22-kw-ac-2x180-kw-dc-elektrikli-arac-sarj-altyapisi-proje-tasarimi/**'
+      - 'alo186/haberler/kisa-devre-secicilik-kablo-koruma-gerilim-dusumu-koordinasyon-raporu/**'
+      - 'alo186/haberler/yangin-algilama-acil-anons-neden-sonuc-zayif-akim-proje-kabul/**'
+      - 'alo186/deployment/routing-overlays/project-design-v338.json'
+      - 'alo186/tests/test_project_design_v338.py'
+      - '.github/workflows/alo186-project-design-v338.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/62-villa-22-kw-ac-2x180-kw-dc-elektrikli-arac-sarj-altyapisi-proje-tasarimi/**'
+      - 'alo186/haberler/kisa-devre-secicilik-kablo-koruma-gerilim-dusumu-koordinasyon-raporu/**'
+      - 'alo186/haberler/yangin-algilama-acil-anons-neden-sonuc-zayif-akim-proje-kabul/**'
+      - 'alo186/deployment/routing-overlays/project-design-v338.json'
+      - 'alo186/tests/test_project_design_v338.py'
+      - '.github/workflows/alo186-project-design-v338.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-project-design-v338-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Content schema mobile trust and collision checks
+        run: python alo186/tests/test_project_design_v338.py
+      - name: Build canonical site bundle
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-project-design-v338
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-project-design-v338 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-project-design-v338
+      - name: Verify production sitemap canonical and structured data
+        run: |
+          python - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+          root = Path('/tmp/alo186-project-design-v338')
+          routes = [
+            '/haberler/62-villa-22-kw-ac-2x180-kw-dc-elektrikli-arac-sarj-altyapisi-proje-tasarimi/',
+            '/haberler/kisa-devre-secicilik-kablo-koruma-gerilim-dusumu-koordinasyon-raporu/',
+            '/haberler/yangin-algilama-acil-anons-neden-sonuc-zayif-akim-proje-kabul/',
+          ]
+          sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
+          release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
+          assert release['routingVersion'] >= 338
+          for route in routes:
+              page = root / route.strip('/') / 'index.html'
+              assert page.is_file(), page
+              html = page.read_text(encoding='utf-8')
+              assert f'https://alo186.com{route}' in sitemap
+              assert f'<link rel="canonical" href="https://alo186.com{route}">' in html
+              blocks = re.findall(r'<script type="application/ld\+json">(.*?)</script>', html, re.S)
+              assert len(blocks) == 1
+              payload = json.loads(blocks[0])
+              text = json.dumps(payload, ensure_ascii=False)
+              for kind in ('Article', 'FAQPage', 'BreadcrumbList'):
+                  assert f'"@type": "{kind}"' in text or f'"@type":"{kind}"' in text
+              assert 'amazon.com.tr' not in html.casefold()
+          print({'ok': True, 'routingVersion': release['routingVersion'], 'routes': routes, 'articleFaqBreadcrumb': True, 'merchantLinks': 0})
+          PY
+      - name: Upload verified bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-project-design-v338-${{ github.sha }}
+          path: /tmp/alo186-project-design-v338
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
