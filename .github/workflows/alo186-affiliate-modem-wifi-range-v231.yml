@@ -1,0 +1,117 @@
+name: ALO186 affiliate modem Wi-Fi kapsama ölçümü v231
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/modem-wifi-kapsama-olcum-menzil-genisletici-secimi/**'
+      - 'alo186/deployment/routing-overlays/231-affiliate-modem-wifi-range.json'
+      - 'alo186/tests/test_affiliate_modem_wifi_range_v231.js'
+      - '.github/workflows/alo186-affiliate-modem-wifi-range-v231.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/modem-wifi-kapsama-olcum-menzil-genisletici-secimi/**'
+      - 'alo186/deployment/routing-overlays/231-affiliate-modem-wifi-range.json'
+      - 'alo186/tests/test_affiliate_modem_wifi_range_v231.js'
+      - '.github/workflows/alo186-affiliate-modem-wifi-range-v231.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-affiliate-modem-wifi-range-v231-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Exact ASIN, Knowledge Graph and stale gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check alo186/amazon-elektrik-urunleri/modem-wifi-kapsama-olcum-menzil-genisletici-secimi/catalog-v231.js
+          node --check alo186/amazon-elektrik-urunleri/modem-wifi-kapsama-olcum-menzil-genisletici-secimi/app-v231.js
+          node alo186/tests/test_affiliate_modem_wifi_range_v231.js
+
+      - name: Affiliate scope, governance and legal safety regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '%s\n' \
+            'alo186/amazon-elektrik-urunleri/modem-wifi-kapsama-olcum-menzil-genisletici-secimi/index.html' \
+            > /tmp/alo186-affiliate-modem-wifi-range-changed.txt
+          python alo186/tests/test_affiliate_scope_policy_v229.py \
+            --changed-files /tmp/alo186-affiliate-modem-wifi-range-changed.txt
+          python alo186/tests/test_commerce_governance_v2.py
+          python alo186/tests/test_commerce_governance_v3.py
+          python alo186/tests/device_damage_deadline_guard.py
+          node alo186/tests/test_release_manifest.js
+
+      - name: Canonical production bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-modem-wifi-range-v231 \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-modem-wifi-range-v231
+          route=/tmp/alo186-modem-wifi-range-v231/amazon-elektrik-urunleri/modem-wifi-kapsama-olcum-menzil-genisletici-secimi
+          test -f "$route/index.html"
+          test -f "$route/catalog-v231.js"
+          test -f "$route/app-v231.js"
+          grep -Fq 'B08RHD97QY' "$route/index.html"
+          grep -Fq 'B01MD1SKLL' "$route/index.html"
+          grep -Fq 'B00KXULGJQ' "$route/index.html"
+          grep -Fq 'alo186rehber-21' "$route/catalog-v231.js"
+          ! grep -Eq 'href="https://www\.amazon\.com\.tr/(dp|s\?k=)' "$route/index.html"
+
+      - name: Custom-domain and project-path commerce acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          for spec in 'custom|' 'project|/chatgpt'; do
+            name="${spec%%|*}"
+            base="${spec#*|}"
+            target="/tmp/alo186-modem-wifi-range-v231-${name}"
+            cp -a /tmp/alo186-modem-wifi-range-v231 "$target"
+            python alo186/deployment/prepare_github_pages.py \
+              --site "$target" \
+              --base-path "$base" \
+              --repository "$GITHUB_REPOSITORY" \
+              --commit "$GITHUB_SHA"
+            python alo186/deployment/inject_outcome_runtime.py \
+              --site "$target" \
+              --base-path "$base"
+            python alo186/deployment/inject_shortlist_growth.py \
+              --site "$target" \
+              --base-path "$base" \
+              > "/tmp/alo186-modem-wifi-range-v231-${name}-growth.json"
+            python alo186/deployment/smoke_github_pages.py \
+              --site "$target" \
+              --base-path "$base"
+            python alo186/deployment/guard_commerce_routes_v3.py \
+              --site "$target" \
+              | tee "/tmp/alo186-modem-wifi-range-v231-${name}-guard.json"
+          done
+
+      - name: Verified artifact
+        if: success()
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-affiliate-modem-wifi-range-v231
+          path: /tmp/alo186-modem-wifi-range-v231-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
