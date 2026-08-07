@@ -1,0 +1,33 @@
+name: ALO186 discovery growth v333
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/robots.txt'
+      - 'alo186/sitemap-growth-v333.xml'
+      - 'alo186/kesintiye-hazirlik-atolyesi/**'
+      - 'alo186/tests/test_discovery_growth_v333.py'
+      - '.github/workflows/alo186-discovery-growth-v333.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/robots.txt'
+      - 'alo186/sitemap-growth-v333.xml'
+      - 'alo186/kesintiye-hazirlik-atolyesi/**'
+      - 'alo186/tests/test_discovery_growth_v333.py'
+      - '.github/workflows/alo186-discovery-growth-v333.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  trust-discovery-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate sitemap, discovery and trust boundaries
+        run: python -m unittest alo186.tests.test_discovery_growth_v333 -v
