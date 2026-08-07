@@ -2,20 +2,20 @@
   "version": 340,
   "generatedAt": "2026-08-07",
   "topic": "extension-cord-and-power-strip-safety",
-  "decision": "one-low-risk-class-after-load-and-safety-validation",
-  "newAffiliateClasses": 1,
-  "newMerchantLinks": 1,
-  "affiliateClass": "overload-protection-verifiable-indoor-power-strip-extension-for-low-power-electronics",
-  "merchantRoute": "/amazon-elektrik-urunleri/coklu-priz-uzatma-kablosu-secimi/",
+  "decision": "reuse-existing-trust-gated-surge-strip-affiliate-journey",
+  "newAffiliateClasses": 0,
+  "newMerchantLinks": 0,
+  "reusedAffiliateClass": "surge-strip-after-suitability-tool",
+  "existingDecisionRoute": "/hesaplama/akim-korumali-grup-priz-uygunluk/",
+  "reason": "avoid duplicate commercial intent and canonical cannibalization; qualify extension/power-strip search intent with a non-commercial guide and quick load check before the existing advanced suitability gate",
   "allowedOnlyWhen": [
     "product-label-max-power-and-connected-device-total-are-compared-first",
     "dry-indoor-intact-wall-outlet-plugs-and-cords",
-    "only-low-power-electronics-such-as-modem-tv-laptop-monitor-or-lamp",
     "no-daisy-chain-or-adapter-chain",
     "connected-device-manufacturer-does-not-prohibit-extension-or-power-strip-use",
-    "candidate-product-max-power-grounding-and-overload-protection-are-verified-from-manufacturer",
     "existing-safe-product-is-insufficient",
-    "affiliate-relationship-is-disclosed-before-merchant-link"
+    "advanced-existing-suitability-tool-passes-its-own-technical-gates",
+    "affiliate-relationship-is-disclosed-before-any-existing-merchant-link"
   ],
   "blockedClasses": [
     "electric-heater-kettle-iron-oven-microwave",
