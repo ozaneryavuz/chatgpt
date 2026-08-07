@@ -1,0 +1,21 @@
+{
+  "version": 331,
+  "generatedAt": "2026-08-07",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesilince-otomatik-kepenk-garaj-kapisi-nasil-acilir/index.html",
+      "canonicalPath": "/haberler/elektrik-kesilince-otomatik-kepenk-garaj-kapisi-nasil-acilir/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/otomatik-kapi-kepenk-elektrik-kesintisi-sureklilik-plani/index.html",
+      "canonicalPath": "/hesaplama/otomatik-kapi-kepenk-elektrik-kesintisi-sureklilik-plani/",
+      "type": "business-tool"
+    },
+    {
+      "source": "alo186/sektor-rehberi/site-otel-isletme-otomatik-kapi-kepenk-kesinti-surekliligi/index.html",
+      "canonicalPath": "/sektor-rehberi/site-otel-isletme-otomatik-kapi-kepenk-kesinti-surekliligi/",
+      "type": "article"
+    }
+  ]
+}
