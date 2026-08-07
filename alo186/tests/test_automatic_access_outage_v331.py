@@ -11,10 +11,13 @@ OVERLAY = SITE / "deployment/routing-overlays/automatic-access-outage-v331.json"
 GUIDE = SITE / "haberler/elektrik-kesilince-otomatik-kapi-kepenk-garaj-kapisi-nasil-acilir/index.html"
 PLANNER = SITE / "hesaplama/otomatik-kapi-kepenk-elektrik-kesintisi-sureklilik-plani/index.html"
 SECTOR = SITE / "sektor-rehberi/site-otel-isletme-otomatik-kapi-kepenk-kesinti-surekliligi/index.html"
-ROUTES = {
-    "/haberler/elektrik-kesilince-otomatik-kapi-kepenk-garaj-kapisi-nasil-acilir/": GUIDE,
+OVERLAY_ROUTES = {
     "/hesaplama/otomatik-kapi-kepenk-elektrik-kesintisi-sureklilik-plani/": PLANNER,
     "/sektor-rehberi/site-otel-isletme-otomatik-kapi-kepenk-kesinti-surekliligi/": SECTOR,
+}
+PAGES = {
+    "/haberler/elektrik-kesilince-otomatik-kapi-kepenk-garaj-kapisi-nasil-acilir/": GUIDE,
+    **OVERLAY_ROUTES,
 }
 COMMERCIAL = {"Product", "Offer", "AggregateRating", "Review"}
 
@@ -47,8 +50,8 @@ def schema(html: str) -> object:
 def main() -> None:
     overlay = json.loads(OVERLAY.read_text(encoding="utf-8"))
     assert overlay["version"] == 331
-    assert {r["canonicalPath"] for r in overlay["routes"]} == set(ROUTES)
-    pages = {route: path.read_text(encoding="utf-8") for route, path in ROUTES.items()}
+    assert {r["canonicalPath"] for r in overlay["routes"]} == set(OVERLAY_ROUTES)
+    pages = {route: path.read_text(encoding="utf-8") for route, path in PAGES.items()}
 
     for route, html in pages.items():
         visible = text(html).casefold()
@@ -99,8 +102,8 @@ def main() -> None:
     print(json.dumps({
         "ok": True,
         "routingVersion": 331,
-        "routes": list(ROUTES),
-        "updatedExistingCanonical": True,
+        "newRoutes": list(OVERLAY_ROUTES),
+        "updatedExistingCanonical": "/haberler/elektrik-kesilince-otomatik-kapi-kepenk-garaj-kapisi-nasil-acilir/",
         "newAffiliateClasses": 0,
         "merchantLinks": 0,
         "personalDataFields": 0,
