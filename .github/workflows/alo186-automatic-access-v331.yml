@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
-      - 'alo186/haberler/elektrik-kesilince-otomatik-kepenk-garaj-kapisi-nasil-acilir/**'
+      - 'alo186/haberler/elektrik-kesilince-otomatik-kapi-kepenk-garaj-kapisi-nasil-acilir/**'
       - 'alo186/hesaplama/otomatik-kapi-kepenk-elektrik-kesintisi-sureklilik-plani/**'
       - 'alo186/sektor-rehberi/site-otel-isletme-otomatik-kapi-kepenk-kesinti-surekliligi/**'
       - 'alo186/deployment/routing-overlays/automatic-access-outage-v331.json'
@@ -13,7 +13,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'alo186/haberler/elektrik-kesilince-otomatik-kepenk-garaj-kapisi-nasil-acilir/**'
+      - 'alo186/haberler/elektrik-kesilince-otomatik-kapi-kepenk-garaj-kapisi-nasil-acilir/**'
       - 'alo186/hesaplama/otomatik-kapi-kepenk-elektrik-kesintisi-sureklilik-plani/**'
       - 'alo186/sektor-rehberi/site-otel-isletme-otomatik-kapi-kepenk-kesinti-surekliligi/**'
       - 'alo186/deployment/routing-overlays/automatic-access-outage-v331.json'
@@ -51,7 +51,7 @@ jobs:
           from pathlib import Path
           root = Path('/tmp/alo186-access-v331')
           routes = [
-            '/haberler/elektrik-kesilince-otomatik-kepenk-garaj-kapisi-nasil-acilir/',
+            '/haberler/elektrik-kesilince-otomatik-kapi-kepenk-garaj-kapisi-nasil-acilir/',
             '/hesaplama/otomatik-kapi-kepenk-elektrik-kesintisi-sureklilik-plani/',
             '/sektor-rehberi/site-otel-isletme-otomatik-kapi-kepenk-kesinti-surekliligi/',
           ]
