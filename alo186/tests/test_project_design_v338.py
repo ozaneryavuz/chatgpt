@@ -34,6 +34,10 @@ REQUIRED_VISIBLE = (
 )
 
 
+def fold(value: str) -> str:
+    return value.casefold().replace("i̇", "i")
+
+
 def visible_text(html: str) -> str:
     html = re.sub(r"<script\b.*?</script>|<style\b.*?</style>", " ", html, flags=re.I | re.S)
     return re.sub(r"\s+", " ", unescape(re.sub(r"<[^>]+>", " ", html))).strip()
@@ -64,14 +68,14 @@ def schema(html: str) -> object:
 def normalized_title(html: str) -> str:
     match = re.search(r"<title>(.*?)</title>", html, re.I | re.S)
     assert match
-    return re.sub(r"\s+", " ", unescape(match.group(1))).strip().casefold()
+    return fold(re.sub(r"\s+", " ", unescape(match.group(1))).strip())
 
 
 def normalized_h1(html: str) -> str:
     match = re.search(r"<h1\b[^>]*>(.*?)</h1>", html, re.I | re.S)
     assert match
     value = re.sub(r"<[^>]+>", " ", match.group(1))
-    return re.sub(r"\s+", " ", unescape(value)).strip().casefold()
+    return fold(re.sub(r"\s+", " ", unescape(value)).strip())
 
 
 def main() -> None:
@@ -84,7 +88,7 @@ def main() -> None:
     new_titles: list[str] = []
     new_h1: list[str] = []
     for route, html in pages.items():
-        visible = visible_text(html).casefold()
+        visible = fold(visible_text(html))
         assert f'<link rel="canonical" href="https://alo186.com{route}">' in html
         assert '<meta name="viewport"' in html
         assert len(re.findall(r"<h1\b", html, re.I)) == 1
@@ -97,7 +101,7 @@ def main() -> None:
         for required in REQUIRED_VISIBLE:
             assert required in visible, (route, required)
         assert "affiliate" in visible or "mağaza" in visible
-        assert "amazon.com.tr" not in html.casefold()
+        assert "amazon.com.tr" not in fold(html)
         assert not COMMERCIAL_SCHEMA.intersection(schema_types(schema(html)))
         assert {"Article", "FAQPage", "BreadcrumbList"}.issubset(schema_types(schema(html)))
         assert html.count('href="/') >= 3
@@ -111,7 +115,6 @@ def main() -> None:
         for right in new_h1[left_idx + 1:]:
             assert SequenceMatcher(None, left, right).ratio() < 0.72, (left, right)
 
-    # Global exact title/H1/canonical collision guard against existing article corpus.
     new_files = {path.resolve() for path in ROUTES.values()}
     other_titles: set[str] = set()
     other_h1: set[str] = set()
@@ -123,32 +126,32 @@ def main() -> None:
         other_html += "\n" + html
         title = re.search(r"<title>(.*?)</title>", html, re.I | re.S)
         if title:
-            other_titles.add(re.sub(r"\s+", " ", unescape(title.group(1))).strip().casefold())
+            other_titles.add(fold(re.sub(r"\s+", " ", unescape(title.group(1))).strip()))
         h1 = re.search(r"<h1\b[^>]*>(.*?)</h1>", html, re.I | re.S)
         if h1:
             text = re.sub(r"<[^>]+>", " ", h1.group(1))
-            other_h1.add(re.sub(r"\s+", " ", unescape(text)).strip().casefold())
+            other_h1.add(fold(re.sub(r"\s+", " ", unescape(text)).strip()))
     assert not set(new_titles).intersection(other_titles)
     assert not set(new_h1).intersection(other_h1)
     for route in ROUTES:
         assert other_html.count(f"https://alo186.com{route}") == 0
 
     ev = pages[next(route for route in ROUTES if "62-villa" in route)]
-    ev_visible = visible_text(ev).casefold()
+    ev_visible = fold(visible_text(ev))
     for token in ("1.724 kw", "62×22 kw", "2×180 kw", "dinamik yük yönetimi", "iec 60364-7-722:2018", "iec 61851-23:2023", "epdk"):
         assert token in ev_visible
     for domain in ("epdk.gov.tr", "webstore.iec.ch"):
         assert domain in ev
 
     protection = pages[next(route for route in ROUTES if "kisa-devre" in route)]
-    protection_visible = visible_text(protection).casefold()
+    protection_visible = fold(visible_text(protection))
     for token in ("iec 60909-0:2026", "23 temmuz 2026", "iec 60364-4-43:2023", "iec 61439-1:2020", "minimum", "maksimum", "jeneratör", "seçicilik"):
         assert token in protection_visible
     for domain in ("webstore.iec.ch", "enerji.gov.tr"):
         assert domain in protection
 
     fire = pages[next(route for route in ROUTES if "yangin-algilama" in route)]
-    fire_visible = visible_text(fire).casefold()
+    fire_visible = fold(visible_text(fire))
     for token in ("neden-sonuç matrisi", "iso 7240-14:2013", "iso 7240-19:2007", "iso 7240-16:2007", "asansör", "damper", "kartlı geçiş", "can güvenliği"):
         assert token in fire_visible
     for domain in ("csb.gov.tr", "iso.org"):
