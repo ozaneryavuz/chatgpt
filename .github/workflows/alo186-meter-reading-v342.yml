@@ -1,0 +1,81 @@
+name: ALO186 meter reading retention v342
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/elektrik-sayaci-nasil-okunur-t0-t1-t2-t3-endeks/**'
+      - 'alo186/hesaplama/elektrik-sayaci-endeks-kwh-gun-takibi/**'
+      - 'alo186/fatura-ve-sayac-kontrol-merkezi/**'
+      - 'alo186/deployment/routing-overlays/meter-reading-retention-v342.json'
+      - 'alo186/deployment/affiliate-category-decisions/meter-reading-retention-v342.json'
+      - 'alo186/tests/test_meter_reading_retention_v342.py'
+      - '.github/workflows/alo186-meter-reading-v342.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/elektrik-sayaci-nasil-okunur-t0-t1-t2-t3-endeks/**'
+      - 'alo186/hesaplama/elektrik-sayaci-endeks-kwh-gun-takibi/**'
+      - 'alo186/fatura-ve-sayac-kontrol-merkezi/**'
+      - 'alo186/deployment/routing-overlays/meter-reading-retention-v342.json'
+      - 'alo186/deployment/affiliate-category-decisions/meter-reading-retention-v342.json'
+      - 'alo186/tests/test_meter_reading_retention_v342.py'
+      - '.github/workflows/alo186-meter-reading-v342.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-meter-reading-v342-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Trust privacy tariff and affiliate-reuse checks
+        run: python alo186/tests/test_meter_reading_retention_v342.py
+      - name: Build canonical site bundle
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-meter-v342
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-meter-v342 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-meter-v342
+      - name: Verify production routes sitemap and no direct merchant links
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/alo186-meter-v342')
+          routes = [
+            '/haberler/elektrik-sayaci-nasil-okunur-t0-t1-t2-t3-endeks/',
+            '/hesaplama/elektrik-sayaci-endeks-kwh-gun-takibi/',
+            '/fatura-ve-sayac-kontrol-merkezi/',
+          ]
+          sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
+          release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
+          assert release['routingVersion'] >= 342
+          for route in routes:
+              page = root / route.strip('/') / 'index.html'
+              assert page.is_file(), page
+              assert f'https://alo186.com{route}' in sitemap
+              html = page.read_text(encoding='utf-8')
+              assert 'amazon.com.tr' not in html
+          hub = (root / 'fatura-ve-sayac-kontrol-merkezi/index.html').read_text(encoding='utf-8')
+          assert '/amazon-elektrik-urunleri/priz-tipi-enerji-olcer-secimi/' in hub
+          assert 'Affiliate açıklaması' in hub
+          print({'ok': True, 'routingVersion': release['routingVersion'], 'routes': routes, 'newAffiliateClasses': 0, 'newMerchantLinks': 0})
+          PY
+      - name: Upload verified bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-meter-reading-v342-${{ github.sha }}
+          path: /tmp/alo186-meter-v342
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
