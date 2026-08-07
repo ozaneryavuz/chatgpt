@@ -1,0 +1,85 @@
+name: ALO186 consumption baseline v339
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/elektrik-faturasi-neden-yuksek-kwh-gun-tuketim-artisi/**'
+      - 'alo186/hesaplama/elektrik-faturasi-kwh-gun-tuketim-karsilastirma/**'
+      - 'alo186/amazon-elektrik-urunleri/priz-tipi-enerji-olcer-secimi/**'
+      - 'alo186/deployment/routing-overlays/consumption-baseline-v339.json'
+      - 'alo186/deployment/affiliate-category-decisions/consumption-baseline-v339.json'
+      - 'alo186/tests/test_consumption_baseline_v339.py'
+      - '.github/workflows/alo186-consumption-baseline-v339.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/elektrik-faturasi-neden-yuksek-kwh-gun-tuketim-artisi/**'
+      - 'alo186/hesaplama/elektrik-faturasi-kwh-gun-tuketim-karsilastirma/**'
+      - 'alo186/amazon-elektrik-urunleri/priz-tipi-enerji-olcer-secimi/**'
+      - 'alo186/deployment/routing-overlays/consumption-baseline-v339.json'
+      - 'alo186/deployment/affiliate-category-decisions/consumption-baseline-v339.json'
+      - 'alo186/tests/test_consumption_baseline_v339.py'
+      - '.github/workflows/alo186-consumption-baseline-v339.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-consumption-baseline-v339-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Trust privacy no-buy and affiliate boundary checks
+        run: python alo186/tests/test_consumption_baseline_v339.py
+      - name: Build canonical site bundle
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-consumption-v339
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-consumption-v339 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-consumption-v339
+      - name: Verify production routes sitemap and trust-gated merchant link
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/alo186-consumption-v339')
+          routes = [
+            '/haberler/elektrik-faturasi-neden-yuksek-kwh-gun-tuketim-artisi/',
+            '/hesaplama/elektrik-faturasi-kwh-gun-tuketim-karsilastirma/',
+            '/amazon-elektrik-urunleri/priz-tipi-enerji-olcer-secimi/',
+          ]
+          sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
+          release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
+          assert release['routingVersion'] >= 339
+          for route in routes:
+              page = root / route.strip('/') / 'index.html'
+              assert page.is_file(), page
+              assert f'https://alo186.com{route}' in sitemap
+          guide = (root / routes[0].strip('/') / 'index.html').read_text(encoding='utf-8').casefold()
+          tool = (root / routes[1].strip('/') / 'index.html').read_text(encoding='utf-8').casefold()
+          selector = (root / routes[2].strip('/') / 'index.html').read_text(encoding='utf-8')
+          assert 'amazon.com.tr' not in guide
+          assert 'amazon.com.tr' not in tool
+          assert selector.count('amazon.com.tr') == 1
+          assert 'data-merchant-url=' in selector
+          assert 'href="https://www.amazon.com.tr' not in selector
+          assert selector.count('rel="sponsored noopener"') == 1
+          print({'ok': True, 'routingVersion': release['routingVersion'], 'routes': routes, 'newAffiliateClasses': 1, 'newMerchantLinks': 1, 'merchantTrustGated': True})
+          PY
+      - name: Upload verified bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-consumption-baseline-v339-${{ github.sha }}
+          path: /tmp/alo186-consumption-v339
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30

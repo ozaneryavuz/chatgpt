@@ -1,0 +1,44 @@
+{
+  "version": 339,
+  "generatedAt": "2026-08-07",
+  "topic": "electricity-bill-consumption-baseline",
+  "decision": "one-low-risk-class-after-measurement-need-validation",
+  "newAffiliateClasses": 1,
+  "newMerchantLinks": 1,
+  "affiliateClass": "plug-in-energy-meter-wattmeter",
+  "merchantRoute": "/amazon-elektrik-urunleri/priz-tipi-enerji-olcer-secimi/",
+  "allowedOnlyWhen": [
+    "consumption-gap-is-first-normalized-by-kwh-per-day",
+    "dry-indoor-intact-wall-outlet-and-device-plug",
+    "plug-in-low-or-medium-power-electronic-or-lighting-load",
+    "meter-voltage-current-power-and-plug-compatibility-verified-from-manufacturer",
+    "no-extension-multiplug-or-adapter-chain",
+    "existing-safe-measurement-solution-is-insufficient",
+    "affiliate-relationship-is-disclosed-before-merchant-link"
+  ],
+  "blockedClasses": [
+    "meter-cabinet-or-sealed-meter-work",
+    "electrical-panel-or-fixed-installation-measurement",
+    "electric-heater-kettle-iron-oven",
+    "ev-charging",
+    "motor-compressor-or-high-inrush-load-without-professional-compatibility-check",
+    "wet-or-damaged-electrical-equipment",
+    "business-energy-audit-and-power-quality-analysis"
+  ],
+  "mustNotClaim": [
+    "meter-purchase-will-reduce-bill",
+    "meter-proves-utility-meter-fault",
+    "unverified-measurement-accuracy",
+    "unverified-price",
+    "unverified-stock",
+    "unverified-rating",
+    "unverified-warranty"
+  ],
+  "professionalOnly": [
+    "fixed-installation-load-measurement",
+    "high-power-or-motor-load-analysis",
+    "power-quality-and-harmonics",
+    "energy-audit",
+    "meter-calibration-or-official-meter-testing"
+  ]
+}
