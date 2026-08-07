@@ -8,6 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 SITE = ROOT / "alo186"
 OVERLAY = SITE / "deployment/routing-overlays/basement-drainage-outage-v332.json"
+OWNER_OVERLAY = SITE / "deployment/routing-overlays/growth-v298-drainage-pump-outage-trust.json"
 GUIDE = SITE / "haberler/elektrik-kesilince-bodrum-drenaj-pompasi-calisir-mi/index.html"
 PLANNER = SITE / "hesaplama/bodrum-drenaj-pompasi-elektrik-kesintisi-su-baskini-plani/index.html"
 SECTOR = SITE / "sektor-rehberi/apartman-otel-bodrum-drenaj-pompasi-kesinti-surekliligi/index.html"
@@ -47,7 +48,10 @@ def load_schema(html: str) -> object:
 def main() -> None:
     overlay = json.loads(OVERLAY.read_text(encoding="utf-8"))
     assert overlay["version"] == 332
-    assert {item["canonicalPath"] for item in overlay["routes"]} == set(ROUTES)
+    assert overlay["routes"] == [], "v332 must not duplicate canonical routes already owned by v298"
+
+    owner = json.loads(OWNER_OVERLAY.read_text(encoding="utf-8"))
+    assert {item["canonicalPath"] for item in owner["routes"]} == set(ROUTES)
 
     pages = {route: path.read_text(encoding="utf-8") for route, path in ROUTES.items()}
     for route, html in pages.items():
@@ -107,7 +111,9 @@ def main() -> None:
     print(json.dumps({
         "ok": True,
         "routingVersion": 332,
+        "canonicalOwnerVersion": owner["version"],
         "routes": list(ROUTES),
+        "duplicateCanonicalRoutes": 0,
         "newAffiliateClasses": 0,
         "merchantLinks": 0,
         "commercialSchemaTypes": 0,
