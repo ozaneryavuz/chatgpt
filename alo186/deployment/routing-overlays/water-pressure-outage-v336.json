@@ -1,0 +1,21 @@
+{
+  "version": 336,
+  "generatedAt": "2026-08-07",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesilince-hidrofor-neden-calismiyor/index.html",
+      "canonicalPath": "/haberler/elektrik-kesilince-hidrofor-neden-calismiyor/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/hidrofor-elektrik-kesintisi-su-basinci-sureklilik-plani/index.html",
+      "canonicalPath": "/hesaplama/hidrofor-elektrik-kesintisi-su-basinci-sureklilik-plani/",
+      "type": "business-tool"
+    },
+    {
+      "source": "alo186/sektor-rehberi/site-otel-hidrofor-elektrik-kesintisi-su-surekliligi/index.html",
+      "canonicalPath": "/sektor-rehberi/site-otel-hidrofor-elektrik-kesintisi-su-surekliligi/",
+      "type": "article"
+    }
+  ]
+}
