@@ -1,0 +1,45 @@
+{
+  "version": 344,
+  "generatedAt": "2026-08-07",
+  "topic": "lighting-flicker-safe-consumer-measurement-and-replacement",
+  "decision": "one-new-low-risk-replaceable-led-bulb-class-after-eight-gates",
+  "newAffiliateClasses": 1,
+  "newMerchantLinks": 1,
+  "affiliateClass": "replaceable-led-bulb",
+  "decisionRoute": "/hesaplama/aydinlatma-titreme-guvenlik-ayirici/",
+  "affiliateRoute": "/amazon-elektrik-urunleri/led-ampul-uygunluk-secimi/",
+  "allowedOnlyWhen": [
+    "no-active-fire-shock-heat-burning-smell-buzz-spark-or-repeated-protection-trip",
+    "flicker-is-limited-to-one-light-point",
+    "light-source-is-a-normal-user-replaceable-bulb-not-integrated-led-driver-or-fixture",
+    "socket-and-fixture-show-no-visible-damage-overheating-or-loose-condition",
+    "dimmer-is-absent-or-compatibility-requirement-is-understood-from-manufacturer-documentation",
+    "existing-known-compatible-spare-is-not-already-sufficient",
+    "bulb-base-type-voltage-lumens-color-temperature-and-dimmer-compatibility-are-rechecked-by-user",
+    "affiliate-relationship-is-disclosed-before-merchant-link"
+  ],
+  "blockedConsumerAffiliateClasses": [
+    "integrated-led-fixture-or-driver",
+    "lamp-holder-socket-switch-or-dimmer",
+    "fixed-wiring-neutral-panel-or-voltage-correction",
+    "multi-room-or-whole-building-flicker",
+    "damaged-overheated-wet-or-arcing-equipment",
+    "repeated-breaker-or-rcd-trip"
+  ],
+  "professionalOnly": [
+    "socket-holder-switch-and-dimmer-repair",
+    "integrated-fixture-driver-repair",
+    "neutral-and-fixed-wiring-diagnosis",
+    "voltage-quality-measurement-and-fixed-protection-work"
+  ],
+  "mustNotClaim": [
+    "bulb-replacement-solves-multi-room-flicker",
+    "any-led-bulb-is-compatible-with-any-dimmer",
+    "affiliate-product-repairs-wiring-neutral-or-voltage-problems",
+    "unverified-price",
+    "unverified-stock",
+    "unverified-rating",
+    "unverified-warranty"
+  ],
+  "noBuyRule": "If a known-compatible safe spare already solves the need, do not recommend a new purchase."
+}
