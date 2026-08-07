@@ -1,0 +1,47 @@
+{
+  "version": 343,
+  "generatedAt": "2026-08-07",
+  "topic": "pv-grid-outage-backup-governance",
+  "decision": "professional-only-no-new-affiliate-class",
+  "newAffiliateClasses": 0,
+  "newMerchantLinks": 0,
+  "canonicalGuide": "/haberler/elektrik-kesilince-gunes-paneli-calisir-mi/",
+  "existingDecisionTool": "/hesaplama/ges-elektrik-kesintisi-yedek-guc-uygunluk-kontrolu/",
+  "workshopPriority": "solar_backup",
+  "allowedOnlyWhen": [
+    "system-topology-is-identified-from-project-or-manufacturer-documentation",
+    "backup-or-eps-output-and-transfer-arrangement-are-verified",
+    "critical-loads-are-explicitly-defined",
+    "real-outage-test-is-recorded-before-expansion-or-replacement",
+    "existing-system-that-meets-the-target-is-kept-without-new-purchase"
+  ],
+  "blockedConsumerAffiliateClasses": [
+    "grid-tied-inverter",
+    "hybrid-inverter",
+    "battery-storage-system",
+    "backup-interface-or-transfer-equipment",
+    "fixed-dc-protection",
+    "fixed-ac-protection",
+    "critical-load-panel",
+    "generator-or-ats",
+    "fixed-installation-cabling-and-switchgear"
+  ],
+  "professionalOnly": [
+    "anti-islanding-and-islanding-design",
+    "backup-eps-and-transfer-design",
+    "battery-and-inverter-sizing",
+    "critical-load-panel-design",
+    "protection-coordination-and-earthing",
+    "commissioning-and-real-outage-acceptance-test"
+  ],
+  "mustNotClaim": [
+    "solar-panels-alone-power-the-house-during-a-grid-outage",
+    "battery-alone-guarantees-backup-operation",
+    "every-hybrid-inverter-has-the-same-backup-behavior",
+    "a-fixed-transfer-time-without-model-documentation",
+    "unverified-price",
+    "unverified-stock",
+    "unverified-rating",
+    "unverified-warranty"
+  ]
+}
