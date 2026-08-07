@@ -1,0 +1,35 @@
+{
+  "version": 338,
+  "generatedAt": "2026-08-07",
+  "topic": "electricity-outage-mobile-communication",
+  "decision": "reuse-existing-low-risk-path-only",
+  "newAffiliateClasses": 0,
+  "newMerchantLinks": 0,
+  "reusedInternalRoutes": [
+    "/hesaplama/telefon-elektrik-kesintisi-sarj-plani/",
+    "/amazon-elektrik-urunleri/telefon-powerbank-kablo-secimi/"
+  ],
+  "allowedOnlyWhen": [
+    "future-preparation-not-active-incident",
+    "phone-energy-gap-is-real",
+    "existing-safe-charging-setup-is-insufficient",
+    "battery-and-cable-are-not-damaged",
+    "affiliate-relationship-is-disclosed-before-merchant-link"
+  ],
+  "mustNotClaim": [
+    "powerbank-restores-mobile-coverage",
+    "powerbank-restores-base-station-service",
+    "fixed-runtime-guarantee",
+    "unverified-price",
+    "unverified-stock",
+    "unverified-rating",
+    "unverified-warranty"
+  ],
+  "professionalOnly": [
+    "business-network-infrastructure",
+    "fixed-ups-and-external-battery",
+    "generator-and-ats",
+    "building-electrical-installation",
+    "business-communication-continuity-architecture"
+  ]
+}
