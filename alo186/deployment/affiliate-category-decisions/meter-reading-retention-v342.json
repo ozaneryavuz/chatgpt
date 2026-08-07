@@ -1,0 +1,44 @@
+{
+  "version": 342,
+  "generatedAt": "2026-08-07",
+  "topic": "meter-reading-bill-control-retention",
+  "decision": "reuse-existing-low-risk-measurement-class-only-after-consumption-anomaly-validation",
+  "newAffiliateClasses": 0,
+  "newMerchantLinks": 0,
+  "existingAffiliateClass": "plug-in-energy-meter-wattmeter",
+  "existingDecisionRoute": "/amazon-elektrik-urunleri/priz-tipi-enerji-olcer-secimi/",
+  "allowedOnlyWhen": [
+    "bill-period-and-meter-index-are-normalized-before-product-consideration",
+    "consumption-anomaly-or-device-level-measurement-need-is-real",
+    "target-load-is-a-dry-indoor-intact-plug-in-low-or-medium-power-device",
+    "no-meter-panel-or-fixed-installation-work-is-required",
+    "existing-safe-measurement-solution-is-insufficient",
+    "affiliate-relationship-is-disclosed-before-any-merchant-link"
+  ],
+  "blockedClasses": [
+    "sealed-meter-or-meter-terminal-work",
+    "electrical-panel-or-fixed-installation-measurement",
+    "electric-heater-kettle-iron-oven",
+    "ev-charging",
+    "motor-compressor-or-high-inrush-load-without-professional-check",
+    "wet-damaged-or-overheating-electrical-equipment",
+    "business-energy-audit-power-quality-or-official-meter-testing"
+  ],
+  "mustNotClaim": [
+    "plug-in-meter-proves-utility-meter-fault",
+    "plug-in-meter-purchase-will-reduce-bill",
+    "unverified-measurement-accuracy",
+    "unverified-price",
+    "unverified-stock",
+    "unverified-rating",
+    "unverified-warranty",
+    "fixed-t1-t2-t3-time-window-without-current-tariff-verification"
+  ],
+  "professionalOnly": [
+    "meter-calibration-or-official-meter-testing",
+    "meter-terminal-seal-or-current-transformer-work",
+    "fixed-installation-load-measurement",
+    "high-power-or-motor-load-analysis",
+    "power-quality-harmonics-and-energy-audit"
+  ]
+}
