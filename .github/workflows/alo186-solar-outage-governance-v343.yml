@@ -1,0 +1,101 @@
+name: ALO186 solar outage governance v343
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/deployment/content-consolidations.json'
+      - 'alo186/deployment/affiliate-category-decisions/solar-outage-governance-v343.json'
+      - 'alo186/kesinti-hazirlik-atolyesi/index.html'
+      - 'alo186/kesinti-hazirlik-atolyesi/app.js'
+      - 'alo186/tests/test_solar_outage_governance_v343.py'
+      - '.github/workflows/alo186-solar-outage-governance-v343.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/deployment/content-consolidations.json'
+      - 'alo186/deployment/affiliate-category-decisions/solar-outage-governance-v343.json'
+      - 'alo186/kesinti-hazirlik-atolyesi/index.html'
+      - 'alo186/kesinti-hazirlik-atolyesi/app.js'
+      - 'alo186/tests/test_solar_outage_governance_v343.py'
+      - '.github/workflows/alo186-solar-outage-governance-v343.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-solar-outage-v343-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Solar outage trust, no-buy and affiliate boundary
+        run: python alo186/tests/test_solar_outage_governance_v343.py
+
+      - name: Global content intent collision guard
+        run: python alo186/tests/test_content_intent_consolidation.py
+
+      - name: Canonical production build
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-solar-v343
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-solar-v343 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-solar-v343
+
+      - name: Verify PV alias consolidation and workshop production path
+        run: |
+          set -euo pipefail
+          cp -a /tmp/alo186-solar-v343 /tmp/alo186-solar-v343-alias
+          touch /tmp/alo186-solar-v343-alias/.htaccess
+          python alo186/deployment/apply_content_consolidation.py --site /tmp/alo186-solar-v343-alias --base-path '' >/tmp/alo186-solar-v343-consolidation.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path('/tmp/alo186-solar-v343-alias')
+          alias = root / 'haberler/ges-elektrik-kesintisinde-calisir-mi/index.html'
+          canonical = root / 'haberler/elektrik-kesilince-gunes-paneli-calisir-mi/index.html'
+          workshop = root / 'kesintiye-hazirlik-atolyesi/index.html'
+          assert alias.is_file(), alias
+          assert canonical.is_file(), canonical
+          assert workshop.is_file(), workshop
+
+          alias_html = alias.read_text(encoding='utf-8')
+          assert 'noindex,follow' in alias_html
+          assert '/haberler/elektrik-kesilince-gunes-paneli-calisir-mi' in alias_html
+
+          sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
+          assert 'https://alo186.com/haberler/elektrik-kesilince-gunes-paneli-calisir-mi/' in sitemap
+          assert 'https://alo186.com/haberler/ges-elektrik-kesintisinde-calisir-mi' not in sitemap
+
+          workshop_html = workshop.read_text(encoding='utf-8')
+          assert 'value="solar_backup"' in workshop_html
+          assert 'amazon.com.tr' not in workshop_html.lower()
+
+          result = json.loads(Path('/tmp/alo186-solar-v343-consolidation.json').read_text(encoding='utf-8'))
+          assert result['ok'] is True
+          print({
+              'ok': True,
+              'aliasCount': result['aliasCount'],
+              'newAffiliateClasses': 0,
+              'newMerchantLinks': 0,
+              'workshopPriority': 'solar_backup',
+          })
+          PY
+
+      - name: Upload verified bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-solar-outage-v343-${{ github.sha }}
+          path: /tmp/alo186-solar-v343-alias
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
