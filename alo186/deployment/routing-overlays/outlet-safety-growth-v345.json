@@ -1,0 +1,21 @@
+{
+  "version": 345,
+  "generatedAt": "2026-08-07",
+  "routes": [
+    {
+      "source": "alo186/haberler/priz-isiniyor-cizirti-yanik-kokusu-ne-yapmali/index.html",
+      "canonicalPath": "/haberler/priz-isiniyor-cizirti-yanik-kokusu-ne-yapmali/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/priz-fis-elektrik-guvenlik-belirti-ayirici/index.html",
+      "canonicalPath": "/hesaplama/priz-fis-elektrik-guvenlik-belirti-ayirici/",
+      "type": "business-tool"
+    },
+    {
+      "source": "alo186/ev-elektrik-guvenlik-kontrol-merkezi/index.html",
+      "canonicalPath": "/ev-elektrik-guvenlik-kontrol-merkezi/",
+      "type": "business-tool"
+    }
+  ]
+}
