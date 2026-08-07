@@ -1,0 +1,50 @@
+{
+  "version": 340,
+  "generatedAt": "2026-08-07",
+  "topic": "extension-cord-and-power-strip-safety",
+  "decision": "one-low-risk-class-after-load-and-safety-validation",
+  "newAffiliateClasses": 1,
+  "newMerchantLinks": 1,
+  "affiliateClass": "overload-protection-verifiable-indoor-power-strip-extension-for-low-power-electronics",
+  "merchantRoute": "/amazon-elektrik-urunleri/coklu-priz-uzatma-kablosu-secimi/",
+  "allowedOnlyWhen": [
+    "product-label-max-power-and-connected-device-total-are-compared-first",
+    "dry-indoor-intact-wall-outlet-plugs-and-cords",
+    "only-low-power-electronics-such-as-modem-tv-laptop-monitor-or-lamp",
+    "no-daisy-chain-or-adapter-chain",
+    "connected-device-manufacturer-does-not-prohibit-extension-or-power-strip-use",
+    "candidate-product-max-power-grounding-and-overload-protection-are-verified-from-manufacturer",
+    "existing-safe-product-is-insufficient",
+    "affiliate-relationship-is-disclosed-before-merchant-link"
+  ],
+  "blockedClasses": [
+    "electric-heater-kettle-iron-oven-microwave",
+    "air-conditioner-refrigerator-freezer-washer-dishwasher",
+    "pump-compressor-or-high-inrush-motor-load",
+    "ev-charging",
+    "power-tools-and-worksite-use",
+    "outdoor-or-wet-location-use",
+    "generator-backfeed-or-male-to-male-extension-cord",
+    "electrical-panel-or-fixed-installation-work",
+    "damaged-loose-overheated-or-wet-outlet-cord-or-plug",
+    "daisy-chained-power-strips-extension-cords-or-adapters"
+  ],
+  "mustNotClaim": [
+    "below-label-load-alone-proves-safe-use",
+    "surge-protection-is-the-same-as-overload-protection",
+    "a-new-power-strip-fixes-an-overloaded-circuit",
+    "unverified-certification",
+    "unverified-price",
+    "unverified-stock",
+    "unverified-rating",
+    "unverified-warranty"
+  ],
+  "professionalOnly": [
+    "new-fixed-wall-outlet-or-circuit",
+    "high-power-appliance-supply",
+    "motor-or-compressor-load-analysis",
+    "generator-transfer-and-backfeed-prevention",
+    "worksite-or-wet-location-distribution",
+    "damaged-or-overheating-electrical-installation"
+  ]
+}
