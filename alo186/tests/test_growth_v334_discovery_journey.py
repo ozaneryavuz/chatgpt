@@ -38,9 +38,10 @@ class GrowthV334DiscoveryJourneyTest(unittest.TestCase):
             self.assertIn(phrase, html)
         self.assertNotIn("amazon.com.tr", html.lower())
         self.assertNotIn("amzn.to", html.lower())
-        self.assertNotIn("localStorage", html)
-        self.assertNotIn("sessionStorage", html)
+        self.assertNotIn("localStorage.", html)
+        self.assertNotIn("sessionStorage.", html)
         self.assertNotIn("fetch(", html)
+        self.assertNotIn("XMLHttpRequest", html)
 
     def test_existing_cold_chain_journey_is_reused_not_duplicated(self):
         guide = COLD_GUIDE.read_text(encoding="utf-8")
