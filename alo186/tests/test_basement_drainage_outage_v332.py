@@ -62,13 +62,13 @@ def main() -> None:
         for word in ("fiyat", "stok", "puan", "garanti"):
             assert word in visible
 
-    guide_visible = visible_text(pages[next(iter(ROUTES))]).casefold()
+    guide_visible = visible_text(GUIDE.read_text(encoding="utf-8")).casefold()
     for required in (
         "aktif su baskınında test veya alışveriş yapmayın",
         "yeni ürün almayın",
         "tek pompa “yedeklilik” değildir",
         "yüksek su alarmı",
-        "merchant",
+        "affiliate",
     ):
         assert required.casefold() in guide_visible
 
@@ -85,7 +85,7 @@ def main() -> None:
         assert forbidden not in planner.casefold()
     for required in (
         "BEGIN:VCALENDAR",
-        "Form ve ticari yol kapalı",
+        "test ve ticari yol kapalı",
         "Professional-only",
         "Mevcut sistem yeterli — yeni ürün almayın",
         "mağaza bağlantısı yok",
