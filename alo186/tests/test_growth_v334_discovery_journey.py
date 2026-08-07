@@ -75,10 +75,11 @@ class GrowthV334DiscoveryJourneyTest(unittest.TestCase):
             hub = out / "kesintiye-hazirlik-atolyesi" / "index.html"
             self.assertTrue(hub.is_file())
             html = hub.read_text(encoding="utf-8")
-            self.assertIn('href="https://alo186.com/kesintiye-hazirlik-atolyesi/"', html)
+            self.assertIn('href="https://alo186.com/kesintiye-hazirlik-atolyesi"', html)
             self.assertNotIn("https://www.alo186.com", html)
             sitemap = (out / "sitemap.xml").read_text(encoding="utf-8")
-            self.assertIn("https://alo186.com/kesintiye-hazirlik-atolyesi/", sitemap)
+            self.assertIn("https://alo186.com/kesintiye-hazirlik-atolyesi</loc>", sitemap)
+            self.assertNotIn("https://alo186.com/kesintiye-hazirlik-atolyesi/</loc>", sitemap)
             robots = (out / "robots.txt").read_text(encoding="utf-8")
             sitemap_urls = [line.split(":", 1)[1].strip() for line in robots.splitlines() if line.strip().lower().startswith("sitemap:")]
             self.assertGreaterEqual(len(sitemap_urls), 2)
