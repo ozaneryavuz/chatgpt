@@ -1,0 +1,21 @@
+{
+  "version": 335,
+  "generatedAt": "2026-08-07",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesintisi-sonrasi-klima-neden-calismiyor/index.html",
+      "canonicalPath": "/haberler/elektrik-kesintisi-sonrasi-klima-neden-calismiyor/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/klima-elektrik-kesintisi-yeniden-baslatma-plani/index.html",
+      "canonicalPath": "/hesaplama/klima-elektrik-kesintisi-yeniden-baslatma-plani/",
+      "type": "business-tool"
+    },
+    {
+      "source": "alo186/sektor-rehberi/otel-vrf-klima-elektrik-kesintisi-surekliligi/index.html",
+      "canonicalPath": "/sektor-rehberi/otel-vrf-klima-elektrik-kesintisi-surekliligi/",
+      "type": "article"
+    }
+  ]
+}
