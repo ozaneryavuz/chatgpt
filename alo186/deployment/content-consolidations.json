@@ -1,6 +1,6 @@
 {
-  "version": 13,
-  "generatedAt": "2026-08-07",
+  "version": 12,
+  "generatedAt": "2026-08-06",
   "consolidations": [
     {
       "intentKey": "lifepo4-low-temperature-charging",
@@ -162,13 +162,6 @@
       "canonicalPath": "/amazon-elektrik-urunleri/modem-ont-mini-ups-yedekleme-secici/",
       "label": "Modem, router ve fiber ONT yedek güç seçimi",
       "reason": "Aynı cihaz zinciri, gerilim, akım, polarite, konnektör, çalışma süresi ve satın almama kararını hedefleyen rota; mevcut güvenlik kapılı canonical seçicide birleştirildi. Yeni arama rehberi ve kişisel verisiz planlayıcı bu tek seçiciye nitelikli trafik taşır."
-    },
-    {
-      "intentKey": "pos-ynokc-outage-continuity-v327",
-      "aliasPath": "/haberler/elektrik-kesilince-pos-cihazi-yazar-kasa-calisir-mi",
-      "canonicalPath": "/haberler/elektrik-kesilince-pos-yazar-kasa-calisir-mi",
-      "label": "POS, YN ÖKC ve yazar kasa elektrik kesintisi sürekliliği",
-      "reason": "İki rehber aynı POS, YN ÖKC, enerji, iletişim ve kesinti davranışı niyetini hedefliyor. Daha güncel ve kapsamlı v327 rota canonical seçilerek arama sinyali bölünmesi giderildi."
     }
   ]
 }
