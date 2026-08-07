@@ -1,0 +1,78 @@
+name: ALO186 mobile communication outage v338
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/elektrik-kesilince-telefon-neden-cekmiyor-baz-istasyonu-calisir-mi/**'
+      - 'alo186/hesaplama/elektrik-kesintisi-mobil-iletisim-hazirlik-plani/**'
+      - 'alo186/sektor-rehberi/otel-site-isletme-mobil-iletisim-elektrik-kesintisi-surekliligi/**'
+      - 'alo186/deployment/routing-overlays/mobile-communication-outage-v338.json'
+      - 'alo186/deployment/affiliate-category-decisions/mobile-communication-outage-v338.json'
+      - 'alo186/tests/test_mobile_communication_outage_v338.py'
+      - '.github/workflows/alo186-mobile-communication-outage-v338.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/elektrik-kesilince-telefon-neden-cekmiyor-baz-istasyonu-calisir-mi/**'
+      - 'alo186/hesaplama/elektrik-kesintisi-mobil-iletisim-hazirlik-plani/**'
+      - 'alo186/sektor-rehberi/otel-site-isletme-mobil-iletisim-elektrik-kesintisi-surekliligi/**'
+      - 'alo186/deployment/routing-overlays/mobile-communication-outage-v338.json'
+      - 'alo186/deployment/affiliate-category-decisions/mobile-communication-outage-v338.json'
+      - 'alo186/tests/test_mobile_communication_outage_v338.py'
+      - '.github/workflows/alo186-mobile-communication-outage-v338.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-mobile-communication-v338-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Trust privacy no-buy and affiliate boundary checks
+        run: python alo186/tests/test_mobile_communication_outage_v338.py
+      - name: Build canonical site bundle
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-mobile-communication-v338
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-mobile-communication-v338 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-mobile-communication-v338
+      - name: Verify production routes sitemap and zero new merchant links
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/alo186-mobile-communication-v338')
+          routes = [
+            '/haberler/elektrik-kesilince-telefon-neden-cekmiyor-baz-istasyonu-calisir-mi/',
+            '/hesaplama/elektrik-kesintisi-mobil-iletisim-hazirlik-plani/',
+            '/sektor-rehberi/otel-site-isletme-mobil-iletisim-elektrik-kesintisi-surekliligi/',
+          ]
+          sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
+          release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
+          assert release['routingVersion'] >= 338
+          for route in routes:
+              page = root / route.strip('/') / 'index.html'
+              assert page.is_file(), page
+              assert f'https://alo186.com{route}' in sitemap
+              html = page.read_text(encoding='utf-8').casefold()
+              assert 'amazon.com.tr' not in html
+          print({'ok': True, 'routingVersion': release['routingVersion'], 'routes': routes, 'newAffiliateClasses': 0, 'newMerchantLinks': 0})
+          PY
+      - name: Upload verified bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-mobile-communication-v338-${{ github.sha }}
+          path: /tmp/alo186-mobile-communication-v338
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
