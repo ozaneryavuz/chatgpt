@@ -2,6 +2,7 @@ from pathlib import Path
 import re
 import unittest
 import xml.etree.ElementTree as ET
+from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
 ROBOTS = ROOT / "robots.txt"
@@ -10,10 +11,16 @@ HUB = ROOT / "kesintiye-hazirlik-atolyesi" / "index.html"
 
 
 class DiscoveryGrowthV333Test(unittest.TestCase):
-    def test_robots_announces_only_effective_canonical_sitemap(self):
+    def test_robots_announces_primary_and_existing_discovery_sitemaps(self):
         text = ROBOTS.read_text(encoding="utf-8")
         sitemap_lines = [line.strip() for line in text.splitlines() if line.strip().lower().startswith("sitemap:")]
-        self.assertEqual(["Sitemap: https://alo186.com/sitemap.xml"], sitemap_lines)
+        self.assertIn("Sitemap: https://alo186.com/sitemap.xml", sitemap_lines)
+        self.assertIn("Sitemap: https://alo186.com/sitemap-growth-v333.xml", sitemap_lines)
+        for line in sitemap_lines:
+            url = line.split(":", 1)[1].strip()
+            self.assertEqual("alo186.com", urlparse(url).netloc)
+            filename = Path(urlparse(url).path).name
+            self.assertTrue((ROOT / filename).is_file(), f"robots sitemap source missing: {filename}")
 
     def test_v333_discovery_inventory_remains_valid_unique_and_recent(self):
         tree = ET.parse(SITEMAP)

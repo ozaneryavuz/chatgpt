@@ -4,6 +4,7 @@ import tempfile
 from pathlib import Path
 import sys
 import unittest
+from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
 REPO = ROOT.parent
@@ -20,9 +21,16 @@ COLD_SELECTOR = ROOT / "amazon-elektrik-urunleri" / "buzdolabi-dondurucu-termome
 
 
 class GrowthV334DiscoveryJourneyTest(unittest.TestCase):
-    def test_robots_has_one_effective_sitemap(self):
+    def test_robots_sitemaps_are_apex_and_have_sources(self):
         lines = [line.strip() for line in ROBOTS.read_text(encoding="utf-8").splitlines() if line.strip().lower().startswith("sitemap:")]
-        self.assertEqual(["Sitemap: https://alo186.com/sitemap.xml"], lines)
+        self.assertIn("Sitemap: https://alo186.com/sitemap.xml", lines)
+        self.assertGreaterEqual(len(lines), 2)
+        for line in lines:
+            url = line.split(":", 1)[1].strip()
+            parsed = urlparse(url)
+            self.assertEqual("https", parsed.scheme)
+            self.assertEqual("alo186.com", parsed.netloc)
+            self.assertTrue((ROOT / Path(parsed.path).name).is_file())
 
     def test_hub_is_intent_first_and_has_no_direct_merchant(self):
         html = HUB.read_text(encoding="utf-8")
@@ -60,7 +68,7 @@ class GrowthV334DiscoveryJourneyTest(unittest.TestCase):
         self.assertIn("/hesaplama/buzdolabi-dondurucu-elektrik-kesintisi-gida-guvenligi-plani/", hub)
         self.assertIn("/amazon-elektrik-urunleri/buzdolabi-dondurucu-termometre-soguk-zincir-secimi/", hub)
 
-    def test_production_build_contains_hub_and_canonical_sitemap(self):
+    def test_production_build_contains_hub_and_every_advertised_sitemap(self):
         with tempfile.TemporaryDirectory() as tmp:
             out = Path(tmp) / "site"
             release = build(REPO, out, "v334-test")
@@ -72,7 +80,12 @@ class GrowthV334DiscoveryJourneyTest(unittest.TestCase):
             sitemap = (out / "sitemap.xml").read_text(encoding="utf-8")
             self.assertIn("https://alo186.com/kesintiye-hazirlik-atolyesi/", sitemap)
             robots = (out / "robots.txt").read_text(encoding="utf-8")
-            self.assertEqual(1, sum(1 for line in robots.splitlines() if line.strip().lower().startswith("sitemap:")))
+            sitemap_urls = [line.split(":", 1)[1].strip() for line in robots.splitlines() if line.strip().lower().startswith("sitemap:")]
+            self.assertGreaterEqual(len(sitemap_urls), 2)
+            for url in sitemap_urls:
+                parsed = urlparse(url)
+                self.assertEqual("alo186.com", parsed.netloc)
+                self.assertTrue((out / Path(parsed.path).name).is_file(), f"advertised sitemap missing from production artifact: {url}")
             self.assertGreaterEqual(int(release.get("routingVersion", 0)), 334)
 
 
