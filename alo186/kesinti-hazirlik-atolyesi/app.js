@@ -5,7 +5,7 @@
   const allowedValues = {
     hazard: ['none', 'danger'],
     setting: ['home', 'small_business', 'hotel_site'],
-    priority: ['internet', 'mobile', 'electronics', 'lighting', 'cold_chain', 'long_outage'],
+    priority: ['internet', 'mobile', 'electronics', 'lighting', 'cold_chain', 'solar_backup', 'long_outage'],
     duration: ['short', 'medium', 'long'],
     existing: ['none', 'works', 'weak', 'unknown'],
     verified: ['yes', 'no']
@@ -70,6 +70,18 @@
         'Kompresörün çalışma ve kalkış gücünü ayrı değerlendirin.',
         'Kapı açma sıklığını azaltın ve sıcaklığı bağımsız termometreyle izleyin.',
         'Uzun süre veya ticari soğuk zincirde jeneratör, transfer ve yakıt planını birlikte oluşturun.'
+      ]
+    },
+    solar_backup: {
+      title: 'GES yedek güç için önce sistem topolojisi ve ada işletmesini doğrulayın',
+      calculate: ['/hesaplama/ges-elektrik-kesintisi-yedek-guc-uygunluk-kontrolu/', 'GES kesinti ve yedek güç uygunluğunu değerlendir'],
+      product: null,
+      affiliateEligible: false,
+      professional: true,
+      steps: [
+        'İnverterin on-grid, hibrit veya off-grid olduğunu üretici belgesi ve mevcut proje üzerinden doğrulayın.',
+        'Kesintide backup/EPS çıkışı, ayırma-transfer düzeni ve kritik yük devrelerinin gerçekten projelendirilmiş olup olmadığını kontrol edin.',
+        'Mevcut sistem hedef yükleri kayıtlı gerçek kesinti testinde karşılıyorsa yeni ürün almayın; bakım ve periyodik test planını sürdürün.'
       ]
     },
     long_outage: {
@@ -172,6 +184,7 @@
     const professional = setting === 'hotel_site'
       || duration === 'long'
       || priority === 'cold_chain'
+      || priority === 'solar_backup'
       || priority === 'long_outage'
       || (setting === 'small_business' && ['internet', 'electronics'].includes(priority));
 
