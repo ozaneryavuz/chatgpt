@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
@@ -8,6 +9,15 @@ from typing import Any
 SITEMAP_NAMESPACE = "http://www.sitemaps.org/schemas/sitemap/0.9"
 XHTML_NAMESPACE = "http://www.w3.org/1999/xhtml"
 LANGUAGE_ALTERNATES_PATH = Path(__file__).with_name("language-alternates.json")
+REPO_ROOT = Path(__file__).resolve().parents[2]
+SUPPLEMENTAL_SITEMAPS = (
+    "sitemap-electric-project-v200.xml",
+    "sitemap-growth-v207.xml",
+    "sitemap-growth-v311.xml",
+    "sitemap-growth-v312.xml",
+    "sitemap-growth-v313.xml",
+    "sitemap-growth-v333.xml",
+)
 
 
 def normalize_route_path(value: Any) -> str:
@@ -119,6 +129,27 @@ def alternate_links_by_route(
     return result
 
 
+def publish_supplemental_sitemaps(output: Path) -> tuple[str, ...]:
+    """Keep robots-advertised discovery inventories present in canonical builds.
+
+    The primary sitemap is generated from the effective routing manifest. Historical
+    growth/domain sitemaps remain useful discovery inventories and are still
+    referenced by long-lived regression contracts, so every advertised file must
+    also exist in the final artifact instead of becoming a dead robots.txt URL.
+    """
+
+    published: list[str] = []
+    for filename in SUPPLEMENTAL_SITEMAPS:
+        source = REPO_ROOT / "alo186" / filename
+        if not source.is_file():
+            raise FileNotFoundError(f"Supplemental sitemap source missing: {source}")
+        target = output / filename
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, target)
+        published.append(filename)
+    return tuple(published)
+
+
 def write_effective_sitemap(output: Path, manifest: dict[str, Any]) -> None:
     pairs = load_language_alternates(manifest)
     links_by_route = alternate_links_by_route(manifest, pairs)
@@ -148,3 +179,4 @@ def write_effective_sitemap(output: Path, manifest: dict[str, Any]) -> None:
     tree = ET.ElementTree(urlset)
     ET.indent(tree, space="  ")
     tree.write(output / "sitemap.xml", encoding="utf-8", xml_declaration=True)
+    publish_supplemental_sitemaps(output)
