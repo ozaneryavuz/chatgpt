@@ -77,10 +77,7 @@ Allow: /amazon-elektrik-urunleri/
 Allow: /rehber/
 Allow: /urunler/
 
+# The production build generates one authoritative sitemap from the effective
+# routing manifest and all routing overlays. Do not advertise source-only
+# historical growth sitemaps that are not shipped in the public artifact.
 Sitemap: https://alo186.com/sitemap.xml
-Sitemap: https://alo186.com/sitemap-electric-project-v200.xml
-Sitemap: https://alo186.com/sitemap-growth-v207.xml
-Sitemap: https://alo186.com/sitemap-growth-v311.xml
-Sitemap: https://alo186.com/sitemap-growth-v312.xml
-Sitemap: https://alo186.com/sitemap-growth-v313.xml
-Sitemap: https://alo186.com/sitemap-growth-v333.xml
