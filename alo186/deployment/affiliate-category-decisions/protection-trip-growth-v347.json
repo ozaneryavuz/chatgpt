@@ -1,0 +1,49 @@
+{
+  "version": 347,
+  "generatedAt": "2026-08-14",
+  "topic": "breaker-rcd-rcbo-repeated-trip-safety",
+  "decision": "no-consumer-affiliate-for-fixed-protection-triage",
+  "newAffiliateClasses": 0,
+  "newMerchantLinks": 0,
+  "canonicalGuide": "/haberler/kacak-akim-rolesi-neden-atar/",
+  "decisionTool": "/hesaplama/sigorta-kacak-akim-belirti-ayirici/",
+  "retentionHub": "/ev-elektrik-guvenlik-kontrol-merkezi/",
+  "affiliateMayOpenOnlyWhen": [
+    "outside-this-fixed-protection-flow",
+    "no-active-smoke-flame-shock-spark-heat-burn-smell-buzzing-or-moisture",
+    "fixed-wiring-and-protective-device-are-not-the-suspected-fault",
+    "no-repeating-protection-trip",
+    "need-is-a-low-risk-plug-and-play-class-owned-by-an-existing-selector",
+    "existing-safe-solution-is-not-already-sufficient"
+  ],
+  "blockedConsumerAffiliateClasses": [
+    "mcb-or-circuit-breaker",
+    "rcd-or-rccb",
+    "rcbo",
+    "distribution-board-component",
+    "socket-wiring-tester",
+    "non-contact-voltage-detector",
+    "electrical-hand-tools",
+    "fixed-wiring",
+    "earthing-component",
+    "breaker-sizing-or-upsizing"
+  ],
+  "professionalOnly": [
+    "repeated-breaker-or-rcd-trip",
+    "unknown-protection-device-or-multiple-circuits-affected",
+    "moisture-related-trip",
+    "fixed-wiring-neutral-and-earthing-fault",
+    "protective-device-selection-coordination-and-replacement",
+    "insulation-resistance-and-protection-testing"
+  ],
+  "mustNotClaim": [
+    "a-larger-breaker-solves-repeated-tripping",
+    "an-rcd-rccb-provides-overcurrent-protection-unless-the-specific-device-does",
+    "a-reset-proves-the-circuit-safe",
+    "a-consumer-tester-proves-fixed-wiring-safe",
+    "unverified-price",
+    "unverified-stock",
+    "unverified-rating",
+    "unverified-warranty"
+  ]
+}
