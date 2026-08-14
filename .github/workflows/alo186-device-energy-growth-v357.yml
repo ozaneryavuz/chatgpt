@@ -1,4 +1,4 @@
-name: ALO186 device energy trust growth v357
+name: ALO186 device energy trust growth v358
 
 on:
   workflow_dispatch:
@@ -24,7 +24,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: alo186-device-energy-v357-${{ github.ref }}
+  group: alo186-device-energy-v358-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -43,22 +43,22 @@ jobs:
       - name: Canonical production build and smoke
         run: |
           set -euo pipefail
-          rm -rf /tmp/alo186-device-energy-v357
-          python alo186/deployment/build_static_site.py --output /tmp/alo186-device-energy-v357 --commit "$GITHUB_SHA"
-          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-device-energy-v357
+          rm -rf /tmp/alo186-device-energy-v358
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-device-energy-v358 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-device-energy-v358
       - name: Verify routes sitemap schemas and merchant closure
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
-          root = Path('/tmp/alo186-device-energy-v357')
+          root = Path('/tmp/alo186-device-energy-v358')
           routes = [
               ('/haberler/klima-ne-kadar-elektrik-harcar-kwh-hesaplama/', 'Article'),
               ('/hesaplama/cihaz-elektrik-tuketimi-kwh-hesaplama/', 'WebApplication'),
           ]
           sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
           release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
-          assert release['routingVersion'] >= 357
+          assert release['routingVersion'] >= 358
           for route, schema in routes:
               page = root / route.strip('/') / 'index.html'
               assert page.is_file(), page
