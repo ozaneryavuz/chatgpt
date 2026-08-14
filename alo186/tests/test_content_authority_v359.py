@@ -49,7 +49,7 @@ def main() -> None:
         "input voltage",
         "input frequency",
         "on-battery",
-        "transfer aralığını rastgele genişletmeyin",
+        "Transfer aralığını rastgele genişletmeyin",
         "FA156546",
         "/haberler/ups-giris-thdi-jenerator-uyumluluk-kabul-testi/",
         "yeni akü satın almak kök nedeni çözmez",
