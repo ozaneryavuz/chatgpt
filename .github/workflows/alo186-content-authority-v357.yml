@@ -1,4 +1,4 @@
-name: ALO186 content authority weather and meter v357
+name: ALO186 content authority weather and inverter v357
 
 on:
   workflow_dispatch:
@@ -6,7 +6,7 @@ on:
     paths:
       - 'alo186/haberler/yagmurda-kacak-akim-rolesi-atiyor-nem-izolasyon-arizasi/**'
       - 'alo186/haberler/yagmurda-elektrikli-arac-sarj-edilir-mi-su-girisi/**'
-      - 'alo186/haberler/elektrik-sayaci-ekrani-kapali-arizali-ne-yapmali/**'
+      - 'alo186/haberler/inverter-yuk-baglayinca-kapaniyor-overload-low-battery/**'
       - 'alo186/deployment/routing-overlays/content-authority-weather-meter-v357.json'
       - 'alo186/tests/test_content_authority_weather_meter_v357.py'
       - '.github/workflows/alo186-content-authority-v357.yml'
@@ -15,7 +15,7 @@ on:
     paths:
       - 'alo186/haberler/yagmurda-kacak-akim-rolesi-atiyor-nem-izolasyon-arizasi/**'
       - 'alo186/haberler/yagmurda-elektrikli-arac-sarj-edilir-mi-su-girisi/**'
-      - 'alo186/haberler/elektrik-sayaci-ekrani-kapali-arizali-ne-yapmali/**'
+      - 'alo186/haberler/inverter-yuk-baglayinca-kapaniyor-overload-low-battery/**'
       - 'alo186/deployment/routing-overlays/content-authority-weather-meter-v357.json'
       - 'alo186/tests/test_content_authority_weather_meter_v357.py'
       - '.github/workflows/alo186-content-authority-v357.yml'
@@ -36,7 +36,7 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - name: Weather and meter AEO, trust and commerce checks
+      - name: Weather and inverter AEO, trust and commerce checks
         run: python alo186/tests/test_content_authority_weather_meter_v357.py
       - name: Global content intent collision guard
         run: python alo186/tests/test_content_intent_consolidation.py
@@ -56,7 +56,7 @@ jobs:
           routes = [
               '/haberler/yagmurda-kacak-akim-rolesi-atiyor-nem-izolasyon-arizasi/',
               '/haberler/yagmurda-elektrikli-arac-sarj-edilir-mi-su-girisi/',
-              '/haberler/elektrik-sayaci-ekrani-kapali-arizali-ne-yapmali/',
+              '/haberler/inverter-yuk-baglayinca-kapaniyor-overload-low-battery/',
           ]
           sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
           release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
