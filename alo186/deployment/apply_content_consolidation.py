@@ -7,6 +7,7 @@ import re
 import xml.etree.ElementTree as ET
 from html import escape
 from pathlib import Path
+from urllib.parse import urlsplit, urlunsplit
 
 CANONICAL_HOST = "https://alo186.com"
 DEFAULT_CONFIG = Path(__file__).with_name("content-consolidations.json")
@@ -60,6 +61,13 @@ def public_url(base_path: str, route: str) -> str:
 
 def route_file(site: Path, route: str) -> Path:
     return site / normalize_path(route).lstrip("/") / "index.html"
+
+
+def canonical_url_identity(value: str) -> str:
+    """Sitemap karşılaştırmasında yalnız anlamsız son eğik çizgiyi yok say."""
+    parsed = urlsplit(str(value or "").strip())
+    path = parsed.path.rstrip("/") or "/"
+    return urlunsplit((parsed.scheme.casefold(), parsed.netloc.casefold(), path, parsed.query, ""))
 
 
 def load_config(path: Path = DEFAULT_CONFIG) -> dict:
@@ -155,8 +163,8 @@ def update_sitemap(site: Path, items: list[dict]) -> dict:
     root = tree.getroot()
     namespace = root.tag.split("}")[0].strip("{") if "}" in root.tag else ""
     ns = f"{{{namespace}}}" if namespace else ""
-    alias_urls = {f"{CANONICAL_HOST}{item['aliasPath']}" for item in items}
-    canonical_urls = {f"{CANONICAL_HOST}{item['canonicalPath']}" for item in items}
+    alias_urls = {canonical_url_identity(f"{CANONICAL_HOST}{item['aliasPath']}") for item in items}
+    canonical_urls = {canonical_url_identity(f"{CANONICAL_HOST}{item['canonicalPath']}") for item in items}
     removed: list[str] = []
     present: set[str] = set()
 
@@ -165,11 +173,12 @@ def update_sitemap(site: Path, items: list[dict]) -> dict:
         if loc is None or not loc.text:
             continue
         url = loc.text.strip()
-        if url in alias_urls:
+        identity = canonical_url_identity(url)
+        if identity in alias_urls:
             root.remove(node)
             removed.append(url)
         else:
-            present.add(url)
+            present.add(identity)
 
     missing = canonical_urls - present
     if missing:
@@ -186,11 +195,11 @@ def update_release(site: Path, payload: dict, base_path: str) -> dict:
     if not release_path.is_file():
         raise FileNotFoundError(f"Release envanteri bulunamadı: {release_path}")
     release = json.loads(release_path.read_text(encoding="utf-8"))
-    aliases = {item["aliasPath"] for item in payload["consolidations"]}
+    aliases = {normalize_path(item["aliasPath"]) for item in payload["consolidations"]}
     routes = [
         item
         for item in release.get("routes", [])
-        if canonical_route_path(item.get("canonicalPath"), base_path) not in aliases
+        if normalize_path(canonical_route_path(item.get("canonicalPath"), base_path)) not in aliases
     ]
     release["routes"] = routes
     release["routeCount"] = len(routes)

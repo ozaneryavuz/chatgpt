@@ -132,8 +132,22 @@ def test_custom_domain() -> None:
             assert release["liveTechnicalQuality"]["deviceDamageDeadline"] == "30 gün"
             assert release["finalUserEntryPointAudit"]["primaryCardCount"] == 5
         css = (site / CSS_FILE).read_text(encoding="utf-8")
-        for token in ["min-height:44px", ".amazon-intent-card small", "focus-visible", "overflow-wrap:anywhere"]:
+        for token in [
+            "min-height:44px",
+            ".amazon-intent-card small",
+            ".amazon-intent-card a[href]",
+            ":where(header) a[href]",
+            ":where(.hero-card)>a[href]",
+            ":where(.popular) button",
+            "[class*=\"answerList\"]>article>span",
+            "button[data-analytics-choice]",
+            "font-size:max(.875rem,14px)",
+            "input,select,textarea,button{font-size:16px}",
+            "focus-visible",
+            "overflow-wrap:anywhere",
+        ]:
             assert token in css
+        assert "body{overflow-x:clip}" not in css
 
 
 def test_project_base_path() -> None:

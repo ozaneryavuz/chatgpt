@@ -12,13 +12,19 @@ const routes = [
   '/',
   '/elektrik-portali',
   '/amazon-elektrik-urunleri',
+  '/amazon-elektrik-urunleri/modem-ont-mini-ups-yedekleme-secici/',
   '/akilli-urun-secimi',
   '/hesaplama/',
+  '/hesaplama/kablo-gerilim-dusumu/',
+  '/karar-motoru/',
   '/edas-bul/',
   '/haberler/ups-online-line-interactive-offline-farki',
 ];
 const viewports = [
-  { name: 'mobile', width: 390, height: 844, isMobile: true, hasTouch: true },
+  { name: 'phone-320', width: 320, height: 568, isMobile: true, hasTouch: true },
+  { name: 'phone-360', width: 360, height: 800, isMobile: true, hasTouch: true },
+  { name: 'phone-390', width: 390, height: 844, isMobile: true, hasTouch: true },
+  { name: 'phone-430', width: 430, height: 932, isMobile: true, hasTouch: true },
   { name: 'desktop', width: 1440, height: 900, isMobile: false, hasTouch: false },
 ];
 
@@ -103,8 +109,46 @@ for (const viewport of viewports) {
       const badImages = images.filter(image => !image.complete || image.naturalWidth <= 0 || !image.altPresent);
       const interactives = [...document.querySelectorAll('a[href],button,input,select,textarea,summary,[role="button"]')].filter(visible).map(element => {
         const rect = element.getBoundingClientRect();
-        return { element, rect, selector: selector(element) };
+        const style = getComputedStyle(element);
+        return { element, rect, style, selector: selector(element) };
       }).filter(item => item.rect.bottom > 0 && item.rect.top < innerHeight && item.rect.right > 0 && item.rect.left < innerWidth);
+      const smallTargets = interactives.filter(item => {
+        if (item.element.matches('input[type="checkbox"],input[type="radio"],input[type="hidden"]')) return false;
+        if (item.element.matches('a[href]') && item.style.display === 'inline') return false;
+        return item.rect.width < 44 || item.rect.height < 44;
+      }).map(item => ({
+        selector: item.selector,
+        width: Number(item.rect.width.toFixed(1)),
+        height: Number(item.rect.height.toFixed(1)),
+        text: (item.element.textContent || item.element.getAttribute('aria-label') || '').trim().slice(0, 100),
+      })).slice(0, 30);
+      const readabilitySelector = [
+        '.amazon-intent-card small',
+        '[class*="heroProof"] span',
+        '[class*="taskTop"] > span',
+        '[class*="taskCard"] small',
+        '[class*="task-card"] small',
+        '[class*="answerList"] > article > span',
+        '#analytics-preferences-open',
+        'button[data-analytics-choice]',
+      ].join(',');
+      const smallText = [...document.querySelectorAll(readabilitySelector)].filter(visible).map(element => {
+        const style = getComputedStyle(element);
+        return { selector: selector(element), fontSize: Number.parseFloat(style.fontSize), text: (element.textContent || '').trim().slice(0, 100) };
+      }).filter(item => item.fontSize < 14).slice(0, 30);
+      const undersizedMobileControls = innerWidth <= 760
+        ? [...document.querySelectorAll('input:not([type="hidden"]),select,textarea,button')].filter(visible).map(element => ({
+            selector: selector(element),
+            fontSize: Number.parseFloat(getComputedStyle(element).fontSize),
+            text: (element.textContent || element.getAttribute('aria-label') || '').trim().slice(0, 100),
+          })).filter(item => item.fontSize < 16).slice(0, 30)
+        : [];
+      const menuIssues = [...document.querySelectorAll('header nav,.site-header nav,[aria-label*="menü" i],[aria-label*="menu" i]')].filter(visible).flatMap(element => {
+        const style = getComputedStyle(element);
+        const containedScroll = ['auto', 'scroll'].includes(style.overflowX);
+        if (element.scrollWidth <= element.clientWidth + 2 || containedScroll) return [];
+        return [{ selector: selector(element), clientWidth: element.clientWidth, scrollWidth: element.scrollWidth }];
+      }).slice(0, 20);
       const overlaps = [];
       for (let first = 0; first < interactives.length; first += 1) {
         for (let second = first + 1; second < interactives.length; second += 1) {
@@ -126,6 +170,10 @@ for (const viewport of viewports) {
         mainCount: document.querySelectorAll('main').length,
         documentOverflow,
         overflowElements,
+        smallTargets,
+        smallText,
+        undersizedMobileControls,
+        menuIssues,
         imageCount: images.length,
         badImages,
         overlaps: overlaps.slice(0, 20),
@@ -151,6 +199,10 @@ for (const viewport of viewports) {
       if (checks.mainCount !== 1) failures.push(`main count ${checks.mainCount}`);
       if (checks.documentOverflow > 2) failures.push(`document horizontal overflow ${checks.documentOverflow}px`);
       if (checks.overflowElements.length) failures.push(`${checks.overflowElements.length} uncontained overflow element`);
+      if (viewport.width <= 430 && checks.smallTargets.length) failures.push(`${checks.smallTargets.length} touch target below 44×44px`);
+      if (checks.smallText.length) failures.push(`${checks.smallText.length} key label below 14px`);
+      if (checks.undersizedMobileControls.length) failures.push(`${checks.undersizedMobileControls.length} mobile form/control text below 16px`);
+      if (checks.menuIssues.length) failures.push(`${checks.menuIssues.length} uncontained mobile menu overflow`);
       if (checks.badImages.length) failures.push(`${checks.badImages.length} broken/altless image`);
       if (checks.overlaps.length) failures.push(`${checks.overlaps.length} overlapping interactive pair`);
       if (!checks.canonical.startsWith('https://alo186.com/')) failures.push(`canonical ${checks.canonical || 'missing'}`);
