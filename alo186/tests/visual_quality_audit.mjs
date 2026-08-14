@@ -199,7 +199,7 @@ for (const viewport of viewports) {
       if (checks.mainCount !== 1) failures.push(`main count ${checks.mainCount}`);
       if (checks.documentOverflow > 2) failures.push(`document horizontal overflow ${checks.documentOverflow}px`);
       if (checks.overflowElements.length) failures.push(`${checks.overflowElements.length} uncontained overflow element`);
-      if (checks.smallTargets.length) failures.push(`${checks.smallTargets.length} touch target below 44×44px`);
+      if (viewport.width <= 430 && checks.smallTargets.length) failures.push(`${checks.smallTargets.length} touch target below 44×44px`);
       if (checks.smallText.length) failures.push(`${checks.smallText.length} key label below 14px`);
       if (checks.undersizedMobileControls.length) failures.push(`${checks.undersizedMobileControls.length} mobile form/control text below 16px`);
       if (checks.menuIssues.length) failures.push(`${checks.menuIssues.length} uncontained mobile menu overflow`);

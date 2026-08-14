@@ -27,7 +27,7 @@ QUALITY_STYLE = (
     '[class*="taskTop"]>span,[class*="answerList"]>article>span{color:#5d390d!important;font-size:max(.875rem,14px)!important;font-weight:750}'
     '[class*="taskCard"] small,[class*="task-card"] small{color:#484d48!important;font-size:max(.875rem,14px)!important;line-height:1.45}'
     '#analytics-preferences-open,button[data-analytics-choice]{min-height:44px;font-size:max(.875rem,14px)!important;line-height:1.35}'
-    '@media(max-width:720px){:where(h1,h2,h3,p,a,button,summary,th,td){overflow-wrap:anywhere}:where(input,select,textarea,button){font-size:16px}:where(h1){font-size:clamp(1.85rem,9vw,3rem);overflow-wrap:break-word}}'
+    '@media(max-width:720px){:where(h1,h2,h3,p,a,button,summary,th,td){overflow-wrap:anywhere}:where(input,select,textarea,button){font-size:16px}:where(header) a[href]{display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px}:where(.hero-card)>a[href]{display:inline-flex;align-items:center;min-height:44px;padding-block:.55rem}:where(.popular) button{min-height:44px;font-size:16px!important}:where(h1){font-size:clamp(1.85rem,9vw,3rem);overflow-wrap:break-word}}'
     '@media(prefers-reduced-motion:reduce){html:focus-within{scroll-behavior:auto!important}}'
     '</style>'
 )

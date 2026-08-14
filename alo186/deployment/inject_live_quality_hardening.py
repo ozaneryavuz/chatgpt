@@ -56,6 +56,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   nav a,.button,.btn,button,summary,[role="button"],input[type="submit"],input[type="button"]{min-height:44px}
   button,.button,.btn,[role="button"]{max-width:100%;white-space:normal}
   input,select,textarea,button{font-size:16px}
+  :where(header) a[href]{display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px}
+  :where(.hero-card)>a[href]{display:inline-flex;align-items:center;min-height:44px;padding-block:.55rem}
+  :where(.popular) button{min-height:44px;font-size:16px!important}
   h1{font-size:clamp(1.85rem,9vw,3rem);overflow-wrap:break-word}
   table{max-width:100%}
   .table-wrap,[class*="table-wrap"]{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
