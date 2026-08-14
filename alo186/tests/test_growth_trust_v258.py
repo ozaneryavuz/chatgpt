@@ -76,8 +76,10 @@ def main() -> None:
             assert forbidden not in script
 
         article = (output / "source/haberler/elektrik-kesintisi-cihaz-hasari-edas-basvurusu/index.html").read_text(encoding="utf-8")
-        assert '"dateModified":"2026-08-04"' in article
-        assert "Son doğrulama: 4 Ağustos 2026" in article
+        # The critical-claims snapshot remains v258/2026-08-04, but this article was
+        # independently re-verified on 2026-08-07. Do not pin an older page date.
+        assert '"dateModified":"2026-08-07"' in article
+        assert "Son doğrulama: 7 Ağustos 2026" in article
         assert "Cihaz hasarı başvurusunda süre 30 gündür" in article
         assert "talebin zararın ortaya çıktığı tarihten itibaren <strong>30 gün</strong> içinde" in article
         assert "özel süre 10 iş günüdür" not in article
