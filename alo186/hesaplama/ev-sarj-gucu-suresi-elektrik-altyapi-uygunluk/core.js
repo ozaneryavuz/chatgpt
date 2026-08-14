@@ -65,6 +65,7 @@
     const requiredEffectiveKw=gridEnergyKwh/input.targetHours;
     const targetFeasibleByVehicleAndSite=requiredEffectiveKw<=siteVehicleCeilingKw+1e-9;
     const candidateMeetsTime=targetFeasibleByVehicleAndSite&&input.evseMaxKw+1e-9>=requiredEffectiveKw;
+    const candidateWithinUsefulCeiling=input.evseMaxKw<=siteVehicleCeilingKw*1.05+1e-9;
     const approximateCurrentA=input.phase==='three'
       ? (effectivePowerKw*1000)/(SQRT3*THREE_V)
       : (effectivePowerKw*1000)/SINGLE_V;
@@ -130,7 +131,7 @@
       input.ownership==='candidate'&&
       !input.advancedEnergySystem&&
       !input.existingSafeSolutionAdequate&&
-      hardSafe&&evidenceVerified&&expectationFit
+      hardSafe&&evidenceVerified&&expectationFit&&candidateWithinUsefulCeiling
     );
     const professionalRequired=Boolean(blockers.length||input.usage!=='private'||input.advancedEnergySystem||!evidenceVerified);
 
@@ -145,7 +146,7 @@
       usefulClassKw,
       approximateCurrentA:round(approximateCurrentA,1),
       bottlenecks,
-      targetFeasibleByVehicleAndSite,candidateMeetsTime,evidenceVerified,
+      targetFeasibleByVehicleAndSite,candidateMeetsTime,candidateWithinUsefulCeiling,evidenceVerified,
       noPurchaseNeeded,commercialAllowed,professionalRequired,
       affiliateQuery:'elektrikli araç şarj istasyonu wallbox AC EVSE'
     };
