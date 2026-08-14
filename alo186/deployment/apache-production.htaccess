@@ -5,6 +5,10 @@ ErrorDocument 404 /404.html
 <IfModule mod_rewrite.c>
 RewriteEngine On
 
+# Eski teknik devir-kabul hizmet niyetini genel portala düşürme. Absolute apex
+# hedefi sayesinde www/http varyantları da tek adımda canonical hizmete gider.
+RewriteRule ^hizmetler/teknik-devir-kabul-paketi/?$ https://alo186.com/kurumsal-elektrik-surekliligi-on-degerlendirme [R=301,L,NE]
+
 # Tek canonical host: www veya başka bir Host aynı path ve query ile apex'e gider.
 RewriteCond %{HTTP_HOST} !^alo186\.com$ [NC]
 RewriteRule ^ https://alo186.com%{REQUEST_URI} [R=301,L,NE]
