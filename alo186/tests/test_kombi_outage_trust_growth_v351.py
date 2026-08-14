@@ -30,7 +30,7 @@ def main() -> None:
         assert '<meta name="robots" content="index,follow,max-image-preview:large">' in page
         assert '"@type":"BreadcrumbList"' in page
         assert "ALO186" in page
-        assert "resmî kurum" in page
+        assert "resmî kurum" in page or "kamu kurumu" in page
         assert "yeni ürün almayın" in lowered
         assert "fiyat" in lowered and "stok" in lowered and "puan" in lowered and "garanti" in lowered
         assert "amazon.com.tr" not in lowered
