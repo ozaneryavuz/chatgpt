@@ -1,0 +1,81 @@
+name: ALO186 content authority intent triage v349
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/evde-bazi-prizlerde-elektrik-var-bazilarinda-yok-faz-arizasi/**'
+      - 'alo186/haberler/ev-sarj-baslayinca-sigorta-kacak-akim-rolesi-atiyor/**'
+      - 'alo186/haberler/notr-kablosu-isiniyor-ucuncu-harmonik-neden/**'
+      - 'alo186/deployment/routing-overlays/content-authority-intent-triage-v349.json'
+      - 'alo186/tests/test_content_authority_intent_triage_v349.py'
+      - '.github/workflows/alo186-content-authority-v349.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/evde-bazi-prizlerde-elektrik-var-bazilarinda-yok-faz-arizasi/**'
+      - 'alo186/haberler/ev-sarj-baslayinca-sigorta-kacak-akim-rolesi-atiyor/**'
+      - 'alo186/haberler/notr-kablosu-isiniyor-ucuncu-harmonik-neden/**'
+      - 'alo186/deployment/routing-overlays/content-authority-intent-triage-v349.json'
+      - 'alo186/tests/test_content_authority_intent_triage_v349.py'
+      - '.github/workflows/alo186-content-authority-v349.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-content-authority-v349-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Intent triage trust, AEO and non-commercial checks
+        run: python alo186/tests/test_content_authority_intent_triage_v349.py
+      - name: Global content intent collision guard
+        run: python alo186/tests/test_content_intent_consolidation.py
+      - name: Canonical production build and smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-content-authority-v349
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-content-authority-v349 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-content-authority-v349
+      - name: Verify production routes, sitemap and commercial closure
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/alo186-content-authority-v349')
+          routes = [
+              '/haberler/evde-bazi-prizlerde-elektrik-var-bazilarinda-yok-faz-arizasi/',
+              '/haberler/ev-sarj-baslayinca-sigorta-kacak-akim-rolesi-atiyor/',
+              '/haberler/notr-kablosu-isiniyor-ucuncu-harmonik-neden/',
+          ]
+          sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
+          release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
+          assert release['routingVersion'] >= 349
+          for route in routes:
+              page = root / route.strip('/') / 'index.html'
+              assert page.is_file(), page
+              html = page.read_text(encoding='utf-8')
+              assert f'https://alo186.com{route}' in sitemap
+              assert f'<link rel="canonical" href="https://alo186.com{route}">' in html
+              assert 'amazon.com.tr' not in html.lower()
+              for schema in ('"@type":"Article"', '"@type":"FAQPage"', '"@type":"BreadcrumbList"'):
+                  assert schema in html
+          print({'ok': True, 'routingVersion': release['routingVersion'], 'routes': routes, 'merchantLinks': 0})
+          PY
+      - name: Upload verified bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-content-authority-v349-${{ github.sha }}
+          path: /tmp/alo186-content-authority-v349
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
