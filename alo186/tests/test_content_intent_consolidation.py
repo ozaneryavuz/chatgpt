@@ -3,7 +3,9 @@ from __future__ import annotations
 import json
 import re
 import sys
+import tempfile
 import unicodedata
+import xml.etree.ElementTree as ET
 from html import unescape
 from pathlib import Path
 
@@ -11,7 +13,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 DEPLOYMENT = REPO_ROOT / "alo186/deployment"
 sys.path.insert(0, str(DEPLOYMENT))
 
-from apply_content_consolidation import load_config  # noqa: E402
+from apply_content_consolidation import canonical_url_identity, load_config, update_release, update_sitemap  # noqa: E402
 from build_static_site import load_effective_manifest  # noqa: E402
 
 STOPWORDS = {
@@ -25,6 +27,41 @@ def normalize_route(value: str) -> str:
     """Karşılaştırmalarda /rota ve /rota/ biçimlerini tek kimlikte birleştir."""
     cleaned = "/" + str(value or "").strip().strip("/")
     return cleaned if cleaned != "" else "/"
+
+
+def test_sitemap_trailing_slash_identity() -> None:
+    assert canonical_url_identity("https://alo186.com/ornek/") == canonical_url_identity("https://alo186.com/ornek")
+    with tempfile.TemporaryDirectory() as directory:
+        site = Path(directory)
+        sitemap = site / "sitemap.xml"
+        sitemap.write_text(
+            '<?xml version="1.0" encoding="utf-8"?>\n'
+            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+            '  <url><loc>https://alo186.com/eski/</loc></url>\n'
+            '  <url><loc>https://alo186.com/guncel/</loc></url>\n'
+            '</urlset>\n',
+            encoding="utf-8",
+        )
+        result = update_sitemap(site, [{"aliasPath": "/eski", "canonicalPath": "/guncel"}])
+        assert result["removed"] == ["https://alo186.com/eski/"]
+        locs = [node.text for node in ET.parse(sitemap).getroot().findall(".//{*}loc")]
+        assert locs == ["https://alo186.com/guncel/"]
+
+        release = {
+            "routes": [
+                {"canonicalPath": "/eski/", "type": "article"},
+                {"canonicalPath": "/guncel/", "type": "article"},
+            ]
+        }
+        (site / "alo186-release.json").write_text(json.dumps(release), encoding="utf-8")
+        updated = update_release(
+            site,
+            {"version": 1, "generatedAt": "2026-08-14", "consolidations": [{"aliasPath": "/eski", "canonicalPath": "/guncel"}]},
+            "",
+        )
+        assert updated["routeCount"] == 1
+        retained = json.loads((site / "alo186-release.json").read_text(encoding="utf-8"))["routes"]
+        assert retained == [{"canonicalPath": "/guncel/", "type": "article"}]
 
 
 def html_text(html: str, tag: str) -> str:
@@ -128,6 +165,7 @@ def commerce_pair_matches(left: dict, right: dict) -> tuple[bool, str]:
 
 
 def main() -> None:
+    test_sitemap_trailing_slash_identity()
     manifest = load_effective_manifest(REPO_ROOT)
     config = load_config()
     route_by_path: dict[str, dict] = {}

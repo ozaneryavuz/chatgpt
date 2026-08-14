@@ -40,19 +40,23 @@ CANONICAL_RE = re.compile(
 QUALITY_CSS = r"""
 /* ALO186 canlı teknik kalite katmanı — güvenli, içerikten bağımsız düzeltmeler */
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-padding-top:5rem}
-body{overflow-x:clip}
 img,svg,video,canvas{max-width:100%;height:auto}
 main,section,article,aside,nav,header,footer,form,fieldset,div{min-width:0}
 h1,h2,h3,h4,p,li,dd,dt,a,button,label,summary,small,strong,span{overflow-wrap:anywhere}
 a,button,input,select,textarea,summary,[role="button"]{touch-action:manipulation}
 a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible,[role="button"]:focus-visible{outline:4px solid #ffbf47!important;outline-offset:3px!important}
-.amazon-intent-card small{color:#5b554d!important}
-[class*="heroProof"] span{color:#50554f!important}
-[class*="taskTop"]>span{color:#684313!important;font-weight:700}
-[class*="taskCard"] small,[class*="task-card"] small{color:#555a54!important}
+.amazon-intent-card small{color:#514b44!important;font-size:max(.875rem,14px)!important;line-height:1.45}
+.amazon-intent-card a[href]{min-height:44px;align-items:center;padding-block:.5rem}
+[class*="heroProof"] span{color:#454a45!important;font-size:max(.875rem,14px)!important;line-height:1.45}
+[class*="taskTop"]>span{color:#5d390d!important;font-size:max(.875rem,14px)!important;font-weight:750}
+[class*="taskCard"] small,[class*="task-card"] small{color:#484d48!important;font-size:max(.875rem,14px)!important;line-height:1.45}
+[class*="answerList"]>article>span{color:#5d390d!important;font-size:max(.875rem,14px)!important;font-weight:750}
+#analytics-preferences-open,button[data-analytics-choice]{min-height:44px;font-size:max(.875rem,14px)!important;line-height:1.35}
 @media(max-width:760px){
   nav a,.button,.btn,button,summary,[role="button"],input[type="submit"],input[type="button"]{min-height:44px}
   button,.button,.btn,[role="button"]{max-width:100%;white-space:normal}
+  input,select,textarea,button{font-size:16px}
+  h1{font-size:clamp(1.85rem,9vw,3rem);overflow-wrap:break-word}
   table{max-width:100%}
   .table-wrap,[class*="table-wrap"]{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
 }
