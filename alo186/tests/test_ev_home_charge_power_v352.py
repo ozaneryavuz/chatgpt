@@ -64,7 +64,7 @@ def main() -> None:
 
     require("min(input.vehicleAcMaxKw,input.installationMaxKw)", CORE, "araç+tesisat tavanı")
     require("Math.min(siteVehicleCeilingKw,input.evseMaxKw)", CORE, "etkili güç darboğazı")
-    require("batteryEnergyKwh/input.targetHours", CORE, "hedef süre gücü")
+    require("gridEnergyKwh/input.targetHours", CORE, "hedef süre gücü")
     require("SQRT3*THREE_V", CORE, "trifaze yaklaşık akım")
     require("Kablo kesiti veya sigorta değerini", CORE, "akım hesabı sınırı")
 
@@ -88,7 +88,7 @@ def main() -> None:
     assert "price" in POLICY["claimsForbidden"] and "stock" in POLICY["claimsForbidden"]
 
     assert not re.search(r"\b(16|32|40|63)\s*A\s*(sigorta|mcb|rcbo)", HTML, re.I), "Sabit koruma cihazı boyutlandırması yayımlanmamalı"
-    print("ALO186 EV ev şarj gücü/süre/altypı v352: PASS")
+    print("ALO186 EV ev şarj gücü/süre/altyapı v352: PASS")
 
 
 if __name__ == "__main__":
