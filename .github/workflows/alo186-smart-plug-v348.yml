@@ -1,0 +1,102 @@
+name: ALO186 smart plug energy meter v348
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/akilli-priz-enerji-olcer-uygunluk/**'
+      - 'alo186/deployment/affiliate-category-decisions/smart-plug-energy-meter-v348.json'
+      - 'alo186/tests/test_smart_plug_energy_meter_v348.py'
+      - '.github/workflows/alo186-smart-plug-v348.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/akilli-priz-enerji-olcer-uygunluk/**'
+      - 'alo186/deployment/affiliate-category-decisions/smart-plug-energy-meter-v348.json'
+      - 'alo186/tests/test_smart_plug_energy_meter_v348.py'
+      - '.github/workflows/alo186-smart-plug-v348.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-smart-plug-v348-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
+      - name: Decision, privacy, cost and affiliate contract
+        run: |
+          set -euo pipefail
+          python alo186/tests/test_smart_plug_energy_meter_v348.py
+          node --check alo186/hesaplama/akilli-priz-enerji-olcer-uygunluk/core.js
+          node --check alo186/hesaplama/akilli-priz-enerji-olcer-uygunluk/app.js
+
+      - name: Canonical production build and smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-smart-plug-v348
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-smart-plug-v348 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-smart-plug-v348
+
+      - name: Final artifact route, sitemap, privacy and commerce gates
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('/tmp/alo186-smart-plug-v348')
+          route='/hesaplama/akilli-priz-enerji-olcer-uygunluk/'
+          page=root/route.strip('/')/'index.html'
+          assert page.is_file(), page
+          html=page.read_text(encoding='utf-8')
+          core=(page.parent/'core.js').read_text(encoding='utf-8')
+          app=(page.parent/'app.js').read_text(encoding='utf-8')
+          css=(page.parent/'styles.css').read_text(encoding='utf-8')
+          sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
+          assert f'https://alo186.com{route}' in sitemap
+          assert f'<link rel="canonical" href="https://alo186.com{route}">' in html
+          assert 'https://www.alo186.com' not in html
+          assert html.count('id="affiliateAck') == 3
+          assert 'rel="sponsored nofollow noopener"' in html
+          assert 'alo186rehber-21' in app
+          assert 'alo186hazirlik-21' not in html+app
+          assert 'candidateContinuousPct' in html+core+app
+          assert 'monthlyCostTry' in core+app
+          assert 'localStorage' not in html+core+app
+          assert 'sessionStorage' not in html+core+app
+          assert 'geolocation' not in (html+core+app).lower()
+          assert 'fetch(' not in (html+core+app).lower()
+          assert 'min-height:48px' in css
+          assert 'forced-colors' in css and 'prefers-reduced-motion' in css
+          gov=json.loads((root/'deployment/affiliate-category-decisions/smart-plug-energy-meter-v348.json').read_text(encoding='utf-8')) if (root/'deployment/affiliate-category-decisions/smart-plug-energy-meter-v348.json').exists() else json.loads(Path('alo186/deployment/affiliate-category-decisions/smart-plug-energy-meter-v348.json').read_text(encoding='utf-8'))
+          assert gov['version']==348 and gov['affiliateTag']=='alo186rehber-21'
+          print({'ok':True,'route':route,'affiliateConsents':3,'privacy':'pass','mobileTargets':'48px','tariffSource':'user-input-only'})
+          PY
+
+      - name: Existing release and portal regressions
+        run: |
+          set -euo pipefail
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Upload verified artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-smart-plug-v348-${{ github.sha }}
+          path: /tmp/alo186-smart-plug-v348
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
