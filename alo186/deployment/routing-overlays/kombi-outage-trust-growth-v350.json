@@ -1,0 +1,21 @@
+{
+  "version": 350,
+  "generatedAt": "2026-08-14",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesilince-kombi-calisir-mi-elektrik-gelince-ne-yapmali/index.html",
+      "canonicalPath": "/haberler/elektrik-kesilince-kombi-calisir-mi-elektrik-gelince-ne-yapmali/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/kombi-elektrik-kesintisi-sonrasi-guvenli-kontrol/index.html",
+      "canonicalPath": "/hesaplama/kombi-elektrik-kesintisi-sonrasi-guvenli-kontrol/",
+      "type": "application"
+    },
+    {
+      "source": "alo186/sektor-rehberi/site-otel-kombi-kazan-elektrik-kesintisi-isitma-surekliligi/index.html",
+      "canonicalPath": "/sektor-rehberi/site-otel-kombi-kazan-elektrik-kesintisi-isitma-surekliligi/",
+      "type": "article"
+    }
+  ]
+}
