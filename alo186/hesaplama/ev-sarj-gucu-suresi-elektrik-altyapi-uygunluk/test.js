@@ -19,6 +19,7 @@ assert.strictEqual(r.effectivePowerKw,7.4);
 assert.ok(r.chargeTimeHours>5.3&&r.chargeTimeHours<5.5);
 assert.strictEqual(r.targetFeasibleByVehicleAndSite,true);
 assert.strictEqual(r.candidateMeetsTime,true);
+assert.strictEqual(r.candidateWithinUsefulCeiling,true);
 assert.strictEqual(r.commercialAllowed,true);
 assert.strictEqual(r.blockers.length,0);
 
@@ -29,10 +30,13 @@ assert.strictEqual(r.effectivePowerKw,11);
 r=run({vehicleAcMaxKw:11,evseMaxKw:22,installationMaxKw:22});
 assert.strictEqual(r.effectivePowerKw,11);
 assert.ok(r.warnings.some(x=>x.includes('daha büyük wallbox')));
+assert.strictEqual(r.candidateWithinUsefulCeiling,false);
+assert.strictEqual(r.commercialAllowed,false);
 
 r=run({vehicleAcMaxKw:7.4,evseMaxKw:11,installationMaxKw:7.4});
 assert.strictEqual(r.effectivePowerKw,7.4);
 assert.ok(r.warnings.some(x=>x.includes('tesisat sınırından yüksek')));
+assert.strictEqual(r.commercialAllowed,false);
 
 r=run({targetHours:2});
 assert.strictEqual(r.targetFeasibleByVehicleAndSite,false);
