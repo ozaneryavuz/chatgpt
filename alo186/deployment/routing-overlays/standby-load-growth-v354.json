@@ -1,0 +1,16 @@
+{
+  "version": 354,
+  "generatedAt": "2026-08-14",
+  "routes": [
+    {
+      "source": "alo186/haberler/kapali-cihaz-elektrik-harcar-mi-bekleme-modu-standby-tuketimi/index.html",
+      "canonicalPath": "/haberler/kapali-cihaz-elektrik-harcar-mi-bekleme-modu-standby-tuketimi/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/bekleme-modu-standby-kwh-hesaplama/index.html",
+      "canonicalPath": "/hesaplama/bekleme-modu-standby-kwh-hesaplama/",
+      "type": "application"
+    }
+  ]
+}
