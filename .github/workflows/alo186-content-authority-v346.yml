@@ -1,0 +1,81 @@
+name: ALO186 content authority symptom triage v346
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/kacak-akim-rolesi-test-butonu-basilinca-atmiyor/**'
+      - 'alo186/haberler/jenerator-calisiyor-ama-elektrik-gelmiyor-ats-transfer-etmiyor/**'
+      - 'alo186/haberler/ups-surekli-otuyor-bip-sesi-alarm-ne-anlama-gelir/**'
+      - 'alo186/deployment/routing-overlays/content-authority-symptom-triage-v346.json'
+      - 'alo186/tests/test_content_authority_symptom_triage_v346.py'
+      - '.github/workflows/alo186-content-authority-v346.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/kacak-akim-rolesi-test-butonu-basilinca-atmiyor/**'
+      - 'alo186/haberler/jenerator-calisiyor-ama-elektrik-gelmiyor-ats-transfer-etmiyor/**'
+      - 'alo186/haberler/ups-surekli-otuyor-bip-sesi-alarm-ne-anlama-gelir/**'
+      - 'alo186/deployment/routing-overlays/content-authority-symptom-triage-v346.json'
+      - 'alo186/tests/test_content_authority_symptom_triage_v346.py'
+      - '.github/workflows/alo186-content-authority-v346.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-content-authority-v346-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Symptom triage trust, AEO and non-commercial checks
+        run: python alo186/tests/test_content_authority_symptom_triage_v346.py
+      - name: Global content intent collision guard
+        run: python alo186/tests/test_content_intent_consolidation.py
+      - name: Canonical production build and smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-content-authority-v346
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-content-authority-v346 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-content-authority-v346
+      - name: Verify production routes, sitemap and commercial closure
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/alo186-content-authority-v346')
+          routes = [
+              '/haberler/kacak-akim-rolesi-test-butonu-basilinca-atmiyor/',
+              '/haberler/jenerator-calisiyor-ama-elektrik-gelmiyor-ats-transfer-etmiyor/',
+              '/haberler/ups-surekli-otuyor-bip-sesi-alarm-ne-anlama-gelir/',
+          ]
+          sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
+          release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
+          assert release['routingVersion'] >= 346
+          for route in routes:
+              page = root / route.strip('/') / 'index.html'
+              assert page.is_file(), page
+              html = page.read_text(encoding='utf-8')
+              assert f'https://alo186.com{route}' in sitemap
+              assert f'<link rel="canonical" href="https://alo186.com{route}">' in html
+              assert 'amazon.com.tr' not in html.lower()
+              for schema in ('"@type":"Article"', '"@type":"FAQPage"', '"@type":"BreadcrumbList"'):
+                  assert schema in html
+          print({'ok': True, 'routingVersion': release['routingVersion'], 'routes': routes, 'merchantLinks': 0})
+          PY
+      - name: Upload verified bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-content-authority-v346-${{ github.sha }}
+          path: /tmp/alo186-content-authority-v346
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
