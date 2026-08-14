@@ -1,0 +1,92 @@
+name: ALO186 USB-C PD trust growth v355
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/usb-c-kablo-kac-watt-60w-240w-pd-farki/**'
+      - 'alo186/hesaplama/usb-c-pd-sarj-kablo-uygunluk/**'
+      - 'alo186/deployment/routing-overlays/355-usb-c-pd-growth.json'
+      - 'alo186/deployment/affiliate-category-decisions/usb-c-pd-v355.json'
+      - 'alo186/tests/test_usb_c_pd_growth_v355.py'
+      - '.github/workflows/alo186-usb-c-pd-v355.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/usb-c-kablo-kac-watt-60w-240w-pd-farki/**'
+      - 'alo186/hesaplama/usb-c-pd-sarj-kablo-uygunluk/**'
+      - 'alo186/deployment/routing-overlays/355-usb-c-pd-growth.json'
+      - 'alo186/deployment/affiliate-category-decisions/usb-c-pd-v355.json'
+      - 'alo186/tests/test_usb_c_pd_growth_v355.py'
+      - '.github/workflows/alo186-usb-c-pd-v355.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-usb-c-pd-v355-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - name: USB-C trust privacy and commerce contract
+        run: |
+          set -euo pipefail
+          python alo186/tests/test_usb_c_pd_growth_v355.py
+          node --check alo186/hesaplama/usb-c-pd-sarj-kablo-uygunluk/app.js
+      - name: Global intent collision guard
+        run: python alo186/tests/test_content_intent_consolidation.py
+      - name: Canonical production build and smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-usbc-v355
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-usbc-v355 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-usbc-v355
+      - name: Final artifact routes sitemap and gated commerce
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          root=Path('/tmp/alo186-usbc-v355')
+          routes=[
+            '/haberler/usb-c-kablo-kac-watt-60w-240w-pd-farki/',
+            '/hesaplama/usb-c-pd-sarj-kablo-uygunluk/'
+          ]
+          sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
+          release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
+          assert release['routingVersion'] >= 355
+          for route in routes:
+            page=root/route.strip('/')/'index.html'
+            assert page.is_file(), page
+            html=page.read_text(encoding='utf-8')
+            assert f'https://alo186.com{route}' in sitemap
+            assert f'<link rel="canonical" href="https://alo186.com{route}">' in html
+            assert '"@type":"Offer"' not in html
+            assert 'AggregateRating' not in html
+          article=(root/'haberler/usb-c-kablo-kac-watt-60w-240w-pd-farki/index.html').read_text(encoding='utf-8')
+          tool=(root/'hesaplama/usb-c-pd-sarj-kablo-uygunluk/index.html').read_text(encoding='utf-8')
+          app=(root/'hesaplama/usb-c-pd-sarj-kablo-uygunluk/app.js').read_text(encoding='utf-8')
+          assert 'amazon.com.tr' not in article.lower()
+          assert 'amazon.com.tr' not in tool.lower()
+          assert 'alo186rehber-21' in app
+          assert 'sponsored nofollow noopener' in app
+          print('ALO186 USB-C v355 final artifact: PASS')
+          PY
+      - name: Upload verified bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-usb-c-v355-${{ github.sha }}
+          path: /tmp/alo186-usbc-v355
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
