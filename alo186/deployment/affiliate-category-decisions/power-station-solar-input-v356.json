@@ -1,0 +1,35 @@
+{
+  "version": 356,
+  "route": "/hesaplama/power-station-gunes-paneli-uygunluk-sarj-suresi/",
+  "category": "portable solar panel for power station",
+  "amazonMarketplace": "amazon.com.tr",
+  "affiliateTag": "alo186rehber-21",
+  "defaultDecision": "closed",
+  "allowedOnlyWhen": [
+    "portable low-voltage panel and portable power-station scenario",
+    "power-station PV input and panel datasheet values are verified for the exact models",
+    "cold-corrected array Voc stays below the station maximum PV input voltage",
+    "array Vmp stays inside the documented PV operating window",
+    "array Isc/Imp and Wp satisfy documented input limits or explicit manufacturer overpanel/current-clipping permission",
+    "connector polarity and manufacturer-approved cable or adapter are verified",
+    "cables and connectors are dry, undamaged and not being modified live",
+    "no active thunderstorm",
+    "existing safe panel is not already adequate",
+    "three explicit affiliate confirmations are completed"
+  ],
+  "alwaysClosedFor": [
+    "fixed rooftop or facade PV",
+    "grid-tied PV",
+    "cold-corrected Voc at or above maximum PV input voltage",
+    "Vmp below MPPT operating minimum",
+    "Isc above documented short-circuit current maximum",
+    "unverified overpaneling or current clipping",
+    "wet, damaged, overheated or loose connectors",
+    "live connector rewiring or polarity modification",
+    "active thunderstorm",
+    "existing compatible panel already passes real solar test"
+  ],
+  "linkContract": "dynamic only after compatible result + three confirmations; rel=sponsored nofollow noopener",
+  "claimsForbidden": ["price", "stock", "rating", "delivery", "warranty", "merchant listing eligibility"],
+  "sizingPolicy": "calculator does not design fixed PV strings, cable cross-section, DC protection or grid-connected solar systems"
+}
