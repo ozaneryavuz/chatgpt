@@ -1,0 +1,95 @@
+name: ALO186 EV ev şarj gücü ve süre v352
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/ev-sarj-gucu-suresi-elektrik-altyapi-uygunluk/**'
+      - 'alo186/deployment/routing-overlays/352-ev-home-charge-power-time.json'
+      - 'alo186/deployment/affiliate-category-decisions/ev-home-charge-power-v352.json'
+      - 'alo186/tests/test_ev_home_charge_power_v352.py'
+      - '.github/workflows/alo186-ev-home-charge-power-v352.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/ev-sarj-gucu-suresi-elektrik-altyapi-uygunluk/**'
+      - 'alo186/deployment/routing-overlays/352-ev-home-charge-power-time.json'
+      - 'alo186/deployment/affiliate-category-decisions/ev-home-charge-power-v352.json'
+      - 'alo186/tests/test_ev_home_charge_power_v352.py'
+      - '.github/workflows/alo186-ev-home-charge-power-v352.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-ev-home-charge-power-v352-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
+      - name: EV karar motoru, güvenlik, gizlilik ve affiliate sözleşmesi
+        run: |
+          set -euo pipefail
+          python alo186/tests/test_ev_home_charge_power_v352.py
+          node --check alo186/hesaplama/ev-sarj-gucu-suresi-elektrik-altyapi-uygunluk/core.js
+          node --check alo186/hesaplama/ev-sarj-gucu-suresi-elektrik-altyapi-uygunluk/app.js
+
+      - name: Canonical üretim paketi ve smoke
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-ev-home-charge-v352 \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-ev-home-charge-v352
+
+      - name: Final artifact rota, sitemap ve ticari güven kabulü
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          root=Path('/tmp/alo186-ev-home-charge-v352')
+          route=root/'hesaplama/ev-sarj-gucu-suresi-elektrik-altyapi-uygunluk/index.html'
+          assert route.is_file(), route
+          html=route.read_text(encoding='utf-8')
+          url='https://alo186.com/hesaplama/ev-sarj-gucu-suresi-elektrik-altyapi-uygunluk/'
+          assert f'<link rel="canonical" href="{url}">' in html
+          assert url in (root/'sitemap.xml').read_text(encoding='utf-8')
+          assert 'amazon.com.tr' not in html.lower()
+          app=(root/'hesaplama/ev-sarj-gucu-suresi-elektrik-altyapi-uygunluk/app.js').read_text(encoding='utf-8')
+          assert 'alo186rehber-21' in app
+          assert 'sponsored nofollow noopener' in app
+          release=json.loads((root/'alo186-release.json').read_text(encoding='utf-8'))
+          assert any(r.get('canonicalPath')=='/hesaplama/ev-sarj-gucu-suresi-elektrik-altyapi-uygunluk/' for r in release.get('routes',[]))
+          print('ALO186 EV v352 final artifact: PASS')
+          PY
+
+      - name: Release, portal ve hukuk süre regresyonları
+        run: |
+          set -euo pipefail
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Doğrulanmış EV v352 artifactı
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-ev-home-charge-power-v352-pages
+          path: /tmp/alo186-ev-home-charge-v352
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
