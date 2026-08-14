@@ -1,0 +1,83 @@
+name: ALO186 kombi outage trust growth v350
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/elektrik-kesilince-kombi-calisir-mi-elektrik-gelince-ne-yapmali/**'
+      - 'alo186/hesaplama/kombi-elektrik-kesintisi-sonrasi-guvenli-kontrol/**'
+      - 'alo186/sektor-rehberi/site-otel-kombi-kazan-elektrik-kesintisi-isitma-surekliligi/**'
+      - 'alo186/deployment/routing-overlays/kombi-outage-trust-growth-v350.json'
+      - 'alo186/tests/test_kombi_outage_trust_growth_v350.py'
+      - '.github/workflows/alo186-kombi-outage-trust-v350.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/elektrik-kesilince-kombi-calisir-mi-elektrik-gelince-ne-yapmali/**'
+      - 'alo186/hesaplama/kombi-elektrik-kesintisi-sonrasi-guvenli-kontrol/**'
+      - 'alo186/sektor-rehberi/site-otel-kombi-kazan-elektrik-kesintisi-isitma-surekliligi/**'
+      - 'alo186/deployment/routing-overlays/kombi-outage-trust-growth-v350.json'
+      - 'alo186/tests/test_kombi_outage_trust_growth_v350.py'
+      - '.github/workflows/alo186-kombi-outage-trust-v350.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-kombi-outage-v350-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Kombi trust privacy and no-commerce checks
+        run: python alo186/tests/test_kombi_outage_trust_growth_v350.py
+      - name: Global content intent collision guard
+        run: python alo186/tests/test_content_intent_consolidation.py
+      - name: Canonical production build and smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-kombi-outage-v350
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-kombi-outage-v350 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-kombi-outage-v350
+      - name: Verify routes sitemap schemas and commercial closure
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/alo186-kombi-outage-v350')
+          routes = [
+              ('/haberler/elektrik-kesilince-kombi-calisir-mi-elektrik-gelince-ne-yapmali/', 'Article'),
+              ('/hesaplama/kombi-elektrik-kesintisi-sonrasi-guvenli-kontrol/', 'WebApplication'),
+              ('/sektor-rehberi/site-otel-kombi-kazan-elektrik-kesintisi-isitma-surekliligi/', 'Article'),
+          ]
+          sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
+          release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
+          assert release['routingVersion'] >= 350
+          for route, schema in routes:
+              page = root / route.strip('/') / 'index.html'
+              assert page.is_file(), page
+              html = page.read_text(encoding='utf-8')
+              assert f'https://alo186.com{route}' in sitemap
+              assert f'<link rel="canonical" href="https://alo186.com{route}">' in html
+              assert f'"@type":"{schema}"' in html
+              assert '"@type":"BreadcrumbList"' in html
+              assert 'amazon.com.tr' not in html.lower()
+              assert '"@type":"Product"' not in html
+              assert '"@type":"Offer"' not in html
+          print({'ok': True, 'routingVersion': release['routingVersion'], 'routes': [r[0] for r in routes], 'merchantLinks': 0})
+          PY
+      - name: Upload verified bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-kombi-outage-v350-${{ github.sha }}
+          path: /tmp/alo186-kombi-outage-v350
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
