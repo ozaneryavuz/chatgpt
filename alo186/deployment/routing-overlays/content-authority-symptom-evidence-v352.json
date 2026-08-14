@@ -1,0 +1,21 @@
+{
+  "version": 352,
+  "generatedAt": "2026-08-14",
+  "routes": [
+    {
+      "source": "alo186/haberler/notr-toprak-arasi-voltaj-kac-volt-olmali/index.html",
+      "canonicalPath": "/haberler/notr-toprak-arasi-voltaj-kac-volt-olmali/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ev-sarj-kablosu-fisi-konnektoru-isiniyor/index.html",
+      "canonicalPath": "/haberler/ev-sarj-kablosu-fisi-konnektoru-isiniyor/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/jenerator-yuk-alinca-voltaj-frekans-dusuyor/index.html",
+      "canonicalPath": "/haberler/jenerator-yuk-alinca-voltaj-frekans-dusuyor/",
+      "type": "article"
+    }
+  ]
+}
