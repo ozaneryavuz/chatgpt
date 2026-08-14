@@ -1,0 +1,61 @@
+name: ALO186 pil yedekli otomatik mama makinesi affiliate v348
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/pil-yedekli-otomatik-mama-makinesi-elektrik-kesintisi-secimi/**'
+      - 'alo186/deployment/routing-overlays/348-affiliate-pet-feeder.json'
+      - 'alo186/tests/test_affiliate_pet_feeder_v348.js'
+      - '.github/workflows/alo186-affiliate-pet-feeder-v348.yml'
+  pull_request:
+    paths:
+      - 'alo186/amazon-elektrik-urunleri/pil-yedekli-otomatik-mama-makinesi-elektrik-kesintisi-secimi/**'
+      - 'alo186/deployment/routing-overlays/348-affiliate-pet-feeder.json'
+      - 'alo186/tests/test_affiliate_pet_feeder_v348.js'
+      - '.github/workflows/alo186-affiliate-pet-feeder-v348.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-affiliate-pet-feeder-v348-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Ürün, Knowledge Graph ve affiliate güven regresyonu
+        run: |
+          node --check alo186/amazon-elektrik-urunleri/pil-yedekli-otomatik-mama-makinesi-elektrik-kesintisi-secimi/catalog-v348.js
+          node --check alo186/amazon-elektrik-urunleri/pil-yedekli-otomatik-mama-makinesi-elektrik-kesintisi-secimi/app-v348.js
+          node alo186/tests/test_affiliate_pet_feeder_v348.js
+      - name: Affiliate kapsam ve risk yönetişimi
+        run: |
+          printf '%s\n' \
+            'alo186/amazon-elektrik-urunleri/pil-yedekli-otomatik-mama-makinesi-elektrik-kesintisi-secimi/index.html' \
+            'alo186/amazon-elektrik-urunleri/pil-yedekli-otomatik-mama-makinesi-elektrik-kesintisi-secimi/catalog-v348.js' \
+            'alo186/amazon-elektrik-urunleri/pil-yedekli-otomatik-mama-makinesi-elektrik-kesintisi-secimi/app-v348.js' \
+            > /tmp/changed-affiliate-v348.txt
+          python alo186/tests/test_affiliate_scope_policy_v229.py --changed-files /tmp/changed-affiliate-v348.txt
+          python alo186/tests/test_affiliate_route_risk_policy_v265.py
+          node alo186/tests/test_release_manifest.js
+      - name: Canonical production paketi
+        run: |
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-affiliate-v348 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-affiliate-v348
+          test -f /tmp/alo186-affiliate-v348/amazon-elektrik-urunleri/pil-yedekli-otomatik-mama-makinesi-elektrik-kesintisi-secimi/index.html
+          grep -Fq 'https://alo186.com/amazon-elektrik-urunleri/pil-yedekli-otomatik-mama-makinesi-elektrik-kesintisi-secimi/' /tmp/alo186-affiliate-v348/amazon-elektrik-urunleri/pil-yedekli-otomatik-mama-makinesi-elektrik-kesintisi-secimi/index.html
+          grep -Fq 'rel="sponsored nofollow noopener"' /tmp/alo186-affiliate-v348/amazon-elektrik-urunleri/pil-yedekli-otomatik-mama-makinesi-elektrik-kesintisi-secimi/index.html
+          ! grep -Eqi '"@type"[[:space:]]*:[[:space:]]*"Offer"|priceCurrency|aggregateRating|ratingValue|reviewCount|availability' /tmp/alo186-affiliate-v348/amazon-elektrik-urunleri/pil-yedekli-otomatik-mama-makinesi-elektrik-kesintisi-secimi/index.html
