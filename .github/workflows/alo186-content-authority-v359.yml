@@ -1,0 +1,86 @@
+name: ALO186 content authority UPS Riso PE v359
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/ups-elektrik-var-ama-akuden-calisiyor/**'
+      - 'alo186/haberler/ges-inverter-izolasyon-hatasi-riso-low/**'
+      - 'alo186/haberler/toprak-hattinda-akim-var-kacak-akim-neden/**'
+      - 'alo186/deployment/routing-overlays/content-authority-ups-riso-pe-v359.json'
+      - 'alo186/tests/test_content_authority_v359.py'
+      - '.github/workflows/alo186-content-authority-v359.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/ups-elektrik-var-ama-akuden-calisiyor/**'
+      - 'alo186/haberler/ges-inverter-izolasyon-hatasi-riso-low/**'
+      - 'alo186/haberler/toprak-hattinda-akim-var-kacak-akim-neden/**'
+      - 'alo186/deployment/routing-overlays/content-authority-ups-riso-pe-v359.json'
+      - 'alo186/tests/test_content_authority_v359.py'
+      - '.github/workflows/alo186-content-authority-v359.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-content-authority-v359-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: v359 AEO trust and commerce checks
+        run: python alo186/tests/test_content_authority_v359.py
+      - name: Global content intent collision guard
+        run: python alo186/tests/test_content_intent_consolidation.py
+      - name: Canonical production build and smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-content-authority-v359
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-content-authority-v359 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-content-authority-v359
+      - name: Verify production routes sitemap schema and commercial closure
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path('/tmp/alo186-content-authority-v359')
+          routes = [
+              '/haberler/ups-elektrik-var-ama-akuden-calisiyor/',
+              '/haberler/ges-inverter-izolasyon-hatasi-riso-low/',
+              '/haberler/toprak-hattinda-akim-var-kacak-akim-neden/',
+          ]
+          sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
+          release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
+          assert release['routingVersion'] >= 359
+          for route in routes:
+              page = root / route.strip('/') / 'index.html'
+              assert page.is_file(), page
+              html = page.read_text(encoding='utf-8')
+              lowered = html.lower()
+              assert f'https://alo186.com{route}' in sitemap
+              assert f'<link rel="canonical" href="https://alo186.com{route}">' in html
+              assert 'amazon.com.tr' not in lowered
+              assert 'pricecurrency' not in lowered
+              for schema in ('"@type":"Article"', '"@type":"FAQPage"', '"@type":"BreadcrumbList"'):
+                  assert schema in html
+              for forbidden in ('"@type":"Product"', '"@type":"Offer"', 'AggregateRating'):
+                  assert forbidden not in html
+          print({'ok': True, 'routingVersion': release['routingVersion'], 'routes': routes, 'merchantLinks': 0})
+          PY
+      - name: Upload verified bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-content-authority-v359-${{ github.sha }}
+          path: /tmp/alo186-content-authority-v359
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
