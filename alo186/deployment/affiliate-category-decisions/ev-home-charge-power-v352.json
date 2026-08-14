@@ -1,0 +1,34 @@
+{
+  "version": 352,
+  "route": "/hesaplama/ev-sarj-gucu-suresi-elektrik-altyapi-uygunluk/",
+  "category": "AC EVSE / wallbox",
+  "amazonMarketplace": "amazon.com.tr",
+  "affiliateTag": "alo186rehber-21",
+  "defaultDecision": "closed",
+  "allowedOnlyWhen": [
+    "private single-user home scenario",
+    "target charging duration is feasible with vehicle and professionally verified installation",
+    "vehicle, connector, EVSE and installation evidence is verified",
+    "dedicated circuit, protective-device coordination, EV residual-current protection and PE/earth are professionally verified",
+    "commissioning and real charging test pass",
+    "no damage, abnormal heating or recurring protective-device trip",
+    "no extension, multi-socket or adapter chain",
+    "no unresolved load-management requirement",
+    "no PV/ESS/V2H/V2G or bidirectional system",
+    "existing safe solution is not already adequate",
+    "three explicit affiliate confirmations are completed"
+  ],
+  "alwaysClosedFor": [
+    "apartment/shared parking",
+    "hotel, workplace, fleet or commercial charging",
+    "recurring MCB/RCD/RCBO trip",
+    "damage, water exposure, burning smell or abnormal heat",
+    "unverified PE/earthing or EV residual-current protection",
+    "extension, multi-socket or general adapter use",
+    "PV, ESS, V2H, V2G or bidirectional energy system",
+    "existing safe solution already meets the target"
+  ],
+  "linkContract": "dynamic only after result + three confirmations; rel=sponsored nofollow noopener",
+  "claimsForbidden": ["price", "stock", "rating", "delivery", "warranty", "merchant listing eligibility"],
+  "sizingPolicy": "calculator never selects cable cross-section or protective-device rating"
+}
