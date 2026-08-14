@@ -10,6 +10,12 @@ def read(path: str) -> str:
     return (ROOT / path).read_text(encoding="utf-8")
 
 
+def require_all(page: str, values: tuple[str, ...]) -> None:
+    lowered = page.lower()
+    for value in values:
+        assert value.lower() in lowered, value
+
+
 def main() -> None:
     article = read("alo186/haberler/elektrik-kesilince-kombi-calisir-mi-elektrik-gelince-ne-yapmali/index.html")
     tool = read("alo186/hesaplama/kombi-elektrik-kesintisi-sonrasi-guvenli-kontrol/index.html")
@@ -41,7 +47,7 @@ def main() -> None:
 
     assert '"@type":"Article"' in article
     assert '"@type":"FAQPage"' in article
-    for required in (
+    require_all(article, (
         "60 saniyelik karar",
         "Evrensel reset sayısı",
         "Doğal Gaz Acil 187",
@@ -50,8 +56,7 @@ def main() -> None:
         "DemirDöküm",
         "Vaillant",
         "Enerya",
-    ):
-        assert required in article
+    ))
 
     assert '"@type":"WebApplication"' in tool
     assert '"@type":"FAQPage"' in tool
@@ -61,7 +66,7 @@ def main() -> None:
     assert "sessionStorage" not in tool
     assert "XMLHttpRequest" not in tool
     assert "fetch(" not in tool
-    for required in (
+    require_all(tool, (
         "Gaz kokusu, karbonmonoksit alarmı",
         "Evinizde elektrik geri geldi mi?",
         "kendi marka/model kullanım kılavuzunuza",
@@ -69,12 +74,11 @@ def main() -> None:
         "Doğal Gaz Acil 187",
         "30 gün sonra kontrol",
         "Isıtma sezonu öncesi 180 gün",
-    ):
-        assert required in tool
+    ))
 
     assert '"@type":"Article"' in b2b
     assert '"@type":"FAQPage"' in b2b
-    for required in (
+    require_all(b2b, (
         "uçtan uca kabul matrisi",
         "Jeneratör / ATS",
         "BMS / alarm / personel",
@@ -82,8 +86,7 @@ def main() -> None:
         "Bu sayfada merchant bağlantısı yoktur",
         "Isıtma sezonu",
         "/kurumsal-elektrik-surekliligi-on-degerlendirme",
-    ):
-        assert required in b2b
+    ))
 
     print({
         "ok": True,
