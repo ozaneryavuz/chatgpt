@@ -84,7 +84,7 @@ def main() -> None:
         "BMS / alarm / personel",
         "Professional-only gelir modeli",
         "Bu sayfada merchant bağlantısı yoktur",
-        "Isıtma sezonu",
+        "ısıtma sezonu",
         "/kurumsal-elektrik-surekliligi-on-degerlendirme",
     ))
 
