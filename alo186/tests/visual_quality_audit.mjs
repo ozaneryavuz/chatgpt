@@ -107,12 +107,13 @@ for (const viewport of viewports) {
         altPresent: image.hasAttribute('alt'),
       }));
       const badImages = images.filter(image => !image.complete || image.naturalWidth <= 0 || !image.altPresent);
-      const interactives = [...document.querySelectorAll('a[href],button,input,select,textarea,summary,[role="button"]')].filter(visible).map(element => {
+      const allInteractives = [...document.querySelectorAll('a[href],button,input,select,textarea,summary,[role="button"]')].filter(visible).map(element => {
         const rect = element.getBoundingClientRect();
         const style = getComputedStyle(element);
         return { element, rect, style, selector: selector(element) };
-      }).filter(item => item.rect.bottom > 0 && item.rect.top < innerHeight && item.rect.right > 0 && item.rect.left < innerWidth);
-      const smallTargets = interactives.filter(item => {
+      });
+      const interactives = allInteractives.filter(item => item.rect.bottom > 0 && item.rect.top < innerHeight && item.rect.right > 0 && item.rect.left < innerWidth);
+      const smallTargets = allInteractives.filter(item => {
         if (item.element.matches('input[type="checkbox"],input[type="radio"],input[type="hidden"]')) return false;
         if (item.element.matches('a[href]') && item.style.display === 'inline') return false;
         return item.rect.width < 44 || item.rect.height < 44;
@@ -120,8 +121,9 @@ for (const viewport of viewports) {
         selector: item.selector,
         width: Number(item.rect.width.toFixed(1)),
         height: Number(item.rect.height.toFixed(1)),
+        top: Number(item.rect.top.toFixed(1)),
         text: (item.element.textContent || item.element.getAttribute('aria-label') || '').trim().slice(0, 100),
-      })).slice(0, 30);
+      })).slice(0, 60);
       const readabilitySelector = [
         '.amazon-intent-card small',
         '[class*="heroProof"] span',
@@ -170,6 +172,9 @@ for (const viewport of viewports) {
         mainCount: document.querySelectorAll('main').length,
         documentOverflow,
         overflowElements,
+        interactiveCount: allInteractives.length,
+        viewportInteractiveCount: interactives.length,
+        touchTargetAuditScope: 'full-document',
         smallTargets,
         smallText,
         undersizedMobileControls,
