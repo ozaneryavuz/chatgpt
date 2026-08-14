@@ -14,13 +14,13 @@ def main() -> None:
     pages = {
         "rcd": read("alo186/haberler/yagmurda-kacak-akim-rolesi-atiyor-nem-izolasyon-arizasi/index.html"),
         "evrain": read("alo186/haberler/yagmurda-elektrikli-arac-sarj-edilir-mi-su-girisi/index.html"),
-        "meter": read("alo186/haberler/elektrik-sayaci-ekrani-kapali-arizali-ne-yapmali/index.html"),
+        "inverter": read("alo186/haberler/inverter-yuk-baglayinca-kapaniyor-overload-low-battery/index.html"),
     }
     routing = json.loads(read("alo186/deployment/routing-overlays/content-authority-weather-meter-v357.json"))
     expected = {
         "/haberler/yagmurda-kacak-akim-rolesi-atiyor-nem-izolasyon-arizasi/",
         "/haberler/yagmurda-elektrikli-arac-sarj-edilir-mi-su-girisi/",
-        "/haberler/elektrik-sayaci-ekrani-kapali-arizali-ne-yapmali/",
+        "/haberler/inverter-yuk-baglayinca-kapaniyor-overload-low-battery/",
     }
 
     assert routing["version"] == 357
@@ -68,17 +68,17 @@ def main() -> None:
     ):
         assert required in evrain
 
-    meter = pages["meter"]
+    inverter = pages["inverter"]
     for required in (
-        "mühür",
-        "dağıtım şirketi",
-        "sayaç kontrolü",
-        "Madde 51",
-        "/haberler/elektrik-sayaci-nasil-okunur-t0-t1-t2-t3-endeks/",
-        "/fatura-ve-sayac-kontrol-merkezi/",
-        "Kontrol sonucu gelmeden",
+        "overload",
+        "low battery",
+        "DC ripple",
+        "motor ve pompa",
+        "kalkış/inrush",
+        "/haberler/inverter-eps-backup-notr-toprak-rcd-kabul-testi",
+        "yeni inverter satın almak yerine",
     ):
-        assert required in meter
+        assert required in inverter
 
     print({
         "ok": True,
@@ -86,7 +86,7 @@ def main() -> None:
         "routes": 3,
         "merchantLinks": 0,
         "schemas": ["Article", "FAQPage", "BreadcrumbList"],
-        "policy": "weather-event / no-buy-first / official-process-first",
+        "policy": "weather-event / no-buy-first / measured-root-cause-first",
     })
 
 
