@@ -1,0 +1,53 @@
+{
+  "version": 346,
+  "generatedAt": "2026-08-14",
+  "topic": "surge-protective-device-risk-and-suitability",
+  "canonicalTool": "/hesaplama/parafudr-risk-testi/",
+  "principle": "fixed-panel-SPD-is-professional-only; affiliate-may-open-only-for-downstream-Type-3-after-verified-upstream-protection",
+  "amazonMarket": "amazon.com.tr",
+  "associateTag": "alo186rehber-21",
+  "fixedPanelAffiliateAllowed": false,
+  "affiliateMayOpenOnlyWhen": [
+    "no-active-smoke-spark-shock-water-or-panel-damage",
+    "no-active-thunderstorm-intervention",
+    "home-or-small-office-use",
+    "no-PV-EV-storage-or-special-data-protection-design",
+    "earthing-and-equipotential-bonding-verified",
+    "upstream-Type-2-or-required-Type-1-plus-2-is-verified",
+    "existing-upstream-SPD-indicator-and-inspection-evidence-is-valid",
+    "need-is-only-downstream-Type-3-sensitive-device-protection",
+    "user-confirms-need-spec-recheck-and-affiliate-disclosure"
+  ],
+  "professionalOnly": [
+    "Type-1",
+    "Type-1-plus-2",
+    "Type-2",
+    "Type-2-plus-3-fixed-panel",
+    "three-phase-SPD",
+    "PV-DC-SPD",
+    "EV-charging-SPD",
+    "storage-system-SPD",
+    "data-anten-telecom-SPD-coordination",
+    "earthing-or-equipotential-remediation",
+    "backup-fuse-MCB-short-circuit-coordination",
+    "panel-opening-or-installation"
+  ],
+  "allowedAffiliateClass": "downstream-Type-3-device-near-surge-protection-only",
+  "mustNotClaim": [
+    "overhead-supply-alone-means-Type-1-is-mandatory",
+    "Type-1-is-simply-better-than-Type-2",
+    "Type-3-replaces-upstream-SPD",
+    "SPD-fixes-sustained-overvoltage-or-undervoltage",
+    "a-kA-number-alone-proves-suitability",
+    "an-Amazon-listing-title-proves-IEC-EN-61643-11-compliance",
+    "unverified-price-stock-rating-warranty-or-availability"
+  ],
+  "noBuyWhen": [
+    "required-upstream-SPD-type-is-already-installed",
+    "status-indicator-is-healthy",
+    "technical-documentation-is-verified",
+    "earthing-is-verified",
+    "professional-inspection-passes",
+    "no-additional-sensitive-device-layer-is-needed"
+  ]
+}
