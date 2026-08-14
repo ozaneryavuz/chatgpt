@@ -1,0 +1,72 @@
+name: ALO186 device energy trust growth v357
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/klima-ne-kadar-elektrik-harcar-kwh-hesaplama/**'
+      - 'alo186/hesaplama/cihaz-elektrik-tuketimi-kwh-hesaplama/**'
+      - 'alo186/fatura-ve-sayac-kontrol-merkezi/**'
+      - 'alo186/deployment/routing-overlays/device-energy-growth-v357.json'
+      - 'alo186/tests/test_device_energy_growth_v357.py'
+      - '.github/workflows/alo186-device-energy-growth-v357.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/klima-ne-kadar-elektrik-harcar-kwh-hesaplama/**'
+      - 'alo186/hesaplama/cihaz-elektrik-tuketimi-kwh-hesaplama/**'
+      - 'alo186/fatura-ve-sayac-kontrol-merkezi/**'
+      - 'alo186/deployment/routing-overlays/device-energy-growth-v357.json'
+      - 'alo186/tests/test_device_energy_growth_v357.py'
+      - '.github/workflows/alo186-device-energy-growth-v357.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-device-energy-v357-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Device energy trust privacy and no-commerce checks
+        run: python alo186/tests/test_device_energy_growth_v357.py
+      - name: Global content intent collision guard
+        run: python alo186/tests/test_content_intent_consolidation.py
+      - name: Canonical production build and smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-device-energy-v357
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-device-energy-v357 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-device-energy-v357
+      - name: Verify routes sitemap schemas and merchant closure
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/alo186-device-energy-v357')
+          routes = [
+              ('/haberler/klima-ne-kadar-elektrik-harcar-kwh-hesaplama/', 'Article'),
+              ('/hesaplama/cihaz-elektrik-tuketimi-kwh-hesaplama/', 'WebApplication'),
+          ]
+          sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
+          release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
+          assert release['routingVersion'] >= 357
+          for route, schema in routes:
+              page = root / route.strip('/') / 'index.html'
+              assert page.is_file(), page
+              html = page.read_text(encoding='utf-8')
+              assert f'https://alo186.com{route}' in sitemap
+              assert f'<link rel="canonical" href="https://alo186.com{route}">' in html
+              assert f'"@type":"{schema}"' in html
+              assert 'amazon.com.tr' not in html.lower()
+              assert '"@type":"Offer"' not in html
+          print({'ok': True, 'routingVersion': release['routingVersion'], 'routes': [r[0] for r in routes], 'merchantLinks': 0})
+          PY
