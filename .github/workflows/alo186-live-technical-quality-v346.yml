@@ -1,0 +1,96 @@
+name: ALO186 live technical quality v346
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/robots.txt'
+      - 'alo186/deployment/apache-production.htaccess'
+      - 'alo186/deployment/build_static_site.py'
+      - 'alo186/deployment/build_static_site_core.py'
+      - 'alo186/deployment/prepare_github_pages.py'
+      - 'alo186/deployment/prepare_github_pages_core.py'
+      - 'alo186/deployment/finalize_live_quality.py'
+      - 'alo186/tests/test_live_technical_quality_v346.py'
+      - '.github/workflows/alo186-live-technical-quality-v346.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/robots.txt'
+      - 'alo186/deployment/apache-production.htaccess'
+      - 'alo186/deployment/build_static_site.py'
+      - 'alo186/deployment/build_static_site_core.py'
+      - 'alo186/deployment/prepare_github_pages.py'
+      - 'alo186/deployment/prepare_github_pages_core.py'
+      - 'alo186/deployment/finalize_live_quality.py'
+      - 'alo186/tests/test_live_technical_quality_v346.py'
+      - '.github/workflows/alo186-live-technical-quality-v346.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-live-technical-quality-v346-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Canonical sitemap and intent-preserving redirect contract
+        run: python alo186/tests/test_live_technical_quality_v346.py
+
+      - name: Existing legal and production safety guard
+        run: python alo186/tests/device_damage_deadline_guard.py
+
+      - name: Canonical production build and broken-route smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-live-quality-v346
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-live-quality-v346 \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-live-quality-v346
+
+      - name: Custom-domain and project-path regression
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-pages-custom /tmp/alo186-pages-project
+          cp -a /tmp/alo186-live-quality-v346 /tmp/alo186-pages-custom
+          cp -a /tmp/alo186-live-quality-v346 /tmp/alo186-pages-project
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-pages-custom \
+            --base-path '' \
+            --repository ozaneryavuz/chatgpt \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-pages-custom \
+            --base-path ''
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-pages-project \
+            --base-path '/chatgpt' \
+            --repository ozaneryavuz/chatgpt \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_github_pages.py \
+            --site /tmp/alo186-pages-project \
+            --base-path '/chatgpt'
+
+      - name: Verify no new personal-data or unofficial-contact surface
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          target = Path('/tmp/alo186-pages-custom/kurumsal-elektrik-surekliligi-on-degerlendirme/index.html')
+          text = target.read_text(encoding='utf-8').casefold()
+          forbidden = ('type="email"', 'type="tel"', 'name="email"', 'name="phone"', 'name="address"', 'name="tc"', 'name="tckn"')
+          assert not [token for token in forbidden if token in text]
+          assert 'kişisel veri' in text
+          assert 'kamu kurumu değildir' in text or 'resmî kurum' in text
+          print({'ok': True, 'personalDataFieldsAdded': 0, 'officialAffiliationClaimed': False})
+          PY
