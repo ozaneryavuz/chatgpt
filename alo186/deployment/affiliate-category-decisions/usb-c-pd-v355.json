@@ -1,0 +1,48 @@
+{
+  "version": 355,
+  "routes": [
+    "/haberler/usb-c-kablo-kac-watt-60w-240w-pd-farki/",
+    "/hesaplama/usb-c-pd-sarj-kablo-uygunluk/"
+  ],
+  "category": "USB-C PD chargers and USB-C to USB-C power cables",
+  "amazonMarketplace": "amazon.com.tr",
+  "affiliateTag": "alo186rehber-21",
+  "defaultDecision": "closed",
+  "commercialSurface": "calculator only, dynamic after result and three confirmations",
+  "allowedOnlyWhen": [
+    "non-critical consumer device",
+    "device input power is verified from manufacturer/model documentation",
+    "charger single-port output and required USB PD/PPS support are verified",
+    "cable power capability is verified from cable/packaging/manufacturer documentation",
+    "no abnormal heat, melting, discoloration, looseness, smell or liquid exposure",
+    "existing safe solution does not already meet the user's need",
+    "tool identifies a real charger, cable or combined equipment gap",
+    "three explicit affiliate confirmations are completed"
+  ],
+  "alwaysClosedFor": [
+    "medical or life-safety use",
+    "damaged or abnormally hot cable, connector, charger or receptacle",
+    "unknown cable power capability",
+    "unverified device or charger documentation",
+    "existing safe solution already meets the target",
+    "fixed electrical installation work"
+  ],
+  "noBuyRule": "if the existing safe charger and cable already meet the verified device target, recommend no purchase",
+  "linkContract": "Amazon Türkiye search link generated only after qualified result plus three confirmations; rel=sponsored nofollow noopener",
+  "claimsForbidden": [
+    "price",
+    "stock",
+    "rating",
+    "review score",
+    "seller",
+    "delivery",
+    "warranty",
+    "charge-time guarantee",
+    "unverified USB-IF certification"
+  ],
+  "standardsNotes": [
+    "USB-IF USB Power Delivery supports up to 240W with appropriate USB Type-C cable and connector",
+    "USB-IF compliance program uses 60W or 240W power marking for USB-C to USB-C cables",
+    "EU Regulation 2025/2052 USB-C cable marking requirements apply from 14 December 2028"
+  ]
+}
