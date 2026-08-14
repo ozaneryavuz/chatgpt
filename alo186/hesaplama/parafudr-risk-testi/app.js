@@ -6,194 +6,204 @@
   'use strict';
 
   const WEIGHTS = Object.freeze({
-    lps: { yes: 35, no: 0, unknown: 12 },
-    supply: { overhead: 22, mixed: 14, underground: 3, unknown: 10 },
-    events: { frequent: 18, occasional: 10, rare: 2, unknown: 7 },
-    sensitive: { many: 14, some: 8, none: 1 },
-    existing: { none: 18, unknown: 12, type3: 12, type2: 4, type12: 0 },
-    distance: { over10: 8, under10: 1, unknown: 4 },
-    earthing: { verified: 0, old: 6, unknown: 7 },
-    damage: { yes: 15, no: 0, unknown: 3 }
+    lps: { yes: 34, no: 0, unknown: 12 },
+    supply: { overhead: 18, mixed: 12, underground: 2, unknown: 8 },
+    events: { frequent: 16, occasional: 8, rare: 1, unknown: 6 },
+    sensitive: { many: 12, some: 6, none: 0 },
+    existing: { none: 15, unknown: 10, type3: 12, type2: 3, type12: 0 },
+    distance: { over10: 6, under10: 0, unknown: 3 },
+    earthing: { verified: 0, old: 7, failed: 14, unknown: 9 },
+    damage: { yes: 14, no: 0, unknown: 3 }
   });
 
-  const MAX_SCORE = Object.values(WEIGHTS).reduce((total, group) => {
-    return total + Math.max.apply(null, Object.values(group));
-  }, 0);
-
-  function clamp(value, min, max) {
-    return Math.min(Math.max(value, min), max);
-  }
+  const MAX_SCORE = Object.values(WEIGHTS).reduce((sum, group) => sum + Math.max(...Object.values(group)), 0);
+  const FIXED_TYPES = new Set(['type1', 'type12', 'type2', 'type23']);
+  const valid = (group, value, fallback) => Object.prototype.hasOwnProperty.call(WEIGHTS[group], value) ? value : fallback;
+  const uniq = (items) => Array.from(new Set(items));
 
   function normalizeAnswers(raw) {
-    const source = raw || {};
-    const valid = (group, fallback) => {
-      const value = source[group];
-      return Object.prototype.hasOwnProperty.call(WEIGHTS[group], value) ? value : fallback;
-    };
+    const s = raw || {};
     return {
-      lps: valid('lps', 'unknown'),
-      supply: valid('supply', 'unknown'),
-      events: valid('events', 'unknown'),
-      sensitive: valid('sensitive', 'some'),
-      existing: valid('existing', 'unknown'),
-      distance: valid('distance', 'unknown'),
-      earthing: valid('earthing', 'unknown'),
-      damage: valid('damage', 'unknown')
+      emergency: Boolean(s.emergency),
+      activeStorm: s.activeStorm || 'no',
+      useCase: s.useCase || 'home',
+      specialSystem: s.specialSystem || 'no',
+      phase: s.phase || 'single',
+      lps: valid('lps', s.lps, 'unknown'),
+      supply: valid('supply', s.supply, 'unknown'),
+      events: valid('events', s.events, 'unknown'),
+      sensitive: valid('sensitive', s.sensitive, 'some'),
+      existing: valid('existing', s.existing, 'unknown'),
+      indicator: s.indicator || 'unknown',
+      documentation: s.documentation || 'unknown',
+      inspection: s.inspection || 'unknown',
+      distance: valid('distance', s.distance, 'unknown'),
+      earthing: valid('earthing', s.earthing, 'unknown'),
+      damage: valid('damage', s.damage, 'unknown'),
+      candidateType: s.candidateType || 'none',
+      candidateStandard: s.candidateStandard || 'unknown',
+      candidateSystemMatch: s.candidateSystemMatch || 'unknown',
+      candidateCoordination: s.candidateCoordination || 'unknown',
+      confirmNeed: Boolean(s.confirmNeed),
+      confirmSpecs: Boolean(s.confirmSpecs),
+      confirmAffiliate: Boolean(s.confirmAffiliate)
     };
   }
 
   function calculateScore(raw) {
-    const answers = normalizeAnswers(raw);
-    const rawScore = Object.keys(answers).reduce((total, key) => total + WEIGHTS[key][answers[key]], 0);
-    const score = Math.round((rawScore / MAX_SCORE) * 100);
-    return { answers, rawScore, score: clamp(score, 0, 100) };
+    const a = normalizeAnswers(raw);
+    const keys = ['lps', 'supply', 'events', 'sensitive', 'existing', 'distance', 'earthing', 'damage'];
+    const rawScore = keys.reduce((sum, key) => sum + WEIGHTS[key][a[key]], 0);
+    return { answers: a, rawScore, score: Math.max(0, Math.min(100, Math.round(rawScore / MAX_SCORE * 100))) };
   }
 
   function classify(score) {
-    if (score >= 66) return { key: 'critical', label: 'Yüksek öncelik', css: 'bad' };
-    if (score >= 36) return { key: 'elevated', label: 'Orta–yüksek öncelik', css: 'warn' };
-    return { key: 'review', label: 'Temel kontrol önerilir', css: 'ok' };
-  }
-
-  function dedupe(items) {
-    return Array.from(new Set(items));
+    if (score >= 65) return { key: 'high', label: 'Yüksek öncelik', css: 'bad' };
+    if (score >= 35) return { key: 'medium', label: 'Orta öncelik', css: 'warn' };
+    return { key: 'review', label: 'Temel kontrol', css: 'ok' };
   }
 
   function buildRecommendation(raw) {
-    const result = calculateScore(raw);
-    const a = result.answers;
-    const level = classify(result.score);
+    const base = calculateScore(raw);
+    const a = base.answers;
+    const level = classify(base.score);
+    const stops = [];
+    const professional = [];
+    const evidence = [];
     const layers = [];
     const reasons = [];
-    const checks = [];
     const warnings = [];
-    const productCategories = [];
+    const strengths = [];
 
-    const type1Need = a.lps === 'yes' || a.supply === 'overhead' || (a.events === 'frequent' && a.damage === 'yes');
-    const type2Need = a.existing === 'none' || a.existing === 'unknown' || a.existing === 'type3' || a.events !== 'rare' || a.sensitive !== 'none';
-    const type3Need = a.sensitive === 'many' || a.distance === 'over10' || a.damage === 'yes';
+    if (a.emergency) stops.push('Duman, erime, su teması, elektrik çarpması veya aktif kıvılcım riski varsa ürün seçmeyin; güvenli alana geçin, yangın/yaralanmada 112 önceliklidir.');
+    if (a.activeStorm === 'yes') stops.push('Aktif gök gürültülü fırtına sırasında pano açmayın, SPD değiştirmeyin veya bağlantıya müdahale etmeyin. Değerlendirmeyi fırtına geçtikten sonra yetkili elektrikçiyle sürdürün.');
+    if (a.earthing === 'failed') stops.push('Topraklama/eşpotansiyel kontrolde uygunsuzluk var. SPD satın almadan önce tesisat kusuru giderilmelidir.');
+    if (a.indicator === 'failed') professional.push('Mevcut SPD durum göstergesi ömür sonu/arıza işareti veriyor. Ürün sınıfını büyütmek yerine aynı sistem için üretici talimatına göre profesyonel değişim gerekir.');
+
+    if (a.useCase !== 'home') professional.push('Ticari, ortak pano veya kritik tesiste yıldırım risk analizi, seçicilik ve SPD koordinasyonu projelendirilmelidir.');
+    if (a.specialSystem === 'yes') professional.push('PV, EV şarj, enerji depolama veya veri/anten hattı varsa AC pano SPD seçimi tek başına yeterli değildir; ilgili AC/DC/data koruma mimarisi birlikte projelendirilmelidir.');
+    if (a.phase === 'three') professional.push('Trifaze sistemde şebeke/topraklama düzeni, kutup sayısı, Uc ve kısa devre koordinasyonu saha verisiyle doğrulanmalıdır.');
+    if (a.phase === 'unknown') evidence.push('Faz ve şebeke/topraklama düzeni bilinmiyor; ürün kutup ve Uc seçimi güvenle yapılamaz.');
+    if (a.earthing !== 'verified') evidence.push('Topraklama ve eşpotansiyel bağlantı güncel ölçümle doğrulanmadı.');
+
+    const type1Need = a.lps === 'yes';
+    const upstreamAdequate = type1Need ? a.existing === 'type12' : ['type2', 'type12'].includes(a.existing);
+    const type2Need = !upstreamAdequate;
+    const type3Useful = a.sensitive === 'many' && upstreamAdequate;
 
     if (type1Need) {
-      layers.push('Ana girişte Tip 1 veya Tip 1+2 SPD uygunluğu profesyonel olarak değerlendirilmeli.');
-      productCategories.push('Tip 1+2 parafudr');
+      layers.push('Dış yıldırımlık/LPS bulunan yapıda giriş kademesinde Tip 1 veya kombine Tip 1+2 SPD profesyonel olarak doğrulanmalıdır.');
+      reasons.push('Dış yıldırımlık/LPS, yıldırım akımının tesis girişinde yönetilmesini gerektiren ana göstergedir.');
+    } else {
+      layers.push('Tipik konut dağıtım panosunda Tip 2 SPD, transient aşırı gerilim için ana pano koruma katmanı olarak değerlendirilir.');
     }
-    if (type2Need) {
-      layers.push('Ana veya tali dağıtım panosunda Tip 2 SPD ve üreticiye uygun yedek koruma/koordinasyon kontrol edilmeli.');
-      productCategories.push('Tip 2 parafudr');
+    if (a.supply === 'overhead' || a.supply === 'mixed') reasons.push('Havai veya karma besleme atmosferik transient maruziyetini artırabilir; bu tek başına Tip 1 seçimi anlamına gelmez, risk değerlendirmesini yükseltir.');
+    if (a.events === 'frequent') reasons.push('Sık yıldırım veya gerilim darbesi gözlemi koruma ve bakım önceliğini artırır.');
+    if (a.damage === 'yes') reasons.push('Geçmiş cihaz hasarı mevcut koruma, topraklama ve koordinasyonun yeniden incelenmesini gerektirir.');
+    if (a.existing === 'type3') warnings.push('Yalnız priz tipi/Tip 3 ürün, panodaki Tip 2 veya gerekli Tip 1+2 katmanının yerine geçmez.');
+    if (a.existing === 'unknown') evidence.push('Mevcut panodaki SPD tipi ve etiket değerleri bilinmiyor.');
+    if (a.documentation !== 'verified' && a.existing !== 'none') evidence.push('Mevcut SPD için tam model teknik belge ve IEC/EN 61643-11 uygunluk beyanı doğrulanmadı.');
+    if (a.inspection !== 'pass' && a.existing !== 'none') evidence.push('Mevcut SPD, yedek koruma ve bağlantı düzeni yetkili kontrolde doğrulanmadı.');
+    if (a.indicator === 'unknown' && a.existing !== 'none') evidence.push('Mevcut SPD durum göstergesi/ömür sonu bilgisi doğrulanmadı.');
+    if (a.distance === 'over10') warnings.push('Ana pano ile hassas yük arasındaki uzun hat, ikinci dağıtım kademesi veya cihaz yakınında ek koordinasyon ihtiyacını artırabilir; Tip 3 kararı otomatik verilmez.');
+
+    if (type2Need && !type1Need) layers.push('Mevcut üst kademe doğrulanmadığı için Tip 2 SPD sınıfı, yetkili elektrikçi tarafından şebeke sistemi ve üretici koordinasyonuyla seçilmelidir.');
+    if (type3Useful) layers.push('Üst kademe SPD doğrulanmışsa hassas elektronikler için cihaz yakınında Tip 3 ek koruma değerlendirilebilir; tek başına bina koruması sayılmaz.');
+
+    const candidate = a.candidateType;
+    const candidateMismatch = [];
+    if (candidate !== 'none') {
+      if (type1Need && !['type1', 'type12'].includes(candidate)) candidateMismatch.push('Bu yapıda LPS nedeniyle Tip 1 kapasitesi gereken giriş katmanını aday ürün karşılamıyor.');
+      if (!type1Need && candidate === 'type1') warnings.push('Tip 1 “daha iyi Tip 2” değildir; seçim gerçek yıldırım akımı senaryosu ve koordinasyona göre yapılır.');
+      if (candidate === 'type3' && !upstreamAdequate) candidateMismatch.push('Tip 3 aday ürünün önünde doğrulanmış Tip 2 veya Tip 1+2 katmanı yok.');
+      if (FIXED_TYPES.has(candidate) && a.candidateSystemMatch !== 'verified') evidence.push('Aday sabit SPD’nin faz/topraklama sistemi, kutup düzeni ve Uc uyumu üretici belgesiyle doğrulanmadı.');
+      if (FIXED_TYPES.has(candidate) && a.candidateCoordination !== 'verified') evidence.push('Aday sabit SPD’nin yedek sigorta/MCB ve kısa devre koordinasyonu üretici tablosuyla doğrulanmadı.');
+      if (a.candidateStandard !== 'verified') evidence.push('Aday ürünün IEC/EN 61643-11 uygunluk beyanı doğrulanmadı.');
     }
-    if (type3Need) {
-      layers.push('Hassas cihazlara yakın noktada, üst kademe korumayı tamamlayan Tip 3 koruma değerlendirilebilir.');
-      productCategories.push('Tip 3 cihaz koruyucu');
+    evidence.push(...candidateMismatch);
+
+    const existingPass = upstreamAdequate && a.indicator === 'ok' && a.documentation === 'verified' && a.inspection === 'pass' && a.earthing === 'verified';
+    if (existingPass) strengths.push('Mevcut üst kademe SPD tipi, durum göstergesi, teknik belge, topraklama ve yetkili kontrol kanıtı mevcut.');
+
+    let status = 'recommend';
+    let headline = type1Need ? 'Tip 1+2 giriş korumasını profesyonel olarak doğrulayın' : 'Tip 2 pano korumasını profesyonel olarak doğrulayın';
+    if (stops.length) {
+      status = 'stop'; headline = 'Önce can ve tesisat güvenliği';
+    } else if (professional.length) {
+      status = 'professional'; headline = 'Tek ürün yerine profesyonel SPD mimarisi gerekli';
+    } else if (existingPass && !type3Useful && a.damage !== 'yes') {
+      status = 'no-buy'; headline = 'Mevcut üst kademe koruma yeterli — yeni SPD almayın';
+    } else if (candidateMismatch.length || a.phase === 'unknown' || a.earthing !== 'verified') {
+      status = 'evidence'; headline = 'Ürün seçmeden önce eksik teknik kanıtları tamamlayın';
+    } else if (existingPass && type3Useful) {
+      status = 'downstream'; headline = 'Üst kademe yeterli; yalnız hassas cihaz için Tip 3 ek korumayı değerlendirin';
     }
 
-    if (a.lps === 'yes') reasons.push('Binada dış yıldırımlık/paratoner sistemi bulunması, yıldırım akımının girişte yönetilmesini önemli hâle getirir.');
-    if (a.supply === 'overhead') reasons.push('Havai besleme hattı, atmosferik geçici aşırı gerilimlere maruziyeti artırabilir.');
-    if (a.events === 'frequent') reasons.push('Sık yıldırım veya gerilim olayı bildirimi risk puanını yükseltti.');
-    if (a.damage === 'yes') reasons.push('Daha önce cihaz hasarı yaşanması, mevcut koruma düzeninin incelenmesini önceliklendirir.');
-    if (a.sensitive === 'many') reasons.push('Çok sayıda hassas veya yüksek değerli elektronik cihaz bulunuyor.');
-    if (a.existing === 'none') reasons.push('Panoda bilinen bir SPD bulunmuyor.');
-    if (a.existing === 'unknown') reasons.push('Mevcut koruma tipi bilinmediği için pano etiketi ve ürün bilgisi doğrulanmalı.');
-    if (a.distance === 'over10') reasons.push('Ana pano ile hassas yük arasındaki mesafe, ek koordineli koruma ihtiyacını artırabilir.');
+    const confirmations = Boolean(a.confirmNeed && a.confirmSpecs && a.confirmAffiliate);
+    const affiliateAllowed = status === 'downstream' && confirmations && a.earthing === 'verified' && upstreamAdequate && a.specialSystem === 'no';
 
-    checks.push('Şebeke sistemi (TT/TN/IT), faz sayısı, Uc/Up değerleri ve kutup düzeni cihaz etiketinden/projeden doğrulanmalı.');
-    checks.push('SPD bağlantı iletkenleri mümkün olduğunca kısa tutulmalı; montaj ve yedek koruma üretici talimatına göre yapılmalı.');
-    checks.push('SPD durum göstergesi ve değiştirilebilir kartuşlar periyodik olarak kontrol edilmeli.');
-    checks.push('Enerji, data/telefon, koaksiyel ve dışarıdan gelen metal hatlar birlikte değerlendirilmeden tam koruma varsayılmamalı.');
-
-    if (a.earthing !== 'verified') {
-      checks.push('Topraklama ve eşpotansiyel bağlantılar yetkili uzman tarafından ölçülüp doğrulanmalı.');
-      warnings.push('Topraklama durumu bilinmiyor veya ölçüm eski; yalnız parafudr satın almak tesisat uygunluğunu garanti etmez.');
-    }
-    if (a.existing === 'type12' && level.key === 'review') {
-      layers.push('Mevcut Tip 1+2 korumanın gösterge durumu, koordinasyonu ve bakım kaydı doğrulanmalı; gereksiz ikinci ürün eklenmemeli.');
-    }
-    if (a.existing === 'type2' && type1Need) {
-      warnings.push('Mevcut Tip 2 cihaz, doğrudan yıldırım akımı riski bulunan senaryoda tek başına yeterli kabul edilmemelidir.');
-    }
-    if (a.existing === 'type3') {
-      warnings.push('Priz tipi/Tip 3 koruma, üst kademe Tip 1 veya Tip 2 korumanın yerine geçmez.');
-    }
-
-    warnings.push('Bu sonuç keşif veya proje değildir; pano içinde çalışma yalnız yetkili elektrikçi tarafından, enerjisiz çalışma prosedürüyle yapılmalıdır.');
+    warnings.push('SPD sürekli düşük/yüksek gerilimi düzeltmez; gerilim izleme/regülasyon ve transient koruma farklı işlevlerdir.');
+    warnings.push('Sabit pano SPD montajı, enerjili ölçüm ve bağlantı kullanıcı işi değildir; yetkili elektrikçi ve üretici talimatı gerekir.');
+    warnings.push('IEC 61643-11:2025 güncel AC alçak gerilim SPD ürün standardıdır; ürünün tam model beyanı ve yerel uygulama şartları ayrıca doğrulanmalıdır.');
 
     return {
-      score: result.score,
-      rawScore: result.rawScore,
-      maxScore: MAX_SCORE,
+      score: base.score,
       level,
       answers: a,
-      layers: dedupe(layers),
-      reasons: dedupe(reasons),
-      checks: dedupe(checks),
-      warnings: dedupe(warnings),
-      productCategories: dedupe(productCategories),
+      status,
+      headline,
       type1Need,
       type2Need,
-      type3Need
+      type3Useful,
+      upstreamAdequate,
+      stops: uniq(stops),
+      professional: uniq(professional),
+      evidence: uniq(evidence),
+      layers: uniq(layers),
+      reasons: uniq(reasons),
+      warnings: uniq(warnings),
+      strengths: uniq(strengths),
+      confirmations,
+      affiliateAllowed,
+      affiliateHref: 'https://www.amazon.com.tr/s?k=tip+3+akim+korumali+priz+IEC+61643-11&tag=alo186rehber-21',
+      privacy: 'Form tarayıcıda değerlendirilir; kişisel veri, konum, kalıcı depolama veya ağ isteği kullanılmaz.'
     };
   }
 
   function readForm(form) {
-    const data = new FormData(form);
-    return Object.fromEntries(data.entries());
+    const data = Object.fromEntries(new FormData(form).entries());
+    ['emergency', 'confirmNeed', 'confirmSpecs', 'confirmAffiliate'].forEach((name) => { data[name] = Boolean(form.elements[name] && form.elements[name].checked); });
+    return data;
   }
+  function esc(value) { return String(value).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+  function list(title, items) { return items.length ? `<section><h3>${esc(title)}</h3><ul>${items.map(i => `<li>${esc(i)}</li>`).join('')}</ul></section>` : ''; }
 
-  function escapeHtml(value) {
-    return String(value).replace(/[&<>'"]/g, function (char) {
-      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[char];
-    });
-  }
-
-  function renderList(target, items) {
-    target.innerHTML = items.map(function (item) { return '<li>' + escapeHtml(item) + '</li>'; }).join('');
+  function render(r) {
+    const results = document.getElementById('results');
+    document.getElementById('riskScore').textContent = `${r.score}/100`;
+    const level = document.getElementById('riskLevel'); level.textContent = r.level.label; level.className = `status ${r.level.css}`;
+    const bar = document.getElementById('riskBar'); bar.style.width = `${r.score}%`; bar.setAttribute('aria-valuenow', String(r.score));
+    document.getElementById('resultTitle').textContent = r.headline;
+    document.getElementById('resultBody').innerHTML =
+      list('Önerilen koruma katmanları', r.layers) + list('Olumlu kanıtlar', r.strengths) + list('Önceliği yükselten göstergeler', r.reasons) +
+      list('Önce durdurun', r.stops) + list('Profesyonel tasarım gerektirenler', r.professional) + list('Eksik teknik kanıtlar', r.evidence) + list('Sınırlar', r.warnings);
+    const affiliate = document.getElementById('affiliateAction');
+    if (r.affiliateAllowed) {
+      affiliate.hidden = false;
+      const link = affiliate.querySelector('a'); link.href = r.affiliateHref;
+    } else affiliate.hidden = true;
+    results.classList.remove('hidden'); results.focus();
+    results.scrollIntoView({behavior: 'smooth', block: 'start'});
   }
 
   function init() {
-    const form = document.getElementById('riskForm');
-    if (!form) return;
-
-    const results = document.getElementById('results');
-    const scoreEl = document.getElementById('riskScore');
-    const levelEl = document.getElementById('riskLevel');
-    const bar = document.getElementById('riskBar');
-    const layersEl = document.getElementById('layers');
-    const reasonsEl = document.getElementById('reasons');
-    const checksEl = document.getElementById('checks');
-    const warningsEl = document.getElementById('warnings');
-    const productsEl = document.getElementById('productCategories');
-    const resetBtn = document.getElementById('resetBtn');
-
-    form.addEventListener('submit', function (event) {
-      event.preventDefault();
-      const recommendation = buildRecommendation(readForm(form));
-      scoreEl.textContent = recommendation.score + '/100';
-      levelEl.textContent = recommendation.level.label;
-      levelEl.className = 'status ' + recommendation.level.css;
-      bar.style.width = recommendation.score + '%';
-      bar.setAttribute('aria-valuenow', String(recommendation.score));
-      renderList(layersEl, recommendation.layers);
-      renderList(reasonsEl, recommendation.reasons.length ? recommendation.reasons : ['Belirgin yüksek risk göstergesi seçilmedi; mevcut koruma ve bakım durumu yine de doğrulanmalıdır.']);
-      renderList(checksEl, recommendation.checks);
-      renderList(warningsEl, recommendation.warnings);
-      productsEl.innerHTML = recommendation.productCategories.map(function (category) {
-        return '<div class="category-link">' + escapeHtml(category) + '<span>Teknik kriterleri ürün merkezinde doğrulayın</span></div>';
-      }).join('') || '<p>Bu sonuçta doğrudan ürün yönlendirmesi yapılmadı; önce mevcut tesisat ve SPD durumu doğrulanmalıdır.</p>';
-      results.classList.remove('hidden');
-      results.focus();
-      results.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-
-    resetBtn.addEventListener('click', function () {
-      form.reset();
-      results.classList.add('hidden');
-      document.getElementById('arac').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
+    const form = document.getElementById('riskForm'); if (!form) return;
+    form.addEventListener('submit', e => { e.preventDefault(); render(buildRecommendation(readForm(form))); });
+    document.getElementById('resetBtn').addEventListener('click', () => { form.reset(); document.getElementById('results').classList.add('hidden'); document.getElementById('arac').scrollIntoView({behavior:'smooth'}); });
   }
 
   if (typeof document !== 'undefined') {
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
-    else init();
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
   }
-
   return { WEIGHTS, MAX_SCORE, normalizeAnswers, calculateScore, classify, buildRecommendation };
 });

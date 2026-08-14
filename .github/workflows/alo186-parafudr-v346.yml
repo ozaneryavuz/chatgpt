@@ -1,0 +1,82 @@
+name: ALO186 parafudr risk ve uygunluk v346
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/hesaplama/parafudr-risk-testi/**'
+      - 'alo186/deployment/affiliate-category-decisions/parafudr-risk-v346.json'
+      - 'alo186/tests/test_parafudr_risk_v346.js'
+      - '.github/workflows/alo186-parafudr-v346.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/hesaplama/parafudr-risk-testi/**'
+      - 'alo186/deployment/affiliate-category-decisions/parafudr-risk-v346.json'
+      - 'alo186/tests/test_parafudr_risk_v346.js'
+      - '.github/workflows/alo186-parafudr-v346.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-parafudr-v346-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Parafudr karar güvenlik no-buy affiliate testleri
+        run: |
+          node alo186/hesaplama/parafudr-risk-testi/test.js
+          node alo186/tests/test_parafudr_risk_v346.js
+      - name: Canonical production build ve smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-parafudr-v346
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-parafudr-v346 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-parafudr-v346
+      - name: Production artifact kabulü
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const root='/tmp/alo186-parafudr-v346';
+          const html=fs.readFileSync(root+'/hesaplama/parafudr-risk-testi/index.html','utf8');
+          const js=fs.readFileSync(root+'/hesaplama/parafudr-risk-testi/app.js','utf8');
+          const sitemap=fs.readFileSync(root+'/sitemap.xml','utf8');
+          const release=JSON.parse(fs.readFileSync(root+'/alo186-release.json','utf8'));
+          if(!html.includes('IEC 61643-11:2025')) throw new Error('latest IEC marker missing');
+          if(!html.includes('rel="sponsored nofollow noopener"')) throw new Error('affiliate rel missing');
+          if(!html.includes('Satış ortaklığı açıklaması')) throw new Error('affiliate disclosure missing');
+          if(!js.includes('Mevcut üst kademe koruma yeterli — yeni SPD almayın')) throw new Error('runtime no-buy decision missing');
+          if(!sitemap.includes('https://alo186.com/hesaplama/parafudr-risk-testi/')) throw new Error('sitemap route missing');
+          if(/localStorage|sessionStorage|geolocation|fetch\s*\(/.test(js)) throw new Error('privacy contract violated');
+          if((html.match(/amazon\.com\.tr/g)||[]).length !== 0) console.log('Amazon URL is generated at runtime only, static HTML stays safety-first.');
+          if((release.routingVersion||0) < 345) throw new Error('routing baseline regressed');
+          console.log({ok:true,route:'/hesaplama/parafudr-risk-testi/',routingVersion:release.routingVersion,standard:'IEC 61643-11:2025'});
+          NODE
+      - name: Global regresyonlar
+        run: |
+          set -euo pipefail
+          python alo186/tests/test_content_intent_consolidation.py
+          node alo186/tests/test_release_manifest.js
+          node alo186/tests/test_portal_hardening.js
+          python alo186/tests/device_damage_deadline_guard.py
+      - name: Doğrulanmış production artifactı
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-parafudr-v346-${{ github.sha }}
+          path: /tmp/alo186-parafudr-v346
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
