@@ -38,10 +38,10 @@ def main() -> None:
     assert "Amazon Türkiye satış ortaklığı" in hub
     assert "doğrulanmamış fiyat, stok, puan veya garanti" in hub
 
-    assert '"version": 357' in routes
+    assert '"version": 358' in routes
     assert "klima-ne-kadar-elektrik-harcar-kwh-hesaplama" in routes
     assert "cihaz-elektrik-tuketimi-kwh-hesaplama" in routes
-    print({"ok": True, "version": 357, "newMerchantLinks": 0, "newAffiliateClasses": 0})
+    print({"ok": True, "version": 358, "newMerchantLinks": 0, "newAffiliateClasses": 0})
 
 
 if __name__ == "__main__":
