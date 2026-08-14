@@ -28,7 +28,8 @@ assert 'alo186rehber-21' in app
 assert 'sponsored nofollow noopener' in app
 assert 'Mevcut güvenli çözüm ihtiyacınızı karşılıyorsa yeni şarj cihazı veya kablo almayın.' in app
 assert 'Fiyat, stok, puan' in tool
-assert 'fiyat' in json.dumps(policy, ensure_ascii=False).lower()
+for forbidden_claim in ('price', 'stock', 'rating', 'warranty'):
+    assert forbidden_claim in policy['claimsForbidden']
 assert policy['defaultDecision'] == 'closed'
 assert 'medical or life-safety use' in policy['alwaysClosedFor']
 for banned in ('"@type":"Offer"', 'AggregateRating'):
