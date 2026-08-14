@@ -1,0 +1,49 @@
+{
+  "version": 348,
+  "generatedAt": "2026-08-14",
+  "route": "/hesaplama/akilli-priz-enerji-olcer-uygunluk/",
+  "goal": "Only open Amazon Turkey affiliate discovery after model-specific load evidence and low-risk plug-in use are verified.",
+  "affiliateTag": "alo186rehber-21",
+  "allowedClasses": [
+    "plug-in energy meter / wattmeter for verified low-risk plug loads",
+    "energy-monitoring smart plug for verified low-risk plug loads"
+  ],
+  "blockedClassesAndScenarios": [
+    "electric vehicle charging",
+    "medical or life-support equipment",
+    "fixed wiring or distribution-board circuits",
+    "power strips or multiple-load aggregation",
+    "motor or compressor loads in consumer affiliate flow",
+    "damaged or overheating outlet, plug or device",
+    "extension, multi-plug or power-strip interposition",
+    "wet or unverified environment",
+    "missing protective-earth continuity where required",
+    "unattended remote switching of resistive heating loads",
+    "unknown manufacturer load support",
+    "unknown model-specific long-duration load rule when daily use is long"
+  ],
+  "requiredAffiliateConsents": [
+    "real_need_confirmed",
+    "model_specific_specs_will_be_rechecked",
+    "affiliate_disclosure_understood"
+  ],
+  "commercialClaimsForbidden": [
+    "live price",
+    "stock",
+    "rating",
+    "review score",
+    "seller quality",
+    "delivery promise",
+    "warranty promise",
+    "universal 16A compatibility"
+  ],
+  "noBuyRule": "If an owned product is technically compatible with the stated goal and safety evidence is complete, show no-purchase before any affiliate route.",
+  "energyCostRule": "TRY cost is calculated only from the unit energy price entered by the user; ALO186 does not publish or infer a live tariff in this module.",
+  "privacy": {
+    "personalDataRequested": false,
+    "localStorage": false,
+    "sessionStorage": false,
+    "geolocation": false,
+    "networkFetch": false
+  }
+}
