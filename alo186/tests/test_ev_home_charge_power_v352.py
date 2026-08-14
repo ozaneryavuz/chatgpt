@@ -38,6 +38,7 @@ def main() -> None:
     require("amazon.com.tr/s?k=", APP, "dinamik Amazon Türkiye araması")
     require("alo186rehber-21", APP, "affiliate tag")
     require('rel=\"sponsored nofollow noopener\"', APP, "affiliate rel")
+    require("safeChecks(false)", APP, "presetlerde varsayılan kapalı güvenlik kanıtları")
     for gate in ("affNeed", "affSpecs", "affDisclosure"):
         require(gate, HTML, f"affiliate onayı {gate}")
         require(gate, APP, f"runtime affiliate onayı {gate}")
@@ -65,6 +66,7 @@ def main() -> None:
     require("min(input.vehicleAcMaxKw,input.installationMaxKw)", CORE, "araç+tesisat tavanı")
     require("Math.min(siteVehicleCeilingKw,input.evseMaxKw)", CORE, "etkili güç darboğazı")
     require("gridEnergyKwh/input.targetHours", CORE, "hedef süre gücü")
+    require("candidateWithinUsefulCeiling", CORE, "aşırı wallbox ticari kapanışı")
     require("SQRT3*THREE_V", CORE, "trifaze yaklaşık akım")
     require("Kablo kesiti veya sigorta değerini", CORE, "akım hesabı sınırı")
 
