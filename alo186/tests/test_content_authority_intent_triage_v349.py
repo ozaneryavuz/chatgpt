@@ -47,7 +47,7 @@ def main() -> None:
         "Tek oda veya tek devre",
         "Bina veya sokak etkisi",
         "186 / dağıtım şirketi",
-        "pano kapağını açmayın",
+        "Pano kapağını açmayın",
         "/edas-bul",
         "/haberler/gerilim-dengesizligi-vuf-edas-teknik-kalite-olcum-dosyasi",
         "/haberler/gerilim-cukuru-yukselmesi-kisa-kesinti-edas-olay-kaydi",
