@@ -1,0 +1,85 @@
+name: ALO186 EV apartment readiness v375
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/apartmanda-elektrikli-arac-sarj-istasyonu-kurulur-mu-2026/**'
+      - 'alo186/hesaplama/apartman-elektrikli-arac-sarj-kurulum-on-kontrolu/**'
+      - 'alo186/sektor-rehberi/site-apartman-elektrikli-arac-sarj-altyapisi-kabul/**'
+      - 'alo186/content/commerce/ev-apartment-readiness-v375.json'
+      - 'alo186/deployment/routing-overlays/ev-apartment-readiness-v375.json'
+      - 'alo186/tests/test_ev_apartment_readiness_v375.py'
+      - '.github/workflows/alo186-ev-apartment-readiness-v375.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/apartmanda-elektrikli-arac-sarj-istasyonu-kurulur-mu-2026/**'
+      - 'alo186/hesaplama/apartman-elektrikli-arac-sarj-kurulum-on-kontrolu/**'
+      - 'alo186/sektor-rehberi/site-apartman-elektrikli-arac-sarj-altyapisi-kabul/**'
+      - 'alo186/content/commerce/ev-apartment-readiness-v375.json'
+      - 'alo186/deployment/routing-overlays/ev-apartment-readiness-v375.json'
+      - 'alo186/tests/test_ev_apartment_readiness_v375.py'
+      - '.github/workflows/alo186-ev-apartment-readiness-v375.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-ev-apartment-v375-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: v375 trust privacy no-buy and commerce checks
+        run: python alo186/tests/test_ev_apartment_readiness_v375.py
+      - name: Canonical production build and smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-ev-v375
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-ev-v375 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-ev-v375
+      - name: Verify routes sitemap schema and zero merchant links
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/alo186-ev-v375')
+          routes = [
+              '/haberler/apartmanda-elektrikli-arac-sarj-istasyonu-kurulur-mu-2026/',
+              '/hesaplama/apartman-elektrikli-arac-sarj-kurulum-on-kontrolu/',
+              '/sektor-rehberi/site-apartman-elektrikli-arac-sarj-altyapisi-kabul/',
+          ]
+          sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
+          release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
+          assert release['routingVersion'] >= 375
+          for route in routes:
+              page = root / route.strip('/') / 'index.html'
+              assert page.is_file(), page
+              html = page.read_text(encoding='utf-8')
+              low = html.casefold()
+              canonical = f'https://alo186.com{route}'
+              assert canonical in sitemap or canonical.rstrip('/') in sitemap
+              assert f'<link rel="canonical" href="{canonical}">' in html
+              assert 'amazon.com.tr' not in low
+              assert 'amzn.to' not in low
+              assert 'pricecurrency' not in low
+              assert '"@type":"product"' not in low
+              assert '"@type":"offer"' not in low
+          print({'ok': True, 'routingVersion': release['routingVersion'], 'routes': routes, 'newMerchantLinks': 0})
+          PY
+      - name: Upload verified bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-ev-apartment-v375-${{ github.sha }}
+          path: /tmp/alo186-ev-v375
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30

@@ -1,0 +1,61 @@
+{
+  "version": 375,
+  "cluster": "ev-apartment-readiness",
+  "generatedAt": "2026-08-15",
+  "scope": [
+    "/haberler/apartmanda-elektrikli-arac-sarj-istasyonu-kurulur-mu-2026/",
+    "/hesaplama/apartman-elektrikli-arac-sarj-kurulum-on-kontrolu/",
+    "/sektor-rehberi/site-apartman-elektrikli-arac-sarj-altyapisi-kabul/"
+  ],
+  "independence": "ALO186 is an independent information platform and must not imply affiliation with EPDK, the Ministry, municipalities, electricity distribution companies, site managements, charging network operators or equipment manufacturers.",
+  "commerce": {
+    "mode": "professional-only-fixed-ev-charging",
+    "new_affiliate_classes": 0,
+    "new_merchant_links": 0,
+    "unverified_price": false,
+    "unverified_stock": false,
+    "unverified_rating": false,
+    "unverified_warranty": false
+  },
+  "no_buy": [
+    "do_not_buy_wallbox_before_parking_status_and_approval_path_are_known",
+    "do_not_select_charger_power_before_capacity_and_vehicle_onboard_charger_are_verified",
+    "existing_safe_compliant_solution_meeting_the_need_means_no_new_purchase"
+  ],
+  "blocked_categories": [
+    "wallbox",
+    "portable_evse_for_fixed_installation_problem",
+    "rcd_rcbo",
+    "surge_protection_device",
+    "panel_components",
+    "fixed_cable",
+    "electricity_meter_or_submeter",
+    "contactors",
+    "load_management_hardware",
+    "fixed_installation"
+  ],
+  "privacy": {
+    "do_not_collect": [
+      "address",
+      "site_or_building_name",
+      "vehicle_plate",
+      "vehicle_owner_identity",
+      "installation_or_subscription_number",
+      "meter_serial_number",
+      "phone",
+      "email",
+      "location"
+    ],
+    "network_submission": false,
+    "persistent_browser_storage": false
+  },
+  "prohibited_claims": [
+    "alo186_grants_installation_permission",
+    "alo186_is_a_distribution_company_or_public_authority",
+    "private_parking_always_requires_no_board_decision",
+    "common_parking_always_needs_only_one_specific_vote_without_context",
+    "any_fixed_kw_wallbox_is_suitable_without_capacity_study",
+    "guaranteed_installation_cost_or_savings",
+    "official_connection_or_project_approval_service"
+  ]
+}
