@@ -1,0 +1,46 @@
+{
+  "version": 382,
+  "generatedAt": "2026-08-15",
+  "topic": "appliance-body-electric-shock-protective-earth-safety",
+  "decision": "safety-and-qualified-diagnosis-first-no-consumer-affiliate",
+  "newAffiliateClasses": 0,
+  "newMerchantLinks": 0,
+  "canonicalGuide": "/haberler/cihaz-govdesi-elektrik-carpiyor-ne-yapmali/",
+  "decisionTool": "/hesaplama/cihaz-govdesi-elektrik-carpmasi-guvenlik-ayirici/",
+  "businessGuide": "/sektor-rehberi/otel-isletme-cihaz-topraklama-kacak-akim-kabul/",
+  "blockedConsumerAffiliateClasses": [
+    "socket-tester",
+    "non-contact-voltage-detector",
+    "multimeter-or-electrical-test-instrument",
+    "rcd-rccb-rcbo",
+    "socket-plug-or-adapter",
+    "earthing-grounding-component",
+    "fixed-wiring-or-distribution-board-component",
+    "appliance-electrical-spare-part"
+  ],
+  "professionalOnly": [
+    "protective-conductor-continuity-and-connection-verification",
+    "insulation-resistance-and-leakage-current-assessment",
+    "rcd-trip-current-and-time-testing",
+    "socket-fixed-wiring-and-protection-coordination",
+    "authorized-appliance-service-assessment",
+    "commercial-post-repair-electrical-acceptance"
+  ],
+  "noBuyWhen": [
+    "active-electric-shock-or-other-electrical-hazard-exists",
+    "root-cause-has-not-been-confirmed-by-qualified-measurement",
+    "existing-appliance-may-be-repairable-and-installation-suitability-is-unknown",
+    "user-is-considering-test-equipment-to-diagnose-an-energized-shock-symptom"
+  ],
+  "mustNotClaim": [
+    "body-shock-always-means-the-earthing-electrode-is-faulty",
+    "rcd-not-tripping-proves-the-appliance-is-safe",
+    "a-handheld-tester-can-replace-qualified-installation-and-appliance-assessment",
+    "buying-a-new-appliance-is-the-first-solution-before-diagnosis",
+    "alo186-is-a-public-authority-distribution-company-electrician-or-authorized-service",
+    "unverified-price",
+    "unverified-stock",
+    "unverified-rating",
+    "unverified-warranty"
+  ]
+}
