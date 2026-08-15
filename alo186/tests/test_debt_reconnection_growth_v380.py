@@ -5,6 +5,7 @@ ROOT = Path(__file__).resolve().parents[2]
 GUIDE = ROOT / "alo186/haberler/elektrik-borcu-odendi-ne-zaman-acilir/index.html"
 TOOL = ROOT / "alo186/hesaplama/borctan-kesilen-elektrik-yeniden-baglama-takibi/index.html"
 HUB = ROOT / "alo186/abonelik-ve-guvence-bedeli-kontrol-merkezi/index.html"
+REPEAT = ROOT / "alo186/tekrar-kullanilan-araclar/index.html"
 ROUTES = ROOT / "alo186/deployment/routing-overlays/debt-reconnection-growth-v380.json"
 COMMERCE = ROOT / "alo186/deployment/affiliate-category-decisions/debt-reconnection-growth-v380.json"
 
@@ -13,13 +14,15 @@ def text(path):
     return path.read_text(encoding="utf-8")
 
 
-def test_v380_files_and_canonicals():
-    for path in [GUIDE, TOOL, HUB, ROUTES, COMMERCE]:
+def test_v380_files_canonicals_and_internal_distribution():
+    for path in [GUIDE, TOOL, HUB, REPEAT, ROUTES, COMMERCE]:
         assert path.is_file(), path
     assert '<link rel="canonical" href="https://alo186.com/haberler/elektrik-borcu-odendi-ne-zaman-acilir/">' in text(GUIDE)
     assert '<link rel="canonical" href="https://alo186.com/hesaplama/borctan-kesilen-elektrik-yeniden-baglama-takibi/">' in text(TOOL)
     assert '/haberler/elektrik-borcu-odendi-ne-zaman-acilir/' in text(HUB)
     assert '/hesaplama/borctan-kesilen-elektrik-yeniden-baglama-takibi/' in text(HUB)
+    assert '/hesaplama/borctan-kesilen-elektrik-yeniden-baglama-takibi/' in text(REPEAT)
+    assert 'Borç ödendi / açma kaydı bekleniyor' in text(REPEAT)
 
 
 def test_epdk_timing_is_not_misrepresented():
@@ -48,7 +51,7 @@ def test_privacy_and_life_support_safety():
 
 
 def test_no_commerce_and_no_unverified_commercial_claims():
-    combined = "\n".join(text(p).lower() for p in [GUIDE, TOOL, HUB])
+    combined = "\n".join(text(p).lower() for p in [GUIDE, TOOL, HUB, REPEAT])
     for merchant in ["amazon.com.tr", "amzn.to", "rel=\"sponsored"]:
         assert merchant not in combined
     policy = json.loads(text(COMMERCE))
@@ -57,6 +60,7 @@ def test_no_commerce_and_no_unverified_commercial_claims():
     assert {"unverified-price", "unverified-stock", "unverified-rating", "unverified-warranty"}.issubset(set(policy["mustNotClaim"]))
     assert "ürün satın alma problemi değildir" in text(GUIDE).lower()
     assert "ürün satın alarak çözülmez" in text(HUB).lower()
+    assert "mevcut çözüm yeterliyse yeni ürün almayın" in text(REPEAT).lower()
 
 
 def test_routing_v380():
@@ -70,7 +74,7 @@ def test_routing_v380():
 
 
 if __name__ == "__main__":
-    test_v380_files_and_canonicals()
+    test_v380_files_canonicals_and_internal_distribution()
     test_epdk_timing_is_not_misrepresented()
     test_privacy_and_life_support_safety()
     test_no_commerce_and_no_unverified_commercial_claims()
