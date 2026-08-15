@@ -1,16 +1,17 @@
 {
-  "schemaVersion": 8,
-  "release": "alo186-v365-content-authority-live-2026-08-15T06:08+03:00",
-  "requestedAt": "2026-08-15T03:08:00Z",
+  "schemaVersion": 9,
+  "release": "alo186-v366-outage-journal-trust-live-2026-08-15T06:25+03:00",
+  "requestedAt": "2026-08-15T03:25:12Z",
   "requestedTimeZone": "Europe/Istanbul",
-  "includesMainThrough": "28403623503d7065306df43b5b8e6088cddc6c05",
-  "purpose": "Ana daldaki bütün onaylı ALO186 içerik ve araçlarını; v253 konum/AEO altyapısını ve v365 ile eklenen kaçak akım rölesi reset olmuyor, EV Wallbox bağlı ama şarj başlamıyor ve elektrik geldiği halde jeneratör durmuyor kullanıcı niyetlerini tek production artifactında derle, GitHub Pages yayınını tetikle ve canlı origin üzerinde fail-closed doğrula.",
+  "includesMainThrough": "aee09281855ec48bd65428b78dd50e61c6252488",
+  "purpose": "Ana daldaki bütün onaylı ALO186 içerik ve araçlarını; v365 içerik otoritesi paketini ve v366 ile eski Kesinti Günlüğü niyetinin kişisel verisiz güncel Kesinti Süre Günlüğü canonical sahibinde birleştirilmesini, Elektrik Durum Merkezi iç yolculuk onarımını ve ücretsiz araçlardaki sıfır fiyatlı Offer şeması temizliğini tek production artifactında derle, GitHub Pages yayınını tetikle ve canlı origin üzerinde fail-closed doğrula.",
   "deploymentWorkflow": ".github/workflows/alo186-pages-autobootstrap-live.yml",
   "verificationWorkflow": ".github/workflows/alo186-v177-hosting-aware-live.yml",
   "receiptTargets": [
     "pull/832",
     "pull/833",
     "pull/979",
+    "pull/982",
     "issues/21",
     "issues/400"
   ],
@@ -18,6 +19,7 @@
   "requiredLiveRoutes": [
     "/",
     "/elektrik-portali",
+    "/elektrik-durum-merkezi",
     "/edas-bul/",
     "/il/ankara/",
     "/il/istanbul/",
@@ -27,6 +29,8 @@
     "/amazon-elektrik-urunleri/kombi-yedek-enerji-urun-secici/",
     "/karar-motoru/",
     "/hesaplama/kesinti-hazirlik-plani/",
+    "/hesaplama/elektrik-kesintisi-sure-gunlugu/",
+    "/hesaplama/kesinti-gunlugu/",
     "/haberler/kacak-akim-rolesi-kalkmiyor-reset-olmuyor/",
     "/haberler/ev-sarj-baslamiyor-wallbox-araca-bagli-ama-sarj-etmiyor/",
     "/haberler/elektrik-geldi-jenerator-durmuyor-ats-sebeke-algilama/",
@@ -75,7 +79,12 @@
     "projectBasePathInlineExecutableUrlsChecked": true,
     "contentAuthorityV365": true,
     "contentAuthorityV365Routes": 3,
-    "contentAuthorityV365MerchantLinks": 0
+    "contentAuthorityV365MerchantLinks": 0,
+    "outageJournalTrustV366": true,
+    "outageJournalCanonicalOwners": 1,
+    "outageJournalLegacyNoindex": true,
+    "outageJournalV366MerchantLinks": 0,
+    "freeUtilityZeroPriceOfferSchema": false
   },
   "forbiddenPublicClaims": [
     "AggregateRating",
@@ -105,13 +114,15 @@
       "Article",
       "FAQPage",
       "BreadcrumbList"
-    ]
+    ],
+    "outageJournalV366AccessibleForFree": true,
+    "outageJournalV366ZeroPriceOfferRemoved": true
   },
   "scheduledAudit": {
     "workflow": ".github/workflows/alo186-competitor-gap-v251.yml",
     "cronUtc": "30 6 * * 1",
     "localSchedule": "Her pazartesi 09:30 Europe/Istanbul",
-    "scope": "v250-v365 semantik, affiliate, SSR, 81 il, 21 EDAŞ, sitemap, AI crawler ve içerik niyet denetimi"
+    "scope": "v250-v366 semantik, affiliate, SSR, 81 il, 21 EDAŞ, sitemap, AI crawler, içerik niyeti ve kesinti günlüğü canonical/güven denetimi"
   },
   "status": "requested"
 }
