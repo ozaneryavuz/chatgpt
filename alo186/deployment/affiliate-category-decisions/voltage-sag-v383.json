@@ -1,0 +1,45 @@
+{
+  "version": 383,
+  "generatedAt": "2026-08-15",
+  "topic": "home-voltage-sag-dimming-power-quality",
+  "decision": "evidence-and-qualified-diagnosis-first-no-consumer-affiliate",
+  "newAffiliateClasses": 0,
+  "newMerchantLinks": 0,
+  "canonicalGuide": "/haberler/evde-voltaj-dusuyor-isiklar-karariyor-ne-yapmali/",
+  "decisionTool": "/hesaplama/ev-voltaj-dusmesi-dalgalanma-belirti-ayirici/",
+  "businessGuide": "/sektor-rehberi/otel-isletme-gerilim-dusmesi-guc-kalitesi-kabul/",
+  "blockedConsumerAffiliateClasses": [
+    "avr-voltage-stabilizer",
+    "voltage-protection-relay",
+    "multimeter-or-electrical-test-instrument",
+    "fixed-ups-or-battery-system",
+    "generator-or-ats",
+    "distribution-board-or-fixed-wiring-component"
+  ],
+  "professionalOnly": [
+    "power-quality-event-logging-and-sag-swell-analysis",
+    "phase-voltage-and-unbalance-assessment",
+    "motor-start-and-large-load-correlation",
+    "neutral-and-fixed-wiring-voltage-drop-diagnosis",
+    "protection-coordination-and-connection-assessment",
+    "generator-ats-ups-power-quality-acceptance",
+    "commercial-remediation-and-maintenance-sla"
+  ],
+  "noBuyWhen": [
+    "active-burning-smell-smoke-sparks-shock-hot-connection-or-water-hazard-exists",
+    "root-cause-has-not-been-confirmed-by-qualified-measurement",
+    "event-may-be-local-wiring-neutral-upstream-supply-or-load-start-related",
+    "existing-system-has-not-yet-been-tested-against-its-required-duty"
+  ],
+  "mustNotClaim": [
+    "a-stabilizer-or-avr-is-the-universal-first-solution",
+    "a-single-voltage-reading-proves-or-excludes-a-power-quality-problem",
+    "dimming-always-means-a-distribution-company-fault",
+    "dimming-always-means-an-internal-installation-fault",
+    "alo186-is-epdk-a-distribution-company-an-electrician-or-an-official-complaint-channel",
+    "unverified-price",
+    "unverified-stock",
+    "unverified-rating",
+    "unverified-warranty"
+  ]
+}
