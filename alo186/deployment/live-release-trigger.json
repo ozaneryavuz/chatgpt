@@ -1,15 +1,16 @@
 {
-  "schemaVersion": 7,
-  "release": "alo186-v253-competitor-gap-location-aeo-live-2026-08-03T23:06+03:00",
-  "requestedAt": "2026-08-03T20:06:52Z",
+  "schemaVersion": 8,
+  "release": "alo186-v365-content-authority-live-2026-08-15T06:08+03:00",
+  "requestedAt": "2026-08-15T03:08:00Z",
   "requestedTimeZone": "Europe/Istanbul",
-  "includesMainThrough": "972f8d9ffc239b0d53cc85fd870531c71e19ae26",
-  "purpose": "Ana daldaki bütün onaylı ALO186 içerik ve araçlarını; v252 Soru–Sorun–Çözüm–Ürün semantik zinciri, kararlı urun-ups-3000va Amazon Türkiye ankrajı, JavaScript kapalı Akıllı Yol ve Kişisel Hazırlık SSR blokları, v253 ile üretilen 81 il ve 21 EDAŞ statik canonical AEO sayfaları, doğru 112 GovernmentService / özel EDAŞ Organization-Service ayrımı ve AI crawler robots kurallarıyla tek production artifactında derle, GitHub Pages yayınını tetikle ve canlı origin üzerinde fail-closed doğrula.",
+  "includesMainThrough": "28403623503d7065306df43b5b8e6088cddc6c05",
+  "purpose": "Ana daldaki bütün onaylı ALO186 içerik ve araçlarını; v253 konum/AEO altyapısını ve v365 ile eklenen kaçak akım rölesi reset olmuyor, EV Wallbox bağlı ama şarj başlamıyor ve elektrik geldiği halde jeneratör durmuyor kullanıcı niyetlerini tek production artifactında derle, GitHub Pages yayınını tetikle ve canlı origin üzerinde fail-closed doğrula.",
   "deploymentWorkflow": ".github/workflows/alo186-pages-autobootstrap-live.yml",
   "verificationWorkflow": ".github/workflows/alo186-v177-hosting-aware-live.yml",
   "receiptTargets": [
     "pull/832",
     "pull/833",
+    "pull/979",
     "issues/21",
     "issues/400"
   ],
@@ -26,6 +27,9 @@
     "/amazon-elektrik-urunleri/kombi-yedek-enerji-urun-secici/",
     "/karar-motoru/",
     "/hesaplama/kesinti-hazirlik-plani/",
+    "/haberler/kacak-akim-rolesi-kalkmiyor-reset-olmuyor/",
+    "/haberler/ev-sarj-baslamiyor-wallbox-araca-bagli-ama-sarj-etmiyor/",
+    "/haberler/elektrik-geldi-jenerator-durmuyor-ats-sebeke-algilama/",
     "/robots.txt",
     "/sitemap.xml"
   ],
@@ -68,7 +72,10 @@
     "sitemapApexCanonicalOnly": true,
     "activeCanonicalRoutesOnly": true,
     "projectBasePathStructuralLinksChecked": true,
-    "projectBasePathInlineExecutableUrlsChecked": true
+    "projectBasePathInlineExecutableUrlsChecked": true,
+    "contentAuthorityV365": true,
+    "contentAuthorityV365Routes": 3,
+    "contentAuthorityV365MerchantLinks": 0
   },
   "forbiddenPublicClaims": [
     "AggregateRating",
@@ -93,13 +100,18 @@
     "privateEdasUsesServiceOrganization": true,
     "governmentServiceReservedForActualGovernmentServices": true,
     "provinceAndCompanyPagesAreStaticHtml": true,
-    "googleRichResultAppearanceGuaranteed": false
+    "googleRichResultAppearanceGuaranteed": false,
+    "contentAuthorityV365StructuredData": [
+      "Article",
+      "FAQPage",
+      "BreadcrumbList"
+    ]
   },
   "scheduledAudit": {
     "workflow": ".github/workflows/alo186-competitor-gap-v251.yml",
     "cronUtc": "30 6 * * 1",
     "localSchedule": "Her pazartesi 09:30 Europe/Istanbul",
-    "scope": "v250-v253 semantik, affiliate, SSR, 81 il, 21 EDAŞ, sitemap ve AI crawler denetimi"
+    "scope": "v250-v365 semantik, affiliate, SSR, 81 il, 21 EDAŞ, sitemap, AI crawler ve içerik niyet denetimi"
   },
   "status": "requested"
 }
