@@ -1,0 +1,88 @@
+name: ALO186 reactive energy growth v363
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/elektrik-faturasinda-reaktif-enduktif-kapasitif-bedel-nedir/**'
+      - 'alo186/hesaplama/reaktif-enerji-oran-hesaplama/**'
+      - 'alo186/sektor-rehberi/isletme-reaktif-enerji-kompanzasyon-kontrolu/**'
+      - 'alo186/deployment/routing-overlays/growth-reactive-energy-v363.json'
+      - 'alo186/tests/test_growth_reactive_energy_v363.py'
+      - '.github/workflows/alo186-growth-reactive-energy-v363.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/elektrik-faturasinda-reaktif-enduktif-kapasitif-bedel-nedir/**'
+      - 'alo186/hesaplama/reaktif-enerji-oran-hesaplama/**'
+      - 'alo186/sektor-rehberi/isletme-reaktif-enerji-kompanzasyon-kontrolu/**'
+      - 'alo186/deployment/routing-overlays/growth-reactive-energy-v363.json'
+      - 'alo186/tests/test_growth_reactive_energy_v363.py'
+      - '.github/workflows/alo186-growth-reactive-energy-v363.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-reactive-energy-v363-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: v363 trust privacy and commercial-boundary checks
+        run: python alo186/tests/test_growth_reactive_energy_v363.py
+      - name: Global content intent collision guard
+        run: python alo186/tests/test_content_intent_consolidation.py
+      - name: Canonical production build and smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-reactive-v363
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-reactive-v363 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-reactive-v363
+      - name: Verify routes sitemap schema privacy and merchant closure
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path('/tmp/alo186-reactive-v363')
+          routes = [
+              ('/haberler/elektrik-faturasinda-reaktif-enduktif-kapasitif-bedel-nedir/', ('"@type":"Article"', '"@type":"FAQPage"', '"@type":"BreadcrumbList"')),
+              ('/hesaplama/reaktif-enerji-oran-hesaplama/', ('"@type":"WebApplication"', '"@type":"FAQPage"', '"@type":"BreadcrumbList"')),
+              ('/sektor-rehberi/isletme-reaktif-enerji-kompanzasyon-kontrolu/', ('"@type":"Article"', '"@type":"FAQPage"', '"@type":"BreadcrumbList"')),
+          ]
+          sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
+          release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
+          assert release['routingVersion'] >= 363
+          for route, schemas in routes:
+              page = root / route.strip('/') / 'index.html'
+              assert page.is_file(), page
+              html = page.read_text(encoding='utf-8')
+              low = html.lower()
+              assert f'https://alo186.com{route}' in sitemap
+              assert f'<link rel="canonical" href="https://alo186.com{route}">' in html
+              assert 'amazon.com.tr' not in low
+              assert 'pricecurrency' not in low
+              assert 'aggregaterating' not in low
+              for schema in schemas:
+                  assert schema in html
+          calc = (root / 'hesaplama/reaktif-enerji-oran-hesaplama/index.html').read_text(encoding='utf-8').lower()
+          for forbidden in ('fetch(', 'localstorage.', 'sessionstorage.', 'navigator.geolocation'):
+              assert forbidden not in calc
+          print({'ok': True, 'routingVersion': release['routingVersion'], 'routes': [r for r,_ in routes], 'merchantLinks': 0})
+          PY
+      - name: Upload verified bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-reactive-energy-v363-${{ github.sha }}
+          path: /tmp/alo186-reactive-v363
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
