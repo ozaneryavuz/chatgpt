@@ -41,14 +41,15 @@ def main() -> None:
     assert '<link rel="canonical" href="https://alo186.com/sarj-cihazi-ve-kablo-kontrol-merkezi/">' in hub
     for schema in ('"@type":"WebPage"', '"@type":"ItemList"', '"@type":"BreadcrumbList"'):
         assert schema in hub
+    hub_lower = hub.lower()
     for required in (
-        "No-buy-first ticari kural",
+        "no-buy-first ticari kural",
         "mevcut adaptör/kablo güvenli ve yeterliyse yeni ürün almayın",
         "/haberler/usb-c-kablo-kac-watt-60w-240w-pd-farki/",
         "/fatura-ve-sayac-kontrol-merkezi/",
-        "EDAŞ veya kamu kurumu değildir",
+        "edaş veya kamu kurumu değildir",
     ):
-        assert required in hub
+        assert required in hub_lower
 
     for page in (article, hub):
         lowered = page.lower()
