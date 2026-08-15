@@ -1,0 +1,29 @@
+{
+  "version": 373,
+  "generatedAt": "2026-08-15",
+  "routes": [
+    {
+      "source": "alo186/haberler/vfd-surucu-kacak-akim-rolesi-atiyor-type-f-type-b/index.html",
+      "canonicalPath": "/haberler/vfd-surucu-kacak-akim-rolesi-atiyor-type-f-type-b",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/parafudr-kacak-akim-rolesi-atiyor-spd-rcd-sirasi/index.html",
+      "canonicalPath": "/haberler/parafudr-kacak-akim-rolesi-atiyor-spd-rcd-sirasi",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/bess-izolasyon-hatasi-imd-toprak-arizasi-kabul/index.html",
+      "canonicalPath": "/haberler/bess-izolasyon-hatasi-imd-toprak-arizasi-kabul",
+      "type": "article"
+    }
+  ],
+  "contentAuthority": {
+    "schemaVersion": 1,
+    "runDate": "2026-08-15",
+    "sourceVerified": true,
+    "intentCollisionChecked": true,
+    "commercialPolicy": "no-buy-first",
+    "structuredData": ["Article", "FAQPage", "BreadcrumbList"]
+  }
+}
