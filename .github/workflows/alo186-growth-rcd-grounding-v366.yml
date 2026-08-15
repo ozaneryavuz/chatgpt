@@ -1,0 +1,96 @@
+name: ALO186 RCD and grounding trust growth v366
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/kacak-akim-rolesi-test-dugmesi-ne-ise-yarar/**'
+      - 'alo186/hesaplama/kacak-akim-test-gunlugu/**'
+      - 'alo186/haberler/topraklama-direnci-kac-ohm-olmali/**'
+      - 'alo186/ev-elektrik-guvenlik-kontrol-merkezi/**'
+      - 'alo186/deployment/routing-overlays/growth-rcd-grounding-v366.json'
+      - 'alo186/tests/test_growth_rcd_grounding_v366.py'
+      - '.github/workflows/alo186-growth-rcd-grounding-v366.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/kacak-akim-rolesi-test-dugmesi-ne-ise-yarar/**'
+      - 'alo186/hesaplama/kacak-akim-test-gunlugu/**'
+      - 'alo186/haberler/topraklama-direnci-kac-ohm-olmali/**'
+      - 'alo186/ev-elektrik-guvenlik-kontrol-merkezi/**'
+      - 'alo186/deployment/routing-overlays/growth-rcd-grounding-v366.json'
+      - 'alo186/tests/test_growth_rcd_grounding_v366.py'
+      - '.github/workflows/alo186-growth-rcd-grounding-v366.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-rcd-grounding-v366-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: v366 trust privacy and no-commerce checks
+        run: python alo186/tests/test_growth_rcd_grounding_v366.py
+      - name: Global content intent collision guard
+        run: python alo186/tests/test_content_intent_consolidation.py
+      - name: Canonical production build and smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-rcd-grounding-v366
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-rcd-grounding-v366 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-rcd-grounding-v366
+      - name: Verify routes sitemap schema privacy and merchant closure
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path('/tmp/alo186-rcd-grounding-v366')
+          routes = [
+              ('/haberler/kacak-akim-rolesi-test-dugmesi-ne-ise-yarar/', ('"@type":"Article"', '"@type":"FAQPage"', '"@type":"BreadcrumbList"')),
+              ('/hesaplama/kacak-akim-test-gunlugu/', ('"@type":"WebApplication"', '"@type":"FAQPage"', '"@type":"BreadcrumbList"')),
+          ]
+          sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
+          release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
+          assert release['routingVersion'] >= 366
+          for route, schemas in routes:
+              page = root / route.strip('/') / 'index.html'
+              assert page.is_file(), page
+              html = page.read_text(encoding='utf-8')
+              low = html.lower()
+              assert f'https://alo186.com{route}' in sitemap
+              assert f'<link rel="canonical" href="https://alo186.com{route}">' in html
+              assert 'amazon.com.tr' not in low
+              assert 'pricecurrency' not in low
+              assert 'aggregaterating' not in low
+              for schema in schemas:
+                  assert schema in html
+          grounding = root / 'haberler/topraklama-direnci-kac-ohm-olmali/index.html'
+          assert grounding.is_file(), grounding
+          grounding_html = grounding.read_text(encoding='utf-8')
+          assert '<link rel="canonical" href="https://alo186.com/haberler/topraklama-direnci-kac-ohm-olmali/">' in grounding_html
+          assert 'yaklaşık 1.667' not in grounding_html.lower()
+          calc = (root / 'hesaplama/kacak-akim-test-gunlugu/index.html').read_text(encoding='utf-8').lower()
+          for forbidden in ('fetch(', 'localstorage.', 'sessionstorage.', 'navigator.geolocation'):
+              assert forbidden not in calc
+          hub = (root / 'ev-elektrik-guvenlik-kontrol-merkezi/index.html').read_text(encoding='utf-8')
+          assert '/hesaplama/kacak-akim-test-gunlugu/' in hub
+          print({'ok': True, 'routingVersion': release['routingVersion'], 'newRoutes': [r for r,_ in routes], 'merchantLinks': 0})
+          PY
+      - name: Upload verified bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-rcd-grounding-v366-${{ github.sha }}
+          path: /tmp/alo186-rcd-grounding-v366
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
