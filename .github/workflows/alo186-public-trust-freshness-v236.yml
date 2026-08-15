@@ -1,0 +1,92 @@
+name: ALO186 canlı tazelik ve güven makbuzu v236
+
+on:
+  pull_request:
+    paths:
+      - 'alo186/index.html'
+      - 'alo186/amazon-elektrik-urunleri/**'
+      - 'alo186/deployment/prepare_github_pages.py'
+      - 'alo186/deployment/prepare_github_pages_core.py'
+      - 'alo186/deployment/verify_public_trust_freshness.py'
+      - 'alo186/tests/test_public_trust_freshness_v236.py'
+      - '.github/workflows/alo186-public-trust-freshness-v236.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/index.html'
+      - 'alo186/amazon-elektrik-urunleri/**'
+      - 'alo186/deployment/prepare_github_pages.py'
+      - 'alo186/deployment/prepare_github_pages_core.py'
+      - 'alo186/deployment/verify_public_trust_freshness.py'
+      - 'alo186/tests/test_public_trust_freshness_v236.py'
+      - '.github/workflows/alo186-public-trust-freshness-v236.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-public-trust-freshness-v236-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Kaynak sözleşmesi ve fail-closed regresyonlar
+        run: |
+          set -euo pipefail
+          python -m py_compile alo186/deployment/verify_public_trust_freshness.py
+          python alo186/tests/test_public_trust_freshness_v236.py
+
+      - name: Canonical üretim paketi
+        run: |
+          set -euo pipefail
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-public-trust-canonical \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py \
+            --bundle /tmp/alo186-public-trust-canonical
+
+      - name: Custom-domain yayın makbuzu
+        run: |
+          set -euo pipefail
+          cp -a /tmp/alo186-public-trust-canonical /tmp/alo186-public-trust-custom
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-public-trust-custom \
+            --base-path '' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/verify_public_trust_freshness.py \
+            --site /tmp/alo186-public-trust-custom \
+            --expected-commit "$GITHUB_SHA" \
+            --base-path ''
+
+      - name: Project-path yayın makbuzu
+        run: |
+          set -euo pipefail
+          cp -a /tmp/alo186-public-trust-canonical /tmp/alo186-public-trust-project
+          python alo186/deployment/prepare_github_pages.py \
+            --site /tmp/alo186-public-trust-project \
+            --base-path '/chatgpt' \
+            --repository "$GITHUB_REPOSITORY" \
+            --commit "$GITHUB_SHA"
+          python alo186/deployment/verify_public_trust_freshness.py \
+            --site /tmp/alo186-public-trust-project \
+            --expected-commit "$GITHUB_SHA" \
+            --base-path '/chatgpt'
+
+      - name: Doğrulanmış custom-domain artifactı
+        uses: actions/upload-artifact@v5
+        with:
+          name: alo186-public-trust-freshness-v236
+          path: /tmp/alo186-public-trust-custom
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
