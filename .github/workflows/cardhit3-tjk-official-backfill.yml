@@ -1,0 +1,146 @@
+name: CardHit-3 official TJK history and OOF backfill
+
+on:
+  push:
+    branches: [cardhit3-tjk-backfill-20260816]
+    paths:
+      - 'race-data/cardhit3_backfill.py'
+      - 'race-data/cardhit3_build_oof.py'
+      - '.github/workflows/cardhit3-tjk-official-backfill.yml'
+  workflow_dispatch:
+    inputs:
+      start:
+        description: Earliest official history date
+        required: false
+        default: '2021-08-25'
+      recent_start:
+        description: Start daily official track discovery after public filename index
+        required: false
+        default: '2025-01-21'
+      end:
+        description: Latest completed result date
+        required: false
+        default: '2026-08-15'
+      workers:
+        description: Modest concurrent HTTP workers
+        required: false
+        default: '6'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cardhit3-tjk-official-backfill
+  cancel-in-progress: false
+
+jobs:
+  backfill-and-oof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    env:
+      PYTHONUNBUFFERED: '1'
+      OMP_NUM_THREADS: '2'
+      OPENBLAS_NUM_THREADS: '2'
+      MKL_NUM_THREADS: '2'
+      NUMEXPR_NUM_THREADS: '2'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install deterministic analytics runtime
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install \
+            'requests>=2.32,<3' \
+            'beautifulsoup4>=4.12,<5' \
+            'pandas>=2.2,<3' \
+            'numpy>=2.0,<3' \
+            'scipy>=1.14,<2' \
+            'scikit-learn>=1.5,<2' \
+            'lightgbm>=4.5,<5'
+          python -m py_compile race-data/cardhit3_backfill.py race-data/cardhit3_build_oof.py
+
+      - name: Pin public filename index
+        run: |
+          git clone --filter=blob:none --no-checkout https://github.com/fatihbozdag/Ganyan.git /tmp/ganyan-index
+          git -C /tmp/ganyan-index sparse-checkout init --cone
+          git -C /tmp/ganyan-index sparse-checkout set data/processed
+          git -C /tmp/ganyan-index checkout 463143050f654c81e80a180a1641cb26fd672a5c
+          find /tmp/ganyan-index/data/processed -maxdepth 1 -name '*.csv' | wc -l
+
+      - name: Download official TJK program and result CSV pairs
+        env:
+          START: ${{ inputs.start || '2021-08-25' }}
+          RECENT_START: ${{ inputs.recent_start || '2025-01-21' }}
+          END: ${{ inputs.end || '2026-08-15' }}
+          WORKERS: ${{ inputs.workers || '6' }}
+        run: |
+          rm -rf artifacts/cardhit3-official
+          mkdir -p artifacts/cardhit3-official
+          python race-data/cardhit3_backfill.py \
+            --seed-dir /tmp/ganyan-index/data/processed \
+            --start "$START" \
+            --recent-start "$RECENT_START" \
+            --end "$END" \
+            --workers "$WORKERS" \
+            --output artifacts/cardhit3-official
+
+      - name: Build leakage-safe card-linked OOF base probabilities
+        run: |
+          python race-data/cardhit3_build_oof.py \
+            --manifest artifacts/cardhit3-official/complete_meetings.csv \
+            --folds 5 \
+            --output artifacts/cardhit3-official/oof
+
+      - name: Package raw history and verify contract
+        run: |
+          set -euo pipefail
+          tar -czf artifacts/cardhit3-official/raw_history_program_results.tar.gz \
+            -C artifacts/cardhit3-official raw/history
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import pandas as pd
+
+          root = Path('artifacts/cardhit3-official')
+          audit = json.loads((root / 'oof/cardhit3_oof_audit.json').read_text(encoding='utf-8'))
+          oof = pd.read_csv(root / 'oof/cardhit3_oof_rows.csv.gz')
+          required = {
+              'date','card_id','leg','betting_interest','winner','agf_prob','ganyan_prob',
+              'conditional_prob','pairwise_prob','lambdamart_prob','oof_fold'
+          }
+          assert required.issubset(oof.columns), sorted(required - set(oof.columns))
+          assert oof.groupby('card_id')['leg'].nunique().eq(6).all()
+          assert oof.groupby(['card_id','leg'])['winner'].sum().eq(1).all()
+          assert oof['card_id'].nunique() >= 200
+          contract = {
+              'status': 'COMPLETE',
+              'official_complete_meetings': audit['build']['official_meetings_read'],
+              'complete_sixfold_cards_all': audit['build']['complete_sixfold_cards'],
+              'complete_oof_cards': audit['oof']['cards'],
+              'oof_rows': audit['oof']['rows'],
+              'probability_columns': audit['oof']['probability_columns'],
+              'raw_history_archive': 'raw_history_program_results.tar.gz',
+              'oof_file': 'oof/cardhit3_oof_rows.csv.gz',
+          }
+          (root / 'DATA_CONTRACT_COMPLETE.json').write_text(
+              json.dumps(contract, ensure_ascii=False, indent=2), encoding='utf-8'
+          )
+          print(json.dumps(contract, ensure_ascii=False, indent=2))
+          PY
+          find artifacts/cardhit3-official -type f -maxdepth 3 -printf '%p %s bytes\n' | sort | tail -30
+
+      - name: Upload official data contract artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cardhit3-official-tjk-history-oof
+          path: artifacts/cardhit3-official
+          if-no-files-found: error
+          compression-level: 6
+          retention-days: 14
