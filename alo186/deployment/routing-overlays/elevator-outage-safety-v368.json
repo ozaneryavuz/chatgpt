@@ -1,0 +1,21 @@
+{
+  "version": 368,
+  "generatedAt": "2026-08-15",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesilince-asansor-ne-olur-mahsur-kalinca-ne-yapmali/index.html",
+      "canonicalPath": "/haberler/elektrik-kesilince-asansor-ne-olur-mahsur-kalinca-ne-yapmali/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/asansor-elektrik-kesintisi-kurtarma-hazirlik-kontrolu/index.html",
+      "canonicalPath": "/hesaplama/asansor-elektrik-kesintisi-kurtarma-hazirlik-kontrolu/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/sektor-rehberi/site-otel-asansor-elektrik-kesintisi-kurtarma-surekliligi/index.html",
+      "canonicalPath": "/sektor-rehberi/site-otel-asansor-elektrik-kesintisi-kurtarma-surekliligi/",
+      "type": "sector-guide"
+    }
+  ]
+}
