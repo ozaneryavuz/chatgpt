@@ -1,0 +1,44 @@
+{
+  "version": 380,
+  "generatedAt": "2026-08-15",
+  "topic": "debt-disconnection-and-official-reconnection",
+  "decision": "rights-and-official-process-first-no-consumer-affiliate",
+  "newAffiliateClasses": 0,
+  "newMerchantLinks": 0,
+  "canonicalGuide": "/haberler/elektrik-borcu-odendi-ne-zaman-acilir/",
+  "decisionTool": "/hesaplama/borctan-kesilen-elektrik-yeniden-baglama-takibi/",
+  "journeyHub": "/abonelik-ve-guvence-bedeli-kontrol-merkezi/",
+  "blockedConsumerAffiliateClasses": [
+    "electricity-meter",
+    "meter-seal-or-terminal-part",
+    "distribution-board-component",
+    "mcb-rcd-rcbo",
+    "fixed-wiring",
+    "ups-power-station-or-generator-as-reconnection-substitute",
+    "electrical-test-instrument"
+  ],
+  "professionalOrOfficialOnly": [
+    "debt-and-payment-status-verification-by-retail-supplier",
+    "official-reconnection-order",
+    "meter-seal-and-service-connection-work",
+    "life-support-device-special-registration",
+    "formal-complaint-or-regulatory-review"
+  ],
+  "noBuyWhen": [
+    "electricity-is-disconnected-for-debt",
+    "user-is-waiting-for-official-reconnection",
+    "reconnection-status-is-uncertain",
+    "life-support-or-active-health-risk-exists"
+  ],
+  "mustNotClaim": [
+    "payment-time-is-always-the-start-of-the-two-or-three-day-period",
+    "the-two-or-three-day-period-is-a-business-day-period",
+    "the-user-can-open-a-cut-or-sealed-supply-themselves",
+    "alo186-can-take-payment-or-create-a-reconnection-order",
+    "alo186-is-a-public-authority-distribution-company-or-retail-supplier",
+    "unverified-price",
+    "unverified-stock",
+    "unverified-rating",
+    "unverified-warranty"
+  ]
+}
