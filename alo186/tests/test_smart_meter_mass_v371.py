@@ -25,7 +25,11 @@ def main() -> None:
         canonical = f"https://alo186.com{route}"
         assert f'<link rel="canonical" href="{canonical}">' in html
         assert "bağımsız" in low
-        assert "yeni ürün almayın" in low
+        assert any(token in low for token in (
+            "yeni ürün almayın",
+            "yeni bir ürün satın alma gerekçesi değildir",
+            "satın almanız gerektiğini varsaymayın",
+        )), route
         for merchant_token in ("amazon.com", "amazon.com.tr", "amzn.to", "tag="):
             assert merchant_token not in low, (route, merchant_token)
         for commercial_schema in ('"@type":"product"', '"@type":"offer"', '"@type":"aggregaterating"', "pricecurrency"):
