@@ -1,0 +1,87 @@
+name: ALO186 outage rights v367
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/elektrik-kesintisi-tazminati-nasil-alinir/**'
+      - 'alo186/hesaplama/elektrik-kesintisi-tazminat-on-kontrolu/**'
+      - 'alo186/elektrik-kesintisi-haklari-merkezi/**'
+      - 'alo186/content/commerce/outage-rights-v367.json'
+      - 'alo186/deployment/routing-overlays/outage-rights-v367.json'
+      - 'alo186/tests/test_outage_rights_growth_v367.py'
+      - '.github/workflows/alo186-outage-rights-v367.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/elektrik-kesintisi-tazminati-nasil-alinir/**'
+      - 'alo186/hesaplama/elektrik-kesintisi-tazminat-on-kontrolu/**'
+      - 'alo186/elektrik-kesintisi-haklari-merkezi/**'
+      - 'alo186/content/commerce/outage-rights-v367.json'
+      - 'alo186/deployment/routing-overlays/outage-rights-v367.json'
+      - 'alo186/tests/test_outage_rights_growth_v367.py'
+      - '.github/workflows/alo186-outage-rights-v367.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-outage-rights-v367-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: v367 trust privacy and commerce checks
+        run: python alo186/tests/test_outage_rights_growth_v367.py
+      - name: Canonical production build and smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-outage-rights-v367
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-outage-rights-v367 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-outage-rights-v367
+      - name: Verify production routes sitemap schema and commercial closure
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path('/tmp/alo186-outage-rights-v367')
+          routes = [
+              '/haberler/elektrik-kesintisi-tazminati-nasil-alinir/',
+              '/hesaplama/elektrik-kesintisi-tazminat-on-kontrolu/',
+              '/elektrik-kesintisi-haklari-merkezi/',
+          ]
+          sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
+          release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
+          assert release['routingVersion'] >= 367
+          for route in routes:
+              page = root / route.strip('/') / 'index.html'
+              assert page.is_file(), page
+              html = page.read_text(encoding='utf-8')
+              lowered = html.lower()
+              with_slash = f'https://alo186.com{route}'
+              without_slash = f'https://alo186.com{route.rstrip("/")}'
+              assert with_slash in sitemap or without_slash in sitemap, route
+              assert f'<link rel="canonical" href="{with_slash}">' in html
+              assert 'amazon.com.tr' not in lowered
+              assert 'amzn.to' not in lowered
+              assert 'pricecurrency' not in lowered
+              assert '"@type":"Product"' not in html
+              assert '"@type":"Offer"' not in html
+          print({'ok': True, 'routingVersion': release['routingVersion'], 'routes': routes, 'merchantLinks': 0})
+          PY
+      - name: Upload verified bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-outage-rights-v367-${{ github.sha }}
+          path: /tmp/alo186-outage-rights-v367
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30

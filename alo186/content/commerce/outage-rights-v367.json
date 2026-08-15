@@ -1,0 +1,21 @@
+{
+  "version": 367,
+  "cluster": "outage-rights",
+  "generatedAt": "2026-08-15",
+  "independentPlatform": true,
+  "officialInstitutionImpersonation": false,
+  "affiliateEligible": false,
+  "newAffiliateCategories": 0,
+  "merchantLinks": 0,
+  "noBuyFirst": true,
+  "prohibitedUnverifiedFields": ["price", "stock", "rating", "warranty"],
+  "blockedProductClasses": [
+    "UPS",
+    "voltage-regulator",
+    "portable-power-station",
+    "generator",
+    "ATS",
+    "panel-equipment"
+  ],
+  "reason": "Kesinti tazminatı, resmî kayıt ve cihaz hasarı başvurusu satın alma problemi değildir; bu kullanıcı yolculuğu ticari olarak kapalıdır."
+}
