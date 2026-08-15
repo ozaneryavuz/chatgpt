@@ -1,0 +1,32 @@
+{
+  "version": 368,
+  "cluster": "elevator-outage-safety",
+  "generatedAt": "2026-08-15",
+  "independentPlatform": true,
+  "officialInstitutionImpersonation": false,
+  "affiliateEligible": false,
+  "newAffiliateCategories": 0,
+  "merchantLinks": 0,
+  "noBuyFirst": true,
+  "prohibitedUnverifiedFields": ["price", "stock", "rating", "warranty"],
+  "blockedProductClasses": [
+    "elevator-ARD",
+    "elevator-UPS",
+    "elevator-battery",
+    "elevator-drive",
+    "elevator-control-panel",
+    "elevator-safety-components",
+    "generator",
+    "ATS",
+    "fixed-electrical-installation"
+  ],
+  "professionalConversionClasses": [
+    "authorized-elevator-maintenance",
+    "passenger-release-training",
+    "alarm-intercom-functional-test",
+    "automatic-rescue-functional-test",
+    "generator-ATS-elevator-integration-acceptance",
+    "periodic-inspection-nonconformity-closure"
+  ],
+  "reason": "Asansörde mahsur kalma ve elektrik kesintisi can güvenliği ile yetkili bakım/kurtarma konusudur. Tek bir olay, ARD/UPS/akü/jeneratör veya başka bir ekipmanı consumer affiliate üzerinden satın alma gerekçesi değildir."
+}
