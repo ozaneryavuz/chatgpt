@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>VPP ve Esnek Yük Hazırlık Ön Değerlendirmesi | ALO186</title>
+  <meta name="description" content="GES, batarya, EV şarj, jeneratör ve esnek yüklerin VPP/toplayıcılık görüşmesine veri, telemetri, uzaktan kontrol ve kullanılabilirlik açısından ne kadar hazır olduğunu kişisel veri vermeden değerlendirin.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta name="theme-color" content="#071631">
+  <link rel="canonical" href="https://alo186.com/hesaplama/vpp-esnek-yuk-hazirlik/">
+  <style>
+    :root{--n:#071631;--b:#1e5eff;--i:#172238;--m:#58677c;--l:#dce5ef;--s:#f4f8fd;--g:#0b6b52;--a:#7b5200;--r:#8a1e1e;--f:#ffbf47}*{box-sizing:border-box}body{margin:0;font:16px/1.58 system-ui,sans-serif;color:var(--i);background:linear-gradient(#f3f7ff,#fff 720px)}.sh{max-width:1080px;margin:auto;padding:22px}.top{background:var(--n);color:#fff}.top .sh{display:flex;justify-content:space-between;align-items:center;gap:18px}.top a{color:#fff;font-weight:800}.hero{padding:52px 0 24px}.hero h1{font-size:clamp(2.25rem,6vw,4.7rem);line-height:1.02;letter-spacing:-.05em;color:var(--n);margin:.35rem 0}.hero p{max-width:860px;color:var(--m);font-size:1.08rem}.note,.panel,.result,.source{padding:20px;border:1px solid var(--l);border-radius:18px;background:#fff}.note{background:#eef4ff}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}.grid label,.group{display:grid;gap:7px;font-weight:800}.grid select{min-height:46px;padding:9px 11px;border:1px solid #9dafc2;border-radius:10px;font:inherit;background:#fff}.checks{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.checks label{display:flex;align-items:center;gap:8px;padding:10px;border:1px solid var(--l);border-radius:11px;background:var(--s);font-weight:700}.actions{display:flex;flex-wrap:wrap;gap:10px;margin:17px 0}.actions button,.actions a{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:10px 15px;border:2px solid var(--n);border-radius:11px;background:var(--n);color:#fff;font:inherit;font-weight:850;text-decoration:none;cursor:pointer}.actions .alt{background:#fff;color:var(--n)}.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0}.metrics div{padding:15px;border-radius:14px;background:var(--s)}.metrics strong{display:block;font-size:1.35rem;color:var(--n)}.pill{display:inline-block;padding:5px 9px;border-radius:999px;font-size:.8rem;font-weight:850}.good{background:#e6f6f0;color:var(--g)}.warn{background:#fff3cf;color:var(--a)}.bad{background:#fdecec;color:var(--r)}.small{font-size:.9rem;color:var(--m)}.hidden{display:none}.source a{color:#174bb9;font-weight:800}.faq details{padding:14px;border:1px solid var(--l);border-radius:12px;background:#fff;margin:8px 0}.faq summary{font-weight:850;color:var(--n)}a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible{outline:4px solid var(--f);outline-offset:3px}@media(max-width:720px){.grid,.metrics,.checks{grid-template-columns:1fr}.top .sh{align-items:flex-start;flex-direction:column}.actions>*{width:100%}}
+  </style>
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"VPP ve Esnek Yük Hazırlık Ön Değerlendirmesi","url":"https://alo186.com/hesaplama/vpp-esnek-yuk-hazirlik/","applicationCategory":"BusinessApplication","operatingSystem":"Web","isAccessibleForFree":true,"description":"Dağıtık enerji kaynaklarının VPP/toplayıcılık için ölçüm, telemetri, kontrol, baz yük ve kullanılabilirlik hazırlığını değerlendiren kişisel verisiz araç."},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Bu araç VPP geliri hesaplar mı?","acceptedAnswer":{"@type":"Answer","text":"Hayır. Gelir; mevzuat, piyasa ürünü, sözleşme, performans, kullanılabilirlik, çevrim maliyeti ve toplayıcı koşullarına bağlıdır. Araç yalnız teknik hazırlık boşluklarını gösterir."}},{"@type":"Question","name":"Ev tipi UPS VPP kaynağı sayılır mı?","acceptedAnswer":{"@type":"Answer","text":"Kesinti yedeklemesi için kullanılan ev tipi UPS, tek başına toplayıcılık veya yan hizmet uygunluğu oluşturmaz. Ölçüm, kontrol, bağlantı ve sözleşme koşulları ayrıca doğrulanmalıdır."}},{"@type":"Question","name":"ALO186 toplayıcı öneriyor mu?","acceptedAnswer":{"@type":"Answer","text":"Hayır. ALO186 şirket sıralamaz, komisyonla yönlendirme yapmaz ve resmî başvuru mercii değildir."}}]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Ana sayfa","item":"https://alo186.com/"},{"@type":"ListItem","position":2,"name":"Hesaplama","item":"https://alo186.com/hesaplama/"},{"@type":"ListItem","position":3,"name":"VPP ve Esnek Yük Hazırlığı","item":"https://alo186.com/hesaplama/vpp-esnek-yuk-hazirlik/"}]}]}</script>
+<link rel="stylesheet" href="/assets/alo186-accessibility-v215.css" data-alo186-accessibility-v215="true">
+</head>
+<body>
+<header class="top"><div class="sh"><strong>ALO186 · Bağımsız elektrik bilgi ağı</strong><nav><a href="/haberler/vpp-toplayicilik-sayac-telemetri-uzaktan-kontrol">VPP rehberi</a> · <a href="/hizmetler/ges-batarya-ev-sarj-fizibilitesi/">Fizibilite</a></nav></div></header>
+<main class="sh">
+  <section class="hero"><span class="small">Dağıtık kaynak · telemetri · kontrol · gelir garantisi yok</span><h1>VPP fikrini ürün listesinden önce <span style="color:var(--b)">ölçülebilir hazırlık planına</span> dönüştürün.</h1><p>GES, batarya, EV şarj, jeneratör ve esnek yüklerinizi seçin. Araç; sayaç verisi, telemetri, uzaktan kontrol, baz tüketim ve kullanılabilirlik eksiklerini ayırarak toplayıcı görüşmesi için tarafsız bir teknik ön dosya üretir.</p></section>
+  <section class="note"><strong>Bağımsızlık sınırı:</strong> Bu araç EPDK, TEİAŞ, dağıtım şirketi veya toplayıcı başvurusu değildir. Toplayıcı sıralamaz, gelir/tasarruf garantisi vermez ve bağlantı ya da piyasa uygunluğunu onaylamaz.</section>
+  <form id="form" class="panel">
+    <h2>Hazırlık durumunu işaretleyin</h2>
+    <div class="group"><span>Portföyünüzde bulunan kaynaklar</span><div class="checks"><label><input type="checkbox" name="asset" value="pv"> GES / inverter</label><label><input type="checkbox" name="asset" value="battery"> Enerji depolama</label><label><input type="checkbox" name="asset" value="ev"> EV şarj / araç filosu</label><label><input type="checkbox" name="asset" value="generator"> Jeneratör</label><label><input type="checkbox" name="asset" value="hvac"> HVAC / soğutma</label><label><input type="checkbox" name="asset" value="process"> Esnek proses yükü</label></div></div>
+    <div class="grid">
+      <label>Ölçüm geçmişi<select id="history"><option value="none">Düzenli geçmiş yok</option><option value="three">En az 3 aylık zaman serisi</option><option value="twelve">En az 12 aylık zaman serisi</option></select></label>
+      <label>Veri çözünürlüğü<select id="meter"><option value="invoice">Yalnız aylık fatura / toplam</option><option value="fifteen">15 dakikalık veya daha sık</option><option value="five">5 dakikalık veya daha sık</option></select></label>
+      <label>Telemetri<select id="telemetry"><option value="none">Uzak veri aktarımı yok</option><option value="local">Yerel EMS/SCADA kaydı var</option><option value="remote">Güvenli uzaktan telemetri var</option></select></label>
+      <label>Kontrol kabiliyeti<select id="control"><option value="manual">Yalnız manuel işletme</option><option value="scheduled">Programlanabilir yerel kontrol</option><option value="remote">Yetkilendirilmiş uzaktan set değeri / aç-kapa</option></select></label>
+      <label>Kullanılabilirlik penceresi<select id="availability"><option value="unknown">Henüz tanımlanmadı</option><option value="partial">Bazı saatler ve sınırlar biliniyor</option><option value="defined">Güç, süre, SoC/konfor ve geri dönüş sınırları tanımlı</option></select></label>
+      <label>Toplayıcı / sözleşme aşaması<select id="contract"><option value="none">Henüz görüşülmedi</option><option value="research">Yetkili şirket ve ürün koşulları araştırılıyor</option><option value="identified">Lisans/sözleşme ve teknik arayüz doğrulanmaya hazır</option></select></label>
+    </div>
+    <div class="actions"><button type="submit">Hazırlık ön değerlendirmesini oluştur</button></div>
+    <p class="small">Tesis adı, adres, sayaç numarası, müşteri bilgisi, marka/model, sözleşme bedeli veya piyasa fiyatı istenmez. Hesaplama yalnız tarayıcıda yapılır.</p>
+  </form>
+  <section id="result" class="result hidden" aria-live="polite">
+    <span id="state" class="pill warn">—</span><h2 id="title">Sonuç</h2><p id="summary"></p>
+    <div class="metrics"><div><span>Hazırlık puanı</span><strong id="score">—</strong></div><div><span>Kaynak çeşitliliği</span><strong id="assets">—</strong></div><div><span>Sonraki gözden geçirme</span><strong>30 gün</strong></div></div>
+    <h3>Öncelikli eksikler</h3><ol id="steps"></ol>
+    <div class="actions"><button id="json" type="button">Kişisel verisiz ön dosyayı indir</button><button id="ics" class="alt" type="button">30 günlük gözden geçirmeyi takvime ekle</button><a class="alt" href="/haberler/vpp-toplayicilik-sayac-telemetri-uzaktan-kontrol">Sayaç ve telemetri rehberini aç</a><a class="alt" href="/hizmetler/ges-batarya-ev-sarj-fizibilitesi/">Bağımsız fizibilite kapsamını incele</a></div>
+    <p class="small">Ücretli teknik hizmet zorunlu değildir. Mevcut veri ve kontrol altyapısı yeterliyse yeni cihaz satın almadan belge ve test hazırlığıyla ilerlenebilir.</p>
+  </section>
+  <section class="source"><h2>Kaynak ve kapsam doğrulaması</h2><p>TEİAŞ, Talep Tarafı Katılımı hizmeti için toplayıcı yan hizmet anlaşması, başvuru verisi ve web servis/başvuru bileşenleri yayımlar. Güncel piyasa dönemi ve sözleşme koşulları işlem öncesinde resmî kaynaktan yeniden doğrulanmalıdır.</p><p><a href="https://www.teias.gov.tr/talep-tarafi-katilimi-hizmeti" target="_blank" rel="noopener">TEİAŞ Talep Tarafı Katılımı Hizmeti ↗</a> · <a href="https://www.teias.gov.tr/haberler/talep-tarafi-katilimi-anlasmasi" target="_blank" rel="noopener">14 Mayıs 2026 anlaşma duyurusu ↗</a></p></section>
+  <section class="faq"><h2>Sık sorulanlar</h2><details><summary>Yalnız GES olması yeterli mi?</summary><p>Hayır. Ölçüm çözünürlüğü, telemetri, kontrol edilebilir güç, kullanılabilirlik penceresi, bağlantı ve sözleşme koşulları birlikte değerlendirilir.</p></details><details><summary>Jeneratör VPP portföyüne eklenebilir mi?</summary><p>Teknik ve mevzuat kapsamı, emisyon/işletme sınırları, bağlantı ve hedef piyasa ürünü ayrıca doğrulanmalıdır. Araç jeneratör kullanımını otomatik gelir kaynağı saymaz.</p></details><details><summary>Yeni EMS almak zorunlu mu?</summary><p>Hayır. Önce mevcut sayaç, inverter portalı, BMS, SCADA ve kayıtların veri kalitesi değerlendirilir. Mevcut altyapı yeterliyse satın almama geçerli sonuçtur.</p></details></section>
+</main>
+<script>
+(()=>{
+  'use strict';
+  const $=id=>document.getElementById(id);
+  let receipt=null;
+  const points={
+    history:{none:0,three:1,twelve:2},
+    meter:{invoice:0,fifteen:1,five:2},
+    telemetry:{none:0,local:1,remote:2},
+    control:{manual:0,scheduled:1,remote:2},
+    availability:{unknown:0,partial:1,defined:2},
+    contract:{none:0,research:1,identified:2}
+  };
+
+  function dl(name,type,text){
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([text],{type}));
+    a.download=name;
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),500);
+  }
+
+  function ymd(d){
+    return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+  }
+
+  function selected(){
+    return [...document.querySelectorAll('input[name="asset"]:checked')].map(input=>input.value);
+  }
+
+  $('form').addEventListener('submit',event=>{
+    event.preventDefault();
+    const assets=selected();
+    const values={
+      history:$('history').value,
+      meter:$('meter').value,
+      telemetry:$('telemetry').value,
+      control:$('control').value,
+      availability:$('availability').value,
+      contract:$('contract').value
+    };
+
+    let score=assets.length?Math.min(2,assets.length):0;
+    Object.entries(values).forEach(([key,value])=>score+=points[key][value]);
+    const max=14;
+    const steps=[];
+
+    if(!assets.length){
+      score=0;
+      steps.push('Önce en az bir kontrol edilebilir veya ölçülebilir kaynağı seçin; kaynak olmadan telemetri ve kontrol puanları hazırlık sonucu oluşturmaz.');
+    }
+    if(values.history==='none') steps.push('En az birkaç aylık zaman serisi oluşturarak normal tüketim/üretim bazını görünür kılın.');
+    if(values.meter==='invoice') steps.push('Aylık toplam yerine hedef ürünün gerektirdiği zaman çözünürlüğünde sayaç/veri kaynağını doğrulayın.');
+    if(values.telemetry==='none') steps.push('Verinin güvenli, zaman damgalı ve kesinti durumunu gösterecek biçimde aktarılma yöntemini tasarlayın.');
+    if(values.control==='manual') steps.push('Yetki, fail-safe, yerel öncelik ve siber güvenlik sınırlarıyla programlanabilir/uzak kontrol ihtiyacını değerlendirin.');
+    if(values.availability==='unknown') steps.push('Güç, süre, konfor, üretim, SoC ve geri dönüş sınırlarını tanımlayın; teorik kapasiteyi tamamen satılabilir saymayın.');
+    if(values.contract==='none') steps.push('Yalnız lisans ve resmî sözleşme kapsamı doğrulanmış toplayıcı/piyasa ürünüyle görüşün; gelir garantisi kabul etmeyin.');
+    if(!steps.length) steps.push('Tek hat, sayaç eşlemesi, veri sözlüğü, kontrol senaryosu ve kabul testini bağımsız teknik incelemeyle doğrulayın.');
+
+    let cls='bad';
+    let state='Ön keşif';
+    let title='Önce veri ve kaynak envanteri oluşturun.';
+    let summary='Mevcut bilgiler VPP/toplayıcılık görüşmesinde performans taahhüdü vermek için yeterli görünmüyor.';
+
+    if(assets.length&&score>=9){
+      cls='good';
+      state='Teknik görüşmeye hazırlanabilir';
+      title='Temel veri ve kontrol bileşenleri büyük ölçüde tanımlı.';
+      summary='Bu sonuç piyasa uygunluğu veya gelir onayı değildir. Teknik arayüz, bağlantı, test, siber güvenlik ve sözleşme koşullarını doğrulayarak ilerleyin.';
+    }else if(assets.length&&score>=5){
+      cls='warn';
+      state='Hazırlık geliştirilmeli';
+      title='Kaynak var; ölçüm, telemetri veya kontrol boşlukları kapanmalı.';
+      summary='Önce eksik kanıtları tamamlamak, gereksiz donanım alımından ve gerçekçi olmayan kapasite taahhüdünden korur.';
+    }
+
+    receipt={
+      schema:'alo186.vppReadiness.v1',
+      personalData:false,
+      createdAt:new Date().toISOString(),
+      assets,
+      values,
+      score,
+      max,
+      assetRequired:true,
+      incomeEstimate:false,
+      aggregatorRanking:false,
+      officialApproval:false,
+      steps
+    };
+
+    $('result').classList.remove('hidden');
+    $('state').textContent=state;
+    $('state').className=`pill ${cls}`;
+    $('title').textContent=title;
+    $('summary').textContent=summary;
+    $('score').textContent=`${score}/${max}`;
+    $('assets').textContent=assets.length?`${assets.length} sınıf`:'Tanımlanmadı';
+    $('steps').innerHTML=steps.map(step=>`<li>${step}</li>`).join('');
+    $('result').scrollIntoView({behavior:'smooth',block:'start'});
+  });
+
+  $('json').addEventListener('click',()=>receipt&&dl(
+    'alo186-vpp-hazirlik-on-dosyasi.json',
+    'application/json',
+    JSON.stringify(receipt,null,2)
+  ));
+
+  $('ics').addEventListener('click',()=>{
+    const start=new Date();
+    start.setDate(start.getDate()+30);
+    const end=new Date(start.getTime()+1800000);
+    dl('alo186-vpp-gozden-gecirme.ics','text/calendar',`BEGIN:VCALENDAR\r
+VERSION:2.0\r
+PRODID:-//ALO186//VPP Hazirlik//TR\r
+BEGIN:VEVENT\r
+UID:${Date.now()}@alo186.com\r
+DTSTART:${ymd(start)}T090000\r
+DTEND:${ymd(end)}T093000\r
+SUMMARY:VPP ve esnek yuk hazirligini yeniden gozden gecir\r
+DESCRIPTION:Veri telemetri kontrol ve kullanilabilirlik eksiklerini yeniden kontrol edin.\r
+END:VEVENT\r
+END:VCALENDAR\r
+`);
+  });
+})();
+</script>
+</body>
+</html>

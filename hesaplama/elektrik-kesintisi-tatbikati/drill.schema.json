@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://alo186.com/schemas/electric-outage-drill-v1.json",
+  "title": "ALO186 Elektrik Kesintisi Tatbikatı v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "version", "createdAt", "facilityType", "scenarioId", "criticalLoads", "backupSources", "score", "band", "timeline", "gaps", "nextDrillDate", "passportEvidenceSuggestions", "handoff"],
+  "properties": {
+    "schema": { "const": "alo186.electric-outage-drill.v1" },
+    "version": { "const": 1 },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "facilityType": { "enum": ["hotel", "site", "business", "other"] },
+    "scenarioId": { "enum": ["grid-outage", "generator-failure", "short-autonomy", "voltage-anomaly", "critical-load-loss"] },
+    "criticalLoads": { "type": "array", "uniqueItems": true, "items": { "type": "string", "maxLength": 64 } },
+    "backupSources": { "type": "array", "uniqueItems": true, "items": { "type": "string", "maxLength": 64 } },
+    "score": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "band": { "enum": ["controlled", "developing", "fragile", "uncontrolled"] },
+    "timeline": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["window", "tasks"],
+        "properties": {
+          "window": { "enum": ["5", "15", "60"] },
+          "tasks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["id", "status"],
+              "properties": {
+                "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+                "status": { "enum": ["ready", "partial", "missing"] }
+              }
+            }
+          }
+        }
+      }
+    },
+    "gaps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "window", "priority", "status"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+          "window": { "enum": ["5", "15", "60"] },
+          "priority": { "enum": ["P0", "P1", "P2"] },
+          "status": { "enum": ["ready", "partial", "missing"] }
+        }
+      }
+    },
+    "nextDrillDate": { "type": "string", "format": "date-time" },
+    "passportEvidenceSuggestions": {
+      "type": "object",
+      "additionalProperties": { "enum": ["current", "due", "planned"] }
+    },
+    "handoff": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "version", "createdAt", "expiresAt", "facilityType", "scenarioId", "criticalLoads", "backupSources", "score", "band", "gaps", "passportEvidenceSuggestions"],
+      "properties": {
+        "schema": { "const": "alo186.continuity-drill-handoff.v1" },
+        "version": { "const": 1 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "expiresAt": { "type": "string", "format": "date-time" },
+        "facilityType": { "enum": ["hotel", "site", "business", "other"] },
+        "scenarioId": { "type": "string" },
+        "criticalLoads": { "type": "array", "items": { "type": "string" } },
+        "backupSources": { "type": "array", "items": { "type": "string" } },
+        "score": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "band": { "type": "string" },
+        "gaps": { "type": "array" },
+        "passportEvidenceSuggestions": { "type": "object" }
+      }
+    }
+  }
+}

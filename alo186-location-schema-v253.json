@@ -1,0 +1,39 @@
+{
+  "version": 253,
+  "central": {
+    "services": 81,
+    "specificProvinceUrls": 81,
+    "serviceChannels": 81
+  },
+  "local": {
+    "provincePages": 81,
+    "companyPages": 21,
+    "governmentService112Pages": 102,
+    "questionPages": 102,
+    "privateEdasGovernmentServiceCount": 0
+  },
+  "sitemap": {
+    "expected": 102,
+    "present": 102,
+    "duplicates": 0
+  },
+  "schemaOrgTypes": [
+    "WebPage",
+    "Question",
+    "Answer",
+    "ItemList",
+    "Organization",
+    "Service",
+    "ServiceChannel",
+    "ContactPoint",
+    "GovernmentOrganization",
+    "GovernmentService"
+  ],
+  "privateEdasSchema": "Organization + Service + ServiceChannel(186)",
+  "governmentServiceSchema": "112 Acil Çağrı Hizmeti only",
+  "staticHtml": true,
+  "javascriptRequired": false,
+  "affiliateLinksOnLocationPages": 0,
+  "jsonLdSyntax": "pass",
+  "visibleContentParity": "pass"
+}

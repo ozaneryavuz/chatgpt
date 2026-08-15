@@ -1,0 +1,95 @@
+Options -Indexes
+DirectoryIndex index.html
+ErrorDocument 404 /404.html
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+# Eski teknik devir-kabul hizmet niyetini genel portala düşürme. Absolute apex
+# hedefi sayesinde www/http varyantları da tek adımda canonical hizmete gider.
+RewriteRule ^hizmetler/teknik-devir-kabul-paketi/?$ https://alo186.com/kurumsal-elektrik-surekliligi-on-degerlendirme [R=301,L,NE]
+
+# Tek canonical host: www veya başka bir Host aynı path ve query ile apex'e gider.
+RewriteCond %{HTTP_HOST} !^alo186\.com$ [NC]
+RewriteRule ^ https://alo186.com%{REQUEST_URI} [R=301,L,NE]
+
+# Apex host üzerindeki doğrudan HTTP isteğini HTTPS'e taşı. CDN/proxy
+# X-Forwarded-Proto gönderiyorsa HTTPS isteğinde yönlendirme döngüsü oluşmaz.
+RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTP:X-Forwarded-Proto} !https [NC]
+RewriteRule ^ https://alo186.com%{REQUEST_URI} [R=301,L,NE]
+
+# Eski/canlı uygulama manifesti www origin ile çağırsa da canonical apex üzerinde
+# aynı dosya ve doğru MIME türü sunulur. Dosya hesaplama rotasıyla artifact'a girer.
+RewriteRule ^manifest\.webmanifest$ hesaplama/manifest.webmanifest [T=application/manifest+json,L]
+
+# Extensionless canonical araç rotaları directory redirect oluşturmadan index dosyasını sunar.
+RewriteRule ^elektrik-portali/?$ elektrik-portali/index.html [L]
+RewriteRule ^edas-bul/?$ edas-bul/index.html [L]
+RewriteRule ^karar-motoru/?$ karar-motoru/index.html [L]
+RewriteRule ^hesaplama/?$ hesaplama/index.html [L]
+RewriteRule ^akilli-urun-secimi/?$ akilli-urun-secimi/index.html [L]
+RewriteRule ^isletme-surekliligi/?$ isletme-surekliligi/index.html [L]
+RewriteRule ^fatura-analizi/?$ fatura-analizi/index.html [L]
+RewriteRule ^hesaplama/yedek-guc/?$ hesaplama/yedek-guc/index.html [L]
+RewriteRule ^hesaplama/kesinti-maliyeti/?$ hesaplama/kesinti-maliyeti/index.html [L]
+</IfModule>
+
+<IfModule mod_headers.c>
+Header always set Strict-Transport-Security "max-age=31536000"
+Header always set X-Content-Type-Options "nosniff"
+Header always set X-Frame-Options "DENY"
+Header always set Referrer-Policy "strict-origin-when-cross-origin"
+Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+Header always set Cross-Origin-Opener-Policy "same-origin"
+Header always set Content-Security-Policy "default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' https: data:; font-src 'self' https: data:; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self' https:; upgrade-insecure-requests"
+
+<FilesMatch "\.(html?)$">
+Header set Cache-Control "public, max-age=300, must-revalidate"
+Header set CDN-Cache-Control "public, max-age=300, must-revalidate"
+</FilesMatch>
+<FilesMatch "\.(css|js)$">
+Header set Cache-Control "public, max-age=86400, must-revalidate"
+</FilesMatch>
+<Files "tailwindcss">
+Header set Cache-Control "public, max-age=604800, immutable"
+</Files>
+<Files "manifest.webmanifest">
+Header always set Access-Control-Allow-Origin "https://alo186.com"
+Header always set Cross-Origin-Resource-Policy "cross-origin"
+Header set Cache-Control "public, max-age=86400, must-revalidate"
+</Files>
+</IfModule>
+
+<IfModule mod_mime.c>
+AddType text/css .css
+AddType application/javascript .js
+AddType application/json .json
+AddType application/xml .xml
+AddType application/manifest+json .webmanifest
+</IfModule>
+
+# Canlı ana sayfadaki çözümlenemeyen @import "tailwindcss" isteği kaynak
+# şablondan kaldırılana kadar görünümü değiştirmeyen boş CSS yanıtı ver.
+<Files "tailwindcss">
+ForceType text/css
+</Files>
+
+# Cihaz hasarı başvuru süresi HTML yanıt katmanında değiştirilmez. Yayın paketi,
+# yürürlükteki Kalite Yönetmeliği Madde 26/1 uyarınca 30 günlük süreyi build
+# aşamasında doğrular. Sunucu filtresi eski veya doğru hukukî metni sessizce
+# dönüştüremez; görünür içerik ile JSON-LD aynı canonical kaynaktan gelir.
+
+<IfModule mod_expires.c>
+ExpiresActive On
+ExpiresByType text/css "access plus 7 days"
+ExpiresByType application/javascript "access plus 7 days"
+ExpiresByType image/svg+xml "access plus 30 days"
+ExpiresByType image/webp "access plus 30 days"
+ExpiresByType image/avif "access plus 30 days"
+ExpiresByType application/manifest+json "access plus 1 day"
+</IfModule>
+
+<IfModule mod_deflate.c>
+AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript application/json application/xml application/manifest+json image/svg+xml
+</IfModule>

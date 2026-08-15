@@ -1,0 +1,38 @@
+{
+  "schema": "alo186.sample-deliverable.v1",
+  "sampleType": "hotel-electrical-continuity-audit",
+  "fictional": true,
+  "customerClaim": false,
+  "facility": "Mavi Kıyı Oteli — kurgusal örnek",
+  "decisionGoal": "Sezon öncesi kritik yük ve yedek kaynak kabulü",
+  "evidenceStatus": {
+    "singleLineDiagram": "available",
+    "criticalLoadMatrix": "partial",
+    "actualUpsRuntimeTest": "missing",
+    "atsReturnEventLog": "missing"
+  },
+  "sampleFindings": [
+    {
+      "finding": "Yangın algılama ve ağ yüklerinin UPS listesiyle eşleşmesi doğrulanmamış",
+      "priority": "P0",
+      "requiredEvidence": "Kritik yük matrisi, tek hat ve kontrollü şebeke kesme testi"
+    },
+    {
+      "finding": "Jeneratör–ATS geri dönüş senaryosu için imzalı event log yok",
+      "priority": "P1",
+      "requiredEvidence": "Şebeke kesme/geri gelme testi, faz sırası ve nötr/RCD kaydı"
+    },
+    {
+      "finding": "Akü testleri yalnız blok voltajına dayanıyor",
+      "priority": "P2",
+      "requiredEvidence": "Aynı yöntemle trend, bağlantı direnci ve kontrollü kapasite testi planı"
+    }
+  ],
+  "deliverables": [
+    "Yönetici özeti",
+    "Teknik kontrol eki",
+    "Kabul matrisi",
+    "30/60/90 günlük aksiyon planı"
+  ],
+  "disclaimer": "Bu dosya tamamen kurgusaldır; gerçek müşteri, tesis, ölçüm veya başarı iddiası değildir. Resmî uygunluk veya kabul belgesi değildir."
+}

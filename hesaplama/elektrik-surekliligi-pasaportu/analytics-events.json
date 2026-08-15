@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "privacy": {
+    "containsPersonalData": false,
+    "forbiddenParameters": ["name", "company", "email", "phone", "address", "subscription_number", "free_text", "life_support"]
+  },
+  "events": [
+    {
+      "name": "continuity_passport_started",
+      "parameters": ["facility_type", "maturity_imported"]
+    },
+    {
+      "name": "continuity_passport_completed",
+      "parameters": ["facility_type", "score_band", "score_bucket", "p0_count", "p1_count", "p2_count", "backup_present", "panel_recommended"]
+    },
+    {
+      "name": "continuity_passport_emergency_route_shown",
+      "parameters": []
+    },
+    {
+      "name": "continuity_passport_exported",
+      "parameters": ["facility_type", "score_band", "p0_count", "maturity_imported"]
+    },
+    {
+      "name": "continuity_passport_printed",
+      "parameters": ["facility_type", "score_band"]
+    },
+    {
+      "name": "continuity_passport_storage_enabled",
+      "parameters": ["ttl_days"]
+    },
+    {
+      "name": "continuity_passport_restored",
+      "parameters": ["facility_type"]
+    },
+    {
+      "name": "continuity_passport_panel_handoff_created",
+      "parameters": ["facility_type", "score_band", "p0_count", "gap_count", "ttl_days"]
+    }
+  ]
+}

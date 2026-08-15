@@ -1,0 +1,6 @@
+/*
+ * Temporary compatibility stylesheet.
+ * The live home page currently requests /tailwindcss through an unresolved
+ * @import. Generated page styles are already inlined, so this file must stay
+ * empty of visual rules. Remove it after the source import is deleted.
+ */

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Elektrik Kesintisi Tatbikatı | 5/15/60 Dakika Simülatörü | ALO186</title>
+  <meta name="description" content="Otel, site ve işletmeniz için ilk 5, 15 ve 60 dakika elektrik kesintisi görevlerini değerlendirin; kişisel veri vermeden hazırlık skoru, P0/P1/P2 planı, JSON ve panel aktarımı oluşturun.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta name="theme-color" content="#0b1633">
+  <link rel="canonical" href="https://alo186.com/hesaplama/elektrik-kesintisi-tatbikati/">
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","@id":"https://alo186.com/hesaplama/elektrik-kesintisi-tatbikati/#app","name":"Elektrik Kesintisi Tatbikatı","url":"https://alo186.com/hesaplama/elektrik-kesintisi-tatbikati/","applicationCategory":"BusinessApplication","operatingSystem":"Web","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"TRY"},"description":"Otel, site ve işletmeler için ilk 5, 15 ve 60 dakika elektrik kesintisi görevlerini kişisel veri istemeden değerlendiren masa başı tatbikat aracı."},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Bu araç gerçek elektrik arızasında kullanılabilir mi?","acceptedAnswer":{"@type":"Answer","text":"Aktif yangın, duman, elektrik çarpması, kıvılcım veya düşmüş iletken varsa kullanılmamalıdır; güvenli uzaklaşma ve 112 önceliklidir. Araç planlı masa başı veya yetkili ekip gözetimindeki kontrollü tatbikat içindir."}},{"@type":"Question","name":"Tatbikat hangi verileri toplar?","acceptedAnswer":{"@type":"Answer","text":"Ad, şirket adı, telefon, e-posta, adres, abonelik numarası, seri numarası ve serbest metin alınmaz. Yalnız tesis sınıfı, senaryo, kritik yük, yedek kaynak ve kapalı uçlu görev durumları değerlendirilir."}},{"@type":"Question","name":"Sonuç ne işe yarar?","acceptedAnswer":{"@type":"Answer","text":"İlk 5, 15 ve 60 dakika görevlerini, P0/P1/P2 boşluklarını, sonraki tatbikat tarihini ve Elektrik Sürekliliği Pasaportu ile Panel için kişisel verisiz handoff dosyasını üretir."}}]}]}</script>
+<link rel="stylesheet" href="/assets/alo186-accessibility-v215.css" data-alo186-accessibility-v215="true">
+</head>
+<body>
+  <a class="skip-link" href="#drillForm">Tatbikata geç</a>
+  <header class="site-header"><div class="header-inner"><a class="brand" href="https://alo186.com" aria-label="ALO186 ana sayfa"><span class="brand-mark" aria-hidden="true">186</span><span><strong>ALO186</strong><small>Bağımsız elektrik bilgi ağı</small></span></a><nav aria-label="Üst menü"><a href="https://alo186.com/elektrik-kesintisi">Kesinti</a><a href="https://alo186.com/elektrik-portali">Portal</a><a href="https://alo186.com/hesaplama/">Hesaplayıcılar</a></nav></div></header>
+  <main>
+    <section class="trust-banner"><strong>Planlı tatbikattır, canlı müdahale talimatı değildir.</strong> Enerjili pano, transfer şalteri, jeneratör, kablo veya iletkene kullanıcı müdahalesi önermez. Gerçek olayda yangın, duman, elektrik çarpması, kıvılcım veya düşmüş iletken varsa güvenli uzaklaşın ve 112’yi arayın.</section>
+
+    <section class="hero">
+      <div class="hero-copy"><span class="eyebrow">Otel · site · işletme · kişisel veri yok</span><h1>Elektrik kesintisinin ilk saatini <em>önceden prova edin.</em></h1><p>Şebeke kesintisi, jeneratör/transfer başarısızlığı, kısa UPS otonomisi, gerilim anormalliği veya kritik yük kaybı senaryosunda ilk 5, 15 ve 60 dakika görevlerini değerlendirin. Sonuçta hazırlık skoru, P0/P1/P2 planı ve panel aktarımı oluşur.</p><div class="chip-row"><span class="chip">5/15/60 dakika</span><span class="chip">Kapalı uçlu görevler</span><span class="chip">JSON / PDF</span><span class="chip">SaaS handoff</span></div></div>
+      <aside class="hero-card"><span>Ücretsiz B2B aktivasyon aracı</span><strong>1 senaryo · 16 görev</strong><small>İsim, iletişim, adres, abonelik, seri numarası veya serbest metin istemez.</small><a href="#drillForm">Tatbikatı başlat ↓</a></aside>
+    </section>
+
+    <section id="emergencyNotice" class="emergency" role="alert" tabindex="-1" hidden><strong>Tatbikatı durdurun, önce can güvenliği.</strong> Yangın, duman, elektrik çarpması, kıvılcım veya yere düşmüş iletken varsa bölgeden uzaklaşın ve 112’yi arayın. Enerjili pano veya iletkene müdahale etmeyin.<br><a href="tel:112">112’yi ara</a></section>
+
+    <form id="drillForm" novalidate>
+      <section class="drill-layout">
+        <div class="drill-main">
+          <section class="panel"><div class="section-title"><div><span class="step">1</span><h2>Senaryo ve güvenlik sınırı</h2></div></div><div class="form-grid">
+            <label class="field"><span>Tesis türü</span><select name="facilityType"><option value="hotel">Otel / konaklama</option><option value="site">Site / apartman yönetimi</option><option value="business" selected>Küçük veya orta işletme</option><option value="other">Diğer teknik tesis</option></select></label>
+            <label class="field"><span>Tatbikat senaryosu</span><select id="scenarioId" name="scenarioId"><option value="grid-outage">Şebeke kesintisi ve yedek kaynağa geçiş</option><option value="generator-failure">Jeneratör başlamıyor veya transfer gerçekleşmiyor</option><option value="short-autonomy">UPS veya batarya otonomisi beklenenden kısa</option><option value="voltage-anomaly">Kısmi faz kaybı veya gerilim anormalliği</option><option value="critical-load-loss">Kritik su, iletişim veya soğuk zincir yükü kaybı</option></select></label>
+            <label class="check-item field full"><input name="immediateDanger" type="checkbox"><span><strong>Şu anda yangın, duman, kıvılcım, elektrik çarpması veya düşmüş iletken var</strong><br><small>Bu durumda skor, export ve ticari CTA durur; 112 rotası açılır.</small></span></label>
+            <label class="check-item field full"><input name="lifeSupport" type="checkbox"><span><strong>Tıbbi veya yaşam destek yükü bulunuyor</strong><br><small>Üretici onaylı profesyonel plan zorunludur. Bu seçim saklanmaz, dışa aktarılmaz ve analitiğe gönderilmez.</small></span></label>
+            <label class="check-item field full"><input name="confirmTabletop" type="checkbox"><span><strong>Bu çalışma planlı masa başı veya yetkili ekip gözetimindeki kontrollü tatbikattır</strong><br><small>Gerçek olayda enerjili ekipmana müdahale talimatı olarak kullanılmayacağını doğrulayın.</small></span></label>
+          </div></section>
+
+          <section class="panel"><div class="section-title"><div><span class="step">2</span><h2>Kritik yük ve yedek kaynak</h2></div></div><p class="section-copy">Marka, model, güç veya tesis adı girmeden yalnız kategori ve çözüm sınıfını seçin.</p><h3>Kritik yük kategorileri</h3><div id="criticalLoads" class="choice-grid"></div><h3>Mevcut yedek kaynak sınıfları</h3><div id="backupSources" class="choice-grid"></div></section>
+
+          <section class="panel"><div class="section-title"><div><span class="step">3</span><h2>Yönetişim hazırlığı</h2></div></div><div class="choice-grid compact-grid">
+            <label class="choice-card"><input name="rolesAssigned" type="checkbox"><span>Birincil ve yedek görev rolleri tanımlı</span></label>
+            <label class="choice-card"><input name="offlineContacts" type="checkbox"><span>112, 186, yönetim ve servis listesi çevrimdışı erişilebilir</span></label>
+            <label class="choice-card"><input name="recordTemplate" type="checkbox"><span>Standart olay/tatbikat kayıt şablonu hazır</span></label>
+          </div></section>
+
+          <section class="panel"><div class="section-title"><div><span class="step">4</span><h2>İlk 5 / 15 / 60 dakika görevleri</h2></div></div><p class="section-copy">“Hazır” yalnız prosedür, sorumlu rol ve uygulanabilir kanıt varsa seçilmelidir. Bu araç enerjili ekipmana müdahale adımı vermez.</p><div id="taskList" class="task-list"></div></section>
+
+          <div id="validation" class="validation" role="alert" aria-live="assertive" tabindex="-1" hidden></div>
+          <div class="actions"><button class="btn btn-primary" type="submit">Tatbikat skorunu ve planı oluştur</button><button id="resetBtn" class="btn btn-secondary" type="button">Sıfırla</button></div>
+        </div>
+
+        <aside class="drill-side"><section class="panel side"><span class="eyebrow">Tatbikat neden gelir üretir?</span><ul class="side-list"><li>Eksik görevi görünür ve ölçülebilir hâle getirir.</li><li>Pasaporttaki “tatbikat kanıtı” boşluğunu kapatır.</li><li>Panelde görev, audit ve yenileme ihtiyacını somutlaştırır.</li><li>İlk SaaS onboarding görüşmesini kısaltır.</li></ul><div class="privacy-box"><strong>Veri minimizasyonu</strong><br>Lead formu değildir. Önce kullanılabilir tatbikat dosyası üretir; panel aktarımı sonuçtan sonra isteğe bağlıdır.</div></section><section class="panel side"><span class="eyebrow">Canlı olayda</span><p>Şebeke, bina ve ekipman sorumluluğunu ayırmak için <a href="https://alo186.com/karar-motoru">karar motorunu</a> kullanın. Tehlikede 112, bölgesel şebeke arızasında 186 önceliklidir.</p></section></aside>
+      </section>
+    </form>
+
+    <section id="results" class="results" tabindex="-1" aria-live="polite" hidden>
+      <div class="result-hero"><div class="score-card"><span>Kesinti tatbikatı hazırlık skoru</span><strong id="scoreValue">0/100</strong><small>ALO186 Tatbikat v1 · kişisel veri içermez</small></div><div class="panel score-copy"><span id="bandValue" class="status warn">Sonuç</span><h2 id="scoreSummary">Tatbikat özeti</h2><p><strong>P0 kritik boşluk:</strong> <span id="p0Value">0</span></p><p><strong>P1 yüksek öncelik:</strong> <span id="p1Value">0</span></p><p><strong>Sonraki tatbikat:</strong> <span id="nextDrillValue">—</span></p><p id="statusSummary" class="muted"></p></div></div>
+
+      <section class="content-section"><span class="eyebrow">Yönetici özeti</span><h2>Tek cümlede hazırlık durumu</h2><div class="panel"><p id="managerSummary"></p></div></section>
+
+      <section class="content-section"><span class="eyebrow">Zaman çizelgesi</span><h2>İlk 5, 15 ve 60 dakika</h2><div id="timeline" class="timeline"></div></section>
+
+      <section class="content-section"><span class="eyebrow">Kapanış gündemi</span><h2>P0 / P1 / P2 boşlukları</h2><div id="gapList" class="gap-list"></div></section>
+
+      <section class="content-section"><span class="eyebrow">Pasaport güncellemesi</span><h2>Kanıt durumuna aktarılabilecek öneriler</h2><div class="panel"><ul id="passportSuggestions" class="suggestion-list"></ul><p class="muted">Bunlar otomatik sertifika veya uygunluk sonucu değildir; yalnız tatbikat bulgusundan üretilen kapalı uçlu önerilerdir.</p></div></section>
+
+      <div class="results-actions"><button id="exportBtn" class="btn btn-secondary" type="button">JSON tatbikat dosyasını indir</button><button id="printBtn" class="btn btn-secondary" type="button">Yazdır / PDF</button><button id="panelBtn" class="btn btn-primary" type="button">7 günlük panel aktarımını hazırla</button><a class="btn btn-secondary" href="https://alo186.com/hesaplama/elektrik-surekliligi-pasaportu/">Pasaportu güncelle</a></div>
+
+      <section class="business-cta"><div><h3>Tatbikatı yaşayan görev sistemine dönüştürün.</h3><p>İlk 5/15/60 dakika boşluklarını, sorumlu rolleri, test tarihlerini, olay kayıtlarını ve kapanış kanıtlarını ALO186 Elektrik Sürekliliği Paneli’nde kuruluş bazında izleyin.</p></div><a href="https://alo186.com/isletme-surekliligi">Süreklilik Panelini aç →</a></section>
+    </section>
+  </main>
+  <footer><div class="footer-inner"><div><strong>ALO186</strong><p>Bağımsız bilgilendirme platformudur; EDAŞ, kamu kurumu, servis veya uygunluk kuruluşu değildir.</p></div><div class="footer-links"><a href="https://alo186.com/yayin-ilkeleri">Yayın ilkeleri</a><a href="https://alo186.com/gizlilik">Gizlilik</a><a href="https://alo186.com/iletisim">İletişim</a></div></div></footer>
+  <noscript><div class="noscript">Bu tatbikat aracı JavaScript gerektirir.</div></noscript>
+  <script src="./core.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>

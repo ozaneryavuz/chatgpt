@@ -1,0 +1,99 @@
+{
+  "ok": true,
+  "version": 250,
+  "generatedAt": "2026-08-03",
+  "routeCount": 6,
+  "itemListCount": 6,
+  "productEntityCount": 18,
+  "faqPageCount": 6,
+  "verifiedOfferCount": 0,
+  "emittedOfferCount": 0,
+  "offerPolicy": "fail-closed",
+  "directAmazonLinkCount": 0,
+  "annotatedAmazonLinkCount": 0,
+  "staticPrerendered": true,
+  "javascriptRequiredForCoreRecommendations": false,
+  "routes": [
+    {
+      "route": "/hesaplama/yedek-guc-cozum-secici/",
+      "productAnchorCount": 3,
+      "faqAnchorCount": 2,
+      "staticComparisonTable": true,
+      "jsonLdTypes": [
+        "ItemList",
+        "ListItem",
+        "Product",
+        "FAQPage"
+      ]
+    },
+    {
+      "route": "/hesaplama/yedek-guc-maliyet-karsilastirma/",
+      "productAnchorCount": 3,
+      "faqAnchorCount": 1,
+      "staticComparisonTable": true,
+      "jsonLdTypes": [
+        "ItemList",
+        "ListItem",
+        "Product",
+        "FAQPage"
+      ]
+    },
+    {
+      "route": "/hesaplama/modem-internet-yedekleme/",
+      "productAnchorCount": 3,
+      "faqAnchorCount": 1,
+      "staticComparisonTable": true,
+      "jsonLdTypes": [
+        "ItemList",
+        "ListItem",
+        "Product",
+        "FAQPage"
+      ]
+    },
+    {
+      "route": "/hesaplama/akim-korumali-grup-priz-uygunluk/",
+      "productAnchorCount": 3,
+      "faqAnchorCount": 2,
+      "staticComparisonTable": true,
+      "jsonLdTypes": [
+        "ItemList",
+        "ListItem",
+        "Product",
+        "FAQPage"
+      ]
+    },
+    {
+      "route": "/hesaplama/gerilim-koruma-cozum-secici/",
+      "productAnchorCount": 3,
+      "faqAnchorCount": 1,
+      "staticComparisonTable": true,
+      "jsonLdTypes": [
+        "ItemList",
+        "ListItem",
+        "Product",
+        "FAQPage"
+      ]
+    },
+    {
+      "route": "/kesintiye-hazirlik-atolyesi",
+      "productAnchorCount": 3,
+      "faqAnchorCount": 1,
+      "staticComparisonTable": true,
+      "jsonLdTypes": [
+        "ItemList",
+        "ListItem",
+        "Product",
+        "FAQPage"
+      ]
+    }
+  ],
+  "externalValidatorStatus": {
+    "googleRichResults": "tool-ready; Product rich-result eligibility intentionally unavailable without verified offers/reviews",
+    "schemaOrg": "JSON-LD parsed and type/property contracts checked locally; live URL validation follows deployment"
+  },
+  "failures": [],
+  "injectedRouteCount": 6,
+  "alreadyInjectedRouteCount": 0,
+  "amazonRelAnnotationsAdded": 0,
+  "affiliateTag": "alo186rehber-21"
+}

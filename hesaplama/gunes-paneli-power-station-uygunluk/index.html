@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Güneş Paneli Power Station Uygunluk Hesabı | ALO186</title>
+  <meta name="description" content="Panel Voc, Vmp, Isc, Imp, seri-paralel bağlantı, soğuk hava ve power station MPPT sınırlarıyla güneş paneli giriş uyumunu ve yaklaşık şarj süresini kontrol edin.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="https://alo186.com/hesaplama/gunes-paneli-power-station-uygunluk/">
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","@id":"https://alo186.com/hesaplama/gunes-paneli-power-station-uygunluk/#app","name":"Güneş Paneli ve Power Station PV Giriş Uygunluk Testi","url":"https://alo186.com/hesaplama/gunes-paneli-power-station-uygunluk/","applicationCategory":"UtilitiesApplication","operatingSystem":"Web","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"TRY"},"description":"Panel Voc/Vmp/Isc/Imp, sıcaklık katsayısı, seri-paralel bağlantı ve power station MPPT sınırlarıyla taşınabilir güneş paneli uyumunu ön değerlendiren ücretsiz araç."},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Güneş panelleri seri bağlanınca ne değişir?","acceptedAnswer":{"@type":"Answer","text":"Seri bağlantıda panel gerilimleri toplanır, akım yaklaşık aynı kalır. Soğuk havada Voc yükseldiği için toplam açık devre gerilimi cihazın mutlak PV sınırını aşmamalıdır."}},{"@type":"Question","name":"Paneller paralel bağlanınca ne değişir?","acceptedAnswer":{"@type":"Answer","text":"Paralel bağlantıda akımlar toplanır, gerilim yaklaşık aynı kalır. Toplam Imp ve gerekiyorsa Isc, power station veya MPPT giriş sınırlarıyla karşılaştırılmalıdır."}},{"@type":"Question","name":"Panel wattı power station giriş wattından yüksek olabilir mi?","acceptedAnswer":{"@type":"Answer","text":"Bazı cihazlar fazla panel gücünü kırpar; bazıları yalnız belirli aşırı panelleme oranına izin verir. Gerilim ve akım sınırları kesinlikle aşılmamalı, tam model kılavuzu doğrulanmalıdır."}},{"@type":"Question","name":"Araç kesin ürün uyumu verir mi?","acceptedAnswer":{"@type":"Answer","text":"Hayır. Araç elektriksel ön kontrol sunar. Konnektör, polarite, kablo, port, koruma ve üretici tarafından izin verilen bağlantı mimarisi ayrıca doğrulanmalıdır."}}]}]}</script>
+<link rel="stylesheet" href="/assets/alo186-accessibility-v215.css" data-alo186-accessibility-v215="true">
+</head>
+<body>
+  <a class="skip-link" href="#arac">Araca geç</a>
+  <header class="site-header"><div class="header-inner"><a class="brand" href="https://alo186.com" aria-label="ALO186 ana sayfa"><span class="brand-mark" aria-hidden="true">186</span><span><strong>ALO186</strong><small>Bağımsız elektrik bilgi ağı</small></span></a><nav aria-label="Üst menü"><a href="https://alo186.com/elektrik-kesintisi">Kesinti</a><a href="https://alo186.com/elektrik-portali">Portal</a><a href="https://alo186.com/hesaplama/">Hesaplayıcılar</a></nav></div></header>
+  <main>
+    <section class="trust-banner"><strong>Elektriksel ön kontroldür; kurulum onayı değildir.</strong> Çatı, sabit tesisat, araç/karavan ve yüksek gerilimli seri dizilerde kablo, koruma, ayırma, topraklama ve yangın güvenliği yetkili uzman tarafından doğrulanmalıdır. ALO186 resmî kurum veya üretici temsilcisi değildir.</section>
+    <section class="hero"><div class="hero-copy"><span class="eyebrow">Voc · Vmp · Isc · Imp · seri/paralel · MPPT</span><h1>Güneş paneli power station’a <em>gerçekten uygun mu?</em></h1><p>Yalnız toplam watt değerine bakmayın. Soğuk hava Voc yükselmesini, MPPT çalışma aralığını, akım ve güç sınırlarını aynı anda kontrol edin.</p><div class="chip-row"><span class="chip">Kişisel veri yok</span><span class="chip">Tarayıcıda çalışır</span><span class="chip">Fiyat ve stok iddiası yok</span></div></div><aside class="hero-card"><span>Kontrol zinciri</span><strong>Panel etiketi → dizi → PV portu</strong><small>Seride gerilim, paralelde akım toplanır; soğuk Voc ayrıca hesaplanır.</small><a href="#arac">Uyumluluğu hesapla ↓</a></aside></section>
+
+    <form id="compatibilityForm">
+      <section id="arac" class="layout">
+        <div class="panel">
+          <div class="section-title"><div><span class="step">1</span><h2>Panel ve bağlantı düzeni</h2></div></div>
+          <div class="preset-grid" aria-label="Hazır örnekler"><button type="button" class="preset" data-preset="portable"><strong>Tek taşınabilir panel</strong><small>200 W, düşük gerilim</small></button><button type="button" class="preset" data-preset="series"><strong>Üç panel seri</strong><small>Soğuk Voc kontrolü</small></button><button type="button" class="preset" data-preset="overvoltage"><strong>Sınırı aşan örnek</strong><small>Uyumsuzluğu görün</small></button></div>
+          <div class="form-grid">
+            <label class="field"><span>Tek panel gücü (W)</span><input id="panelPower" type="number" min="10" max="1000" step="1" inputmode="decimal" required></label>
+            <label class="field"><span>Panel Voc (V)</span><input id="panelVoc" type="number" min="1" max="250" step="0.1" inputmode="decimal" required></label>
+            <label class="field"><span>Panel Vmp (V)</span><input id="panelVmp" type="number" min="1" max="250" step="0.1" inputmode="decimal" required></label>
+            <label class="field"><span>Panel Isc (A)</span><input id="panelIsc" type="number" min="0.1" max="40" step="0.1" inputmode="decimal" required></label>
+            <label class="field"><span>Panel Imp (A)</span><input id="panelImp" type="number" min="0.1" max="40" step="0.1" inputmode="decimal" required></label>
+            <label class="field"><span>|Voc sıcaklık katsayısı| (%/°C)</span><input id="vocTempCoeff" type="number" min="0.05" max="1" step="0.01" inputmode="decimal" required><small class="help">Etikette -0,28 %/°C yazıyorsa 0,28 girin.</small></label>
+            <label class="field"><span>Seri panel sayısı</span><input id="seriesCount" type="number" min="1" max="12" step="1" inputmode="numeric" required></label>
+            <label class="field"><span>Paralel dizi sayısı</span><input id="parallelCount" type="number" min="1" max="8" step="1" inputmode="numeric" required></label>
+            <label class="field"><span>Beklenen en düşük sıcaklık (°C)</span><input id="minTemp" type="number" min="-40" max="25" step="1" inputmode="decimal" required></label>
+          </div>
+        </div>
+        <aside class="panel side"><span class="step">i</span><h2>Etiketten hangi değerler alınır?</h2><ul><li><strong>Voc:</strong> Yüksüz açık devre gerilimi.</li><li><strong>Vmp:</strong> Azami güç noktasındaki çalışma gerilimi.</li><li><strong>Isc:</strong> Kısa devre akımı.</li><li><strong>Imp:</strong> Azami güç noktasındaki çalışma akımı.</li></ul><div class="formula">Soğuk Voc ≈ panel Voc × seri adet × [1 + katsayı × (25 − Tmin)]</div><p class="help">Katsayı yüzde olduğu için hesapta 100’e bölünür. Panel hücresi ortamdan daha soğuk veya sıcak davranabilir; sonuç muhafazakâr ön kontroldür.</p></aside>
+      </section>
+
+      <section class="panel settings-panel"><div class="section-title"><div><span class="step">2</span><h2>Power station / MPPT PV giriş sınırları</h2></div></div>
+        <div class="form-grid">
+          <label class="field"><span>MPPT alt çalışma gerilimi (V)</span><input id="mpptMinV" type="number" min="1" max="250" step="0.1" inputmode="decimal" required></label>
+          <label class="field"><span>MPPT üst çalışma gerilimi (V)</span><input id="mpptMaxV" type="number" min="2" max="300" step="0.1" inputmode="decimal" required></label>
+          <label class="field"><span>Mutlak azami PV Voc (V)</span><input id="absoluteMaxVoc" type="number" min="2" max="350" step="0.1" inputmode="decimal" required></label>
+          <label class="field"><span>Azami PV çalışma akımı (A)</span><input id="maxInputCurrent" type="number" min="0.1" max="100" step="0.1" inputmode="decimal" required></label>
+          <label class="field"><span>Azami PV kısa devre akımı (A, isteğe bağlı)</span><input id="maxShortCircuitCurrent" type="number" min="0.1" max="150" step="0.1" inputmode="decimal"><small class="help">Kılavuz ayrı bir Isc sınırı veriyorsa girin.</small></label>
+          <label class="field"><span>Azami PV giriş gücü (W)</span><input id="maxInputPower" type="number" min="10" max="10000" step="1" inputmode="decimal" required></label>
+          <label class="field"><span>Kullanım biçimi</span><select id="application"><option value="portable">Taşınabilir, fişli ve geçici kullanım</option><option value="vehicle">Karavan / araç / tekne</option><option value="fixed">Çatı veya sabit kurulum</option><option value="unknown">Henüz bilmiyorum</option></select></label>
+        </div>
+        <div class="field full safety-grid"><label class="check-item"><input id="manualVerified" type="checkbox"><span><strong>Tam model kılavuzundaki aynı PV portu değerlerini kontrol ettim</strong></span></label><label class="check-item"><input id="connectorKnown" type="checkbox"><span><strong>Konnektör tipi ve polarite doğrulandı</strong></span></label><label class="check-item"><input id="factoryCable" type="checkbox"><span><strong>Üreticinin önerdiği kablo/adaptör kullanılıyor</strong></span></label></div>
+      </section>
+
+      <section class="panel settings-panel"><div class="section-title"><div><span class="step">3</span><h2>İsteğe bağlı yaklaşık şarj süresi</h2></div></div>
+        <div class="form-grid">
+          <label class="field"><span>Power station nominal kapasitesi (Wh)</span><input id="stationCapacity" type="number" min="50" max="10000" step="1" inputmode="decimal"></label>
+          <label class="field"><span>Başlangıç doluluk (%)</span><input id="currentSoc" type="number" min="0" max="100" step="1" inputmode="decimal"></label>
+          <label class="field"><span>Hedef doluluk (%)</span><input id="targetSoc" type="number" min="1" max="100" step="1" inputmode="decimal"></label>
+          <label class="field"><span>Gerçek koşul katsayısı</span><select id="derating"><option value="0.9">%90 — çok iyi koşul</option><option value="0.8" selected>%80 — iyi taşınabilir kurulum</option><option value="0.7">%70 — değişken güneş/yön</option><option value="0.6">%60 — zorlayıcı koşul</option></select></label>
+        </div>
+        <div id="validation" class="validation" role="alert" aria-live="assertive" tabindex="-1"></div>
+        <div class="actions"><button class="btn btn-primary" type="submit">PV giriş uyumunu hesapla</button><button id="resetBtn" class="btn btn-secondary" type="button">Sıfırla</button></div>
+      </section>
+    </form>
+
+    <section id="results" class="results hidden" tabindex="-1" aria-live="polite" aria-labelledby="resultTitle">
+      <div class="panel result-head"><div><span class="eyebrow">Açıklanabilir uyumluluk sonucu</span><h2 id="resultTitle">Panel dizisi ve PV giriş karşılaştırması</h2><span id="resultStatus" class="status warn">—</span></div><div><strong id="arraySummary">—</strong><small>Elektriksel sınırlar, konnektör veya kurulum onayı değildir.</small></div></div>
+      <div class="metric-grid solar-metrics"><article class="metric accent"><span>Soğuk koşul Voc</span><strong id="coldVocMetric">—</strong><small>Mutlak PV sınırıyla karşılaştırılır</small></article><article class="metric"><span>Dizi Vmp</span><strong id="vmpMetric">—</strong><small>MPPT çalışma aralığı</small></article><article class="metric"><span>Toplam Imp</span><strong id="currentMetric">—</strong><small>Çalışma akımı</small></article><article class="metric"><span>Tahmini kabul edilen güç</span><strong id="powerMetric">—</strong><small>W, V ve A sınırlarının en düşüğü</small></article></div>
+      <div id="blockerCard" class="panel result-card danger-card hidden"><h3>Uyumsuzluk / risk engelleri</h3><ul id="blockerList"></ul></div>
+      <div class="layout"><article class="panel result-card warning-card"><h3>Koşullar ve uyarılar</h3><ul id="warningList"></ul></article><article class="panel result-card"><h3>Satın almadan önce doğrulayın</h3><ul id="checkList"></ul></article></div>
+      <div id="chargeCard" class="panel result-card hidden"><h3>Yaklaşık ideal şarj süresi</h3><div class="compact-grid"><div class="metric"><span>Bataryaya eklenecek enerji</span><strong id="energyNeed">—</strong></div><div class="metric"><span>İdealize süre</span><strong id="chargeHours">—</strong></div></div><p id="chargeNote"></p></div>
+      <div id="professionalPanel" class="panel result-card hidden"><h3>Profesyonel tasarım / üretici doğrulaması gerekir</h3><p>Çatı, sabit kurulum, araç/karavan, yüksek seri gerilim, çoklu paralel dizi veya sınır aşımı bulunan sonuçlarda ürün bağlantısı gösterilmez. DC ayırma, sigorta, kablo, konnektör, topraklama ve yangın güvenliği proje kapsamında değerlendirilmelidir.</p></div>
+      <aside id="affiliatePanel" class="affiliate-panel hidden" aria-labelledby="affiliateTitle"><span class="eyebrow">Reklam / satış ortaklığı açıklaması</span><h3 id="affiliateTitle">Yalnız düşük riskli taşınabilir sonuçta ürün karar merkezi</h3><p>ALO186 fiyat, stok, puan, garanti veya kesin ürün uyumu iddia etmez. Ürün merkezindeki bazı dış bağlantılardan komisyon kazanılabilir; bu durum size ek maliyet oluşturmaz.</p><label class="check-item"><input id="affiliateAck" type="checkbox"><span>Panel ve power station tam model değerlerini, konnektörü ve polariteyi satıcı/üretici sayfasında yeniden kontrol edeceğim.</span></label><a id="productCenterLink" class="btn btn-primary disabled-link" href="https://alo186.com/akilli-urun-secimi?ihtiyac=portable-gunes-paneli" aria-disabled="true" tabindex="-1">Şeffaf ürün karar merkezine geç</a></aside>
+    </section>
+
+    <section class="panel sources"><span class="eyebrow">Birincil teknik kaynaklar · 28 Temmuz 2026 kontrolü</span><h2>Hesap mantığının dayanağı</h2><ul><li><a href="https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_150-60_up_to_250-70/en/technical-specifications.html" rel="noopener">Victron Energy SmartSolar MPPT teknik özellikleri</a> — mutlak PV Voc, kısa devre akımı, güç ve çalışma sınırları.</li><li><a href="https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_75-10_up_to_100-20/en/introduction.html" rel="noopener">Victron Energy MPPT giriş açıklaması</a> — PV gerilimi, akım ve cihaz adlandırması.</li><li><a href="https://manuals.ecoflow.com/us/product/delta-pro-3-portable-power-station?lang=en_US" rel="noopener">EcoFlow DELTA Pro 3 resmî kılavuzu</a> — seri bağlantıda gerilim, paralelde akım ve PV port sınırları.</li></ul><p>Kaynaklardaki değerler örnektir; hesapta yalnız kullanıcının kendi panel ve power station tam model değerleri kullanılır.</p></section>
+  </main>
+  <footer><div class="footer-inner"><div><strong>ALO186</strong><p>Bağımsız bilgilendirme platformudur; resmî kurum, üretici veya kurulum onay kuruluşu değildir.</p></div><div class="footer-links"><a href="https://alo186.com/yayin-ilkeleri">Yayın ilkeleri</a><a href="https://alo186.com/gizlilik">Gizlilik</a><a href="https://alo186.com/iletisim">İletişim</a></div></div></footer>
+  <script src="../common.js"></script><script src="./core.js"></script><script src="./app.js"></script>
+</body>
+</html>
