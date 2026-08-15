@@ -1,0 +1,21 @@
+{
+  "version": 364,
+  "generatedAt": "2026-08-15",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-faturasinda-reaktif-enduktif-kapasitif-bedel-nedir/index.html",
+      "canonicalPath": "/haberler/elektrik-faturasinda-reaktif-enduktif-kapasitif-bedel-nedir/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/reaktif-enerji-oran-hesaplama/index.html",
+      "canonicalPath": "/hesaplama/reaktif-enerji-oran-hesaplama/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/sektor-rehberi/isletme-reaktif-enerji-kompanzasyon-kontrolu/index.html",
+      "canonicalPath": "/sektor-rehberi/isletme-reaktif-enerji-kompanzasyon-kontrolu/",
+      "type": "article"
+    }
+  ]
+}
