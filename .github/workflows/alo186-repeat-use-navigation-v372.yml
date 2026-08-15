@@ -73,7 +73,8 @@ jobs:
               assert '"@type":"offer"' not in low
           legacy = (root / 'hesaplama/kesinti-gunlugu/index.html').read_text(encoding='utf-8')
           assert '<meta name="robots" content="noindex,follow">' in legacy
-          assert '<link rel="canonical" href="https://alo186.com/hesaplama/elektrik-kesintisi-sure-gunlugu/">' in legacy
+          assert '<link rel="canonical" href="https://alo186.com/hesaplama/kesinti-gunlugu/">' in legacy
+          assert "location.replace('/hesaplama/elektrik-kesintisi-sure-gunlugu/')" in legacy
           print({'ok': True, 'routingVersion': release['routingVersion'], 'routes': routes, 'newMerchantLinks': 0})
           PY
       - name: Upload verified bundle
