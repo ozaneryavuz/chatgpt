@@ -1,0 +1,86 @@
+name: ALO186 smart plug savings v370
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/akilli-priz-elektrik-tasarrufu-saglar-mi/**'
+      - 'alo186/hesaplama/akilli-priz-net-tasarruf-hesaplama/**'
+      - 'alo186/enerji-tasarrufu-kontrol-merkezi/**'
+      - 'alo186/content/commerce/smart-plug-savings-v370.json'
+      - 'alo186/deployment/routing-overlays/smart-plug-savings-v370.json'
+      - 'alo186/tests/test_smart_plug_savings_v370.py'
+      - '.github/workflows/alo186-smart-plug-savings-v370.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/akilli-priz-elektrik-tasarrufu-saglar-mi/**'
+      - 'alo186/hesaplama/akilli-priz-net-tasarruf-hesaplama/**'
+      - 'alo186/enerji-tasarrufu-kontrol-merkezi/**'
+      - 'alo186/content/commerce/smart-plug-savings-v370.json'
+      - 'alo186/deployment/routing-overlays/smart-plug-savings-v370.json'
+      - 'alo186/tests/test_smart_plug_savings_v370.py'
+      - '.github/workflows/alo186-smart-plug-savings-v370.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-smart-plug-v370-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: v370 trust privacy no-buy and commerce checks
+        run: python alo186/tests/test_smart_plug_savings_v370.py
+      - name: Canonical production build and smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-smart-plug-v370
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-smart-plug-v370 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-smart-plug-v370
+      - name: Verify routes sitemap schema and zero new merchant links
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path('/tmp/alo186-smart-plug-v370')
+          routes = [
+              '/haberler/akilli-priz-elektrik-tasarrufu-saglar-mi/',
+              '/hesaplama/akilli-priz-net-tasarruf-hesaplama/',
+              '/enerji-tasarrufu-kontrol-merkezi/',
+          ]
+          sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
+          release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
+          assert release['routingVersion'] >= 370
+          for route in routes:
+              page = root / route.strip('/') / 'index.html'
+              assert page.is_file(), page
+              html = page.read_text(encoding='utf-8')
+              lowered = html.casefold()
+              canonical = f'https://alo186.com{route}'
+              assert canonical in sitemap or canonical.rstrip('/') in sitemap
+              assert f'<link rel="canonical" href="{canonical}">' in html
+              assert 'amazon.com.tr' not in lowered
+              assert 'amzn.to' not in lowered
+              assert 'pricecurrency' not in lowered
+              assert '"@type":"product"' not in lowered
+              assert '"@type":"offer"' not in lowered
+          print({'ok': True, 'routingVersion': release['routingVersion'], 'routes': routes, 'newMerchantLinks': 0})
+          PY
+      - name: Upload verified bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-smart-plug-v370-${{ github.sha }}
+          path: /tmp/alo186-smart-plug-v370
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
