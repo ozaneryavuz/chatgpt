@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
-      - 'alo186/haberler/ges-inverter-dc-arc-fault-afci-alarmi/**'
-      - 'alo186/haberler/jenerator-low-oil-pressure-dusuk-yag-basinci-alarmi/**'
+      - 'alo186/haberler/parafudr-on-sigorta-max-backup-fuse-secimi/**'
+      - 'alo186/haberler/lityum-batarya-bms-hucre-dengesizligi-cell-imbalance/**'
       - 'alo186/haberler/ups-fan-fault-fan-inoperable-alarmi/**'
       - 'alo186/deployment/routing-overlays/content-authority-v368-afci-oil-fan.json'
       - 'alo186/tests/test_content_authority_v368.py'
@@ -13,8 +13,8 @@ on:
   push:
     branches: [main]
     paths:
-      - 'alo186/haberler/ges-inverter-dc-arc-fault-afci-alarmi/**'
-      - 'alo186/haberler/jenerator-low-oil-pressure-dusuk-yag-basinci-alarmi/**'
+      - 'alo186/haberler/parafudr-on-sigorta-max-backup-fuse-secimi/**'
+      - 'alo186/haberler/lityum-batarya-bms-hucre-dengesizligi-cell-imbalance/**'
       - 'alo186/haberler/ups-fan-fault-fan-inoperable-alarmi/**'
       - 'alo186/deployment/routing-overlays/content-authority-v368-afci-oil-fan.json'
       - 'alo186/tests/test_content_authority_v368.py'
@@ -54,8 +54,8 @@ jobs:
 
           root = Path('/tmp/alo186-content-authority-v368')
           routes = [
-              '/haberler/ges-inverter-dc-arc-fault-afci-alarmi/',
-              '/haberler/jenerator-low-oil-pressure-dusuk-yag-basinci-alarmi/',
+              '/haberler/parafudr-on-sigorta-max-backup-fuse-secimi/',
+              '/haberler/lityum-batarya-bms-hucre-dengesizligi-cell-imbalance/',
               '/haberler/ups-fan-fault-fan-inoperable-alarmi/',
           ]
           sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
