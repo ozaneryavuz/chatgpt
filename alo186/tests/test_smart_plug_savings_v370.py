@@ -51,15 +51,16 @@ def main() -> None:
     assert '"@type":"CollectionPage"' in hub
     assert '"@type":"ItemList"' in hub
 
-    # When the existing affiliate selector is referenced, disclosure must appear before it.
+    # Disclosure must precede the clickable selector reference. Structured-data URLs do not count as a CTA.
+    visible_selector = f'href="{SELECTOR}"'
     for route in (
         "/haberler/akilli-priz-elektrik-tasarrufu-saglar-mi/",
         "/hesaplama/akilli-priz-net-tasarruf-hesaplama/",
         "/enerji-tasarrufu-kontrol-merkezi/",
     ):
         html = html_by_route[route]
-        selector_pos = html.find(SELECTOR)
-        assert selector_pos > 0
+        selector_pos = html.find(visible_selector)
+        assert selector_pos > 0, route
         disclosure_pos = html.rfind("Satış ortaklığı açıklaması", 0, selector_pos)
         assert disclosure_pos >= 0, route
 
