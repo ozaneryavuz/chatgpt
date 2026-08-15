@@ -1,0 +1,89 @@
+name: ALO186 debt reconnection growth v380
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/elektrik-borcu-odendi-ne-zaman-acilir/**'
+      - 'alo186/hesaplama/borctan-kesilen-elektrik-yeniden-baglama-takibi/**'
+      - 'alo186/abonelik-ve-guvence-bedeli-kontrol-merkezi/**'
+      - 'alo186/tekrar-kullanilan-araclar/**'
+      - 'alo186/deployment/routing-overlays/debt-reconnection-growth-v380.json'
+      - 'alo186/deployment/affiliate-category-decisions/debt-reconnection-growth-v380.json'
+      - 'alo186/tests/test_debt_reconnection_growth_v380.py'
+      - '.github/workflows/alo186-debt-reconnection-v380.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/elektrik-borcu-odendi-ne-zaman-acilir/**'
+      - 'alo186/hesaplama/borctan-kesilen-elektrik-yeniden-baglama-takibi/**'
+      - 'alo186/abonelik-ve-guvence-bedeli-kontrol-merkezi/**'
+      - 'alo186/tekrar-kullanilan-araclar/**'
+      - 'alo186/deployment/routing-overlays/debt-reconnection-growth-v380.json'
+      - 'alo186/deployment/affiliate-category-decisions/debt-reconnection-growth-v380.json'
+      - 'alo186/tests/test_debt_reconnection_growth_v380.py'
+      - '.github/workflows/alo186-debt-reconnection-v380.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-debt-reconnection-v380-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Debt reconnection trust privacy and no-commerce checks
+        run: python alo186/tests/test_debt_reconnection_growth_v380.py
+      - name: Canonical production build and smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-debt-reconnection-v380
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-debt-reconnection-v380 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-debt-reconnection-v380
+      - name: Verify production routes sitemap internal distribution and commercial closure
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/alo186-debt-reconnection-v380')
+          routes = [
+              '/haberler/elektrik-borcu-odendi-ne-zaman-acilir/',
+              '/hesaplama/borctan-kesilen-elektrik-yeniden-baglama-takibi/',
+          ]
+          sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
+          release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
+          assert release['routingVersion'] >= 380
+          for route in routes:
+              page = root / route.strip('/') / 'index.html'
+              assert page.is_file(), page
+              html = page.read_text(encoding='utf-8').lower()
+              assert f'https://alo186.com{route}' in sitemap
+              assert 'amazon.com.tr' not in html
+              assert 'amzn.to' not in html
+          hub = root / 'abonelik-ve-guvence-bedeli-kontrol-merkezi/index.html'
+          repeat = root / 'tekrar-kullanilan-araclar/index.html'
+          assert hub.is_file(), hub
+          assert repeat.is_file(), repeat
+          hub_html = hub.read_text(encoding='utf-8')
+          repeat_html = repeat.read_text(encoding='utf-8')
+          for route in routes:
+              assert route in hub_html
+          assert routes[1] in repeat_html
+          print({'ok': True, 'routingVersion': release['routingVersion'], 'routes': routes, 'merchantLinks': 0})
+          PY
+      - name: Upload verified bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-debt-reconnection-v380-${{ github.sha }}
+          path: /tmp/alo186-debt-reconnection-v380
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
