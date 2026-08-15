@@ -48,6 +48,7 @@ def main() -> None:
     assert "12 saati aşan" in article
     assert "/hesaplama/elektrik-kesintisi-sure-gunlugu/" in article
     assert "/hesaplama/kesinti-gunlugu/" not in article
+    assert "/elektrik-kesintisi/" in article
     assert "Ürün veya affiliate önerisi yok" in article
     assert '"@type":"Article"' in article
     assert '"@type":"FAQPage"' in article
@@ -65,7 +66,8 @@ def main() -> None:
     assert '"@type":"ItemList"' in hub
     assert "Bu merkez neden affiliate içermez?" in hub
     assert "/hesaplama/elektrik-kesintisi-sure-gunlugu/" in hub
-    assert "/haberler/elektrik-kesintisi-cihaz-hasari-tazminat-edas-basvuru/" in hub
+    assert "/elektrik-kesintisi/" in hub
+    assert "/haberler/elektrik-kesintisi-cihaz-hasari-tazminat-edas-basvuru/" not in hub
 
     print({
         "ok": True,
