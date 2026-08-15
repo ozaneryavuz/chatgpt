@@ -1,0 +1,16 @@
+{
+  "version": 372,
+  "generatedAt": "2026-08-15",
+  "routes": [
+    {
+      "source": "alo186/tekrar-kullanilan-araclar/index.html",
+      "canonicalPath": "/tekrar-kullanilan-araclar/",
+      "type": "hub"
+    },
+    {
+      "source": "alo186/hesaplama/urun-almadan-once-uygunluk-kontrolu/index.html",
+      "canonicalPath": "/hesaplama/urun-almadan-once-uygunluk-kontrolu/",
+      "type": "calculator"
+    }
+  ]
+}
