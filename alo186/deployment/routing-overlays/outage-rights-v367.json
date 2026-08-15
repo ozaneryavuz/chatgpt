@@ -1,0 +1,21 @@
+{
+  "version": 367,
+  "generatedAt": "2026-08-15",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-kesintisi-tazminati-nasil-alinir/index.html",
+      "canonicalPath": "/haberler/elektrik-kesintisi-tazminati-nasil-alinir/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/elektrik-kesintisi-tazminat-on-kontrolu/index.html",
+      "canonicalPath": "/hesaplama/elektrik-kesintisi-tazminat-on-kontrolu/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/elektrik-kesintisi-haklari-merkezi/index.html",
+      "canonicalPath": "/elektrik-kesintisi-haklari-merkezi/",
+      "type": "hub"
+    }
+  ]
+}
