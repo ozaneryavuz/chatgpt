@@ -1,0 +1,29 @@
+{
+  "version": 374,
+  "generatedAt": "2026-08-15",
+  "routes": [
+    {
+      "source": "alo186/haberler/ev-sarj-input-voltage-too-low-dusuk-gerilim-hatasi/index.html",
+      "canonicalPath": "/haberler/ev-sarj-input-voltage-too-low-dusuk-gerilim-hatasi",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/bess-precharge-hatasi-kontaktor-dc-link-welded/index.html",
+      "canonicalPath": "/haberler/bess-precharge-hatasi-kontaktor-dc-link-welded",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/jenerator-overspeed-asiri-devir-alarmi-rpm/index.html",
+      "canonicalPath": "/haberler/jenerator-overspeed-asiri-devir-alarmi-rpm",
+      "type": "article"
+    }
+  ],
+  "contentAuthority": {
+    "schemaVersion": 1,
+    "runDate": "2026-08-15",
+    "sourceVerified": true,
+    "intentCollisionChecked": true,
+    "commercialPolicy": "no-buy-first",
+    "structuredData": ["Article", "FAQPage", "BreadcrumbList"]
+  }
+}
