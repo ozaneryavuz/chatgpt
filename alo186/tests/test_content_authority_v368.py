@@ -12,14 +12,14 @@ def read(path: str) -> str:
 
 def main() -> None:
     pages = {
-        "afci": read("alo186/haberler/ges-inverter-dc-arc-fault-afci-alarmi/index.html"),
-        "oil": read("alo186/haberler/jenerator-low-oil-pressure-dusuk-yag-basinci-alarmi/index.html"),
+        "spd": read("alo186/haberler/parafudr-on-sigorta-max-backup-fuse-secimi/index.html"),
+        "bms": read("alo186/haberler/lityum-batarya-bms-hucre-dengesizligi-cell-imbalance/index.html"),
         "fan": read("alo186/haberler/ups-fan-fault-fan-inoperable-alarmi/index.html"),
     }
     routing = json.loads(read("alo186/deployment/routing-overlays/content-authority-v368-afci-oil-fan.json"))
     expected = {
-        "/haberler/ges-inverter-dc-arc-fault-afci-alarmi/",
-        "/haberler/jenerator-low-oil-pressure-dusuk-yag-basinci-alarmi/",
+        "/haberler/parafudr-on-sigorta-max-backup-fuse-secimi/",
+        "/haberler/lityum-batarya-bms-hucre-dengesizligi-cell-imbalance/",
         "/haberler/ups-fan-fault-fan-inoperable-alarmi/",
     }
     assert routing["version"] == 368
@@ -42,26 +42,25 @@ def main() -> None:
         assert "AggregateRating" not in page
         assert "priceCurrency" not in page
 
-    afci = pages["afci"]
+    spd = pages["spd"]
     for required in (
-        "DC Arc Fault",
-        "AFCI Check Failure",
-        "Alarm–string–konnektör–termal kanıt matrisi",
-        "/haberler/ges-mc4-konnektor-capraz-eslestirme-krimp-kabul/",
-        "/haberler/ges-inverter-izolasyon-hatasi-riso-low/",
-        "IEC 63027:2023",
+        "Max backup fuse",
+        "SPD–üst koruma–Ik–backup fuse matrisi",
+        "/haberler/parafudr-tip-1-tip-2-tip-3-koordinasyon-secimi/",
+        "/haberler/parafudr-omur-sonu-gosterge-uzak-kontak-degisim-kabul/",
+        "IEC 61643-11:2025",
     ):
-        assert required in afci
+        assert required in spd
 
-    oil = pages["oil"]
+    bms = pages["bms"]
     for required in (
-        "Low Oil Pressure",
-        "Alarm–yağ seviyesi–sızıntı–çalışma saati matrisi",
-        "/haberler/jenerator-mars-basiyor-ama-calismiyor-overcrank/",
-        "/haberler/jenerator-siyah-beyaz-mavi-duman-neden-atar/",
-        "ISO 8528-13:2026",
+        "Cell Imbalance",
+        "Min/max hücre–delta–SoC–akım–alarm matrisi",
+        "/haberler/inverter-akuyu-sarj-etmiyor-charge-disabled-bms/",
+        "/haberler/bess-kullanilabilir-enerji-round-trip-verim-standby-kaybi-kabul/",
+        "Victron Energy",
     ):
-        assert required in oil
+        assert required in bms
 
     fan = pages["fan"]
     for required in (
@@ -79,7 +78,7 @@ def main() -> None:
         "routes": 3,
         "merchantLinks": 0,
         "schemas": ["Article", "FAQPage", "BreadcrumbList"],
-        "policy": "incident-intent / evidence-first / no-buy-first / professional-only energized work",
+        "policy": "intent-separated / evidence-first / no-buy-first / professional-only energized work",
     })
 
 
