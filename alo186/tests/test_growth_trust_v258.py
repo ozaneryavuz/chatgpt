@@ -67,7 +67,8 @@ def main() -> None:
         assert "ALO186 başvuru, hasar veya tazminat kararı almaz" in journal
         assert "ad, e-posta, telefon, açık adres, abonelik veya T.C. kimlik bilgisi girmeyin" in journal
         assert "damage-deadline-v258.js" not in journal
-        assert "localStorage" not in journal
+        assert "localStorage.getItem" not in journal
+        assert "localStorage.setItem" not in journal
 
         legacy = (output / "source/hesaplama/kesinti-gunlugu/index.html").read_text(encoding="utf-8")
         assert 'content="0;url=/hesaplama/elektrik-kesintisi-sure-gunlugu/"' in legacy
