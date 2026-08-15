@@ -1,0 +1,64 @@
+name: ALO186 v372 içerik otoritesi kalite kapısı
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/otoyol-ev-sarj-kredi-karti-temassiz-odeme-zorunlu-mu/**'
+      - 'alo186/haberler/bess-yan-hizmet-2026-primer-sekonder-hizli-frekans-atalet-kabul/**'
+      - 'alo186/haberler/jenerator-underspeed-alarmi-1600-1603/**'
+      - 'alo186/deployment/routing-overlays/content-authority-v372-ev-bess-underspeed.json'
+      - 'alo186/tests/test_content_authority_v372.py'
+      - '.github/workflows/alo186-content-authority-v372.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: v372 AEO SEO kaynak güven ve çakışma regresyonu
+        run: python alo186/tests/test_content_authority_v372.py
+
+      - name: Canonical production build
+        run: |
+          rm -rf /tmp/alo186-v372
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-v372 \
+            --commit "$GITHUB_SHA"
+
+      - name: Production smoke
+        run: python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-v372
+
+      - name: Yeni canonical rotaları sitemap ve artifactta doğrula
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          root = Path('/tmp/alo186-v372')
+          sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
+          routes = [
+              '/haberler/otoyol-ev-sarj-kredi-karti-temassiz-odeme-zorunlu-mu',
+              '/haberler/bess-yan-hizmet-2026-primer-sekonder-hizli-frekans-atalet-kabul',
+              '/haberler/jenerator-underspeed-alarmi-1600-1603',
+          ]
+          for route in routes:
+              page = root / route.lstrip('/') / 'index.html'
+              assert page.is_file(), page
+              html = page.read_text(encoding='utf-8')
+              canonical = f'https://alo186.com{route}'
+              assert f'<link rel="canonical" href="{canonical}">' in html, canonical
+              assert canonical in sitemap, canonical
+          print('v372 production route contract: OK')
+          PY
