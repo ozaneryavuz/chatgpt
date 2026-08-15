@@ -1,0 +1,40 @@
+{
+  "version": 381,
+  "generatedAt": "2026-08-15",
+  "topic": "rcd-test-button-periodic-functional-check",
+  "decision": "repeat-use-and-qualified-electrician-first-no-consumer-affiliate",
+  "newAffiliateClasses": 0,
+  "newMerchantLinks": 0,
+  "canonicalGuide": "/haberler/kacak-akim-rolesi-test-butonu-basilinca-atmiyor/",
+  "decisionTool": "/hesaplama/kacak-akim-rolesi-test-hatirlatici/",
+  "journeyHub": "/ev-elektrik-guvenlik-kontrol-merkezi/",
+  "blockedConsumerAffiliateClasses": [
+    "rcd-rccb-rcbo",
+    "distribution-board-component",
+    "professional-rcd-test-instrument",
+    "fixed-wiring",
+    "voltage-detector-or-electrical-hand-tool"
+  ],
+  "professionalOnly": [
+    "rcd-trip-current-and-time-measurement",
+    "protective-conductor-and-installation-verification",
+    "panel-or-live-terminal-work",
+    "critical-load-test-planning"
+  ],
+  "noBuyWhen": [
+    "existing-protection-is-suitable-and-functional",
+    "test-interval-is-unknown-before-manufacturer-verification",
+    "test-button-result-is-failed-or-uncertain",
+    "active-electrical-hazard-exists"
+  ],
+  "mustNotClaim": [
+    "one-universal-rcd-test-interval-applies-to-all-devices",
+    "test-button-pass-proves-the-whole-installation-is-safe",
+    "test-button-replaces-professional-trip-current-or-time-testing",
+    "alo186-is-a-public-authority-distribution-company-electrician-or-manufacturer",
+    "unverified-price",
+    "unverified-stock",
+    "unverified-rating",
+    "unverified-warranty"
+  ]
+}
