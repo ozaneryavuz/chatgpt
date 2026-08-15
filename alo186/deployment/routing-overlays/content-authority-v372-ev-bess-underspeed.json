@@ -1,0 +1,29 @@
+{
+  "version": 372,
+  "generatedAt": "2026-08-15",
+  "routes": [
+    {
+      "source": "alo186/haberler/otoyol-ev-sarj-kredi-karti-temassiz-odeme-zorunlu-mu/index.html",
+      "canonicalPath": "/haberler/otoyol-ev-sarj-kredi-karti-temassiz-odeme-zorunlu-mu",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/bess-yan-hizmet-2026-primer-sekonder-hizli-frekans-atalet-kabul/index.html",
+      "canonicalPath": "/haberler/bess-yan-hizmet-2026-primer-sekonder-hizli-frekans-atalet-kabul",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/jenerator-underspeed-alarmi-1600-1603/index.html",
+      "canonicalPath": "/haberler/jenerator-underspeed-alarmi-1600-1603",
+      "type": "article"
+    }
+  ],
+  "contentAuthority": {
+    "schemaVersion": 1,
+    "runDate": "2026-08-15",
+    "sourceVerified": true,
+    "intentCollisionChecked": true,
+    "commercialPolicy": "no-buy-first",
+    "structuredData": ["Article", "FAQPage", "BreadcrumbList"]
+  }
+}
