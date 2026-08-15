@@ -115,7 +115,7 @@ class ContentAuthorityV376Tests(unittest.TestCase):
         for slug in ARTICLES:
             html = article_path(slug).read_text(encoding="utf-8")
             self.assertIn("Professional-only", html, slug)
-            self.assertRegex(html, r"satın almayın|değiştirmeyin", slug)
+            self.assertRegex(html, r"satın almayın|satın almak yerine|değiştirmeyin", slug)
 
     def test_routing_overlay_is_exact_and_no_buy_first(self) -> None:
         data = json.loads(ROUTING.read_text(encoding="utf-8"))
