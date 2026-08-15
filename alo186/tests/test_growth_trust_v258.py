@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[2]
 DEPLOYMENT = ROOT / "alo186/deployment"
 sys.path.insert(0, str(DEPLOYMENT))
 
-from export_chatgpt_sites_bundle_v3 import export_bundle  # noqa: E402
+from export_chatgpt_sites_bundle_v4 import export_bundle  # noqa: E402
 
 
 def main() -> None:
@@ -18,17 +18,17 @@ def main() -> None:
         manifest = export_bundle(output, "test-v258")
 
         assert manifest["targetPlatform"] == "ChatGPT Sites"
-        assert manifest["exporterVersion"] == 3
+        assert manifest["exporterVersion"] == 4
         assert manifest["criticalClaimsVersion"] == 258
         assert manifest["criticalClaimsVerifiedAt"] == "2026-08-04"
         assert manifest["deviceDamageDeadline"] == "30 gün"
         assert manifest["deviceDamageRegulationUrl"].startswith("https://www.resmigazete.gov.tr/")
+        assert manifest["outageJournalCanonicalPath"] == "/hesaplama/elektrik-kesintisi-sure-gunlugu/"
 
         home = (output / "source/index.html").read_text(encoding="utf-8")
         assert "Cihaz hasarında başvuru süresi 30 gündür" in home
         assert "zararın ortaya çıktığı tarihten itibaren <strong>30 gün içinde</strong>" in home
         assert "Cihaz hasarında başvuru süresi 10 iş günüdür" not in home
-        assert "zararın ortaya çıktığı tarihten itibaren <strong>10 iş günü içinde</strong>" not in home
         assert "ALO186 başvuru, hasar veya tazminat kararı almaz" in home
 
         home_md = (output / "content/pages/elektrik-portali.md").read_text(encoding="utf-8")
@@ -56,28 +56,24 @@ def main() -> None:
         assert "Kalite Yönetmeliği Madde 26/1 esas alınır" in sources
         assert "Kaynak merkezi son gözden geçirme: 4 Ağustos 2026." in sources
 
-        journal = (output / "source/hesaplama/kesinti-gunlugu/index.html").read_text(encoding="utf-8")
+        journal_path = output / "source/hesaplama/elektrik-kesintisi-sure-gunlugu/index.html"
+        assert journal_path.is_file()
+        journal = journal_path.read_text(encoding="utf-8")
         assert 'data-alo186-damage-deadline="v258"' in journal
-        for token in ("damageDeadlineSummary", "damageDeadlineEntries", "damageReminderBtn"):
-            assert token in journal
-        assert '<script src="./damage-deadline-v258.js"></script>' in journal
-        assert "Cihaz hasarı için 30 günlük süre planı" in journal
-        assert "30 takvim günü" in journal
-        assert "ad, e-posta, telefon, adres, abonelik veya başvuru numarası istenmez" in journal
-        assert "zararın ortaya çıktığı tarihten itibaren 30 gün içinde" in journal
+        assert "Cihaz hasarı şüphesinde 30 günlük süreyi ayrı takip edin" in journal
+        assert "zararın ortaya çıktığı tarihten itibaren <strong>30 gün içinde</strong>" in journal
+        assert "/haberler/elektrik-kesintisi-cihaz-hasari-edas-basvurusu" in journal
+        assert "Kalite Yönetmeliğini doğrula" in journal
+        assert "ALO186 başvuru, hasar veya tazminat kararı almaz" in journal
+        assert "ad, e-posta, telefon, açık adres, abonelik veya T.C. kimlik bilgisi girmeyin" in journal
+        assert "damage-deadline-v258.js" not in journal
+        assert "localStorage" not in journal
 
-        script_path = output / "source/hesaplama/kesinti-gunlugu/damage-deadline-v258.js"
-        assert script_path.is_file()
-        script = script_path.read_text(encoding="utf-8")
-        for token in ("addCalendarDays", "BEGIN:VCALENDAR", "30 günlük talep süresi", "localStorage"):
-            assert token in script
-        assert "10 iş günü" not in script
-        for forbidden in ("fetch(", "XMLHttpRequest", "amazon.com.tr", "price", "stock", "rating", "warranty"):
-            assert forbidden not in script
+        legacy = (output / "source/hesaplama/kesinti-gunlugu/index.html").read_text(encoding="utf-8")
+        assert 'content="0;url=/hesaplama/elektrik-kesintisi-sure-gunlugu/"' in legacy
+        assert "location.replace('/hesaplama/elektrik-kesintisi-sure-gunlugu/');" in legacy
 
         article = (output / "source/haberler/elektrik-kesintisi-cihaz-hasari-edas-basvurusu/index.html").read_text(encoding="utf-8")
-        # The critical-claims snapshot remains v258/2026-08-04, but this article was
-        # independently re-verified on 2026-08-07. Do not pin an older page date.
         assert '"dateModified":"2026-08-07"' in article
         assert "Son doğrulama: 7 Ağustos 2026" in article
         assert "Cihaz hasarı başvurusunda süre 30 gündür" in article
@@ -88,6 +84,7 @@ def main() -> None:
         assert action["version"] == 258
         assert action["deviceDamageDeadline"] == "30 gün"
         assert len(action["actions"]) == 3
+        assert "Güncel Elektrik Kesintisi Süre Günlüğüne" in action["actions"][2]["action"]
         assert action["affiliateLinksAdded"] == 0
         assert action["commercialFieldsPublished"] == []
         assert action["officialInstitutionImpressionCreated"] is False
@@ -96,21 +93,26 @@ def main() -> None:
 
         sites_manifest = json.loads((output / "sites-import.json").read_text(encoding="utf-8"))
         sources_page = next(page for page in sites_manifest["pages"] if page["canonicalPath"] == "/kaynaklar")
+        journal_page = next(page for page in sites_manifest["pages"] if page["canonicalPath"] == "/hesaplama/elektrik-kesintisi-sure-gunlugu/")
         assert "Claim" in sources_page["schemaTypes"]
         assert any(item.get("@id") == "https://alo186.com/kaynaklar#critical-claims" for item in sources_page["jsonLd"])
+        assert journal_page["sourceCopy"] == "source/hesaplama/elektrik-kesintisi-sure-gunlugu/index.html"
 
         checksums = (output / "checksums.sha256").read_text(encoding="utf-8")
         for required in (
             "data/critical-claims.json",
             "data/growth-action-v258.json",
-            "source/hesaplama/kesinti-gunlugu/damage-deadline-v258.js",
+            "source/hesaplama/elektrik-kesintisi-sure-gunlugu/index.html",
         ):
             assert required in checksums
+        assert "source/hesaplama/kesinti-gunlugu/damage-deadline-v258.js" not in checksums
 
         print(json.dumps({
             "ok": True,
+            "exporterVersion": manifest["exporterVersion"],
             "criticalClaimsVersion": manifest["criticalClaimsVersion"],
             "deviceDamageDeadline": manifest["deviceDamageDeadline"],
+            "outageJournalCanonicalPath": manifest["outageJournalCanonicalPath"],
             "actions": len(action["actions"]),
             "affiliateLinksAdded": action["affiliateLinksAdded"],
             "importReady": manifest["stats"]["importReady"],
