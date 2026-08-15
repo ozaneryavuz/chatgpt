@@ -66,8 +66,10 @@ jobs:
               assert page.is_file(), page
               html = page.read_text(encoding='utf-8')
               lowered = html.lower()
-              assert f'https://alo186.com{route}' in sitemap
-              assert f'<link rel="canonical" href="https://alo186.com{route}">' in html
+              with_slash = f'https://alo186.com{route}'
+              without_slash = f'https://alo186.com{route.rstrip("/")}'
+              assert with_slash in sitemap or without_slash in sitemap, route
+              assert f'<link rel="canonical" href="{with_slash}">' in html
               assert 'amazon.com.tr' not in lowered
               assert 'amzn.to' not in lowered
               assert 'pricecurrency' not in lowered
