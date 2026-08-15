@@ -51,7 +51,9 @@
   "canonical_cleanup": {
     "legacy": "/hesaplama/kesinti-gunlugu/",
     "preferred": "/hesaplama/elektrik-kesintisi-sure-gunlugu/",
-    "legacy_robots": "noindex,follow",
-    "legacy_canonical_must_target_preferred": true
+    "legacy_indexing": "noindex,follow",
+    "legacy_canonical": "/hesaplama/kesinti-gunlugu/",
+    "legacy_redirects_to_preferred": true,
+    "reason": "The canonical production manifest owns the legacy route; noindex plus immediate redirect prevents it from competing while preserving build-route integrity. Internal links should migrate to the preferred route."
   }
 }
