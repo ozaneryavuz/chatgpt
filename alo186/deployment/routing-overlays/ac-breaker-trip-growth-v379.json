@@ -1,0 +1,21 @@
+{
+  "version": 379,
+  "generatedAt": "2026-08-15",
+  "routes": [
+    {
+      "source": "alo186/haberler/klima-acinca-sigorta-neden-atar-kacak-akim/index.html",
+      "canonicalPath": "/haberler/klima-acinca-sigorta-neden-atar-kacak-akim/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/klima-sigorta-kacak-akim-belirti-ayirici/index.html",
+      "canonicalPath": "/hesaplama/klima-sigorta-kacak-akim-belirti-ayirici/",
+      "type": "business-tool"
+    },
+    {
+      "source": "alo186/sektor-rehberi/otel-isletme-klima-elektrik-koruma-kabul/index.html",
+      "canonicalPath": "/sektor-rehberi/otel-isletme-klima-elektrik-koruma-kabul/",
+      "type": "article"
+    }
+  ]
+}

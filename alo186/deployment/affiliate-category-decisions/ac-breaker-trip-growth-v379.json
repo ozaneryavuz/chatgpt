@@ -1,0 +1,47 @@
+{
+  "version": 379,
+  "generatedAt": "2026-08-15",
+  "topic": "air-conditioner-breaker-rcd-trip-safety",
+  "decision": "professional-first-no-consumer-affiliate-for-hvac-protection-trip",
+  "newAffiliateClasses": 0,
+  "newMerchantLinks": 0,
+  "canonicalGuide": "/haberler/klima-acinca-sigorta-neden-atar-kacak-akim/",
+  "decisionTool": "/hesaplama/klima-sigorta-kacak-akim-belirti-ayirici/",
+  "businessGuide": "/sektor-rehberi/otel-isletme-klima-elektrik-koruma-kabul/",
+  "blockedConsumerAffiliateClasses": [
+    "mcb-or-circuit-breaker",
+    "rcd-rccb-or-rcbo",
+    "air-conditioner-capacitor",
+    "air-conditioner-contactor",
+    "compressor-or-motor-component",
+    "distribution-board-component",
+    "fixed-wiring-or-cable",
+    "electrical-test-instrument",
+    "generator-or-ats",
+    "fixed-ups-or-battery-system"
+  ],
+  "professionalOnly": [
+    "repeated-air-conditioner-protection-trip",
+    "insulation-and-leakage-current-test",
+    "breaker-and-conductor-coordination",
+    "starting-current-and-running-current-measurement",
+    "fixed-wiring-and-terminal-assessment",
+    "generator-ats-hvac-transfer-acceptance",
+    "commercial-hvac-electrical-commissioning"
+  ],
+  "noBuyWhen": [
+    "single-non-repeating-event-with-no-danger-and-normal-subsequent-operation",
+    "existing-system-passes-accepted-operating-and-protection-tests",
+    "need-is-not-yet-confirmed-by-measurement-or-manufacturer-data"
+  ],
+  "mustNotClaim": [
+    "a-larger-breaker-solves-air-conditioner-tripping",
+    "an-rcd-trip-proves-the-rcd-is-faulty",
+    "a-capacitor-or-compressor-replacement-can-be-selected-from-symptom-only",
+    "a-reset-proves-the-system-safe",
+    "unverified-price",
+    "unverified-stock",
+    "unverified-rating",
+    "unverified-warranty"
+  ]
+}
