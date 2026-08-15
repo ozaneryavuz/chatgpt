@@ -1,6 +1,6 @@
 {
-  "version": 14,
-  "generatedAt": "2026-08-07",
+  "version": 15,
+  "generatedAt": "2026-08-15",
   "consolidations": [
     {
       "intentKey": "lifepo4-low-temperature-charging",
@@ -176,6 +176,13 @@
       "canonicalPath": "/haberler/elektrik-kesilince-gunes-paneli-calisir-mi/",
       "label": "Elektrik kesintisinde güneş paneli ve GES davranışı",
       "reason": "İki rehber aynı on-grid anti-islanding, hibrit/off-grid ayrımı, yedek çıkış, transfer ve kritik yük niyetini hedefliyor. 4 Ağustos 2026 tarihli, kişisel verisiz yedek güç uygunluk aracına bağlı kapsamlı rota canonical tutuldu; eski URL kalıcı alias olarak korunur."
+    },
+    {
+      "intentKey": "generator-low-oil-pressure-diagnostics",
+      "aliasPath": "/haberler/jenerator-low-oil-pressure-dusuk-yag-basinci-sensor-gercek-basinci-teshis",
+      "canonicalPath": "/haberler/jenerator-low-oil-pressure-dusuk-yag-basinci-alarmi",
+      "label": "Jeneratör Low Oil Pressure ve düşük yağ basıncı teşhisi",
+      "reason": "İki rehber aynı Low Oil Pressure alarmı, yağ seviyesi, sensör ve gerçek basınç ayrımını hedefliyor. 15 Ağustos 2026 tarihinde yeniden doğrulanan kullanıcı odaklı rota canonical tutuldu; eski teknik teşhis URL'si canonical sinyali bölmeden alias olarak korunur."
     }
   ]
 }
