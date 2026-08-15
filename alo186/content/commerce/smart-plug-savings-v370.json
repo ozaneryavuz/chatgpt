@@ -1,0 +1,45 @@
+{
+  "version": 370,
+  "cluster": "smart-plug-savings",
+  "generatedAt": "2026-08-15",
+  "scope": [
+    "/haberler/akilli-priz-elektrik-tasarrufu-saglar-mi/",
+    "/hesaplama/akilli-priz-net-tasarruf-hesaplama/",
+    "/enerji-tasarrufu-kontrol-merkezi/"
+  ],
+  "independence": "ALO186 is an independent information platform and must not imply affiliation with EDAŞ, electricity suppliers, public authorities or product merchants.",
+  "commerce": {
+    "mode": "evidence-gated-existing-affiliate-reuse",
+    "new_affiliate_classes": 0,
+    "new_merchant_links": 0,
+    "existing_selector": "/amazon-elektrik-urunleri/akilli-priz-enerji-olcer-secimi/",
+    "requires": [
+      "net_kwh_positive",
+      "safe_low_or_moderate_plug_load",
+      "no_existing_suitable_solution"
+    ],
+    "unverified_price": false,
+    "unverified_stock": false,
+    "unverified_rating": false,
+    "unverified_warranty": false
+  },
+  "no_buy": [
+    "existing_suitable_solution",
+    "net_kwh_not_positive",
+    "measurement_or_manufacturer_data_missing"
+  ],
+  "blocked_categories": [
+    "heaters",
+    "ev_charging",
+    "motors_and_compressors",
+    "fixed_installation",
+    "medical_or_critical_loads",
+    "damaged_hot_loose_or_wet_outlets"
+  ],
+  "prohibited_claims": [
+    "universal_savings_percentage",
+    "universal_smart_plug_idle_watts",
+    "unsourced_tl_savings",
+    "guaranteed_payback"
+  ]
+}

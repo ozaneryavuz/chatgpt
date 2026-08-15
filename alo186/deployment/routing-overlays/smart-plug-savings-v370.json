@@ -1,0 +1,21 @@
+{
+  "version": 370,
+  "generatedAt": "2026-08-15",
+  "routes": [
+    {
+      "source": "alo186/haberler/akilli-priz-elektrik-tasarrufu-saglar-mi/index.html",
+      "canonicalPath": "/haberler/akilli-priz-elektrik-tasarrufu-saglar-mi/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/akilli-priz-net-tasarruf-hesaplama/index.html",
+      "canonicalPath": "/hesaplama/akilli-priz-net-tasarruf-hesaplama/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/enerji-tasarrufu-kontrol-merkezi/index.html",
+      "canonicalPath": "/enerji-tasarrufu-kontrol-merkezi/",
+      "type": "hub"
+    }
+  ]
+}
