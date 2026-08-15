@@ -1,0 +1,29 @@
+{
+  "version": 369,
+  "generatedAt": "2026-08-15",
+  "routes": [
+    {
+      "source": "alo186/haberler/ups-battery-disconnected-aku-bagli-degil-alarmi/index.html",
+      "canonicalPath": "/haberler/ups-battery-disconnected-aku-bagli-degil-alarmi",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/jenerator-low-oil-pressure-dusuk-yag-basinci-alarmi/index.html",
+      "canonicalPath": "/haberler/jenerator-low-oil-pressure-dusuk-yag-basinci-alarmi",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ges-inverter-spd-parafudr-alarmi-wsd-open/index.html",
+      "canonicalPath": "/haberler/ges-inverter-spd-parafudr-alarmi-wsd-open",
+      "type": "article"
+    }
+  ],
+  "contentAuthority": {
+    "schemaVersion": 1,
+    "runDate": "2026-08-15",
+    "sourceVerified": true,
+    "intentCollisionChecked": true,
+    "commercialPolicy": "no-buy-first",
+    "structuredData": ["Article", "FAQPage", "BreadcrumbList"]
+  }
+}
