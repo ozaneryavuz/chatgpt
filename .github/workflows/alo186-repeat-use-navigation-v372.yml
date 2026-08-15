@@ -39,7 +39,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: v372 trust no-buy canonical and privacy regression
-        run: python -m pytest -q alo186/tests/test_repeat_use_navigation_v372.py
+        run: python alo186/tests/test_repeat_use_navigation_v372.py
       - name: Canonical production build and smoke
         run: |
           set -euo pipefail
