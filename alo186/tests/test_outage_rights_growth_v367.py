@@ -82,4 +82,4 @@ def main() -> None:
 if __name__ == "__main__":
     main()
 
-# Build gate refresh: compatibility fix for the legacy outage-journal alias is included in this PR.
+# Build gate refresh: legacy outage-journal compatibility and canonical alignment are included in this PR.
