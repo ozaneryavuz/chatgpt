@@ -1,0 +1,86 @@
+name: ALO186 repeat-use navigation v372
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/tekrar-kullanilan-araclar/**'
+      - 'alo186/hesaplama/urun-almadan-once-uygunluk-kontrolu/**'
+      - 'alo186/hesaplama/kesinti-gunlugu/index.html'
+      - 'alo186/content/commerce/repeat-use-navigation-v372.json'
+      - 'alo186/deployment/routing-overlays/repeat-use-navigation-v372.json'
+      - 'alo186/tests/test_repeat_use_navigation_v372.py'
+      - '.github/workflows/alo186-repeat-use-navigation-v372.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/tekrar-kullanilan-araclar/**'
+      - 'alo186/hesaplama/urun-almadan-once-uygunluk-kontrolu/**'
+      - 'alo186/hesaplama/kesinti-gunlugu/index.html'
+      - 'alo186/content/commerce/repeat-use-navigation-v372.json'
+      - 'alo186/deployment/routing-overlays/repeat-use-navigation-v372.json'
+      - 'alo186/tests/test_repeat_use_navigation_v372.py'
+      - '.github/workflows/alo186-repeat-use-navigation-v372.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-repeat-use-v372-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: v372 trust no-buy canonical and privacy regression
+        run: python -m pytest -q alo186/tests/test_repeat_use_navigation_v372.py
+      - name: Canonical production build and smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-repeat-use-v372
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-repeat-use-v372 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-repeat-use-v372
+      - name: Verify routes sitemap canonical and zero merchant links
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/alo186-repeat-use-v372')
+          sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
+          release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
+          assert release['routingVersion'] >= 372
+          routes = [
+              '/tekrar-kullanilan-araclar/',
+              '/hesaplama/urun-almadan-once-uygunluk-kontrolu/',
+          ]
+          for route in routes:
+              page = root / route.strip('/') / 'index.html'
+              assert page.is_file(), page
+              html = page.read_text(encoding='utf-8')
+              low = html.casefold()
+              canonical = f'https://alo186.com{route}'
+              assert canonical in sitemap or canonical.rstrip('/') in sitemap
+              assert f'<link rel="canonical" href="{canonical}">' in html
+              assert 'amazon.com.tr' not in low
+              assert 'amzn.to' not in low
+              assert 'pricecurrency' not in low
+              assert '"@type":"offer"' not in low
+          legacy = (root / 'hesaplama/kesinti-gunlugu/index.html').read_text(encoding='utf-8')
+          assert '<meta name="robots" content="noindex,follow">' in legacy
+          assert '<link rel="canonical" href="https://alo186.com/hesaplama/elektrik-kesintisi-sure-gunlugu/">' in legacy
+          print({'ok': True, 'routingVersion': release['routingVersion'], 'routes': routes, 'newMerchantLinks': 0})
+          PY
+      - name: Upload verified bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-repeat-use-v372-${{ github.sha }}
+          path: /tmp/alo186-repeat-use-v372
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
