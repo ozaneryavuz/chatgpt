@@ -1,0 +1,85 @@
+name: ALO186 SKTT consumer v373
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/2026-elektrik-4000-kwh-siniri-sktt-ne-zaman-baslar/**'
+      - 'alo186/hesaplama/2026-yillik-elektrik-tuketimi-4000-kwh-sktt-kontrolu/**'
+      - 'alo186/elektrik-tedarik-ve-tarife-kontrol-merkezi/**'
+      - 'alo186/content/commerce/sktt-consumer-v373.json'
+      - 'alo186/deployment/routing-overlays/sktt-consumer-v373.json'
+      - 'alo186/tests/test_sktt_consumer_v373.py'
+      - '.github/workflows/alo186-sktt-consumer-v373.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/2026-elektrik-4000-kwh-siniri-sktt-ne-zaman-baslar/**'
+      - 'alo186/hesaplama/2026-yillik-elektrik-tuketimi-4000-kwh-sktt-kontrolu/**'
+      - 'alo186/elektrik-tedarik-ve-tarife-kontrol-merkezi/**'
+      - 'alo186/content/commerce/sktt-consumer-v373.json'
+      - 'alo186/deployment/routing-overlays/sktt-consumer-v373.json'
+      - 'alo186/tests/test_sktt_consumer_v373.py'
+      - '.github/workflows/alo186-sktt-consumer-v373.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-sktt-v373-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: v373 trust privacy no-buy and commerce checks
+        run: python alo186/tests/test_sktt_consumer_v373.py
+      - name: Canonical production build and smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-sktt-v373
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-sktt-v373 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-sktt-v373
+      - name: Verify routes sitemap schema and zero merchant links
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/alo186-sktt-v373')
+          routes = [
+              '/haberler/2026-elektrik-4000-kwh-siniri-sktt-ne-zaman-baslar/',
+              '/hesaplama/2026-yillik-elektrik-tuketimi-4000-kwh-sktt-kontrolu/',
+              '/elektrik-tedarik-ve-tarife-kontrol-merkezi/',
+          ]
+          sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
+          release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
+          assert release['routingVersion'] >= 373
+          for route in routes:
+              page = root / route.strip('/') / 'index.html'
+              assert page.is_file(), page
+              html = page.read_text(encoding='utf-8')
+              low = html.casefold()
+              canonical = f'https://alo186.com{route}'
+              assert canonical in sitemap or canonical.rstrip('/') in sitemap
+              assert f'<link rel="canonical" href="{canonical}">' in html
+              assert 'amazon.com.tr' not in low
+              assert 'amzn.to' not in low
+              assert 'pricecurrency' not in low
+              assert '"@type":"product"' not in low
+              assert '"@type":"offer"' not in low
+          print({'ok': True, 'routingVersion': release['routingVersion'], 'routes': routes, 'newMerchantLinks': 0})
+          PY
+      - name: Upload verified bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-sktt-v373-${{ github.sha }}
+          path: /tmp/alo186-sktt-v373
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
