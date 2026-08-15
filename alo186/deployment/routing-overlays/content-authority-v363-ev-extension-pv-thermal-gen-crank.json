@@ -1,0 +1,21 @@
+{
+  "version": 363,
+  "generatedAt": "2026-08-15",
+  "routes": [
+    {
+      "source": "alo186/haberler/ev-sarj-uzatma-kablosu-kullanilir-mi/index.html",
+      "canonicalPath": "/haberler/ev-sarj-uzatma-kablosu-kullanilir-mi/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ges-inverter-asiri-isiniyor-temperature-derating/index.html",
+      "canonicalPath": "/haberler/ges-inverter-asiri-isiniyor-temperature-derating/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/jenerator-mars-basiyor-ama-calismiyor-overcrank/index.html",
+      "canonicalPath": "/haberler/jenerator-mars-basiyor-ama-calismiyor-overcrank/",
+      "type": "article"
+    }
+  ]
+}
