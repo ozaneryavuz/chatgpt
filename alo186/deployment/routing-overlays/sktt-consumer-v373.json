@@ -1,0 +1,21 @@
+{
+  "version": 373,
+  "generatedAt": "2026-08-15",
+  "routes": [
+    {
+      "source": "alo186/haberler/2026-elektrik-4000-kwh-siniri-sktt-ne-zaman-baslar/index.html",
+      "canonicalPath": "/haberler/2026-elektrik-4000-kwh-siniri-sktt-ne-zaman-baslar/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/2026-yillik-elektrik-tuketimi-4000-kwh-sktt-kontrolu/index.html",
+      "canonicalPath": "/hesaplama/2026-yillik-elektrik-tuketimi-4000-kwh-sktt-kontrolu/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/elektrik-tedarik-ve-tarife-kontrol-merkezi/index.html",
+      "canonicalPath": "/elektrik-tedarik-ve-tarife-kontrol-merkezi/",
+      "type": "hub"
+    }
+  ]
+}
