@@ -28,11 +28,8 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: v373 AEO SEO kaynak güven ve çakışma regresyonu
+      - name: v373 AEO SEO kaynak güven ve fuzzy niyet çakışma regresyonu
         run: python alo186/tests/test_content_authority_v373.py
-
-      - name: Global intent collision guard
-        run: python alo186/ai-cms/intent_collision_guard.py --repo .
 
       - name: Canonical production build
         run: |

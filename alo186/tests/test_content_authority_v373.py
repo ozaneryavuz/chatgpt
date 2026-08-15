@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+import unicodedata
 import unittest
 from pathlib import Path
 
@@ -37,6 +38,29 @@ def ld_json_objects(html: str) -> list[dict]:
     return [json.loads(block) for block in blocks]
 
 
+def visible_h1(html: str) -> str:
+    match = re.search(r"<h1\b[^>]*>(.*?)</h1>", html, flags=re.S | re.I)
+    if not match:
+        return ""
+    return re.sub(r"<[^>]+>", "", match.group(1)).strip()
+
+
+def intent_tokens(text: str) -> set[str]:
+    folded = unicodedata.normalize("NFKD", text.casefold())
+    folded = "".join(ch for ch in folded if not unicodedata.combining(ch))
+    tokens = set(re.findall(r"[a-z0-9]+", folded))
+    stop = {
+        "ve", "veya", "mi", "mu", "mı", "mü", "ne", "neden", "nasil", "nasıl",
+        "icin", "için", "ile", "bir", "bu", "da", "de", "nedir", "rehberi", "kabul",
+    }
+    return {token for token in tokens if token not in stop and len(token) > 1}
+
+
+def jaccard(left: set[str], right: set[str]) -> float:
+    union = left | right
+    return 0.0 if not union else len(left & right) / len(union)
+
+
 class ContentAuthorityV373Tests(unittest.TestCase):
     def test_three_articles_exist_with_unique_seo_contract(self) -> None:
         for slug, spec in ARTICLES.items():
@@ -59,8 +83,7 @@ class ContentAuthorityV373Tests(unittest.TestCase):
             self.assertTrue({"Article", "FAQPage", "BreadcrumbList"}.issubset(types), (slug, types))
             faq = next(item for item in graph if item.get("@type") == "FAQPage")
             self.assertGreaterEqual(len(faq.get("mainEntity", [])), 4, slug)
-            visible_h3 = len(re.findall(r"<h3\b", html, flags=re.I))
-            self.assertGreaterEqual(visible_h3, 4, slug)
+            self.assertGreaterEqual(len(re.findall(r"<h3\b", html, flags=re.I)), 4, slug)
 
     def test_primary_sources_and_claim_markers(self) -> None:
         for slug, spec in ARTICLES.items():
@@ -79,12 +102,8 @@ class ContentAuthorityV373Tests(unittest.TestCase):
 
     def test_no_commerce_on_high_risk_intents(self) -> None:
         forbidden = (
-            "amazon.com.tr",
-            "alo186rehber-21",
-            '"@type":"Product"',
-            '"@type":"Offer"',
-            '"@type":"AggregateRating"',
-            "priceCurrency",
+            "amazon.com.tr", "alo186rehber-21", '"@type":"Product"', '"@type":"Offer"',
+            '"@type":"AggregateRating"', "priceCurrency",
         )
         for slug in ARTICLES:
             html = article_path(slug).read_text(encoding="utf-8")
@@ -113,19 +132,35 @@ class ContentAuthorityV373Tests(unittest.TestCase):
         for slug, spec in ARTICLES.items():
             ours = article_path(slug).read_text(encoding="utf-8")
             title = re.search(r"<title>(.*?)</title>", ours, flags=re.S | re.I).group(1).strip()
-            h1 = re.sub(r"<[^>]+>", "", re.search(r"<h1\b[^>]*>(.*?)</h1>", ours, flags=re.S | re.I).group(1)).strip()
+            h1 = visible_h1(ours)
             title_hits = h1_hits = canonical_hits = 0
             for page in all_pages:
                 html = page.read_text(encoding="utf-8", errors="ignore")
                 if f"<title>{title}</title>" in html:
                     title_hits += 1
-                match = re.search(r"<h1\b[^>]*>(.*?)</h1>", html, flags=re.S | re.I)
-                if match and re.sub(r"<[^>]+>", "", match.group(1)).strip() == h1:
+                if visible_h1(html) == h1:
                     h1_hits += 1
                 canonical_hits += html.count(f'<link rel="canonical" href="{spec["canonical"]}">')
             self.assertEqual(1, title_hits, (slug, title_hits))
             self.assertEqual(1, h1_hits, (slug, h1_hits))
             self.assertEqual(1, canonical_hits, (slug, canonical_hits))
+
+    def test_fuzzy_h1_intent_collision_guard(self) -> None:
+        all_pages = list((ALO / "haberler").glob("*/index.html"))
+        new_paths = {article_path(slug).resolve() for slug in ARTICLES}
+        for slug in ARTICLES:
+            ours = article_path(slug)
+            ours_tokens = intent_tokens(visible_h1(ours.read_text(encoding="utf-8")))
+            self.assertGreaterEqual(len(ours_tokens), 3, slug)
+            collisions: list[tuple[float, str, str]] = []
+            for page in all_pages:
+                if page.resolve() in new_paths:
+                    continue
+                other_h1 = visible_h1(page.read_text(encoding="utf-8", errors="ignore"))
+                score = jaccard(ours_tokens, intent_tokens(other_h1))
+                if score >= 0.78:
+                    collisions.append((score, page.parent.name, other_h1))
+            self.assertFalse(collisions, (slug, sorted(collisions, reverse=True)[:5]))
 
 
 if __name__ == "__main__":
