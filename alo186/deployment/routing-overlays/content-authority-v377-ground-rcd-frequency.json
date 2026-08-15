@@ -1,0 +1,29 @@
+{
+  "version": 377,
+  "generatedAt": "2026-08-15",
+  "routes": [
+    {
+      "source": "alo186/haberler/topraklama-direnci-dusmuyor-ilave-kazik-neden-ise-yaramiyor/index.html",
+      "canonicalPath": "/haberler/topraklama-direnci-dusmuyor-ilave-kazik-neden-ise-yaramiyor",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/30ma-300ma-kacak-akim-rolesi-ayni-anda-atiyor-selektivite/index.html",
+      "canonicalPath": "/haberler/30ma-300ma-kacak-akim-rolesi-ayni-anda-atiyor-selektivite",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ges-inverter-grid-frequency-high-low-sebeke-frekansi-alarmi/index.html",
+      "canonicalPath": "/haberler/ges-inverter-grid-frequency-high-low-sebeke-frekansi-alarmi",
+      "type": "article"
+    }
+  ],
+  "contentAuthority": {
+    "schemaVersion": 1,
+    "runDate": "2026-08-15",
+    "sourceVerified": true,
+    "intentCollisionChecked": true,
+    "commercialPolicy": "no-buy-first",
+    "structuredData": ["Article", "FAQPage", "BreadcrumbList"]
+  }
+}
