@@ -1,0 +1,21 @@
+{
+  "version": 368,
+  "generatedAt": "2026-08-15",
+  "routes": [
+    {
+      "source": "alo186/haberler/ges-inverter-dc-arc-fault-afci-alarmi/index.html",
+      "canonicalPath": "/haberler/ges-inverter-dc-arc-fault-afci-alarmi/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/jenerator-low-oil-pressure-dusuk-yag-basinci-alarmi/index.html",
+      "canonicalPath": "/haberler/jenerator-low-oil-pressure-dusuk-yag-basinci-alarmi/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ups-fan-fault-fan-inoperable-alarmi/index.html",
+      "canonicalPath": "/haberler/ups-fan-fault-fan-inoperable-alarmi/",
+      "type": "article"
+    }
+  ]
+}
