@@ -7,7 +7,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 ALO = ROOT / "alo186"
-ROUTING = ALO / "deployment/routing-overlays/content-authority-v372-ev-bess-underspeed.json"
+ROUTING = ALO / "deployment/routing-overlays/content-authority-v372-ev-pricing-underspeed.json"
 
 ARTICLES = {
     "otoyol-ev-sarj-kredi-karti-temassiz-odeme-zorunlu-mu": {
@@ -15,10 +15,10 @@ ARTICLES = {
         "sources": ("epdk.gov.tr", "sarjtr.epdk.gov.tr"),
         "needles": ("1 Temmuz 2026", "DC 50 kW", "ilave bedel", "komisyon"),
     },
-    "bess-yan-hizmet-2026-primer-sekonder-hizli-frekans-atalet-kabul": {
-        "canonical": "https://alo186.com/haberler/bess-yan-hizmet-2026-primer-sekonder-hizli-frekans-atalet-kabul",
-        "sources": ("teias.gov.tr", "webim.teias.gov.tr"),
-        "needles": ("3 Temmuz 2026", "30 MW", "50 MW", "200 milisaniye", "AGC", "RoCoF"),
+    "ev-sarj-fiyati-ek-ucret-rezervasyon-bekleme-bedeli": {
+        "canonical": "https://alo186.com/haberler/ev-sarj-fiyati-ek-ucret-rezervasyon-bekleme-bedeli",
+        "sources": ("epdk.gov.tr",),
+        "needles": ("TL/kWh", "işlem başlatma", "rezervasyon", "%25", "şarj hizmetinin tamamlandığı"),
     },
     "jenerator-underspeed-alarmi-1600-1603": {
         "canonical": "https://alo186.com/haberler/jenerator-underspeed-alarmi-1600-1603",
