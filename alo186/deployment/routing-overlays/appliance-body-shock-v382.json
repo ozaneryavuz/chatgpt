@@ -1,0 +1,21 @@
+{
+  "version": 382,
+  "generatedAt": "2026-08-15",
+  "routes": [
+    {
+      "source": "alo186/haberler/cihaz-govdesi-elektrik-carpiyor-ne-yapmali/index.html",
+      "canonicalPath": "/haberler/cihaz-govdesi-elektrik-carpiyor-ne-yapmali/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/cihaz-govdesi-elektrik-carpmasi-guvenlik-ayirici/index.html",
+      "canonicalPath": "/hesaplama/cihaz-govdesi-elektrik-carpmasi-guvenlik-ayirici/",
+      "type": "business-tool"
+    },
+    {
+      "source": "alo186/sektor-rehberi/otel-isletme-cihaz-topraklama-kacak-akim-kabul/index.html",
+      "canonicalPath": "/sektor-rehberi/otel-isletme-cihaz-topraklama-kacak-akim-kabul/",
+      "type": "article"
+    }
+  ]
+}
