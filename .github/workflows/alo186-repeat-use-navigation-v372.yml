@@ -39,7 +39,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: v372 trust no-buy canonical and privacy regression
-        run: python -m pytest -q alo186/tests/test_repeat_use_navigation_v372.py
+        run: python alo186/tests/test_repeat_use_navigation_v372.py
       - name: Canonical production build and smoke
         run: |
           set -euo pipefail
@@ -73,7 +73,8 @@ jobs:
               assert '"@type":"offer"' not in low
           legacy = (root / 'hesaplama/kesinti-gunlugu/index.html').read_text(encoding='utf-8')
           assert '<meta name="robots" content="noindex,follow">' in legacy
-          assert '<link rel="canonical" href="https://alo186.com/hesaplama/elektrik-kesintisi-sure-gunlugu/">' in legacy
+          assert '<link rel="canonical" href="https://alo186.com/hesaplama/kesinti-gunlugu/">' in legacy
+          assert "location.replace('/hesaplama/elektrik-kesintisi-sure-gunlugu/')" in legacy
           print({'ok': True, 'routingVersion': release['routingVersion'], 'routes': routes, 'newMerchantLinks': 0})
           PY
       - name: Upload verified bundle
