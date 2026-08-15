@@ -1,0 +1,45 @@
+{
+  "version": 360,
+  "generatedAt": "2026-08-15",
+  "intent": "charger-standby-and-usb-c-decision-journey",
+  "commercialDecision": {
+    "newAffiliateClass": false,
+    "newMerchantLinksOnNewPages": 0,
+    "reuseExistingAffiliateClass": "usb-c-pd-v355",
+    "reuseOnlyWhen": [
+      "no active heat burn spark melt moisture or loose-outlet symptom",
+      "user is solving a documented USB-C power or cable compatibility gap rather than standby curiosity",
+      "existing safe charger and cable do not already satisfy the documented device need",
+      "the existing USB-C suitability tool reaches its compatible commerce state",
+      "affiliate disclosure is visible before any merchant link"
+    ],
+    "noBuyWhen": [
+      "existing charger and cable are safe and sufficient",
+      "the user only wants to estimate no-load consumption and already has reliable product data or a safe measurement method",
+      "there is an active outlet plug charger or cable safety symptom",
+      "the device is medical critical life-safety or requires manufacturer-specific power equipment"
+    ],
+    "claimsForbidden": [
+      "unverified price",
+      "unverified stock",
+      "unverified rating",
+      "unverified warranty",
+      "universal no-load watt value",
+      "stale electricity unit price presented as current"
+    ]
+  },
+  "trust": {
+    "independenceStatementRequired": true,
+    "officialAffiliationImpressionForbidden": true,
+    "merchantDisclosureBeforeLinkRequired": true,
+    "merchantLinksOnArticle": 0,
+    "merchantLinksOnHub": 0
+  },
+  "repeatVisit": [
+    "new device or charger",
+    "cable replacement",
+    "measured standby baseline changes",
+    "new bill kWh-per-day comparison",
+    "new physical heat smell damage or loose-contact symptom"
+  ]
+}
