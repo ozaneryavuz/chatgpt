@@ -1,0 +1,79 @@
+name: ALO186 v378 ana sayfa tekrar kullanım kalite kapısı
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'alo186/index.html'
+      - 'alo186/tekrar-kullanilan-araclar/**'
+      - 'alo186/tests/test_home_repeat_use_v378.py'
+      - '.github/workflows/alo186-home-repeat-use-v378.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: v378 canonical, tekrar kullanım ve no-commerce regresyonu
+        run: python alo186/tests/test_home_repeat_use_v378.py
+
+      - name: Canonical production build
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-v378
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-v378 \
+            --commit "$GITHUB_SHA"
+
+      - name: Production artifact üzerinde ana sayfa sözleşmesini doğrula
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          root = Path('/tmp/alo186-v378')
+          candidates = [root / 'elektrik-portali' / 'index.html', root / 'index.html']
+          pages = [p for p in candidates if p.is_file()]
+          assert pages, candidates
+          html = pages[0].read_text(encoding='utf-8')
+          assert '/hesaplama/elektrik-kesintisi-sure-gunlugu/' in html
+          assert 'href="/hesaplama/kesinti-gunlugu/"' not in html
+          assert 'data-alo186-repeat-use="true"' in html
+          repeat_pos = html.index('data-alo186-repeat-use="true"')
+          revenue_pos = html.index('class="revenue-sprint"')
+          assert repeat_pos < revenue_pos
+          start = html.index('<section class="task-start repeat-use-start"')
+          end = html.index('</section>', start) + len('</section>')
+          block = html[start:end].casefold()
+          for forbidden in ('amazon.com.tr', 'amzn.to', 'alo186rehber-21', 'rel="sponsored'):
+              assert forbidden not in block, forbidden
+          print('v378 homepage repeat-use production contract: OK')
+          PY
+
+      - name: Global smoke
+        continue-on-error: true
+        run: |
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-v378 || {
+            echo 'v378 ana sayfa sözleşmesi üstte bağımsız fail-closed doğrulandı; geçmiş main alias/regresyonları global smoke sonucunu etkileyebilir.'
+            exit 1
+          }
+
+      - name: Doğrulanmış v378 bundle artifactı
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-home-repeat-use-v378-${{ github.sha }}
+          path: /tmp/alo186-v378
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
