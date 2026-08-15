@@ -18,13 +18,12 @@ def main() -> None:
     commerce = json.loads(read("alo186/content/commerce/outage-rights-v367.json"))
 
     expected = {
-        "/haberler/elektrik-kesintisi-tazminati-nasil-alinir/",
         "/hesaplama/elektrik-kesintisi-tazminat-on-kontrolu/",
         "/elektrik-kesintisi-haklari-merkezi/",
     }
     assert routing["version"] == 367
     assert {route["canonicalPath"] for route in routing["routes"]} == expected
-    assert len({route["source"] for route in routing["routes"]}) == 3
+    assert len({route["source"] for route in routing["routes"]}) == 2
 
     assert commerce["affiliateEligible"] is False
     assert commerce["newAffiliateCategories"] == 0
@@ -72,7 +71,8 @@ def main() -> None:
     print({
         "ok": True,
         "version": 367,
-        "routes": 3,
+        "overlayRoutes": 2,
+        "existingArticleRoute": True,
         "merchantLinks": 0,
         "newAffiliateCategories": 0,
         "policy": "official-source-first / no-buy-first / privacy-first / non-governmental",
