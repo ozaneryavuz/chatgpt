@@ -1,0 +1,21 @@
+{
+  "version": 383,
+  "generatedAt": "2026-08-15",
+  "routes": [
+    {
+      "source": "alo186/haberler/evde-voltaj-dusuyor-isiklar-karariyor-ne-yapmali/index.html",
+      "canonicalPath": "/haberler/evde-voltaj-dusuyor-isiklar-karariyor-ne-yapmali/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/ev-voltaj-dusmesi-dalgalanma-belirti-ayirici/index.html",
+      "canonicalPath": "/hesaplama/ev-voltaj-dusmesi-dalgalanma-belirti-ayirici/",
+      "type": "business-tool"
+    },
+    {
+      "source": "alo186/sektor-rehberi/otel-isletme-gerilim-dusmesi-guc-kalitesi-kabul/index.html",
+      "canonicalPath": "/sektor-rehberi/otel-isletme-gerilim-dusmesi-guc-kalitesi-kabul/",
+      "type": "article"
+    }
+  ]
+}
