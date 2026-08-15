@@ -1,0 +1,84 @@
+name: ALO186 smart meter MASS v371
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'alo186/haberler/milli-akilli-sayac-sistemi-mass-nedir-2026/**'
+      - 'alo186/hesaplama/akilli-sayac-mass-gecis-kontrolu/**'
+      - 'alo186/fatura-ve-sayac-kontrol-merkezi/**'
+      - 'alo186/content/commerce/smart-meter-mass-v371.json'
+      - 'alo186/deployment/routing-overlays/smart-meter-mass-v371.json'
+      - 'alo186/tests/test_smart_meter_mass_v371.py'
+      - '.github/workflows/alo186-smart-meter-mass-v371.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/milli-akilli-sayac-sistemi-mass-nedir-2026/**'
+      - 'alo186/hesaplama/akilli-sayac-mass-gecis-kontrolu/**'
+      - 'alo186/fatura-ve-sayac-kontrol-merkezi/**'
+      - 'alo186/content/commerce/smart-meter-mass-v371.json'
+      - 'alo186/deployment/routing-overlays/smart-meter-mass-v371.json'
+      - 'alo186/tests/test_smart_meter_mass_v371.py'
+      - '.github/workflows/alo186-smart-meter-mass-v371.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo186-smart-meter-v371-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: v371 trust privacy no-buy and commerce checks
+        run: python alo186/tests/test_smart_meter_mass_v371.py
+      - name: Canonical production build and smoke
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-smart-meter-v371
+          python alo186/deployment/build_static_site.py --output /tmp/alo186-smart-meter-v371 --commit "$GITHUB_SHA"
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-smart-meter-v371
+      - name: Verify routes sitemap schema and zero merchant links
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/alo186-smart-meter-v371')
+          routes = [
+              '/haberler/milli-akilli-sayac-sistemi-mass-nedir-2026/',
+              '/hesaplama/akilli-sayac-mass-gecis-kontrolu/',
+          ]
+          sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
+          release = json.loads((root / 'alo186-release.json').read_text(encoding='utf-8'))
+          assert release['routingVersion'] >= 371
+          for route in routes:
+              page = root / route.strip('/') / 'index.html'
+              assert page.is_file(), page
+              html = page.read_text(encoding='utf-8')
+              low = html.casefold()
+              canonical = f'https://alo186.com{route}'
+              assert canonical in sitemap or canonical.rstrip('/') in sitemap
+              assert f'<link rel="canonical" href="{canonical}">' in html
+              assert 'amazon.com.tr' not in low
+              assert 'amzn.to' not in low
+              assert 'pricecurrency' not in low
+              assert '"@type":"product"' not in low
+              assert '"@type":"offer"' not in low
+          print({'ok': True, 'routingVersion': release['routingVersion'], 'routes': routes, 'newMerchantLinks': 0})
+          PY
+      - name: Upload verified bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-smart-meter-v371-${{ github.sha }}
+          path: /tmp/alo186-smart-meter-v371
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
