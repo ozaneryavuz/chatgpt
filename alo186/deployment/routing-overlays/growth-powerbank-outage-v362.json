@@ -1,0 +1,21 @@
+{
+  "version": 362,
+  "generatedAt": "2026-08-15",
+  "routes": [
+    {
+      "source": "alo186/haberler/powerbank-ucaga-alinir-mi-2026-mah-wh/index.html",
+      "canonicalPath": "/haberler/powerbank-ucaga-alinir-mi-2026-mah-wh/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/powerbank-mah-wh-hesaplama/index.html",
+      "canonicalPath": "/hesaplama/powerbank-mah-wh-hesaplama/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/hesaplama/elektrik-kesintisi-sure-gunlugu/index.html",
+      "canonicalPath": "/hesaplama/elektrik-kesintisi-sure-gunlugu/",
+      "type": "calculator"
+    }
+  ]
+}
