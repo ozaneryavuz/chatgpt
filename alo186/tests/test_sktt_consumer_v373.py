@@ -9,6 +9,7 @@ PAGES = {
     "/hesaplama/2026-yillik-elektrik-tuketimi-4000-kwh-sktt-kontrolu/": ROOT / "alo186/hesaplama/2026-yillik-elektrik-tuketimi-4000-kwh-sktt-kontrolu/index.html",
     "/elektrik-tedarik-ve-tarife-kontrol-merkezi/": ROOT / "alo186/elektrik-tedarik-ve-tarife-kontrol-merkezi/index.html",
 }
+REPEAT_HUB = ROOT / "alo186/tekrar-kullanilan-araclar/index.html"
 GOV = ROOT / "alo186/content/commerce/sktt-consumer-v373.json"
 ROUTING = ROOT / "alo186/deployment/routing-overlays/sktt-consumer-v373.json"
 
@@ -65,6 +66,13 @@ def main() -> None:
     assert "doğrudan affiliate/merchant bağlantısı yoktur" in hub_low
     assert "fiyat teklifi sunmaz" in hub_low
 
+    repeat_hub = read(REPEAT_HUB)
+    repeat_low = repeat_hub.casefold()
+    assert "/elektrik-tedarik-ve-tarife-kontrol-merkezi/" in repeat_hub
+    assert "4.000 kwh sktt" in repeat_low
+    assert "500 kwh serbest tüketici" in repeat_low
+    assert "doğrudan amazon" in repeat_low
+
     gov = json.loads(read(GOV))
     commerce = gov["commerce"]
     assert gov["version"] == 373
@@ -86,7 +94,7 @@ def main() -> None:
     for route, page in PAGES.items():
         assert actual[route]["source"] == str(page.relative_to(ROOT)).replace("\\", "/")
 
-    print({"ok": True, "version": 373, "routes": list(PAGES), "newAffiliateClasses": 0, "newMerchantLinks": 0})
+    print({"ok": True, "version": 373, "routes": list(PAGES), "repeatHub": True, "newAffiliateClasses": 0, "newMerchantLinks": 0})
 
 
 if __name__ == "__main__":
