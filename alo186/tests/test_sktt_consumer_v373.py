@@ -40,7 +40,7 @@ def main() -> None:
     assert "500 kwh" in article_low
     assert "takip eden üçüncü ayın ilk" in article_low
     assert "epdk" in article_low
-    assert "epiaş" in article_low
+    assert "EPİAŞ" in article
     assert "merchant bağlantısı yoktur" in article_low
 
     calculator = html_by_route["/hesaplama/2026-yillik-elektrik-tuketimi-4000-kwh-sktt-kontrolu/"]
