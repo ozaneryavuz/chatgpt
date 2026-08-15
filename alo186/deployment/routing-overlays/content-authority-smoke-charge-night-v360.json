@@ -1,0 +1,21 @@
+{
+  "version": 360,
+  "generatedAt": "2026-08-15",
+  "routes": [
+    {
+      "source": "alo186/haberler/jenerator-siyah-beyaz-mavi-duman-neden-atar/index.html",
+      "canonicalPath": "/haberler/jenerator-siyah-beyaz-mavi-duman-neden-atar/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/inverter-akuyu-sarj-etmiyor-charge-disabled-bms/index.html",
+      "canonicalPath": "/haberler/inverter-akuyu-sarj-etmiyor-charge-disabled-bms/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/ges-inverter-gece-elektrik-tuketir-mi-night-consumption/index.html",
+      "canonicalPath": "/haberler/ges-inverter-gece-elektrik-tuketir-mi-night-consumption/",
+      "type": "article"
+    }
+  ]
+}
