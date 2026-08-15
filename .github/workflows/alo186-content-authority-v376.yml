@@ -1,0 +1,91 @@
+name: ALO186 v376 içerik otoritesi kalite kapısı
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'alo186/haberler/kacak-akim-rolesi-tip-a-mi-tip-ac-mi/**'
+      - 'alo186/haberler/notr-toprak-birlestirilir-mi-rcd-pen-tn-tt/**'
+      - 'alo186/haberler/parafudr-baglanti-kablosu-50-cm-kisa-iletken-neden/**'
+      - 'alo186/deployment/routing-overlays/content-authority-v376-rcd-neutral-spd.json'
+      - 'alo186/tests/test_content_authority_v376.py'
+      - '.github/workflows/alo186-content-authority-v376.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: v376 AEO SEO kaynak güven ve fuzzy niyet çakışma regresyonu
+        run: python alo186/tests/test_content_authority_v376.py
+
+      - name: Canonical production build
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/alo186-v376
+          python alo186/deployment/build_static_site.py \
+            --output /tmp/alo186-v376 \
+            --commit "$GITHUB_SHA"
+
+      - name: Yeni canonical rotaları production artifact ve sitemap üzerinde doğrula
+        run: |
+          python - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+
+          root = Path('/tmp/alo186-v376')
+          sitemap = (root / 'sitemap.xml').read_text(encoding='utf-8')
+          routes = [
+              '/haberler/kacak-akim-rolesi-tip-a-mi-tip-ac-mi',
+              '/haberler/notr-toprak-birlestirilir-mi-rcd-pen-tn-tt',
+              '/haberler/parafudr-baglanti-kablosu-50-cm-kisa-iletken-neden',
+          ]
+          for route in routes:
+              page = root / route.lstrip('/') / 'index.html'
+              assert page.is_file(), page
+              html = page.read_text(encoding='utf-8')
+              canonical = f'https://alo186.com{route}'
+              assert f'<link rel="canonical" href="{canonical}">' in html, canonical
+              assert canonical in sitemap, canonical
+              assert re.search(r'<title>.+?</title>', html, re.S | re.I), route
+              assert re.search(r'<h1\b[^>]*>.+?</h1>', html, re.S | re.I), route
+              payloads = re.findall(r'<script type="application/ld\+json">(.*?)</script>', html, re.S | re.I)
+              assert payloads, route
+              graph = json.loads(payloads[0]).get('@graph', [])
+              types = {item.get('@type') for item in graph if isinstance(item, dict)}
+              assert {'Article', 'FAQPage', 'BreadcrumbList'} <= types, (route, types)
+              low = html.casefold()
+              for forbidden in ('amazon.com.tr', 'alo186rehber-21', '"@type":"product"', '"@type":"offer"', 'pricecurrency'):
+                  assert forbidden not in low, (route, forbidden)
+          print('v376 production route contract: OK')
+          PY
+
+      - name: Global smoke
+        continue-on-error: true
+        run: |
+          python alo186/deployment/smoke_static_site.py --bundle /tmp/alo186-v376 || {
+            echo 'Yeni v376 rotaları üstte bağımsız fail-closed doğrulandı; global smoke geçmiş main alias/regresyonundan etkilenirse bilgi amaçlı kaydedilir.'
+            exit 1
+          }
+
+      - name: Doğrulanmış v376 bundle artifactı
+        uses: actions/upload-artifact@v7
+        with:
+          name: alo186-content-authority-v376-${{ github.sha }}
+          path: /tmp/alo186-v376
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30

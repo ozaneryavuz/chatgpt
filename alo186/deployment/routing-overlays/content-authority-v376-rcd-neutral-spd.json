@@ -1,0 +1,29 @@
+{
+  "version": 376,
+  "generatedAt": "2026-08-15",
+  "routes": [
+    {
+      "source": "alo186/haberler/kacak-akim-rolesi-tip-a-mi-tip-ac-mi/index.html",
+      "canonicalPath": "/haberler/kacak-akim-rolesi-tip-a-mi-tip-ac-mi",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/notr-toprak-birlestirilir-mi-rcd-pen-tn-tt/index.html",
+      "canonicalPath": "/haberler/notr-toprak-birlestirilir-mi-rcd-pen-tn-tt",
+      "type": "article"
+    },
+    {
+      "source": "alo186/haberler/parafudr-baglanti-kablosu-50-cm-kisa-iletken-neden/index.html",
+      "canonicalPath": "/haberler/parafudr-baglanti-kablosu-50-cm-kisa-iletken-neden",
+      "type": "article"
+    }
+  ],
+  "contentAuthority": {
+    "schemaVersion": 1,
+    "runDate": "2026-08-15",
+    "sourceVerified": true,
+    "intentCollisionChecked": true,
+    "commercialPolicy": "no-buy-first",
+    "structuredData": ["Article", "FAQPage", "BreadcrumbList"]
+  }
+}
