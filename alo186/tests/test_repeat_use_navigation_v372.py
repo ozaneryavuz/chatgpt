@@ -64,3 +64,19 @@ def test_v372_governance_and_routing_contract():
         "/tekrar-kullanilan-araclar/",
         "/hesaplama/urun-almadan-once-uygunluk-kontrolu/",
     }
+
+
+def main() -> None:
+    checks = (
+        test_legacy_outage_journal_points_to_preferred_canonical,
+        test_repeat_use_hub_is_noncommercial_and_links_core_return_paths,
+        test_product_precheck_fails_closed_before_commerce,
+        test_v372_governance_and_routing_contract,
+    )
+    for check in checks:
+        check()
+    print({"ok": True, "version": 372, "checks": len(checks), "newMerchantLinks": 0})
+
+
+if __name__ == "__main__":
+    main()
