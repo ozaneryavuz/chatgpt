@@ -1,0 +1,21 @@
+{
+  "version": 376,
+  "generatedAt": "2026-08-15",
+  "routes": [
+    {
+      "source": "alo186/haberler/elektrik-guvence-bedeli-iadesi-kac-gunde-nasil-alinir-2026/index.html",
+      "canonicalPath": "/haberler/elektrik-guvence-bedeli-iadesi-kac-gunde-nasil-alinir-2026/",
+      "type": "article"
+    },
+    {
+      "source": "alo186/hesaplama/elektrik-guvence-bedeli-iade-takibi/index.html",
+      "canonicalPath": "/hesaplama/elektrik-guvence-bedeli-iade-takibi/",
+      "type": "calculator"
+    },
+    {
+      "source": "alo186/abonelik-ve-guvence-bedeli-kontrol-merkezi/index.html",
+      "canonicalPath": "/abonelik-ve-guvence-bedeli-kontrol-merkezi/",
+      "type": "hub"
+    }
+  ]
+}
