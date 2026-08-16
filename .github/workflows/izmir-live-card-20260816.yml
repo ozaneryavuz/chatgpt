@@ -1,0 +1,276 @@
+name: İzmir live card 2026-08-16
+
+on:
+  push:
+    branches:
+      - izmir-live-20260816-1612
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PYTHONUNBUFFERED: "1"
+
+jobs:
+  fetch-live-card:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install parser dependencies
+        run: python -m pip install --disable-pip-version-check requests beautifulsoup4 lxml
+
+      - name: Fetch official TJK program, current AGF and parse all runners
+        shell: bash
+        run: |
+          mkdir -p live_card
+          python - <<'PY'
+          from __future__ import annotations
+          import csv, io, json, re, time, hashlib
+          from datetime import datetime, timezone
+          from pathlib import Path
+          from urllib.parse import quote
+          import requests
+          from bs4 import BeautifulSoup
+
+          OUT = Path('live_card')
+          session = requests.Session()
+          session.headers.update({
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/151 Safari/537.36',
+              'Accept-Language': 'tr-TR,tr;q=0.9,en;q=0.7',
+          })
+
+          date_iso = '2026-08-16'
+          date_dot = '16.08.2026'
+          date_slash = '16/08/2026'
+          city = 'İzmir'
+          city_id = 2
+          program_url = (
+              'https://medya-cdn.tjk.org/raporftp/TJKPDF/2026/2026-08-16/CSV/'
+              'GunlukYarisProgrami/16.08.2026-' + quote(city, safe='') + '-GunlukYarisProgrami-TR.csv'
+          )
+          agf_urls = [
+              'https://www.tjk.org/AGFv2/2/16082026/TR/1/1',
+              'https://www.tjk.org/AGFv2/2/16082026/TR/1/2',
+          ]
+          page_url = (
+              'https://www.tjk.org/TR/YarisSever/Info/Page/GunlukYarisProgrami?'
+              'QueryParameter_Tarih=' + quote(date_slash, safe='') + '&SehirAdi=' + quote(city, safe='') + '&SehirId=2'
+          )
+          city_page_url = (
+              'https://www.tjk.org/TR/YarisSever/Info/Sehir/GunlukYarisProgrami?Era=today&'
+              'QueryParameter_Tarih=' + quote(date_slash, safe='') + '&SehirAdi=' + quote(city, safe='') + '&SehirId=2'
+          )
+
+          def fetch(url: str, name: str) -> bytes:
+              last = None
+              for attempt in range(4):
+                  try:
+                      r = session.get(url, timeout=45)
+                      r.raise_for_status()
+                      data = r.content
+                      if len(data) < 20:
+                          raise RuntimeError(f'too small: {len(data)}')
+                      (OUT / name).write_bytes(data)
+                      return data
+                  except Exception as exc:
+                      last = exc
+                      time.sleep(2 ** attempt)
+              raise RuntimeError(f'fetch failed {url}: {last}')
+
+          program_bytes = fetch(program_url, 'official_program.csv')
+          html_main = fetch(page_url, 'official_program_page.html')
+          html_city = fetch(city_page_url, 'official_program_city.html')
+          agf_raw = []
+          for idx, url in enumerate(agf_urls, start=1):
+              try:
+                  agf_raw.append(fetch(url, f'agf_{idx}.html'))
+              except Exception as exc:
+                  (OUT / f'agf_{idx}_error.txt').write_text(str(exc), encoding='utf-8')
+                  agf_raw.append(b'')
+
+          text = None
+          for encoding in ('utf-8-sig', 'cp1254', 'latin1'):
+              try:
+                  text = program_bytes.decode(encoding)
+                  break
+              except UnicodeDecodeError:
+                  pass
+          assert text is not None
+          rows = list(csv.reader(io.StringIO(text), delimiter=';'))
+
+          races = []
+          race = None
+          header = None
+          coupled_lines = []
+          first_six_start = None
+          second_six_start = None
+
+          def clean(s):
+              return re.sub(r'\s+', ' ', str(s or '')).strip()
+
+          def num(s):
+              s = clean(s).replace(',', '.')
+              m = re.search(r'-?\d+(?:\.\d+)?', s)
+              return float(m.group()) if m else None
+
+          def agf_values(s):
+              vals = []
+              for pct, rank in re.findall(r'%(\d+(?:[.,]\d+)?)\((\d+)\)', str(s or '')):
+                  vals.append({'pct': float(pct.replace(',', '.')), 'rank': int(rank)})
+              return vals
+
+          def parse_race_header(row):
+              first = clean(row[0])
+              m = re.search(r'(\d+)\.\s*(?:Kosu|Koşu)\s*:\s*(\d{1,2})[.:](\d{2})', first, re.I)
+              if not m:
+                  return None
+              fields = [clean(x) for x in row]
+              return {
+                  'race_number': int(m.group(1)),
+                  'post_time': f'{int(m.group(2)):02d}:{m.group(3)}',
+                  'condition': fields[1] if len(fields) > 1 else '',
+                  'age_group': fields[2] if len(fields) > 2 else '',
+                  'weight_rule': fields[3] if len(fields) > 3 else '',
+                  'distance': fields[4] if len(fields) > 4 else '',
+                  'surface': fields[5] if len(fields) > 5 else '',
+                  'record': next((x for x in fields if 'Rekor Derece' in x), ''),
+                  'runners': [],
+                  'bet_types': [],
+                  'coupled_text': [],
+              }
+
+          for row in rows:
+              if not row:
+                  continue
+              first = clean(row[0])
+              parsed_header = parse_race_header(row)
+              if parsed_header:
+                  if race is not None:
+                      races.append(race)
+                  race = parsed_header
+                  header = None
+                  continue
+              if race is None:
+                  continue
+              joined = ' '.join(clean(x) for x in row if clean(x))
+              if "1. 6'LI GANYAN" in joined or '1. 6LI GANYAN' in joined:
+                  first_six_start = race['race_number']
+              if "2. 6'LI GANYAN" in joined or '2. 6LI GANYAN' in joined:
+                  second_six_start = race['race_number']
+              if first == 'At No':
+                  header = [clean(x) for x in row]
+                  continue
+              if header is not None and re.fullmatch(r'\d+', first or ''):
+                  # Header is stable on TJK CSV exports.
+                  padded = row + [''] * max(0, len(header) - len(row))
+                  item = {header[i]: clean(padded[i]) for i in range(min(len(header), len(padded)))}
+                  agf_raw_cell = item.get('AGF', '')
+                  agfs = agf_values(agf_raw_cell)
+                  horse_name_raw = item.get('At İsmi', '')
+                  scratched = 'Koşmaz' in horse_name_raw or 'KOSMAZ' in horse_name_raw.upper()
+                  horse_name = re.sub(r'\s*\(Koşmaz\)\s*', '', horse_name_raw, flags=re.I).strip()
+                  runner = {
+                      'number': int(first),
+                      'horse': horse_name,
+                      'horse_raw': horse_name_raw,
+                      'scratched': scratched,
+                      'age_sex': item.get('Yaş', ''),
+                      'sire': item.get('Orijin(Baba)', ''),
+                      'dam': item.get('Orijin(Anne)', ''),
+                      'weight': item.get('Kilo', ''),
+                      'jockey': item.get('Jokey Adı', ''),
+                      'owner': item.get('Sahip Adı', ''),
+                      'trainer': item.get('Antrenör Adı', ''),
+                      'gate': item.get('St', ''),
+                      'agf_raw': agf_raw_cell,
+                      'agf_values': agfs,
+                      'agf_first_pct': agfs[0]['pct'] if agfs else None,
+                      'agf_second_pct': agfs[1]['pct'] if len(agfs) > 1 else None,
+                      'handicap': item.get('H', ''),
+                      'last6': item.get('Son 6 Yarış', ''),
+                      'kgs': item.get('KGS', ''),
+                      's20': item.get('s20', ''),
+                      'best_time': item.get('EnİyiDerece', ''),
+                  }
+                  race['runners'].append(runner)
+                  continue
+              if header is not None and joined:
+                  # Footer/betting/coupling line ends runner table.
+                  if 'eküridir' in joined or 'ekuridir' in joined.lower():
+                      race['coupled_text'].append(joined)
+                  if any(token in joined for token in ('GANYAN', 'ÇİFTE', "6'LI", "5'Lİ", "4'LÜ", "3'LÜ")):
+                      race['bet_types'].append(joined)
+                  header = None
+          if race is not None:
+              races.append(race)
+
+          # Parse AGF HTML into a simple list of visible numeric/text tokens for audit.
+          agf_extracts = []
+          for idx, raw in enumerate(agf_raw, start=1):
+              if not raw:
+                  continue
+              soup = BeautifulSoup(raw, 'lxml')
+              txt = ' '.join(soup.stripped_strings)
+              agf_extracts.append({'index': idx, 'text': txt[:20000], 'length': len(txt)})
+
+          first_start = first_six_start or 1
+          first_six_races = [r for r in races if first_start <= r['race_number'] <= first_start + 5]
+          payload = {
+              'fetched_at_utc': datetime.now(timezone.utc).isoformat(),
+              'date': date_iso,
+              'track': city,
+              'program_url': program_url,
+              'page_url': page_url,
+              'city_page_url': city_page_url,
+              'agf_urls': agf_urls,
+              'first_six_start': first_start,
+              'second_six_start': second_six_start,
+              'race_count': len(races),
+              'first_six_races': first_six_races,
+              'all_races': races,
+              'agf_html_extracts': agf_extracts,
+              'sha256': {
+                  'program_csv': hashlib.sha256(program_bytes).hexdigest(),
+                  'program_page': hashlib.sha256(html_main).hexdigest(),
+                  'program_city': hashlib.sha256(html_city).hexdigest(),
+              },
+          }
+          (OUT / 'izmir_live_card.json').write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding='utf-8')
+
+          # Runner-level CSV for convenient analysis.
+          out_rows = []
+          for r in first_six_races:
+              for x in r['runners']:
+                  out_rows.append({
+                      'race_number': r['race_number'], 'post_time': r['post_time'],
+                      'condition': r['condition'], 'age_group': r['age_group'],
+                      'distance': r['distance'], 'surface': r['surface'],
+                      **x,
+                  })
+          if out_rows:
+              with (OUT / 'izmir_first_six_runners.csv').open('w', encoding='utf-8-sig', newline='') as handle:
+                  writer = csv.DictWriter(handle, fieldnames=list(out_rows[0].keys()))
+                  writer.writeheader(); writer.writerows(out_rows)
+          print(json.dumps({
+              'first_six_start': first_start,
+              'races': len(first_six_races),
+              'runners': len(out_rows),
+              'fetched_at_utc': payload['fetched_at_utc'],
+              'program_url': program_url,
+          }, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Upload live card artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: izmir-live-card-20260816
+          path: live_card
+          if-no-files-found: error
+          retention-days: 2
