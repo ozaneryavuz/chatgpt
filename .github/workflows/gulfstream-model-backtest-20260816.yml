@@ -1,0 +1,244 @@
+name: Gulfstream model backtest 2026-08-16
+
+on:
+  push:
+    branches:
+      - gulfstream-live-20260816-1806
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PYTHONUNBUFFERED: "1"
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: python -m pip install --disable-pip-version-check requests beautifulsoup4 lxml pandas numpy
+      - name: Build recent Gulfstream historical test and compare models
+        shell: bash
+        run: |
+          mkdir -p gulfstream_backtest
+          python - <<'PY'
+          from __future__ import annotations
+          import json, math, re, time, unicodedata
+          from datetime import date, timedelta, datetime, timezone
+          from pathlib import Path
+          from urllib.parse import quote
+          import requests
+          import numpy as np
+          import pandas as pd
+          from bs4 import BeautifulSoup
+
+          OUT=Path('gulfstream_backtest')
+          S=requests.Session(); S.headers.update({'User-Agent':'Mozilla/5.0','Accept-Language':'tr-TR,tr;q=0.9,en;q=0.7'})
+          CITY='Gulfstream Park ABD'; CITY_ID=85
+          START=date(2026,6,1); END=date(2026,8,15)
+
+          def norm(x):
+            x=unicodedata.normalize('NFKD',str(x or ''))
+            x=''.join(c for c in x if not unicodedata.combining(c)).upper()
+            x=re.sub(r'\(KOSMAZ\)','',x)
+            x=re.sub(r'\(USA\)|\(IRE\)|\(FR\)|\(ARG\)|\(GB\)|\(CAN\)','',x)
+            x=re.sub(r'\(\d+\)\s*$','',x)
+            return re.sub(r'[^A-Z0-9]+','',x)
+
+          def num(x):
+            s=str(x or '').strip().replace('%','').replace(' ','')
+            if not s or s in {'-','--'}: return math.nan
+            if ',' in s and '.' in s:
+              s=s.replace('.','').replace(',','.') if s.rfind(',')>s.rfind('.') else s.replace(',','')
+            else: s=s.replace(',','.')
+            m=re.search(r'-?\d+(?:\.\d+)?',s)
+            return float(m.group()) if m else math.nan
+
+          def agf(x):
+            m=re.search(r'%(\d+(?:[.,]\d+)?)',str(x or ''))
+            return float(m.group(1).replace(',','.'))/100 if m else math.nan
+
+          def mlprob(x):
+            s=str(x or '').strip()
+            if '/' in s:
+              a,b=s.split('/',1)
+              try: return float(b)/(float(a)+float(b))
+              except: return math.nan
+            try: return 1/(float(s)+1)
+            except: return math.nan
+
+          def formscore(x):
+            vals=[]
+            for c in re.findall(r'\d',str(x or ''))[-6:]:
+              v=int(c); vals.append(10 if v==0 else v)
+            if not vals: return math.nan
+            weights=np.linspace(.65,1.35,len(vals))
+            weights=weights/weights.sum()
+            win=np.average([v==1 for v in vals],weights=weights)
+            top3=np.average([v<=3 for v in vals],weights=weights)
+            inv=np.average([1/v for v in vals],weights=weights)
+            return float(.30*win+.45*top3+.25*inv)
+
+          def fetch(url):
+            last=None
+            for a in range(3):
+              try:
+                r=S.get(url,timeout=35,allow_redirects=True)
+                if r.status_code==404: return b''
+                r.raise_for_status()
+                return r.content
+              except Exception as e:
+                last=e; time.sleep(1.2*(a+1))
+            return b''
+
+          def tables(content):
+            soup=BeautifulSoup(content,'lxml')
+            out=[]
+            for t in soup.find_all('table'):
+              rows=[]
+              for tr in t.find_all('tr'):
+                cells=[re.sub(r'\s+',' ',c.get_text(' ',strip=True)).strip() for c in tr.find_all(['th','td'])]
+                if cells: rows.append(cells)
+              if rows: out.append(rows)
+            return out
+
+          def find_col(header, names):
+            hs=[norm(x) for x in header]
+            for name in names:
+              n=norm(name)
+              for i,h in enumerate(hs):
+                if h==n or n in h: return i
+            return None
+
+          def parse_program(content):
+            out=[]
+            for race_no,rows in enumerate(tables(content),start=1):
+              h=rows[0]
+              idx={
+                'number':find_col(h,['N','At No']), 'horse':find_col(h,['At İsmi']),
+                'hp':find_col(h,['HP']), 'last6':find_col(h,['Son 6 Y.']),
+                'gny':find_col(h,['Gny']), 'agf':find_col(h,['AGF'])}
+              if idx['horse'] is None: continue
+              rr=[]
+              for row in rows[1:]:
+                def get(k):
+                  i=idx[k]; return row[i] if i is not None and i<len(row) else ''
+                horse=get('horse')
+                if not horse or 'KOŞMAZ' in horse.upper(): continue
+                n=int(num(get('number'))) if np.isfinite(num(get('number'))) else None
+                if n is None: continue
+                rr.append({'race':race_no,'number':n,'horse':re.sub(r'\s*\(\d+\)\s*$','',horse).strip(),
+                           'horse_key':norm(horse),'hp':num(get('hp')),'last6':get('last6'),
+                           'form':formscore(get('last6')),'gny':num(get('gny')),'agf':agf(get('agf'))})
+              if rr: out.append(rr)
+            return out
+
+          def parse_results(content):
+            wins={}
+            for race_no,rows in enumerate(tables(content),start=1):
+              if len(rows)<2: continue
+              h=rows[0]; ih=find_col(h,['At İsmi'])
+              if ih is None: continue
+              first=rows[1]
+              if ih<len(first): wins[race_no]=norm(first[ih])
+            return wins
+
+          def parse_equibase(day,race_no):
+            url=f'https://mobile.equibase.com/html/entriesGP{day.strftime("%Y%m%d")}{race_no:02d}.html'
+            raw=fetch(url)
+            if not raw: return {}
+            text=' '.join(BeautifulSoup(raw,'lxml').stripped_strings)
+            pat=re.compile(r'Program:\s*(\d+)\s*Post:\s*(\d+)\s*Odds:\s*([^\s]+)\s+(.+?)\s+Jockey:',re.I)
+            return {norm(m.group(4)):mlprob(m.group(3)) for m in pat.finditer(text)}
+
+          def normalise(v):
+            v=np.asarray(v,float); v=np.nan_to_num(v,nan=0,posinf=0,neginf=0); v=np.clip(v,0,None)
+            return v/v.sum() if v.sum()>0 else np.ones(len(v))/len(v)
+
+          def rank_prob(v, higher=True):
+            s=pd.Series(v)
+            if s.notna().sum()==0: return np.ones(len(s))/len(s)
+            med=s.median(); s=s.fillna(med)
+            r=s.rank(method='average',ascending=not higher,pct=True).to_numpy(float)
+            return normalise(r)
+
+          models=['agf','gny','ml','agf_ml','prior_composite','tjk_robust']
+          race_rows=[]; card_rows=[]; audit=[]
+          day=START
+          while day<=END:
+            ds=day.strftime('%d/%m/%Y'); q=quote(ds,safe=''); cq=quote(CITY,safe='')
+            pu=f'https://www.tjk.org/TR/YarisSever/Info/Sehir/GunlukYarisProgrami?Era=lastMonth&QueryParameter_Tarih={q}&SehirAdi={cq}&SehirId=85&sehir-id=85'
+            ru=f'https://www.tjk.org/TR/YarisSever/Info/Sehir/GunlukYarisSonuclari?Era=lastMonth&QueryParameter_Tarih={q}&SehirAdi={cq}&SehirId=85&sehir-id=85'
+            pr=fetch(pu); rr=fetch(ru)
+            if len(pr)<100000 or len(rr)<100000:
+              day+=timedelta(days=1); continue
+            prog=parse_program(pr); wins=parse_results(rr)
+            if len(prog)<6 or not all(r in wins for r in range(1,7)):
+              audit.append({'date':str(day),'status':'incomplete','program_tables':len(prog),'winner_races':len(wins)})
+              day+=timedelta(days=1); continue
+            card_hit={m:True for m in models}; complete=True
+            for race_no in range(1,7):
+              data=pd.DataFrame(prog[race_no-1])
+              data=data[data.horse_key.isin(set(data.horse_key))].copy()
+              winner=wins[race_no]
+              if winner not in set(data.horse_key) or len(data)<3:
+                complete=False; break
+              ml=parse_equibase(day,race_no)
+              data['ml']=data.horse_key.map(ml)
+              p_agf=normalise(data.agf)
+              inv=np.where(np.isfinite(data.gny)&(data.gny>0),1/data.gny,0)
+              p_gny=normalise(inv)
+              p_ml=normalise(data.ml)
+              p_hp=rank_prob(data.hp,True)
+              p_form=rank_prob(data.form,True)
+              uniform=np.ones(len(data))/len(data)
+              def pool(parts,weights):
+                s=np.zeros(len(data))
+                for p,w in zip(parts,weights): s+=w*np.log(np.clip(p,1e-8,None))
+                e=np.exp(s-s.max()); return e/e.sum()
+              probs={
+                'agf':p_agf,
+                'gny':p_gny,
+                'ml':p_ml,
+                'agf_ml':pool([p_agf,p_ml],[.65,.35]),
+                'prior_composite':pool([p_agf,p_ml,p_gny,p_form,p_hp],[.58,.20,.02,.06,.14]),
+                'tjk_robust':pool([p_agf,p_gny,p_form,p_hp],[.68,.07,.10,.15]),
+              }
+              for m,p in probs.items():
+                order=np.argsort(-p); picks=set(data.iloc[order[:3]].horse_key)
+                hit=winner in picks; card_hit[m]=card_hit[m] and hit
+                race_rows.append({'date':str(day),'race':race_no,'model':m,'hit':int(hit),
+                                  'winner':winner,'picks':'|'.join(data.iloc[order[:3]].horse.astype(str)),
+                                  'winner_rank':int(np.where(data.iloc[order].horse_key.to_numpy()==winner)[0][0]+1)})
+            if complete:
+              for m in models: card_rows.append({'date':str(day),'model':m,'exact6':int(card_hit[m])})
+              audit.append({'date':str(day),'status':'ok','races':6})
+            day+=timedelta(days=1)
+
+          rdf=pd.DataFrame(race_rows); cdf=pd.DataFrame(card_rows); adf=pd.DataFrame(audit)
+          rdf.to_csv(OUT/'race_predictions.csv',index=False); cdf.to_csv(OUT/'card_results.csv',index=False); adf.to_csv(OUT/'audit.csv',index=False)
+          summary=[]
+          if len(rdf):
+            for m in models:
+              r=rdf[rdf.model==m]; c=cdf[cdf.model==m]
+              summary.append({'model':m,'races':len(r),'top3':float(r.hit.mean()),
+                              'cards':len(c),'exact6_hits':int(c.exact6.sum()),'exact6':float(c.exact6.mean()),
+                              'mean_winner_rank':float(r.winner_rank.mean())})
+          payload={'generated_at_utc':datetime.now(timezone.utc).isoformat(),'date_range':[str(START),str(END)],
+                   'summary':summary,'complete_cards':int(cdf.date.nunique()) if len(cdf) else 0,
+                   'audit_status_counts':adf.status.value_counts().to_dict() if len(adf) else {}}
+          (OUT/'summary.json').write_text(json.dumps(payload,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps(payload,ensure_ascii=False,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gulfstream-model-backtest
+          path: gulfstream_backtest
+          if-no-files-found: error
+          retention-days: 2
