@@ -1,0 +1,313 @@
+name: Gulfstream Park live card 2026-08-16
+
+on:
+  push:
+    branches:
+      - gulfstream-live-20260816-1806
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PYTHONUNBUFFERED: "1"
+
+jobs:
+  fetch-and-parse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check requests beautifulsoup4 lxml pandas
+
+      - name: Fetch current official/TJK card and parse
+        shell: bash
+        run: |
+          mkdir -p gulfstream_live
+          python - <<'PY'
+          from __future__ import annotations
+          import json, re, time, hashlib
+          from datetime import datetime, timezone
+          from pathlib import Path
+          from urllib.parse import quote
+          import requests
+          import pandas as pd
+          from bs4 import BeautifulSoup
+
+          OUT = Path('gulfstream_live')
+          session = requests.Session()
+          session.headers.update({
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/151 Safari/537.36',
+              'Accept-Language': 'tr-TR,tr;q=0.9,en;q=0.8',
+              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          })
+
+          date_iso = '2026-08-16'
+          date_slash = '16/08/2026'
+          date_compact = '20260816'
+          track = 'Gulfstream Park ABD'
+          track_id = 85
+
+          tjk_urls = {
+              'page': (
+                  'https://www.tjk.org/TR/YarisSever/Info/Page/GunlukYarisProgrami?'
+                  f'QueryParameter_Tarih={quote(date_slash, safe="")}&SehirAdi={quote(track, safe="")}&SehirId={track_id}'
+              ),
+              'city': (
+                  'https://www.tjk.org/TR/YarisSever/Info/Sehir/GunlukYarisProgrami?Era=today&'
+                  f'QueryParameter_Tarih={quote(date_slash, safe="")}&SehirAdi={quote(track, safe="")}&SehirId={track_id}'
+              ),
+              'data': (
+                  'https://www.tjk.org/TR/YarisSever/Info/Data/GunlukYarisProgrami?Era=today&'
+                  f'QueryParameter_Tarih={quote(date_slash, safe="")}&SehirAdi={quote(track, safe="")}&SehirId={track_id}'
+              ),
+          }
+
+          def fetch(url: str, filename: str, required: bool = True) -> bytes:
+              last = None
+              for attempt in range(4):
+                  try:
+                      r = session.get(url, timeout=45, allow_redirects=True)
+                      if r.status_code == 404 and not required:
+                          return b''
+                      r.raise_for_status()
+                      data = r.content
+                      if required and len(data) < 50:
+                          raise RuntimeError(f'too small ({len(data)} bytes)')
+                      (OUT / filename).write_bytes(data)
+                      return data
+                  except Exception as exc:
+                      last = exc
+                      time.sleep(2 ** attempt)
+              if required:
+                  raise RuntimeError(f'fetch failed: {url}: {last}')
+              (OUT / f'{filename}.error.txt').write_text(str(last), encoding='utf-8')
+              return b''
+
+          tjk_payloads = {}
+          for key, url in tjk_urls.items():
+              tjk_payloads[key] = fetch(url, f'tjk_{key}.html', required=(key == 'page'))
+
+          # Equibase mobile entry pages are used as an independent entry/ML cross-check.
+          equibase = []
+          for race_no in range(1, 13):
+              url = f'https://mobile.equibase.com/html/entriesGP{date_compact}{race_no:02d}.html'
+              data = fetch(url, f'equibase_race_{race_no:02d}.html', required=False)
+              if data:
+                  soup = BeautifulSoup(data, 'lxml')
+                  text = ' '.join(soup.stripped_strings)
+                  equibase.append({'race': race_no, 'url': url, 'text': text[:50000], 'bytes': len(data)})
+              elif race_no > 10:
+                  break
+
+          # Select the richest TJK response.
+          candidates = [(k, v) for k, v in tjk_payloads.items() if v]
+          source_key, source_bytes = max(candidates, key=lambda item: len(item[1]))
+          text = None
+          for enc in ('utf-8-sig', 'utf-8', 'cp1254', 'latin1'):
+              try:
+                  text = source_bytes.decode(enc)
+                  break
+              except UnicodeDecodeError:
+                  pass
+          assert text is not None
+          soup = BeautifulSoup(text, 'lxml')
+          full_text = '\n'.join(soup.stripped_strings)
+          (OUT / 'tjk_visible_text.txt').write_text(full_text, encoding='utf-8')
+
+          def clean(value):
+              return re.sub(r'\s+', ' ', str(value or '')).strip()
+
+          def float_tr(value):
+              s = clean(value).replace('%', '').replace('₺', '').replace('TL', '').replace(' ', '')
+              if not s:
+                  return None
+              if ',' in s and '.' in s:
+                  s = s.replace('.', '').replace(',', '.') if s.rfind(',') > s.rfind('.') else s.replace(',', '')
+              else:
+                  s = s.replace(',', '.')
+              m = re.search(r'-?\d+(?:\.\d+)?', s)
+              return float(m.group()) if m else None
+
+          # Extract all tables, retaining nearest preceding race heading.
+          race_heading_re = re.compile(r'(\d+)\.\s*(?:Koşu|Kosu|Race)\s*(\d{1,2})[.:](\d{2})', re.I)
+          tables = []
+          runners = []
+          race_meta = {}
+          pick6_starts = []
+
+          # Build an ordered stream of relevant headings/markers/tables.
+          current_race = None
+          for node in soup.find_all(['h2','h3','h4','div','p','table']):
+              if node.name == 'table':
+                  if current_race is None:
+                      continue
+                  rows = []
+                  for tr in node.find_all('tr'):
+                      cells = [clean(c.get_text(' ', strip=True)) for c in tr.find_all(['th','td'])]
+                      if cells:
+                          rows.append(cells)
+                  if not rows:
+                      continue
+                  header = rows[0]
+                  header_key = ' | '.join(header).lower()
+                  if ('at ismi' in header_key or 'horse name' in header_key) and ('jokey' in header_key or 'jockey' in header_key):
+                      tables.append({'race': current_race, 'header': header, 'rows': rows[1:]})
+                  continue
+
+              own = clean(node.get_text(' ', strip=True))
+              if not own or len(own) > 800:
+                  continue
+              m = race_heading_re.search(own)
+              if m:
+                  current_race = int(m.group(1))
+                  race_meta.setdefault(current_race, {})['post_time'] = f'{int(m.group(2)):02d}:{m.group(3)}'
+                  race_meta[current_race]['heading'] = own
+              marker = own.upper().replace('’', "'")
+              if "6'LI GANYAN" in marker and ('BAŞLAR' in marker or 'STARTS' in marker):
+                  if current_race is not None:
+                      pick6_starts.append(current_race)
+
+          # Header-based runner rows.
+          aliases = {
+              'number': ['N', 'No', 'At No', 'Program'],
+              'horse': ['At İsmi', 'Horse Name'],
+              'age': ['Yaş', 'Age'],
+              'weight': ['Sıklet', 'Kilo', 'Weight'],
+              'jockey': ['Jokey', 'Jockey'],
+              'trainer': ['Antrenör', 'Trainer'],
+              'post': ['St', 'Post'],
+              'rating': ['HP', 'RT'],
+              'last6': ['Son 6 Y.', 'Last 6 Race'],
+              'kgs': ['KGS', 'LR'],
+              'ganyan': ['Gny', 'Win'],
+              'agf': ['AGF', 'PSF'],
+          }
+          def find_col(header, names):
+              normalized = [clean(x).lower() for x in header]
+              for name in names:
+                  n = name.lower()
+                  for i, value in enumerate(normalized):
+                      if value == n or n in value:
+                          return i
+              return None
+
+          for table in tables:
+              header = table['header']
+              idx = {k: find_col(header, v) for k, v in aliases.items()}
+              for row in table['rows']:
+                  def get(key):
+                      i = idx.get(key)
+                      return row[i] if i is not None and i < len(row) else ''
+                  no_raw = get('number')
+                  number_match = re.search(r'\d+', no_raw)
+                  horse = clean(get('horse'))
+                  if not number_match or not horse:
+                      continue
+                  scratched = bool(re.search(r'koşmaz|scratch', horse, re.I))
+                  horse_clean = re.sub(r'\s*\((?:Koşmaz|SCR(?:ATCH)?)\)\s*', '', horse, flags=re.I)
+                  agf_raw = get('agf')
+                  agf_values = [float(x.replace(',', '.')) for x in re.findall(r'%(\d+(?:[.,]\d+)?)', agf_raw)]
+                  runners.append({
+                      'race': table['race'],
+                      'post_time': race_meta.get(table['race'], {}).get('post_time'),
+                      'number': int(number_match.group()),
+                      'horse': horse_clean,
+                      'horse_raw': horse,
+                      'scratched': scratched,
+                      'age': get('age'),
+                      'weight': get('weight'),
+                      'jockey': get('jockey'),
+                      'trainer': get('trainer'),
+                      'post': get('post'),
+                      'rating': get('rating'),
+                      'last6': get('last6'),
+                      'kgs': get('kgs'),
+                      'ganyan_raw': get('ganyan'),
+                      'ganyan': float_tr(get('ganyan')),
+                      'agf_raw': agf_raw,
+                      'agf_first_pct': agf_values[0] if agf_values else None,
+                      'agf_second_pct': agf_values[1] if len(agf_values) > 1 else None,
+                  })
+
+          # Fallback: pandas read_html if DOM traversal missed tables.
+          if not runners:
+              try:
+                  frames = pd.read_html(text)
+              except Exception:
+                  frames = []
+              for frame_index, frame in enumerate(frames):
+                  cols = [clean(c) for c in frame.columns]
+                  key = ' | '.join(cols).lower()
+                  if ('at ismi' not in key and 'horse name' not in key) or ('jokey' not in key and 'jockey' not in key):
+                      continue
+                  frame.columns = cols
+                  frame.to_csv(OUT / f'fallback_table_{frame_index}.csv', index=False)
+
+          # Parse Equibase text into a compact runner list.
+          eq_runners = []
+          for item in equibase:
+              text_eq = item['text']
+              pattern = re.compile(
+                  r'Program:\s*(\d+)\s*Post:\s*(\d+)\s*Odds:\s*([^\s]+)\s+(.+?)\s+Jockey:\s*(.+?)\s+Trainer:\s*(.+?)(?=\s+Image:|\s+Program:|$)',
+                  re.I,
+              )
+              for match in pattern.finditer(text_eq):
+                  eq_runners.append({
+                      'race': item['race'],
+                      'program': int(match.group(1)),
+                      'post': int(match.group(2)),
+                      'morning_line': clean(match.group(3)),
+                      'horse': clean(match.group(4)),
+                      'jockey': clean(match.group(5)),
+                      'trainer': clean(match.group(6)),
+                  })
+
+          if runners:
+              pd.DataFrame(runners).sort_values(['race','number']).to_csv(OUT / 'tjk_runners.csv', index=False, encoding='utf-8-sig')
+          if eq_runners:
+              pd.DataFrame(eq_runners).sort_values(['race','program']).to_csv(OUT / 'equibase_runners.csv', index=False, encoding='utf-8-sig')
+
+          payload = {
+              'fetched_at_utc': datetime.now(timezone.utc).isoformat(),
+              'date': date_iso,
+              'track': track,
+              'tjk_urls': tjk_urls,
+              'selected_tjk_source': source_key,
+              'tjk_response_bytes': {k: len(v) for k,v in tjk_payloads.items()},
+              'tjk_sha256': {k: hashlib.sha256(v).hexdigest() if v else None for k,v in tjk_payloads.items()},
+              'race_meta': race_meta,
+              'pick6_start_candidates': sorted(set(pick6_starts)),
+              'tjk_runner_count': len(runners),
+              'equibase_race_count': len(equibase),
+              'equibase_runner_count': len(eq_runners),
+              'equibase': equibase,
+              'tjk_runners': runners,
+              'equibase_runners': eq_runners,
+          }
+          (OUT / 'gulfstream_live_card.json').write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding='utf-8')
+          print(json.dumps({
+              'fetched_at_utc': payload['fetched_at_utc'],
+              'selected_tjk_source': source_key,
+              'tjk_response_bytes': payload['tjk_response_bytes'],
+              'pick6_start_candidates': payload['pick6_start_candidates'],
+              'tjk_runner_count': len(runners),
+              'equibase_races': len(equibase),
+              'equibase_runners': len(eq_runners),
+              'race_meta': race_meta,
+          }, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Upload current Gulfstream card artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gulfstream-live-card-20260816
+          path: gulfstream_live
+          if-no-files-found: error
+          retention-days: 2
