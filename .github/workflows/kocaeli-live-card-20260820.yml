@@ -1,0 +1,283 @@
+name: Kocaeli live card 2026-08-20
+
+on:
+  push:
+    branches:
+      - kocaeli-live-20260820-1525
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PYTHONUNBUFFERED: "1"
+
+jobs:
+  fetch-live-card:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install parser dependencies
+        run: python -m pip install --disable-pip-version-check requests beautifulsoup4 lxml pandas
+
+      - name: Fetch official TJK program, current AGF and parse runners
+        shell: bash
+        run: |
+          mkdir -p live_card
+          python - <<'PY'
+          from __future__ import annotations
+          import csv, io, json, re, time, hashlib
+          from datetime import datetime, timezone
+          from pathlib import Path
+          from urllib.parse import quote
+          import requests
+          import pandas as pd
+          from bs4 import BeautifulSoup
+
+          OUT = Path('live_card')
+          session = requests.Session()
+          session.headers.update({
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/151 Safari/537.36',
+              'Accept-Language': 'tr-TR,tr;q=0.9,en;q=0.7',
+          })
+
+          date_iso = '2026-08-20'
+          date_dot = '20.08.2026'
+          date_slash = '20/08/2026'
+          city = 'Kocaeli'
+          city_id = 9
+          program_url = (
+              'https://medya-cdn.tjk.org/raporftp/TJKPDF/2026/2026-08-20/CSV/'
+              'GunlukYarisProgrami/20.08.2026-Kocaeli-GunlukYarisProgrami-TR.csv'
+          )
+          page_url = (
+              'https://www.tjk.org/TR/YarisSever/Info/Page/GunlukYarisProgrami?'
+              'QueryParameter_Tarih=' + quote(date_slash, safe='') + '&SehirAdi=' + quote(city, safe='') + '&SehirId=9'
+          )
+          city_page_url = (
+              'https://www.tjk.org/TR/YarisSever/Info/Sehir/GunlukYarisProgrami?Era=today&'
+              'QueryParameter_Tarih=' + quote(date_slash, safe='') + '&SehirAdi=' + quote(city, safe='') + '&SehirId=9'
+          )
+          data_url = (
+              'https://www.tjk.org/TR/YarisSever/Info/Data/GunlukYarisProgrami?Era=today&'
+              'QueryParameter_Tarih=' + quote(date_slash, safe='') + '&SehirAdi=' + quote(city, safe='') + '&SehirId=9'
+          )
+          agf_urls = [
+              'https://www.tjk.org/AGFv2/9/20082026/TR/1/1',
+              'https://www.tjk.org/AGFv2/9/20082026/TR/1/2',
+          ]
+
+          def fetch(url: str, name: str, required: bool = True) -> bytes:
+              last = None
+              for attempt in range(4):
+                  try:
+                      r = session.get(url, timeout=45)
+                      if r.status_code == 404 and not required:
+                          return b''
+                      r.raise_for_status()
+                      data = r.content
+                      if required and len(data) < 20:
+                          raise RuntimeError(f'too small: {len(data)}')
+                      (OUT / name).write_bytes(data)
+                      return data
+                  except Exception as exc:
+                      last = exc
+                      time.sleep(2 ** attempt)
+              if required:
+                  raise RuntimeError(f'fetch failed {url}: {last}')
+              (OUT / f'{name}.error.txt').write_text(str(last), encoding='utf-8')
+              return b''
+
+          program_bytes = fetch(program_url, 'official_program.csv')
+          page_bytes = fetch(page_url, 'official_program_page.html')
+          city_bytes = fetch(city_page_url, 'official_program_city.html')
+          data_bytes = fetch(data_url, 'official_program_data.html', required=False)
+          agf_raw = []
+          for idx, url in enumerate(agf_urls, start=1):
+              agf_raw.append(fetch(url, f'agf_{idx}.html', required=False))
+
+          text = None
+          used_encoding = None
+          for encoding in ('utf-8-sig', 'cp1254', 'latin1'):
+              try:
+                  text = program_bytes.decode(encoding)
+                  used_encoding = encoding
+                  break
+              except UnicodeDecodeError:
+                  pass
+          assert text is not None
+          rows = list(csv.reader(io.StringIO(text), delimiter=';'))
+
+          races = []
+          race = None
+          header = None
+          first_six_start = None
+          second_six_start = None
+
+          def clean(value):
+              return re.sub(r'\s+', ' ', str(value or '')).strip()
+
+          def num(value):
+              s = clean(value).replace(',', '.')
+              m = re.search(r'-?\d+(?:\.\d+)?', s)
+              return float(m.group()) if m else None
+
+          def agf_values(value):
+              vals = []
+              for pct, rank in re.findall(r'%(\d+(?:[.,]\d+)?)\((\d+)\)', str(value or '')):
+                  vals.append({'pct': float(pct.replace(',', '.')), 'rank': int(rank)})
+              return vals
+
+          def parse_race_header(row):
+              first = clean(row[0])
+              m = re.search(r'(\d+)\.\s*(?:Kosu|Koşu)\s*:\s*(\d{1,2})[.:](\d{2})', first, re.I)
+              if not m:
+                  return None
+              fields = [clean(x) for x in row]
+              return {
+                  'race_number': int(m.group(1)),
+                  'post_time': f'{int(m.group(2)):02d}:{m.group(3)}',
+                  'condition': fields[1] if len(fields) > 1 else '',
+                  'age_group': fields[2] if len(fields) > 2 else '',
+                  'weight_rule': fields[3] if len(fields) > 3 else '',
+                  'distance': fields[4] if len(fields) > 4 else '',
+                  'surface': fields[5] if len(fields) > 5 else '',
+                  'record': next((x for x in fields if 'Rekor Derece' in x), ''),
+                  'runners': [],
+                  'bet_types': [],
+                  'coupled_text': [],
+              }
+
+          for row in rows:
+              if not row:
+                  continue
+              first = clean(row[0])
+              parsed_header = parse_race_header(row)
+              if parsed_header:
+                  if race is not None:
+                      races.append(race)
+                  race = parsed_header
+                  header = None
+                  continue
+              if race is None:
+                  continue
+              joined = ' '.join(clean(x) for x in row if clean(x))
+              marker = joined.upper().replace('’', "'")
+              if "1. 6'LI GANYAN" in marker or '1. 6LI GANYAN' in marker:
+                  first_six_start = race['race_number']
+              if "2. 6'LI GANYAN" in marker or '2. 6LI GANYAN' in marker:
+                  second_six_start = race['race_number']
+              if first == 'At No':
+                  header = [clean(x) for x in row]
+                  continue
+              if header is not None and re.fullmatch(r'\d+', first or ''):
+                  padded = row + [''] * max(0, len(header) - len(row))
+                  item = {header[i]: clean(padded[i]) for i in range(min(len(header), len(padded)))}
+                  agf_raw_cell = item.get('AGF', '')
+                  agfs = agf_values(agf_raw_cell)
+                  horse_name_raw = item.get('At İsmi', '')
+                  scratched = bool(re.search(r'Koşmaz|KOSMAZ', horse_name_raw))
+                  horse_name = re.sub(r'\s*\(Koşmaz\)\s*', '', horse_name_raw, flags=re.I).strip()
+                  runner = {
+                      'number': int(first),
+                      'horse': horse_name,
+                      'horse_raw': horse_name_raw,
+                      'scratched': scratched,
+                      'age_sex': item.get('Yaş', ''),
+                      'sire': item.get('Orijin(Baba)', ''),
+                      'dam': item.get('Orijin(Anne)', ''),
+                      'weight': item.get('Kilo', ''),
+                      'jockey': item.get('Jokey Adı', ''),
+                      'owner': item.get('Sahip Adı', ''),
+                      'trainer': item.get('Antrenör Adı', ''),
+                      'gate': item.get('St', ''),
+                      'agf_raw': agf_raw_cell,
+                      'agf_values': agfs,
+                      'agf_first_pct': agfs[0]['pct'] if agfs else None,
+                      'agf_second_pct': agfs[1]['pct'] if len(agfs) > 1 else None,
+                      'handicap': item.get('H', ''),
+                      'last6': item.get('Son 6 Yarış', ''),
+                      'kgs': item.get('KGS', ''),
+                      's20': item.get('s20', ''),
+                      'best_time': item.get('EnİyiDerece', ''),
+                  }
+                  race['runners'].append(runner)
+                  continue
+              if header is not None and joined:
+                  if 'eküridir' in joined.lower() or 'ekuridir' in joined.lower():
+                      race['coupled_text'].append(joined)
+                  if any(token in marker for token in ('GANYAN', 'ÇİFTE', "6'LI", "5'Lİ", "4'LÜ", "3'LÜ")):
+                      race['bet_types'].append(joined)
+                  header = None
+          if race is not None:
+              races.append(race)
+
+          first_start = first_six_start or 1
+          first_six_races = [r for r in races if first_start <= r['race_number'] <= first_start + 5]
+          out_rows = []
+          for r in first_six_races:
+              for x in r['runners']:
+                  out_rows.append({
+                      'race_number': r['race_number'], 'post_time': r['post_time'],
+                      'condition': r['condition'], 'age_group': r['age_group'],
+                      'distance': r['distance'], 'surface': r['surface'],
+                      **x,
+                  })
+          if out_rows:
+              pd.DataFrame(out_rows).to_csv(OUT / 'kocaeli_first_six_runners.csv', index=False, encoding='utf-8-sig')
+
+          agf_extracts = []
+          for idx, raw in enumerate(agf_raw, start=1):
+              if not raw:
+                  continue
+              soup = BeautifulSoup(raw, 'lxml')
+              visible = ' '.join(soup.stripped_strings)
+              agf_extracts.append({'index': idx, 'text': visible[:30000], 'length': len(visible)})
+
+          payload = {
+              'fetched_at_utc': datetime.now(timezone.utc).isoformat(),
+              'date': date_iso,
+              'track': city,
+              'program_url': program_url,
+              'page_url': page_url,
+              'city_page_url': city_page_url,
+              'data_url': data_url,
+              'agf_urls': agf_urls,
+              'encoding': used_encoding,
+              'first_six_start': first_start,
+              'second_six_start': second_six_start,
+              'race_count': len(races),
+              'first_six_races': first_six_races,
+              'all_races': races,
+              'agf_html_extracts': agf_extracts,
+              'sha256': {
+                  'program_csv': hashlib.sha256(program_bytes).hexdigest(),
+                  'program_page': hashlib.sha256(page_bytes).hexdigest(),
+                  'program_city': hashlib.sha256(city_bytes).hexdigest(),
+                  'program_data': hashlib.sha256(data_bytes).hexdigest() if data_bytes else None,
+              },
+          }
+          (OUT / 'kocaeli_live_card.json').write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding='utf-8')
+          print(json.dumps({
+              'fetched_at_utc': payload['fetched_at_utc'],
+              'first_six_start': first_start,
+              'second_six_start': second_six_start,
+              'races': len(first_six_races),
+              'runners': len(out_rows),
+              'program_url': program_url,
+          }, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Upload live card artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kocaeli-live-card-20260820
+          path: live_card
+          if-no-files-found: error
+          retention-days: 2
