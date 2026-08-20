@@ -1,0 +1,96 @@
+name: Parse Kocaeli first-six AGF 2026-08-20
+
+on:
+  push:
+    branches:
+      - kocaeli-live-20260820-1525
+    paths-ignore:
+      - 'data/kocaeli_live_20260820/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  parse-and-commit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: kocaeli-live-20260820-1525
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Fetch and parse current AGF
+        run: |
+          python -m pip install --disable-pip-version-check requests beautifulsoup4 lxml pandas
+          python - <<'PY'
+          from pathlib import Path
+          from datetime import datetime, timezone
+          import json, re, requests
+          from bs4 import BeautifulSoup
+
+          out = Path('data/kocaeli_live_20260820')
+          out.mkdir(parents=True, exist_ok=True)
+          url = 'https://www.tjk.org/AGFv2/9/20082026/TR/1/1'
+          s = requests.Session(); s.headers.update({'User-Agent':'Mozilla/5.0 Chrome/151','Accept-Language':'tr-TR,tr;q=0.9'})
+          r = s.get(url, timeout=45); r.raise_for_status()
+          soup = BeautifulSoup(r.content, 'lxml')
+          text = '\n'.join(soup.stripped_strings)
+          legs = {}
+          current = None
+          for line in [re.sub(r'\s+',' ',x).strip() for x in text.splitlines() if x.strip()]:
+              m = re.match(r'([1-6])\.\s*AYAK', line, re.I)
+              if m:
+                  current = int(m.group(1)); legs.setdefault(str(current),[]); continue
+              if current is None: continue
+              # Common visible row forms include: 1 4 (%34,33) or 4 (%34,33)
+              for no,pct in re.findall(r'(?<!\d)(\d{1,2})\s*\(%\s*([0-9]+(?:[.,][0-9]+)?)\)', line):
+                  item={'horse_no':int(no),'pct':float(pct.replace(',','.'))}
+                  if item not in legs[str(current)]: legs[str(current)].append(item)
+          # Fallback: parse table cells and assign tables in order.
+          if sum(len(v) for v in legs.values()) < 20:
+              legs={}
+              leg=0
+              for table in soup.find_all('table'):
+                  found=[]
+                  for tr in table.find_all('tr'):
+                      row=' '.join(c.get_text(' ',strip=True) for c in tr.find_all(['th','td']))
+                      pairs=re.findall(r'(?<!\d)(\d{1,2})\s*\(%\s*([0-9]+(?:[.,][0-9]+)?)\)',row)
+                      for no,pct in pairs:
+                          found.append({'horse_no':int(no),'pct':float(pct.replace(',','.'))})
+                  uniq=[]
+                  for x in found:
+                      if x not in uniq: uniq.append(x)
+                  if len(uniq)>=3:
+                      leg+=1; legs[str(leg)]=uniq
+                      if leg==6: break
+          for key in list(legs):
+              # Deduplicate by horse number, keep first visible value, sort by pct descending.
+              dedup={}
+              for x in legs[key]: dedup.setdefault(x['horse_no'],x)
+              legs[key]=sorted(dedup.values(), key=lambda x:(-x['pct'],x['horse_no']))
+          updated=None
+          m=re.search(r'Son güncellenme zamanı\s*:\s*(\d{1,2}:\d{2}:\d{2})', text, re.I)
+          if m: updated=m.group(1)
+          payload={'fetched_at_utc':datetime.now(timezone.utc).isoformat(),'url':url,'tjk_last_update':updated,'legs':legs,'row_count':sum(len(v) for v in legs.values()),'visible_text_tail':text[-2000:]}
+          if len(legs)!=6 or payload['row_count']<20:
+              raise RuntimeError('AGF parse incomplete: '+json.dumps(payload,ensure_ascii=False))
+          (out/'agf_first_parsed.json').write_text(json.dumps(payload,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps(payload,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Commit parsed AGF
+        run: |
+          git config user.name 'chatgpt-data-analytics'
+          git config user.email '53664771+ozaneryavuz@users.noreply.github.com'
+          git add data/kocaeli_live_20260820/agf_first_parsed.json
+          if git diff --cached --quiet; then
+            echo 'No changes to commit'
+          else
+            git commit -m 'Persist parsed Kocaeli first-six AGF 2026-08-20'
+            git push origin HEAD:kocaeli-live-20260820-1525
+          fi
