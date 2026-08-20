@@ -1,0 +1,28 @@
+name: Export current Kocaeli program
+
+on:
+  push:
+    branches:
+      - kocaeli-live-20260820-1525
+    paths:
+      - '.github/workflows/kocaeli-export-current.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  export-current:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: kocaeli-live-20260820-1525
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kocaeli-current-program-20260820
+          path: |
+            data/kocaeli_live_20260820/official_program.csv
+            data/kocaeli_live_20260820/fetch_audit.json
+          if-no-files-found: error
+          retention-days: 2
