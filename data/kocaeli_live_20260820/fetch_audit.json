@@ -1,5 +1,5 @@
 {
-  "fetched_at_utc": "2026-08-20T13:56:42.469121+00:00",
+  "fetched_at_utc": "2026-08-20T14:00:48.296301+00:00",
   "sources": {
     "official_program.csv": {
       "url": "https://medya-cdn.tjk.org/raporftp/TJKPDF/2026/2026-08-20/CSV/GunlukYarisProgrami/20.08.2026-Kocaeli-GunlukYarisProgrami-TR.csv",
@@ -10,13 +10,13 @@
     "official_program_page.html": {
       "url": "https://www.tjk.org/TR/YarisSever/Info/Page/GunlukYarisProgrami?QueryParameter_Tarih=20%2F08%2F2026&SehirAdi=Kocaeli&SehirId=9",
       "bytes": 68213,
-      "sha256": "4a13ca77b9713e34c3848362e97a48f726a169da70efed1cc937929a5d6e80ac",
+      "sha256": "51c795087cf5b4c31e80d7d5f810a2f03e4f085bf86f41e33637712081a2e363",
       "status": 200
     },
     "official_program_city.html": {
       "url": "https://www.tjk.org/TR/YarisSever/Info/Sehir/GunlukYarisProgrami?Era=today&QueryParameter_Tarih=20%2F08%2F2026&SehirAdi=Kocaeli&SehirId=9",
-      "bytes": 913431,
-      "sha256": "7658618dcd4c4b04db865bbf7e23caebe75c851af44578c01fad69d5df19bab9",
+      "bytes": 913469,
+      "sha256": "908d91f49cec352ab5218b99a0514420591fcbd0218425ee25aa8abd5a56ccc5",
       "status": 200
     },
     "official_program_data.html": {
@@ -27,14 +27,14 @@
     },
     "agf_first.html": {
       "url": "https://www.tjk.org/AGFv2/9/20082026/TR/1/1",
-      "bytes": 143112,
-      "sha256": "7eb06a2cbea9a8abe067f406c363555394fee2772e16ac8186126a03ff0ff665",
+      "bytes": 143088,
+      "sha256": "104008f329f2d1c5555816d4826763db6a83500f2e0e0bc7065c7abb0d48bf14",
       "status": 200
     },
     "agf_second.html": {
       "url": "https://www.tjk.org/AGFv2/9/20082026/TR/1/2",
-      "bytes": 143260,
-      "sha256": "781373850726405b533dcd85561c57254110095e32942177169c72745310b9ce",
+      "bytes": 143261,
+      "sha256": "62fe5ef9a13cf56ffc60456d5248fd9aa809c4c8a196d5b40532775456936c86",
       "status": 200
     }
   }
