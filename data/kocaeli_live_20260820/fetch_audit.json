@@ -1,22 +1,22 @@
 {
-  "fetched_at_utc": "2026-08-20T12:32:17.275287+00:00",
+  "fetched_at_utc": "2026-08-20T13:54:13.901856+00:00",
   "sources": {
     "official_program.csv": {
       "url": "https://medya-cdn.tjk.org/raporftp/TJKPDF/2026/2026-08-20/CSV/GunlukYarisProgrami/20.08.2026-Kocaeli-GunlukYarisProgrami-TR.csv",
-      "bytes": 18883,
-      "sha256": "4e22edaf78d051356fa3bab918e30673a3ff21ed955378f82cb6059b79285256",
+      "bytes": 18897,
+      "sha256": "3be9d55517f65f91a5984dd12b292ccd70cb675be315af4e9596919df33be8c6",
       "status": 200
     },
     "official_program_page.html": {
       "url": "https://www.tjk.org/TR/YarisSever/Info/Page/GunlukYarisProgrami?QueryParameter_Tarih=20%2F08%2F2026&SehirAdi=Kocaeli&SehirId=9",
       "bytes": 68213,
-      "sha256": "4d8666b2fc1ca3136f664507ea812ca003cf490b1a3522104f4031ee75470808",
+      "sha256": "4a13ca77b9713e34c3848362e97a48f726a169da70efed1cc937929a5d6e80ac",
       "status": 200
     },
     "official_program_city.html": {
       "url": "https://www.tjk.org/TR/YarisSever/Info/Sehir/GunlukYarisProgrami?Era=today&QueryParameter_Tarih=20%2F08%2F2026&SehirAdi=Kocaeli&SehirId=9",
-      "bytes": 912083,
-      "sha256": "92336794bbb109b9790d57da38370d9d8b7a5e71c746d40c6ee804930ca8ca8b",
+      "bytes": 913254,
+      "sha256": "4372a14eaab535f825566c59d072dfe1fec27f0643c62efb364f1338d96f83a5",
       "status": 200
     },
     "official_program_data.html": {
@@ -27,14 +27,14 @@
     },
     "agf_first.html": {
       "url": "https://www.tjk.org/AGFv2/9/20082026/TR/1/1",
-      "bytes": 142805,
-      "sha256": "0aa20376b3679086e6c31eeec932f187118555093b40de0006fc443fd9d63d67",
+      "bytes": 143090,
+      "sha256": "ba87810e1fe43127377a1cc78d23d2092ae73806c7f9219c0190e8642b2af251",
       "status": 200
     },
     "agf_second.html": {
       "url": "https://www.tjk.org/AGFv2/9/20082026/TR/1/2",
-      "bytes": 142930,
-      "sha256": "970c478dc44f2d377f32dfdc2cdb7ada2e73fcd5b95c54dc409c29cd0e60038d",
+      "bytes": 143235,
+      "sha256": "b00a0e332300d5116344b1487fded485bce67db1eeb2eeb68a7482036530deac",
       "status": 200
     }
   }
