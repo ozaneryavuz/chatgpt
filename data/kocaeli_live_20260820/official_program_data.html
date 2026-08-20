@@ -1,0 +1,321 @@
+<style type="text/css">
+    #dataDiv .race-info {
+        height: auto !important;
+        min-height: 24px;
+        padding-bottom: 6px;
+    }
+
+        #dataDiv .race-info:after {
+            content: "";
+            display: block;
+            clear: both;
+        }
+
+    #dataDiv ul.gunluk-tabs {
+        margin: 0;
+        padding: 0;
+    }
+
+        #dataDiv ul.gunluk-tabs li {
+            margin-top: 7px;
+            margin-bottom: 8px;
+            height: 18px;
+            line-height: 18px;
+            font-size: 13px;
+        }
+
+            #dataDiv ul.gunluk-tabs li a {
+                display: block;
+                margin-right: 1px;
+                padding: 5px;
+                white-space: nowrap;
+            }
+</style>
+<div class="table-loading" id="table-loading">
+    Sorgu Tamamlanıyor
+</div>
+
+<div id="dataDiv" style="min-width: 960px; display: inline-block;">
+        <div class="race-info">
+            <ul class="gunluk-tabs">
+                        <li>
+                            <a id="Ankara" data-sehir-id="5" href="/TR/YarisSever/Info/Sehir/GunlukYarisProgrami?SehirId=5&amp;QueryParameter_Tarih=20%2F08%2F2026&amp;SehirAdi=Ankara&amp;Era=today">Ankara  (53. Y.G.)</a>
+                        </li>
+                        <li>
+                            <a id="Lion Dangers Fransa" data-sehir-id="48" href="/TR/YarisSever/Info/Sehir/GunlukYarisProgrami?SehirId=48&amp;QueryParameter_Tarih=20%2F08%2F2026&amp;SehirAdi=Lion%20Dangers%20Fransa&amp;Era=today">Lion Dangers Fransa (YD 1) </a>
+                        </li>
+                        <li>
+                            <a id="York Birleşik Krallık" data-sehir-id="29" href="/TR/YarisSever/Info/Sehir/GunlukYarisProgrami?SehirId=29&amp;QueryParameter_Tarih=20%2F08%2F2026&amp;SehirAdi=York%20Birle%C5%9Fik%20Krall%C4%B1k&amp;Era=today">York Birleşik Krallık (YD 2) </a>
+                        </li>
+                        <li>
+                            <a id="Deauville Fransa" data-sehir-id="26" href="/TR/YarisSever/Info/Sehir/GunlukYarisProgrami?SehirId=26&amp;QueryParameter_Tarih=20%2F08%2F2026&amp;SehirAdi=Deauville%20Fransa&amp;Era=today">Deauville Fransa (YD 3) </a>
+                        </li>
+                        <li>
+                            <a id="Kocaeli" data-sehir-id="9" href="/TR/YarisSever/Info/Sehir/GunlukYarisProgrami?SehirId=9&amp;QueryParameter_Tarih=20%2F08%2F2026&amp;SehirAdi=Kocaeli&amp;Era=today">Kocaeli  (31. Y.G.)</a>
+                        </li>
+                        <li>
+                            <a id="Karma" data-sehir-id="17" href="/TR/YarisSever/Info/Sehir/GunlukYarisProgrami?SehirId=17&amp;QueryParameter_Tarih=20%2F08%2F2026&amp;SehirAdi=Karma&amp;Era=today">Karma </a>
+                        </li>
+                        <li>
+                            <a id="Delaware Park ABD" data-sehir-id="81" href="/TR/YarisSever/Info/Sehir/GunlukYarisProgrami?SehirId=81&amp;QueryParameter_Tarih=20%2F08%2F2026&amp;SehirAdi=Delaware%20Park%20ABD&amp;Era=today">Delaware Park ABD (YD 4) </a>
+                        </li>
+                        <li>
+                            <a id="Saratoga ABD" data-sehir-id="92" href="/TR/YarisSever/Info/Sehir/GunlukYarisProgrami?SehirId=92&amp;QueryParameter_Tarih=20%2F08%2F2026&amp;SehirAdi=Saratoga%20ABD&amp;Era=today">Saratoga ABD (YD 5) </a>
+                        </li>
+                        <li>
+                            <a id="Horseshoe Indianapolis ABD" data-sehir-id="529" href="/TR/YarisSever/Info/Sehir/GunlukYarisProgrami?SehirId=529&amp;QueryParameter_Tarih=20%2F08%2F2026&amp;SehirAdi=Horseshoe%20Indianapolis%20ABD&amp;Era=today">Horseshoe Indianapolis ABD (YD 6) </a>
+                        </li>
+                        <li>
+                            <a id="Del Mar ABD" data-sehir-id="110" href="/TR/YarisSever/Info/Sehir/GunlukYarisProgrami?SehirId=110&amp;QueryParameter_Tarih=20%2F08%2F2026&amp;SehirAdi=Del%20Mar%20ABD&amp;Era=today">Del Mar ABD (YD 7) </a>
+                        </li>
+            </ul>
+        </div>
+        <div class="gunluk-panes">
+            <div style="display: block;">
+            </div>
+        </div>
+        <script type="text/javascript">
+
+            var activeLi = $('.gunluk-tabs >li').find('a.current');
+            var activeLink = activeLi.index('.gunluk-tabs >li >a');
+            var gunlukTabsInitialIndex = activeLink;
+            if (gunlukTabsInitialIndex==-1) {
+                gunlukTabsInitialIndex=0;
+            }
+
+            if (document.location.hash) {
+                var anchor = document.location.hash.substring(1);
+                if (anchor.length > 0 && !parseInt(anchor)) {
+                    gunlukTabsInitialIndex = $("ul.gunluk-tabs li").index($("a[id^='" + decodeURI(anchor) + "']").parent());
+                }
+            } else {
+                    
+
+                var sehirAdi = "Kocaeli";
+                gunlukTabsInitialIndex = $("ul.gunluk-tabs li").index($("a[id^='" + sehirAdi + "']").parent());
+
+                
+            }
+            $("ul.gunluk-tabs").tabs("div.gunluk-panes > div", { effect: 'ajax', initialIndex:gunlukTabsInitialIndex });
+        </script>
+
+    <script type="text/javascript">
+        var dayNames = ['Pazar', 'Pazartesi','Salı','Çarşamba','Perşembe', 'Cuma', 'Cumartesi'];
+
+        var queryParameterTarih = "20/08/2026";
+        var dayName = dayNames[new Date(2026, 8 - 1, 20).getDay()];
+
+        $(".tableTitle").html(queryParameterTarih + ' ' + dayName + ' - ' + $(document).attr('title').replace(' | TJK', ''));
+        $(".tableTitle").attr("style", "position: relative;top: 19px;left: 50%;margin-left: -90px;display:inline-block;");
+        $("form.query").attr("style", "margin-top:-10px !important;");
+       /* $("#ShowSilk").removeAttr("checked");*/
+        //if (parseInt($("div.race-info > ul.gunluk-tabs > li > a").attr("data-sehir-id")) > 10 && parseInt($("div.race-info > ul.gunluk-tabs > li > a").attr("data-sehir-id")) < 1000) {
+        //    $("#ShowSilk").hide();
+        //    $("#ShowSilk").next("span").hide();
+        //}
+        //else {
+        //    $("#ShowSilk").show();
+        //    $("#ShowSilk").next("span").show();
+        //}
+
+    </script>
+
+    <script type="text/javascript">
+
+        var refreshInterval;
+
+        $(document).ready(function () {
+            /*$(".tabs").tabs({});*/
+
+        });
+
+    </script>
+
+        <script type="text/javascript">
+                  var activeIndex;
+          $(document).ready(function () {
+
+
+                      if ($("div.race-info > ul.gunluk-tabs > li > a").length == 0) {
+                          $("#ShowSilk").hide();
+                          $("#ShowSilk").next("span").hide();
+                      }
+
+                      $("div.race-info > ul.gunluk-tabs > li > a").live('click', function () {
+                         $("#ShowSilk").removeAttr("checked");
+                      //   if (parseInt($(this).attr("data-sehir-id")) > 10 && parseInt($(this).attr("data-sehir-id")) < 1000) {
+                      //       $("#ShowSilk").hide();
+                      //       $("#ShowSilk").next("span").hide();
+                      //   } else {
+                      //       $("#ShowSilk").show();
+                      //       $("#ShowSilk").next("span").show();
+                      //   }
+                      });
+
+                      var lastUpdatedTime = new Date();
+                      $("span#LastUpdated").text("Son Güncelleme " + pad(lastUpdatedTime.getHours(), 2) + ":" + pad(lastUpdatedTime.getMinutes(), 2));
+
+                      refreshInterval = window.setInterval(function () {
+                            if (!false && $("ul.gunluk-tabs li a.current").length > 0) {
+
+                        var $activeLink = $("ul.gunluk-tabs li a.current");
+
+
+                        var href = $activeLink.attr("href");
+                        var sehirId = ((href.split("?")[1]).split("&", 2))[0].split("=")[1];
+                        let currentColor = $("ul.races-tabs li h3.race-no a.current").css('background-color');
+                        let _bottomCurrentTab = $("div.races-panes ul>li a[class*='current']");
+
+                        var currentId = $("ul.races-tabs li h3.race-no a.current").attr('id');
+                        if (currentId == null || currentId == undefined) {
+
+                            var raceCodes = new Array();
+                            var currentRaceList = $("ul.races-tabs li h3.race-no a")
+                                .map(function () {
+                                    if (this.id.replace("anc", "") != "") {
+                                        raceCodes.push(this.id.replace("anc", ""));
+                                    }
+                                })
+
+                            var selectedBottomTabs = new Array();
+
+                            function tabsClickFunction(item) {
+                                var _findd = $('#' + item + " ul.tabs li a.current");
+                                selectedBottomTabs.push(_findd.attr('id'));
+                            }
+
+                            function ClickBottomTabs(item) {
+                                var id = $('#' + item);
+
+
+                                id.click()
+
+                            }
+
+                        }
+                        else {
+                            var activess = $('#' + currentId.replace("anc", "") + " ul.tabs li a.current");
+                        }
+                               
+                        $.ajax({
+                            url: href,
+                            cache: true,
+                            async: false,
+                            beforeSend: function(request) {
+                                request.setRequestHeader("Content-Hash", $("div.gunluk-panes div #DataHash").last().val());
+                                currentColor = $("ul.races-tabs li h3.race-no a.current").css('background-color');
+                                _bottomCurrentTab = $("div.races-panes ul>li a[class*='current']");
+                            },
+                            complete: function(data, status) {
+                                if (data.status == 200) {
+                                    if (currentId == null || currentId == undefined) {
+                                        raceCodes.forEach(tabsClickFunction); //// List of selected tabs before refreshing
+                                    }
+
+                                    activeIndex = $("ul.races-tabs li h3.race-no a.current").parent().parent().index();
+
+                                    var isLastIndex = false;
+                                    if((activeIndex + 1) == $("ul.races-tabs li").length) {
+                                        isLastIndex = true;
+                                    }
+
+                                    $("div.gunluk-panes > div > div.program").first().fadeOut(1, function() {
+                                        $(data.responseText).appendTo('div.gunluk-panes > div');
+
+                                        $("div.gunluk-panes > div > div.program").first().remove();
+                                        if ($("div.gunluk-panes > div > #DataHash").length > 1) {
+                                            $("div.gunluk-panes > div > #DataHash").first().remove();
+                                        }
+
+                                        if (isLastIndex && $("ul.races-tabs li").length > activeIndex + 1) {
+                                            activeIndex++;
+                                        }
+
+                                        $('ul.races-tabs' + sehirId).tabs('div.races-panes' + sehirId + ' > div', { initialIndex: activeIndex, onClick: onClick })
+
+                                        //
+                                        $('#' + currentId).css({
+                                            "background-color": currentId == 'allRaces' ? "#7D9F63" : currentColor,
+                                            "color": "#fff"
+                                        })
+                                        //
+
+                                        if (currentId == null || currentId == undefined) {
+                                            selectedBottomTabs.forEach(ClickBottomTabs);
+                                        }
+                                        else {
+                                            $(activess).click();
+                                        }
+
+                                        if (_bottomCurrentTab) {
+                                            _bottomCurrentTab.click();
+                                        }
+
+                                        var showSilk = $(document).find("#ShowSilk");
+                                        const SilkPage = $("td.gunluk-GunlukYarisProgrami-FormaKodu > a > img").length > 0 ? $("td.gunluk-GunlukYarisProgrami-FormaKodu > a > img") : ($("td.gunluk-GunlukYarisSonuclari-FormaKodu > a > img").length > 0 ? $("td.gunluk-GunlukYarisSonuclari-FormaKodu > a > img") : null);
+
+                                        if (showSilk.is(":checked")) {
+                                            $("th.formaHeader").show();
+                                            if (SilkPage != null && SilkPage?.parent() != null) {
+                                                SilkPage.parent().parent().show();
+                                                for (i = 0; i < SilkPage.length; i++) {
+                                                    var att = document.createAttribute("src");
+                                                    var ImgTag = SilkPage[i];
+                                                    att.value = SilkPage.parent()[i].getAttribute("href");
+                                                    if (ImgTag.getAttribute("src") !== att.value) {
+                                                        ImgTag.setAttributeNode(att);
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        else {
+                                            $("th.formaHeader").hide();
+                                            if (SilkPage?.parent() != null) {
+                                                SilkPage.parent().parent().hide();
+                                            }
+                                        }
+                                    });
+                                   // $("ul.races-tabs li h3.race-no a.current").css("background-color", currentColor);
+
+                                }
+                                else {
+                                  /*  console.log(":"+data.status);*/
+                                }
+
+                                var lastUpdatedTime = new Date();
+                                $("span#LastUpdated").text("Son Güncelleme " + pad(lastUpdatedTime.getHours(), 2) + ":" + pad(lastUpdatedTime.getMinutes(), 2));
+                            },
+                            processData: false
+                        });
+                    }
+                      }, 30000);
+          });
+            //$(document).ready(function () {
+            //    if (window.location.href.indexOf("GunlukYurtdisiYarisSonuclari") > -1) {
+            //        // Bütün tabları gizle
+            //        $("ul.gunluk-tabs li a").hide();
+
+            //        // URL parametrelerinden 'sehir-id' alalım
+            //        var sehirId = new URLSearchParams(window.location.search).get('sehir-id');
+
+            //        // Eğer 'sehir-id' parametresi varsa, buna göre tabı bulalım
+            //        var activeTab = $("ul.gunluk-tabs li a[data-sehir-id='" + sehirId + "']");
+
+            //        if (activeTab.length === 0) {
+            //            // Eğer belirtilen 'sehir-id' ile tab bulunamazsa, ilk tabı aktif yap
+            //            activeTab = $("ul.gunluk-tabs li a").first();
+            //            activeTab.addClass("current");
+            //        } else {
+            //            // Eğer uygun tab bulunursa, 'current' sınıfını ekle
+            //            activeTab.addClass("current");
+            //        }
+
+            //        // Seçilen tabı görünür yap
+            //        activeTab.show();  // Seçilen tabı göster
+            //    }
+            //});
+
+
+        </script>
+</div>
