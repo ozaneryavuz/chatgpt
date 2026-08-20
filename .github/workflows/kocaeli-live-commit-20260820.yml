@@ -1,0 +1,80 @@
+name: Persist Kocaeli live sources 2026-08-20
+
+on:
+  push:
+    branches:
+      - kocaeli-live-20260820-1525
+    paths-ignore:
+      - 'data/kocaeli_live_20260820/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch-and-commit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: kocaeli-live-20260820-1525
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Fetch official TJK sources
+        run: |
+          python -m pip install --disable-pip-version-check requests
+          python - <<'PY'
+          from pathlib import Path
+          from datetime import datetime, timezone
+          from urllib.parse import quote
+          import hashlib, json, requests, time
+
+          out = Path('data/kocaeli_live_20260820')
+          out.mkdir(parents=True, exist_ok=True)
+          s = requests.Session()
+          s.headers.update({'User-Agent':'Mozilla/5.0 Chrome/151','Accept-Language':'tr-TR,tr;q=0.9'})
+          date_slash = '20/08/2026'
+          urls = {
+            'official_program.csv': 'https://medya-cdn.tjk.org/raporftp/TJKPDF/2026/2026-08-20/CSV/GunlukYarisProgrami/20.08.2026-Kocaeli-GunlukYarisProgrami-TR.csv',
+            'official_program_page.html': 'https://www.tjk.org/TR/YarisSever/Info/Page/GunlukYarisProgrami?QueryParameter_Tarih=' + quote(date_slash, safe='') + '&SehirAdi=Kocaeli&SehirId=9',
+            'official_program_city.html': 'https://www.tjk.org/TR/YarisSever/Info/Sehir/GunlukYarisProgrami?Era=today&QueryParameter_Tarih=' + quote(date_slash, safe='') + '&SehirAdi=Kocaeli&SehirId=9',
+            'official_program_data.html': 'https://www.tjk.org/TR/YarisSever/Info/Data/GunlukYarisProgrami?Era=today&QueryParameter_Tarih=' + quote(date_slash, safe='') + '&SehirAdi=Kocaeli&SehirId=9',
+            'agf_first.html': 'https://www.tjk.org/AGFv2/9/20082026/TR/1/1',
+            'agf_second.html': 'https://www.tjk.org/AGFv2/9/20082026/TR/1/2',
+          }
+          audit = {'fetched_at_utc': datetime.now(timezone.utc).isoformat(), 'sources': {}}
+          for name, url in urls.items():
+            last = None
+            for attempt in range(4):
+              try:
+                r = s.get(url, timeout=45)
+                r.raise_for_status()
+                if len(r.content) < 20:
+                  raise RuntimeError(f'too small: {len(r.content)}')
+                (out/name).write_bytes(r.content)
+                audit['sources'][name] = {'url':url,'bytes':len(r.content),'sha256':hashlib.sha256(r.content).hexdigest(),'status':r.status_code}
+                break
+              except Exception as exc:
+                last = exc
+                time.sleep(2 ** attempt)
+            else:
+              audit['sources'][name] = {'url':url,'error':str(last)}
+          (out/'fetch_audit.json').write_text(json.dumps(audit,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps(audit,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Commit live sources to branch
+        run: |
+          git config user.name 'chatgpt-data-analytics'
+          git config user.email '53664771+ozaneryavuz@users.noreply.github.com'
+          git add data/kocaeli_live_20260820
+          if git diff --cached --quiet; then
+            echo 'No changes to commit'
+          else
+            git commit -m 'Persist Kocaeli official live sources 2026-08-20'
+            git push origin HEAD:kocaeli-live-20260820-1525
+          fi
